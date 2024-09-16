@@ -1,0 +1,10 @@
+.thumbnail-container {
+    text-align: center; /* Căn giữa hình ảnh thu nhỏ */
+}
+
+.img-thumbnail {
+    width: 100px; /* Điều chỉnh kích thước hình ảnh thu nhỏ */
+    height: auto; /* Đảm bảo tỷ lệ khung hình đúng */
+    border: 1px solid #ddd; /* Thêm viền cho hình ảnh */
+    border-radius: 4px; /* Làm tròn các góc */
+}
