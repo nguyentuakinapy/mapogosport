@@ -1,0 +1,29 @@
+.hv-link {
+  box-sizing: border-box;
+  transition: color 0.5s ease;
+  color: black;
+  padding: 3px 10px;
+}
+
+.hv-link:hover {
+  color: red;
+}
+
+.hv-nav {
+  transition: background-color 0.5s ease;
+  border-radius: 10px;
+}
+
+.hv-nav:hover {
+  background-color: #FFDD9D;
+}
+
+.row .img-dm {
+  box-sizing: border-box;
+}
+
+.row .img-dm:hover {
+  border: 2px solid #FFDD9D;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+}
