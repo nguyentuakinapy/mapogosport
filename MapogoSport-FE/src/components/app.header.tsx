@@ -10,7 +10,7 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 const Header = () => {
     return (
         <>
-            <Navbar expand="lg" className="bg-light">
+            <Navbar expand="lg" >
                 <Container>
                     <Navbar.Brand href="#"><img src="/images/logo.png" style={{ width: '100px' }} alt="" /></Navbar.Brand>
                     <Navbar.Toggle aria-controls="navbarScroll" />
@@ -54,7 +54,7 @@ const Header = () => {
                     </Navbar.Collapse>
                 </Container>
             </Navbar>
-            <Navbar className="bg-body-secondary mb-2" style={{ boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
+            <Navbar className="bg-body-secondary" style={{ boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
                 <Container>
                     <Nav className='hv-nav'>
                         <Link href="#" className="hv-link text-decoration-none">
