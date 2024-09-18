@@ -1,13 +1,11 @@
+import { Inter } from 'next/font/google';
 import '/node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: "Trang Chủ",
@@ -23,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={geistMono.className}>
+      <body className={inter.className}>
         {children}
       </body>
     </html>
