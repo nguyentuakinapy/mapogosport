@@ -1,0 +1,70 @@
+.bg-white {
+    padding: 1.5rem !important;
+    border-radius: 15px !important;
+    margin-top: 1.5rem !important;
+}
+
+.avatar-upload {
+    display: inline-block;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+
+    .avatar-edit {
+        position: absolute;
+        bottom: -1px;
+        width: 100%;
+        text-align: center;
+        z-index: 9;
+
+        input + label {
+            margin-bottom: 0;
+            background-color: #000;
+            cursor: pointer;
+            transition: all .2s ease-in-out;
+            width: 100%;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        input {
+            display: none;
+        }
+    }
+
+    .avatar-preview {
+        div {
+            width: 6rem;
+            height: 6rem;
+            margin: 0 auto;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+    }
+}
+
+.flex-column {
+    a {
+        color: #000;
+    }
+    .item {
+        font-weight: 700 !important;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        &:focus, &:hover {
+            color: red !important;
+        }
+    }
+    .collapse {
+        a:hover, a:focus {
+            color: red !important;
+        }
+
+        a {
+            text-decoration: none;
+        }
+    }
+}

@@ -1,7 +1,12 @@
+import { Inter } from 'next/font/google';
 import '/node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+const inter = Inter({ subsets: ['latin'] })
+
 import Header from '@/components/app.header';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Footer from '@/components/app.footer';
@@ -12,6 +17,7 @@ import Footer from '@/components/app.footer';
 //   variable: "--font-geist-mono",
 //   weight: "100 900",
 // });
+
 
 export const metadata: Metadata = {
   title: "Trang Chủ",
@@ -27,11 +33,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* <body className={geistMono.className} > */}
-      <body>
+      <body className={inter.className}>
         <Header />
         <main>{children}</main>
-        <Footer></Footer>
+        <Footer />
       </body>
     </html>
   );
