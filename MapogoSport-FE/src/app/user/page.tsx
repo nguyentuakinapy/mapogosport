@@ -11,7 +11,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
     return (
         <div className="pb-5" style={{ background: "#f3f3f3" }}>
-            <Container className='mt-4'>
+            <Container className='pt-1'>
                 <Row>
                     <Col xs={12} md={3}>
                         <div className="bg-white">

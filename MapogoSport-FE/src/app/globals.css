@@ -1,6 +1,6 @@
-
 .bg-light {
-    background-color: #f3f3f3;
+  background-color: #f3f3f3;
+}
 
 .hv-link {
   box-sizing: border-box;
@@ -20,7 +20,7 @@
 }
 
 .hv-nav:hover {
-  background-color: #FFDD9D;
+  background-color: white;
 }
 
 .row .col-img {
