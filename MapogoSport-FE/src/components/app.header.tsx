@@ -30,13 +30,13 @@ const Header = () => {
                             style={{ maxHeight: '100px' }}
                             navbarScroll
                         >
-                            <Nav.Link href="#">
-                                Dụng cụ
+                            <Nav.Link href="#" className='head-hv-nav'>
+                                <i className="bi bi-tools me-2"></i> Dụng cụ
                             </Nav.Link>
-                            <Nav.Link href="#">
-                                Sân thể thao
+                            <Nav.Link href="#" className='head-hv-nav'>
+                                <i className="bi bi-trophy me-2"></i>Sân thể thao
                             </Nav.Link>
-                            <NavDropdown title={<><i className="bi bi-person me-2"></i>Tài khoản</>} id="navbarScrollingDropdown">
+                            <NavDropdown title={<><Link href="#" className='head-hv-nav text-decoration-none'><i className="bi bi-person me-2"></i>Tài khoản</Link></>} id="navbarScrollingDropdown">
                                 <NavDropdown.Item href="#action3">Action</NavDropdown.Item>
                                 <NavDropdown.Item href="#action4">
                                     Another action
@@ -46,7 +46,7 @@ const Header = () => {
                                     Something else here
                                 </NavDropdown.Item>
                             </NavDropdown>
-                            <Nav.Link href="#">
+                            <Nav.Link href="#" className='head-hv-nav'>
                                 <i className="bi bi-cart me-2"></i>
                                 Giỏ hàng
                             </Nav.Link>

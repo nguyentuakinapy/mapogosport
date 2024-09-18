@@ -3,6 +3,7 @@
   transition: color 0.5s ease;
   color: black;
   padding: 3px 10px;
+  letter-spacing: 0.5px;
 }
 
 .hv-link:hover {
@@ -18,12 +19,28 @@
   background-color: #FFDD9D;
 }
 
-.row .img-dm {
+.row .col-img {
   box-sizing: border-box;
+}
+
+.row .img-dm {
+  border: 2px solid transparent;
+  transition: box-shadow 0.3s ease, border 0.3s ease;
 }
 
 .row .img-dm:hover {
   border: 2px solid #FFDD9D;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 15px;
+}
+
+.head-hv-nav {
+  letter-spacing: 0.5px;
+  margin: 0px 10px;
+  font-weight: bold !important;
+  color: black !important;
+}
+
+.head-hv-nav:hover {
+  color: red !important;
 }
