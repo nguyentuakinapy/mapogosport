@@ -12,7 +12,7 @@ const Header = () => {
         <>
             <Navbar expand="lg" >
                 <Container>
-                    <Navbar.Brand href="#"><img src="/images/logo.png" style={{ width: '100px' }} alt="" /></Navbar.Brand>
+                    <Navbar.Brand href="#"><Link href={'/'}><img src="/images/logo.png" style={{ width: '100px' }} alt="" /></Link></Navbar.Brand>
                     <Navbar.Toggle aria-controls="navbarScroll" />
                     <Navbar.Collapse id="navbarScroll">
                         <Form className="d-flex m-auto">
@@ -31,19 +31,19 @@ const Header = () => {
                             navbarScroll
                         >
                             <Nav.Link href="#" className='head-hv-nav'>
-                                <i className="bi bi-tools me-2"></i> Dụng cụ
+                                <i className="bi bi-tools me-2"></i> Sản phẩm
                             </Nav.Link>
                             <Nav.Link href="#" className='head-hv-nav'>
                                 <i className="bi bi-trophy me-2"></i>Sân thể thao
                             </Nav.Link>
                             <NavDropdown title={<><Link href="#" className='head-hv-nav text-decoration-none'><i className="bi bi-person me-2"></i>Tài khoản</Link></>} id="navbarScrollingDropdown">
-                                <NavDropdown.Item href="#action3">Action</NavDropdown.Item>
+                                <NavDropdown.Item href="#action3">Đăng nhập</NavDropdown.Item>
                                 <NavDropdown.Item href="#action4">
-                                    Another action
+                                    Đăng ký
                                 </NavDropdown.Item>
                                 <NavDropdown.Divider />
-                                <NavDropdown.Item href="#action5">
-                                    Something else here
+                                <NavDropdown.Item href="/user/profile">
+                                    Thông tin tài khoản
                                 </NavDropdown.Item>
                             </NavDropdown>
                             <Nav.Link href="#" className='head-hv-nav'>
