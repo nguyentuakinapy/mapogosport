@@ -2,7 +2,8 @@ import '/node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",

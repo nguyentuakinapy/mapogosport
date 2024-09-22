@@ -1,6 +1,5 @@
 'use client';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+
 import { Container, Row, Col, Button, Card, ButtonGroup, Form } from 'react-bootstrap';
 import { useState } from 'react';
 import '../globals.css';
@@ -94,7 +93,7 @@ const ProductDetail = () => {
     }
     return (
         <>
-            <Container className="p-3 container" >
+            <Container className="p-3 container1" >
                 <Row className=''>
                     {/* Hình ảnh sản phẩm */}
                     <Col md={5} className='ms-5' style={{ maxWidth: '350px' }}>
