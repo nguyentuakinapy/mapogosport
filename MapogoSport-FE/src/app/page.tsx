@@ -1,8 +1,5 @@
 import { Container, Carousel } from "react-bootstrap";
 import { useState } from 'react';
-import ExampleCarouselImage from 'public/images/danhmucnoibat.png';
-import LoginModal from "@/components/account/modal/login.modal";
-
 
 export default function Home() {
 
@@ -254,7 +251,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <LoginModal></LoginModal>
     </Container>
   );
 }
