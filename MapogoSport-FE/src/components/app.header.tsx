@@ -33,7 +33,7 @@ const Header = () => {
 
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
-            <Navbar expand="lg" className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
+            <Navbar expand="lg" className='header-area bg-light' style={{ position: 'sticky', zIndex: '1001' }}>
                 <Container>
                     <Navbar.Brand href="#"><Link href={'/'}><img src="/images/logo.png" style={{ width: '100px' }} alt="" /></Link></Navbar.Brand>
                     <Navbar.Toggle aria-controls="navbarScroll" />
@@ -57,8 +57,8 @@ const Header = () => {
                                 <i className="bi bi-trophy me-2"></i>Sân thể thao
                             </Nav.Link>
                             <NavDropdown title={<><span className='head-hv-nav text-decoration-none'><i className="bi bi-person me-2"></i>Tài khoản</span></>} id="navbarScrollingDropdown">
-                                <NavDropdown.Item href="#action3">Đăng nhập</NavDropdown.Item>
-                                <NavDropdown.Item href="#action4">
+                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</NavDropdown.Item>
+                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#registerModal">
                                     Đăng ký
                                 </NavDropdown.Item>
                                 <NavDropdown.Divider />
