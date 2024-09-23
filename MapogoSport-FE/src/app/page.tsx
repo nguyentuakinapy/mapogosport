@@ -1,3 +1,4 @@
+import LoginModal from "@/components/account/modal/login.modal";
 import { Container } from "react-bootstrap";
 
 export default function Home() {
@@ -98,6 +99,7 @@ export default function Home() {
       <div>
         <h3 className="text-center fw-bold mt-5">THÔNG TIN NỔI BẬT</h3>
       </div>
+      <LoginModal></LoginModal>
     </Container>
   );
 }
