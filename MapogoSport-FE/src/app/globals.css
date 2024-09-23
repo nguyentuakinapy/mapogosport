@@ -48,3 +48,42 @@
 .head-hv-nav:hover {
   color: red !important;
 }
+
+/* ACCOUNT */
+
+.btn-submit {
+  background-color: black;
+  color: white;
+  border: 1px solid transparent;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-submit:hover {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-submit:hover img {
+  filter: invert(1);
+}
+
+.icon-white path {
+  fill: white;
+  transition: fill 0.3s;
+}
+
+.btn-submit:hover .icon-white path {
+  fill: black;
+}
+
+.btn-close {
+  border-radius: 50%;
+  border: 1px solid black;
+}
+
+.modal-custom {
+  max-width: 40%;
+}
+
