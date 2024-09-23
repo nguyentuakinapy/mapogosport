@@ -48,3 +48,25 @@
 .head-hv-nav:hover {
   color: red !important;
 }
+
+.sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  /* Hoặc màu sắc của header */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  animation: slideDown 0.3s ease-in-out;
+}
+
+@keyframes slideDown {
+  from {
+      transform: translateY(-100%);
+  }
+
+  to {
+      transform: translateY(0);
+  }
+}

@@ -35,7 +35,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Header />
-        <main className='bg-light'>{children}</main>
+        <main className='bg-light main-area pb-5'>{children}</main>
         <Footer />
       </body>
     </html>

@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link';
+import { useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
@@ -8,22 +9,41 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
 const Header = () => {
+    useEffect(() => {
+        require('bootstrap/dist/js/bootstrap.bundle.min.js');
+    }, []);
+
+    window.addEventListener('scroll', function () {
+        var header = document.querySelector('.header-area');
+        var main = document.querySelector('.main-area') as HTMLElement | null;;
+        var scrollPosition = window.scrollY;
+
+        if (scrollPosition > 230) {
+            header?.classList.add('sticky-header');
+            if (main) {
+                main.style.marginTop = '20px';
+            }
+        } else {
+            header?.classList.remove('sticky-header');
+            if (main) {
+                main.style.marginTop = '0px';
+            }
+        }
+    });
+
     return (
-        <>
-            <Navbar expand="lg" >
+        <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
+            <Navbar expand="lg" className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
                 <Container>
                     <Navbar.Brand href="#"><Link href={'/'}><img src="/images/logo.png" style={{ width: '100px' }} alt="" /></Link></Navbar.Brand>
                     <Navbar.Toggle aria-controls="navbarScroll" />
                     <Navbar.Collapse id="navbarScroll">
                         <Form className="d-flex m-auto">
-                            <Form.Control
-                                type="search"
-                                placeholder="Search"
-                                className="me-2"
-                                aria-label="Search"
-                                style={{ width: '300px' }}
-                            />
-                            <Button variant="outline-dark"><i className="bi bi-search"></i></Button>
+                            <div className="input-group">
+                                <input type="search" className='form-control' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
+                                    style={{ width: '300px' }} />
+                                <Button variant="outline-dark"><i className="bi bi-search"></i></Button>
+                            </div>
                         </Form>
                         <Nav
                             className="ms-auto my-2 my-lg-0"
@@ -36,19 +56,23 @@ const Header = () => {
                             <Nav.Link href="#" className='head-hv-nav'>
                                 <i className="bi bi-trophy me-2"></i>Sân thể thao
                             </Nav.Link>
-                            <NavDropdown title={<><Link href="#" className='head-hv-nav text-decoration-none'><i className="bi bi-person me-2"></i>Tài khoản</Link></>} id="navbarScrollingDropdown">
+                            <NavDropdown title={<><span className='head-hv-nav text-decoration-none'><i className="bi bi-person me-2"></i>Tài khoản</span></>} id="navbarScrollingDropdown">
                                 <NavDropdown.Item href="#action3">Đăng nhập</NavDropdown.Item>
                                 <NavDropdown.Item href="#action4">
                                     Đăng ký
                                 </NavDropdown.Item>
                                 <NavDropdown.Divider />
-                                <NavDropdown.Item href="/user/profile">
-                                    Thông tin tài khoản
+                                <NavDropdown.Item>
+                                    <Link href={'/user/profile'} className='text-decoration-none text-dark'>Thông tin tài khoản</Link>
                                 </NavDropdown.Item>
                             </NavDropdown>
-                            <Nav.Link href="#" className='head-hv-nav'>
+                            <Nav.Link href="#" className='head-hv-nav position-relative'>
                                 <i className="bi bi-cart me-2"></i>
                                 Giỏ hàng
+                                <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
+                                    0
+                                    <span className="visually-hidden">unread messages</span>
+                                </span>
                             </Nav.Link>
                         </Nav>
                     </Navbar.Collapse>
@@ -96,24 +120,10 @@ const Header = () => {
                             Golf
                         </Link>
                     </Nav>
-                    <Nav className='hv-nav'>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            Gym
-                        </Link>
-                    </Nav>
-                    <Nav className='hv-nav'>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            Bơi
-                        </Link>
-                    </Nav>
-                    <Nav className='hv-nav'>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            Thiết kế & thi công
-                        </Link>
-                    </Nav>
+
                 </Container>
             </Navbar>
-        </>
+        </main>
     );
 }
 
