@@ -88,6 +88,8 @@ const ProductDetail = () => {
     // Example options
     const colors = ['Red', 'Blue', 'Green', 'Black'];
     const sizes = ['S', 'M', 'L', 'XL'];
+    const [selectedColor, setSelectedColor] = useState<string | null>(null);
+    const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const handleClickBtn = () => {
         setOpen(true);
     }
@@ -148,16 +150,36 @@ const ProductDetail = () => {
                         <div>
                             <span className='fs-4'>Màu:</span>
                             {colors.map((color) => {
+                                const isSelected = selectedColor === color;  // Kiểm tra xem màu có được chọn hay không
+
                                 return (
-                                    <Button key={color} className='ms-2 mb-4' variant="outline-secondary" style={{ backgroundColor: color, color: 'white', borderRadius: '5px', padding: '5px 10px' }}>{color}</Button>
-                                )
+                                    <Button
+                                        key={color}
+                                        className={`ms-2 mb-4 ${isSelected ? 'border-3 border-dark' : ''}`}  // Thêm viền nếu màu đang được chọn
+                                        variant={isSelected ? "primary" : "outline-secondary"}  // Thay đổi kiểu dựa trên trạng thái chọn
+                                        style={{
+                                            backgroundColor: color,
+                                            color: 'white',
+                                            borderRadius: '5px',
+                                            padding: '5px 10px',
+                                            opacity: isSelected ? 1 : 0.7  // Làm cho button đã chọn nổi bật hơn
+                                        }}
+                                        onClick={() => setSelectedColor(color)}  // Cập nhật trạng thái khi click vào
+                                    >
+                                        {color}
+                                    </Button>
+                                );
                             })}
                         </div>
                         <div>
                             <span className='fs-4'>Size:</span>
                             {sizes.map((size) => {
+                                const isSelected = selectedSize === size;  // Kiểm tra xem size có được chọn hay không
                                 return (
-                                    <Button key={size} className='ms-2 mb-4' variant="outline-secondary" style={{ borderRadius: '5px', padding: '5px 10px' }}>{size}</Button>
+                                    <Button key={size} className={`ms-2 mb-4 ${isSelected ? 'text-white' : ''}`} variant="outline-secondary"
+                                        style={{ borderRadius: '5px', padding: '5px 10px', backgroundColor: isSelected ? 'gray' : '' }}
+                                        onClick={() => setSelectedSize(size)}>
+                                        {size}</Button>
                                 )
                             })}
                         </div>
@@ -187,11 +209,11 @@ const ProductDetail = () => {
             <Container className="p-3 mt-4 mb-4">
                 <Row>
 
-
+                    <h6>Giới thiệu Lưới chắn bóng 3mm</h6>
                     <Collapse in={open}>
                         <Col className="m-auto" >
 
-                            <h6>Giới thiệu Lưới chắn bóng 3mm</h6>
+
                             <p>
                                 Lưới chắn bóng 3mm là một sản phẩm chất lượng cao, được thiết kế để cung cấp giải pháp bảo vệ và kiểm soát tối ưu trong các khu vực thể thao và giải trí. Với đường kính sợi 3mm, lưới này mang lại sự bền bỉ vượt trội và khả năng chịu lực tốt, làm cho nó trở thành sự lựa chọn hàng đầu cho các sân bóng đá, sân tennis và nhiều ứng dụng khác.
                             </p>
