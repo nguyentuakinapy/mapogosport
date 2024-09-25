@@ -12,6 +12,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Footer from '@/components/app.footer';
 import LoginModal from '@/components/account/modal/login.modal';
 import RegisterModal from '@/components/account/modal/register.modal';
+import ChangeEmailModel from '@/components/account/modal/changeEmail.modal';
+import ChangePassword from '@/components/account/modal/changePassword.modal';
+import ForgotPassword from '@/components/account/modal/forgotPassword.modal';
 
 
 // const geistMono = localFont({
@@ -41,6 +44,9 @@ export default function RootLayout({
         <Footer />
         <LoginModal></LoginModal>
         <RegisterModal></RegisterModal>
+        <ChangeEmailModel></ChangeEmailModel>
+        <ChangePassword></ChangePassword>
+        <ForgotPassword></ForgotPassword>
       </body>
     </html>
   );

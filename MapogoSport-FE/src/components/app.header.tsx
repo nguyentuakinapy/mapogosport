@@ -61,6 +61,15 @@ const Header = () => {
                                 <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#registerModal">
                                     Đăng ký
                                 </NavDropdown.Item>
+                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#changeEmail">
+                                    Thay đổi Email
+                                </NavDropdown.Item>
+                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#changePassword">
+                                    Thay đổi Password
+                                </NavDropdown.Item>
+                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#forgotModaln">
+                                    Quên mật khẩu
+                                </NavDropdown.Item>
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item>
                                     <Link href={'/user/profile'} className='text-decoration-none text-dark'>Thông tin tài khoản</Link>
