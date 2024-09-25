@@ -1,131 +1,133 @@
-'use client'
-import React from 'react';
-
-import { Button } from 'react-bootstrap';
-
+"use client";
+import React, { useState } from 'react';
 
 const Cart = () => {
+  const [selectAll, setSelectAll] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState([false, false, false]); // Giả định có 3 sản phẩm
+
+  const handleSelectAll = () => {
+    const newSelectAll = !selectAll;
+    setSelectAll(newSelectAll);
+    setSelectedProducts(selectedProducts.map(() => newSelectAll));
+  };
+
+  const handleProductSelect = (index) => {
+    const updatedProducts = [...selectedProducts];
+    updatedProducts[index] = !updatedProducts[index];
+    setSelectedProducts(updatedProducts);
+    setSelectAll(updatedProducts.every(Boolean));
+  };
+
   return (
     <>
-      <h1 className="text-center mt-5">Giỏ hàng</h1>
-      <div className="container-fluid py-5">
-        <div className="container py-5">
-          <div className="table-responsive">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th scope="col">Sản phẩm</th>
-                  <th scope="col">Tên sản phẩm</th>
-                  <th scope="col">Giá</th>
-                  <th scope="col">Số lượng</th>
-                  <th scope="col">Tổng</th>
-                  <th scope="col">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">
-                    <div className="d-flex align-items-center">
-                      <img
-                        src="https://www.racquetpoint.com/cdn/shop/articles/what-is-badminton-racquet-point.jpg?v=1654120169"
-                        className="img-fluid me-5 rounded-circle"
-                        style={{ width: '80px', height: '80px' }}
-                        alt=""
-                      />
-                    </div>
-                  </th>
-                  <td>
-                    <p className="mb-0 mt-4">Ống cầu</p>
-                  </td>
-                  <td>
-                    <p className="mb-0 mt-4">200.000</p>
-                  </td>
-                  <td>
-                    <div className="input-group quantity mt-4" style={{ width: '100px' }}>
-                      <div className="input-group-btn">
-                        <button className="btn btn-sm btn-minus rounded-circle bg-light border">
-                          {/* <i className="fa fa-minus"></i> */} <i className="bi bi-dash"></i>
-                        </button>
-                      </div>
+      <h1 className="text-center pt-5">Giỏ hàng</h1>
+      <div className="container shadow p-3 mb-5 bg-body rounded">
+        <div className="row " >
+          <div className="col-md-8">
+            <div className="table-responsive">
+              <table className="table  table-hover ">
+                <thead >
+                  <tr >
+                    <th  scope="col" style={{ width: '5%' }}>
                       <input
-                        type="text"
-                        className="form-control form-control-sm text-center border-0"
-                        value="2"
-                      />
-                      <div className="input-group-btn">
-                        <button className="btn btn-sm btn-plus rounded-circle bg-light border">
-                          {/* <i className="fa fa-plus"></i> */}<i className="bi bi-plus-lg"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <p className="mb-0 mt-4">400.000</p>
-                  </td>
-                  <td>
-                    <button className="btn btn-md rounded-circle bg-light border mt-4">
-                      {/* <i className="fa fa-times text-danger"></i> */}<i className="text-danger bi bi-x"></i>
+                        className='me-2'
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                      /> 
+                    </th>
+                    <th scope="col" >Sản phẩm</th>
+                    <th scope="col" >Tên sản phẩm</th>
+                    <th scope="col" >Giá</th>
+                    <th scope="col" >Số lượng</th>
+                    <th scope="col" >Tổng</th>
+                    <th scope="col" style={{ width: '10%' }}>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...Array(3)].map((_, index) => (
+                    <tr key={index}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedProducts[index]}
+                          onChange={() => handleProductSelect(index)}
+                        />
+                      </td>
+                      <th scope="row">
+                        <img
+                          src="https://www.racquetpoint.com/cdn/shop/articles/what-is-badminton-racquet-point.jpg?v=1654120169"
+                          className="img-fluid me-5 rounded-circle"
+                          style={{ width: '80px', height: '80px' }}
+                          alt=""
+                        />
+                      </th>
+                      <td>
+                        <p className="mb-0">Ống cầu</p>
+                      </td>
+                      <td>
+                        <p className="mb-0">200.000</p>
+                      </td>
+                      <td>
+                        <div className="input-group quantity" style={{ width: '100px' }}>
+                          <button className="btn btn-sm btn-minus rounded-circle bg-light border">
+                            <i className="bi bi-dash"></i>
+                          </button>
+                          <input
+                            type="text"
+                            className="form-control form-control-sm text-center border-0"
+                            value="2"
+                          />
+                          <button className="btn btn-sm btn-plus rounded-circle bg-light border">
+                            <i className="bi bi-plus-lg"></i>
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        <p className="mb-0">400.000</p>
+                      </td>
+                      <td>
+                    <button className="btn btn-md rounded-circle bg-light border" style={{ width: '35px', height: '35px', padding: 0 }}>
+                      <i className="text-danger bi bi-x"></i>
                     </button>
                   </td>
-                </tr>
-                {/* Bạn có thể lặp lại các sản phẩm khác tương tự */}
-              </tbody>
-            </table>
+
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div className="mt-5">
-            <input
-              type="text"
-              className="border-0 border-bottom rounded me-5 py-3 mb-4"
-              placeholder="Mã giảm giá"
-            />
-            <button className="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">
-              Áp mã
-            </button>
-          </div>
-          {/* Tổng tiền */}
-          <div className="row g-4 justify-content-end">
-            <div className="col-8"></div>
-            <div className="col-sm-8 col-md-7 col-lg-6 col-xl-4">
-              <div className="bg-light rounded">
-                <div className="p-4">
-                  <h1 className="display-6 mb-4">
-                    Tổng <span className="fw-normal">Tiền</span>
-                  </h1>
-                  <div className="d-flex justify-content-between mb-4">
-                    <h5 className="mb-0 me-4">Tạm tính:</h5>
-                    <p className="mb-0">400.000</p>
-                  </div>
-                  <div className="d-flex justify-content-between">
-                    <h5 className="mb-0 me-4">Vận chuyển</h5>
-                    <div>
-                      <p className="mb-0">Phí vận chuyển: 15.000</p>
-                    </div>
-                  </div>
-                  <p className="mb-0 text-end">Vận chuyển đến Kiên Giang</p>
+
+          <div className="col-md-4">
+            <div className="rounded"  style={{ backgroundColor: "#f2f2f2" }}>
+              <div className="p-4">
+                <h1 className="display-6 mb-4 text-primary">Tổng tiền</h1>
+                <div className="d-flex justify-content-between mb-4">
+                  <h5 className="mb-0">Tạm tính:</h5>
+                  <p className="mb-0">400.000 VND</p>
                 </div>
-                <div className="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
-                  <h5 className="mb-0 ps-4 me-4">Tổng cộng</h5>
-                  <p className="mb-0 pe-4">400.000</p>
+                <div className="d-flex justify-content-between">
+                  <h5 className="mb-0">Vận chuyển</h5>
+                  <p className="mb-0">Phí vận chuyển: 15.000 VND</p>
                 </div>
-                <button
-                  className="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4"
-                  type="button"
-                >
-                  Xác nhận thanh toán
-                </button>
+                <p className="mb-0 text-end">Vận chuyển đến Kiên Giang</p>
+              </div>
+              <div className="py-4 mb-4 border-top border-bottom border-dark d-flex justify-content-between ">
+                <h5 className="mb-0 mx-4">Tổng cộng</h5>
+                <p className="mb-0 mx-4 text-primary fw-bold">415.000 VND</p>
+              </div>
+              <div className=' text-end'>
+              <button
+                className="btn border-secondary bg-success rounded-pill px-4 me-3 py-3 text-light text-uppercase mb-4"
+                type="button">
+                Xác nhận thanh toán
+              </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    
-    
-     <Button variant='danger'>BAtoluxi</Button>
-     <i className="bi bi-alarm"></i>
-     <i className="fa fa-minus"></i>
-     
-     <div className='btn btn-danger'>dsds</div>
-
     </>
   );
 };
