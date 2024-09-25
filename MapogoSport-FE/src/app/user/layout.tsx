@@ -2,7 +2,7 @@ export const metadata = {
     title: 'Quản lý tài khoản'
 }
 
-export default function UserLayout({
+export default function Layout({
     children,
 }: {
     children: React.ReactNode

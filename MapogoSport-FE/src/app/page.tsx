@@ -4,7 +4,7 @@ import { useState } from 'react';
 export default function Home() {
 
   return (
-    <Container className="bg-light pt-3">
+     <Container className="pt-3">
       <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">
         <div className="carousel-inner">
           <div className="carousel-item active" data-bs-interval="2000">

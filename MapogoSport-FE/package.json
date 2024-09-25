@@ -40,9 +40,10 @@
     "next": "14.2.11",
     "react": "18.3.1",
     "react-bootstrap": "2.10.4",
+    "react-datepicker": "7.3.0",
     "react-dom": "18.3.1",
     "react-toastify": "10.0.5",
-    "sass": "^1.78.0"
+    "sass": "1.78.0"
   },
   "devDependencies": {
     "@types/node": "20.14.2",
