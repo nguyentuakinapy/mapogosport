@@ -109,3 +109,27 @@
 .modal-custom {
   max-width: 40%;
 }
+/* CHANGE EMAIL */
+
+
+.verification input {
+  width: 50px;
+  height: 60px;
+  text-align: center;
+  font-size: 20px;
+  border-radius: 10px;
+}
+
+.re-verification {
+  border-radius: 10px;
+  color: red;
+  border: 1px solid red;
+  background-color: white
+}
+
+.re-verification:hover {
+  background-color: red;
+  border: none;
+  color: white;
+  border-radius: 10px;
+}
