@@ -1,75 +1,228 @@
-.bg-white {
-    padding: 1.5rem !important;
-    border-radius: 15px !important;
-    margin-top: 1.5rem !important;
+/*======================================================Profile CSS Start======================================================*/
+.form-control-sm, .form-select {
+    border: 1px solid black !important;
+    border-radius: 5px;
 }
-
-.avatar-upload {
-    display: inline-block;
-    border-radius: 50%;
-    position: relative;
-    overflow: hidden;
-
-    .avatar-edit {
-        position: absolute;
-        bottom: -1px;
-        width: 100%;
-        text-align: center;
-        z-index: 9;
-
-        input+label {
-            margin-bottom: 0;
-            background-color: #000;
-            cursor: pointer;
-            transition: all .2s ease-in-out;
-            width: 100%;
-            color: #fff;
-            text-decoration: none;
-        }
-
-        input {
-            display: none;
-        }
-    }
-
-    .avatar-preview {
-        div {
-            width: 6rem;
-            height: 6rem;
-            margin: 0 auto;
-            background-size: cover;
-            background-repeat: no-repeat;
-        }
+a {
+    text-decoration: none;
+    color: #dc3545;
+    &:hover {
+        color: #142239;
     }
 }
-
-.flex-column {
-    a {
-        color: #000;
+.btn-profile {
+    width: 15%;
+    border: 1px solid #142239;
+    background: #142239;
+    color: #fff;
+    &:hover {
+        background: white;
+        color: black;
+        border: 1px solid #142239;  
     }
-
-    .item {
-        font-weight: 700 !important;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        &:focus,
+}
+/*======================================================Profile CSS End======================================================*/
+/*======================================================Address CSS Start======================================================*/
+.item-address {
+    background: #f8f8f8;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px dashed black;
+    font-size: 15px;
+    &:last-child{
+        margin-bottom: 0;
+    }
+    .btn-address {
+        cursor: pointer;
         &:hover {
-            color: red !important;
-        }
-    }
-
-    .collapse {
-
-        a:hover,
-        a:focus {
-            color: red !important;
-        }
-
-        a {
-            text-decoration: none;
+            text-shadow: 0 0 10px #142239;
         }
     }
 }
+/*======================================================Address CSS End======================================================*/
+/*======================================================Order & Booking CSS Start======================================================*/
+.search-date {
+    flex-wrap: nowrap;
+    .start {
+        border-radius: 5px 0 0 5px;
+        border-width: 1px 0px 1px 1px !important;
+        border-style: solid;
+        border-color: black;
+    }
+    .input-group-text {
+        border-width: 1px 0;
+        border-style: solid;
+        border-color: black;
+        background: #e9ecef;
+    }
+    .end {
+        border-radius: 0 5px 5px 0;
+        border-width: 1px 1px 1px 0px !important;
+        border-style: solid;
+        border-color: black;
+    }
+}
+.box-table-border {
+    border: 1px solid #142239;
+    border-radius: 8px 8px 0 0;
+    .table {
+        text-align: center;
+        thead {
+            tr {
+                th {
+                    text-transform: uppercase;
+                    background-color: #142239;
+                    color: white;
+                    font-weight: normal;
+                    &:first-child {
+                        border-radius: 8px 0 0 0;
+                    }
+                    &:last-child {
+                        border-radius: 0 8px 0 0;
+                    }
+                }
+            }
+        }
+        tbody {
+            tr {
+                td {
+                    font-size: 15px;
+                    a {
+                        text-decoration: none;
+                        color: #142239;
+                        font-weight: 700;
+                    }
+                    .bg-badge-user {
+                        background: #142239 !important;
+                    }
+                }
+                .title {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    max-width: 250px;
+                }
+            }
+        }
+    }
+}
+/*======================================================Order & Booking CSS End======================================================*/
+/*======================================================Detail Order CSS Start======================================================*/
+.detail-order {
+    tr {
+        td {
+            text-align: center;
+            vertical-align: middle;
+        }
+    }
+    .total-money {
+        td {
+            background-color: #142239;
+            color: white;
+        }
+    }
+}
+/*======================================================Detail Order CSS End======================================================*/
+/*======================================================Detail Booking CSS Start======================================================*/
+.booking-container {
+    .col {
+        .bill-booking {
+            background: #ffe0f4;
+            margin: 0 -10px;
+            padding: 0 8px;
+            border-bottom: 2px dashed black;
+        }
+        .row {
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba($color: rgb(108, 117, 125), $alpha: 1.0);
+        }
+        .table {
+            tbody {
+                tr {
+                    .title {
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                        max-width: 250px;
+                    }
+                }
+            }
+        }
+        .map-container {
+            .note-map {
+                text-align: center;
+                background: #142239;
+                color: white;
+                padding: 5px 0;
+            }
+            .map-border {
+                width: 100%;
+                height: 310px;
+                border: 1px solid #142239;
+            }
+        }
+    }
+}
+/*======================================================Detail Booking CSS End======================================================*/
+/*======================================================Wishlist CSS Start======================================================*/
+.user-border {
+    border-radius: 8px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    overflow: hidden;
+    img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+    &:hover {
+        box-shadow: 0 0 10px #142239;
+    }
+    &:first-child {
+        margin-bottom: 1.5rem;
+    }
+    .content {
+        .title {
+            a {
+                color: #dc3545;
+                text-decoration: none;
+                &:hover {
+                    text-decoration: none;
+                }
+            }
+        }
+        .address {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 250px;
+        }
+        .btn-user {
+            background: #142239;
+            width: 100%;
+            color: white;
+            border: 1px solid #142239;
+            &:hover {
+                background: white;
+                color: black;
+                border: 1px solid #142239;  
+            }
+        }
+        .button-product {
+            .btn-user-product {
+                background: #142239;
+                width: 40%;
+                color: white;
+                border: 1px solid #142239;
+                &:hover {
+                    background: white;
+                    color: black;
+                    border: 1px solid #142239;  
+                }
+            }
+        }
+    }
+}
+/*======================================================Wishlist CSS End======================================================*/

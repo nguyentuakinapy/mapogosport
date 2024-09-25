@@ -2,7 +2,7 @@ import { Container } from "react-bootstrap";
 
 export default function Home() {
   return (
-    <Container className="bg-light pt-3">
+    <Container className="pt-3">
       <img src="https://img.thegioithethao.vn/media/icon/thi-cong-cai-tao.webp" className="w-100" alt="" />
       <div className="row mt-2">
         <div className="col">

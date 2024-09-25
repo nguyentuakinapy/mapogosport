@@ -36,7 +36,7 @@ const Header = () => {
                             <Nav.Link href="#" className='head-hv-nav'>
                                 <i className="bi bi-trophy me-2"></i>Sân thể thao
                             </Nav.Link>
-                            <NavDropdown title={<><Link href="#" className='head-hv-nav text-decoration-none'><i className="bi bi-person me-2"></i>Tài khoản</Link></>} id="navbarScrollingDropdown">
+                            {/* <NavDropdown title={<><Link href="#" className='head-hv-nav text-decoration-none'><i className="bi bi-person me-2"></i>Tài khoản</Link></>} id="navbarScrollingDropdown">
                                 <NavDropdown.Item href="#action3">Action</NavDropdown.Item>
                                 <NavDropdown.Item href="#action4">
                                     Another action
@@ -45,7 +45,7 @@ const Header = () => {
                                 <NavDropdown.Item href="#action5">
                                     Something else here
                                 </NavDropdown.Item>
-                            </NavDropdown>
+                            </NavDropdown> */}
                             <Nav.Link href="#" className='head-hv-nav'>
                                 <i className="bi bi-cart me-2"></i>
                                 Giỏ hàng
