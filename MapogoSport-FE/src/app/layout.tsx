@@ -7,6 +7,8 @@ const inter = Inter({ subsets: ['latin'] })
 import Header from '@/components/app.header';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Footer from '@/components/app.footer';
+import LoginModal from '@/components/account/modal/login.modal';
+import RegisterModal from '@/components/account/modal/register.modal';
 
 
 export const metadata: Metadata = {
@@ -21,12 +23,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
       <body className={inter.className}>
         <Header />
-        <main className='bg-web'>{children}</main>
+        <main className='bg-web main-area pb-5'>{children}</main>
         <Footer />
+        <LoginModal></LoginModal>
+        <RegisterModal></RegisterModal>
       </body>
     </html>
   );

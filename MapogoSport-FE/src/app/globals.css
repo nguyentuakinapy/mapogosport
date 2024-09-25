@@ -48,3 +48,64 @@
 .head-hv-nav:hover {
   color: red !important;
 }
+
+
+.sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  /* Hoặc màu sắc của header */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  animation: slideDown 0.3s ease-in-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ACCOUNT */
+
+.btn-submit {
+  background-color: black !important;
+  color: white !important;
+  border: 1px solid transparent !important;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-submit:hover {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid black !important;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-submit:hover img {
+  filter: invert(1);
+}
+
+.icon-white path {
+  fill: white !important;
+  transition: fill 0.3s;
+}
+
+.btn-submit:hover .icon-white path {
+  fill: black !important;
+}
+
+.btn-close {
+  border-radius: 50% !important;
+  border: 1px solid black !important;
+}
+
+.modal-custom {
+  max-width: 40%;
+}
