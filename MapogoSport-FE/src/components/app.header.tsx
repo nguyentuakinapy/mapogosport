@@ -13,29 +13,42 @@ const Header = () => {
         require('bootstrap/dist/js/bootstrap.bundle.min.js');
     }, []);
 
-    window.addEventListener('scroll', function () {
-        var header = document.querySelector('.header-area');
-        var main = document.querySelector('.main-area') as HTMLElement | null;;
-        var scrollPosition = window.scrollY;
+    useEffect(() => {
+        // Kiểm tra nếu đang chạy ở phía client
+        if (typeof window !== 'undefined') {
+            const handleScroll = () => {
+                const header = document.querySelector('.header-area');
+                const main = document.querySelector('.main-area') as HTMLElement | null;
+                const scrollPosition = window.scrollY;
 
-        if (scrollPosition > 230) {
-            header?.classList.add('sticky-header');
-            if (main) {
-                main.style.marginTop = '20px';
-            }
-        } else {
-            header?.classList.remove('sticky-header');
-            if (main) {
-                main.style.marginTop = '0px';
-            }
+                if (scrollPosition > 230) {
+                    header?.classList.add('sticky-header');
+                    if (main) {
+                        main.style.marginTop = '20px';
+                    }
+                } else {
+                    header?.classList.remove('sticky-header');
+                    if (main) {
+                        main.style.marginTop = '0px';
+                    }
+                }
+            };
+
+            // Lắng nghe sự kiện scroll khi component được mount
+            window.addEventListener('scroll', handleScroll);
+
+            // Dọn dẹp sự kiện khi component bị unmount
+            return () => {
+                window.removeEventListener('scroll', handleScroll);
+            };
         }
-    });
+    }, []); // Chỉ chạy một lần khi component được mount
 
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
             <Navbar expand="lg" className='header-area bg-light' style={{ position: 'sticky', zIndex: '1001' }}>
                 <Container>
-                    <Navbar.Brand href="#"><Link href={'/'}><img src="/images/logo.png" style={{ width: '100px' }} alt="" /></Link></Navbar.Brand>
+                    <Navbar><Link href={'/'} ><img src="/images/logo.png" style={{ width: '100px' }} alt="" /></Link></Navbar>
                     <Navbar.Toggle aria-controls="navbarScroll" />
                     <Navbar.Collapse id="navbarScroll">
                         <Form className="d-flex m-auto">

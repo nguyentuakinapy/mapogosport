@@ -12,6 +12,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Footer from '@/components/app.footer';
 import LoginModal from '@/components/account/modal/login.modal';
 import RegisterModal from '@/components/account/modal/register.modal';
+import { usePathname } from 'next/navigation';
 
 
 // const geistMono = localFont({
@@ -33,6 +34,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const currentPath = usePathname(); // Lấy đường dẫn hiện tại
+  alert(currentPath)
   return (
     <html lang="en">
       <body className={inter.className}>
