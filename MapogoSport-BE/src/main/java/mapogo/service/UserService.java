@@ -1,5 +1,7 @@
 package mapogo.service;
 
-public class UserService {
+import mapogo.entity.User;
 
+public interface UserService {
+	User findByUsername(String username);
 }
