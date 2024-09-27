@@ -17,7 +17,7 @@ export default function UserLayout({
             <Header />
             <main className="main-right">
                 <div className="main-body">
-                    ok
+                    {children}
                 </div>
             </main>
         </>

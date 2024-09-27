@@ -46,7 +46,7 @@ export default function Header() {
                                 <a href="" className="nav-link"><i className="bi bi-bell" style={{ fontSize: 'large' }}></i></a>
                             </li>
                             <li className="nav-item dropdown" style={{ borderLeft: '1px solid' }}>
-                                <a href="#" className="nav-link dropdown-toggle d-flex align-items-center" role="button"
+                                <a href="#" className="nav-link d-flex align-items-center" role="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                     <div className="img" style={{ backgroundImage: 'url()' }}></div>
                                     <span>Nguyễn Tú</span>
