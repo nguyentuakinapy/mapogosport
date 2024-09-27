@@ -3,6 +3,7 @@ import '/node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import type { Metadata } from "next";
 import "./globals.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 const inter = Inter({ subsets: ['latin'] })
 import LoginModal from '@/components/account/modal/login.modal';
 import RegisterModal from '@/components/account/modal/register.modal';
