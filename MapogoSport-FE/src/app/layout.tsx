@@ -3,10 +3,8 @@ import '/node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import type { Metadata } from "next";
 import "./globals.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 const inter = Inter({ subsets: ['latin'] })
-import Header from '@/components/app.header';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Footer from '@/components/app.footer';
 import LoginModal from '@/components/account/modal/login.modal';
 import RegisterModal from '@/components/account/modal/register.modal';
 import ChangeEmailModel from '@/components/account/modal/changeEmail.modal';
@@ -30,9 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Header />
-        <main className='bg-web main-area pb-5'>{children}</main>
-        <Footer />
+        {children}
         <LoginModal></LoginModal>
         <RegisterModal></RegisterModal>
         <ChangeEmailModel></ChangeEmailModel>
