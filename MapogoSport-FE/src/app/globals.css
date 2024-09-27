@@ -101,6 +101,7 @@ body{
     border-color: #1b2b46 !important;
    
   }
+<<<<<<< HEAD
 
 /* category */
 
@@ -290,3 +291,151 @@ body{
 
 
   
+=======
+  
+.bg-web {
+  background-color: #f3f3f3;
+}
+
+.hv-link {
+  box-sizing: border-box;
+  transition: color 0.5s ease;
+  color: black;
+  padding: 3px 10px;
+  letter-spacing: 0.5px;
+}
+
+.hv-link:hover {
+  color: red;
+}
+
+.hv-nav {
+  transition: background-color 0.5s ease;
+  border-radius: 10px;
+}
+
+.hv-nav:hover {
+  background-color: white;
+}
+
+.row .col-img {
+  box-sizing: border-box;
+}
+
+.row .img-dm {
+  border: 2px solid transparent;
+  transition: box-shadow 0.3s ease, border 0.3s ease;
+}
+
+.row .img-dm:hover {
+  border: 2px solid #FFDD9D;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+}
+
+.head-hv-nav {
+  letter-spacing: 0.5px;
+  margin: 0px 10px;
+  font-weight: bold !important;
+  color: black !important;
+}
+
+.head-hv-nav:hover {
+  color: red !important;
+}
+
+.head-hv-nav:hover {
+  color: red !important;
+}
+
+
+
+.sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  /* Hoặc màu sắc của header */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  animation: slideDown 0.3s ease-in-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ACCOUNT */
+
+.btn-submit {
+  background-color: black !important;
+  color: white !important;
+  border: 1px solid transparent !important;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-submit:hover {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid black !important;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-submit:hover img {
+  filter: invert(1);
+}
+
+.icon-white path {
+  fill: white !important;
+  transition: fill 0.3s;
+}
+
+.btn-submit:hover .icon-white path {
+  fill: black !important;
+}
+
+.btn-close {
+  border-radius: 50% !important;
+  border: 1px solid black !important;
+}
+
+.modal-custom {
+  max-width: 40%;
+}
+
+/* CHANGE EMAIL */
+.verification input {
+  width: 50px;
+  height: 60px;
+  text-align: center;
+  font-size: 20px;
+  border-radius: 10px;
+}
+
+.re-verification {
+  border-radius: 10px;
+  color: red !important;
+  border: 1px solid red !important;
+  background-color: white
+}
+
+.re-verification:hover {
+  background-color: red !important;
+  border: none;
+  color: white !important;
+  border-radius: 10px;
+}
+
+/*  */
+.dropdown-toggle::after {
+  margin-left: -0.5em !important;
+}
+
+>>>>>>> 077ec48c18fdd35497be8616fca27c38bf408ef3
