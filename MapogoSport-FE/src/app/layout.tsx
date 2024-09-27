@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google';
 import '/node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import type { Metadata } from "next";
+
 import "./globals.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -11,6 +12,7 @@ import ChangeEmailModel from '@/components/account/modal/changeEmail.modal';
 import ChangePassword from '@/components/account/modal/changePassword.modal';
 import ForgotPassword from '@/components/account/modal/forgotPassword.modal';
 import ChatMessenger from '@/components/app.chatMessenger';
+
 
 
 export const metadata: Metadata = {
