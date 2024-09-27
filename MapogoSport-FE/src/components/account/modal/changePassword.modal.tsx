@@ -43,7 +43,6 @@ export default function ChangePassword() {
                                         <label htmlFor="floatingPassword">Nhập lại mật khẩu  <span className="text-danger">*</span></label>
                                     </div>
 
-+
                                     <button className="btn btn-submit w-100 ">
                                         Lưu thay đổi
                                     </button>
