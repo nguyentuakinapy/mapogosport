@@ -1,21 +1,26 @@
 'use client'
-import React from "react";
+import React, { useState } from "react";
 import Nav from "./app.nav";
 import './owner.css'
 import Header from "./app.header";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
-export default function UserLayout({
+export default function OwnerLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const [isAniActive, setIsAniActive] = useState(false);
+
+    const toggleAni = () => {
+        setIsAniActive(!isAniActive);
+    }
     return (
         <>
-            <Nav />
-            <Header />
-            <main className="main-right">
+            <Nav isAniActive={isAniActive} toggleAni={toggleAni} />
+            <Header isAniActive={isAniActive} toggleAni={toggleAni} />
+            <main className={`main-right ${isAniActive ? 'mainRight' : ''}`}>
                 <div className="main-body">
                     {children}
                 </div>

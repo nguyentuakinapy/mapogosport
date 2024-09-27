@@ -1,7 +1,8 @@
-import OwnerLayout from "@/components/Owner/OwnerLayout"
+import AdminLayout from "@/components/Admin/AdminLayout"
 import './globals.css'
+
 export const metadata = {
-    title: 'Chủ sân'
+    title: 'Admin'
 }
 
 export default function Layout({
@@ -10,6 +11,6 @@ export default function Layout({
     children: React.ReactNode
 }) {
     return (
-        <OwnerLayout>{children}</OwnerLayout>
+        <AdminLayout>{children}</AdminLayout>
     )
 }

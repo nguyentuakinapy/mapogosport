@@ -1,19 +1,30 @@
 'use client'
-import React from "react";
-import { Col, Container, Row } from "react-bootstrap";
-import Header from "../app.header";
-import Footer from "../app.footer";
+import React, { useState } from "react";
+import Nav from "./app.nav";
+import './admin.css'
+import Header from "./app.header";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-export default function UserLayout({
+
+export default function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const [isAniActive, setIsAniActive] = useState(false);
+
+    const toggleAni = () => {
+        setIsAniActive(!isAniActive);
+    }
     return (
         <>
-            <Header />
-            <main className='bg-web main-area pb-5'>{children}</main>
-            <Footer />
+            <Nav isAniActive={isAniActive} toggleAni={toggleAni} />
+            <Header isAniActive={isAniActive} toggleAni={toggleAni} />
+            <main className={`main-right ${isAniActive ? 'mainRight' : ''}`}>
+                <div className="main-body">
+                    {children}
+                </div>
+            </main>
         </>
     )
 }
