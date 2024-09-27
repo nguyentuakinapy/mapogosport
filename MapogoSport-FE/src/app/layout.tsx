@@ -10,6 +10,7 @@ import RegisterModal from '@/components/account/modal/register.modal';
 import ChangeEmailModel from '@/components/account/modal/changeEmail.modal';
 import ChangePassword from '@/components/account/modal/changePassword.modal';
 import ForgotPassword from '@/components/account/modal/forgotPassword.modal';
+import ChatMessenger from '@/components/app.chatMessenger';
 
 
 export const metadata: Metadata = {
@@ -28,12 +29,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+
         {children}
         <LoginModal></LoginModal>
         <RegisterModal></RegisterModal>
         <ChangeEmailModel></ChangeEmailModel>
         <ChangePassword></ChangePassword>
         <ForgotPassword></ForgotPassword>
+        <ChatMessenger></ChatMessenger>
+
       </body>
     </html>
   );
