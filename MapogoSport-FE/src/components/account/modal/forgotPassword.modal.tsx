@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 export default function ForgotPassword() {
     useEffect(() => {
-        const sendCodeButton = document.getElementById('button-addon2');
+        const sendCodeButton = document.getElementById('button-request');
         let countdown: NodeJS.Timeout;
 
         if (sendCodeButton) {
@@ -72,8 +72,8 @@ export default function ForgotPassword() {
 
                                     <div className="input-group mb-3">
                                         <input type="email" className="form-control" placeholder="Email *" aria-label="Email *"
-                                            aria-describedby="button-addon2" />
-                                        <button className="btn btn-dark" type="submit" id="button-addon2">Gửi mã</button>
+                                            aria-describedby="button-request" />
+                                        <button className="btn btn-dark" type="submit" id="button-request">Gửi mã</button>
                                     </div>
 
 

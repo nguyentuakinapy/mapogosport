@@ -1,3 +1,4 @@
+
 'use client';
 import { Container } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
@@ -123,4 +124,17 @@ const Admin = () => {
     );
 };
 
-export default Admin;
+
+import { ReactNode } from "react";
+
+export default function Owner({ children }: { children: ReactNode }) {
+    if (!children) {
+        return (
+            <>Admin Ta Akinu</>
+        )
+    }
+    return (
+        <>{children}</>
+    )
+
+}

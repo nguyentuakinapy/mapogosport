@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
+interface HeaderProps {
+    isAniActive: boolean;
+    toggleAni: () => void;
+}
 
-export default function Header() {
+export default function Header({ isAniActive, toggleAni }: HeaderProps) {
     const [currentDateTime, setCurrentDateTime] = useState('');
+
     useEffect(() => {
         const updateDateTime = () => {
             const now = new Date();
@@ -28,25 +33,26 @@ export default function Header() {
     }, []);
 
     return (
-        <header>
-            <div className="row m-0 justify-content-between align-items-center">
-                <div className="col-4 d-flex justify-content-center align-items-center">
+        <header className={isAniActive ? 'aniHead' : ''}>
+            <div className="d-flex m-0 justify-content-between align-items-center m-auto">
+                <div className="d-flex justify-content-center align-items-center">
+                    <i className="bi bi-filter-left mx-3" onClick={() => toggleAni()} style={{ fontSize: '50px' }}></i>
                     <form className="d-flex search" role="search">
                         <input className="form-control" type="search" placeholder="Search" aria-label="Search" />
-                        <button className="btn btn-outline-success" type="submit"><i className="bi bi-search"></i></button>
+                        <button className="btn btn-outline-success" type="submit"><i className="bi bi-search" /></button>
                     </form>
                 </div>
-                <div className="col-4 d-flex justify-content-center align-items-center">
+                <div className="d-flex justify-content-center align-items-center">
                     <em id="clock">{currentDateTime}</em>
                 </div>
-                <div className="col-4 d-flex justify-content-center align-items-center">
+                <div className=" d-flex justify-content-center align-items-center">
                     <nav className="navbar navbar-expand-lg p-0">
                         <ul className="navbar-nav d-flex align-items-center">
                             <li className="nav-item me-2 ">
                                 <a href="" className="nav-link"><i className="bi bi-bell" style={{ fontSize: 'large' }}></i></a>
                             </li>
                             <li className="nav-item dropdown" style={{ borderLeft: '1px solid' }}>
-                                <a href="#" className="nav-link dropdown-toggle d-flex align-items-center" role="button"
+                                <a href="#" className="nav-link d-flex align-items-center me-3" role="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                     <div className="img" style={{ backgroundImage: 'url()' }}></div>
                                     <span>Nguyễn Tú</span>
@@ -61,6 +67,6 @@ export default function Header() {
                     </nav>
                 </div>
             </div>
-        </header>
+        </header >
     )
 }

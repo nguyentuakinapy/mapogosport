@@ -15,8 +15,8 @@ const Orders = () => {
         <UserLayout>
             <div className='text-danger' style={{ fontSize: '20px', fontWeight: '700' }}>Quản lý đơn hàng</div>
             <div className="my-3">
-                <Row>
-                    <Col xs={12} md={6}>
+                <Row className="d-flex justify-content-between align-items-center">
+                    <Col xs={12} md={4}>
                         <InputGroup className="search-date">
                             <DatePicker
                                 selected={startDate || undefined}
@@ -40,7 +40,7 @@ const Orders = () => {
                             />
                         </InputGroup>
                     </Col>
-                    <Col xs={12} md={6}>
+                    <Col xs={12} md={4}>
                         <Form.Select>
                             <option>-- Trạng thái --</option>
                             <option value="1">Chờ thanh toán</option>
@@ -50,7 +50,7 @@ const Orders = () => {
                             <option value="5">Đã hoàn thành</option>
                         </Form.Select>
                     </Col>
-                    <Col xs={12} md={12} className="mt-2">
+                    <Col xs={12} md={4}>
                         <Button variant="danger" style={{ width: '100%' }} type="submit">
                             <i className="bi bi-search"></i> Tìm kiếm
                         </Button>
