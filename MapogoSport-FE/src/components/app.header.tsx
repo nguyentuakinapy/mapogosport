@@ -59,17 +59,17 @@ const Header = () => {
                             </div>
                         </Form>
                         <Nav
-                            className="ms-auto my-2 my-lg-0"
+                            className="ms-auto my-2 my-lg-0 d-flex justify-content-center align-items-center"
                             style={{ maxHeight: '100px' }}
                             navbarScroll
                         >
-                            <Nav.Link href="#" className='head-hv-nav'>
-                                <i className="bi bi-tools me-2"></i> Sản phẩm
-                            </Nav.Link>
-                            <Nav.Link href="#" className='head-hv-nav'>
-                                <i className="bi bi-trophy me-2"></i>Sân thể thao
-                            </Nav.Link>
-                            <NavDropdown title={<><span className='head-hv-nav text-decoration-none'><i className="bi bi-person me-2"></i>Tài khoản</span></>} id="navbarScrollingDropdown">
+                            <Nav>
+                                <Link href="#" className='head-hv-nav text-decoration-none'><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
+                            </Nav>
+                            <Nav>
+                                <Link href="#" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
+                            </Nav>
+                            <NavDropdown title={<><span className='head-hv-nav text-decoration-none demo'><i className="bi bi-person-fill me-2"></i>Tài khoản</span></>} id="navbarScrollingDropdown">
                                 <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</NavDropdown.Item>
                                 <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#registerModal">
                                     Đăng ký
@@ -80,22 +80,24 @@ const Header = () => {
                                 <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#changePassword">
                                     Thay đổi Password
                                 </NavDropdown.Item>
-                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#forgotModaln">
+                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#forgotModal">
                                     Quên mật khẩu
                                 </NavDropdown.Item>
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item>
                                     <Link href={'/user/profile'} className='text-decoration-none text-dark'>Thông tin tài khoản</Link>
                                 </NavDropdown.Item>
+                                <NavDropdown.Item>
+                                    <Link href={'/owner'} className='text-decoration-none text-dark'>Chủ sân</Link>
+                                </NavDropdown.Item>
                             </NavDropdown>
-                            <Nav.Link href="#" className='head-hv-nav position-relative'>
-                                <i className="bi bi-cart me-2"></i>
-                                Giỏ hàng
+                            <Nav className='position-relative'>
+                                <Link href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</Link>
                                 <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
                                     0
                                     <span className="visually-hidden">unread messages</span>
                                 </span>
-                            </Nav.Link>
+                            </Nav>
                         </Nav>
                     </Navbar.Collapse>
                 </Container>

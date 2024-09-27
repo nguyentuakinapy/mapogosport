@@ -62,7 +62,7 @@ export default function Login() {
                                             </label>
                                         </div>
                                         <a className="forgot d-block text-dark text-decoration-none" href="/forgot-password">
-                                            Quên mật khẩu ?
+                                            Quên mật khẩu?
                                         </a>
                                     </div>
 

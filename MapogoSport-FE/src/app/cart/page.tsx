@@ -1,4 +1,5 @@
 "use client";
+import HomeLayout from '@/components/HomeLayout';
 import React, { useState } from 'react';
 
 const Cart = () => {
@@ -11,7 +12,7 @@ const Cart = () => {
     setSelectedProducts(selectedProducts.map(() => newSelectAll));
   };
 
-  const handleProductSelect = (index) => {
+  const handleProductSelect = (index: number) => {
     const updatedProducts = [...selectedProducts];
     updatedProducts[index] = !updatedProducts[index];
     setSelectedProducts(updatedProducts);
@@ -19,7 +20,7 @@ const Cart = () => {
   };
 
   return (
-    <>
+    <HomeLayout>
       <h1 className="text-center pt-5">Giỏ hàng</h1>
       <div className="container shadow p-3 mb-5 bg-body rounded">
         <div className="row " >
@@ -128,7 +129,7 @@ const Cart = () => {
           </div>
         </div>
       </div>
-    </>
+    </HomeLayout>
   );
 };
 

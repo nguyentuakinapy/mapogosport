@@ -49,6 +49,11 @@
   color: red !important;
 }
 
+.head-hv-nav:hover {
+  color: red !important;
+}
+
+
 
 .sticky-header {
   position: fixed;
@@ -109,9 +114,8 @@
 .modal-custom {
   max-width: 40%;
 }
+
 /* CHANGE EMAIL */
-
-
 .verification input {
   width: 50px;
   height: 60px;
@@ -122,14 +126,19 @@
 
 .re-verification {
   border-radius: 10px;
-  color: red;
-  border: 1px solid red;
+  color: red !important;
+  border: 1px solid red !important;
   background-color: white
 }
 
 .re-verification:hover {
-  background-color: red;
+  background-color: red !important;
   border: none;
-  color: white;
+  color: white !important;
   border-radius: 10px;
+}
+
+/*  */
+.dropdown-toggle::after {
+  margin-left: -0.5em !important;
 }
