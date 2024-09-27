@@ -46,11 +46,8 @@
     "react-datepicker": "7.3.0",
     "react-dom": "18.3.1",
     "react-toastify": "10.0.5",
-<<<<<<< HEAD
     "sass": "^1.79.3"
-=======
-    "sass": "1.78.0"
->>>>>>> 077ec48c18fdd35497be8616fca27c38bf408ef3
+
   },
   "devDependencies": {
     "@types/google.visualization": "^0.0.74",
