@@ -19,7 +19,8 @@ export default function Profile() {
             <div className='mt-4'>
                 <div className='item-address d-flex justify-content-between align-items-center'>
                     <div className="item-left">
-                        <span className='align-items-center'>39/6, Nam Lân, Xã Bà Điểm, Huyện Hóc Môn, Hồ Chí Minh</span>
+                        <b>Nguyễn Phi Hùng - 0963861480</b>
+                        <div>39/6, Nam Lân, Xã Bà Điểm, Huyện Hóc Môn, Hồ Chí Minh</div>
                     </div>
                     <div className="item-right">
                         <div className="d-flex">

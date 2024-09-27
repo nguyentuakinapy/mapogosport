@@ -55,7 +55,7 @@ const WishListSportField = () => {
     return (
         <UserLayout>
             <b className='text-danger' style={{ fontSize: '20px' }}>Sân yêu thích</b>
-            <div style={{ fontSize: '15px' }}>
+            <div style={{ fontSize: '14px' }}>
                 <Row className="my-3">
                     {/* {currentStadiums.map((stadium, index) => ( */}
                     <Col xs={4}>
