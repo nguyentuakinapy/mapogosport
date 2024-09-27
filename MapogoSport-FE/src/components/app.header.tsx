@@ -90,6 +90,9 @@ const Header = () => {
                                 <NavDropdown.Item>
                                     <Link href={'/owner'} className='text-decoration-none text-dark'>Chủ sân</Link>
                                 </NavDropdown.Item>
+                                <NavDropdown.Item>
+                                    <Link href={'/admin'} className='text-decoration-none text-dark'>Admin</Link>
+                                </NavDropdown.Item>
                             </NavDropdown>
                             <Nav className='position-relative'>
                                 <Link href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</Link>
