@@ -6,7 +6,6 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css"; // Import the styles
 import Image from 'next/image';
 import Carousel from 'react-bootstrap/Carousel';
-import Link from 'next/link'
 const SportDetail = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     // const [selected, setSelected] = useState(false);
