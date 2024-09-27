@@ -8,16 +8,16 @@ const SidebarDropdown = ({ item }: any) => {
 
     return (
         <ul className="ps-0">
-            {item.map((item: any, index: number) => (
+            {item.map((child: any, index: number) => (
                 <ListGroup key={index}>
                     <Link
-                        href={item.route}
-                        className={`text-decoration-none rounded-2 px-3 py-2 transition-all ${pathname === item.route
+                        href={child.route}
+                        className={`text-decoration-none rounded-2 px-3 py-2 transition-all ${pathname === child.route
                             ? "bg-secondary text-white"
                             : "text-secondary"
                             }`}
                     >
-                        {item.label}
+                        {child.label}
                     </Link>
                 </ListGroup>
             ))}

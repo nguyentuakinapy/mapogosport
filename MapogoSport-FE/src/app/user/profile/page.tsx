@@ -22,7 +22,7 @@ export default function Profile() {
     return (
         <UserLayout>
             <div className='mb-3 text-danger' style={{ fontSize: '20px' }}><b>Thông tin cá nhân</b></div>
-            <div style={{ fontSize: '15px' }}>
+            <div style={{ fontSize: '14px' }}>
                 <Form>
                     <Form.Group className="mb-3">
                         <Form.Floating className="mb-3">
