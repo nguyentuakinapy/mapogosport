@@ -5,7 +5,7 @@ import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 export default function ChangePassword() {
     return (
         <>
-            <div className="modal fade" id="changeModal" tabIndex={-1} aria-labelledby="changeModalLabel" aria-hidden="true">
+            <div className="modal fade" id="changePassword" tabIndex={-1} aria-labelledby="changeModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content">
 
