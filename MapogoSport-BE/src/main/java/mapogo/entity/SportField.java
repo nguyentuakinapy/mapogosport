@@ -15,13 +15,13 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "SportsField")
+@Table(name = "SportFields")
 public class SportField implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SportsFieldId", nullable = false, unique = true)
-    private int sportsFieldId;
+    @Column(name = "SportFieldId", nullable = false, unique = true)
+    private int sportFieldId;
 
     @Column(name = "Name", nullable = false)
     private String name;
@@ -33,7 +33,7 @@ public class SportField implements Serializable{
     private String opening;
 
     @ManyToOne
-    @JoinColumn(name = "CategoryField", nullable = false)
+    @JoinColumn(name = "CategoryFieldId", nullable = false)
     private CategoryField categoriesField;
 
     @Column(name = "Status", nullable = false)
@@ -58,8 +58,6 @@ public class SportField implements Serializable{
     @OneToMany(mappedBy = "sportsField", cascade = CascadeType.ALL)
     private List<FavoriteField> favoriteFields;
 
-    @OneToMany(mappedBy = "sportsField", cascade = CascadeType.ALL)
-    private List<SportField> sportsFields;
     
     @OneToMany(mappedBy = "sportsField", cascade = CascadeType.ALL)
     private List<FieldReview> fieldReviews;
