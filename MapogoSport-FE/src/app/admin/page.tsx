@@ -122,5 +122,4 @@ const Admin = () => {
         </Container>
     );
 };
-
 export default Admin;

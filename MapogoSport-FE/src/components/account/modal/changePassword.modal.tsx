@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react';
 import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function ChangePassword() {
     return (

@@ -29,13 +29,13 @@ const Cart = () => {
               <table className="table  table-hover ">
                 <thead >
                   <tr >
-                    <th  scope="col" style={{ width: '5%' }}>
+                    <th scope="col" style={{ width: '5%' }}>
                       <input
                         className='me-2'
                         type="checkbox"
                         checked={selectAll}
                         onChange={handleSelectAll}
-                      /> 
+                      />
                     </th>
                     <th scope="col" >Sản phẩm</th>
                     <th scope="col" >Tên sản phẩm</th>
@@ -88,10 +88,10 @@ const Cart = () => {
                         <p className="mb-0">400.000</p>
                       </td>
                       <td>
-                    <button className="btn btn-md rounded-circle bg-light border" style={{ width: '35px', height: '35px', padding: 0 }}>
-                      <i className="text-danger bi bi-x"></i>
-                    </button>
-                  </td>
+                        <button className="btn btn-md rounded-circle bg-light border" style={{ width: '35px', height: '35px', padding: 0 }}>
+                          <i className="text-danger bi bi-x"></i>
+                        </button>
+                      </td>
 
                     </tr>
                   ))}
@@ -101,7 +101,7 @@ const Cart = () => {
           </div>
 
           <div className="col-md-4">
-            <div className="rounded"  style={{ backgroundColor: "#f2f2f2" }}>
+            <div className="rounded" style={{ backgroundColor: "#f2f2f2" }}>
               <div className="p-4">
                 <h1 className="display-6 mb-4 text-primary">Tổng tiền</h1>
                 <div className="d-flex justify-content-between mb-4">
@@ -119,11 +119,11 @@ const Cart = () => {
                 <p className="mb-0 mx-4 text-primary fw-bold">415.000 VND</p>
               </div>
               <div className=' text-end'>
-              <button
-                className="btn border-secondary bg-success rounded-pill px-4 me-3 py-3 text-light text-uppercase mb-4"
-                type="button">
-                Xác nhận thanh toán
-              </button>
+                <button
+                  className="btn border-secondary bg-success rounded-pill px-4 me-3 py-3 text-light text-uppercase mb-4"
+                  type="button">
+                  Xác nhận thanh toán
+                </button>
               </div>
             </div>
           </div>
