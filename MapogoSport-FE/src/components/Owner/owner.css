@@ -3,7 +3,7 @@
     width: 250px;
     height: 100%;
     background-color: white;
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 0 4px rgba(146, 105, 105, 0.1);
     z-index: 1000;
     animation: navLef 1s forwards;
 }
@@ -49,7 +49,7 @@ header {
 .main-right {
     margin-left: 250px;
     padding-top: 75px;
-    background-color: aliceblue;
+    background-color: rgb(232, 233, 244);
     min-height: 100vh;
     animation: mainRightRep 1s forwards;
 }
@@ -64,14 +64,15 @@ header {
     }
 
     100% {
-        margin-left: 0px;
+        margin-left: 0%;
+        margin: 0%;
     }
 }
 
 @keyframes mainRightRep {
     0% {
-        margin-left: 0px;
-
+        margin-left: 0%;
+        margin: 0%;
     }
 
     100% {
@@ -118,8 +119,8 @@ nav ul li .link {
 
 nav ul li .link:hover,
 nav ul li .link.active {
-    color: rgb(219, 215, 215);
-    background-color: #535353;
+    color: white;
+    background-color: #142239;
     border-radius: 5px;
 }
 

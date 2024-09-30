@@ -14,7 +14,6 @@ const Header = () => {
     }, []);
 
     useEffect(() => {
-        // Kiểm tra nếu đang chạy ở phía client
         if (typeof window !== 'undefined') {
             const handleScroll = () => {
                 const header = document.querySelector('.header-area');
@@ -34,15 +33,13 @@ const Header = () => {
                 }
             };
 
-            // Lắng nghe sự kiện scroll khi component được mount
             window.addEventListener('scroll', handleScroll);
 
-            // Dọn dẹp sự kiện khi component bị unmount
             return () => {
                 window.removeEventListener('scroll', handleScroll);
             };
         }
-    }, []); // Chỉ chạy một lần khi component được mount
+    }, []);
 
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
@@ -64,10 +61,10 @@ const Header = () => {
                             navbarScroll
                         >
                             <Nav>
-                                <Link href="#" className='head-hv-nav text-decoration-none'><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
+                                <a href="/admin" className='head-hv-nav text-decoration-none '><i className="bi bi-tools me-2"></i>Sản phẩm</a>
                             </Nav>
                             <Nav>
-                                <Link href="#" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
+                                <Link href="/product-detail" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
                             </Nav>
                             <NavDropdown title={<><span className='head-hv-nav text-decoration-none demo'><i className="bi bi-person-fill me-2"></i>Tài khoản</span></>} id="navbarScrollingDropdown">
                                 <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</NavDropdown.Item>
@@ -85,17 +82,17 @@ const Header = () => {
                                 </NavDropdown.Item>
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item>
-                                    <Link href={'/user/profile'} className='text-decoration-none text-dark'>Thông tin tài khoản</Link>
+                                    <Link href='/user/profile' className='text-decoration-none text-dark'>Thông tin tài khoản</Link>
                                 </NavDropdown.Item>
                                 <NavDropdown.Item>
-                                    <Link href={'/owner'} className='text-decoration-none text-dark'>Chủ sân</Link>
+                                    <Link href='/owner' className='text-decoration-none text-dark'>Chủ sân</Link>
                                 </NavDropdown.Item>
                                 <NavDropdown.Item>
-                                    <Link href={'/admin'} className='text-decoration-none text-dark'>Admin</Link>
+                                    <Link href='/admin' className='text-decoration-none text-dark'>Admin</Link>
                                 </NavDropdown.Item>
                             </NavDropdown>
                             <Nav className='position-relative'>
-                                <Link href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</Link>
+                                <a href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</a>
                                 <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
                                     0
                                     <span className="visually-hidden">unread messages</span>

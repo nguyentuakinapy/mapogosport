@@ -14,10 +14,11 @@ import ChatMessenger from '@/components/app.chatMessenger';
 
 
 export const metadata: Metadata = {
-  title: "Trang Chủ",
+  title: "Mapogo Sport",
   icons: {
     icon: "/images/logo.png"
-  }
+  },
+  description: "Hệ thống quản lý sân thể thao và cung cấp dụng cụ thể thao Mapogo Sport"
 };
 
 export default function RootLayout({
