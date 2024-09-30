@@ -100,7 +100,7 @@ const ProductDetail = () => {
                 <Container className="p-3  container1" >
                     <Row className=''>
                         {/* Hình ảnh sản phẩm */}
-                        <Col md={5} className='ms-5' style={{ maxWidth: '350px' }}>
+                        <Col md={6} className='ms-5' style={{ maxWidth: '350px' }}>
                             <Carousel style={{ maxWidth: '350px' }}>
                                 <Carousel.Item>
                                     <Card>
@@ -147,7 +147,7 @@ const ProductDetail = () => {
                         </Col>
 
                         {/* Thông tin sản phẩm */}
-                        <Col md={7} className='ms-5 mt-5' style={{ marginLeft: '100px' }}>
+                        <Col md={6} className='ms-5 mt-5' style={{ marginLeft: '100px' }}>
                             <h4 className='mb-4'>Tên sản phẩm: Sản phẩm tự chế</h4>
                             <div>
                                 <span className='fs-4'>Màu:</span>

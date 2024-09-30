@@ -10,7 +10,10 @@ export default function Nav({ isAniActive, toggleAni }: NavProps) {
         <>
             <div className={`nav-left ${isAniActive ? 'hidden' : 'hiddenRep'}`}>
                 <div className="logo text-center p-2">
-                    <img src="/images/logo.png" style={{ width: '60%' }} alt="Logo" />
+                    <Link href='/'>
+                        <img src="/images/logo.png" style={{ width: '60%' }} alt="Logo" />
+                    </Link>
+
                 </div>
                 <div className="mt-5">
                     <nav className="container m-auto">
