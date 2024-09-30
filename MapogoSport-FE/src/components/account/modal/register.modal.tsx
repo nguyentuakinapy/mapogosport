@@ -1,8 +1,51 @@
 'use client'
 
+import { useEffect } from "react";
 import { Modal } from "react-bootstrap"
 
 export default function login() {
+    useEffect(() => {
+        const sendCodeButton = document.getElementById('button-addon2');
+        let countdown: NodeJS.Timeout;
+
+        if (sendCodeButton) {
+            sendCodeButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                startCountdown();
+            });
+        }
+
+        function startCountdown() {
+            let timeLeft = 45;
+            if (sendCodeButton) {
+                (sendCodeButton as HTMLButtonElement).disabled = true;
+                (sendCodeButton as HTMLButtonElement).innerText = `Gửi lại mã (${timeLeft}s)`;
+
+                countdown = setInterval(function () {
+                    timeLeft--;
+                    if (sendCodeButton) {
+                        sendCodeButton.innerText = `Gửi lại mã (${timeLeft}s)`;
+                    }
+
+                    if (timeLeft <= 0) {
+                        clearInterval(countdown);
+                        if (sendCodeButton) {
+                            (sendCodeButton as HTMLButtonElement).disabled = false;
+                            (sendCodeButton as HTMLButtonElement).innerText = 'Gửi lại mã';
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        return () => {
+            if (sendCodeButton) {
+                sendCodeButton.removeEventListener('click', startCountdown);
+            }
+            clearInterval(countdown);
+        };
+    }, []);
+
     return (
         <>
             <div className="modal fade" id="registerModal" tabIndex={-1} aria-labelledby="loginModalLabel" aria-hidden="true">
