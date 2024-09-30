@@ -65,7 +65,7 @@ export default function ChangeEmail() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>  
         </>
     )
 }

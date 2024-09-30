@@ -46,9 +46,29 @@ export default function login() {
         };
     }, []);
 
+    // Clear input fields 
+    useEffect(() => {
+        const registerModal = document.getElementById('registerModal');
+
+        if (registerModal) {
+            registerModal.addEventListener('hidden.bs.modal', () => {
+                const inputs = registerModal.querySelectorAll('input');
+                inputs.forEach(input => {
+                    (input as HTMLInputElement).value = '';
+                });
+            });
+        }
+
+        return () => {
+            if (registerModal) {
+                registerModal.removeEventListener('hidden.bs.modal', () => { });
+            }
+        };
+    }, []);
+
     return (
         <>
-            <div className="modal fade" id="registerModal" tabIndex={-1} aria-labelledby="loginModalLabel" aria-hidden="true">
+            <div className="modal fade" id="registerModal" tabIndex={-1} aria-labelledby="loginModalLabel" aria-hidden="true" data-bs-backdrop="static">
                 <div className="modal-dialog modal-dialog-centered modal-custom">
                     <div className="modal-content">
                         <div className="modal-header border-0 ">
@@ -86,32 +106,27 @@ export default function login() {
                                         <span className="mx-3">Hoặc tài khoản</span>
                                         <hr className="flex-grow-1" />
                                     </div>
-                                    <div className="form-floating mb-3">
-                                        <input type="text" className="form-control" id="floatingInput" placeholder="Hoàng Thành" />
-                                        <label htmlFor="floatingInput">Họ và tên <span className="text-danger">*</span></label>
+                                    <div className="form-group mb-3">
+                                        <input type="text" className="form-control" id="floatingInput" placeholder="Họ và tên *" />                                  
                                     </div>
                                     <div className="row mb-3">
-                                        <div className="form-floating col-6">
+                                        <div className="form-group col-6">
                                             <input type="text" className="form-control" id="floatingPassword"
-                                                placeholder="0888888888888" />
-                                            <label className="ms-3" htmlFor="floatingPassword">Số điện thoại <span className="text-danger">*</span></label>
+                                                placeholder="Số điện thoại *" />
                                         </div>
-                                        <div className="form-floating col-6">
+                                        <div className="form-group col-6">
                                             <input type="email" className="form-control" id="floatingPassword"
-                                                placeholder="thanhPt@gmail.com" />
-                                            <label className="ms-3" htmlFor="floatingPassword">Email <span className="text-danger">*</span></label>
+                                                placeholder="Email *" />
                                         </div>
                                     </div>
                                     <div className="row mb-3">
-                                        <div className="form-floating col-6">
+                                        <div className="form-group col-6">
                                             <input type="password" className="form-control" id="floatingPassword"
-                                                placeholder="Password" />
-                                            <label className="ms-3" htmlFor="floatingPassword">Mật khẩu <span className="text-danger">*</span></label>
+                                                placeholder="Mật khẩu *" />
                                         </div>
-                                        <div className="form-floating col-6">
+                                        <div className="form-group col-6">
                                             <input type="password" className="form-control" id="floatingPassword"
-                                                placeholder="Password" />
-                                            <label className="ms-3" htmlFor="floatingPassword">Xác nhận mật khẩu <span className="text-danger">*</span></label>
+                                                placeholder="Nhập lại mật khẩu *" />
                                         </div>
                                     </div>
                                     <div className="input-group mb-3">
@@ -135,5 +150,5 @@ export default function login() {
                 </div>
             </div>
         </>
-    )
+    );
 }
