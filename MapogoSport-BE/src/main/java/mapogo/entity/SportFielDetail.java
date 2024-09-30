@@ -15,7 +15,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "SportFielDetail")
+@Table(name = "SportFielDetails")
 public class SportFielDetail implements Serializable{
 
     @Id
@@ -45,8 +45,6 @@ public class SportFielDetail implements Serializable{
     @Column(name = "PeakHour", nullable = false)
     private String peakHour;
 
-    @OneToMany(mappedBy = "sportFielDetail", cascade = CascadeType.ALL)
-    private List<Booking> bookings;
 
     
 }

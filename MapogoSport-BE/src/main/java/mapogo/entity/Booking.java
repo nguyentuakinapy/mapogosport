@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -29,19 +28,9 @@ public class Booking implements Serializable{
     @Column(name = "Date", nullable = false)
     private Date date = new Date();
 
-    @Column(name = "StartTime", nullable = false)
-    private LocalTime startTime;
-
-    @Column(name = "EndTime", nullable = false)
-    private LocalTime endTime;
-
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
     private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "SportFielDetail", nullable = false)
-    private SportFielDetail sportFielDetail;
 
     @Column(name = "TotalAmount", nullable = false)
     private double totalAmount;
@@ -64,5 +53,10 @@ public class Booking implements Serializable{
 	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
 	private List<BookingPayment> bookingPayments;
 
+	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
+	private List<BookingDetail> bookingDetails;
+	
+	@Column(name = "Note")
+    private String note;
 }
 

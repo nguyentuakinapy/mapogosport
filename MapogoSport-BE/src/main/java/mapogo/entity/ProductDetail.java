@@ -32,7 +32,7 @@ public class ProductDetail implements Serializable{
     private Long productDetailId;
 
     @ManyToOne
-    @JoinColumn(name = "Product", nullable = false)
+    @JoinColumn(name = "ProductId", nullable = false)
     private Product product;
 
     @Column(name = "Color", nullable = false)
@@ -54,6 +54,6 @@ public class ProductDetail implements Serializable{
     private List<Cart> carts;
     
     @OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-    private List<OrderDetail> orderDetail;
+    private List<OrderDetail> orderDetails;
 }
 
