@@ -30,3 +30,145 @@ body{
     margin-bottom: 30px;
     height: 100%;
 }
+/*======================================================Product CSS Start======================================================*/
+.box-ultil {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 5px solid #142239;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    .btn-sd-admin {
+        background-color: #142239 !important;
+        border: 1px solid #142239 !important;
+        padding: 0.25rem;
+        width: 190px;
+        font-size: 15px;
+        &:hover {
+            background-color: white !important;
+            color: black;
+        }
+    }
+}
+
+.box-table-border {
+    border: 1px solid #142239;
+    border-radius: 8px 8px 0 0;
+    .table {
+        text-align: center;
+        thead {
+            tr {
+                th {
+                    text-transform: uppercase;
+                    background-color: #142239;
+                    color: white;
+                    font-weight: normal;
+                    font-size: 14px;
+                    &:first-child {
+                        border-radius: 8px 0 0 0;
+                    }
+                    &:last-child {
+                        border-radius: 0 8px 0 0;
+                    }
+                }
+            }
+        }
+        tbody {
+            tr {
+                td {
+                    font-size: 15px;
+                    a {
+                        text-decoration: none;
+                        color: #142239;
+                        font-weight: 700;
+                    }
+                    .bg-badge-user {
+                        background: #142239 !important;
+                    }
+                    .btn-edit {
+                        color: #142239;
+                        font-size: 20px;
+                    }
+                }
+                .title {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    max-width: 300px;
+                }
+                .title-brand {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    max-width: 200px;
+                }
+            }
+        }
+    }
+}
+/*======================================================Product CSS Start======================================================*/
+/*======================================================Order CSS Start======================================================*/
+.custom-tabs {
+    .nav-item {
+        flex: 1;
+        text-align: center;
+        & + .nav-item {
+            margin-left: 1.5px;
+        }
+        &:first-child {
+            .nav-link {
+                border-radius: 8px 0 0 8px;
+            }
+        }
+        &:last-child {
+            .nav-link {
+                border-radius: 0 8px 8px 0;
+            }
+        }
+        .nav-link {
+            border-radius: 0;
+            color: #1a1a1a;
+            background-color: #f5f5f5;
+            padding: 12px 24px;
+            text-align: center;
+            font-weight: 600;
+            &:hover, &.active {
+                background-color: #142239; /* Màu xanh đậm */
+                color: white;
+            }
+        }
+    }
+}
+/*======================================================Order CSS End======================================================*/
+/*======================================================Subcription CSS Start======================================================*/
+.packageUpdate {
+    width: 100%;
+    margin: auto;
+    box-shadow: 8px 8px #e2dfdf;
+    height: auto;
+    border-radius: 0;
+    border: 1px solid black;
+    .body-package {
+        padding: 10px;
+        margin: 0 10px;
+        border-top: 2px solid silver;
+        border-bottom: 2px solid silver;
+        div {
+            margin: 5px 0;
+        }
+    }
+    .btn-sub {
+        background-color: #142239;
+        border: 1px solid #142239;
+        margin: 10px 20px;
+        &:hover {
+            background-color: white;
+            color: black;
+            font-weight: 700;
+        }
+    }
+}
+/*======================================================Subcription CSS End======================================================*/
+/*======================================================Voucher CSS Start======================================================*/
+
+/*======================================================Voucher CSS End======================================================*/

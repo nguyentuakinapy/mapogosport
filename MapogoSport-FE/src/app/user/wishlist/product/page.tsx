@@ -55,47 +55,45 @@ const WishListProduct = () => {
     return (
         <UserLayout>
             <b className='text-danger' style={{ fontSize: '20px' }}>Sản phẩm yêu thích</b>
-            <div style={{ fontSize: '14px' }}>
-                <Row className="my-3">
-                    {/* {currentStadiums.map((stadium, index) => ( */}
-                    <Col xs={4}>
-                        <div className="user-border">
-                            <div className="mb-3">
-                                <Link href={"#"}>
-                                    <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                                </Link>
+            <Row className="my-3">
+                {/* {currentStadiums.map((stadium, index) => ( */}
+                <Col xs={4}>
+                    <div className="user-border">
+                        <div className="mb-3">
+                            <Link href={"#"}>
+                                <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
+                            </Link>
+                        </div>
+                        <div className="content">
+                            <div className="mb-1 title" style={{ fontSize: '15px' }}>
+                                <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
                             </div>
-                            <div className="content">
-                                <div className="mb-1 title">
-                                    <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
-                                </div>
-                                <div className="d-flex align-items-center justify-content-between">
-                                    <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                                    <div className="star-item text-warning">
-                                        {renderStars(rating)}
-                                    </div>
+                            <div className="d-flex align-items-center justify-content-between">
+                                <div style={{ fontSize: '15px' }}><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
+                                <div className="star-item text-warning">
+                                    {renderStars(rating)}
                                 </div>
                             </div>
                         </div>
-                    </Col>
-                    {/* ))} */}
-                </Row>
-                {/* <nav className="d-flex justify-content-center">
-                    <ul className="pagination">
-                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                            <span className="page-link" onClick={() => handlePageChange(currentPage - 1)}>Previous</span>
+                    </div>
+                </Col>
+                {/* ))} */}
+            </Row>
+            {/* <nav className="d-flex justify-content-center">
+                <ul className="pagination">
+                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                        <span className="page-link" onClick={() => handlePageChange(currentPage - 1)}>Previous</span>
+                    </li>
+                    {Array.from({ length: totalPages }, (_, index) => (
+                        <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                            <span className="page-link" onClick={() => handlePageChange(index + 1)}>{index + 1}</span>
                         </li>
-                        {Array.from({ length: totalPages }, (_, index) => (
-                            <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                                <span className="page-link" onClick={() => handlePageChange(index + 1)}>{index + 1}</span>
-                            </li>
-                        ))}
-                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                            <span className="page-link" onClick={() => handlePageChange(currentPage + 1)}>Next</span>
-                        </li>
-                    </ul>
-                </nav> */}
-            </div>
+                    ))}
+                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                        <span className="page-link" onClick={() => handlePageChange(currentPage + 1)}>Next</span>
+                    </li>
+                </ul>
+            </nav> */}
         </UserLayout >
     )
 }

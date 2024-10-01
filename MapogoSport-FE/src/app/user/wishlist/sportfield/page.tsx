@@ -55,51 +55,49 @@ const WishListSportField = () => {
     return (
         <UserLayout>
             <b className='text-danger' style={{ fontSize: '20px' }}>Sân yêu thích</b>
-            <div style={{ fontSize: '14px' }}>
-                <Row className="my-3">
-                    {/* {currentStadiums.map((stadium, index) => ( */}
-                    <Col xs={4}>
-                        <div className="user-border">
-                            <div className="mb-3">
-                                <Link href={"#"}>
-                                    <Image src={"/images/ck3.jpg"} alt="Tên sân" />
-                                </Link>
-                            </div>
-                            <div className="content">
-                                <div className="mb-1 title">
-                                    <Link href={"#"}><b>GG Stadium</b></Link>
-                                </div>
-                                <div className="address mb-1">
-                                    <span className="me-2">Khu vực:</span>Quận 7 <span className="mx-2">- </span>Hồ Chí Minh
-                                </div>
-                                <div className="d-flex align-items-center justify-content-between">
-                                    <div>Số sân: 4</div>
-                                    <div className="star-item text-warning">
-                                        {renderStars(rating)}
-                                    </div>
-                                </div>
-                                <Link href={"#"} className="btn btn-user mt-2">Đặt sân</Link>
-                            </div>
+            <Row className="my-3">
+                {/* {currentStadiums.map((stadium, index) => ( */}
+                <Col xs={4}>
+                    <div className="user-border">
+                        <div className="mb-3">
+                            <Link href={"#"}>
+                                <Image src={"/images/ck3.jpg"} alt="Tên sân" />
+                            </Link>
                         </div>
-                    </Col>
-                    {/* ))} */}
-                </Row>
-                {/* <nav className="d-flex justify-content-center">
-                    <ul className="pagination">
-                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                            <span className="page-link" onClick={() => handlePageChange(currentPage - 1)}>Previous</span>
+                        <div className="content">
+                            <div className="mb-1 title">
+                                <Link href={"#"}><b>GG Stadium</b></Link>
+                            </div>
+                            <div className="address mb-1">
+                                <span className="me-2">Khu vực:</span>Quận 7 <span className="mx-2">- </span>Hồ Chí Minh
+                            </div>
+                            <div className="d-flex align-items-center justify-content-between">
+                                <div>Số sân: 4</div>
+                                <div className="star-item text-warning">
+                                    {renderStars(rating)}
+                                </div>
+                            </div>
+                            <Link href={"#"} className="btn btn-user mt-2">Đặt sân</Link>
+                        </div>
+                    </div>
+                </Col>
+                {/* ))} */}
+            </Row>
+            {/* <nav className="d-flex justify-content-center">
+                <ul className="pagination">
+                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                        <span className="page-link" onClick={() => handlePageChange(currentPage - 1)}>Previous</span>
+                    </li>
+                    {Array.from({ length: totalPages }, (_, index) => (
+                        <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                            <span className="page-link" onClick={() => handlePageChange(index + 1)}>{index + 1}</span>
                         </li>
-                        {Array.from({ length: totalPages }, (_, index) => (
-                            <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                                <span className="page-link" onClick={() => handlePageChange(index + 1)}>{index + 1}</span>
-                            </li>
-                        ))}
-                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                            <span className="page-link" onClick={() => handlePageChange(currentPage + 1)}>Next</span>
-                        </li>
-                    </ul>
-                </nav> */}
-            </div>
+                    ))}
+                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                        <span className="page-link" onClick={() => handlePageChange(currentPage + 1)}>Next</span>
+                    </li>
+                </ul>
+            </nav> */}
         </UserLayout >
     )
 }
