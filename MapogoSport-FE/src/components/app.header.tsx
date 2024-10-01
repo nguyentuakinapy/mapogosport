@@ -61,7 +61,7 @@ const Header = () => {
                             navbarScroll
                         >
                             <Nav>
-                                <a href="/admin" className='head-hv-nav text-decoration-none '><i className="bi bi-tools me-2"></i>Sản phẩm</a>
+                                <a href="/categories" className='head-hv-nav text-decoration-none '><i className="bi bi-tools me-2"></i>Sản phẩm</a>
                             </Nav>
                             <Nav>
                                 <Link href="/product-detail" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>

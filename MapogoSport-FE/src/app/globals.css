@@ -451,9 +451,8 @@ body{
 
 /*  */
 .dropdown-toggle::after {
-
   margin-left: 0.5em !important;
-
+}
 
 /* statis owner */
 .price-amount {
@@ -478,5 +477,4 @@ body{
 .tab-item {
   background-color: black;
   color: white;
-
 }

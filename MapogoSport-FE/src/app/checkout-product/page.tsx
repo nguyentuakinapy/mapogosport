@@ -4,40 +4,22 @@ import React from 'react';
 import { useState } from 'react';
 import { InputGroup } from 'react-bootstrap';
 
-const OrderItem = ({ image, name, size, price, quantity }) => (
-  <div className="order-item d-flex align-items-center my-3">
-    <div className="product-image me-3 position-relative">
-      <img
-        src={image}
-        className="img-fluid rounded-circle"
-        style={{ width: "50px", height: "50px" }}
-        alt={name}
-      />
-      <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-        {quantity}
-      </span>
-    </div>
-    <div>
-      <p className="mb-0">{name}</p>
-      <small>{size}</small>
-    </div>
-    <span className="ms-auto fw-bold">{price} VND</span>
-  </div>
-);
-
+// import Button from 'react-bootstrap/Button';
+import Collapse from 'react-bootstrap/Collapse';
 const CheckoutPage = () => {
-  const [isCODOpen, setCODOpen] = useState(false);
-  const [isTransferOpen, setTransferOpen] = useState(false);
+
+  const [open, setOpen] = useState(false);
+  const [open_1, setOpen_1] = useState(false);
+
 
   return (
     <HomeLayout>
       <h3 className='text-center text-danger mt-3 fw-bold'>Thanh toán</h3>
       <div className="container pt-2 ">
-
         <div className="row shadow p-3 mb-5 bg-body rounded">
-          {/* Customer Info */}
+          {/* Cột trái: Customer Info */}
           <div className="col-lg-4 col-md-6 col-12">
-            <h5 className="text-primary">Thông tin nhận hàng</h5>
+            <h5 className='text-primary'>Thông tin nhận hàng</h5>
             <hr />
             <form className="mt-4">
               {/* Email */}
@@ -52,9 +34,15 @@ const CheckoutPage = () => {
                 </select>
                 <label htmlFor="city" style={{ color: "gray" }}>Số địa chỉ</label>
               </div>
-              {/* Name */}
+
+              {/* Họ và tên */}
               <div className="form-floating mb-1">
-                <input type="text" className="form-control" id="name" placeholder="Họ và tên" />
+                <input
+                  type="text"
+                  className="form-control"
+                  id="name"
+                  placeholder="Họ và tên"
+                />
                 <label htmlFor="name" style={{ color: "gray" }}>Họ và tên</label>
               </div>
               <div className="mb-1">
@@ -77,54 +65,111 @@ const CheckoutPage = () => {
                   </div>
                 </InputGroup>
               </div>
+
+
               <div className="form-floating mb-1">
-                <input type="text" className="form-control" id="specificAddress" placeholder="Số nhà" />
+                <select className="form-select" id="city">
+                  <option selected>...</option>
+                  <option>Hồ Chí Minh</option>
+                  <option>Hà Nội</option>
+                  <option>Đà Nẵng</option>
+                  <option>Địa chỉ khác...</option>
+                  {/* Add more options as needed */}
+                </select>
+                <label htmlFor="city" style={{ color: "gray" }}>Tỉnh thành</label>
+              </div>
+
+              <div className="form-floating mb-1">
+                <select className="form-select" id="city">
+                  <option selected>...</option>
+                  <option>1</option>
+                  {/* Add more options as needed */}
+                </select>
+                <label htmlFor="city" style={{ color: "gray" }}>Quận</label>
+              </div>
+              <div className="form-floating mb-1">
+                <select className="form-select" id="city">
+                  <option selected>...</option>
+                  <option>1</option>
+                  {/* Add more options as needed */}
+                </select>
+                <label htmlFor="city" style={{ color: "gray" }}>Phường</label>
+              </div>
+              {/* Địa chỉ cụ thể */}
+              <div className="form-floating mb-1">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="specificAddress"
+                  placeholder="Số nhà"
+                />
                 <label htmlFor="specificAddress" style={{ color: "gray" }}>Địa chỉ cụ thể</label>
               </div>
               <div className="form-floating mb-1">
-                <textarea className="form-control" id="notes"></textarea>
-                <label htmlFor="notes" className="form-label">Ghi chú (tùy chọn)</label>
+                <textarea className="form-control" id="notes" ></textarea>
+                <label htmlFor="notes" className="form-label">
+                  Ghi chú (tùy chọn)
+                </label>
               </div>
             </form>
           </div>
 
-          {/* Payment Options */}
+          {/* Cột giữa: Payment options */}
           <div className="col-lg-3 col-md-6 col-12">
             <h5 className='text-primary'>Thanh toán</h5>
             <hr />
             <div className="card list-group mt-4 my-3">
-              {/* COD Payment Option */}
               <div className="card-body d-flex list-group-item align-items-center">
                 <div className="form-check flex-grow-1">
-                  <input className="form-check-input" type="radio" name="paymentMethod" id="cod" />
-                  <label className="form-check-label" htmlFor="cod">Thanh toán khi nhận hàng (COD)</label>
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="paymentMethod"
+                    id="cod"
+                    aria-expanded={open}
+                  />
+                  <label className="form-check-label" htmlFor="cod">
+                    Thanh toán khi nhận hàng (COD)
+                  </label>
                 </div>
                 <i className="bi bi-cash" style={{ cursor: 'pointer' }} onClick={() => setOpen_1(!open_1)}></i>
               </div>
-              <Collapse in={isCODOpen}>
-                <div className="card-footer">
-                  <p>Nhận hàng rồi bạn mới cần thanh toán cho bên vận chuyển nhé. Cảm ơn bạn!</p>
+              {/* Collapse for bank transfer details */}
+              <Collapse in={open_1}>
+                <div id="bank-transfer-collapse" className="card-footer">
+                  <p>
+                    Nhận hàng rồi bạn mới cần thanh toán cho bên vận chuyển nhé. Cảm ơn bạn!
+                  </p>
                 </div>
               </Collapse>
-
-              {/* Bank Transfer Option */}
               <div className="card-body d-flex list-group-item align-items-center">
                 <div className="form-check flex-grow-1">
-                  <input className="form-check-input" type="radio" name="paymentMethod" id="bankTransfer" />
-                  <label className="form-check-label" htmlFor="bankTransfer">Chuyển khoản</label>
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="paymentMethod"
+                    id="cod"
+                    aria-expanded={open}
+                  />
+                  <label className="form-check-label" htmlFor="cod">
+                    Chuyển khoản
+                  </label>
                 </div>
                 <i className="bi bi-cash" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}></i>
               </div>
-              <Collapse in={isTransferOpen}>
-                <div className="card-footer">
+              {/* Collapse for bank transfer details */}
+              <Collapse in={open}>
+                <div id="bank-transfer-collapse" className="card-footer">
                   <h6>Thông tin chuyển khoản</h6>
-                  {/* Payment Logos */}
+
+                  {/* Hiển thị các hình ảnh của các hình thức thanh toán */}
                   <div className="d-flex align-items-center mb-3">
-                    {["Visa", "MasterCard"].map((name, idx) => (
-                      <img key={idx} src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" alt={name} className="me-2" style={{ width: "50px" }} />
-                    ))}
+                    <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" alt="Visa" className="me-2" style={{ width: "50px" }} />
+                    <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" alt="MasterCard" className="me-2" style={{ width: "50px" }} />
+                    <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" className="me-2" style={{ width: "50px" }} />
                   </div>
-                  {/* Bank Info */}
+
+                  {/* Thông tin chi tiết chuyển khoản */}
                   <p>
                     <strong>Ngân hàng:</strong> ABC Bank <br />
                     <strong>Số tài khoản:</strong> 123456789 <br />
@@ -132,6 +177,7 @@ const CheckoutPage = () => {
                   </p>
                 </div>
               </Collapse>
+
             </div>
           </div>
 
@@ -229,18 +275,8 @@ const CheckoutPage = () => {
                 <span>Phí vận chuyển </span>
                 <span className="fw-light">31.000 VND</span>
               </div>
-            </div>
-            <hr />
-            {/* Summary */}
-            <div className="d-flex justify-content-between my-3 fw-light">
-              <span className="fw-bold">Tạm tính</span>
-              <span>4.490.000 VND</span>
-            </div>
-            <div className="d-flex justify-content-between my-3 fw-light">
-              <span>Giảm giá</span>
-              <span>4.000 VND</span>
-            </div>
-            <div className="order-total d-flex justify-content-between">
+              <hr />
+              <div className="order-total d-flex justify-content-between">
                 <span className="fw-bold">Tổng cộng</span>
                 <span className="fw-bold text-primary">4.490.000 VND</span>
               </div>
@@ -253,6 +289,7 @@ const CheckoutPage = () => {
 
                 <span className="btn btn-success px-3">Thanh toán</span>
               </div>
+            </div>
           </div>
         </div>
       </div>

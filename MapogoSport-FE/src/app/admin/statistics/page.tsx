@@ -2,7 +2,6 @@
 import { Container } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 // import Form from 'react-bootstrap/Form';
-import '../adminStyle.scss';
 import { Dropdown } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css'; // Ensure to import the styles

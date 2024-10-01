@@ -1,5 +1,6 @@
 import AdminLayout from "@/components/Admin/AdminLayout"
 import './globals.css'
+import './adminStyle.scss';
 
 export const metadata = {
     title: 'Admin'
