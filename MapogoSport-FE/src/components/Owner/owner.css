@@ -3,8 +3,35 @@
     width: 250px;
     height: 100%;
     background-color: white;
-    box-shadow: 4px 0 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 0 4px rgba(146, 105, 105, 0.1);
     z-index: 1000;
+    animation: navLef 1s forwards;
+}
+
+.nav-left.hidden {
+    animation: navLefRep 1s forwards;
+
+}
+
+@keyframes navLefRep {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+
+    }
+}
+
+@keyframes navLef {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(0%);
+    }
 }
 
 header {
@@ -15,13 +42,42 @@ header {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 999;
     right: 0;
+    animation: headRep 1s forwards;
+
 }
 
 .main-right {
     margin-left: 250px;
     padding-top: 75px;
-    background-color: aliceblue;
+    background-color: rgb(232, 233, 244);
     min-height: 100vh;
+    animation: mainRightRep 1s forwards;
+}
+
+.mainRight {
+    animation: mainRight 1s forwards;
+}
+
+@keyframes mainRight {
+    0% {
+        margin-left: 250px;
+    }
+
+    100% {
+        margin-left: 0%;
+        margin: 0%;
+    }
+}
+
+@keyframes mainRightRep {
+    0% {
+        margin-left: 0%;
+        margin: 0%;
+    }
+
+    100% {
+        margin-left: 250px;
+    }
 }
 
 .main-body {
@@ -57,13 +113,14 @@ nav ul li .link {
     font-weight: bold;
     display: block;
     padding: 10px;
+    margin-right: 30px;
     transition: background-color 0.3s ease;
 }
 
 nav ul li .link:hover,
 nav ul li .link.active {
-    color: rgb(219, 215, 215);
-    background-color: #535353;
+    color: white;
+    background-color: #142239;
     border-radius: 5px;
 }
 
@@ -144,4 +201,32 @@ table th {
     color: green;
     font-size: 1.5rem;
     cursor: pointer;
+}
+
+.aniHead {
+    animation: head 1s forwards;
+}
+
+.aniHeadRep {
+    animation: headRep 1s forwards;
+}
+
+@keyframes head {
+    0% {
+        width: calc(100% - 250px);
+    }
+
+    100% {
+        width: 100%
+    }
+}
+
+@keyframes headRep {
+    0% {
+        width: 100%
+    }
+
+    100% {
+        width: calc(100% - 250px);
+    }
 }

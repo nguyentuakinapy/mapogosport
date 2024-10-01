@@ -36,8 +36,8 @@ public class CategoryField implements Serializable{
     @Column(name = "Image", nullable = false)
     private String image;
 
-    @OneToMany(mappedBy = "sportsField", cascade = CascadeType.ALL)
-    private List<SportField> categoriesField;
+    @OneToMany(mappedBy = "categoriesField", cascade = CascadeType.ALL)
+    private List<SportField> sportField;
 
 }
 

@@ -7,6 +7,8 @@ import "react-datepicker/dist/react-datepicker.css"; // Import the styles
 import Image from 'next/image';
 import Carousel from 'react-bootstrap/Carousel';
 import Link from 'next/link'
+import HomeLayout from '@/components/HomeLayout';
+
 const SportDetail = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     // const [selected, setSelected] = useState(false);
@@ -16,8 +18,8 @@ const SportDetail = () => {
 
     return (
 
-        <>
-            <Container>
+        <HomeLayout>
+            <Container className='pt-2'>
                 <Row>
                     <Col>
                         <h1 className="fs-3 ">Sân bóng bóng bóng bang bang</h1>
@@ -169,7 +171,7 @@ const SportDetail = () => {
                 <br />
                 <br /><br /><br />
             </Container>
-        </>
+        </HomeLayout>
 
 
     );

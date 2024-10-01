@@ -1,11 +1,74 @@
 'use client'
 
+import { useEffect } from "react";
 import { Modal } from "react-bootstrap"
 
 export default function login() {
+    useEffect(() => {
+        const sendCodeButton = document.getElementById('button-addon2');
+        let countdown: NodeJS.Timeout;
+
+        if (sendCodeButton) {
+            sendCodeButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                startCountdown();
+            });
+        }
+
+        function startCountdown() {
+            let timeLeft = 45;
+            if (sendCodeButton) {
+                (sendCodeButton as HTMLButtonElement).disabled = true;
+                (sendCodeButton as HTMLButtonElement).innerText = `Gửi lại mã (${timeLeft}s)`;
+
+                countdown = setInterval(function () {
+                    timeLeft--;
+                    if (sendCodeButton) {
+                        sendCodeButton.innerText = `Gửi lại mã (${timeLeft}s)`;
+                    }
+
+                    if (timeLeft <= 0) {
+                        clearInterval(countdown);
+                        if (sendCodeButton) {
+                            (sendCodeButton as HTMLButtonElement).disabled = false;
+                            (sendCodeButton as HTMLButtonElement).innerText = 'Gửi lại mã';
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        return () => {
+            if (sendCodeButton) {
+                sendCodeButton.removeEventListener('click', startCountdown);
+            }
+            clearInterval(countdown);
+        };
+    }, []);
+
+    // Clear input fields 
+    useEffect(() => {
+        const registerModal = document.getElementById('registerModal');
+
+        if (registerModal) {
+            registerModal.addEventListener('hidden.bs.modal', () => {
+                const inputs = registerModal.querySelectorAll('input');
+                inputs.forEach(input => {
+                    (input as HTMLInputElement).value = '';
+                });
+            });
+        }
+
+        return () => {
+            if (registerModal) {
+                registerModal.removeEventListener('hidden.bs.modal', () => { });
+            }
+        };
+    }, []);
+
     return (
         <>
-            <div className="modal fade" id="registerModal" tabIndex={-1} aria-labelledby="loginModalLabel" aria-hidden="true">
+            <div className="modal fade" id="registerModal" tabIndex={-1} aria-labelledby="loginModalLabel" aria-hidden="true" data-bs-backdrop="static">
                 <div className="modal-dialog modal-dialog-centered modal-custom">
                     <div className="modal-content">
                         <div className="modal-header border-0 ">
@@ -43,32 +106,27 @@ export default function login() {
                                         <span className="mx-3">Hoặc tài khoản</span>
                                         <hr className="flex-grow-1" />
                                     </div>
-                                    <div className="form-floating mb-3">
-                                        <input type="text" className="form-control" id="floatingInput" placeholder="Hoàng Thành" />
-                                        <label htmlFor="floatingInput">Họ và tên <span className="text-danger">*</span></label>
+                                    <div className="form-group mb-3">
+                                        <input type="text" className="form-control" id="floatingInput" placeholder="Họ và tên *" />                                  
                                     </div>
                                     <div className="row mb-3">
-                                        <div className="form-floating col-6">
+                                        <div className="form-group col-6">
                                             <input type="text" className="form-control" id="floatingPassword"
-                                                placeholder="0888888888888" />
-                                            <label className="ms-3" htmlFor="floatingPassword">Số điện thoại <span className="text-danger">*</span></label>
+                                                placeholder="Số điện thoại *" />
                                         </div>
-                                        <div className="form-floating col-6">
+                                        <div className="form-group col-6">
                                             <input type="email" className="form-control" id="floatingPassword"
-                                                placeholder="thanhPt@gmail.com" />
-                                            <label className="ms-3" htmlFor="floatingPassword">Email <span className="text-danger">*</span></label>
+                                                placeholder="Email *" />
                                         </div>
                                     </div>
                                     <div className="row mb-3">
-                                        <div className="form-floating col-6">
+                                        <div className="form-group col-6">
                                             <input type="password" className="form-control" id="floatingPassword"
-                                                placeholder="Password" />
-                                            <label className="ms-3" htmlFor="floatingPassword">Mật khẩu <span className="text-danger">*</span></label>
+                                                placeholder="Mật khẩu *" />
                                         </div>
-                                        <div className="form-floating col-6">
+                                        <div className="form-group col-6">
                                             <input type="password" className="form-control" id="floatingPassword"
-                                                placeholder="Password" />
-                                            <label className="ms-3" htmlFor="floatingPassword">Xác nhận mật khẩu <span className="text-danger">*</span></label>
+                                                placeholder="Nhập lại mật khẩu *" />
                                         </div>
                                     </div>
                                     <div className="input-group mb-3">
@@ -92,5 +150,5 @@ export default function login() {
                 </div>
             </div>
         </>
-    )
+    );
 }

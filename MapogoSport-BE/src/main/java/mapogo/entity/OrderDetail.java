@@ -29,15 +29,16 @@ public class OrderDetail implements Serializable{
     private Long orderDetailId;
 
 	@ManyToOne
-    @JoinColumn(name = "ProductDetail", nullable = false)
+    @JoinColumn(name = "ProductDetailId", nullable = false)
     private ProductDetail productDetail;
 
     @Column(name = "Quantity", nullable = false)
     private Integer quantity;
 
     @ManyToOne
-    @JoinColumn(name = "Order", nullable = false)
+    @JoinColumn(name = "OrderId", nullable = false)
     private Order order;
+    
 
 }
 

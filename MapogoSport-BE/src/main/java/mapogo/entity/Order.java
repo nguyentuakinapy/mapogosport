@@ -65,4 +65,7 @@ public class Order implements Serializable{
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails;
+    
+	@Column(name = "Note")
+    private String note;
 }
