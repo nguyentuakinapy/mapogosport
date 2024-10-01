@@ -40,7 +40,7 @@ const OrdersDetail = () => {
                 </div>
             </div>
             <b className='text-danger' style={{ fontSize: '20px' }}>Địa chỉ nhận hàng</b>
-            <div className='p-3'>
+            <div className='p-3' style={{ fontSize: '15px' }}>
                 <Row className='item-address'>
                     <Col xs={12} md={5}>
                         <p><i className="bi bi-person-vcard"></i> <b>Họ và tên: </b>Nguyễn Phi Hùng</p>

@@ -17,8 +17,11 @@ export default function Nav({ isAniActive, toggleAni }: NavProps) {
                         <ul>
                             <li><a className="link active" href="/"><i className="bi bi-house me-2"></i>TRANG CHỦ</a></li>
                             <li><a className="link" href="#"><i className="bi bi-box-seam me-2"></i>QUẢN LÝ SÂN</a></li>
+                            <li><Link className="link" href={"/admin/product"}><i className="bi bi-box-seam me-2"></i>QUẢN LÝ SẢN PHẨM</Link></li>
                             <li><Link className="link" href="#"><i className="bi bi-people me-2"></i>LỊCH ĐẶT SÂN</Link></li>
-                            <li><a className="link" href="#"><i className="bi bi-receipt me-2"></i>HÓA ĐƠN</a></li>
+                            <li><Link className="link" href={"/admin/order"}><i className="bi bi-receipt-cutoff me-2"></i>QUẢN LÝ HÓA ĐƠN</Link></li>
+                            <li><Link className="link" href={"/admin/subcription"}><i className="bi bi-ticket-detailed me-2"></i>QUẢN LÝ GÓI TÀI KHOẢN</Link></li>
+                            <li><Link className="link" href={"/admin/voucher"}><i className="bi bi-ticket-detailed me-2"></i>QUẢN LÝ VOUCHER</Link></li>
                             <li><a className="link" href="#"><i className="bi bi-bar-chart me-2"></i>THỐNG KÊ</a>
                             </li>
                         </ul>

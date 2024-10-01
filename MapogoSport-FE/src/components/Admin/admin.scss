@@ -1,0 +1,40 @@
+/*======================================================Modal Product CSS Start======================================================*/
+.text-center {
+    .avatar-upload {
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+        .avatar-edit {
+            position: absolute;
+            bottom: -1px;
+            width: 100%;
+            text-align: center;
+            z-index: 9;
+            input + label {
+                margin-bottom: 0;
+                background-color: #000;
+                cursor: pointer;
+                transition: all 0.2s ease-in-out;
+                width: 100%;
+                color: #fff;
+                text-decoration: none;
+            }
+            input {
+                display: none;
+            }
+        }
+        .avatar-preview {
+            div {
+                width: 20rem; // Có thể thay đổi kích thước theo ý muốn
+                height: 20rem; // Đặt chiều cao cố định để hình ảnh không bị méo
+                margin: 0 auto;
+                background-size: cover; // Đảm bảo hình ảnh được co giãn theo tỷ lệ
+                background-repeat: no-repeat;
+                background-position: center; // Đặt vị trí hình ảnh ở giữa
+                border-radius: 10px; // Thêm bo tròn nếu cần
+                border: 1px solid #ccc; // Thêm viền nếu muốn
+            }
+        }
+    }
+}
+/*======================================================Modal Product CSS End======================================================*/
