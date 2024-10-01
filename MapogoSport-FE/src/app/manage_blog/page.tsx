@@ -98,7 +98,7 @@ const BlogManagement = () => {
         <Button variant="success" className="mb-4" onClick={handleCreateClick}>
           <i className="bi bi-plus-square-fill"><span className='mx-1'> Tạo mới</span></i>
         </Button>
-        <Button 
+        <Button
           variant="danger"
           className="mb-4 mx-2 "
           disabled={selectedBlogs.length === 0}
@@ -143,10 +143,10 @@ const BlogManagement = () => {
 
                 {/* Hình ảnh */}
                 <td className="text-center align-middle">
-                  <img 
-                    src={`/chat_page/assets/images/posts/${post.imagePost}`} 
-                    alt="Hình ảnh bài viết" 
-                    style={{ width: '150px', height: 'auto' }} 
+                  <img
+                    src={`/chat_page/assets/images/posts/${post.imagePost}`}
+                    alt="Hình ảnh bài viết"
+                    style={{ width: '150px', height: 'auto' }}
                   />
                 </td>
 
