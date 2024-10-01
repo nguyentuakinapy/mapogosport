@@ -22,65 +22,63 @@ export default function Profile() {
     return (
         <UserLayout>
             <div className='mb-3 text-danger' style={{ fontSize: '20px' }}><b>Thông tin cá nhân</b></div>
-            <div style={{ fontSize: '14px' }}>
-                <Form>
-                    <Form.Group className="mb-3">
-                        <Form.Floating className="mb-3">
-                            <Form.Control size="sm" type="text" placeholder="Họ và tên"
-                                value={name} onChange={(e) => setName(e.target.value)} />
-                            <Form.Label>Họ và tên <b className='text-danger'>*</b></Form.Label>
-                        </Form.Floating>
-                    </Form.Group>
+            <Form>
+                <Form.Group className="mb-3">
+                    <Form.Floating className="mb-3">
+                        <Form.Control size="sm" type="text" placeholder="Họ và tên"
+                            value={name} onChange={(e) => setName(e.target.value)} />
+                        <Form.Label>Họ và tên <b className='text-danger'>*</b></Form.Label>
+                    </Form.Floating>
+                </Form.Group>
 
-                    <Row>
-                        <Col xs={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Floating className="mb-3">
-                                    <Form.Control size="sm" type="date" placeholder="Ngày sinh"
-                                        value={dob} onChange={(e) => setDob(e.target.value)} />
-                                    <Form.Label>Ngày sinh</Form.Label>
-                                </Form.Floating>
-                            </Form.Group>
+                <Row>
+                    <Col xs={6}>
+                        <Form.Group className="mb-3">
+                            <Form.Floating className="mb-3">
+                                <Form.Control size="sm" type="date" placeholder="Ngày sinh"
+                                    value={dob} onChange={(e) => setDob(e.target.value)} />
+                                <Form.Label>Ngày sinh</Form.Label>
+                            </Form.Floating>
+                        </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Email:</Form.Label>
-                                <div>{email} <Link href="#" onClick={() => setShowUpdateEmail(true)}>(<i className="bi bi-pencil-square"></i> Cập nhật)</Link></div>
-                            </Form.Group>
-                        </Col>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Email:</Form.Label>
+                            <div>{email} <Link href="#" onClick={() => setShowUpdateEmail(true)}>(<i className="bi bi-pencil-square"></i> Cập nhật)</Link></div>
+                        </Form.Group>
+                    </Col>
 
-                        <Col xs={6}>
-                            <Form.Group className="mb-3">
-                                <FloatingLabel controlId="district" label="Giới tính">
-                                    <Form.Select aria-label="Floating label select example">
-                                        <option>-- Nhấn để chọn --</option>
-                                        <option value="1">Nam</option>
-                                        <option value="2">Nữ</option>
-                                    </Form.Select>
-                                </FloatingLabel>
-                            </Form.Group>
+                    <Col xs={6}>
+                        <Form.Group className="mb-3">
+                            <FloatingLabel controlId="district" label="Giới tính">
+                                <Form.Select aria-label="Floating label select example">
+                                    <option>-- Nhấn để chọn --</option>
+                                    <option value="1">Nam</option>
+                                    <option value="2">Nữ</option>
+                                </Form.Select>
+                            </FloatingLabel>
+                        </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Số điện thoại</Form.Label>
-                                {!phone ? (
-                                    <div>
-                                        Chưa có thông tin
-                                        <Link href="#" onClick={() => setShowUpdatePhone(true)}>(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
-                                    </div>
-                                ) : (
-                                    <div>
-                                        {phone}
-                                        <Link href="#">(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
-                                    </div>
-                                )}
-                            </Form.Group>
-                        </Col>
-                    </Row>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Số điện thoại</Form.Label>
+                            {!phone ? (
+                                <div>
+                                    Chưa có thông tin
+                                    <Link href="#" onClick={() => setShowUpdatePhone(true)}>(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
+                                </div>
+                            ) : (
+                                <div>
+                                    {phone}
+                                    <Link href="#">(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
+                                </div>
+                            )}
+                        </Form.Group>
+                    </Col>
+                </Row>
 
-                    <Link href={"#"} className='btn btn-profile' type="submit" >
-                        <i className="bi bi-floppy2"></i> Lưu
-                    </Link>
-                </Form>
-            </div>
+                <Link href={"#"} className='btn btn-profile' type="submit" >
+                    <i className="bi bi-floppy2"></i> Lưu
+                </Link>
+            </Form>
             <ModalUpdateEmail showUpdateEmail={showUpdateEmail} setShowUpdateEmail={setShowUpdateEmail} />
             <ModalUpdatePhone showUpdatePhone={showUpdatePhone} setShowUpdatePhone={setShowUpdatePhone} />
         </UserLayout>

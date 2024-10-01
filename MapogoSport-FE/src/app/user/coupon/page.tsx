@@ -6,7 +6,7 @@ const CouponPage = () => {
     return (
         <UserLayout>
             <b className='text-danger' style={{ fontSize: '20px' }}>Kho voucher</b>
-            <div style={{ fontSize: '14px' }}>
+            <div style={{ fontSize: '15px' }}>
                 <Row>
                     <Col xs={4} className="mt-4">
                         <div className="box-coupon py-2">

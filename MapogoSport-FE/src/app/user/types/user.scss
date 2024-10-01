@@ -107,7 +107,6 @@ a {
             tr {
                 td {
                     font-size: 14px;
-
                     a {
                         text-decoration: none;
                         color: #142239;
@@ -151,6 +150,7 @@ a {
 /*======================================================Detail Order CSS End======================================================*/
 /*======================================================Detail Booking CSS Start======================================================*/
 .booking-container {
+    font-size: 15px;
     .col {
         .bill-booking {
             background: #ffe0f4;
@@ -167,6 +167,9 @@ a {
         .table {
             tbody {
                 tr {
+                    td {
+                        font-size: 15px;
+                    }
                     .title {
                         overflow: hidden;
                         white-space: nowrap;
@@ -201,7 +204,7 @@ a {
     padding: 5px;
     border: 1px solid #ddd;
     overflow: hidden;
-
+    font-size: 15px;
     img {
         width: 100%;
         height: auto;
