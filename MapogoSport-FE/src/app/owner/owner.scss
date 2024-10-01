@@ -149,3 +149,79 @@
         border-radius: 50px;
     }
 }
+
+.div-tb {
+    max-height: 480px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #142239;
+
+    &::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: #142239;
+        // border-radius: 0px 8px 0 0;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+        .tb-head {
+            font-weight: bold;
+            position: sticky;
+            top: -1px;
+            z-index: 10;
+            white-space: nowrap;
+
+            th {
+                border: none;
+                text-transform: uppercase;
+                background-color: #142239;
+                color: white;
+                font-weight: normal;
+            }
+        }
+
+        tbody {
+
+            tr {
+                .title {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    max-width: 250px;
+                    background-color: #FFDD9D;
+                }
+
+                td {
+                    font-size: 14px;
+                    border: none;
+
+                    a {
+                        text-decoration: none;
+                        color: #142239;
+                        font-weight: 700;
+                    }
+                }
+
+                .w-10 {
+                    span {
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+    }
+}

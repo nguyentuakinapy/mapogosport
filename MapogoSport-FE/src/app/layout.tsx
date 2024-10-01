@@ -40,7 +40,6 @@ export default function RootLayout({
         <ChangePassword></ChangePassword>
         <ForgotPassword></ForgotPassword>
         <ChatMessenger></ChatMessenger>
-        
       </body>
     </html>
   );

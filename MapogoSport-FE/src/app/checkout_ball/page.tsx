@@ -2,6 +2,7 @@
 import HomeLayout from '@/components/HomeLayout';
 import React from 'react';
 import { useState } from 'react';
+import { InputGroup } from 'react-bootstrap';
 
 // import Button from 'react-bootstrap/Button';
 import Collapse from 'react-bootstrap/Collapse';
@@ -12,12 +13,14 @@ const CheckoutPage_Booking = () => {
 
 
   return (
+
     <HomeLayout>
-      <div className="container py-5">
+      <h3 className='text-center text-danger mt-3 fw-bold'>Thanh toán</h3>
+      <div className="container mt-3">
         <div className="row shadow p-3 mb-5 bg-body rounded" >
           {/* Cột trái: Customer Info */}
-          <div className="col-lg-3 col-md-6 col-12">
-            <h5 className='text-primary'>Thông tin đặt lịch</h5>
+          <div className="col-lg-4 col-md-6 col-12">
+            <h5 className='text-primary'>Thông tin cá nhân</h5>
             <hr />
             <form className="mt-4">
               {/* Email */}
@@ -42,29 +45,25 @@ const CheckoutPage_Booking = () => {
                 <label htmlFor="name" style={{ color: "gray" }}>Họ và tên</label>
               </div>
               <div className="mb-1">
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <select className="form-select" style={{ width: "auto", padding: "10 25px" }} id="city">
-                      <option selected>VN</option>
-                      <option>US</option>
-                      <option>JP</option>
-                      {/* Add more options as needed */}
+                <InputGroup className="">
+                  <InputGroup.Text id="basic-addon1" style={{ padding: '0', alignItems: 'normal', border: 'none' }}>
+                    <select defaultValue={'VN'}
+                      className="form-select" aria-label="Default select example">
+                      <option value="VN">VN</option>
+                      <option value="US">US</option>
                     </select>
-                  </span>
-
+                  </InputGroup.Text>
                   <div className="form-floating">
                     <input
-                      type="text"
+                      type="number"
                       className="form-control"
                       id="phone"
                       placeholder="Số điện thoại"
                     />
                     <label htmlFor="phone" style={{ color: "gray" }}>Số điện thoại</label>
                   </div>
-                </div>
+                </InputGroup>
               </div>
-
-
               <div className="form-floating mb-1">
                 <textarea className="form-control" id="notes" ></textarea>
                 <label htmlFor="notes" className="form-label">
@@ -88,7 +87,7 @@ const CheckoutPage_Booking = () => {
 
           {/* Cột giữa: Payment options */}
           <div className="col-lg-3 col-md-6 col-12">
-            <h5 className='text-primary'>Thanh toán</h5>
+            <h5 className='text-primary'>Phương thức thanh toán</h5>
             <hr />
             <div className="card list-group mt-4 my-3">
               <div className="card-body d-flex list-group-item align-items-center">
@@ -101,10 +100,10 @@ const CheckoutPage_Booking = () => {
                     aria-expanded={open}
                   />
                   <label className="form-check-label" htmlFor="cod">
-                    Thanh toán khi nhận hàng (COD)
+                    Thanh toán tại sân
                   </label>
                 </div>
-                <i className="bi bi-cash" onClick={() => setOpen_1(!open_1)}></i>
+                <i className="bi bi-cash" style={{ cursor: 'pointer' }} onClick={() => setOpen_1(!open_1)}></i>
               </div>
               {/* Collapse for bank transfer details */}
               <Collapse in={open_1}>
@@ -127,7 +126,7 @@ const CheckoutPage_Booking = () => {
                     Chuyển khoản
                   </label>
                 </div>
-                <i className="bi bi-cash" onClick={() => setOpen(!open)}></i>
+                <i className="bi bi-cash" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}></i>
               </div>
               {/* Collapse for bank transfer details */}
               <Collapse in={open}>
@@ -154,7 +153,7 @@ const CheckoutPage_Booking = () => {
           </div>
 
           {/* Cột phải: Order Summary */}
-          <div className="col-lg-6 col-md-12 col-12 rounded py-3" style={{ backgroundColor: "#f2f2f2" }} >
+          <div className="col-lg-5 col-md-12 col-12 rounded " >
             <h5 className='text-primary'>Thông tin chi tiết đặt sân</h5>
             <hr />
             <div className="order-summary" >
@@ -168,7 +167,6 @@ const CheckoutPage_Booking = () => {
                       <th>Giờ đặt</th>
                       <th style={{ width: '30%' }}>Sân</th>
                       <th>Giá</th>
-                      <th>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -178,9 +176,7 @@ const CheckoutPage_Booking = () => {
                       <td>10:00 AM</td>
                       <td>Sân 1 (SÂN 7 NGƯỜI)</td>
                       <td>300.000 VND</td>
-                      <td><button className="btn btn-danger">Xóa</button></td>
                     </tr>
-
                   </tbody>
                 </table>
               </div>
@@ -201,11 +197,7 @@ const CheckoutPage_Booking = () => {
               </div>
               <hr />
               {/* Order Summary */}
-
-              <div className="d-flex justify-content-between my-3 fw-light">
-                <span>Địa chỉ </span>
-                <span className="fw-light">Số 2 Phạm Văn Đồng, Dịch Vọng Hậu , Cầu Giấy, Hà Nội , Việt Nam</span>
-              </div>
+              <span>Địa chỉ:  Số 2 Phạm Văn Đồng, Dịch Vọng Hậu, Cầu Giấy, Hà Nội, Việt Nam</span>
               <hr />
               <div className="d-flex justify-content-between my-3 fw-light">
                 <span className='fw-bold'>Tạm tính</span>

@@ -66,6 +66,8 @@ export default function OwnerLayout({
                     (position) => {
                         const { latitude, longitude } = position.coords;
                         fetchWeather(latitude, longitude); // Cập nhật thời tiết
+                        // console.log(latitude + '-' + longitude);
+                        // console.log(navigator.geolocation)
                     },
                     (err) => {
                         console.error('Error getting geolocation:', err);
@@ -74,13 +76,11 @@ export default function OwnerLayout({
             }
         };
 
-        // Gọi ngay khi component được mount
         getLocationAndUpdateWeather();
 
         // Thiết lập interval để cập nhật thời tiết sau mỗi 5 phút (300000ms)
         const intervalId = setInterval(getLocationAndUpdateWeather, 300000); // 5 phút
 
-        // Cleanup khi component unmount
         return () => clearInterval(intervalId);
 
     }, []);

@@ -91,7 +91,7 @@ export default function SportManager() {
             </div>
             <br /> */}
             <div className="card">
-                <Link href={'/'} className='btn btn-danger'><i className="bi bi-plus-circle me-2"></i>Thêm khu vực</Link>
+                <Link href={'/owner?check=withdraw'} className='btn btn-danger'><i className="bi bi-plus-circle me-2"></i>Thêm khu vực</Link>
             </div>
         </>
     )

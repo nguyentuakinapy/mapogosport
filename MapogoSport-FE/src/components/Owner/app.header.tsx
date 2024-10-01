@@ -9,15 +9,20 @@ interface HeaderProps {
 
 const translations: { [key: string]: string } = {
     "clear sky": "trong lành",
-    "few clouds": "it mây",
+    "few clouds": "ít mây",
     "scattered clouds": "mây rải rác",
     "broken clouds": "nhiều mây",
     "shower rain": "mưa rào",
-    "rain": "Mưa",
+    "rain": "mưa",
+    "very heavy rain": "mưa rất to",
     "thunderstorm": "sấm sét",
+    "thunderstorm with rain": "mưa có sấm sét",
+    "thunderstorm with light rain": "mưa rào có sấm sét",
     "snow": "tuyết",
     "mist": "sương mù",
-    "light rain": 'mưa nhẹ'
+    "light rain": 'mưa nhẹ',
+    "light intensity shower rain": 'mưa rào nhẹ',
+    "moderate rain": 'mưa vừa'
 };
 
 export default function Header({ isAniActive, toggleAni, weather }: HeaderProps) {
@@ -68,10 +73,15 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                     {weather?.weather[0].description.toLowerCase() == 'broken clouds' ? <i className="ms-2 me-1 bi bi-clouds-fill"></i> : ''}
                     {weather?.weather[0].description.toLowerCase() == 'shower rain' ? <i className="ms-2 me-1 bi bi-cloud-rain-heavy-fill"></i> : ''}
                     {weather?.weather[0].description.toLowerCase() == 'rain' ? <i className="ms-2 me-1 bi bi-cloud-hail-fill"></i> : ''}
-                    {weather?.weather[0].description.toLowerCase() == 'thunderstorm' ? <i className="ms-2 me-1 bi bi-cloud-lightning-rain-fill"></i> : ''}
+                    {weather?.weather[0].description.toLowerCase() == 'very heavy rain' ? <i className="ms-2 me-1 bi bi-cloud-hail-fill"></i> : ''}
+                    {weather?.weather[0].description.toLowerCase() == 'thunderstorm' ? <i className="ms-2 me-1 bi bi-cloud-lightning-fill"></i> : ''}
+                    {weather?.weather[0].description.toLowerCase() == 'thunderstorm with rain' ? <i className="ms-2 me-1 bi bi-cloud-lightning-rain-fill"></i> : ''}
+                    {weather?.weather[0].description.toLowerCase() == 'thunderstorm with light rain' ? <i className="ms-2 me-1 bi bi-cloud-lightning-rain-fill"></i> : ''}
                     {weather?.weather[0].description.toLowerCase() == 'snow' ? <i className="ms-2 me-1 bi bi-cloud-snow-fill"></i> : ''}
                     {weather?.weather[0].description.toLowerCase() == 'mist' ? <i className="ms-2 me-1 bi bi-cloud-fog2-fill"></i> : ''}
                     {weather?.weather[0].description.toLowerCase() == 'light rain' ? <i className="ms-2 me-1 bi bi-cloud-drizzle-fill"></i> : ''}
+                    {weather?.weather[0].description.toLowerCase() == 'light intensity shower rain' ? <i className="ms-2 me-1 bi bi-cloud-drizzle-fill"></i> : ''}
+                    {weather?.weather[0].description.toLowerCase() == 'moderate rain' ? <i className="ms-2 me-1 bi bi-cloud-drizzle-fill"></i> : ''}
                     Thời tiết {translate(weather == null ? '' : weather?.weather[0].description)}
                 </div>
                 <div className="d-flex justify-content-center align-items-center">
