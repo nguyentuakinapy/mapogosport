@@ -97,57 +97,15 @@ const ProductDetail = () => {
     return (
         <>
             <HomeLayout>
-                <Container className="p-3  container1" >
-                    <Row className=''>
+                <Container className="mt-5 py-3 container1 bg-light" >
+                    <Row className='p-5'>
                         {/* Hình ảnh sản phẩm */}
-                        <Col md={5} className='ms-5' style={{ maxWidth: '350px' }}>
-                            <Carousel style={{ maxWidth: '350px' }}>
-                                <Carousel.Item>
-                                    <Card>
-                                        <Card.Img src="/img/avatar.jpg" alt="Hình ảnh sản phẩm" />
-                                    </Card>
-                                </Carousel.Item>
-                                <Carousel.Item>
-                                    <Card>
-                                        <Card.Img src="/img/avatar.jpg" alt="Hình ảnh sản phẩm" />
-                                    </Card>
-
-                                </Carousel.Item>
-                                <Carousel.Item>
-                                    <Card>
-                                        <Card.Img src="/img/avatar.jpg" alt="Hình ảnh sản phẩm" />
-                                    </Card>
-                                </Carousel.Item>
-                            </Carousel>
-
-                            {/* Hình ảnh thu nhỏ */}
-                            <div className="thumbnail-container mt-3" style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                                <Image
-                                    src="/img/avatar.jpg"
-                                    alt="Hình ảnh thu nhỏ"
-                                    width={130} // Kích thước hình ảnh thu nhỏ
-                                    height={130}
-                                    className='img-thumbnail'
-                                />
-                                <Image
-                                    src="/img/avatar.jpg"
-                                    alt="Hình ảnh thu nhỏ"
-                                    width={130} // Kích thước hình ảnh thu nhỏ
-                                    height={130}
-                                    className='img-thumbnail'
-                                />
-                                <Image
-                                    src="/img/avatar.jpg"
-                                    alt="Hình ảnh thu nhỏ"
-                                    width={130} // Kích thước hình ảnh thu nhỏ
-                                    height={130}
-                                    className='img-thumbnail'
-                                />
-                            </div>
+                        <Col className='ms-5' style={{ maxWidth: '550px' }}>
+                            <img src="/images/ck3.jpg" className='w-100 ' alt="" />
                         </Col>
 
                         {/* Thông tin sản phẩm */}
-                        <Col md={7} className='ms-5 mt-5' style={{ marginLeft: '100px' }}>
+                        <Col className='ms-5' style={{ marginLeft: '100px' }}>
                             <h4 className='mb-4'>Tên sản phẩm: Sản phẩm tự chế</h4>
                             <div>
                                 <span className='fs-4'>Màu:</span>

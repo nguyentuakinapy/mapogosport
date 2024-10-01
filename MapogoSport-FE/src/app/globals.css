@@ -450,5 +450,5 @@ body{
 
 /*  */
 .dropdown-toggle::after {
-  margin-left: -0.5em !important;
+  margin-left: 0.5em !important;
 }

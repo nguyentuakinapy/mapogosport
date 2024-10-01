@@ -1,26 +1,32 @@
 /*======================================================Profile CSS Start======================================================*/
-.form-control-sm, .form-select {
+.form-control-sm,
+.form-select {
     border: 1px solid black !important;
     border-radius: 5px;
 }
+
 a {
     text-decoration: none;
     color: #dc3545;
+
     &:hover {
         color: #142239;
     }
 }
+
 .btn-profile {
     width: 15%;
     border: 1px solid #142239;
     background: #142239;
     color: #fff;
+
     &:hover {
         background: white;
         color: black;
-        border: 1px solid #142239;  
+        border: 1px solid #142239;
     }
 }
+
 /*======================================================Profile CSS End======================================================*/
 /*======================================================Address CSS Start======================================================*/
 .item-address {
@@ -30,32 +36,39 @@ a {
     margin-bottom: 10px;
     border: 1px dashed black;
     font-size: 14px;
-    &:last-child{
+
+    &:last-child {
         margin-bottom: 0;
     }
+
     .btn-address {
         cursor: pointer;
+
         &:hover {
             text-shadow: 0 0 10px #142239;
         }
     }
 }
+
 /*======================================================Address CSS End======================================================*/
 /*======================================================Order & Booking CSS Start======================================================*/
 .search-date {
     flex-wrap: nowrap;
+
     .start {
         border-radius: 5px 0 0 5px;
         border-width: 1px 0px 1px 1px !important;
         border-style: solid;
         border-color: black;
     }
+
     .input-group-text {
         border-width: 1px 0;
         border-style: solid;
         border-color: black;
         background: #e9ecef;
     }
+
     .end {
         border-radius: 0 5px 5px 0;
         border-width: 1px 1px 1px 0px !important;
@@ -63,11 +76,14 @@ a {
         border-color: black;
     }
 }
+
 .box-table-border {
     border: 1px solid #142239;
     border-radius: 8px 8px 0 0;
+
     .table {
         text-align: center;
+
         thead {
             tr {
                 th {
@@ -75,28 +91,34 @@ a {
                     background-color: #142239;
                     color: white;
                     font-weight: normal;
+
                     &:first-child {
                         border-radius: 8px 0 0 0;
                     }
+
                     &:last-child {
                         border-radius: 0 8px 0 0;
                     }
                 }
             }
         }
+
         tbody {
             tr {
                 td {
                     font-size: 14px;
+
                     a {
                         text-decoration: none;
                         color: #142239;
                         font-weight: 700;
                     }
+
                     .bg-badge-user {
                         background: #142239 !important;
                     }
                 }
+
                 .title {
                     overflow: hidden;
                     white-space: nowrap;
@@ -107,6 +129,7 @@ a {
         }
     }
 }
+
 /*======================================================Order & Booking CSS End======================================================*/
 /*======================================================Detail Order CSS Start======================================================*/
 .detail-order {
@@ -116,6 +139,7 @@ a {
             vertical-align: middle;
         }
     }
+
     .total-money {
         td {
             background-color: #142239;
@@ -123,6 +147,7 @@ a {
         }
     }
 }
+
 /*======================================================Detail Order CSS End======================================================*/
 /*======================================================Detail Booking CSS Start======================================================*/
 .booking-container {
@@ -133,10 +158,12 @@ a {
             padding: 0 8px;
             border-bottom: 2px dashed black;
         }
+
         .row {
             padding-bottom: 10px;
             border-bottom: 1px solid rgba($color: rgb(108, 117, 125), $alpha: 1.0);
         }
+
         .table {
             tbody {
                 tr {
@@ -149,6 +176,7 @@ a {
                 }
             }
         }
+
         .map-container {
             .note-map {
                 text-align: center;
@@ -156,6 +184,7 @@ a {
                 color: white;
                 padding: 5px 0;
             }
+
             .map-border {
                 width: 100%;
                 height: 310px;
@@ -164,6 +193,7 @@ a {
         }
     }
 }
+
 /*======================================================Detail Booking CSS End======================================================*/
 /*======================================================Wishlist SprotField & Product Start======================================================*/
 .user-border {
@@ -171,60 +201,71 @@ a {
     padding: 5px;
     border: 1px solid #ddd;
     overflow: hidden;
+
     img {
         width: 100%;
         height: auto;
         border-radius: 8px;
         object-fit: cover;
     }
+
     &:hover {
         box-shadow: 0 0 10px #142239;
     }
+
     &:first-child {
         margin-bottom: 1.5rem;
     }
+
     .content {
         .title {
             a {
                 color: #dc3545;
                 text-decoration: none;
+
                 &:hover {
                     text-decoration: none;
                 }
             }
         }
+
         .address {
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
             max-width: 250px;
         }
+
         .btn-user {
             background: #142239;
             width: 100%;
             color: white;
             border: 1px solid #142239;
+
             &:hover {
                 background: white;
                 color: black;
-                border: 1px solid #142239;  
+                border: 1px solid #142239;
             }
         }
+
         .button-product {
             .btn-user-product {
                 background: #142239;
                 width: 40%;
                 color: white;
                 border: 1px solid #142239;
+
                 &:hover {
                     background: white;
                     color: black;
-                    border: 1px solid #142239;  
+                    border: 1px solid #142239;
                 }
             }
         }
     }
 }
+
 /*======================================================Wishlist SprotField & Product CSS End======================================================*/
 /*======================================================Comment CSS Start======================================================*/
 .box-comment-container {
@@ -232,18 +273,22 @@ a {
     color: white;
     padding: 8px;
     border-radius: 8px;
+
     .box-comment {
         color: white;
         width: 95%;
+
         &:hover {
             background-color: rgb(161, 161, 161);
             border-radius: 8px;
         }
     }
+
     &:last-child {
         margin-bottom: 0px !important;
     }
 }
+
 /*======================================================Comment CSS End======================================================*/
 /*======================================================Wallet CSS Start======================================================*/
 .btn-wallet {
@@ -254,33 +299,41 @@ a {
         color: white;
         padding: 8px;
         border-radius: 8px;
+
         &:hover {
             background: white !important;
             color: black;
         }
+
         &:last-child {
             margin-left: 10px;
         }
     }
 }
+
 .custom-tabs {
     margin-top: 1rem;
+
     .nav-item {
         flex: 1;
         text-align: center;
-        & + .nav-item {
+
+        &+.nav-item {
             margin-left: 1.5px;
         }
+
         &:first-child {
             .nav-link {
                 border-radius: 8px 0 0 8px;
             }
         }
+
         &:last-child {
             .nav-link {
                 border-radius: 0 8px 8px 0;
             }
         }
+
         .nav-link {
             border-radius: 0;
             color: #1a1a1a;
@@ -288,13 +341,17 @@ a {
             padding: 12px 24px;
             text-align: center;
             font-weight: 600;
-            &:hover, &.active {
-                background-color: #142239; /* Màu xanh đậm */
+
+            &:hover,
+            &.active {
+                background-color: #142239;
+                /* Màu xanh đậm */
                 color: white;
             }
         }
     }
 }
+
 /*======================================================Wallet CSS End======================================================*/
 /*======================================================Coupon CSS Start======================================================*/
 .box-coupon {
@@ -304,4 +361,5 @@ a {
     border: 1px solid #142239;
     border-radius: 8px;
 }
+
 /*======================================================Coupon CSS End======================================================*/

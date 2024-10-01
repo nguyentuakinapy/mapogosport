@@ -100,7 +100,7 @@ header {
 
 nav ul {
     list-style: none;
-
+    padding: 0;
 }
 
 nav ul li {
@@ -108,12 +108,11 @@ nav ul li {
 }
 
 nav ul li .link {
+    padding: 10px 10px 10px 30px;
     text-decoration: none;
     color: rgb(95, 92, 92);
     font-weight: bold;
     display: block;
-    padding: 10px;
-    margin-right: 30px;
     transition: background-color 0.3s ease;
 }
 
