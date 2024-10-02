@@ -55,6 +55,9 @@ public class BlogPost implements Serializable{
     @Column(name = "Status", nullable = false)
     private String status;
 
+    @Column(name = "Views", nullable = false)
+    private String views;
+    
     @OneToMany(mappedBy = "blogPost")
     private List<BlogImage> blogImages;
 

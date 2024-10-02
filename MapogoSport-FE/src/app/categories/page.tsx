@@ -29,7 +29,7 @@ const Categories = () => {
 
     return (
         <HomeLayout>
-            <Container>
+            <Container className='pt-5'>
                 <Row>
                     {/* Sidebar responsive: hidden on small screens, show on larger */}
                     <Col lg={2} md={3} sm={12} className="mb-3">

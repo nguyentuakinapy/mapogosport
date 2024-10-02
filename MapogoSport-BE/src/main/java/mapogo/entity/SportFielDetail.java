@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Entity
 @SuppressWarnings("serial")
@@ -36,8 +35,10 @@ public class SportFielDetail implements Serializable{
     private String size;
 
     @Column(name = "Status", nullable = false)
-    private int status;
+    private String status;
 
+    @Column(name = "PercentDeposit", nullable = false)
+    private String percentDeposit;
     @ManyToOne
     @JoinColumn(name = "SportsFiled", nullable = false)
     private SportField sportsField;

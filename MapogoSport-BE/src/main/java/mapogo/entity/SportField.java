@@ -32,12 +32,15 @@ public class SportField implements Serializable{
     @Column(name = "Opening", nullable = false)
     private String opening;
 
+    @Column(name = "Closing", nullable = false)
+    private String closing;
+    
     @ManyToOne
     @JoinColumn(name = "CategoryFieldId", nullable = false)
     private CategoryField categoriesField;
 
     @Column(name = "Status", nullable = false)
-    private boolean status;
+    private String status;
 
     @Column(name = "Quantity", nullable = false)
     private int quantity;
