@@ -1,5 +1,6 @@
 import { Container, Row, Col } from 'react-bootstrap';
 import Link from 'next/link';
+import HomeLayout from '@/components/HomeLayout';
 
 const Categories = () => {
     const categories = [
@@ -19,8 +20,8 @@ const Categories = () => {
     ];
 
     return (
-        <>
-            <Container>
+        <HomeLayout>
+            <Container className='pt-5'>
                 <Row>
                     {/* Sidebar responsive: hidden on small screens, show on larger */}
                     <Col lg={2} md={3} sm={12} className="mb-3">
@@ -124,7 +125,7 @@ const Categories = () => {
                     </Col>
                 </Row>
             </Container>
-        </>
+        </HomeLayout>
     );
 }
 

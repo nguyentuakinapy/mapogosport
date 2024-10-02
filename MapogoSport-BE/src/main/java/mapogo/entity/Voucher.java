@@ -48,6 +48,9 @@ public class Voucher implements Serializable{
 
     @Column(name = "CreatedBy", nullable = false)
     private String createdBy;
+    
+    @Column(name = "Status", nullable = false)
+    private String status;
 
     @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders;
