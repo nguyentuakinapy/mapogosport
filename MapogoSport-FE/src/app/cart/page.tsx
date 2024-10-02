@@ -1,30 +1,97 @@
+
 "use client";
 import HomeLayout from '@/components/HomeLayout';
 import React, { useState } from 'react';
-
+import { Table, InputGroup, FormControl, Card, Row, Col, Button, ButtonGroup, Form } from 'react-bootstrap';
+import './style.css'
 const Cart = () => {
-  const [selectAll, setSelectAll] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([false, false, false]); // Giả định có 3 sản phẩm
+  const [quantities, setQuantities] = useState([1, 1, 1]);
+  const increaseQuantity = (index: number) => {
+    const newQuantities = [...quantities]; // Tạo một bản sao của mảng quantities
+    newQuantities[index] += 1; // Tăng số lượng của sản phẩm tại vị trí index
+    setQuantities(newQuantities); // Cập nhật trạng thái mới
+  };
 
+  const decreaseQuantity = (index: number) => {
+    const newQuantities = [...quantities]; // Tạo một bản sao của mảng quantities
+    newQuantities[index] = newQuantities[index] > 1 ? newQuantities[index] - 1 : 1; // Giảm số lượng, nhưng không dưới 1
+    setQuantities(newQuantities); // Cập nhật trạng thái mới
+  };
+  const [selectAll, setSelectAll] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState([false, false, false]);
+  // const [quantities, setQuantities] = useState([1, 5, 1]); //  là 3 sản phẩm có số lượng lần lượt là 1,5,1
+
+  const products = [
+    {
+      id: 1,
+      name: "Ống cầu lông",
+      price: 200000,
+      quantity: 2,
+      imageUrl: "https://www.example.com/images/badminton-tube.jpg"
+    },
+    {
+      id: 2,
+      name: "Vợt cầu lông",
+      price: 500000,
+      quantity: 1,
+      imageUrl: "https://www.example.com/images/badminton-racket.jpg"
+    },
+    {
+      id: 3,
+      name: "Giày cầu lông",
+      price: 300000,
+      quantity: 3,
+      imageUrl: "https://www.example.com/images/badminton-shoes.jpg"
+    }
+  ];
+
+  const initialQualities = products.map(sp => sp.quantity);
+  console.log("sản phẩm ", initialQualities)
+
+  // const [quantities, setQuantities] = useState(initialQualities); //  là 3 sản phẩm có số lượng lần lượt là 1,5,1
+
+
+  // chọn tất cả sản phẩm
   const handleSelectAll = () => {
     const newSelectAll = !selectAll;
     setSelectAll(newSelectAll);
     setSelectedProducts(selectedProducts.map(() => newSelectAll));
   };
-
+  // chọn từng sản phẩm
   const handleProductSelect = (index: number) => {
     const updatedProducts = [...selectedProducts];
     updatedProducts[index] = !updatedProducts[index];
     setSelectedProducts(updatedProducts);
     setSelectAll(updatedProducts.every(Boolean));
   };
+  // tăng
+  const handleIncrease = (index: number) => {
+    const updatedQuantities = [...quantities];
+    updatedQuantities[index] += 1;
+    setQuantities(updatedQuantities);
+  };
+  // giảm
+  const handleDecrease = (index: number) => {
+    const updatedQuantities = [...quantities];
+    if (updatedQuantities[index] > 1) {
+      updatedQuantities[index] -= 1;
+      setQuantities(updatedQuantities);
+    }
+  };
+  // 1,5,1    
+  const totalPrice = quantities.reduce((total, qty) => total + qty * 200000, 0);
+  //  cú phá:      // array.reduce((tích lũy, phần tử thứ I) => logic xử lý, giá trị khỏi tạo của giá trị tích lũy)
+  // hàm reduce dùng để thay thế cho vòng lặp for hoặc for each khi cần tính tổng của các phần tử trong một mảng
+  const shippingCost = 15000;
+  const finalTotal = totalPrice + shippingCost;
+
 
   return (
     <HomeLayout>
-      <h1 className="text-center pt-5">Giỏ hàng</h1>
-      <div className="container shadow p-3 mb-5 bg-body rounded">
-        <div className="row " >
-          <div className="col-md-8">
+      <h1 className="text-center pt-4 mb-">Giỏ hàng</h1>
+      <div className="container ">
+        <div className="d-flex " >
+          <Col className="col-md-8 shadow p-3 mb-5 bg-body rounded">
             <div className="table-responsive">
               <table className="table  table-hover ">
                 <thead >
@@ -55,14 +122,14 @@ const Cart = () => {
                           onChange={() => handleProductSelect(index)}
                         />
                       </td>
-                      <th scope="row">
+                      <td scope="row">
                         <img
                           src="https://www.racquetpoint.com/cdn/shop/articles/what-is-badminton-racquet-point.jpg?v=1654120169"
                           className="img-fluid me-5 rounded-circle"
                           style={{ width: '80px', height: '80px' }}
                           alt=""
                         />
-                      </th>
+                      </td>
                       <td>
                         <p className="mb-0">Ống cầu</p>
                       </td>
@@ -70,18 +137,18 @@ const Cart = () => {
                         <p className="mb-0">200.000</p>
                       </td>
                       <td>
-                        <div className="input-group quantity" style={{ width: '100px' }}>
-                          <button className="btn btn-sm btn-minus rounded-circle bg-light border">
-                            <i className="bi bi-dash"></i>
-                          </button>
-                          <input
-                            type="text"
-                            className="form-control form-control-sm text-center border-0"
-                            value="2"
-                          />
-                          <button className="btn btn-sm btn-plus rounded-circle bg-light border">
-                            <i className="bi bi-plus-lg"></i>
-                          </button>
+                        <div className="d-flex align-items-center mb-4" key={index}>
+                          <ButtonGroup className="ms-3">
+                            <Button variant="outline-secondary" onClick={() => decreaseQuantity(index)}>-</Button>
+                            <Form.Control
+                              type="text"
+                              value={quantities[index]} // Hiển thị số lượng của sản phẩm tại vị trí index
+                              readOnly
+                              className="text-center"
+                              style={{ maxWidth: '50px' }}
+                            />
+                            <Button variant="outline-secondary" onClick={() => increaseQuantity(index)}>+</Button>
+                          </ButtonGroup>
                         </div>
                       </td>
                       <td>
@@ -98,36 +165,41 @@ const Cart = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+          </Col>
 
-          <div className="col-md-4">
-            <div className="rounded" style={{ backgroundColor: "#f2f2f2" }}>
+          <Col className="col-md-4 ms-3 shadow p-3 mb-5 bg-body rounded">
+            <div className="rounded" >
               <div className="p-4">
-                <h1 className="display-6 mb-4 text-primary">Tổng tiền</h1>
+                <h1 className="display-6 mb-4 ">Tổng tiền</h1>
                 <div className="d-flex justify-content-between mb-4">
                   <h5 className="mb-0">Tạm tính:</h5>
                   <p className="mb-0">400.000 VND</p>
                 </div>
-                <div className="d-flex justify-content-between">
-                  <h5 className="mb-0">Vận chuyển</h5>
-                  <p className="mb-0">Phí vận chuyển: 15.000 VND</p>
-                </div>
-                <p className="mb-0 text-end">Vận chuyển đến Kiên Giang</p>
+
               </div>
-              <div className="py-4 mb-4 border-top border-bottom border-dark d-flex justify-content-between ">
+              <div className="py-4 mb-4 border-top border-bottom border-dark d-flex justify-content-between">
                 <h5 className="mb-0 mx-4">Tổng cộng</h5>
-                <p className="mb-0 mx-4 text-primary fw-bold">415.000 VND</p>
+                <p className="mb-0 mx-4 text-danger fw-bold">415.000 VND</p>
               </div>
-              <div className=' text-end'>
+              <br />
+              <div className=' text-center d-flex ms-3 '>
                 <button
-                  className="btn border-secondary bg-success rounded-pill px-4 me-3 py-3 text-light text-uppercase mb-4"
+                  className="btn btn-outline-secondary  px-3 me-3 py-3 text-dark  mb-4"
                   type="button">
-                  Xác nhận thanh toán
+                  Tiếp Tục Mua hàng
+                </button>
+                <button
+                  className=" btn btn-dark  px-3 me-3 py-3 text-light  mb-4"
+                  type="button">
+                  Thanh toán ngay
                 </button>
               </div>
             </div>
-          </div>
+          </Col>
+
+
         </div>
+
       </div>
     </HomeLayout>
   );

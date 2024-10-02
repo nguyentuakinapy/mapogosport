@@ -247,6 +247,7 @@ body{
 
 .product-item {
   transition: transform 1s ease, box-shadow 1s ease;
+  border-radius: 10px;
 }
 
 .product-item:hover {
@@ -450,5 +451,30 @@ body{
 
 /*  */
 .dropdown-toggle::after {
-  margin-left: -0.5em !important;
+  margin-left: 0.5em !important;
+}
+
+/* statis owner */
+.price-amount {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.nav-item button {
+  color: white;
+  background-color: aqua;
+}
+
+.nav-item button {
+  color: white;
+  background-color: aqua;
+}
+
+.nav-item button:hover {
+  color: white;
+}
+
+.tab-item {
+  background-color: black;
+  color: white;
 }

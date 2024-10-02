@@ -61,36 +61,27 @@ const Header = () => {
                             navbarScroll
                         >
                             <Nav>
-                                <a href="/admin" className='head-hv-nav text-decoration-none '><i className="bi bi-tools me-2"></i>Sản phẩm</a>
+                                <a href="/categories" className='head-hv-nav text-decoration-none '><i className="bi bi-tools me-2"></i>Sản phẩm</a>
                             </Nav>
                             <Nav>
                                 <Link href="/product-detail" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
                             </Nav>
-                            <NavDropdown title={<><span className='head-hv-nav text-decoration-none demo'><i className="bi bi-person-fill me-2"></i>Tài khoản</span></>} id="navbarScrollingDropdown">
-                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</NavDropdown.Item>
-                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#registerModal">
-                                    Đăng ký
-                                </NavDropdown.Item>
-                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#changeEmail">
-                                    Thay đổi Email
-                                </NavDropdown.Item>
-                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#changePassword">
-                                    Thay đổi Password
-                                </NavDropdown.Item>
-                                <NavDropdown.Item data-bs-toggle="modal" data-bs-target="#forgotModal">
-                                    Quên mật khẩu
-                                </NavDropdown.Item>
-                                <NavDropdown.Divider />
-                                <NavDropdown.Item>
-                                    <Link href='/user/profile' className='text-decoration-none text-dark'>Thông tin tài khoản</Link>
-                                </NavDropdown.Item>
-                                <NavDropdown.Item>
-                                    <Link href='/owner' className='text-decoration-none text-dark'>Chủ sân</Link>
-                                </NavDropdown.Item>
-                                <NavDropdown.Item>
-                                    <Link href='/admin' className='text-decoration-none text-dark'>Admin</Link>
-                                </NavDropdown.Item>
-                            </NavDropdown>
+                            <div className="dropdown">
+                                <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i className="bi bi-person-fill me-2"></i>Tài khoản
+                                </span>
+                                <ul className="dropdown-menu">
+                                    <a className="dropdown-item" data-bs-toggle="modal" data-bs-target="#loginModal" style={{ cursor: 'pointer' }}>Đăng nhập</a>
+                                    <a className="dropdown-item" data-bs-toggle="modal" data-bs-target="#registerModal" style={{ cursor: 'pointer' }}>Đăng ký</a>
+                                    <a className="dropdown-item" data-bs-toggle="modal" data-bs-target="#changeEmail" style={{ cursor: 'pointer' }}>Thay đổi Email</a>
+                                    <a className="dropdown-item" data-bs-toggle="modal" data-bs-target="#changePassword" style={{ cursor: 'pointer' }}>Thay đổi mật khẩu</a>
+                                    <a className="dropdown-item" data-bs-toggle="modal" data-bs-target="#forgotModal" style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
+                                    <hr className='m-0' />
+                                    <Link href='/user/profile' className='dropdown-item text-decoration-none text-dark'>Thông tin tài khoản</Link>
+                                    <Link href='/owner' className='dropdown-item text-decoration-none text-dark'>Chủ sân</Link>
+                                    <Link href='/admin' className='dropdown-item text-decoration-none text-dark'>Admin</Link>
+                                </ul>
+                            </div>
                             <Nav className='position-relative'>
                                 <a href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</a>
                                 <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">

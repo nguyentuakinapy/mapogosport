@@ -1,5 +1,5 @@
 import OwnerLayout from "@/components/Owner/OwnerLayout"
-import './global.scss'
+import './owner.scss'
 
 export const metadata = {
     title: 'Chủ sân'

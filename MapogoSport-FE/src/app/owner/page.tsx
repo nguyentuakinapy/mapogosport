@@ -1,10 +1,19 @@
 'use client'
 import Link from "next/link";
-import { ReactNode, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { ReactNode, useEffect, useState } from "react";
 import { Col, FloatingLabel, Form, Nav, Row } from "react-bootstrap";
 
 export default function Owner({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState<string>('all');
+
+    const searchParams = useSearchParams();
+    const check = searchParams.get('check');
+    useEffect(() => {
+        if (check === 'withdraw') {
+            setActiveTab('withdraw');
+        }
+    }, [check]);
 
     const renderContent = () => {
         switch (activeTab) {
