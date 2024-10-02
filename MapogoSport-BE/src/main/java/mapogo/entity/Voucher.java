@@ -13,6 +13,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -52,10 +54,20 @@ public class Voucher implements Serializable{
     @Column(name = "Status", nullable = false)
     private String status;
 
+    @Column(name = "DiscountCode", nullable = false)
+    private String discountCode;
+    
+    @Temporal(TemporalType.DATE)
+    @Column(name = "ActiveDate", nullable = false)
+    private Date activeDate;
+    
     @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders;
     
     @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Booking> bookings;
+
+    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<UserVoucher> userVoucher;
 }
 

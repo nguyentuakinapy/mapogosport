@@ -68,4 +68,7 @@ public class Order implements Serializable{
     
 	@Column(name = "Note")
     private String note;
+	
+    @Column(name = "ShipFee", nullable = false)
+    private String shipFee;
 }

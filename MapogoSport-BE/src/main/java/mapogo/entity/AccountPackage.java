@@ -37,5 +37,8 @@ public class AccountPackage implements Serializable{
 
     @OneToMany(mappedBy = "accountPackage", cascade = CascadeType.ALL)
     private List<UserSubscription> userSubscriptions;
+    
+    @OneToMany(mappedBy = "accountPackage", cascade = CascadeType.ALL)
+    private List<Benefit> benifits;
 
 }
