@@ -75,4 +75,7 @@ public class User implements Serializable {
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Owner> owners;
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UserVoucher> UserVoucher;
 }
