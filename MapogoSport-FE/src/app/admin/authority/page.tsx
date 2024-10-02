@@ -1,6 +1,10 @@
+'use client'
+import AuthorityModal from "@/components/Admin/Modal/authority.modal";
+import { useState } from "react";
 import { Table } from "react-bootstrap";
 
 function Test() {
+    const [showEditRole, setShowEditRole] = useState<boolean>(false)
 
     return (
         <>
@@ -48,7 +52,7 @@ function Test() {
                         <td><input disabled className="form-check-input" type="checkbox" /></td>
                         <td><input disabled className="form-check-input" type="checkbox" /></td>
                     </tr>
-                    <tr>
+                    <tr onClick={() => setShowEditRole(true)}>
                         <td>2</td>
                         <td>Sân bóng 1</td>
                         <td>Nguyễn Văn A</td>
@@ -60,6 +64,11 @@ function Test() {
                 </tbody>
             </Table>
 
+            <AuthorityModal showEditRole={showEditRole} setShowEditRole={
+                setShowEditRole
+            }>
+
+            </AuthorityModal>
         </>
     )
 }
