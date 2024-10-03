@@ -1,150 +1,163 @@
 'use client'
+import { useEffect, useState } from "react";
+import { Button, Form, Modal } from "react-bootstrap";
+import { toast } from "react-toastify";
+import Cookies from 'js-cookie';
 
-import { useState, useEffect } from 'react';
-import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
+interface LoginProps {
+    showLoginModal: boolean;
+    setShowLoginModal: (v: boolean) => void;
+}
 
-export default function Login() {
+export default function Login(props: LoginProps) {
 
-    // State để lưu trữ 
-    const [formData, setFormData] = useState({
-        username: '',
-        password: ''
-    });
+    const [username, setUsername] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [checkRememberMe, setCheckRememberMe] = useState<boolean>(false);
+    // Data auto fet khi update data
+    // const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-    // State để lưu thông báo lỗi
-    const [error, setError] = useState('');
-
-    // Hàm xử lý khi giá trị input thay đổi
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-    };
-
-    // Hàm xử lý khi form được submit
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault(); 
-
-        const { username, password } = formData;
-
-        if (!username || !password) {
-            setError('Vui lòng nhập đầy đủ thông tin.');
-            return;
-        }
-
-        console.log('Đăng nhập với:', formData);
-        setError('');
-    };
-
-    // xóa input khi close modal
-    const handleModalClose = () => {
-        setFormData({
-            username: '',
-            password: '',
-        });
-    };
+    // const { data, error, isLoading } = useSWR(
+    //     `http://localhost:8080/rest/user/${username}`,
+    //     fetcher,
+    //     {
+    //         revalidateIfStale: false,
+    //         revalidateOnFocus: false,
+    //         revalidateOnReconnect: false
+    //     }
+    // );
 
     useEffect(() => {
-        // Lắng nghe sự kiện khi modal đóng và reset form
-        const modalElement = document.getElementById('loginModal');
-        const handleModalHide = () => handleModalClose();
-
-        modalElement?.addEventListener('hide.bs.modal', handleModalHide);
-
-        // Cleanup sự kiện khi component gỡ
-        return () => {
-            modalElement?.removeEventListener('hide.bs.modal', handleModalHide);
-        };
+        const userCookie = Cookies.get('user');
+        if (userCookie) {
+            const parsedUserData = JSON.parse(userCookie);
+            setUsername(parsedUserData.username);
+            setPassword(parsedUserData.password);
+            setCheckRememberMe(true);
+            console.log("Dữ liệu người dùng từ cookie:", parsedUserData);
+        } else {
+            console.log("Không có dữ liệu người dùng trong cookie.");
+        }
     }, []);
+
+    const handleSubmit = async () => {
+        if (!username) {
+            toast.warning("Vui lòng nhập thông tin!");
+            return;
+        } else if (!password) {
+            toast.warning("Vui lòng nhập thông tin!");
+        } else {
+            try {
+                const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
+                if (!responseUser.ok) {
+                    throw new Error('Error fetching data');
+                }
+                const dataUser = await responseUser.json();
+                if (dataUser.password == password) {
+                    if (checkRememberMe) {
+                        const user = { username, password };
+                        Cookies.set('user', JSON.stringify(user), { expires: 7 });
+                    } else {
+                        Cookies.remove('user');
+                    }
+                    handleClose();
+                    sessionStorage.setItem('user', JSON.stringify(dataUser));
+                    if (dataUser.authorities[0].role.name == "Admin") {
+                        window.location.href = "/admin";
+                    } else if (dataUser.authorities[0].role.name == "Owner") {
+                        window.location.href = "/owner";
+                    } else if (dataUser.authorities[0].role.name == "Employee") {
+                        window.location.href = "/admin";
+                    } else {
+                        window.location.href = "/";
+                    }
+                } else {
+                    toast.error("Thông tin đăng nhập không đúng!");
+                }
+            } catch (error: any) {
+                toast.error("Thông tin đăng nhập không đúng!!! " + error);
+            }
+        }
+
+    }
+    const { showLoginModal, setShowLoginModal } = props;
+
+    const handleClose = () => {
+        setShowLoginModal(false);
+        setUsername("");
+        setPassword("");
+        const userCookie = Cookies.get('user');
+        if (userCookie) {
+            const parsedUserData = JSON.parse(userCookie);
+            setUsername(parsedUserData.username);
+            setPassword(parsedUserData.password);
+            setCheckRememberMe(true);
+            console.log("Dữ liệu người dùng từ cookie:", parsedUserData);
+        } else {
+            console.log("Không có dữ liệu người dùng trong cookie.");
+        }
+    }
 
     return (
         <>
-            <div className="modal fade" id="loginModal" tabIndex={-1} aria-labelledby="loginModalLabel" aria-hidden="true" data-bs-keyboard="false" data-bs-backdrop="static">
-                <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content">
-                        <div className="modal-header border-0">
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <Modal show={showLoginModal} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
+                centered backdrop="static" keyboard={false}
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Đăng nhập</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <div className="text-center mb-3">
+                            <span className="btn btn-submit d-flex align-items-center justify-content-center text-center">
+                                Đăng nhập Google
+                            </span>
                         </div>
-                        <div className="modal-body p-0">
-                            <div className="modal-title h2 text-uppercase text-center font-weight-bold pt-lg-2 pt-1">
-                                Đăng nhập
-                            </div>
-
-                            <form className="form-login-register" onSubmit={handleSubmit} autoComplete="off">
-                                <div className="p-lg-4 p-2">
-                                    <div className="row mx-n2">
-                                        <div className="col-md-12 col-12 px-2">
-                                            <span className="btn btn-submit d-flex align-items-center justify-content-center text-center mb-3">
-                                                <svg className="mr-3 me-2 icon-white" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 50 50">
-                                                    <path d="M 25.996094 48 C 13.3125 48 2.992188 37.683594 2.992188 25 C 2.992188 12.316406 13.3125 2 25.996094 2 C 31.742188 2 37.242188 4.128906 41.488281 7.996094 L 42.261719 8.703125 L 34.675781 16.289063 L 33.972656 15.6875 C 31.746094 13.78125 28.914063 12.730469 25.996094 12.730469 C 19.230469 12.730469 13.722656 18.234375 13.722656 25 C 13.722656 31.765625 19.230469 37.269531 25.996094 37.269531 C 30.875 37.269531 34.730469 34.777344 36.546875 30.53125 L 24.996094 30.53125 L 24.996094 20.175781 L 47.546875 20.207031 L 47.714844 21 C 48.890625 26.582031 47.949219 34.792969 43.183594 40.667969 C 39.238281 45.53125 33.457031 48 25.996094 48 Z"></path>
-                                                </svg>
-                                                Đăng nhập Google
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="text-line-through mb-3 text-center d-flex align-items-center">
-                                        <hr className="flex-grow-1" />
-                                        <span className="mx-3">Hoặc tài khoản</span>
-                                        <hr className="flex-grow-1" />
-                                    </div>
-
-                                    {error && <div className="alert alert-danger">{error}</div>}
-
-                                    <div className="form-group mb-4">
-                                        <input
-                                            name="username"
-                                            id="username"
-                                            type="text"
-                                            className="form-control required"
-                                            placeholder="Email hoặc số điện thoại"
-                                            value={formData.username}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
-
-                                    <div className="form-group mb-4">
-                                        <input
-                                            name="password"
-                                            id="password"
-                                            type="password"
-                                            className="form-control required"
-                                            placeholder="Mật khẩu"
-                                            value={formData.password}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
-
-                                    <div className="d-flex justify-content-between align-items-center mt-3 mb-4">
-                                        <div className="form-check">
-                                            <input className="form-check-input" type="checkbox" id="defaultCheck1" />
-                                            <label className="form-check-label" htmlFor="defaultCheck1">
-                                                Nhớ mật khẩu
-                                            </label>
-                                        </div>
-                                        <a className="forgot d-block text-dark text-decoration-none" href="/forgot-password">
-                                            Quên mật khẩu?
-                                        </a>
-                                    </div>
-
-                                    <button className="btn btn-submit w-100 mb-3" type="submit">
-                                        Đăng nhập
-                                    </button>
-
-                                    <div className="d-flex justify-content-center">
-                                        <span>Bạn chưa có tài khoản?</span>
-                                        <a data-bs-toggle="modal" style={{ cursor: 'pointer' }} data-bs-target="#registerModal" className="fw-bold text-danger ms-2 text-decoration-none">
-                                            Đăng ký ngay!
-                                        </a>
-                                    </div>
-                                </div>
-                            </form>
+                        <div className="text-line-through mb-3 text-center d-flex align-items-center">
+                            <hr className="flex-grow-1" />
+                            <span className="mx-3">Hoặc tài khoản</span>
+                            <hr className="flex-grow-1" />
                         </div>
-                    </div>
-                </div>
-            </div>
+                        <Form.Group className="mb-4">
+                            <Form.Control
+                                type="text"
+                                placeholder="Vui long nhập Email!"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-4">
+                            <Form.Control
+                                type="password"
+                                placeholder="Vui long nhập mật khẩu!"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </Form.Group>
+                        <div className="d-flex justify-content-between align-items-center mt-3 mb-4">
+                            <Form.Check type="checkbox" label="Nhớ mật khẩu" checked={checkRememberMe}
+                                onChange={(e) => setCheckRememberMe(e.target.checked)} />
+                            <a className="forgot d-block text-dark text-decoration-none" href="/forgot-password">
+                                Quên mật khẩu?
+                            </a>
+                        </div>
+                        <Button className="btn btn-submit w-100 mb-3" onClick={handleSubmit}>
+                            Đăng nhập
+                        </Button>
+                        <div className="d-flex justify-content-center">
+                            <span>Bạn chưa có tài khoản?</span>
+                            <a
+                                style={{ cursor: 'pointer' }}
+                                data-bs-toggle="modal"
+                                data-bs-target="#registerModal"
+                                className="fw-bold text-danger ms-2 text-decoration-none"
+                            >
+                                Đăng ký ngay!
+                            </a>
+                        </div>
+                    </Form>
+                </Modal.Body>
+            </Modal>
         </>
     );
 }
