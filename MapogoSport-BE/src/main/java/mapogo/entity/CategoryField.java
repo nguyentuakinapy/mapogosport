@@ -22,22 +22,21 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "categories_field")
+@Table(name = "CategoriesField")
 public class CategoryField implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "categories_field_id")
+    @Column(name = "CategoriesFieldId")
     private Integer categoriesFieldId;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "Name", nullable = false)
     private String name;
 
-    @Column(name = "image", nullable = false)
+    @Column(name = "Image", nullable = false)
     private String image;
 
-//    @OneToMany(mappedBy = "categoriesField", cascade = CascadeType.ALL)
-//    private List<SportField> sportField;
+    @OneToMany(mappedBy = "categoriesField", cascade = CascadeType.ALL)
+    private List<SportField> sportField;
 
 }
-
