@@ -17,24 +17,24 @@ import java.util.List;
 @AllArgsConstructor
 
 @Entity
-@Table(name = "Users")
+@Table(name = "users")
 public class User implements Serializable {
 
 	@Id
-	@Column(name = "Username", nullable = false)
+	@Column(name = "username", nullable = false)
 	private String username;
 
-	@Column(name = "Fullname", nullable = false)
+	@Column(name = "fullname", nullable = false)
 	private String fullname;
 
-	@Column(name = "Password", nullable = false)
+	@Column(name = "password", nullable = false)
 	private String password;
 
-	@Column(name = "Enabled", nullable = false)
+	@Column(name = "enabled", nullable = false)
 	private boolean enabled;
 
 	@Temporal(TemporalType.DATE)
-	@Column(name = "CreateAt")
+	@Column(name = "createdAt")
 	private Date createdAt = new Date();
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
