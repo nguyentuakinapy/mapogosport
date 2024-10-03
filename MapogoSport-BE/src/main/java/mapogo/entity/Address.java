@@ -3,6 +3,8 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +35,7 @@ public class Address implements Serializable{
     private String ward;
 
     @OneToMany(mappedBy = "address", cascade = CascadeType.ALL)
+    @JsonIgnore // Ngăn vòng lặp tuần tự hóa
     private List<AddressUser> addressUsers;
 }
 

@@ -36,7 +36,7 @@ public class SportField implements Serializable{
     private String closing;
     
     @ManyToOne
-    @JoinColumn(name = "CategoryFieldId", nullable = false)
+    @JoinColumn(name = "CategoriesFieldId", nullable = false)
     private CategoryField categoriesField;
 
     @Column(name = "Status", nullable = false)

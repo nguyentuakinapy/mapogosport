@@ -9,9 +9,10 @@ export default function UserLayout({
 }: {
     children: React.ReactNode;
 }) {
+  
     return (
         <>
-            <Header />
+            <Header  />
             <main className='bg-web main-area pb-5'>{children}</main>
             <Footer />
         </>
