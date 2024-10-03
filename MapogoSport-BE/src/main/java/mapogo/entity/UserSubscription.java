@@ -19,7 +19,7 @@ public class UserSubscription implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "UserSubscription", nullable = false, unique = true)
+    @Column(name = "UserSubscriptionId", nullable = false, unique = true)
     private int userSubscriptionId;
 
     @ManyToOne
@@ -27,7 +27,7 @@ public class UserSubscription implements Serializable{
     private AccountPackage accountPackage;
 
     @ManyToOne
-    @JoinColumn(name = "User", nullable = false)
+    @JoinColumn(name = "Username", nullable = false)
     private User user;
 
     @Temporal(TemporalType.DATE)

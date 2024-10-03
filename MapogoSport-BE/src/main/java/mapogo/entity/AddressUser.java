@@ -2,6 +2,8 @@ package mapogo.entity;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,26 +17,26 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "AddressUser")
-public class AddressUser implements Serializable{
+public class AddressUser implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "AddressUserId")
-    private int addressUserId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "AddressUserId")
+	private int addressUserId;
 
-    @ManyToOne
-    @JoinColumn(name = "Username", nullable = false)
-    private User user;
+	@ManyToOne
+	@JoinColumn(name = "Username")
+	@JsonBackReference // Ngăn vòng lặp tuần tự hóa
+	private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "Address", nullable = false)
-    private Address address;
+	@ManyToOne
+	@JoinColumn(name = "AddressId", nullable = false)
+	private Address address;
 
-    @Column(name = "PhoneNumber")
-    private String phoneNumber;
+	@Column(name = "PhoneNumber")
+	private String phoneNumber;
 
-    @Column(name = "AddressDetail", nullable = false)
-    private String addressDetail;
+	@Column(name = "AddressDetail", nullable = false)
+	private String addressDetail;
 
 }
-

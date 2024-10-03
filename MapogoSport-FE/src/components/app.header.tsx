@@ -1,45 +1,59 @@
 'use client'
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import LoginModal from './account/modal/login.modal';
+import RegisterModal from './account/modal/register.modal';
 
 const Header = () => {
-    useEffect(() => {
-        require('bootstrap/dist/js/bootstrap.bundle.min.js');
-    }, []);
+    const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+    const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
+
+    const [userData, setUserData] = useState<User | null>(null);
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const handleScroll = () => {
-                const header = document.querySelector('.header-area');
-                const main = document.querySelector('.main-area') as HTMLElement | null;
-                const scrollPosition = window.scrollY;
-
-                if (scrollPosition > 230) {
-                    header?.classList.add('sticky-header');
-                    if (main) {
-                        main.style.marginTop = '20px';
-                    }
-                } else {
-                    header?.classList.remove('sticky-header');
-                    if (main) {
-                        main.style.marginTop = '0px';
-                    }
-                }
-            };
-
-            window.addEventListener('scroll', handleScroll);
-
-            return () => {
-                window.removeEventListener('scroll', handleScroll);
-            };
+        const user = sessionStorage.getItem('user');
+        if (user) {
+            const parsedUserData = JSON.parse(user) as User;
+            setUserData(parsedUserData);
+            // console.log(parsedUserData); // Kiểm tra dữ liệu
         }
-    }, []);
+
+        require('bootstrap/dist/js/bootstrap.bundle.min.js');
+
+        const handleScroll = () => {
+            const header = document.querySelector('.header-area');
+            const main = document.querySelector('.main-area') as HTMLElement | null;
+            const scrollPosition = window.scrollY;
+
+            if (scrollPosition > 230) {
+                header?.classList.add('sticky-header');
+                if (main) {
+                    main.style.marginTop = '20px';
+                }
+            } else {
+                header?.classList.remove('sticky-header');
+                if (main) {
+                    main.style.marginTop = '0px';
+                }
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []); // Chạy một lần khi component được mount
+
+    const logOut = () => {
+        sessionStorage.removeItem('user');
+        window.location.href = "/";
+    }
 
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
@@ -68,18 +82,19 @@ const Header = () => {
                             </Nav>
                             <div className="dropdown">
                                 <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i className="bi bi-person-fill me-2"></i>Tài khoản
+                                    <i className="bi bi-person-fill me-2"></i>{userData ? userData.fullname : 'Tài khoản'}
                                 </span>
                                 <ul className="dropdown-menu">
-                                    <a className="dropdown-item" data-bs-toggle="modal" data-bs-target="#loginModal" style={{ cursor: 'pointer' }}>Đăng nhập</a>
-                                    <a className="dropdown-item" data-bs-toggle="modal" data-bs-target="#registerModal" style={{ cursor: 'pointer' }}>Đăng ký</a>
-                                    <a className="dropdown-item" data-bs-toggle="modal" data-bs-target="#changeEmail" style={{ cursor: 'pointer' }}>Thay đổi Email</a>
-                                    <a className="dropdown-item" data-bs-toggle="modal" data-bs-target="#changePassword" style={{ cursor: 'pointer' }}>Thay đổi mật khẩu</a>
-                                    <a className="dropdown-item" data-bs-toggle="modal" data-bs-target="#forgotModal" style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
-                                    <hr className='m-0' />
+                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowLoginModal(true)} style={{ cursor: 'pointer' }} >Đăng nhập</a>
+                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowRegisterModal(true)} style={{ cursor: 'pointer' }}>Đăng ký</a>
+                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#changeEmail" style={{ cursor: 'pointer' }}>Thay đổi Email</a>
+                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-target="#changePassword" style={{ cursor: 'pointer' }}>Thay đổi mật khẩu</a>
+                                    <a className={`dropdown-item ${userData ? '' : 'd-none'}`} data-bs-toggle="modal" data-bs-target="#forgotModal" style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
+                                    {/* <hr className='m-0' /> */}
                                     <Link href='/user/profile' className='dropdown-item text-decoration-none text-dark'>Thông tin tài khoản</Link>
-                                    <Link href='/owner' className='dropdown-item text-decoration-none text-dark'>Chủ sân</Link>
-                                    <Link href='/admin' className='dropdown-item text-decoration-none text-dark'>Admin</Link>
+                                    <Link href='/owner' className={`dropdown-item text-decoration-none text-dark ${userData?.authorities[0].role.name == 'Owner' ? '' : 'd-none'}`}>Chủ sân</Link>
+                                    <Link href='/admin' className={`dropdown-item text-decoration-none text-dark ${userData?.authorities[0].role.name == 'Admin' ? '' : 'd-none'}`}>Admin</Link>
+                                    <a className={`dropdown-item ${userData ? '' : 'd-none'}`} onClick={() => logOut()} style={{ cursor: 'pointer' }}>Đăng xuất</a>
                                 </ul>
                             </div>
                             <Nav className='position-relative'>
@@ -138,6 +153,8 @@ const Header = () => {
 
                 </Container>
             </Navbar>
+            <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></LoginModal>
+            <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}></RegisterModal>
         </main>
     );
 }

@@ -38,7 +38,7 @@ public class Product implements Serializable {
 	private Double price;
 
 	@ManyToOne
-	@JoinColumn(name = "CateoryProductId", nullable = false)
+	@JoinColumn(name = "CategoryProductId", nullable = false)
 	private CategoryProduct categoryProduct;
 
 	@Column(name = "Description", nullable = false)
@@ -47,7 +47,7 @@ public class Product implements Serializable {
 	@Column(name = "Status", nullable = false)
 	private String status;
 
-	@Column(name = "CreateDate", nullable = false)
+	@Column(name = "CreatedDate", nullable = false)
 	private Date createDate;
 
 	@Column(name = "Brand", nullable = false)

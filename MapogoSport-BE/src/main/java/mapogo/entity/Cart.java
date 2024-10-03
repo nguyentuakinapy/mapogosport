@@ -43,7 +43,7 @@ public class Cart implements Serializable{
     @Temporal(TemporalType.DATE)
     @Column(name = "Date", nullable = false)
     private Date date = new Date();
-
+    
     @Column(name = "TotalAmount", nullable = false)
     private Double totalAmount;
 

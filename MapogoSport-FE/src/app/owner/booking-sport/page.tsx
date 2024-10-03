@@ -10,15 +10,15 @@ type BookingsType = {
 
 export default function BookingSport() {
     const [bookings, setBookings] = useState<BookingsType>({
-        "6h00": ["Đã đặt", "Tạm đóng"]
+        "6h00": ["Đã đặt", "Tạm đóng", "Còn trống"],
+        "6h10": ["Đã đặt", "Tạm đóng"]
+
     });
     const [selectTime, setSelectTime] = useState('');
     const [selectDate, setSelectDate] = useState('');
     const [selectSport, setSelectSport] = useState('');
 
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
-
-    let isUpdating = false;
 
     const checkAndAddStatus = (time: string, newStatus: string) => {
         let checkAdd = true;
@@ -51,7 +51,7 @@ export default function BookingSport() {
             <tr key={time}>
                 <td className="title" style={{ textAlign: 'center' }}>{time}</td>
                 {statuses.map((status, index) => (
-                    <td key={index} className={`w-10`}>
+                    <td key={index} className={`w-10 ${getBadgeClass(status)}`}>
                         <span onClick={() => setShowBookingModal(true)} className={`badge ${getBadgeClass(status)}`} style={{ width: '80px' }}>{status}</span>
                     </td>
                 ))}
@@ -75,6 +75,7 @@ export default function BookingSport() {
     return (
         <>
             <button onClick={() => addNew()} className="btn btn-success">Đặt sân 06h00</button>
+            {selectDate} - {selectSport} - {selectTime}
             <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>LỊCH ĐẶT SÂN</h3>
             <div className="input-group my-2">
                 <select defaultValue={selectDate} onChange={(e) => setSelectDate(e.target.value)}

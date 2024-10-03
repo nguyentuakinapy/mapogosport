@@ -9,6 +9,9 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @SuppressWarnings("serial")
 @Getter
@@ -16,17 +19,18 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "Roles")
-public class Role implements Serializable{
+public class Role implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "RoleId", nullable = false)
-    private int roleId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "RoleId", nullable = false)
+	private int roleId;
 
-    @Column(name = "Name", nullable = false)
-    private String name;
+	@Column(name = "Name", nullable = false)
+	private String name;
 
-    @OneToMany(mappedBy = "role")
-    private List<Authority> authorities;
+	@OneToMany(mappedBy = "role")
+    @JsonIgnore
+	private List<Authority> authorities;
 
 }
