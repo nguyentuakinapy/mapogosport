@@ -2,6 +2,7 @@ package mapogo.entity;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,19 +16,20 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "Authorities")
-public class Authority implements Serializable{
+public class Authority implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "AuthorityId")
-    private long authorityId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "AuthorityId")
+	private long authorityId;
 
-    @ManyToOne
-    @JoinColumn(name = "Username", nullable = false)
-    private User user;
+	@ManyToOne
+	@JoinColumn(name = "Username")
+	@JsonBackReference // Ngăn vòng lặp tuần tự hóa
+	private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "RoleId")
-    private Role role;
+	@ManyToOne
+	@JoinColumn(name = "Authority")
+	private Role role;
+
 }
-

@@ -10,6 +10,9 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @SuppressWarnings("serial")
 @Getter
 @Setter
@@ -34,48 +37,62 @@ public class User implements Serializable {
 	private boolean enabled;
 
 	@Temporal(TemporalType.DATE)
-	@Column(name = "createdAt")
+
+	@Column(name = "CreatedAt")
 	private Date createdAt = new Date();
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Authority> authorities;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<AddressUser> addressUsers;
-	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<UserSubscription> userSubscriptions;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<UserSubscription> subscriptionPayments;
-	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Booking> bookings;
+	@JsonIgnore
+	private List<UserSubscription> userSubscriptions;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<UserSubscription> subscriptionPayments;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Booking> bookings;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<BookingPayment> bookingPayments;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<OrderPayment> orderPayments;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Order> orders;
-	
+	@JsonIgnore
+	private List<Order> orders;
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Cart> carts;
-	
+	@JsonIgnore
+	private List<Cart> carts;
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<FavoriteField> favoriteFields;
-	
+	@JsonIgnore
+	private List<FavoriteField> favoriteFields;
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<FieldReview> fieldReviews;
-	
+	@JsonIgnore
+	private List<FieldReview> fieldReviews;
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<ProductReview> productReviews;
-	
+	@JsonIgnore
+	private List<ProductReview> productReviews;
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Owner> owners;
-	
+	@JsonIgnore
+	private List<Owner> owners;
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<UserVoucher> UserVoucher;
+	@JsonIgnore
+	private List<UserVoucher> UserVoucher;
 }

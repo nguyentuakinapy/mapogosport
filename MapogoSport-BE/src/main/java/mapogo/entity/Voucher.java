@@ -54,7 +54,7 @@ public class Voucher implements Serializable{
     @Column(name = "Status", nullable = false)
     private String status;
 
-    @Column(name = "DiscountCode", nullable = false)
+    @Column(name = "discountCode", nullable = false)
     private String discountCode;
     
     @Temporal(TemporalType.DATE)

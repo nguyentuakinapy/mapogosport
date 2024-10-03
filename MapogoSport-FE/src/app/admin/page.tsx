@@ -125,7 +125,6 @@ export default function Owner({ children }: { children: ReactNode }) {
         )
     }
     return (
-
         <>{children}</>
     )
 

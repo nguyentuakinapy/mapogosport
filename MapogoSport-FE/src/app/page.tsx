@@ -4,6 +4,7 @@ import { useState } from 'react';
 import HomeLayout from "@/components/HomeLayout";
 import Link from "next/link";
 import './user/types/user.scss'
+import useSWR from "swr";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
