@@ -3,6 +3,8 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,6 +37,7 @@ public class CategoryProduct implements Serializable{
     private String image;
 
     @OneToMany(mappedBy = "categoryProduct")
+    @JsonIgnore
     private List<Product> products;
 
 }
