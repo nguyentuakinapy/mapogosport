@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "SportFields")
+@Table(name = "Sportfields")
 public class SportField implements Serializable{
 
     @Id
@@ -40,7 +40,6 @@ public class SportField implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "CategoriesFieldId", nullable = false)
-    @JsonIgnore
     private CategoryField categoriesField;
 
     @Column(name = "Status", nullable = false)
@@ -54,24 +53,18 @@ public class SportField implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "OwnerId", nullable = false)
-    @JsonIgnore
     private Owner owner;
 
     @Column(name = "Decription", nullable = false)
-    @JsonIgnore
     private String decription;
 
-    @OneToMany(mappedBy = "sportsField", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
     private List<SportFielDetail> sportFielDetails;
 
-    @OneToMany(mappedBy = "sportsField", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL) // corrected from "sportsField"
     private List<FavoriteField> favoriteFields;
-
     
-    @OneToMany(mappedBy = "sportsField", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
     private List<FieldReview> fieldReviews;
 }
 

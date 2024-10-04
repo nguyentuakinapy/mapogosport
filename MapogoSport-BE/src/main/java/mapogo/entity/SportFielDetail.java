@@ -39,6 +39,7 @@ public class SportFielDetail implements Serializable{
 
     @Column(name = "PercentDeposit", nullable = false)
     private String percentDeposit;
+    
     @ManyToOne
     @JoinColumn(name = "SportFiledId", nullable = false)
     private SportField sportField;
