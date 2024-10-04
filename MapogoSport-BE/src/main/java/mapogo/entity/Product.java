@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -41,7 +43,7 @@ public class Product implements Serializable {
 	@JoinColumn(name = "CategoryProductId", nullable = false)
 	private CategoryProduct categoryProduct;
 
-	@Column(name = "Description", nullable = false)
+	@Column(name = "Decription", nullable = false)
 	private String description;
 
 	@Column(name = "Status", nullable = false)
@@ -67,6 +69,7 @@ public class Product implements Serializable {
 
 
 	@OneToMany(mappedBy = "product")
+	@JsonIgnore
 	private List<ProductReview> productReviews;
 
 }

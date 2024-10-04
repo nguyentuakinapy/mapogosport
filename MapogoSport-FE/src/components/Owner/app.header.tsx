@@ -5,6 +5,7 @@ interface HeaderProps {
     isAniActive: boolean;
     toggleAni: () => void;
     weather: WeatherData | null;
+    userData: User | null;
 }
 
 const translations: { [key: string]: string } = {
@@ -25,7 +26,7 @@ const translations: { [key: string]: string } = {
     "moderate rain": 'mưa vừa'
 };
 
-export default function Header({ isAniActive, toggleAni, weather }: HeaderProps) {
+export default function Header({ isAniActive, toggleAni, weather, userData }: HeaderProps) {
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
 
@@ -108,7 +109,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                         className="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                                 </ul>
                             </li> */}
-                            <span style={{ borderLeft: '1px solid' }} className='text-decoration-none demo me-3'><i className="bi bi-person-fill ms-3 me-1"></i>Nguyễn Tú Akina</span>
+                            <span style={{ borderLeft: '1px solid' }} className='text-decoration-none demo me-3'><i className="bi bi-person-fill ms-3 me-1"></i>{userData?.fullname}</span>
                         </ul>
                     </nav>
                 </div>

@@ -7,6 +7,20 @@ import { Col, FloatingLabel, Form, Nav, Row } from "react-bootstrap";
 export default function Owner({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState<string>('all');
 
+    const [userData, setUserData] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const [fullName, setFullName] = useState<string>("");
+
+    useEffect(() => {
+        const user = sessionStorage.getItem('user');
+        if (user) {
+            const parsedUserData = JSON.parse(user) as User;
+            setUserData(parsedUserData);
+            setIsLoading(true);
+        }
+    }, []);
+
     const searchParams = useSearchParams();
     const check = searchParams.get('check');
     useEffect(() => {
@@ -42,7 +56,7 @@ export default function Owner({ children }: { children: ReactNode }) {
 
                                         <Form.Group className="mb-3">
                                             <Form.Label>Email:</Form.Label>
-                                            <div>nguyentuakina@gmail.com<Link href="#" >(<i className="bi bi-pencil-square"></i> Cập nhật)</Link></div>
+                                            <div>{userData?.username}<Link href="#" >(<i className="bi bi-pencil-square"></i> Cập nhật)</Link></div>
                                         </Form.Group>
                                     </Col>
 
@@ -139,8 +153,8 @@ export default function Owner({ children }: { children: ReactNode }) {
             <>
                 <div className="profile-header">
                     <div className="profile-info">
-                        <h2>Nguyễn Tú Akina</h2>
-                        <p>Thằng nào có tiền thì nạp vào DONATE cho tao</p>
+                        <h2>{userData?.fullname}</h2>
+                        <p>Chào mừng bạn đến với hệ thống quản lý dành cho chủ sân của MapogoSport</p>
                         <div className="stats">
                             <span>0 Bài Viết</span>
                             <span>0 Sân</span>
