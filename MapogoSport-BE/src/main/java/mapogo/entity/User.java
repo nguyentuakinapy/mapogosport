@@ -34,7 +34,7 @@ public class User implements Serializable {
 	private String password;
 
 	@Column(name = "enabled", nullable = false)
-	private boolean enabled;
+	private Boolean enabled = true;
 
 	@Temporal(TemporalType.DATE)
 	@Column(name = "CreatedAt")

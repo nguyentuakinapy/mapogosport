@@ -1,16 +1,167 @@
 'use client'
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "react-bootstrap"
+import { toast } from "react-toastify";
+import "./account.scss"
+
+
 interface RegisterProps {
     showRegisterModal: boolean;
     setShowRegisterModal: (v: boolean) => void;
 }
-export default function login(props: RegisterProps) {
+
+export default function Register(props: RegisterProps) {
     const { showRegisterModal, setShowRegisterModal } = props;
+
+    const [username, setUsername] = useState<string>("");
+    const [fullName, setFullName] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [forgotPassword, setForgotPassword] = useState<string>("");
+    const [authority, setAuthority] = useState<number>(4);
+
+    const [otp, setOtp] = useState<string>("");
+    const [otpValue, setOtpValue] = useState<string>("");
+
+    const [errorFullName, setErrorFullName] = useState<boolean>(false);
+    const [errorUsername, setErrorUsername] = useState<boolean>(false);
+    const [errorPassword, setErrorPassword] = useState<boolean>(false);
+    const [errorForgotPassword, setErrorForgotPassword] = useState<boolean>(false);
+    const [errorOtp, setErrorOtp] = useState<boolean>(false);
+
+    const [timeLeft, setTimeLeft] = useState(5);
+    const [checkButton, setCheckButton] = useState<boolean>(false);
+
+    const handleSubmit = async () => {
+        if (!fullName) {
+            toast.warning("Vui lòng nhập họ và tên!")
+            return;
+        } else if (!username) {
+            toast.warning("Vui lòng nhập email!")
+            return;
+        } else if (!password) {
+            toast.warning("Vui lòng nhập mật khẩu!")
+            return;
+        } else if (!forgotPassword) {
+            toast.warning("Vui lòng xác nhận mật khẩu!")
+            return;
+        } else if (password != forgotPassword) {
+            toast.warning("Mật khẩu bạn nhập không chính xác!")
+            return;
+        } else if (!otp) {
+            toast.warning("Vui lòng nhập OTP!")
+            return;
+        } else if (otp != otpValue) {
+            toast.warning("OTP Bạn nhập không chính xác!")
+            return;
+        }
+        try {
+            // Create user
+            const responseUser = await fetch('http://localhost:8080/rest/user', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, fullname: fullName, password })
+            });
+            if (!responseUser.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const resUser = await responseUser.json(); // Đọc responseUser ở đây
+
+            // Get New Id Authority
+            const response = await fetch(`http://localhost:8080/rest/authority`);
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+            const dataAuth = await response.json();
+            if (!dataAuth.length) {
+                toast.error("No authority data available");
+                return;
+            }
+            const newAuthorityId = dataAuth[dataAuth.length - 1]?.authorityId + 1 || 1;
+
+            // Create Authority
+            const responseAuth = await fetch('http://localhost:8080/rest/authority', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    authorityId: newAuthorityId,
+                    role: {
+                        roleId: authority // Role phải có ID
+                    },
+                    user: {
+                        username: username // User phải có username
+                    }
+                })
+            });
+            if (!responseAuth.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const resAuth = await responseAuth.json(); // Sửa lại dòng này
+
+            if (resAuth && resUser) {
+                toast.info("Đăng ký thành công!...");
+                handleClose();
+            }
+
+        } catch (error) {   
+            console.error("Error during fetch:", error);
+            toast.error("Create failed!");
+        }
+    }
+
+    const coolDownTime = () => {
+        setCheckButton(true);
+        if (timeLeft) {
+            clearInterval(timeLeft);
+        }
+
+        setTimeLeft(60);
+
+        const newTimerId = setInterval(() => {
+            setTimeLeft((prevTime) => {
+                if (prevTime === 1) {
+                    clearInterval(newTimerId); // Dừng bộ đếm khi thời gian bằng 0
+                    setCheckButton(false);
+                }
+                return prevTime - 1;
+            });
+        }, 1000);
+    }
+
+    const checkEmail = async () => {
+        if (username) {
+            const response = await fetch('http://localhost:8080/rest/user/sendMail', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(username)
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const res = await response.text(); // Bạn đang trả về chuỗi OTP từ backend
+            setOtp(res);
+            toast.success(`OTP is: ${res}`);
+        }
+    }
 
     const handleClose = () => {
         setShowRegisterModal(false);
+        setUsername("");
+        setPassword("");
+        setFullName("");
+        setForgotPassword("");
+        setOtp("");
+        setOtpValue("");
     }
     return (
         <>
@@ -27,7 +178,7 @@ export default function login(props: RegisterProps) {
                         <div className="modal-title h2 text-uppercase text-center font-weight-bold">
                             Đăng Ký
                         </div>
-                        <form className="form-login-register" action="/member/ajax-login" method="post" autoComplete="off">
+                        <div className="form-login-register" >
                             <div className="p-lg-4 p-4">
                                 <div className="row mx-n2">
                                     <div className="col-md-12 col-12 px-2">
@@ -56,7 +207,9 @@ export default function login(props: RegisterProps) {
                                     <hr className="flex-grow-1" />
                                 </div>
                                 <div className="form-group mb-3">
-                                    <input type="text" className="form-control" id="floatingInput" placeholder="Họ và tên *" />
+                                    <input type="text" className={`form-control ${errorFullName ? 'error' : ''}`} placeholder="Họ và tên *"
+                                        value={fullName} onChange={(e) => setFullName(e.target.value)}
+                                    />
                                 </div>
                                 <div className="row mb-3">
                                     {/* <div className="form-group col-6">
@@ -64,27 +217,37 @@ export default function login(props: RegisterProps) {
                                             placeholder="Số điện thoại *" />
                                     </div> */}
                                     <div className="form-group">
-                                        <input type="email" className="form-control" id="floatingPassword"
+                                        <input type="email" className="form-control"
+                                            value={username} onChange={(e) => setUsername(e.target.value)}
                                             placeholder="Email *" />
                                     </div>
                                 </div>
                                 <div className="row mb-3">
                                     <div className="form-group col-6">
-                                        <input type="password" className="form-control" id="floatingPassword"
+                                        <input type="password" className="form-control"
+                                            value={password} onChange={(e) => setPassword(e.target.value)}
                                             placeholder="Mật khẩu *" />
                                     </div>
                                     <div className="form-group col-6">
-                                        <input type="password" className="form-control" id="floatingPassword"
+                                        <input type="password" className="form-control"
+                                            value={forgotPassword} onChange={(e) => setForgotPassword(e.target.value)}
                                             placeholder="Nhập lại mật khẩu *" />
                                     </div>
                                 </div>
                                 <div className="input-group mb-3">
-                                    <input type="text" className="form-control" placeholder="Mã OTP #####"
+                                    <input type="text" className="form-control error" placeholder="Mã OTP #####"
+                                        value={otpValue} onChange={(e) => setOtpValue(e.target.value)}
                                         aria-label="Mã OTP #####" aria-describedby="button-addon2" />
-                                    <button className="btn btn-dark" type="submit" id="button-addon2">Gửi mã</button>
+                                    <button onClick={() => {
+                                        coolDownTime();
+                                        checkEmail();
+                                    }}
+                                        disabled={checkButton}
+                                        className="btn btn-dark " type="submit"
+                                        style={{ width: '100px' }} id="button-addon2"> {checkButton ? timeLeft + 's' : 'Gửi mã'}</button>
                                 </div>
 
-                                <button className="btn btn-submit w-100 mb-3">
+                                <button className="btn btn-submit w-100 mb-3" onClick={handleSubmit}>
                                     Đăng ký
                                 </button>
 
@@ -93,7 +256,7 @@ export default function login(props: RegisterProps) {
                                     <a data-bs-toggle="modal" data-bs-target="#loginModal" style={{ cursor: 'pointer' }} className="ms-2 fw-bold text-danger text-decoration-none">Đăng nhập ngay!</a>
                                 </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </Modal>

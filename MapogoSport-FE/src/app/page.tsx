@@ -1,6 +1,6 @@
 'use client'
 import { Container, Carousel, Row, Col, Image } from "react-bootstrap";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import HomeLayout from "@/components/HomeLayout";
 import Link from "next/link";
 import './user/types/user.scss'
@@ -8,6 +8,7 @@ import useSWR from "swr";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
+  const [sportFields, setSportFields] = useState<SportField[]>([]);
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -25,6 +26,26 @@ export default function Home() {
     }
     return stars;
   };
+
+  // Hiển thị khu vực sân
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/rest/sport_field');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(data);
+        setSportFields(data);
+      } catch (error) {
+        console.error("Fetch error: ", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
 
   return (
     <HomeLayout>
@@ -202,102 +223,33 @@ export default function Home() {
           <h3 className="fw-bold mt-5">SÂN THỂ THAO MỚI</h3>
           <div style={{ fontSize: '15px' }}>
             <Row className="my-3">
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sân" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>GG Stadium</b></Link>
+              {sportFields.map((field: SportField) => (
+                <Col xs={3} key={field.sportFieldId}>
+                  <div className="user-border">
+                    <div className="mb-3">
+                      <Link href={"#"}>
+                        <Image src={`/images/${field.image}`} alt={field.name} />
+                      </Link>
                     </div>
-                    <div className="address mb-1">
-                      <span className="me-2">Khu vực:</span>Quận 7 <span className="mx-2">- </span>Hồ Chí Minh
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div>Số sân: 4</div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
+                    <div className="content">
+                      <div className="mb-1 title">
+                        <Link href={"#"}><b>{field.name}</b></Link>
                       </div>
-                    </div>
-                    <Link href={"#"} className="btn btn-user mt-2">Đặt sân</Link>
-                  </div>
-                </div>
-              </Col>
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sân" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>GG Stadium</b></Link>
-                    </div>
-                    <div className="address mb-1">
-                      <span className="me-2">Khu vực:</span>Quận 7 <span className="mx-2">- </span>Hồ Chí Minh
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div>Số sân: 4</div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
+                      <div className="address mb-1">
+                        <span className="me-2">Khu vực:</span>{field.address}
+                        <span className="mx-2">-</span>Hồ Chí Minh
                       </div>
-                    </div>
-                    <Link href={"#"} className="btn btn-user mt-2">Đặt sân</Link>
-                  </div>
-                </div>
-              </Col>
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sân" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>GG Stadium</b></Link>
-                    </div>
-                    <div className="address mb-1">
-                      <span className="me-2">Khu vực:</span>Quận 7 <span className="mx-2">- </span>Hồ Chí Minh
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div>Số sân: 4</div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
+                      <div className="d-flex align-items-center justify-content-between">
+                        <div>Số sân: {field.quantity}</div>
+                        <div className="star-item text-warning">
+                          {renderStars(rating)}
+                        </div>
                       </div>
+                      <Link href={"#"} className="btn btn-user mt-2">Đặt sân</Link>
                     </div>
-                    <Link href={"#"} className="btn btn-user mt-2">Đặt sân</Link>
                   </div>
-                </div>
-              </Col>
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sân" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>GG Stadium</b></Link>
-                    </div>
-                    <div className="address mb-1">
-                      <span className="me-2">Khu vực:</span>Quận 7 <span className="mx-2">- </span>Hồ Chí Minh
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div>Số sân: 4</div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
-                      </div>
-                    </div>
-                    <Link href={"#"} className="btn btn-user mt-2">Đặt sân</Link>
-                  </div>
-                </div>
-              </Col>
+                </Col>
+              ))}
             </Row>
           </div>
         </div>

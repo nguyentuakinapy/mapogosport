@@ -3,6 +3,8 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,35 +27,37 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "ProductDetails")
-public class ProductDetail implements Serializable{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ProductDetailId")
-    private Long productDetailId;
+public class ProductDetail implements Serializable {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "ProductDetailId")
+	private Long productDetailId;
 
-    @ManyToOne
-    @JoinColumn(name = "ProductId", nullable = false)
-    private Product product;
+	@ManyToOne
+	@JoinColumn(name = "ProductId", nullable = false)
+	@JsonIgnore
+	private Product product;
 
-    @Column(name = "Color", nullable = false)
-    private String color;
+	@Column(name = "Color", nullable = false)
+	private String color;
 
-    @Column(name = "Size", nullable = false)
-    private String size;
+	@Column(name = "Size", nullable = false)
+	private String size;
 
-    @Column(name = "Quantity", nullable = false)
-    private Double quantity;
+	@Column(name = "Quantity", nullable = false)
+	private Double quantity;
 
-    @Column(name = "Image", nullable = false)
-    private String image;
+	@Column(name = "Image", nullable = false)
+	private String image;
 
-    @OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-    private List<Gallery> galleries;
+	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
+	private List<Gallery> galleries;
 
-    @OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-    private List<Cart> carts;
-    
-    @OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-    private List<OrderDetail> orderDetails;
+	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Cart> carts;
+
+	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<OrderDetail> orderDetails;
 }
-
