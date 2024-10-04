@@ -37,9 +37,11 @@ public class User implements Serializable {
 	private boolean enabled;
 
 	@Temporal(TemporalType.DATE)
-
 	@Column(name = "CreatedAt")
 	private Date createdAt = new Date();
+	
+	@Column(name = "Gender", nullable = false)
+	private boolean gender;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Authority> authorities;
