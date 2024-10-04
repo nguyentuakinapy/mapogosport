@@ -34,12 +34,14 @@ public class User implements Serializable {
 	private String password;
 
 	@Column(name = "enabled", nullable = false)
-	private boolean enabled;
+	private Boolean enabled = true;
 
 	@Temporal(TemporalType.DATE)
-
 	@Column(name = "CreatedAt")
 	private Date createdAt = new Date();
+	
+	@Column(name = "Gender", nullable = false)
+	private boolean gender;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Authority> authorities;

@@ -2,7 +2,7 @@ interface User {
     username: string;
     fullname: string;
     password: string;
-    enabled: boolean;
+    enabled: number;
     createdAt: Date;
     authorities: [
         {
