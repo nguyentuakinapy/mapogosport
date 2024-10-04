@@ -33,7 +33,7 @@ public class FieldReview implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "SportFieldId", nullable = false)
-    private SportField sportsField;
+    private SportField sportField;
 
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)

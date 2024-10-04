@@ -40,4 +40,3 @@ public class CategoryField implements Serializable{
     private List<SportField> sportField;
 
 }
-
