@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "UserVoucher")
+@Table(name = "Uservoucher")
 public class UserVoucher implements Serializable{
     
     @Id
