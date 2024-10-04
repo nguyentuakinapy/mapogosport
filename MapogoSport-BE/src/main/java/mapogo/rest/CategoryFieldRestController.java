@@ -8,21 +8,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.dao.CategoryFieldDAO;
 import mapogo.entity.CategoryField;
+import mapogo.service.CategoryFieldService;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
-@RequestMapping("/api/category")
+@CrossOrigin("*")
+@RequestMapping("/rest")
 @RestController
-public class CategoryRestController {
+public class CategoryFieldRestController {
 
 	@Autowired
-	CategoryFieldDAO categoryField;
+	CategoryFieldService categoryFieldService;
 	
-	@GetMapping()
+	@GetMapping("/category_field")
 	public List<CategoryField> getAll() {
-		return categoryField.findAll();
+		return categoryFieldService.findAll();
 	}
 	
 }
