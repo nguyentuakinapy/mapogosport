@@ -55,14 +55,14 @@ public class SportField implements Serializable{
     @Column(name = "Decription", nullable = false)
     private String decription;
 
-    @OneToMany(mappedBy = "sportsField", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
     private List<SportFielDetail> sportFielDetails;
 
-    @OneToMany(mappedBy = "sportsField", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
     private List<FavoriteField> favoriteFields;
 
     
-    @OneToMany(mappedBy = "sportsField", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
     private List<FieldReview> fieldReviews;
 }
 
