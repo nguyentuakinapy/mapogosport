@@ -70,17 +70,17 @@ export default function Register(props: RegisterProps) {
             }
             const resUser = await responseUser.json(); // Đọc responseUser ở đây
 
-            // Get New Id Authority
-            const response = await fetch(`http://localhost:8080/rest/authority`);
-            if (!response.ok) {
-                throw new Error('Error fetching data');
-            }
-            const dataAuth = await response.json();
-            if (!dataAuth.length) {
-                toast.error("No authority data available");
-                return;
-            }
-            const newAuthorityId = dataAuth[dataAuth.length - 1]?.authorityId + 1 || 1;
+            // // Get New Id Authority
+            // const response = await fetch(`http://localhost:8080/rest/authority`);
+            // if (!response.ok) {
+            //     throw new Error('Error fetching data');
+            // }
+            // const dataAuth = await response.json();
+            // if (!dataAuth.length) {
+            //     toast.error("No authority data available");
+            //     return;
+            // }
+            // const newAuthorityId = dataAuth[dataAuth.length - 1]?.authorityId + 1 || 1;
 
             // Create Authority
             const responseAuth = await fetch('http://localhost:8080/rest/authority', {
@@ -90,7 +90,6 @@ export default function Register(props: RegisterProps) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    authorityId: newAuthorityId,
                     role: {
                         roleId: authority // Role phải có ID
                     },
@@ -109,7 +108,7 @@ export default function Register(props: RegisterProps) {
                 handleClose();
             }
 
-        } catch (error) {   
+        } catch (error) {
             console.error("Error during fetch:", error);
             toast.error("Create failed!");
         }

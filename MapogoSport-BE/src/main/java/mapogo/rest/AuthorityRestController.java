@@ -15,7 +15,6 @@ import mapogo.dao.ProductDAO;
 import mapogo.entity.Authority;
 import mapogo.entity.Product;
 import mapogo.service.AuthorityService;
-import mapogo.service.ProductService;
 
 @CrossOrigin("*")
 @RestController
