@@ -9,24 +9,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import mapogo.entity.Product;
-import mapogo.service.ProductService;
 
+import mapogo.entity.CategoryProduct;
+import mapogo.service.CategoryProductService;
+
+@RequestMapping("/rest")
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/rest")
-public class ProductRestController {
+public class CategoryProductRestController {
 	@Autowired
-	ProductService productService;
+	CategoryProductService categoryProductService;
 	
-	@GetMapping("/products")
-	public List<Product> findAll()
-	{
-		return productService.findAll();
+	@GetMapping("/category-products")
+	List<CategoryProduct> findAll(){
+		return categoryProductService.findAll();
 	}
 	
-	@GetMapping("/products/{id}")
-	public Optional<Product> findById(@PathVariable Integer id) { // Thêm @PathVariable
-		return productService.findById(id); // Sửa lại tên phương thức
+	@GetMapping("/category-products/{id}")
+	Optional<CategoryProduct> findCategoryProductById(@PathVariable Integer id) {
+		return categoryProductService.findById(id);
 	}
 }
