@@ -7,6 +7,7 @@ import ModalUpdateEmail from '@/components/User/modal/user.updateEmail'
 import ModalUpdatePhone from '@/components/User/modal/user.updatePhone'
 import '../types/user.scss'
 import useSWR, { mutate } from 'swr'
+import { toast } from 'react-toastify'
 
 export default function Profile() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -41,13 +42,23 @@ export default function Profile() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(userData)
-        }).then(res => res.json()).then(res => {
-            if (res) {
-                mutate(`http://localhost:8080/rest/user/${username}`);
-                console.log("OK");
+        }).then(async (res) => {
+            if (res.ok) {
+                // Kiểm tra nếu server trả về nội dung rỗng
+                const result = await res.text();  // Sử dụng text() thay vì json()
+                if (result) {
+                    // Nếu có phản hồi, cố gắng parse nó thành JSON
+                    const jsonResult = JSON.parse(result);
+                    mutate(`http://localhost:8080/rest/user/${username}`);
+                    toast.success("Cập nhật thành công!");
+                } else {
+                    toast.success("Cập nhật thành công!");
+                }
             } else {
-                console.log("Update error!")
+                toast.error("Cập nhật không thành công!");  // Trường hợp không thành công
             }
+        }).catch(error => {
+            toast.error("Đã xảy ra lỗi:", error);
         });
     }
 
@@ -64,7 +75,7 @@ export default function Profile() {
     useEffect(() => {
         if (data) {
             setUsername(data.username);
-            setFullName(data.fullname); // Lưu lại fullname khi load dữ liệu
+            setFullName(data.fullname);
             setEmail(data.email);
             setBirthday(data.birthday);
             setGender(data.gender);
@@ -84,8 +95,8 @@ export default function Profile() {
 
             updateUser.fullname = fullName;
             updateUser.email = email;
-            // updateUser.birthday = birthday;
-            // updateUser.gender = gender;
+            updateUser.birthday = new Date(birthday);
+            updateUser.gender = gender === 'true';
 
             return updateUser;
 
