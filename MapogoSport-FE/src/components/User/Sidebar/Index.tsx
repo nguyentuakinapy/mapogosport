@@ -3,7 +3,8 @@ import { usePathname } from 'next/navigation';
 import '../types/user.scss'
 import useLocalStorage from "../useLocalStorage";
 import SidebarItem from "./SideBarItem";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 
 const menuGroups = [
     {
@@ -36,6 +37,33 @@ const Sidebar = () => {
     const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
     const pathname = usePathname();
 
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const [usernameFetchApi, setUsernameFetchApi] = useState<string>("");
+    useEffect(() => {
+        const user = sessionStorage.getItem('user');
+        if (user) {
+            const parsedUserData = JSON.parse(user) as User;
+            setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`)
+        }
+    }, [])
+    const { data, error, isLoading } = useSWR(
+        usernameFetchApi, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false
+    }
+    );
+    // const { data, error, isLoading } = useSWR(
+    //     "http://localhost:8080/rest/user/hungnpps30910", fetcher, {
+    //     revalidateIfStale: false,
+    //     revalidateOnFocus: false,
+    //     revalidateOnReconnect: false
+    // }
+    // );
+
+    const [name, setName] = useState('');
+    const [avatar, setAvatar] = useState('');
+
     useEffect(() => {
         const activeItem = menuGroups.flatMap(group => group.menuItems)
             .find(menuItem => menuItem.route === pathname || menuItem.children?.some(child => child.route === pathname));
@@ -44,6 +72,12 @@ const Sidebar = () => {
             setPageName(activeItem.label.toLowerCase());
         }
     }, [pathname, setPageName]);
+    useEffect(() => {
+        if (data) {
+            setName(data.fullname || '');
+            setAvatar(data.image ? data.image : 'avatar-init.gif');
+        }
+    }, [data]);
 
     return (
         <div className="menu-user">
@@ -56,10 +90,10 @@ const Sidebar = () => {
                     </div>
 
                     <div className="avatar-preview">
-                        <div style={{ backgroundImage: `url("/images/avatar-init.gif")` }}></div>
+                        <div style={{ backgroundImage: `url("/images/${avatar}")` }}></div>
                     </div>
                 </div>
-                <div className="text-dark fw-bold mb-3">Nguyễn Phi Hùng</div>
+                <div className="text-dark fw-bold mb-3">{name}</div>
             </div>
             {/* Sidebar Menu */}
             {menuGroups.map((group, groupIndex) => (

@@ -22,7 +22,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "BookingDetails")
+@Table(name = "Bookingdetails")
 public class BookingDetail implements Serializable{
 
 	@Id

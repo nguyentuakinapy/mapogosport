@@ -23,7 +23,7 @@ public class SportField implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SportFieldId", nullable = false, unique = true)
+    @Column(name = "Sport_field_id", nullable = false, unique = true)
     private int sportFieldId;
 
     @Column(name = "Name", nullable = false)

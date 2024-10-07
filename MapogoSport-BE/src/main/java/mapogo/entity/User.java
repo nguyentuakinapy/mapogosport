@@ -10,6 +10,7 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -41,9 +42,22 @@ public class User implements Serializable {
 	private Date createdAt = new Date();
 	
 	@Column(name = "Gender", nullable = false)
-	private String gender;
+
+	private boolean gender;
+	
+	@Temporal(TemporalType.DATE)
+	@Column(name = "Birthday", nullable = true)
+	private Date birthday;
+	
+	@Column(name = "Email", nullable = false)
+	private String email;
+	
+	@Column(name = "Image", nullable = true)
+	private String image;
+	
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonManagedReference
 	private List<Authority> authorities;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

@@ -24,7 +24,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "FieldReviews")
+@Table(name = "Fieldreviews")
 public class FieldReview implements Serializable{
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

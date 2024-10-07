@@ -21,7 +21,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "OrderDetails")
+@Table(name = "Orderdetails")
 public class OrderDetail implements Serializable{
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

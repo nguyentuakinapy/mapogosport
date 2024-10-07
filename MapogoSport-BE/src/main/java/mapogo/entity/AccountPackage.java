@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "AccountPackages")
+@Table(name = "Accountpackages")
 public class AccountPackage implements Serializable{
     
     @Id

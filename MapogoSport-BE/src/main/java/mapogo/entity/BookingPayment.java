@@ -24,7 +24,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "BookingPayments")
+@Table(name = "Bookingpayments")
 public class BookingPayment implements Serializable{
 
     @Id
