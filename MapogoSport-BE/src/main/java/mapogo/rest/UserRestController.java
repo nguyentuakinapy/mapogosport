@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.entity.User;
@@ -40,6 +42,12 @@ public class UserRestController {
 	public User saveStudents(@RequestBody User u) {
 		System.out.println(u.getFullname());
 		return userService.createUser(u);
+	}
+	
+	@PutMapping("/user/{username}")
+	public void putStudent(@PathVariable("username") String username, @RequestBody User u) {
+		System.out.println(u.getUsername());
+		userService.updateUser(u);
 	}
 
 	@PostMapping("/user/sendMail")

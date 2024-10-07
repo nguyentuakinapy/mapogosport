@@ -1,23 +1,101 @@
 'use client'
 import Link from 'next/link'
-import { useState } from 'react'
-import { Row, Col, Form, Button, FloatingLabel } from 'react-bootstrap'
+import { useEffect, useState } from 'react'
+import { Row, Col, Form, FloatingLabel, Button } from 'react-bootstrap'
 import UserLayout from '@/components/User/UserLayout'
 import ModalUpdateEmail from '@/components/User/modal/user.updateEmail'
 import ModalUpdatePhone from '@/components/User/modal/user.updatePhone'
 import '../types/user.scss'
+import useSWR, { mutate } from 'swr'
 
 export default function Profile() {
-    const [name, setName] = useState('Nguyen Phi Hung (FPL HCM)')
-    const [email, setEmail] = useState('hungnpps30910@fpt.edu.vn')
-    const [dob, setDob] = useState('')
-    const [gender, setGender] = useState('')
-    const [phone, setPhone] = useState('')
-    const [address, setAddress] = useState('')
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const [usernameFetchApi, setUsernameFetchApi] = useState<string>("");
+    useEffect(() => {
+        const user = sessionStorage.getItem('user');
+        if (user) {
+            const parsedUserData = JSON.parse(user) as User;
+            setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`)
+        }
+    }, [])
+    const { data, error, isLoading } = useSWR(
+        usernameFetchApi, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false
+    }
+    );
+
+    const [userData, setUserData] = useState<User | null>(null);
+
+    const handleSave = (username: string) => {
+        if (!fullName) {
+            console.log("Fullname đang trống!");
+            return;
+        }
+
+        fetch(`http://localhost:8080/rest/user/${username}`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        }).then(res => res.json()).then(res => {
+            if (res) {
+                mutate(`http://localhost:8080/rest/user/${username}`);
+                console.log("OK");
+            } else {
+                console.log("Update error!")
+            }
+        });
+    }
+
+    const [fullName, setFullName] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
+    const [birthday, setBirthday] = useState('');
+    const [gender, setGender] = useState('');
+    const [username, setUsername] = useState<string>('');
 
     // const [openSport, setOpenSport] = useState(false)
     const [showUpdateEmail, setShowUpdateEmail] = useState<boolean>(false);
     const [showUpdatePhone, setShowUpdatePhone] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (data) {
+            setUsername(data.username);
+            setFullName(data.fullname); // Lưu lại fullname khi load dữ liệu
+            setEmail(data.email);
+            setBirthday(data.birthday);
+            setGender(data.gender);
+            setUserData(data);
+        }
+    }, [data]);
+
+    useEffect(() => {
+        setUserData((prevUserData) => {
+            // Kiểm tra nếu userData là null hoặc không hợp lệ
+            if (!prevUserData) {
+                console.log("User data đang trống hoặc không hợp lệ");
+                return prevUserData;
+            }
+
+            const updateUser = { ...prevUserData };
+
+            updateUser.fullname = fullName;
+            updateUser.email = email;
+            // updateUser.birthday = birthday;
+            // updateUser.gender = gender;
+
+            return updateUser;
+
+        });
+        console.log(userData?.fullname);
+
+    }, [fullName, email, birthday, gender]);
+
+    if (isLoading) return <UserLayout>Đang tải...</UserLayout>;
+    if (error) return <UserLayout>Error loading data</UserLayout>;
 
     return (
         <UserLayout>
@@ -26,7 +104,7 @@ export default function Profile() {
                 <Form.Group className="mb-3">
                     <Form.Floating className="mb-3">
                         <Form.Control size="sm" type="text" placeholder="Họ và tên"
-                            value={name} onChange={(e) => setName(e.target.value)} />
+                            value={fullName} onChange={(e) => setFullName(e.target.value)} />
                         <Form.Label>Họ và tên <b className='text-danger'>*</b></Form.Label>
                     </Form.Floating>
                 </Form.Group>
@@ -36,29 +114,40 @@ export default function Profile() {
                         <Form.Group className="mb-3">
                             <Form.Floating className="mb-3">
                                 <Form.Control size="sm" type="date" placeholder="Ngày sinh"
-                                    value={dob} onChange={(e) => setDob(e.target.value)} />
+                                    value={birthday} onChange={(e) => setBirthday(e.target.value)} />
                                 <Form.Label>Ngày sinh</Form.Label>
                             </Form.Floating>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
                             <Form.Label>Email:</Form.Label>
-                            <div>{email} <Link href="#" onClick={() => setShowUpdateEmail(true)}>(<i className="bi bi-pencil-square"></i> Cập nhật)</Link></div>
+                            {!email ? (
+                                <div>
+                                    Chưa có thông tin
+                                    <Link href="#" onClick={() => setShowUpdateEmail(true)}>(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
+                                </div>
+                            ) : (
+                                <div>
+                                    {email}
+                                    <Link href="#" onClick={() => setShowUpdateEmail(true)}>(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
+                                </div>
+                            )}
                         </Form.Group>
                     </Col>
 
                     <Col xs={6}>
                         <Form.Group className="mb-3">
                             <FloatingLabel controlId="district" label="Giới tính">
-                                <Form.Select aria-label="Floating label select example">
+                                <Form.Select aria-label="Floating label select example" value={gender}
+                                    onChange={(e) => setGender(e.target.value)}>
                                     <option>-- Nhấn để chọn --</option>
-                                    <option value="1">Nam</option>
-                                    <option value="2">Nữ</option>
+                                    <option value="true">Nam</option>
+                                    <option value="false">Nữ</option>
                                 </Form.Select>
                             </FloatingLabel>
                         </Form.Group>
 
-                        <Form.Group className="mb-3">
+                        {/* <Form.Group className="mb-3">
                             <Form.Label>Số điện thoại</Form.Label>
                             {!phone ? (
                                 <div>
@@ -71,16 +160,16 @@ export default function Profile() {
                                     <Link href="#">(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
                                 </div>
                             )}
-                        </Form.Group>
+                        </Form.Group> */}
                     </Col>
                 </Row>
 
-                <Link href={"#"} className='btn btn-profile' type="submit" >
+                <Button className='btn btn-profile' onClick={() => handleSave(username)}>
                     <i className="bi bi-floppy2"></i> Lưu
-                </Link>
+                </Button>
             </Form>
-            <ModalUpdateEmail showUpdateEmail={showUpdateEmail} setShowUpdateEmail={setShowUpdateEmail} />
-            <ModalUpdatePhone showUpdatePhone={showUpdatePhone} setShowUpdatePhone={setShowUpdatePhone} />
+            <ModalUpdateEmail showUpdateEmail={showUpdateEmail} setShowUpdateEmail={setShowUpdateEmail} email={email} setEmail={setEmail} />
+            {/* <ModalUpdatePhone showUpdatePhone={showUpdatePhone} setShowUpdatePhone={setShowUpdatePhone} /> */}
         </UserLayout>
     )
 }

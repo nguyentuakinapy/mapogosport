@@ -23,7 +23,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CategoriesProduct")
+@Table(name = "Categoriesproduct")
 public class CategoryProduct implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

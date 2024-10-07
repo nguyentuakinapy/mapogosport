@@ -417,11 +417,6 @@ body{
   fill: black !important;
 }
 
-.btn-close {
-  border-radius: 50% !important;
-  border: 1px solid black !important;
-}
-
 .modal-custom {
   max-width: 40%;
 }

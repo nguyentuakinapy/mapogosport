@@ -21,7 +21,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "PaymentMethods")
+@Table(name = "Paymentmethods")
 public class PaymentMethod implements Serializable{
 
     @Id

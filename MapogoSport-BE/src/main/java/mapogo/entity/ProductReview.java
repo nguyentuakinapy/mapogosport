@@ -24,7 +24,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "ProductReviews")
+@Table(name = "Productreviews")
 public class ProductReview implements Serializable{
 
     @Id

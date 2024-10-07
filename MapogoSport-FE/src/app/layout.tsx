@@ -13,6 +13,7 @@ import ChatMessenger from '@/components/app.chatMessenger';
 
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import { UserProvider } from '@/components/UserContext';
 
 
 export const metadata: Metadata = {
@@ -32,13 +33,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-
-        {children}
-        <ChangeEmailModel></ChangeEmailModel>
-        <ChangePassword></ChangePassword>
-        <ForgotPassword></ForgotPassword>
-        <ChatMessenger></ChatMessenger>
-        <ToastContainer></ToastContainer>
+        <UserProvider>
+          {children}
+          <ChangeEmailModel></ChangeEmailModel>
+          <ChangePassword></ChangePassword>
+          <ForgotPassword></ForgotPassword>
+          <ChatMessenger></ChatMessenger>
+          <ToastContainer></ToastContainer>
+        </UserProvider>
       </body>
     </html>
   );
