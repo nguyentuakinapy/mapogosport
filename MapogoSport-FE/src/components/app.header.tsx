@@ -13,6 +13,8 @@ import RegisterModal from './account/modal/register.modal';
 const Header = () => {
     const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
+    const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
+
 
     const [userData, setUserData] = useState<User | null>(null);
 
@@ -50,6 +52,23 @@ const Header = () => {
         };
     }, []); // Chạy một lần khi component được mount
 
+    // Fetch CategoryField
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const reponse = await fetch('http://localhost:8080/rest/category_field')
+                const data = await reponse.json();
+                setCategoryFields(data)
+            } catch (error) {
+            console.log("Lỗi call Api rồi: ", error)
+            }
+        }
+        fetchData();
+    }, [])
+
+
+
     const logOut = () => {
         sessionStorage.removeItem('user');
         window.location.href = "/";
@@ -64,7 +83,7 @@ const Header = () => {
                     <Navbar.Collapse id="navbarScroll">
                         <Form className="d-flex m-auto">
                             <div className="input-group">
-                                <input type="search" className='form-control' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
+                                <input type="search" className='form-control border border-dark' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
                                     style={{ width: '300px' }} />
                                 <Button variant="outline-dark"><i className="bi bi-search"></i></Button>
                             </div>
@@ -110,52 +129,18 @@ const Header = () => {
             </Navbar>
             <Navbar className="bg-body-secondary" style={{ boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
                 <Container>
-                    <Nav className='hv-nav'>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            Bóng đá
-                        </Link>
-                    </Nav>
-                    <Nav className='hv-nav'>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            Cầu lông
-                        </Link>
-                    </Nav>
-                    <Nav className='hv-nav'>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            Pickleball
-                        </Link>
-                    </Nav>
-                    <Nav className='hv-nav'>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            Bóng bàn
-                        </Link>
-                    </Nav>
-                    <Nav className='hv-nav'>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            Bóng rổ
-                        </Link>
-                    </Nav>
-                    <Nav className='hv-nav'>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            Tenis
-                        </Link>
-                    </Nav>
-                    <Nav className='hv-nav'>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            Bóng chuyền
-                        </Link>
-                    </Nav>
-                    <Nav className='hv-nav'>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            Golf
-                        </Link>
-                    </Nav>
-
+                    {categoryFields.map((categoryFields: CategoryField) => (
+                        <Nav className='hv-nav' key={categoryFields.categoriesFieldId}>
+                            <Link href="#" className="hv-link text-decoration-none">
+                                {categoryFields.name}
+                            </Link>
+                        </Nav>
+                    ))}
                 </Container>
             </Navbar>
             <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></LoginModal>
-            <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}></RegisterModal>
-        </main>
+            <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
+        </main >
     );
 }
 

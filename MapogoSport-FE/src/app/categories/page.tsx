@@ -1,8 +1,9 @@
 'use client'
 import { Container, Row, Col } from 'react-bootstrap';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
+
 
 const Categories = () => {
     const categories = [
@@ -21,11 +22,31 @@ const Categories = () => {
         { id: 5, name: "xưởng của nhà làm" },
     ];
 
-    const products = [
-        { id: 1, name: "Lưới bóng đá goal 11 người", price: "35.000.000 ₫", oldPrice: "40.000.000 ₫", img: "https://img.thegioithethao.vn/thumbs/product/bong-da/luoi-bong-da/luoi-bong-da-goal-11-nguoi-172045/luoi-bong-da-11-nguoi-172045_thumb_350.webp" },
-        { id: 2, name: "Lưới bóng đá goal 7 người", price: "30.000.000 ₫", oldPrice: "35.000.000 ₫", img: "https://img.thegioithethao.vn/thumbs/product/bong-da/luoi-bong-da/luoi-bong-da-goal-11-nguoi-172045/luoi-bong-da-11-nguoi-172045_thumb_350.webp" },
-        // Thêm các sản phẩm khác ở đây nếu cần
-    ];
+    const [products, setProducts] = useState<Product[]>([]);
+    const [icon, setIcon] = useState<boolean[]>([]); // Để quản lý trạng thái của các biểu tượng
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/rest/products');
+                const data = await response.json();
+                console.log(data);
+                setProducts(data);
+                setIcon(new Array(data.length).fill(false)); // Khởi tạo trạng thái icon
+            } catch (error) {
+                console.log("Lỗi khi gọi API: ", error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const onClickIcon = (index: number) => {
+        setIcon(prev => {
+            const newIcon = [...prev];
+            newIcon[index] = !newIcon[index];
+            return newIcon;
+        });
+    };
 
     return (
         <HomeLayout>
@@ -79,74 +100,65 @@ const Categories = () => {
                             </h3>
 
                             {/* Product Item */}
-                            {products.map((product) => {
-                                const [icon, setIcon] = useState(false);
-
-                                const onClickIcon = () => {
-                                    setIcon(prevIcon => !prevIcon);
-                                };
-
-                                return (
-                                    <Col key={product.id} lg={3} md={4} sm={6} xs={12} className="mb-4">
-                                        <div nh-product={product.id} className="product-item">
-                                            <div className="inner-image mb-3">
-                                                <div className="product-status">
-                                                    <div className="onsale"></div>
-                                                </div>
-                                                <div className="img ratio-1-1">
-                                                    <Link href="">
-                                                        <img nh-lazy="image" className="img-fluid" alt={product.name}
-                                                            src={product.img} />
-                                                    </Link>
-                                                </div>
-                                                <div className="product-action-wishlist">
-                                                    <Link href='' className="btn-product-action" title="Yêu thích">
-                                                        {icon ? (
-                                                            <img
-                                                                onClick={onClickIcon}
-                                                                src="/img/heart-svgrepo-com.svg"
-                                                                alt="Yêu thích"
-                                                                style={{ width: '25px', height: '25px' }}
-                                                            />
-                                                        ) : (
-                                                            <i
-                                                                onClick={onClickIcon}
-                                                                className={`bi bi-heart ${icon ? 'text-danger' : ''}`}
-                                                            ></i>
-                                                        )}
-                                                    </Link>
-                                                </div>
+                            {products.map((product, index) => (
+                                <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
+                                    <div nh-product={product.productId} className="product-item">
+                                        <div className="inner-image mb-3">
+                                            <div className="product-status">
+                                                <div className="onsale"></div>
                                             </div>
-                                            <div className="inner-content">
-                                                <div className="price">
-                                                    <span className="price-amount ms-1">{product.price}</span>
-                                                    <span className="price-amount old-price me-1">{product.oldPrice}</span>
-                                                </div>
-                                                <div className="product-category ms-1">
-                                                    <Link href="">Lưới &amp; Khung thành</Link>
-                                                </div>
-                                                <div className="product-title ms-1">
-                                                    <Link href="">{product.name}</Link>
-                                                </div>
-                                                <div className="d-flex mt-2" style={{ justifyContent: 'space-between', width: '100%' }}>
-                                                    <Link href='' className='btn btn-danger  ms-1 ' style={{ fontSize: '15px', flexGrow: 1 }}>Mua Ngay</Link>
-                                                    <Link href='' className='btn btn-warning ms-2 me-1' style={{ fontSize: '15px', flexGrow: 1 }}>Thêm Giỏ Hàng</Link>
-                                                </div>
-                                                <div className="star-item star d-flex mt-1 ms-1">
-                                                    <div className="icon text-warning mb-2">
-                                                        <i className="bi bi-star-fill"></i>
-                                                        <i className="bi bi-star-fill"></i>
-                                                        <i className="bi bi-star-fill"></i>
-                                                        <i className="bi bi-star-fill"></i>
-                                                        <i className="bi bi-star-fill"></i>
-                                                    </div>
-                                                    <div className="number">(1)</div>
-                                                </div>
+                                            <div className="img ratio-1-1">
+                                                <Link href="">
+                                                    <img nh-lazy="image" className="img-fluid" alt={product.name}
+                                                        src={product.image} />
+                                                </Link>
+                                            </div>
+                                            <div className="product-action-wishlist">
+                                                <Link href='' className="btn-product-action" title="Yêu thích">
+                                                    {icon[index] ? (
+                                                        <img
+                                                            onClick={() => onClickIcon(index)}
+                                                            src="/img/heart-svgrepo-com.svg"
+                                                            alt="Yêu thích"
+                                                            style={{ width: '25px', height: '25px' }} />
+                                                    ) : (
+                                                        <i
+                                                            onClick={() => onClickIcon(index)}
+                                                            className={`bi bi-heart ${icon[index] ? 'text-danger' : ''}`}
+                                                        ></i>
+                                                    )}
+                                                </Link>
                                             </div>
                                         </div>
-                                    </Col>
-                                );
-                            })}
+                                        <div className="inner-content">
+                                            <div className="price">
+                                                <span className="price-amount ms-1">{product.price}</span>
+                                                {/* <span className="price-amount old-price me-1">{product.oldPrice}</span> */}
+                                            </div>
+                                            <div className="product-category ms-1">
+                                                <Link href="">Lưới &amp; Khung thành</Link>
+                                            </div>
+                                            <div className="product-title ms-1">
+                                                <Link href="">{product.name}</Link>
+                                            </div>
+                                            <div className="d-flex mt-2" style={{ justifyContent: 'space-between', width: '100%' }}>
+                                                <Link href='' className='btn btn-danger ms-1' style={{ fontSize: '15px', flexGrow: 1 }}>Mua Ngay</Link>
+                                                <Link href='' className='btn btn-warning ms-2 me-1' style={{ fontSize: '15px', flexGrow: 1 }}>Thêm Giỏ Hàng</Link>
+                                            </div>
+                                            <div className="star-item star d-flex mt-1 ms-1">
+                                                <div className="icon text-warning mb-2">
+                                                    <i className="bi bi-star-fill"></i>
+                                                    <i className="bi bi-star-fill"></i>
+                                                    <i className="bi bi-star-fill"></i>
+                                                    <i className="bi bi-star-fill"></i>
+                                                    <i className="bi bi-star-fill"></i>
+                                                </div>
+                                                <div className="number">(1)</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Col>
+                            ))}
                         </Row>
                     </Col>
                 </Row>
