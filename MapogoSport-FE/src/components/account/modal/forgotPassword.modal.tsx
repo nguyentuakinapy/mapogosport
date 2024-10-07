@@ -163,8 +163,10 @@ export default function ForgotPassword() {
                                     </div>
 
                                     {/* Sử dụng thành phần VerificationCodeInput tại đây */}
+
                                     <VerificationCodeInput />
-                                    <div className="row mb-3">
+
+                                    {/* <div className="row mb-3">
                                         <div className="form-group col-6">
                                             <input type="password" className="form-control"
                                                 value={password} onChange={(e) => setPassword(e.target.value)}
@@ -175,7 +177,7 @@ export default function ForgotPassword() {
                                                 value={forgotPassword} onChange={(e) => setForgotPassword(e.target.value)}
                                                 placeholder="Nhập lại mật khẩu *" />
                                         </div>
-                                    </div>
+                                    </div> */}
                                     <button className="btn btn-submit w-100 mb-3">
                                         Đăng ký
                                     </button>

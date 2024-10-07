@@ -23,7 +23,7 @@ public class SportField implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SportFieldId", nullable = false, unique = true)
+    @Column(name = "Sport_field_id", nullable = false, unique = true)
     private int sportFieldId;
 
     @Column(name = "Name", nullable = false)
@@ -40,6 +40,7 @@ public class SportField implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "CategoriesFieldId", nullable = false)
+    @JsonIgnore
     private CategoryField categoriesField;
 
     @Column(name = "Status", nullable = false)
@@ -53,18 +54,23 @@ public class SportField implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "OwnerId", nullable = false)
+    @JsonIgnore
     private Owner owner;
 
     @Column(name = "Decription", nullable = false)
+    @JsonIgnore
     private String decription;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<SportFielDetail> sportFielDetails;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL) // corrected from "sportsField"
+    @JsonIgnore
     private List<FavoriteField> favoriteFields;
     
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<FieldReview> fieldReviews;
 }
 

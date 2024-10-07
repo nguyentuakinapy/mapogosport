@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "UserSubscriptions")
+@Table(name = "Usersubscriptions")
 public class UserSubscription implements Serializable{
 
     @Id
