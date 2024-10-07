@@ -35,18 +35,11 @@
     "lint": "next lint"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@fortawesome/fontawesome-svg-core": "6.6.0",
     "@fortawesome/free-brands-svg-icons": "6.6.0",
     "@fortawesome/free-solid-svg-icons": "6.6.0",
     "@fortawesome/react-fontawesome": "0.2.2",
-=======
-    "@fortawesome/fontawesome-svg-core": "^6.6.0",
-    "@fortawesome/free-brands-svg-icons": "^6.6.0",
-    "@fortawesome/free-solid-svg-icons": "^6.6.0",
-    "@fortawesome/react-fontawesome": "^0.2.2",
     "axios": "^1.7.7",
->>>>>>> 695ed675d69c9699b1b514de646972edabe2eda3
     "bootstrap": "5.3.3",
     "bootstrap-icons": "1.11.3",
     "cors": "2.8.5",
