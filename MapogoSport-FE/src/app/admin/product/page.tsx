@@ -7,14 +7,13 @@ import { useState, useEffect } from "react";
 import ProductAddNew from "@/components/Admin/Modal/product.addNew";
 import axios from 'axios';
 
-
 const AdminProduct = () => {
     const [activeTab, setActiveTab] = useState<string>('all');
     const [showModal, setShowModal] = useState<boolean>(false);
     const [modalType, setModalType] = useState<'add' | 'edit'>('add'); // 'add' hoặc 'edit'
     const [currentProduct, setCurrentProduct] = useState<any>(null); // Sản phẩm hiện tại
 
-    const [products, setProducts] = useState<any[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [categoryProducts, setCategoryProducts] = useState<any[]>([]);
 
     const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
@@ -38,6 +37,7 @@ const AdminProduct = () => {
                  // Lưu dữ liệu vào state
             setProducts(productsRes.data);      // Dữ liệu từ API products
             setCategoryProducts(categoriesRes.data);  // Dữ liệu từ API category_products
+            
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -150,7 +150,14 @@ const AdminProduct = () => {
                                     </div>
                                 </td>
                                 <td className="text-center align-middle">
-                                    <OverlayTrigger overlay={<Tooltip>Xem</Tooltip>}>
+                                <OverlayTrigger overlay={<Tooltip>Xem</Tooltip>}>
+                                <Link href={`product/view-list-product-detail/${product.productId}`}>
+                                <Button variant="primary" className="m-1">
+                                        <i className="bi bi-eye-fill"></i>
+                                    </Button>
+                                </Link>
+                                </OverlayTrigger>
+                                    <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                                         <Button variant="warning" className="m-1" onClick={() => handleEditClick(product)}>
                                             <i className="bi bi-pencil-fill"></i>
                                         </Button>

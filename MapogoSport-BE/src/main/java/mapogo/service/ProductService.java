@@ -9,5 +9,5 @@ public interface ProductService {
 	
 	List<Product> findAll();
 	
-	Optional<Product> findById(Integer id); // Sửa lại tên phương thức
+	Optional<Product> findById(Integer id); 
 }
