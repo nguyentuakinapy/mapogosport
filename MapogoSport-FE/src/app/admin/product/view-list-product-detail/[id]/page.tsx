@@ -84,7 +84,7 @@ export default function ViewListDetail() {
                     ))}
                 </tbody>
             </Table>
-            <Link href={'/owner/sport-manager'}>Quay lại</Link>
+            <Link href={'/admin/product/'}>Quay lại</Link>
         </>
     );
 }
