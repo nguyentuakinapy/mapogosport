@@ -9,15 +9,16 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import LoginModal from './account/modal/login.modal';
 import RegisterModal from './account/modal/register.modal';
-
+import axios from 'axios';
 const Header = () => {
     const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
 
     const [userData, setUserData] = useState<User | null>(null);
+    const user = sessionStorage.getItem('user');
 
     useEffect(() => {
-        const user = sessionStorage.getItem('user');
+
         if (user) {
             const parsedUserData = JSON.parse(user) as User;
             setUserData(parsedUserData);
@@ -49,6 +50,36 @@ const Header = () => {
             window.removeEventListener('scroll', handleScroll);
         };
     }, []); // Chạy một lần khi component được mount
+
+
+    //count cart
+    const CartBadge = ({ user }) => {
+        const [cartCount, setCartCount] = useState(0); // Initialize cart count to 0
+
+        // Function to fetch the cart count
+        const countCartItem = async () => {
+            if (!user) return; // Don't fetch if no user is logged in
+            try {
+                const response = await axios.get(`http://localhost:8080/res/cart/count/${user.username}`);
+                const cartCount = response.data; // assuming the API returns the count directly
+                setCartCount(cartCount); // Update the cart count in the state
+            } catch (error) {
+                console.error('Error fetching cart count:', error);
+            }
+        };
+
+        // Fetch cart count on component mount and when the user changes
+        useEffect(() => {
+            countCartItem();
+        }, [user]);
+
+        return (
+            <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
+                {cartCount} {/* Display the cart count here */}
+                <span className="visually-hidden">items in cart</span>
+            </span>
+        );
+    };
 
     const logOut = () => {
         sessionStorage.removeItem('user');
@@ -99,10 +130,7 @@ const Header = () => {
                             </div>
                             <Nav className='position-relative'>
                                 <a href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</a>
-                                <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
-                                    0
-                                    <span className="visually-hidden">unread messages</span>
-                                </span>
+                                {userData && <CartBadge user={userData} />}
                             </Nav>
                         </Nav>
                     </Navbar.Collapse>
