@@ -24,7 +24,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CategoriesField")
+@Table(name = "Categoriesfield")
 public class CategoryField implements Serializable{
 
     @Id

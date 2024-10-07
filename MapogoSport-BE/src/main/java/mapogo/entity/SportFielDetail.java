@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "SportFielDetails")
+@Table(name = "Sportfieldetails")
 public class SportFielDetail implements Serializable{
 
     @Id

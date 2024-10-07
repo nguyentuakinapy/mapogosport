@@ -65,6 +65,7 @@ public class Product implements Serializable {
 	private Double stock;
 
 	@OneToMany(mappedBy = "product")
+	@JsonIgnore
 	private List<ProductDetail> productDetails;
 
 
