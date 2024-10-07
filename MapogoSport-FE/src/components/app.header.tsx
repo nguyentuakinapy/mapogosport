@@ -83,7 +83,7 @@ const Header = () => {
                     <Navbar.Collapse id="navbarScroll">
                         <Form className="d-flex m-auto">
                             <div className="input-group">
-                                <input type="search" className='form-control' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
+                                <input type="search" className='form-control border border-dark' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
                                     style={{ width: '300px' }} />
                                 <Button variant="outline-dark"><i className="bi bi-search"></i></Button>
                             </div>
@@ -139,8 +139,8 @@ const Header = () => {
                 </Container>
             </Navbar>
             <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></LoginModal>
-            <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}></RegisterModal>
-        </main>
+            <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
+        </main >
     );
 }
 

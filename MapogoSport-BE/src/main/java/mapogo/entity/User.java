@@ -41,7 +41,7 @@ public class User implements Serializable {
 	private Date createdAt = new Date();
 	
 	@Column(name = "Gender", nullable = false)
-	private boolean gender;
+	private String gender;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Authority> authorities;
