@@ -4,6 +4,7 @@ interface User {
     password: string;
     enabled: number;
     createdAt: Date;
+    gender: string;
     authorities: [
         {
             authorityId: number;

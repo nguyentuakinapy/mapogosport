@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { Modal } from "react-bootstrap"
+import { Form, Modal } from "react-bootstrap"
 import { toast } from "react-toastify";
 import "./account.scss"
 
@@ -9,13 +9,17 @@ import "./account.scss"
 interface RegisterProps {
     showRegisterModal: boolean;
     setShowRegisterModal: (v: boolean) => void;
+    showLoginModal: boolean;
+    setShowLoginModal: (v: boolean) => void;
 }
 
 export default function Register(props: RegisterProps) {
     const { showRegisterModal, setShowRegisterModal } = props;
+    const { showLoginModal, setShowLoginModal } = props;
 
     const [username, setUsername] = useState<string>("");
     const [fullName, setFullName] = useState<string>("");
+    const [gender, setGender] = useState<string>("0");
     const [password, setPassword] = useState<string>("");
     const [forgotPassword, setForgotPassword] = useState<string>("");
     const [authority, setAuthority] = useState<number>(4);
@@ -33,11 +37,14 @@ export default function Register(props: RegisterProps) {
     const [checkButton, setCheckButton] = useState<boolean>(false);
 
     const handleSubmit = async () => {
-        if (!fullName) {
+        if (!username) {
+            toast.warning("Vui lòng nhập email!")
+            return;
+        } else if (!fullName) {
             toast.warning("Vui lòng nhập họ và tên!")
             return;
-        } else if (!username) {
-            toast.warning("Vui lòng nhập email!")
+        } else if (gender == "0") {
+            toast.warning("Vui lòng chọn giới tính!")
             return;
         } else if (!password) {
             toast.warning("Vui lòng nhập mật khẩu!")
@@ -63,7 +70,7 @@ export default function Register(props: RegisterProps) {
                     'Accept': 'application/json, text/plain, */*',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, fullname: fullName, password })
+                body: JSON.stringify({ username, fullname: fullName, gender, password })
             });
             if (!responseUser.ok) {
                 throw new Error('Network response was not ok');
@@ -106,6 +113,7 @@ export default function Register(props: RegisterProps) {
             if (resAuth && resUser) {
                 toast.info("Đăng ký thành công!...");
                 handleClose();
+                setShowLoginModal(true);
             }
 
         } catch (error) {
@@ -162,6 +170,7 @@ export default function Register(props: RegisterProps) {
         setOtp("");
         setOtpValue("");
     }
+
     return (
         <>
             <Modal
@@ -205,41 +214,52 @@ export default function Register(props: RegisterProps) {
                                     <span className="mx-3">Hoặc tài khoản</span>
                                     <hr className="flex-grow-1" />
                                 </div>
+
                                 <div className="form-group mb-3">
-                                    <input type="text" className={`form-control ${errorFullName ? 'error' : ''}`} placeholder="Họ và tên *"
-                                        value={fullName} onChange={(e) => setFullName(e.target.value)}
-                                    />
+                                    <input type="email" className="form-control border border-dark"
+                                        value={username} onChange={(e) => setUsername(e.target.value)}
+                                        placeholder="Email *" />
                                 </div>
-                                <div className="row mb-3">
+                                <div className="row mb-3 row">
                                     {/* <div className="form-group col-6">
                                         <input type="text" className="form-control" id="floatingPassword"
                                             placeholder="Số điện thoại *" />
                                     </div> */}
-                                    <div className="form-group">
-                                        <input type="email" className="form-control"
-                                            value={username} onChange={(e) => setUsername(e.target.value)}
-                                            placeholder="Email *" />
+                                    <div className="form-group col-6">
+                                        <input type="text" className={`form-control ${errorFullName ? 'error' : ''} border border-dark`} placeholder="Họ và tên *"
+                                            value={fullName} onChange={(e) => setFullName(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="form-group col-6">
+                                        <select defaultValue={gender}
+                                            onChange={(e) => setGender(e.target.value)}
+                                            className="form-select">
+                                            <option value="gender">Chọn giới tính *</option>
+                                            <option value="Nam">Nam</option>
+                                            <option value="Nữ">Nữ</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div className="row mb-3">
                                     <div className="form-group col-6">
-                                        <input type="password" className="form-control"
+                                        <input type="password" className="form-control border border-dark"
                                             value={password} onChange={(e) => setPassword(e.target.value)}
                                             placeholder="Mật khẩu *" />
                                     </div>
                                     <div className="form-group col-6">
-                                        <input type="password" className="form-control"
+                                        <input type="password" className="form-control border border-dark"
                                             value={forgotPassword} onChange={(e) => setForgotPassword(e.target.value)}
                                             placeholder="Nhập lại mật khẩu *" />
                                     </div>
                                 </div>
                                 <div className="input-group mb-3">
-                                    <input type="text" className="form-control error" placeholder="Mã OTP #####"
+                                    <input type="text" className="form-control border border-dark" placeholder="Mã OTP ######"
                                         value={otpValue} onChange={(e) => setOtpValue(e.target.value)}
-                                        aria-label="Mã OTP #####" aria-describedby="button-addon2" />
+                                        aria-label="Mã OTP ######" aria-describedby="button-addon2" />
                                     <button onClick={() => {
-                                        coolDownTime();
                                         checkEmail();
+                                        coolDownTime();
                                     }}
                                         disabled={checkButton}
                                         className="btn btn-dark " type="submit"
@@ -252,7 +272,10 @@ export default function Register(props: RegisterProps) {
 
                                 <div className="d-flex justify-content-center">
                                     <span>Bạn đã có tài khoản?</span>
-                                    <a data-bs-toggle="modal" data-bs-target="#loginModal" style={{ cursor: 'pointer' }} className="ms-2 fw-bold text-danger text-decoration-none">Đăng nhập ngay!</a>
+                                    <a onClick={() => {
+                                        setShowRegisterModal(false);
+                                        setShowLoginModal(true);
+                                    }} style={{ cursor: 'pointer' }} className="ms-2 fw-bold text-danger text-decoration-none">Đăng nhập ngay!</a>
                                 </div>
                             </div>
                         </div>

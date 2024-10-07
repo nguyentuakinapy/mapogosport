@@ -10,21 +10,33 @@ export default function Owner({ children }: { children: ReactNode }) {
     const [userData, setUserData] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
+    const [username, setUsername] = useState<string>("");
     const [fullName, setFullName] = useState<string>("");
+    const [gender, setGender] = useState<string>("0");
+    const [check, setCheck] = useState<boolean>(false);
 
     useEffect(() => {
         const user = sessionStorage.getItem('user');
         if (user) {
             const parsedUserData = JSON.parse(user) as User;
             setUserData(parsedUserData);
+            setUsername(parsedUserData.username);
+            setFullName(parsedUserData.fullname);
+            setGender(parsedUserData.gender); // Cập nhật giới tính
             setIsLoading(true);
         }
     }, []);
 
-    const searchParams = useSearchParams();
-    const check = searchParams.get('check');
+
     useEffect(() => {
-        if (check === 'withdraw') {
+        console.log(gender)
+        setCheck(true);
+    }, [gender]);
+
+    const searchParams = useSearchParams();
+    const checkData = searchParams.get('check');
+    useEffect(() => {
+        if (checkData === 'withdraw') {
             setActiveTab('withdraw');
         }
     }, [check]);
@@ -39,6 +51,7 @@ export default function Owner({ children }: { children: ReactNode }) {
                                 <Form.Group className="mb-3">
                                     <Form.Floating className="mb-3">
                                         <Form.Control size="sm" type="text" placeholder="Họ và tên"
+                                            value={fullName} onChange={(e) => setFullName(e.target.value)}
                                         />
                                         <Form.Label>Họ và tên <b className='text-danger'>*</b></Form.Label>
                                     </Form.Floating>
@@ -62,17 +75,20 @@ export default function Owner({ children }: { children: ReactNode }) {
 
                                     <Col xs={6}>
                                         <Form.Group className="mb-3">
-                                            <FloatingLabel controlId="district" label="Giới tính">
-                                                <Form.Select aria-label="Floating label select example">
-                                                    <option>-- Nhấn để chọn --</option>
-                                                    <option value="1">Nam</option>
-                                                    <option value="2">Nữ</option>
-                                                </Form.Select>
+                                            <FloatingLabel label="Giới tính">
+                                                <select value={gender}
+                                                    onChange={(e) => setGender(e.target.value)}
+                                                    className="form-control">
+                                                    <option value="0">-- Chọn giới tính --</option>
+                                                    <option value="Nam">Nam</option>
+                                                    <option value="Nữ">Nữ</option>
+                                                    <option value="Khác">Khác</option>
+                                                </select>
                                             </FloatingLabel>
                                         </Form.Group>
 
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Số điện thoại</Form.Label>
+                                            <Form.Label>Sổ địa chỉ</Form.Label>
 
                                             <div>
                                                 Chưa có thông tin

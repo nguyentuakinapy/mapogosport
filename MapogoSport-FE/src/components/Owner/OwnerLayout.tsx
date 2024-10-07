@@ -83,6 +83,7 @@ export default function OwnerLayout({
         setIsAniActive(!isAniActive);
     }
 
+
     const setIsActive = (index: number) => {
         setIsActiveNumber(index);
         if (typeof window !== 'undefined') {

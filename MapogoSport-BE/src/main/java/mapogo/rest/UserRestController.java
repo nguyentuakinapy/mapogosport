@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import mapogo.dao.ProductDAO;
+import mapogo.entity.Product;
 import mapogo.entity.User;
 import mapogo.service.EmailService;
 import mapogo.service.UserService;
@@ -47,5 +49,13 @@ public class UserRestController {
 		String otp = RandomUtils.generateOTP();
 		emailService.sendEmail(username, "MapogoSport", otp);
 		return otp;
+	}
+	
+	@Autowired
+	ProductDAO productDAO;
+	
+	@GetMapping("/product")
+	public List<Product> findAll(){
+		return productDAO.findAll();
 	}
 }
