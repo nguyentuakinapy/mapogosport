@@ -9,7 +9,6 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -40,6 +39,7 @@ public class SportField implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "CategoriesFieldId", nullable = false)
+    @JsonIgnore
     private CategoryField categoriesField;
 
     @Column(name = "Status", nullable = false)
@@ -53,15 +53,19 @@ public class SportField implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "OwnerId", nullable = false)
+    @JsonIgnore
     private Owner owner;
 
     @Column(name = "Decription", nullable = false)
+    @JsonIgnore
     private String decription;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<SportFielDetail> sportFielDetails;
     
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<FieldReview> fieldReviews;
 }
 

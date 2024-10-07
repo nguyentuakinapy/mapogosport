@@ -1,42 +1,102 @@
 'use client';
 
-import { Container, Row, Col, Button, Card, ButtonGroup, Form } from 'react-bootstrap';
-import { useState } from 'react';
+import { Container, Row, Col, Button, ButtonGroup, Form } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
 import '../globals.css';
 import Image from 'next/image';
 import Modal from 'react-bootstrap/Modal';
-import Carousel from 'react-bootstrap/Carousel';
 import Collapse from 'react-bootstrap/Collapse';
 import HomeLayout from '@/components/HomeLayout';
+import axios from 'axios';
 
-const StarRating = () => {
-    const [rating, setRating] = useState(0); // Current selected rating
-    const [hover, setHover] = useState(0); // Current hovered star
+const StarRating = ({ setRating }) => {
+    const [rating, localSetRating] = useState(0); // Trạng thái cho rating hiện tại
+    const [hover, setHover] = useState(0); // Trạng thái cho sao đang được hover
+
+    const handleClick = (starValue) => {
+        localSetRating(starValue); // Cập nhật trạng thái nội bộ cho rating
+        setRating(starValue); // Gọi hàm từ props để cập nhật rating ở component cha
+    };
 
     return (
         <div className="d-flex justify-content-between my-3" style={{ paddingLeft: '100px', paddingRight: '100px' }}>
-            {['', '', ' ', '', ''].map((label, index) => {
-                const starValue = index + 1;
+            {['', '', '', '', ''].map((label, index) => {
+                const starValue = index + 1; // Tính giá trị sao
                 return (
                     <div
                         key={index}
                         className="text-center"
-                        onMouseEnter={() => setHover(starValue)}
-                        onMouseLeave={() => setHover(0)}
-                        onClick={() => setRating(starValue)}
+                        onMouseEnter={() => setHover(starValue)} // Khi di chuột qua
+                        onMouseLeave={() => setHover(0)} // Khi không còn di chuột qua
+                        onClick={() => handleClick(starValue)} // Gọi hàm handleClick khi nhấp
                     >
                         <i
                             className={`bi bi-star-fill fs-4`}
-                            style={{ color: starValue <= (hover || rating) ? 'gold' : 'gray' }}
+                            style={{ color: starValue <= (hover || rating) ? 'gold' : 'gray' }} // Thiết lập màu sắc của sao
                         ></i>
-
                     </div>
                 );
             })}
         </div>
     );
 };
+
+
 const MyVerticallyCenteredModal = (props) => {
+    const [rating, setRating] = useState(0); // Trạng thái cho rating
+    const [comment, setComment] = useState(''); // Trạng thái cho bình luận
+    const userSession = sessionStorage.getItem('user');
+    const user = userSession ? JSON.parse(userSession) : null;
+
+    const handleRatingSubmit = async () => {
+        if (comment.length < 15) {
+            alert("Bình luận cần ít nhất 15 ký tự.");
+            return;
+        }
+
+        if (!user || !user.username) {
+            alert("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+            return;
+        }
+
+        const ratingData = {
+            user: { // Không dùng mảng nếu chỉ có 1 người dùng
+                username: user.username
+            },
+            product: { // Không dùng mảng nếu chỉ có 1 sản phẩm
+                productId: 1 // Bạn có thể lấy productId từ props hoặc nguồn khác
+            },
+            rating: rating,
+            comment: comment,
+            datedAt: new Date()
+        };
+
+        try {
+            const response = await fetch('http://localhost:8080/api/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(ratingData)
+            });
+
+            if (!response.ok) {
+                const errorMessage = await response.text(); // Nhận thông tin chi tiết từ lỗi
+                throw new Error(`Có lỗi xảy ra khi gửi đánh giá: ${errorMessage}`);
+            }
+
+            const result = await response.json();
+            console.log("Đánh giá đã được gửi thành công", result);
+            props.onHide(); // Đóng modal sau khi gửi thành công
+            alert("Đánh giá đã được gửi thành công!");
+        } catch (error) {
+            console.error("Lỗi khi gửi đánh giá:", error);
+            alert("Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.");
+        }
+    };
+
+
+
     return (
         <Modal
             {...props}
@@ -55,7 +115,7 @@ const MyVerticallyCenteredModal = (props) => {
                     alt="Hình ảnh thu nhỏ"
                     width={100} // Kích thước hình ảnh thu nhỏ
                     height={100}
-                    className="rounded-circle" // Use Bootstrap's utility class for roundedCircle
+                    className="rounded-circle" // Hình tròn
                 />
                 <span className='fs-4'>Vợt cầu lông siêu xịn</span>
 
@@ -63,22 +123,31 @@ const MyVerticallyCenteredModal = (props) => {
                     <span className='fs-5'>Đánh giá chung</span>
                 </div>
 
-                {/* đánh giá*/}
-                <StarRating />
+                {/* Đánh giá */}
+                <StarRating setRating={setRating} />
                 <hr />
 
                 <span className='fs-5 ms-3'>Bình Luận</span><br />
                 <div className="mb-3 mt-3 ms-5 me-5">
-                    <textarea className="form-control " placeholder="Xin mời chia sẻ một số cảm nhận về sản phẩm (nhập tối thiểu 15 kí tự)" rows={4} cols={40} style={{ borderRadius: '8px' }} ></textarea>
+                    <textarea
+                        className="form-control"
+                        placeholder="Xin mời chia sẻ một số cảm nhận về sản phẩm (nhập tối thiểu 15 ký tự)"
+                        rows={4}
+                        cols={40}
+                        style={{ borderRadius: '8px' }}
+                        onChange={(e) => setComment(e.target.value)} // Cập nhật bình luận
+                    ></textarea>
                 </div>
-                {/* <textarea className="m-auto mt-3"  ></textarea> */}
             </Modal.Body>
-            <Modal.Footer >
-                <Button className='m-auto btn btn-danger'>Gửi đánh giá</Button>
+            <Modal.Footer>
+                <Button onClick={handleRatingSubmit} className='m-auto btn btn-danger'>Gửi đánh giá</Button>
             </Modal.Footer>
         </Modal>
     );
-}
+};
+
+
+
 
 const ProductDetail = () => {
     const [quantity, setQuantity] = useState(1);
@@ -94,6 +163,31 @@ const ProductDetail = () => {
     const handleClickBtn = () => {
         setOpen(true);
     }
+
+    // product_review
+    const [data, setData] = useState([]);
+    useEffect(() => {
+        // Fetch data when component is mounted
+        const fetchData = async () => {
+            try {
+                const response = await axios.get('http://localhost:8080/api/1'); // API route or external URL
+                setData(response.data); // Assuming the response contains a list of reviews
+                console.log(">>> check data", response.data);
+                response.data.forEach((review) => {
+                    console.log("Rating:", review.rating);
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+
+
+
+
     return (
         <>
             <HomeLayout>
@@ -236,60 +330,35 @@ const ProductDetail = () => {
                         onHide={() => setModalShow(false)}
                     />
                     <h5 className='ms-3'>Bình luận</h5>
-                    <Row className="mt-5 ms-5">
-                        <Col>
-                            <Image
-                                src="/img/avatar.jpg"
-                                alt="Hình ảnh thu nhỏ"
-                                width={35} // Kích thước hình ảnh thu nhỏ
-                                height={35}
-                                className="rounded-circle" // Use Bootstrap's utility class for roundedCircle
-                            />
-                            <span className='me-4'>Võ Tấn Thành </span>
-                            <i className="bi bi-calendar me-2"></i><span>20/12/2004 </span>
-                            <i className="bi bi-clock"></i> <span>18:30</span>
-                            <div>
-                                <span className="text-warning ms-5 fs-3">★★★★★</span><br />
-                                <span className='ms-5'>Sản phẩm đỉnh nóc, kịch trần, bay phấp phới</span>
-                            </div>
-                        </Col>
-                    </Row>
-                    <Row className="mt-5 ms-5">
-                        <Col>
-                            <Image
-                                src="/img/avatar.jpg"
-                                alt="Hình ảnh thu nhỏ"
-                                width={35} // Kích thước hình ảnh thu nhỏ
-                                height={35}
-                                className="rounded-circle" // Use Bootstrap's utility class for roundedCircle
-                            />
-                            <span className='me-4'>Võ Tấn Thành </span>
-                            <i className="bi bi-calendar me-2"></i><span>20/12/2004 </span>
-                            <i className="bi bi-clock"></i> <span>18:30</span>
-                            <div>
-                                <span className="text-warning ms-5 fs-3">★★★★★</span><br />
-                                <span className='ms-5'>Sản phẩm đỉnh nóc, kịch trần, bay phấp phới</span>
-                            </div>
-                        </Col>
-                    </Row>
-                    <Row className="mt-5 ms-5">
-                        <Col>
-                            <Image
-                                src="/img/avatar.jpg"
-                                alt="Hình ảnh thu nhỏ"
-                                width={35} // Kích thước hình ảnh thu nhỏ
-                                height={35}
-                                className="rounded-circle" // Use Bootstrap's utility class for roundedCircle
-                            />
-                            <span className='me-4'>Võ Tấn Thành </span>
-                            <i className="bi bi-calendar me-2"></i><span>20/12/2004 </span>
-                            <i className="bi bi-clock"></i> <span>18:30</span>
-                            <div>
-                                <span className="text-warning ms-5 fs-3">★★★★★</span><br />
-                                <span className='ms-5'>Sản phẩm đỉnh nóc, kịch trần, bay phấp phới</span>
-                            </div>
-                        </Col>
-                    </Row>
+                    {data.map((review) => (
+                        <Row className="mt-5 ms-5" key={review.productReviewId}>
+                            <Col>
+                                <Image
+                                    src="/img/avatar.jpg"
+                                    alt="Hình ảnh thu nhỏ"
+                                    width={35} // Kích thước hình ảnh thu nhỏ
+                                    height={35}
+                                    className="rounded-circle" // Sử dụng lớp tiện ích Bootstrap để tạo hình tròn
+                                />
+                                <span className='me-4'>{review.user.fullname}</span> {/* Truy cập fullname từ user */}
+                                <i className="bi bi-calendar me-2"></i>
+                                <span>{new Date(review.datedAt).toLocaleDateString('vi-VN')}</span> {/* Định dạng ngày */}
+                                <div>
+                                    {/* Hiển thị đánh giá sao dựa trên giá trị rating */}
+                                    <span className="text-warning ms-5 fs-3">
+                                        {'★'.repeat(review.rating)} {/* Hiển thị sao đầy */}
+                                    </span>
+                                    <br />
+                                    <span className='ms-5'>{review.comment}</span> {/* Hiển thị bình luận đánh giá */}
+                                </div>
+                            </Col>
+                        </Row>
+                    ))}
+
+
+
+
+
 
                 </Container>
             </HomeLayout>

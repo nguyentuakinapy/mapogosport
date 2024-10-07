@@ -6,4 +6,6 @@ import mapogo.entity.SportField;
 
 public interface SportFieldService {
 	List<SportField> findAll();
+	
+	SportField findBySportFieldId(Integer Id);
 }

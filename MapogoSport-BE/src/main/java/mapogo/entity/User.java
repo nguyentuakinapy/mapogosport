@@ -52,6 +52,7 @@ public class User implements Serializable {
 	@Column(name = "Avatar", nullable = true)
 	private String avatar;
 	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private List<Authority> authorities;
