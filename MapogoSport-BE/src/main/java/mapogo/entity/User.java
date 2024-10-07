@@ -42,6 +42,7 @@ public class User implements Serializable {
 	private Date createdAt = new Date();
 	
 	@Column(name = "Gender", nullable = false)
+
 	private boolean gender;
 	
 	@Temporal(TemporalType.DATE)
@@ -54,6 +55,7 @@ public class User implements Serializable {
 	@Column(name = "Image", nullable = true)
 	private String image;
 	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private List<Authority> authorities;

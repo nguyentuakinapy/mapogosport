@@ -8,6 +8,7 @@ interface User {
     birthday: Date;
     email: string;
     image: string;
+
     authorities: [
         {
             authorityId: number;

@@ -23,7 +23,8 @@ const translations: { [key: string]: string } = {
     "mist": "sương mù",
     "light rain": 'mưa nhẹ',
     "light intensity shower rain": 'mưa rào nhẹ',
-    "moderate rain": 'mưa vừa'
+    "moderate rain": 'mưa vừa',
+    "overcast clouds": 'âm u'
 };
 
 export default function Header({ isAniActive, toggleAni, weather, userData }: HeaderProps) {
@@ -60,11 +61,16 @@ export default function Header({ isAniActive, toggleAni, weather, userData }: He
         return () => clearInterval(intervalId);
     }, []);
 
+
+
     return (
-        <header className={isAniActive ? 'aniHead' : ''}>
+        <header className={`${isAniActive ? 'aniHead' : ''} 
+        `}>
             <div className="d-flex m-0 justify-content-between align-items-center m-auto">
                 <div className="d-flex justify-content-center align-items-center">
-                    <i className={`bi ${isAniActive ? 'bi-list' : 'bi-filter-left'} mx-3`} onClick={() => toggleAni()} style={{ fontSize: '50px' }}></i>
+                    <i className={`bi ${isAniActive ? 'bi-list' : 'bi-filter-left'} mx-3`} onClick={() => {
+                        toggleAni();
+                    }} style={{ fontSize: '50px' }}></i>
                     <i className="bi bi-thermometer-half"></i>{weather?.main.temp}°C -
                     <i className="bi bi-moisture mx-1"></i>
                     {weather?.main.humidity}% -
@@ -83,6 +89,7 @@ export default function Header({ isAniActive, toggleAni, weather, userData }: He
                     {weather?.weather[0].description.toLowerCase() == 'light rain' ? <i className="ms-2 me-1 bi bi-cloud-drizzle-fill"></i> : ''}
                     {weather?.weather[0].description.toLowerCase() == 'light intensity shower rain' ? <i className="ms-2 me-1 bi bi-cloud-drizzle-fill"></i> : ''}
                     {weather?.weather[0].description.toLowerCase() == 'moderate rain' ? <i className="ms-2 me-1 bi bi-cloud-drizzle-fill"></i> : ''}
+                    {weather?.weather[0].description.toLowerCase() == 'overcast clouds' ? <i className="ms-2 me-1 bi bi-cloud-fill"></i> : ''}
                     Thời tiết {translate(weather == null ? '' : weather?.weather[0].description)}
                 </div>
                 <div className="d-flex justify-content-center align-items-center">
