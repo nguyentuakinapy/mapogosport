@@ -26,35 +26,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Productdetails")
-public class ProductDetail implements Serializable {
+@Table(name = "Sizes")
+public class Size implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ProductDetailId")
-	private Long productDetailId;
+	@Column(name = "SizeId")
+	private int productDetailId;
 
-	@ManyToOne
-	@JoinColumn(name = "ProductId", nullable = false)
-	@JsonIgnore
-	private Product product;
-
-	@Column(name = "Color", nullable = false)
-	private String color;
-
-	@Column(name = "Image", nullable = false)
-	private String image;
-
-	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-	private List<Gallery> galleries;
-
-	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<Cart> carts;
-
-	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<OrderDetail> orderDetails;
+	@Column(name = "SizeName", nullable = false)
+	private String sizeName;
 	
-	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "size", cascade = CascadeType.ALL)
 	private List<ProductDetailSize> productDetailSizes;
 }

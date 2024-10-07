@@ -60,9 +60,6 @@ public class SportField implements Serializable{
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
     private List<SportFielDetail> sportFielDetails;
-
-    @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL) // corrected from "sportsField"
-    private List<FavoriteField> favoriteFields;
     
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
     private List<FieldReview> fieldReviews;

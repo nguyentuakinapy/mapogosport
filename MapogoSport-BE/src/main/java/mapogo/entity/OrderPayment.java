@@ -32,8 +32,9 @@ public class OrderPayment implements Serializable{
     @Column(name = "OrderPaymentId")
     private Integer orderPaymentId;
 
-    @Column(name = "OrderId", nullable = false)
-    private Integer orderId;
+    @ManyToOne
+    @JoinColumn(name = "OrderId")
+    private Order order;
 
     @Column(name = "Amount", nullable = false)
     private Double amount;

@@ -46,6 +46,9 @@ public class Cart implements Serializable{
     
     @Column(name = "TotalAmount", nullable = false)
     private Double totalAmount;
+    
+    @Column(name = "Quantity", nullable = false)
+    private Integer quantity;
 
 }
 
