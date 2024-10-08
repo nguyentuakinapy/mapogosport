@@ -28,12 +28,12 @@ public class CategoryProduct implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CategoryProductId")
-    private Long categoryProductId;
+    private Integer categoryProductId;
 
-    @Column(nullable = false)
+    @Column(name = "Name", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "Image", nullable = false)
     private String image;
 
     @OneToMany(mappedBy = "categoryProduct")

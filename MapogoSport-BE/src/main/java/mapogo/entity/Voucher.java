@@ -11,6 +11,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -27,47 +29,50 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "Voucher")
-public class Voucher implements Serializable{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "VoucherId")
-    private Long voucherId;
+public class Voucher implements Serializable {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "VoucherId")
+	private Integer voucherId;
 
-    @Column(name = "Name", nullable = false)
-    private String name;
+	@Column(name = "Name", nullable = false)
+	private String name;
 
-    @Column(name = "DiscountPercent", nullable = false)
-    private Integer discountPercent;
+	@Column(name = "DiscountPercent", nullable = false)
+	private Integer discountPercent;
 
-    @Column(name = "Quantity", nullable = false)
-    private Integer quantity;
+	@Column(name = "Quantity", nullable = false)
+	private Integer quantity;
 
-    @Column(name = "CreateDate", nullable = false)
-    private Date createDate;
+	@Temporal(TemporalType.DATE)
+	@Column(name = "CreateDate", nullable = false)
+	private Date createDate = new Date();
 
-    @Column(name = "EndDate", nullable = false)
-    private Date endDate;
+	@Temporal(TemporalType.DATE)
+	@Column(name = "EndDate", nullable = false)
+	private Date endDate = new Date();
 
-    @Column(name = "CreatedBy", nullable = false)
-    private String createdBy;
-    
-    @Column(name = "Status", nullable = false)
-    private String status;
+	@ManyToOne
+	@JoinColumn(name = "CreatedBy", nullable = false)
+	private User user;
 
-    @Column(name = "discountCode", nullable = false)
-    private String discountCode;
-    
-    @Temporal(TemporalType.DATE)
-    @Column(name = "ActiveDate", nullable = false)
-    private Date activeDate;
-    
-    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Order> orders;
-    
-    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Booking> bookings;
+	@Column(name = "Status", nullable = false)
+	private String status;
 
-    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<UserVoucher> userVoucher;
+	@Column(name = "discountCode", nullable = false)
+	private String discountCode;
+
+	@Temporal(TemporalType.DATE)
+	@Column(name = "ActiveDate", nullable = false)
+	private Date activeDate;
+
+	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Order> orders;
+
+	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Booking> bookings;
+
+	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<UserVoucher> userVoucher;
+
 }
-

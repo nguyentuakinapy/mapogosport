@@ -22,7 +22,7 @@ public class Booking implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BookingId", nullable = false, unique = true)
-    private int bookingId;
+    private Integer bookingId;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "Date", nullable = false)
@@ -50,13 +50,14 @@ public class Booking implements Serializable{
     @JoinColumn(name = "VoucherId", nullable = false)
     private Voucher voucher;
 
+	@Column(name = "Note")
+    private String note;
+
 	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
 	private List<BookingPayment> bookingPayments;
 
 	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
 	private List<BookingDetail> bookingDetails;
 	
-	@Column(name = "Note")
-    private String note;
 }
 

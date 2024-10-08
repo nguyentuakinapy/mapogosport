@@ -9,7 +9,6 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -24,7 +23,7 @@ public class SportField implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SportFieldId", nullable = false, unique = true)
-    private int sportFieldId;
+    private Integer sportFieldId;
 
     @Column(name = "Name", nullable = false)
     private String name;
@@ -40,31 +39,36 @@ public class SportField implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "CategoriesFieldId", nullable = false)
+    @JsonIgnore
     private CategoryField categoriesField;
-
-    @Column(name = "Status", nullable = false)
-    private String status;
 
     @Column(name = "Quantity", nullable = false)
     private int quantity;
+    
+    @Column(name = "Status", nullable = false)
+    private String status;
 
     @Column(name = "Image", nullable = false)
     private String image;
 
     @ManyToOne
     @JoinColumn(name = "OwnerId", nullable = false)
+    @JsonIgnore
     private Owner owner;
 
     @Column(name = "Decription", nullable = false)
     private String decription;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
-    private List<SportFielDetail> sportFielDetails;
+    @JsonIgnore
+    private List<SportFieldDetail> sportFielDetails;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL) // corrected from "sportsField"
+    @JsonIgnore
     private List<FavoriteField> favoriteFields;
-    
+ 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<FieldReview> fieldReviews;
 }
 

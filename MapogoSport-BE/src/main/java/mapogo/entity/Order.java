@@ -29,46 +29,49 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "Orders")
-public class Order implements Serializable{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "OrderId")
-    private int orderId;
+public class Order implements Serializable {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "OrderId")
+	private Integer orderId;
 
-    @ManyToOne
-    @JoinColumn(name = "Username", nullable = false)
-    private User user;
+	@ManyToOne
+	@JoinColumn(name = "Username", nullable = false)
+	private User user;
 
-    @Column(nullable = false)
-    private String address;
+	@Column(name = "Address", nullable = false)
+	private String address;
 
-    @Column(name = "PhoneNumber", nullable = false)
-    private String phoneNumber;
+	@Column(name = "PhoneNumber", nullable = false)
+	private String phoneNumber;
 
-    @Temporal(TemporalType.DATE)
+	@Temporal(TemporalType.DATE)
 	@Column(name = "Date")
 	private Date date = new Date();
 
-    @ManyToOne
-    @JoinColumn(name = "PaymentMethodId", nullable = false)
-    private PaymentMethod paymentMethod;
+	@Column(name = "Status", nullable = false)
+	private String status;
 
-    @Column(name = "Status", nullable = false)
-    private String status;
+	@Column(name = "Amount", nullable = false)
+	private Double amount;
 
-    @Column(name = "Amount", nullable = false)
-    private Double amount;
+	@ManyToOne
+	@JoinColumn(name = "PaymentMethodId", nullable = false)
+	private PaymentMethod paymentMethod;
 
-    @ManyToOne
-    @JoinColumn(name = "VoucherId")
-    private Voucher voucher;
+	@ManyToOne
+	@JoinColumn(name = "VoucherId")
+	private Voucher voucher;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<OrderDetail> orderDetails;
-    
 	@Column(name = "Note")
-    private String note;
-	
-    @Column(name = "ShipFee", nullable = false)
-    private String shipFee;
+	private String note;
+
+	@Column(name = "ShipFee", nullable = false)
+	private Double shipFee;
+
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<OrderDetail> orderDetails;
+
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<OrderPayment> orderPayments;
 }

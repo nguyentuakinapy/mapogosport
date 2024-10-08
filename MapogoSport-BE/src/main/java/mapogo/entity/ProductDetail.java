@@ -31,7 +31,7 @@ public class ProductDetail implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ProductDetailId")
-	private Long productDetailId;
+	private Integer productDetailId;
 
 	@ManyToOne
 	@JoinColumn(name = "ProductId", nullable = false)
@@ -41,12 +41,6 @@ public class ProductDetail implements Serializable {
 	@Column(name = "Color", nullable = false)
 	private String color;
 
-	@Column(name = "Size", nullable = false)
-	private String size;
-
-	@Column(name = "Quantity", nullable = false)
-	private Double quantity;
-
 	@Column(name = "Image", nullable = false)
 	private String image;
 
@@ -55,9 +49,5 @@ public class ProductDetail implements Serializable {
 
 	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
 	@JsonIgnore
-	private List<Cart> carts;
-
-	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<OrderDetail> orderDetails;
+	private List<ProductDetailSize> productDetailSizes;
 }

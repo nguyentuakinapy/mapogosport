@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
-import { Col, FloatingLabel, Form, Nav, Row } from "react-bootstrap";
+import { Button, Col, FloatingLabel, Form, Nav, Row } from "react-bootstrap";
 
 export default function Owner({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState<string>('all');
@@ -10,21 +10,33 @@ export default function Owner({ children }: { children: ReactNode }) {
     const [userData, setUserData] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
+    const [username, setUsername] = useState<string>("");
     const [fullName, setFullName] = useState<string>("");
+    const [gender, setGender] = useState<string>("0");
+    const [check, setCheck] = useState<boolean>(false);
 
     useEffect(() => {
         const user = sessionStorage.getItem('user');
         if (user) {
             const parsedUserData = JSON.parse(user) as User;
             setUserData(parsedUserData);
+            setUsername(parsedUserData.username);
+            setFullName(parsedUserData.fullname);
+            setGender(parsedUserData.gender); // Cập nhật giới tính
             setIsLoading(true);
         }
     }, []);
 
-    const searchParams = useSearchParams();
-    const check = searchParams.get('check');
+
     useEffect(() => {
-        if (check === 'withdraw') {
+        console.log(gender)
+        setCheck(true);
+    }, [gender]);
+
+    const searchParams = useSearchParams();
+    const checkData = searchParams.get('check');
+    useEffect(() => {
+        if (checkData === 'withdraw') {
             setActiveTab('withdraw');
         }
     }, [check]);
@@ -39,6 +51,7 @@ export default function Owner({ children }: { children: ReactNode }) {
                                 <Form.Group className="mb-3">
                                     <Form.Floating className="mb-3">
                                         <Form.Control size="sm" type="text" placeholder="Họ và tên"
+                                            value={fullName} onChange={(e) => setFullName(e.target.value)}
                                         />
                                         <Form.Label>Họ và tên <b className='text-danger'>*</b></Form.Label>
                                     </Form.Floating>
@@ -62,17 +75,20 @@ export default function Owner({ children }: { children: ReactNode }) {
 
                                     <Col xs={6}>
                                         <Form.Group className="mb-3">
-                                            <FloatingLabel controlId="district" label="Giới tính">
-                                                <Form.Select aria-label="Floating label select example">
-                                                    <option>-- Nhấn để chọn --</option>
-                                                    <option value="1">Nam</option>
-                                                    <option value="2">Nữ</option>
-                                                </Form.Select>
+                                            <FloatingLabel label="Giới tính">
+                                                <select value={gender}
+                                                    onChange={(e) => setGender(e.target.value)}
+                                                    className="form-control">
+                                                    <option value="0">-- Chọn giới tính --</option>
+                                                    <option value="Nam">Nam</option>
+                                                    <option value="Nữ">Nữ</option>
+                                                    <option value="Khác">Khác</option>
+                                                </select>
                                             </FloatingLabel>
                                         </Form.Group>
 
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Số điện thoại</Form.Label>
+                                            <Form.Label>Sổ địa chỉ</Form.Label>
 
                                             <div>
                                                 Chưa có thông tin
@@ -98,47 +114,62 @@ export default function Owner({ children }: { children: ReactNode }) {
                 );
             case 'withdraw':
                 return (
-                    <div className="row mt-5">
-                        <div className="col">
+                    <Row className="my-3" style={{ fontSize: '15px' }}>
+                        <Col xs={4}>
                             <div className="card packageUpdate">
-                                <h5 className="text-danger text-center fw-bold mt-5">Miễn phí</h5>
-                                <div className="head-package align-items-center">
-                                    <b className="m-auto">Gói cơ bản</b>
-                                </div>
-                                <div className="body-package">
-                                    <div className="mt-2 p-3">
-                                        <span className="m-auto">Một cộng một bằng năm</span>
+                                <b className="ms-3 mt-3 fs-5">Gói cơ bản</b>
+                                <div className="body-package my-3">
+                                    <div >
+                                        <i className="bi bi-check-circle me-2">OKE</i>
+                                    </div>
+                                    <div >
+                                        <i className="bi bi-check-circle me-2">OKE</i>
+                                    </div>
+                                    <div >
+                                        <i className="bi bi-check-circle me-2">OKE</i>
                                     </div>
                                 </div>
+                                <b className="text-danger ms-3">Miễn phí</b>
+                                <Button className='btn-sub'>Sửa</Button>
                             </div>
-                        </div>
-                        <div className="col">
+                        </Col>
+                        <Col xs={4}>
                             <div className="card packageUpdate">
-                                <h5 className="text-danger text-center fw-bold mt-5">100.000 VND / Tháng</h5>
-                                <div className="head-package align-items-center">
-                                    <b className="m-auto">Gói cơ bản</b>
-                                </div>
-                                <div className="body-package">
-                                    <div className="mt-2 p-3">
-                                        <span className="m-auto">Một cộng một bằng năm</span>
+                                <b className="ms-3 mt-3 fs-5">Gói cơ bản</b>
+                                <div className="body-package my-3">
+                                    <div >
+                                        <i className="bi bi-check-circle me-2">OKE</i>
+                                    </div>
+                                    <div >
+                                        <i className="bi bi-check-circle me-2">OKE</i>
+                                    </div>
+                                    <div >
+                                        <i className="bi bi-check-circle me-2">OKE</i>
                                     </div>
                                 </div>
+                                <b className="text-danger ms-3">Miễn phí</b>
+                                <Button className='btn-sub'>Sửa</Button>
                             </div>
-                        </div>
-                        <div className="col">
+                        </Col>
+                        <Col xs={4}>
                             <div className="card packageUpdate">
-                                <h5 className="text-danger text-center fw-bold mt-5">200.000 VND / Tháng</h5>
-                                <div className="head-package align-items-center">
-                                    <b className="m-auto">Gói nâng cao</b>
-                                </div>
-                                <div className="body-package">
-                                    <div className="mt-2 p-3">
-                                        <span className="m-auto">Một cộng một bằng năm</span>
+                                <b className="ms-3 mt-3 fs-5">Gói cơ bản</b>
+                                <div className="body-package my-3">
+                                    <div >
+                                        <i className="bi bi-check-circle me-2">OKE</i>
+                                    </div>
+                                    <div >
+                                        <i className="bi bi-check-circle me-2">OKE</i>
+                                    </div>
+                                    <div >
+                                        <i className="bi bi-check-circle me-2">OKE</i>
                                     </div>
                                 </div>
+                                <b className="text-danger ms-3">Miễn phí</b>
+                                <Button className='btn-sub'>Sửa</Button>
                             </div>
-                        </div>
-                    </div>
+                        </Col>
+                    </Row>
                 );
             default:
                 return (

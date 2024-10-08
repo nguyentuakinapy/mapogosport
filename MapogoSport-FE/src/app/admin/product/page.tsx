@@ -1,85 +1,179 @@
+////// page 	product
 'use client'
 import Link from "next/link";
-import { Row, Col, Form, Button, Table, Badge, Image, OverlayTrigger, Tooltip, Nav } from "react-bootstrap";
+import { Row, Col, Form, FormCheck, Button, Table, Badge, Image, OverlayTrigger, Tooltip, Nav } from "react-bootstrap";
 import '../adminStyle.scss';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductAddNew from "@/components/Admin/Modal/product.addNew";
+import axios from 'axios';
+
 
 const AdminProduct = () => {
     const [activeTab, setActiveTab] = useState<string>('all');
-    const [showAddProduct, setShowAddProduct] = useState<boolean>(false);
+    const [showModal, setShowModal] = useState<boolean>(false);
+    const [modalType, setModalType] = useState<'add' | 'edit'>('add'); // 'add' hoặc 'edit'
+    const [currentProduct, setCurrentProduct] = useState<any>(null); // Sản phẩm hiện tại
+
+    const [products, setProducts] = useState<any[]>([]);
+    const [categoryProducts, setCategoryProducts] = useState<any[]>([]);
+
+    const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+    const [selectAllProduct, setSelectAllProduct] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const apiProducts = 'http://localhost:8080/rest/products';
+                const apiCategoriesProducts  = 'http://localhost:8080/rest/category-products';
+
+                 // Gọi cả hai API cùng lúc
+            const [productsRes, categoriesRes] = await Promise.all([
+                axios.get(apiProducts),
+                axios.get(apiCategoriesProducts),
+            ]);
+
+        console.log('Products:', productsRes.data); // Ghi lại sản phẩm
+        console.log('Category Products:', categoriesRes.data); // Ghi lại danh mục sản phẩm
+                
+                 // Lưu dữ liệu vào state
+            setProducts(productsRes.data);      // Dữ liệu từ API products
+            setCategoryProducts(categoriesRes.data);  // Dữ liệu từ API category_products
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const handleEditClick = (product) => {
+        setCurrentProduct(product); // Cập nhật sản phẩm hiện tại
+        setModalType('edit'); // Đặt loại modal thành 'edit'
+        setShowModal(true); // Hiển thị modal
+    };
+
+    const handleCreateClick = () => {
+        setCurrentProduct(null); // Đặt sản phẩm hiện tại là null để tạo mới
+        setModalType('add'); // Đặt loại modal thành 'add'
+        setShowModal(true); // Hiển thị modal
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false); // Đóng modal
+        setCurrentProduct(null); // Reset sản phẩm hiện tại
+    };
+
+         const handleSelectAllProduct = () => {
+         if (selectAllProduct) {
+             setSelectedProducts([]);
+         } else {
+             setSelectedProducts(products.map((product) => product.productId));
+         }
+         setSelectAllProduct(!selectAllProduct);
+     };
+
+     const handleSelectProduct = (id: number) => {
+         if (selectedProducts.includes(id)) {
+             setSelectedProducts(selectedProducts.filter((productId) => productId !== id));
+         } else {
+             setSelectedProducts([...selectedProducts, id]);
+         }
+     };
+
+     const handleDelete = (id: number) => {
+         setProducts(products.filter(product => product.productId !== id));
+     };
 
     const renderContent = () => {
-        switch (activeTab) {
-            case 'all':
-                return (
-                    <div className="box-table-border mb-4">
-                        <Table striped className="mb-0">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th style={{ width: '300px' }}>Tên sản phẩm</th>
-                                    <th>Ngày cập nhật</th>
-                                    <th>Trạng thái</th>
-                                    <th>Loại</th>
-                                    <th style={{ width: '200px' }}>Hãng</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td className="text-start title">
-                                        <Link href={"#"}>
-                                            <Image src="/images/ck3.jpg" width={"15%"} className="mx-2"></Image>
-                                            Crusader King 3 - Royal Edition
-                                        </Link>
+        return (
+            <div className="box-table-border mb-4">
+                <Table striped className="mb-0">
+                    <thead>
+                        <tr>
+                            <th>
+                        <FormCheck
+                                     type="checkbox"
+                                     checked={selectAllProduct}
+                                     onChange={handleSelectAllProduct}/>
+                                     </th>
+                            <th>STT</th>
+                            <th>Hình ảnh</th>
+                            <th>Thông tin sản phẩm</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {products.map((product, index) => (
+                            <tr key={product.productId}>
+                                 <td className="text-center align-middle">
+                                     <FormCheck
+                                         type="checkbox"
+                                         checked={selectedProducts.includes(product.productId)}
+                                         onChange={() => handleSelectProduct(product.productId)}
+                                     />
                                     </td>
-                                    <td>30/09/2024</td>
-                                    <td><Badge bg="badge-user">Còn hàng</Badge></td>
-                                    <td>Bóng đá</td>
-                                    <td className="title-brand">Paradox Interactive</td>
-                                    <td>
-                                        <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
-                                            <Link className="btn-edit me-3" href={"#"}><i className="bi bi-pencil-square"></i></Link>
-                                        </OverlayTrigger>
-                                        <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
-                                            <Link className="btn-edit" href={"#"}><i className="bi bi-trash3"></i></Link>
-                                        </OverlayTrigger>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </Table>
-                    </div>
-                );
-            case 'inStock':
-                return (
-                    <div style={{ fontSize: '14px' }}>
-                        cc1
-                    </div>
-                );
-            case 'outStock':
-                return (
-                    <div style={{ fontSize: '14px' }}>
-                        chưa biết có gì bên trong
-                    </div>
-                );
-            default:
-                return (
-                    <div style={{ fontSize: '14px' }}>
-                        Đang tải...
-                    </div>
-                );
-        }
-    }
+                                <td className="text-center align-middle">{index + 1}</td>
+                                <td className="text-center align-middle">
+                                    <Link href="#">
+                                        {/* <Image src={product.image} style={{ width: '150px', height: 'auto' }} 
+                                        className="mx-2" /> */}
+                                        <Image src={''} style={{ width: '150px', height: 'auto' }} 
+                                        className="mx-2" alt={product.image} />
+                                    </Link>
+                                </td>
+                                <td className="text-start align-middle">
+                                    <div>
+                                        <span>Tên sản phẩm:</span> <strong className="text-dark">{product.name}</strong>
+                                    </div>
+                                    <div>
+                                        <span>Ngày tạo:</span> <strong>{new Date(product.createDate).toLocaleDateString()}</strong>
+                                    </div>
+                                    <div>
+                                        <span>Danh mục:</span> <strong>{product.categoryProduct.name || 'Không xác định'}</strong>
+                                    </div>
+                                    <div>
+                                        <span>Hãng:</span> <strong>{product.brand}</strong>
+                                    </div>
+                                    <div>
+                                        <span>Xuất sứ:</span> <strong>{product.country}</strong>
+                                    </div>
+                                    <div>
+                                        <span>Trạng thái:</span>
+                                        <Badge bg={product.status === 'Còn hàng' ? 'success' : 'danger'}>
+                                            {product.status}
+                                        </Badge>
+                                    </div>
+                                    <div>
+                                        <span>Số lượng:</span>
+                                        <Badge bg={product.stock > 1 ? 'primary' : 'danger'}>
+                                            {product.stock}
+                                        </Badge>
+                                    </div>
+                                </td>
+                                <td className="text-center align-middle">
+                                    <OverlayTrigger overlay={<Tooltip>Xem</Tooltip>}>
+                                        <Button variant="warning" className="m-1" onClick={() => handleEditClick(product)}>
+                                            <i className="bi bi-pencil-fill"></i>
+                                        </Button>
+                                    </OverlayTrigger>
+                                    <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
+                                         <Button variant="danger" className="m-1" onClick={() => handleDelete(product.productId)}>
+                                             <i className="bi bi-trash3-fill"></i>
+                                         </Button>
+                                     </OverlayTrigger>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
+        );
+    };
+
     return (
         <div style={{ fontSize: '14px' }}>
             <div className="box-ultil">
                 <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Sản Phẩm</b>
-                <div>
-                    <Form.Control type="text" placeholder="Tìm theo tên sản phẩm..." />
-                </div>
-                <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={() => setShowAddProduct(true)}>
+                <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={handleCreateClick}>
                     <i className="bi bi-plus-circle me-2"></i>Thêm Sản Phẩm
                 </Button>
             </div>
@@ -95,11 +189,33 @@ const AdminProduct = () => {
                 </Nav.Item>
             </Nav>
             <div className="mt-3">
+            <div className="text-end py-0">
+                    <Button variant="success" className="mb-4" onClick={handleCreateClick}>
+                        <i className="bi bi-plus-square-fill"><span className='mx-1'>Tạo mới</span></i>
+                    </Button>
+                    <Button
+                        variant="danger"
+                        className="mb-4 mx-2"
+                        disabled={selectedProducts.length === 0}
+                        onClick={() => {
+                            setProducts(products.filter(product => !selectedProducts.includes(product.productId)));
+                            setSelectedProducts([]);
+                            setSelectAllProduct(false);
+                        }}
+                    >
+                        <i className="bi bi-trash-fill"></i> Xóa đã chọn
+                    </Button>
+                </div>
                 {renderContent()}
             </div>
-            <ProductAddNew showAddProduct={showAddProduct} setShowAddProduct={setShowAddProduct} />
+            <ProductAddNew 
+            showAddProduct={showModal} 
+            setShowAddProduct={handleCloseModal}
+             currentProduct={currentProduct} 
+             modalType={modalType} 
+             categoryProducts={categoryProducts} />
         </div>
-    )
+    );
 }
 
 export default AdminProduct;

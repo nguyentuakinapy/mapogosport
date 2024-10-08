@@ -16,13 +16,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "AddressUser")
+@Table(name = "Addressuser")
 public class AddressUser implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "AddressUserId")
-	private int addressUserId;
+	private Integer addressUserId;
 
 	@ManyToOne
 	@JoinColumn(name = "Username")

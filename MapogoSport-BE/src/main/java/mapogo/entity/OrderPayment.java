@@ -24,33 +24,33 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "OrderPayments")
-public class OrderPayment implements Serializable{
+@Table(name = "Orderpayments")
+public class OrderPayment implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "OrderPaymentId")
-    private Integer orderPaymentId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "OrderPaymentId")
+	private Integer orderPaymentId;
 
-    @Column(name = "OrderId", nullable = false)
-    private Integer orderId;
+	@ManyToOne
+	@JoinColumn(name = "OrderId", nullable = false)
+	private Order order;
 
-    @Column(name = "Amount", nullable = false)
-    private Double amount;
+	@Column(name = "Amount", nullable = false)
+	private Double amount;
 
-    @Column(name = "Status", nullable = false)
-    private String status;
+	@Column(name = "Status", nullable = false)
+	private String status;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "Date", nullable = false)
-    private Date date = new Date();
+	@Temporal(TemporalType.DATE)
+	@Column(name = "Date", nullable = false)
+	private Date date = new Date();
 
-    @ManyToOne
-    @JoinColumn(name = "Username", nullable = false)
-    private User user;
+	@ManyToOne
+	@JoinColumn(name = "Username", nullable = false)
+	private User user;
 
-    @Column(name = "ReferenceCode")
-    private String referenceCode;
+	@Column(name = "ReferenceCode")
+	private String referenceCode;
 
 }
-

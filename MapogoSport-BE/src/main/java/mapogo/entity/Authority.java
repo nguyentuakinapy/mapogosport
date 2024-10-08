@@ -3,6 +3,7 @@ package mapogo.entity;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
