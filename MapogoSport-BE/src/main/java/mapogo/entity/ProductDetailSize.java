@@ -55,4 +55,8 @@ public class ProductDetailSize implements Serializable {
 	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<OrderDetail> orderDetails;
+	
+	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Cart> carts;
 }
