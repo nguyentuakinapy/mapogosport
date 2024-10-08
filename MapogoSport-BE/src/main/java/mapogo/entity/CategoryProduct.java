@@ -33,7 +33,7 @@ public class CategoryProduct implements Serializable{
     @Column(name = "Name", nullable = false)
     private String name;
 
-    @Column(name = "Name", nullable = false)
+    @Column(name = "Image", nullable = false)
     private String image;
 
     @OneToMany(mappedBy = "categoryProduct")

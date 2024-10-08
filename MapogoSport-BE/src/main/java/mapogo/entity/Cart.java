@@ -34,8 +34,8 @@ public class Cart implements Serializable {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "ProductDetailId", nullable = false)
-    private ProductDetail productDetail;
+    @JoinColumn(name = "ProductDetailSizeId", nullable = false)
+    private ProductDetailSize productDetailSize;
 
     @Column(name = "Date", nullable = false)
     private Date date;
