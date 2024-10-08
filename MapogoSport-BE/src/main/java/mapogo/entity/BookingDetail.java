@@ -28,7 +28,7 @@ public class BookingDetail implements Serializable{
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BookingDetailId", nullable = false, unique = true)
-    private int bookingId;
+    private Integer bookingId;
 	
 	@Column(name = "StartTime", nullable = false)
     private LocalTime startTime;
@@ -38,7 +38,7 @@ public class BookingDetail implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "SportFielDetailId", nullable = false)
-    private SportFielDetail sportFielDetail;
+    private SportFieldDetail sportFieldDetail;
     
     @Column(name = "Price", nullable = false)
     private Double price;

@@ -22,7 +22,7 @@ public class AddressUser implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "AddressUserId")
-	private int addressUserId;
+	private Integer addressUserId;
 
 	@ManyToOne
 	@JoinColumn(name = "Username")

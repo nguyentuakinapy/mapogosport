@@ -11,6 +11,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -31,7 +33,7 @@ public class Voucher implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "VoucherId")
-    private Long voucherId;
+    private Integer voucherId;
 
     @Column(name = "Name", nullable = false)
     private String name;
@@ -42,14 +44,17 @@ public class Voucher implements Serializable{
     @Column(name = "Quantity", nullable = false)
     private Integer quantity;
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "CreateDate", nullable = false)
-    private Date createDate;
+    private Date createDate = new Date();
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "EndDate", nullable = false)
-    private Date endDate;
+    private Date endDate = new Date();
 
-    @Column(name = "CreatedBy", nullable = false)
-    private String createdBy;
+    @ManyToOne
+    @JoinColumn(name = "CreatedBy", nullable = false)
+    private User user;
     
     @Column(name = "Status", nullable = false)
     private String status;

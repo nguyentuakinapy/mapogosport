@@ -2,9 +2,9 @@ package mapogo.service;
 
 import java.util.List;
 
-import mapogo.entity.SportFielDetail;
+import mapogo.entity.SportFieldDetail;
 
 public interface SportFieldDetailService {
-	List<SportFielDetail> findAll();
+	List<SportFieldDetail> findAll();
 
 }

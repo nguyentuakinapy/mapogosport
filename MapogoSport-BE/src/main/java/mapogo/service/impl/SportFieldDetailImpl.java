@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.SportFieldDetailDAO;
-import mapogo.entity.SportFielDetail;
+import mapogo.entity.SportFieldDetail;
 import mapogo.service.SportFieldDetailService;
 
 
@@ -17,7 +17,7 @@ public class SportFieldDetailImpl implements SportFieldDetailService{
 	SportFieldDetailDAO sportFieldDetailDAO;
 	
 	@Override
-	public List<SportFielDetail> findAll() {
+	public List<SportFieldDetail> findAll() {
 		return sportFieldDetailDAO.findAll();
 	}
 

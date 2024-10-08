@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @SuppressWarnings("serial")
@@ -14,13 +17,13 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Sportfieldetails")
-public class SportFielDetail implements Serializable{
+@Table(name = "SportFieldDetails")
+public class SportFieldDetail implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SportFielDetailId", nullable = false, unique = true)
-    private int sportFielDetailId;
+    private Integer sportFielDetailId;
 
     @Column(name = "Name", nullable = false)
     private String name;
@@ -38,7 +41,7 @@ public class SportFielDetail implements Serializable{
     private String status;
 
     @Column(name = "PercentDeposit", nullable = false)
-    private String percentDeposit;
+    private int percentDeposit;
     
     @ManyToOne
     @JoinColumn(name = "SportFiledId", nullable = false)
@@ -47,7 +50,8 @@ public class SportFielDetail implements Serializable{
     @Column(name = "PeakHour", nullable = false)
     private String peakHour;
 
-
-    
+    @OneToMany(mappedBy = "sportFieldDetail", cascade = CascadeType.ALL) // corrected from "sportsField"
+    @JsonIgnore
+    private List<BookingDetail> bookingDetails;
 }
 

@@ -17,19 +17,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Roles")
-public class Role implements Serializable {
+@Table(name = "Sizes")
+public class Size implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "RoleId", nullable = false)
-	private Integer roleId;
+	@Column(name = "SizeId", nullable = false)
+	private Integer sizeId;
 
-	@Column(name = "Name", nullable = false)
-	private String name;
+	@Column(name = "SizeName", nullable = false)
+	private String sizeName;
 
-	@OneToMany(mappedBy = "role")
+	@OneToMany(mappedBy = "size")
     @JsonIgnore
-	private List<Authority> authorities;
+	private List<ProductDetailSize> productDetailSizes;
 
 }

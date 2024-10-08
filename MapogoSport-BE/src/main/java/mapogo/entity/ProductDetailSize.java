@@ -26,32 +26,30 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Productdetails")
-public class ProductDetail implements Serializable {
+@Table(name = "ProductDetailSize")
+public class ProductDetailSize implements Serializable {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ProductDetailId")
-	private Integer productDetailId;
+	@Column(name = "ProductDetailSizeId")
+	private Integer productDetailSizeId;
 
 	@ManyToOne
-	@JoinColumn(name = "ProductId", nullable = false)
+	@JoinColumn(name = "ProductDetailId", nullable = false)
+	private ProductDetail productDetail;
+
+	@ManyToOne
+	@JoinColumn(name = "SizeId", nullable = false)
+	private Size size;
+
+	@Column(name = "Price", nullable = false)
+	private Double price;
+
+	@Column(name = "Quantity", nullable = false)
+	private int quantity;
+	
+	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
 	@JsonIgnore
-	private Product product;
+	private List<OrderDetail> orderDetails;
 
-	@Column(name = "Color", nullable = false)
-	private String color;
-
-	@Column(name = "Image", nullable = false)
-	private String image;
-
-	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-	private List<Gallery> galleries;
-
-	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<Cart> carts;
-
-	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<ProductDetailSize> productDetailSizes;
 }
