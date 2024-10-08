@@ -6,6 +6,9 @@ import ModalAddAddress from '@/components/User/modal/user.addNewAddress'
 import '../types/user.scss'
 
 export default function Profile() {
+    const fetcher = (url: string) => fetch(url).then((res) => res.json);
+
+
     const [address, setAddress] = useState('')
 
     const [showAddAddress, setShowAddAddress] = useState<boolean>(false)

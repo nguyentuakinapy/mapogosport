@@ -62,7 +62,7 @@ public class Order implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "VoucherId")
 	private Voucher voucher;
-	
+
 	@Column(name = "Note")
 	private String note;
 

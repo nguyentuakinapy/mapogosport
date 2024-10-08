@@ -29,7 +29,7 @@ public class BookingDetail implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BookingDetailId", nullable = false, unique = true)
     private Integer bookingId;
-	
+
 	@Column(name = "StartTime", nullable = false)
     private LocalTime startTime;
 

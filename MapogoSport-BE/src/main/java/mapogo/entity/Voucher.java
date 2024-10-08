@@ -74,5 +74,9 @@ public class Voucher implements Serializable{
 
     @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<UserVoucher> userVoucher;
+    
+    @ManyToOne
+    @JoinColumn(name = "username")
+    private User user;
 }
 

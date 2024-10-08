@@ -18,11 +18,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 @Entity
 @Table(name = "Users")
 public class User implements Serializable {
-
 	@Id
 	@Column(name = "Username", nullable = false)
 	private String username;
@@ -40,18 +38,18 @@ public class User implements Serializable {
 	@Column(name = "CreatedAt")
 	private Date createdAt = new Date();
 	
-	@Column(name = "Gender")
-	private int gender;
-	
-	@Column(name = "Avatar")
-	private String avatar;
+	@Column(name = "Gender", nullable = true)
+	private Integer gender = null;
 	
 	@Temporal(TemporalType.DATE)
-	@Column(name = "Birthday")
-	private Date birthday;
+	@Column(name = "Birthday", nullable = true)
+	private Date birthday = null;
 	
 	@Column(name = "Email", nullable = false)
 	private String email;
+	
+	@Column(name = "Avatar", nullable = true)
+	private String avatar = null;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonManagedReference
@@ -113,4 +111,8 @@ public class User implements Serializable {
 	@JsonIgnore
 	private List<Owner> owners;
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<UserVoucher> UserVoucher;
+	
 }

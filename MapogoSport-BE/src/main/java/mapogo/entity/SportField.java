@@ -66,7 +66,7 @@ public class SportField implements Serializable{
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL) // corrected from "sportsField"
     @JsonIgnore
     private List<FavoriteField> favoriteFields;
-    
+ 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<FieldReview> fieldReviews;

@@ -3,12 +3,11 @@ interface User {
     fullname: string;
     password: string;
     enabled: number;
-    gender: boolean;
+    gender: number | null;
     createdAt: Date;
-    birthday: Date;
+    birthday: Date | null;
     email: string;
-    image: string;
-
+    avatar: string | null;
     authorities: [
         {
             authorityId: number;
@@ -18,16 +17,4 @@ interface User {
             }
         }
     ];
-}
-
-interface User1 {
-    username: string;
-    fullname: string;
-    password: string;
-    enabled: number;
-    gender: boolean;
-    createdAt: Date;
-    birthday: Date;
-    email: string;
-    image: string;
 }

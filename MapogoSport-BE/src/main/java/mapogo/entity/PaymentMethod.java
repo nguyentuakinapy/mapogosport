@@ -33,9 +33,10 @@ public class PaymentMethod implements Serializable{
 
     @Column(name = "Name", nullable = false)
     private String name;
-
+    
     @Column(name = "Description", nullable = false)
     private String description;
+
 
     @OneToMany(mappedBy = "paymentMethod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Booking> bookings;
