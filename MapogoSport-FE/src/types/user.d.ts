@@ -3,7 +3,7 @@ interface User {
     fullname: string;
     password: string;
     enabled: number;
-    gender: boolean | null;
+    gender: number | null;
     createdAt: Date;
     birthday: Date | null;
     email: string;

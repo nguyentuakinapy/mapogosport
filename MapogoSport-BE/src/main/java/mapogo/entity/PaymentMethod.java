@@ -31,15 +31,17 @@ public class PaymentMethod implements Serializable{
 
     @Column(name = "Name", nullable = false)
     private String name;
-
+    
     @Column(name = "Description", nullable = false)
     private String description;
-
+    
     @OneToMany(mappedBy = "paymentMethod")
     private List<Booking> bookings;
 
     @OneToMany(mappedBy = "paymentMethod")
     private List<Order> orders;
-
+    
+    @OneToMany(mappedBy = "paymentMethod")
+    private List<SubscriptionPayment> subscriptionPayments;
 }
 

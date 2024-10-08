@@ -15,17 +15,20 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Benefits")
-public class Benefit implements Serializable{
+@Table(name = "Accountpackagebenefit")
+public class AccountPackageBenefit implements Serializable{
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "BenefitId")
-    private int benefitId;
-
-    @Column(name = "Description", nullable = false)
-    private String description;
+    @Column(name = "AccountPackageBenefitId")
+    private int accountPackageBenefitId;
     
-    @OneToMany(mappedBy = "benefit", cascade = CascadeType.ALL)
-    private List<AccountPackageBenefit> accountPackageBenefits;
+    @ManyToOne
+    @JoinColumn(name = "BenefitId")
+    private Benefit benefit;
+    
+    @ManyToOne
+    @JoinColumn(name = "AccountPackageId")
+    private AccountPackage accountPackage;
+
 }
