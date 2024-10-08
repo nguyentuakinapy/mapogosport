@@ -1,23 +1,17 @@
 'use client'
 import Link from 'next/link';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
+
 import LoginModal from './account/modal/login.modal';
 import RegisterModal from './account/modal/register.modal';
 import axios from 'axios';
 
 
-const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
-const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
-const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
-
-
-const [userData, setUserData] = useState<User | null>(null);
 
 const CartBadge = ({ user }) => {
     const [cartCount, setCartCount] = useState(0); // Initialize cart count to 0
@@ -48,6 +42,12 @@ const CartBadge = ({ user }) => {
 };
 
 const Header = () => {
+    const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+    const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
+    const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
+
+
+    const [userData, setUserData] = useState<User | null>(null);
 
     useEffect(() => {
         const user = sessionStorage.getItem('user');
