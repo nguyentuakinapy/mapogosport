@@ -41,19 +41,18 @@ public class User implements Serializable {
 	@Column(name = "CreatedAt")
 	private Date createdAt = new Date();
 	
-	@Column(name = "Gender", nullable = false)
-
-	private boolean gender;
+	@Column(name = "Gender", nullable = true)
+	private Integer gender = null;
 	
 	@Temporal(TemporalType.DATE)
 	@Column(name = "Birthday", nullable = true)
-	private Date birthday;
+	private Date birthday = null;
 	
 	@Column(name = "Email", nullable = false)
 	private String email;
 	
-	@Column(name = "Image", nullable = true)
-	private String image;
+	@Column(name = "Avatar", nullable = true)
+	private String avatar = null;
 	
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

@@ -18,11 +18,11 @@ export default function Register(props: RegisterProps) {
     const { showLoginModal, setShowLoginModal } = props;
 
     const [username, setUsername] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
     const [fullName, setFullName] = useState<string>("");
-    const [gender, setGender] = useState<string>("0");
     const [password, setPassword] = useState<string>("");
     const [forgotPassword, setForgotPassword] = useState<string>("");
-    const [authority, setAuthority] = useState<number>(4);
+    const [authority, setAuthority] = useState<number>(1);
 
     const [otp, setOtp] = useState<string>("");
     const [otpValue, setOtpValue] = useState<string>("");
@@ -38,13 +38,13 @@ export default function Register(props: RegisterProps) {
 
     const handleSubmit = async () => {
         if (!username) {
+            toast.warning("Vui lòng nhập tên đăng nhập!")
+            return;
+        } else if (!email) {
             toast.warning("Vui lòng nhập email!")
             return;
         } else if (!fullName) {
             toast.warning("Vui lòng nhập họ và tên!")
-            return;
-        } else if (gender == "0") {
-            toast.warning("Vui lòng chọn giới tính!")
             return;
         } else if (!password) {
             toast.warning("Vui lòng nhập mật khẩu!")
@@ -70,7 +70,7 @@ export default function Register(props: RegisterProps) {
                     'Accept': 'application/json, text/plain, */*',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, fullname: fullName, gender, password })
+                body: JSON.stringify({ username, fullname: fullName, password, email })
             });
             if (!responseUser.ok) {
                 throw new Error('Network response was not ok');
@@ -142,14 +142,14 @@ export default function Register(props: RegisterProps) {
     }
 
     const checkEmail = async () => {
-        if (username) {
+        if (email) {
             const response = await fetch('http://localhost:8080/rest/user/sendMail', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(username)
+                body: JSON.stringify(email)
             });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -164,6 +164,7 @@ export default function Register(props: RegisterProps) {
     const handleClose = () => {
         setShowRegisterModal(false);
         setUsername("");
+        setEmail("");
         setPassword("");
         setFullName("");
         setForgotPassword("");
@@ -216,29 +217,24 @@ export default function Register(props: RegisterProps) {
                                 </div>
 
                                 <div className="form-group mb-3">
-                                    <input type="email" className="form-control border border-dark"
+                                    <input type="text" className={`form-control ${errorFullName ? 'error' : ''} border border-dark`} placeholder="Tên đăng nhập *"
                                         value={username} onChange={(e) => setUsername(e.target.value)}
-                                        placeholder="Email *" />
+                                    />
                                 </div>
                                 <div className="row mb-3 row">
                                     {/* <div className="form-group col-6">
                                         <input type="text" className="form-control" id="floatingPassword"
-                                            placeholder="Số điện thoại *" />
-                                    </div> */}
+                                        placeholder="Số điện thoại *" />
+                                        </div> */}
+                                    <div className="form-group col-6">
+                                        <input type="email" className="form-control border border-dark"
+                                            value={email} onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="Email *" />
+                                    </div>
                                     <div className="form-group col-6">
                                         <input type="text" className={`form-control ${errorFullName ? 'error' : ''} border border-dark`} placeholder="Họ và tên *"
                                             value={fullName} onChange={(e) => setFullName(e.target.value)}
                                         />
-                                    </div>
-                                    <div className="form-group col-6">
-                                        <select defaultValue={gender}
-                                            onChange={(e) => setGender(e.target.value)}
-                                            className="form-select">
-                                            <option value="gender">Chọn giới tính *</option>
-                                            <option value="Nam">Nam</option>
-                                            <option value="Nữ">Nữ</option>
-                                            <option value="Khác">Khác</option>
-                                        </select>
                                     </div>
                                 </div>
                                 <div className="row mb-3">
