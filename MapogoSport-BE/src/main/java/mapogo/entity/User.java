@@ -19,11 +19,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 @Entity
 @Table(name = "users")
 public class User implements Serializable {
-
 	@Id
 	@Column(name = "username", nullable = false)
 	private String username;
@@ -110,4 +108,8 @@ public class User implements Serializable {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<UserVoucher> UserVoucher;
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Voucher> vouchers;
 }

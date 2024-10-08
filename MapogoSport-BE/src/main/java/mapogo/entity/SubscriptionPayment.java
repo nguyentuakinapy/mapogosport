@@ -31,8 +31,9 @@ public class SubscriptionPayment implements Serializable{
     @JoinColumn(name = "UserSubscriptionId", nullable = false)
     private UserSubscription userSubscription;
 
-    @Column(name = "PaymentMethod", nullable = false)
-    private int paymentMethod;
+    @ManyToOne
+    @JoinColumn(name = "PaymentMethodId")
+    private PaymentMethod paymentMethod;
 
     @Column(name = "Amount", nullable = false)
     private double amount;

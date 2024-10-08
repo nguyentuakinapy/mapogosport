@@ -49,16 +49,16 @@ public class Order implements Serializable{
 	@Column(name = "Date")
 	private Date date = new Date();
 
-    @ManyToOne
-    @JoinColumn(name = "PaymentMethodId", nullable = false)
-    private PaymentMethod paymentMethod;
-
     @Column(name = "Status", nullable = false)
     private String status;
 
     @Column(name = "Amount", nullable = false)
     private Double amount;
 
+    @ManyToOne
+    @JoinColumn(name = "PaymentMethodId", nullable = false)
+    private PaymentMethod paymentMethod;
+    
     @ManyToOne
     @JoinColumn(name = "VoucherId")
     private Voucher voucher;
@@ -71,4 +71,7 @@ public class Order implements Serializable{
 	
     @Column(name = "ShipFee", nullable = false)
     private String shipFee;
+    
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderPayment> orderPayments;
 }

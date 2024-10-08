@@ -28,7 +28,7 @@ public class BookingDetail implements Serializable{
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BookingDetailId", nullable = false, unique = true)
-    private int bookingId;
+    private int bookingDetailId;
 	
 	@Column(name = "StartTime", nullable = false)
     private LocalTime startTime;

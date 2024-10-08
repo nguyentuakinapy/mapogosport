@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @SuppressWarnings("serial")
@@ -47,7 +48,10 @@ public class SportFielDetail implements Serializable{
     @Column(name = "PeakHour", nullable = false)
     private String peakHour;
 
-
+    @OneToMany(mappedBy = "sportFielDetail", cascade = CascadeType.ALL)
+    private List<BookingDetail> bookingDetails;
     
+    @OneToMany(mappedBy = "sportFielDetail", cascade = CascadeType.ALL)
+    private List<FavoriteField> favoriteFields;
 }
 

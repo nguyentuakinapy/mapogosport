@@ -31,14 +31,11 @@ public class AccountPackage implements Serializable{
     
     @Column(name = "DurationDays", nullable = false)
     private int durationDays;
-    
-    @Column(name = "Features", nullable = false)
-    private String features;
 
     @OneToMany(mappedBy = "accountPackage", cascade = CascadeType.ALL)
     private List<UserSubscription> userSubscriptions;
     
     @OneToMany(mappedBy = "accountPackage", cascade = CascadeType.ALL)
-    private List<Benefit> benifits;
+    private List<AccountPackageBenefit> accountPackageBenefits;
 
 }
