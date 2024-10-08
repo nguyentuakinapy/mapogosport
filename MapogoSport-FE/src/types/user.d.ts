@@ -7,7 +7,7 @@ interface User {
     createdAt: Date;
     birthday: Date | null;
     email: string;
-    image: string | null;
+    avatar: string | null;
     authorities: [
         {
             authorityId: number;
