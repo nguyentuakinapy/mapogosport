@@ -71,6 +71,8 @@ export default function Profile() {
             setGender(data.gender);
             setUserData(data);
         }
+        console.log(data);
+
     }, [data]);
 
     const updateUserData = () => {
@@ -90,7 +92,7 @@ export default function Profile() {
 
     useEffect(() => {
         updateUserData();
-        console.log('Dữ liệu người dùng đã được cập nhật:', { fullName, email, birthday, gender });
+        console.log('Dữ liệu người dùng đã được cập nhật:', { username, fullName, email, birthday, gender });
     }, [fullName, email, birthday, gender]);
 
     if (isLoading) return <UserLayout>Đang tải...</UserLayout>;
