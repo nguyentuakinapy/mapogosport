@@ -16,16 +16,16 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "Benefits")
-public class Benefit implements Serializable{
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "BenefitId")
-    private int benefitId;
+public class Benefit implements Serializable {
 
-    @Column(name = "Description", nullable = false)
-    private String description;
-    
-    @OneToMany(mappedBy = "benefit", cascade = CascadeType.ALL)
-    private List<AccountPackageBenefit> accountPackageBenefits;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "BenefitId")
+	private Integer benefitId;
+
+	@Column(name = "Description", nullable = false)
+	private String description;
+
+	@OneToMany(mappedBy = "benefit", cascade = CascadeType.ALL)
+	private List<AccountPackageBenefit> accountPackageBenefits;
 }

@@ -30,10 +30,10 @@ public class CategoryProduct implements Serializable{
     @Column(name = "CategoryProductId")
     private Integer categoryProductId;
 
-    @Column(nullable = false)
+    @Column(name = "Name", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "Name", nullable = false)
     private String image;
 
     @OneToMany(mappedBy = "categoryProduct")

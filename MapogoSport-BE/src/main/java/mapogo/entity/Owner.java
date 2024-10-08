@@ -21,7 +21,7 @@ public class Owner implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "OwnerId", nullable = false, unique = true)
-	private int ownerId;
+	private Integer ownerId;
 
 	@ManyToOne
 	@JoinColumn(name = "Username", nullable = false)

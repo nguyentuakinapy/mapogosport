@@ -3,6 +3,8 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,26 +18,28 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "Accountpackages")
-public class AccountPackage implements Serializable{
-    
+public class AccountPackage implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "AccountPackageId")
-    private int accountPackageId;
-    
+    private Integer accountPackageId;
+
     @Column(name = "PackageName", nullable = false)
     private String packageName;
-    
+
     @Column(name = "Price", nullable = false)
     private double price;
-    
+
     @Column(name = "DurationDays", nullable = false)
     private int durationDays;
 
     @OneToMany(mappedBy = "accountPackage", cascade = CascadeType.ALL)
-    private List<UserSubscription> userSubscriptions;
-    
-    @OneToMany(mappedBy = "accountPackage", cascade = CascadeType.ALL)
+    @JsonIgnore // Ngăn vòng lặp tuần tự hóa
     private List<AccountPackageBenefit> accountPackageBenefits;
+
+    @OneToMany(mappedBy = "accountPackage", cascade = CascadeType.ALL)
+    @JsonIgnore // Ngăn vòng lặp tuần tự hóa
+    private List<UserSubscription> userSubscriptions;
 
 }

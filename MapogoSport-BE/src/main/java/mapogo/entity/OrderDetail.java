@@ -26,11 +26,11 @@ public class OrderDetail implements Serializable{
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "OrderDetailId")
-    private Long orderDetailId;
+    private Integer orderDetailId;
 
 	@ManyToOne
-    @JoinColumn(name = "ProductDetailId", nullable = false)
-    private ProductDetail productDetail;
+    @JoinColumn(name = "ProductDetailSizeId", nullable = false)
+    private ProductDetailSize productDetailSize;
 
     @Column(name = "Quantity", nullable = false)
     private Integer quantity;

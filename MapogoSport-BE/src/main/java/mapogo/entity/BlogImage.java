@@ -24,7 +24,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Blogimages")
+@Table(name = "BlogImages")
 public class BlogImage implements Serializable{
 
     @Id

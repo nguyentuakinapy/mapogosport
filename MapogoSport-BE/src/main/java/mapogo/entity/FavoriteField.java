@@ -37,8 +37,8 @@ public class FavoriteField implements Serializable{
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "SportFielDetailId", nullable = false)
-    private SportFielDetail sportFielDetail;
+    @JoinColumn(name = "SportFieldId", nullable = false)
+    private SportField sportField;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "AddedDate", nullable = false)

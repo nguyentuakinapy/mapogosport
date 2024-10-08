@@ -1,7 +1,6 @@
 package mapogo.entity;
 
 import java.io.Serializable;
-import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,20 +14,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Accountpackagebenefit")
-public class AccountPackageBenefit implements Serializable{
-    
+@Table(name = "AccountPackageBenefit")
+public class AccountPackageBenefit implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "AccountPackageBenefitId")
-    private int accountPackageBenefitId;
-    
-    @ManyToOne
-    @JoinColumn(name = "BenefitId")
-    private Benefit benefit;
-    
-    @ManyToOne
-    @JoinColumn(name = "AccountPackageId")
-    private AccountPackage accountPackage;
+    private Integer accountPackageBenefitId;
 
+    @ManyToOne
+    @JoinColumn(name = "BenefitId", nullable = false)
+    private Benefit benefit;
+
+    @ManyToOne
+    @JoinColumn(name = "AccountPackageId", nullable = false)
+    private AccountPackage accountPackage;
 }

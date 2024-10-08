@@ -1,6 +1,11 @@
 package mapogo.entity;
 
 import java.io.Serializable;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,6 +14,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+
+import jakarta.persistence.OneToMany;
+
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,24 +29,30 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Sizes")
+
+@Table(name = "ProductDetailSize")
 public class ProductDetailSize implements Serializable {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ProductDetailSizeId")
-	private int productDetailSizeId;
+	private Integer productDetailSizeId;
 
 	@ManyToOne
-	@JoinColumn(name = "ProductDetailId")
+	@JoinColumn(name = "ProductDetailId", nullable = false)
 	private ProductDetail productDetail;
-	
+
 	@ManyToOne
-	@JoinColumn(name = "SizeId")
+	@JoinColumn(name = "SizeId", nullable = false)
 	private Size size;
-	
+
 	@Column(name = "Price", nullable = false)
 	private Double price;
-	
+
 	@Column(name = "Quantity", nullable = false)
-	private Integer quantity;
+	private int quantity;
+	
+	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<OrderDetail> orderDetails;
 }
