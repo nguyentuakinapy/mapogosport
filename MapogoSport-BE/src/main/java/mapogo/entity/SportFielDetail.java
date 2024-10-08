@@ -8,6 +8,9 @@ import lombok.Setter;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @SuppressWarnings("serial")
 @Getter
@@ -15,39 +18,37 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "Sportfieldetails")
-public class SportFielDetail implements Serializable{
+public class SportFielDetail implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SportFielDetailId", nullable = false, unique = true)
-    private int sportFielDetailId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "SportFielDetailId", nullable = false, unique = true)
+	private int sportFielDetailId;
 
-    @Column(name = "Name", nullable = false)
-    private String name;
+	@Column(name = "Name", nullable = false)
+	private String name;
 
-    @Column(name = "Price", nullable = false)
-    private double price;
+	@Column(name = "Price", nullable = false)
+	private double price;
 
-    @Column(name = "PeakHourPrices", nullable = false)
-    private double peakHourPrices;
+	@Column(name = "PeakHourPrices", nullable = false)
+	private double peakHourPrices;
 
-    @Column(name = "Size", nullable = false)
-    private String size;
+	@Column(name = "Size", nullable = false)
+	private String size;
 
-    @Column(name = "Status", nullable = false)
-    private String status;
+	@Column(name = "Status", nullable = false)
+	private String status;
 
-    @Column(name = "PercentDeposit", nullable = false)
-    private String percentDeposit;
-    
-    @ManyToOne
-    @JoinColumn(name = "SportFiledId", nullable = false)
-    private SportField sportField;
+	@Column(name = "PercentDeposit", nullable = false)
+	private String percentDeposit;
 
-    @Column(name = "PeakHour", nullable = false)
-    private String peakHour;
+	@ManyToOne
+	@JoinColumn(name = "SportFiledId", nullable = false)
+	@JsonBackReference
+	private SportField sportField;
 
+	@Column(name = "PeakHour", nullable = false)
+	private String peakHour;
 
-    
 }
-

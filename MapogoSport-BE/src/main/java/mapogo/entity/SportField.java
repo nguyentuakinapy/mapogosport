@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @SuppressWarnings("serial")
@@ -58,11 +59,10 @@ public class SportField implements Serializable{
     private Owner owner;
 
     @Column(name = "Decription", nullable = false)
-    @JsonIgnore
     private String decription;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @JsonManagedReference
     private List<SportFielDetail> sportFielDetails;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL) // corrected from "sportsField"
