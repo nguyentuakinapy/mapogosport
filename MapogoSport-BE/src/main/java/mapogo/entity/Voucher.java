@@ -29,54 +29,50 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "Voucher")
-public class Voucher implements Serializable{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "VoucherId")
-    private Integer voucherId;
+public class Voucher implements Serializable {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "VoucherId")
+	private Integer voucherId;
 
-    @Column(name = "Name", nullable = false)
-    private String name;
+	@Column(name = "Name", nullable = false)
+	private String name;
 
-    @Column(name = "DiscountPercent", nullable = false)
-    private Integer discountPercent;
+	@Column(name = "DiscountPercent", nullable = false)
+	private Integer discountPercent;
 
-    @Column(name = "Quantity", nullable = false)
-    private Integer quantity;
+	@Column(name = "Quantity", nullable = false)
+	private Integer quantity;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "CreateDate", nullable = false)
-    private Date createDate = new Date();
+	@Temporal(TemporalType.DATE)
+	@Column(name = "CreateDate", nullable = false)
+	private Date createDate = new Date();
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "EndDate", nullable = false)
-    private Date endDate = new Date();
+	@Temporal(TemporalType.DATE)
+	@Column(name = "EndDate", nullable = false)
+	private Date endDate = new Date();
 
-    @ManyToOne
-    @JoinColumn(name = "CreatedBy", nullable = false)
-    private User user;
-    
-    @Column(name = "Status", nullable = false)
-    private String status;
+	@ManyToOne
+	@JoinColumn(name = "CreatedBy", nullable = false)
+	private User user;
 
-    @Column(name = "discountCode", nullable = false)
-    private String discountCode;
-    
-    @Temporal(TemporalType.DATE)
-    @Column(name = "ActiveDate", nullable = false)
-    private Date activeDate;
-    
-    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Order> orders;
-    
-    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Booking> bookings;
+	@Column(name = "Status", nullable = false)
+	private String status;
 
-    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<UserVoucher> userVoucher;
-    
-    @ManyToOne
-    @JoinColumn(name = "username")
-    private User user;
+	@Column(name = "discountCode", nullable = false)
+	private String discountCode;
+
+	@Temporal(TemporalType.DATE)
+	@Column(name = "ActiveDate", nullable = false)
+	private Date activeDate;
+
+	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Order> orders;
+
+	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Booking> bookings;
+
+	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<UserVoucher> userVoucher;
+
 }
-
