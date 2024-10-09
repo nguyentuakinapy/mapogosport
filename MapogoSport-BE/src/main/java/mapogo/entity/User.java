@@ -56,7 +56,7 @@ public class User implements Serializable {
 	private List<Authority> authorities;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonManagedReference
 	private List<AddressUser> addressUsers;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

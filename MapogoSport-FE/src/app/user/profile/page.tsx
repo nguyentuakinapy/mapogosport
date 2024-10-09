@@ -77,9 +77,7 @@ export default function Profile() {
 
     const updateUserData = () => {
         setUserData((prevUserData) => {
-            if (!prevUserData) {
-                return prevUserData;
-            }
+            if (!prevUserData) return prevUserData;
             return {
                 ...prevUserData,
                 fullname: fullName,
@@ -148,10 +146,11 @@ export default function Profile() {
                             <FloatingLabel controlId="district" label="Giới tính">
                                 <Form.Select aria-label="Floating label select example"
                                     value={gender != null ? gender.toString() : ''}
-                                    onChange={(e) => setGender(e.target.value === '1' ? 1 : e.target.value === '2' ? 2 : null)}>
+                                    onChange={(e) => setGender(e.target.value === '0' ? 0 : e.target.value === '1' ? 1 : e.target.value === '2' ? 2 : null)}>
                                     <option>-- Nhấn để chọn --</option>
-                                    <option value="1">Nam</option>
-                                    <option value="2">Nữ</option>
+                                    <option value="0">Nam</option>
+                                    <option value="1">Nữ</option>
+                                    <option value="2">Khác</option>
                                 </Form.Select>
                             </FloatingLabel>
                         </Form.Group>

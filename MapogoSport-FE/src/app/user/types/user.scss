@@ -28,21 +28,20 @@ a {
 }
 .row {
     .col-6 {
-        
-.react-datepicker-wrapper {
-    display: block !important;
-    .react-datepicker__input-container {
-        .form-control {
-            padding-top: 1.625rem;
-            padding-bottom: .4rem;
+        .react-datepicker-wrapper {
+            display: block !important;
+            .react-datepicker__input-container {
+                .form-control {
+                    padding-top: 1.625rem;
+                    padding-bottom: .4rem;
+                }
+            }
+            
         }
-    }
-    
-}
-.dateLabel {
-    color: rgba($color: rgb(33, 37, 41), $alpha: 0.65);
-    transform: scale(.85) translateY(-.5rem) translateX(.15rem);
-}
+        .dateLabel {
+            color: rgba($color: rgb(33, 37, 41), $alpha: 0.65);
+            transform: scale(.85) translateY(-.5rem) translateX(.15rem);
+        }
     }
 }
 /*======================================================Profile CSS End======================================================*/
