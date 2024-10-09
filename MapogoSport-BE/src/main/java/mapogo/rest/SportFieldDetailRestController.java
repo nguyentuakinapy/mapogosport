@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import mapogo.entity.SportFielDetail;
+import mapogo.entity.SportFieldDetail;
 import mapogo.service.SportFieldDetailService;
 
 
@@ -22,7 +22,7 @@ public class SportFieldDetailRestController {
 	SportFieldDetailService sportFieldDetailService;
 
 	@RequestMapping("/sport_field_detail")
-	 public List<SportFielDetail> getAll(){
+	 public List<SportFieldDetail> getAll(){
 		return sportFieldDetailService.findAll();	
 	}
 	

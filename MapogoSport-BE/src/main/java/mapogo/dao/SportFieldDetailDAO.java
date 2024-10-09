@@ -6,8 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import mapogo.entity.SportFielDetail;
+import mapogo.entity.SportFieldDetail;
 
+<<<<<<< HEAD
+=======
+public interface SportFieldDetailDAO extends JpaRepository<SportFieldDetail, Integer>{
+>>>>>>> b3b1d701d94b4adc3cbba87561bcdcc9f116a731
 
 public interface SportFieldDetailDAO extends JpaRepository<SportFielDetail, Integer>{
 	

@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @SuppressWarnings("serial")
@@ -24,7 +23,7 @@ public class Role implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "RoleId", nullable = false)
-	private int roleId;
+	private Integer roleId;
 
 	@Column(name = "Name", nullable = false)
 	private String name;

@@ -24,7 +24,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "FavoriteFields")
+@Table(name = "Favoritefields")
 public class FavoriteField implements Serializable{
 
     @Id
@@ -37,7 +37,7 @@ public class FavoriteField implements Serializable{
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "SportsFieldId", nullable = false)
+    @JoinColumn(name = "SportFieldId", nullable = false)
     private SportField sportField;
 
     @Temporal(TemporalType.DATE)

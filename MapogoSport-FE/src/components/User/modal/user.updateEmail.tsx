@@ -3,6 +3,8 @@ import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 interface UserProps {
     showUpdateEmail: boolean;
     setShowUpdateEmail: (v: boolean) => void;
+    email: string;
+    setEmail: (v: string) => void;
 }
 
 const ModalUpdateEmail = (props: UserProps) => {
@@ -29,9 +31,9 @@ const ModalUpdateEmail = (props: UserProps) => {
                             <div className="border border-2 mb-2">
                                 <Row>
                                     <Col xs={2}><i className="bi bi-envelope-at-fill fs-3 ms-4"></i></Col>
-                                    <Col xs={6}>
+                                    <Col xs={10}>
                                         <div style={{ color: "#142239" }} className="fw-bold">Lấy mã xác nhận qua Email</div>
-                                        <div className="fw-bold text-danger">Email: hungnpps30910</div>
+                                        <div className="fw-bold text-danger">Email: {props.email}</div>
                                     </Col>
                                 </Row>
                             </div>

@@ -36,9 +36,6 @@ public class Product implements Serializable {
 	@Column(name = "Name", nullable = false)
 	private String name;
 
-	@Column(name = "Price", nullable = false)
-	private Double price;
-
 	@ManyToOne
 	@JoinColumn(name = "CategoryProductId", nullable = false)
 	private CategoryProduct categoryProduct;
@@ -67,7 +64,6 @@ public class Product implements Serializable {
 	@OneToMany(mappedBy = "product")
 	@JsonIgnore
 	private List<ProductDetail> productDetails;
-
 
 	@OneToMany(mappedBy = "product")
 	@JsonIgnore

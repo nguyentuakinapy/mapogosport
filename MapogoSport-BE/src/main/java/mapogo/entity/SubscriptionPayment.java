@@ -15,36 +15,37 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "SubscriptionPayments")
-public class SubscriptionPayment implements Serializable{
+@Table(name = "Subscriptionpayments")
+public class SubscriptionPayment implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SubscriptionPaymentId", nullable = false, unique = true)
-    private int subscriptionPaymentId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "SubscriptionPaymentId", nullable = false, unique = true)
+	private Integer subscriptionPaymentId;
 
-    @ManyToOne
-    @JoinColumn(name = "Username", nullable = false)
-    private User user;
+	@ManyToOne
+	@JoinColumn(name = "Username", nullable = false)
+	private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "UserSubscriptionId", nullable = false)
-    private UserSubscription userSubscription;
+	@ManyToOne
+	@JoinColumn(name = "UserSubscriptionId", nullable = false)
+	private UserSubscription userSubscription;
 
-    @Column(name = "PaymentMethod", nullable = false)
-    private int paymentMethod;
+	@ManyToOne
+	@JoinColumn(name = "PaymentMethodId")
+	private PaymentMethod paymentMethod;
 
-    @Column(name = "Amount", nullable = false)
-    private double amount;
+	@Column(name = "Amount", nullable = false)
+	private double amount;
 
-    @Column(name = "Status", nullable = false)
-    private String status;
+	@Column(name = "Status", nullable = false)
+	private String status;
 
-    @Column(name = "PaymentDate", nullable = false)
-    private Date paymentDate;
+	@Temporal(TemporalType.DATE)
+	@Column(name = "PaymentDate", nullable = false)
+	private Date paymentDate = new Date();
 
-    @Column(name = "ReferenceCode")
-    private String referenceCode;
+	@Column(name = "ReferenceCode")
+	private String referenceCode;
 
 }
-

@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@SuppressWarnings("serial")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,15 +34,15 @@ public class Cart implements Serializable {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "ProductDetailId", nullable = false)
-    private ProductDetail productDetail;
+    @JoinColumn(name = "ProductDetailSizeId", nullable = false)
+    private ProductDetailSize productDetailSize;
 
     @Column(name = "Date", nullable = false)
     private Date date;
 
     @Column(name = "TotalAmount", nullable = false)
     private Double totalAmount;
-
+    
     @Column(name = "Quantity", nullable = false)
     private Integer quantity;
 }

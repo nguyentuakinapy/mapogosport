@@ -21,7 +21,7 @@ public class UserVoucher implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UserVoucherId")
-    private int userVoucherId;
+    private Integer userVoucherId;
     
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
@@ -36,7 +36,7 @@ public class UserVoucher implements Serializable{
     
     @Temporal(TemporalType.DATE)
     @Column(name = "Date", nullable = false)
-    private Date Date;
+    private Date date = new Date();
 
 
 }

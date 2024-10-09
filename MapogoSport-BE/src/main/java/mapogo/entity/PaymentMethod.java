@@ -3,8 +3,10 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,7 +23,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "PaymentMethods")
+@Table(name = "Paymentmethods")
 public class PaymentMethod implements Serializable{
 
     @Id
@@ -31,15 +33,18 @@ public class PaymentMethod implements Serializable{
 
     @Column(name = "Name", nullable = false)
     private String name;
-
+    
     @Column(name = "Description", nullable = false)
     private String description;
 
-    @OneToMany(mappedBy = "paymentMethod")
+
+    @OneToMany(mappedBy = "paymentMethod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Booking> bookings;
 
-    @OneToMany(mappedBy = "paymentMethod")
+    @OneToMany(mappedBy = "paymentMethod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders;
 
+    @OneToMany(mappedBy = "paymentMethod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<SubscriptionPayment> subscriptionPayments;
 }
 

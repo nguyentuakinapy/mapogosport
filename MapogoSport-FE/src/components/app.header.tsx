@@ -1,14 +1,45 @@
 'use client'
 import Link from 'next/link';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
+
 import LoginModal from './account/modal/login.modal';
 import RegisterModal from './account/modal/register.modal';
+import axios from 'axios';
+
+
+
+const CartBadge = ({ user }) => {
+    const [cartCount, setCartCount] = useState(0); // Initialize cart count to 0
+
+    // Function to fetch the cart count
+    const countCartItem = async () => {
+        if (!user) return; // Don't fetch if no user is logged in
+        try {
+            const response = await axios.get(`http://localhost:8080/res/cart/count/${user.username}`);
+            const cartCount = response.data; // assuming the API returns the count directly
+            setCartCount(cartCount); // Update the cart count in the state
+        } catch (error) {
+            console.error('Error fetching cart count:', error);
+        }
+    };
+
+    // Fetch cart count on component mount and when the user changes
+    useEffect(() => {
+        countCartItem();
+    }, [user]);
+
+    return (
+        <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
+            {cartCount} {/* Display the cart count here */}
+            <span className="visually-hidden">items in cart</span>
+        </span>
+    );
+};
 
 const Header = () => {
     const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
@@ -61,7 +92,7 @@ const Header = () => {
                 const data = await reponse.json();
                 setCategoryFields(data)
             } catch (error) {
-            console.log("Lỗi call Api rồi: ", error)
+                console.log("Lỗi call Api rồi: ", error)
             }
         }
         fetchData();
@@ -111,8 +142,8 @@ const Header = () => {
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#forgotModal" style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
                                     {/* <hr className='m-0' /> */}
                                     <Link href='/user/profile' className='dropdown-item text-decoration-none text-dark'>Thông tin tài khoản</Link>
-                                    <Link href='/owner' className={`dropdown-item text-decoration-none text-dark ${userData?.authorities[0].role.name == 'Owner' ? '' : 'd-none'}`}>Chủ sân</Link>
-                                    <Link href='/admin' className={`dropdown-item text-decoration-none text-dark ${userData?.authorities[0].role.name == 'Admin' ? '' : 'd-none'}`}>Admin</Link>
+                                    {/* <Link href='/owner' className={`dropdown-item text-decoration-none text-dark ${userData?.authorities[0].role.name == 'Owner' ? '' : 'd-none'}`}>Chủ sân</Link>
+                                    <Link href='/admin' className={`dropdown-item text-decoration-none text-dark ${userData?.authorities[0].role.name == 'Admin' ? '' : 'd-none'}`}>Admin</Link> */}
                                     <a className={`dropdown-item ${userData ? '' : 'd-none'}`} onClick={() => logOut()} style={{ cursor: 'pointer' }}>Đăng xuất</a>
                                 </ul>
                             </div>
@@ -122,6 +153,7 @@ const Header = () => {
                                     0
                                     <span className="visually-hidden">unread messages</span>
                                 </span>
+                                {userData && <CartBadge user={userData} />}
                             </Nav>
                         </Nav>
                     </Navbar.Collapse>

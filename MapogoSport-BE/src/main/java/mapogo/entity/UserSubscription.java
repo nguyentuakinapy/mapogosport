@@ -14,13 +14,13 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "UserSubscriptions")
+@Table(name = "Usersubscriptions")
 public class UserSubscription implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UserSubscriptionId", nullable = false, unique = true)
-    private int userSubscriptionId;
+    private Integer userSubscriptionId;
 
     @ManyToOne
     @JoinColumn(name = "AccountPackageId", nullable = false)
@@ -32,11 +32,11 @@ public class UserSubscription implements Serializable{
 
     @Temporal(TemporalType.DATE)
     @Column(name = "StartDay", nullable = false)
-    private Date startDay;
+    private Date startDay = new Date();
 
     @Temporal(TemporalType.DATE)
     @Column(name = "EndDay", nullable = false)
-    private Date endDay;
+    private Date endDay = new Date();
 
     @Column(name = "Status", nullable = false)
     private String status;
