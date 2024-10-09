@@ -19,8 +19,18 @@ public class CartService {
 	}
 
 	public Cart addToCart(Cart cart) {
-//		cart.setTotalAmount(cart.getQuantity() * cart.getProductDetail().getProduct().getPrice());
 		cart.setDate(new Date());
 		return cartDao.save(cart);
+	}
+
+	public Integer CountItem(String username) {
+		return cartDao.countCart(username);
+	}
+
+	public Cart updateCart(Cart cart) {
+		// Fetch the existing cart from the database using the cart ID
+		Cart existingCart = cartDao.findById(cart.getCartId())
+				.orElseThrow(() -> new RuntimeException("Cart not found"));
+		return cartDao.save(existingCart);
 	}
 }
