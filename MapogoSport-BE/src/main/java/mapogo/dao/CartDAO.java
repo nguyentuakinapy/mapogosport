@@ -10,4 +10,14 @@ public interface CartDAO extends JpaRepository<Cart, Integer> {
 
     @Query("SELECT c FROM Cart c JOIN c.user u WHERE u.username = :username")
     List<Cart> findCartByUsername(@Param("username") String username);
+    
+    //COUNT cart
+    
+    @Query("SELECT COUNT(c) "
+    	      + "FROM Cart c "
+    	      + "JOIN c.user u "
+    	      + "WHERE u.username = :username")
+    	Integer countCart(@Param("username") String username);
+
+	
 }

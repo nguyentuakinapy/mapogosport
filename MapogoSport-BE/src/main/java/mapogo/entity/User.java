@@ -10,6 +10,7 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -37,52 +38,52 @@ public class User implements Serializable {
 	@Temporal(TemporalType.DATE)
 	@Column(name = "CreatedAt")
 	private Date createdAt = new Date();
-	
+
 	@Column(name = "Gender", nullable = true)
 	private Integer gender = null;
-	
+
 	@Temporal(TemporalType.DATE)
 	@Column(name = "Birthday", nullable = true)
 	private Date birthday = null;
-	
+
 	@Column(name = "Email", nullable = false)
 	private String email;
-	
+
 	@Column(name = "Avatar", nullable = true)
 	private String avatar = null;
-	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonManagedReference
+	@JsonIgnore
 	private List<Authority> authorities;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<AddressUser> addressUsers;
-	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonBackReference("user-cart") // Match the name used in Cart
 	private List<Cart> carts;
-	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonBackReference
 	private List<ProductReview> productReviews;
-	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<OrderPayment> orderPayments;
-	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<Order> orders;
-	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<FieldReview> fieldReviews;
-	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<UserSubscription> subscriptionPayments;
-	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<FavoriteField> favoriteFields;
@@ -94,11 +95,11 @@ public class User implements Serializable {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<Voucher> vouchers;
-	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<UserVoucher> UserVouchers;
-	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<BookingPayment> bookingPayments;
@@ -114,5 +115,5 @@ public class User implements Serializable {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<UserVoucher> UserVoucher;
-	
+
 }

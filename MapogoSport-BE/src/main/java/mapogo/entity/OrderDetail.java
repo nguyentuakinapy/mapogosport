@@ -2,6 +2,8 @@ package mapogo.entity;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,23 +24,23 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "Orderdetails")
-public class OrderDetail implements Serializable{
+public class OrderDetail implements Serializable {
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "OrderDetailId")
-    private Integer orderDetailId;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "OrderDetailId")
+	private Integer orderDetailId;
 
 	@ManyToOne
-    @JoinColumn(name = "ProductDetailSizeId", nullable = false)
-    private ProductDetailSize productDetailSize;
+	@JoinColumn(name = "ProductDetailSizeId", nullable = false)
+	@JsonManagedReference
+	private ProductDetailSize productDetailSize;
 
-    @Column(name = "Quantity", nullable = false)
-    private Integer quantity;
+	@Column(name = "Quantity", nullable = false)
+	private Integer quantity;
 
-    @ManyToOne
-    @JoinColumn(name = "OrderId", nullable = false)
-    private Order order;
-    
+	@ManyToOne
+	@JoinColumn(name = "OrderId", nullable = false)
+	@JsonManagedReference
+	private Order order;
 
 }
-

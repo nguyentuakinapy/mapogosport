@@ -3,7 +3,9 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 
@@ -30,7 +32,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 
-@Table(name = "ProductDetailSize")
+@Table(name = "Productdetailsize")
 public class ProductDetailSize implements Serializable {
 
 	@Id
@@ -40,23 +42,25 @@ public class ProductDetailSize implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductDetailId", nullable = false)
+	@JsonManagedReference("product-detail-size") // Specify a unique name
 	private ProductDetail productDetail;
 
 	@ManyToOne
 	@JoinColumn(name = "SizeId", nullable = false)
+	@JsonManagedReference
 	private Size size;
-
+	
 	@Column(name = "Price", nullable = false)
 	private Double price;
 
 	@Column(name = "Quantity", nullable = false)
 	private int quantity;
-	
+
 	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<OrderDetail> orderDetails;
-	
+
 	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonBackReference("product-detail-size-cart") // Match the name used in Cart
 	private List<Cart> carts;
 }
