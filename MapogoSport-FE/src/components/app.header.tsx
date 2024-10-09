@@ -10,6 +10,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import LoginModal from './account/modal/login.modal';
 import RegisterModal from './account/modal/register.modal';
 import axios from 'axios';
+import useSWR from 'swr';
 
 
 
@@ -50,13 +51,6 @@ const Header = () => {
     const [userData, setUserData] = useState<User | null>(null);
 
     useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUserData(parsedUserData);
-            // console.log(parsedUserData); // Kiểm tra dữ liệu
-        }
-
         require('bootstrap/dist/js/bootstrap.bundle.min.js');
 
         const handleScroll = () => {
@@ -98,7 +92,31 @@ const Header = () => {
         fetchData();
     }, [])
 
+    const [username, setUsername] = useState<string>("");
+    useEffect(() => {
+        const user = sessionStorage.getItem('user');
+        if (user) {
+            const parsedUserData = JSON.parse(user) as User;
+            setUsername(parsedUserData.username);
+            // console.log(parsedUserData); // Kiểm tra dữ liệu
+        }
+    })
 
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+    const { data, error, isLoading } = useSWR(
+        username == "" ? null : `http://localhost:8080/rest/user/${username}`, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
+
+    useEffect(() => {
+        if (data) {
+            setUserData(data);
+            console.log(data);
+        }
+    }, [data])
 
     const logOut = () => {
         sessionStorage.removeItem('user');
@@ -132,18 +150,18 @@ const Header = () => {
                             </Nav>
                             <div className="dropdown">
                                 <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i className="bi bi-person-fill me-2"></i>{userData ? userData.fullname : 'Tài khoản'}
+                                    <i className="bi bi-person-fill me-2"></i>{userData ? userData?.fullname : 'Tài khoản'}
                                 </span>
                                 <ul className="dropdown-menu">
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowLoginModal(true)} style={{ cursor: 'pointer' }} >Đăng nhập</a>
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowRegisterModal(true)} style={{ cursor: 'pointer' }}>Đăng ký</a>
-                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#changeEmail" style={{ cursor: 'pointer' }}>Thay đổi Email</a>
-                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-target="#changePassword" style={{ cursor: 'pointer' }}>Thay đổi mật khẩu</a>
+                                    {/* <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#changeEmail" style={{ cursor: 'pointer' }}>Thay đổi Email</a> */}
+                                    {/* <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-target="#changePassword" style={{ cursor: 'pointer' }}>Thay đổi mật khẩu</a> */}
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#forgotModal" style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
                                     {/* <hr className='m-0' /> */}
-                                    <Link href='/user/profile' className='dropdown-item text-decoration-none text-dark'>Thông tin tài khoản</Link>
-                                    {/* <Link href='/owner' className={`dropdown-item text-decoration-none text-dark ${userData?.authorities[0].role.name == 'Owner' ? '' : 'd-none'}`}>Chủ sân</Link>
-                                    <Link href='/admin' className={`dropdown-item text-decoration-none text-dark ${userData?.authorities[0].role.name == 'Admin' ? '' : 'd-none'}`}>Admin</Link> */}
+                                    <Link href='/user/profile' className={`dropdown-item text-decoration-none text-dark ${userData ? '' : 'd-none'}`}>Thông tin tài khoản</Link>
+                                    <Link href='/owner' className={`dropdown-item text-decoration-none text-dark ${userData ? userData?.authorities[0].role.name == 'ROLE_OWNER' ? '' : 'd-none' : 'd-none'}`}>Chủ sân</Link>
+                                    <Link href='/admin' className={`dropdown-item text-decoration-none text-dark ${userData ? userData?.authorities[0].role.name == 'ROLE_ADMIN' ? '' : 'd-none' : 'd-none'}`}>Admin</Link>
                                     <a className={`dropdown-item ${userData ? '' : 'd-none'}`} onClick={() => logOut()} style={{ cursor: 'pointer' }}>Đăng xuất</a>
                                 </ul>
                             </div>
