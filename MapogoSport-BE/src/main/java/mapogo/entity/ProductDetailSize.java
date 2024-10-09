@@ -30,7 +30,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 
-@Table(name = "ProductDetailSize")
+@Table(name = "Productdetailsize")
 public class ProductDetailSize implements Serializable {
 
 	@Id
