@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @SuppressWarnings("serial")
@@ -39,7 +40,6 @@ public class SportField implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "CategoriesFieldId", nullable = false)
-    @JsonIgnore
     private CategoryField categoriesField;
 
     @Column(name = "Quantity", nullable = false)
@@ -60,7 +60,7 @@ public class SportField implements Serializable{
     private String decription;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @JsonManagedReference
     private List<SportFieldDetail> sportFielDetails;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL) // corrected from "sportsField"
