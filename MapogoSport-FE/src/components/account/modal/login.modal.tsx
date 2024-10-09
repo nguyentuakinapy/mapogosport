@@ -64,8 +64,8 @@ export default function Login(props: LoginProps) {
                     sessionStorage.setItem('user', JSON.stringify(dataUser));
                     if (dataUser.authorities[0].role.name == "ROLE_ADMIN") {
                         window.location.href = "/admin";
-                    } else if (dataUser.authorities[0].role.name == "ROLE_EMPLOYEE") {
-                        window.location.href = "/owner";
+                    } else if (dataUser.authorities[0].role.name == "ROLE_STAFF") {
+                        window.location.href = "/admin";
                     } else if (dataUser.authorities[0].role.name == "ROLE_OWNER") {
                         window.location.href = "/owner";
                     } else {
