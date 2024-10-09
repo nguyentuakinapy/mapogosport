@@ -22,7 +22,7 @@ export default function Register(props: RegisterProps) {
     const [fullName, setFullName] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [forgotPassword, setForgotPassword] = useState<string>("");
-    const [authority, setAuthority] = useState<number>(1);
+    const [authority, setAuthority] = useState<number>(4);
 
     const [otp, setOtp] = useState<string>("");
     const [otpValue, setOtpValue] = useState<string>("");

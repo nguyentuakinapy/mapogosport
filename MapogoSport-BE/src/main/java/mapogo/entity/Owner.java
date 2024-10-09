@@ -9,6 +9,8 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @SuppressWarnings("serial")
 @Getter
@@ -37,11 +39,14 @@ public class Owner implements Serializable {
 	private String vnpayAccount;
 
 	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<SportField> sportsFields;
 
 	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<BlogPost> blogPosts;
 
 	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<Booking> bookings;
 }

@@ -1,24 +1,45 @@
 'use client';
 import BookingModal from "@/components/Owner/modal/booking.modal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Table } from "react-bootstrap";
 import { toast } from "react-toastify";
+import useSWR from "swr";
 
 type BookingsType = {
     [key: string]: string[];
 };
 
 export default function BookingSport() {
+    const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
+
     const [bookings, setBookings] = useState<BookingsType>({
-        "6h00": ["Đã đặt", "Tạm đóng", "Còn trống"],
-        "6h10": ["Đã đặt", "Tạm đóng"]
+        // "6h00": ["Đã đặt", "Tạm đóng", "Còn trống"],
+        // "6h10": ["Đã đặt", "Tạm đóng"]
 
     });
     const [selectTime, setSelectTime] = useState('');
     const [selectDate, setSelectDate] = useState('');
-    const [selectSport, setSelectSport] = useState('');
+    const [selectSport, setSelectSport] = useState<number>(0);
 
-    const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
+    const [dataSport, setDataSport] = useState<SportField[]>([])
+
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/sport_field_by_owner/1`, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
+
+    useEffect(() => {
+        console.log(data);
+        setDataSport(data);
+    }, [data])
+
+    useEffect(() => {
+        console.log(dataSport);
+        getTime();
+    }, [dataSport])
 
     const checkAndAddStatus = (time: string, newStatus: string) => {
         let checkAdd = true;
@@ -42,9 +63,86 @@ export default function BookingSport() {
 
     };
 
-    const addNew = () => {
-        checkAndAddStatus("09h00", "Tạm đóng");
+    const [opening, setOpening] = useState<number>();
+    const [closing, setClosing] = useState<number>();
+    const [operatingTime, setOperatingTime] = useState<number>(0);
+
+
+    const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
+
+    useEffect(() => {
+        getTime();
+        console.log(selectSport);
+    }, [selectSport])
+
+    useEffect(() => {
+        if (dataTimeSport.length > 0) {
+            const newBookings = { ...bookings };
+
+            const validTimes = dataTimeSport.filter(time => time !== "undefinedh00" && time !== null);
+
+            validTimes.forEach((time) => {
+                if (!newBookings[time]) {
+                    newBookings[time] = [];
+                    // console.log(newBookings[time]);
+                }
+            });
+            setBookings(newBookings); // Cập nhật state bookings
+        }
+    }, [dataTimeSport])
+
+    useEffect(() => {
+        const newData: string[] = [];
+        for (let index = 0; index < (operatingTime * 2) + 1; index++) {
+
+            if (newData.length === 0) {
+                newData.push(String(opening + "h00"));
+            } else {
+                if (newData[newData.length - 1].includes("h30")) {
+                    const getDataTime = newData[newData.length - 2];
+                    const getTime = getDataTime.match(/\d+/);
+                    if (getTime) {
+                        newData.push(String(Number(getTime[0]) + 1) + "h00");
+                    }
+                } else {
+                    const getDataTime = newData[newData.length - 1];
+                    const getTime = getDataTime.match(/\d+/);
+                    if (getTime) {
+                        const createOpening = String(getTime[0]) + "h30";
+                        newData.push(createOpening);
+                    }
+                }
+            }
+        }
+        setDataTimeSport((prevData) => [...prevData, ...newData]);
+    }, [operatingTime])
+
+
+    const getTime = () => {
+        console.log("Get time");
+
+        if (dataSport && dataSport.length > selectSport) {
+            const open = dataSport[selectSport]?.opening;
+            const close = dataSport[selectSport]?.closing;
+
+            if (open && typeof open === 'string' && close && typeof close === 'string') {
+                const numberOpen = open.match(/\d+/);
+                const numberClose = close.match(/\d+/);
+                if (numberOpen && numberClose) {
+                    setOpening(Number(numberOpen[0]));
+                    setClosing(Number(numberClose[0]));
+                    setOperatingTime(Number(numberClose[0]) - Number(numberOpen[0]));
+                } else {
+                    console.log('Không tìm thấy số trong chuỗi mở cửa.');
+                }
+            } else {
+                console.log('Giá trị mở cửa không hợp lệ:', open);
+            }
+        } else {
+            console.log('Không có dữ liệu thể thao hợp lệ hoặc selectSport không hợp lệ:', selectSport);
+        }
     }
+
 
     const renderTableRows = () => {
         return Object.entries(bookings).map(([time, statuses]) => (
@@ -71,12 +169,23 @@ export default function BookingSport() {
                 return "";
         }
     };
+    const clearData = () => {
+        setDataTimeSport([]);
+        setBookings({});
+    }
+
+    if (isLoading) {
+        return (
+            <h2>Data is comming</h2>
+        )
+    }
 
     return (
         <>
-            <button onClick={() => addNew()} className="btn btn-success">Đặt sân 06h00</button>
+            <button onClick={() => checkAndAddStatus("8h00", "Tạm đóng")
+            }></button >
             {selectDate} - {selectSport} - {selectTime}
-            <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>LỊCH ĐẶT SÂN</h3>
+            <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}> LỊCH ĐẶT SÂN</h3>
             <div className="input-group my-2">
                 <select defaultValue={selectDate} onChange={(e) => setSelectDate(e.target.value)}
                     className="form-select" aria-label="Default select example">
@@ -85,10 +194,13 @@ export default function BookingSport() {
                 </select>
                 <input type="time" className="form-control" value={selectTime}
                     onChange={(e) => setSelectTime(e.target.value)} />
-                <select defaultValue={selectSport} onChange={(e) => setSelectSport(e.target.value)} className="form-select" aria-label="Default select example">
-                    <option value="Sân 1">Sân 1</option>
-                    <option value="Sân 2">Sân 2</option>
-                    <option value="Sân3">Sân 3</option>
+                <select value={selectSport} onChange={(e) => {
+                    setSelectSport(Number(e.target.value));
+                    clearData();
+                }} className="form-select" aria-label="Default select example">
+                    {dataSport && dataSport.length > 0 && dataSport.map((item, index) => (
+                        <option key={item.sportFieldId} value={index}>{item.name}</option>
+                    ))}
                 </select>
             </div>
             <div className="div-tb">
@@ -96,21 +208,11 @@ export default function BookingSport() {
                     <thead className="tb-head">
                         <tr>
                             <th>Thời gian</th>
-                            <th>Sân 1</th>
-                            <th>Sân 2</th>
-                            <th>Sân 3</th>
-                            <th>Sân 4</th>
-                            <th>Sân 5</th>
-                            <th>Sân 6</th>
-                            <th>Sân 7</th>
-                            <th>Sân 8</th>
-                            <th>Sân 9</th>
-                            <th>Sân 10</th>
-                            <th>Sân 11</th>
-                            <th>Sân 12</th>
-                            <th>Sân 13</th>
-                            <th>Sân 14</th>
-                            <th>Sân 15</th>
+                            {dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails &&
+                                dataSport[selectSport].sportFielDetails.map(item => (
+                                    <th key={item.sportFielDetailId}>{item.name}</th>
+                                ))
+                            }
                         </tr>
                     </thead>
                     <tbody>
