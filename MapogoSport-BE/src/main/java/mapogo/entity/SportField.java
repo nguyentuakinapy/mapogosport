@@ -61,7 +61,7 @@ public class SportField implements Serializable{
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<SportFieldDetail> sportFielDetails;
+    private List<SportFielDetail> sportFielDetails;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL) // corrected from "sportsField"
     @JsonIgnore

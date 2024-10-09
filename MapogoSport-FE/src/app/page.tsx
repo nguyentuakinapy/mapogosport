@@ -245,7 +245,7 @@ export default function Home() {
                           {renderStars(rating)}
                         </div>
                       </div>
-                      <Link href={"#"} className="btn btn-user mt-2">Đặt sân</Link>
+                      <Link href={`/sport-detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
                     </div>
                   </div>
                 </Col>

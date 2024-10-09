@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 
 
+
+
 const Categories = () => {
     const categories = [
         { id: 1, name: "Cỏ nhân tạo", quantity: 10 },
@@ -134,9 +136,6 @@ const Categories = () => {
                                             <div className="price">
                                                 <span className="price-amount ms-1">{product.price}</span>
                                                 {/* <span className="price-amount old-price me-1">{product.oldPrice}</span> */}
-                                            </div>
-                                            <div className="product-category ms-1">
-                                                <Link href="">Lưới &amp; Khung thành</Link>
                                             </div>
                                             <div className="product-title ms-1">
                                                 <Link href="">{product.name}</Link>
