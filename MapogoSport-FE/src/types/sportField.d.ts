@@ -1,21 +1,29 @@
-interface SportField{
+
+interface SportField {
     sportFieldId: number
     name: string
     address: string
     opening: string
     closing: string
-    quantity: number
-    image: string
-    status: string
-    decription: string
-    sportFielDetails: {
-        sportFielDetailId: number
+    categoriesField: {
+        categoriesFieldId: number
         name: string
-        price: number
-        peakHourPrices: number
-        size: string
-        status: string
-        percentDeposit: number
-        peakHour: string
+        image: string
     }
+    quantity: number
+    status: string
+    image: string
+    decription: string
+    sportFielDetails: [
+        {
+            sportFielDetailId: number
+            name: string
+            price: float
+            peakHourPrices: float
+            size: string
+            status: number
+            percentDeposit: number
+            peakHour: string
+        }
+    ]
 }

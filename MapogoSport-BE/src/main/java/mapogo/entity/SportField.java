@@ -40,7 +40,6 @@ public class SportField implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "CategoriesFieldId", nullable = false)
-    @JsonIgnore
     private CategoryField categoriesField;
 
     @Column(name = "Quantity", nullable = false)
@@ -61,13 +60,8 @@ public class SportField implements Serializable{
     private String decription;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
-<<<<<<< HEAD
     @JsonManagedReference
     private List<SportFielDetail> sportFielDetails;
-=======
-    @JsonIgnore
-    private List<SportFieldDetail> sportFielDetails;
->>>>>>> b3b1d701d94b4adc3cbba87561bcdcc9f116a731
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL) // corrected from "sportsField"
     @JsonIgnore

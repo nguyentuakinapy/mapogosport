@@ -3,6 +3,7 @@ package mapogo.entity;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,7 +37,7 @@ public class Gallery implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "ProductDetailId", nullable = false)
-    @JsonIgnore
+    @JsonManagedReference
     private ProductDetail productDetail;
 
 }

@@ -20,7 +20,7 @@ const CartBadge = ({ user }) => {
     const countCartItem = async () => {
         if (!user) return; // Don't fetch if no user is logged in
         try {
-            const response = await axios.get(`http://localhost:8080/res/cart/count/${user.username}`);
+            const response = await axios.get(`http://localhost:8080/rest/cart/count/${user.username}`);
             const cartCount = response.data; // assuming the API returns the count directly
             setCartCount(cartCount); // Update the cart count in the state
         } catch (error) {
