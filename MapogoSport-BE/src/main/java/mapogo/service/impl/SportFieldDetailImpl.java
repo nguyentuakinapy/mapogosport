@@ -21,5 +21,15 @@ public class SportFieldDetailImpl implements SportFieldDetailService{
 		return sportFieldDetailDAO.findAll();
 	}
 
+	@Override
+	public List<String> findSizeBySportFieldId(Integer sportField) {
+		return sportFieldDetailDAO.findSizeBySportField(sportField);
+	}
+
+	@Override
+	public List<Object[]> findPriceBySize(Integer sportFieId, String size) {
+		return sportFieldDetailDAO.findPriceBySize(sportFieId, size);
+	}
+
 
 }
