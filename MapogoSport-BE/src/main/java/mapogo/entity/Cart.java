@@ -3,6 +3,7 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
@@ -39,7 +40,6 @@ public class Cart implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "ProductDetailSizeId", nullable = false)
-
     @JsonManagedReference
     private ProductDetailSize productDetailSize;
 
