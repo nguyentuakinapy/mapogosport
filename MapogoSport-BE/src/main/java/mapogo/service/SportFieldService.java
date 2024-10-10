@@ -8,4 +8,6 @@ public interface SportFieldService {
 	List<SportField> findAll();
 	
 	SportField findBySportFieldId(Integer Id);
+	
+	List<SportField> findSportFeildByOwner(Integer id);
 }

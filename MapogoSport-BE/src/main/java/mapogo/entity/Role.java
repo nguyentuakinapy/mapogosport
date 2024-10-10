@@ -9,7 +9,6 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -29,7 +28,7 @@ public class Role implements Serializable {
 	private String name;
 
 	@OneToMany(mappedBy = "role")
-	@JsonBackReference
+    @JsonIgnore
 	private List<Authority> authorities;
 
 }

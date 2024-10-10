@@ -12,16 +12,19 @@ import RegisterModal from './account/modal/register.modal';
 import axios from 'axios';
 import useSWR from 'swr';
 
+import ForgotPassword from './account/modal/forgotPassword.modal';
 
 
-const CartBadge = ({ user }) => {
+
+
+const CartBadge = ({ username }: { username: string }) => {
     const [cartCount, setCartCount] = useState(0); // Initialize cart count to 0
 
     // Function to fetch the cart count
     const countCartItem = async () => {
-        if (!user) return; // Don't fetch if no user is logged in
+        if (!username) return; // Don't fetch if no user is logged in
         try {
-            const response = await axios.get(`http://localhost:8080/rest/cart/count/${user.username}`);
+            const response = await axios.get(`http://localhost:8080/rest/cart/count/${username}`);
             const cartCount = response.data; // assuming the API returns the count directly
 
             setCartCount(cartCount); // Update the cart count in the state
@@ -33,7 +36,7 @@ const CartBadge = ({ user }) => {
     // Fetch cart count on component mount and when the user changes
     useEffect(() => {
         countCartItem();
-    }, [user]);
+    }, [username]);
 
     return (
         <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
@@ -46,6 +49,7 @@ const CartBadge = ({ user }) => {
 const Header = () => {
     const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
+    const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
     const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
 
 
@@ -158,7 +162,7 @@ const Header = () => {
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowRegisterModal(true)} style={{ cursor: 'pointer' }}>Đăng ký</a>
                                     {/* <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#changeEmail" style={{ cursor: 'pointer' }}>Thay đổi Email</a> */}
                                     {/* <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-target="#changePassword" style={{ cursor: 'pointer' }}>Thay đổi mật khẩu</a> */}
-                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#forgotModal" style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
+                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowForgotPassword(true)} style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
                                     {/* <hr className='m-0' /> */}
                                     <Link href='/user/profile' className={`dropdown-item text-decoration-none text-dark ${userData ? '' : 'd-none'}`}>Thông tin tài khoản</Link>
                                     <Link href='/owner' className={`dropdown-item text-decoration-none text-dark ${userData ? userData?.authorities[0].role.name == 'ROLE_OWNER' ? '' : 'd-none' : 'd-none'}`}>Chủ sân</Link>
@@ -172,7 +176,7 @@ const Header = () => {
                                     0
                                     <span className="visually-hidden">unread messages</span>
                                 </span>
-                                {userData && <CartBadge user={userData} />}
+                                {userData && <CartBadge username={userData.username} />}
                             </Nav>
                         </Nav>
                     </Navbar.Collapse>
@@ -191,6 +195,7 @@ const Header = () => {
             </Navbar>
             <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></LoginModal>
             <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
+            <ForgotPassword showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}></ForgotPassword>
         </main >
     );
 }

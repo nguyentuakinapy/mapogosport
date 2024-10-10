@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,7 +37,6 @@ public class Order implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "Username", nullable = false)
-	@JsonBackReference
 	private User user;
 
 	@Column(name = "Address", nullable = false)
@@ -73,7 +70,6 @@ public class Order implements Serializable {
 	private Double shipFee;
 
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	
 	private List<OrderDetail> orderDetails;
 
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

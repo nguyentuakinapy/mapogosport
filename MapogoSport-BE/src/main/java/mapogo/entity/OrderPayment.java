@@ -3,8 +3,6 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,7 +34,6 @@ public class OrderPayment implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "OrderId", nullable = false)
-	@JsonBackReference
 	private Order order;
 
 	@Column(name = "Amount", nullable = false)
@@ -51,7 +48,6 @@ public class OrderPayment implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "Username", nullable = false)
-	@JsonBackReference
 	private User user;
 
 	@Column(name = "ReferenceCode")

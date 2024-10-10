@@ -4,9 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,7 +38,6 @@ public class Product implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "CategoryProductId", nullable = false)
-	@JsonManagedReference
 	private CategoryProduct categoryProduct;
 
 	@Column(name = "Decription", nullable = false)
@@ -65,11 +62,11 @@ public class Product implements Serializable {
 	private Double stock;
 
 	@OneToMany(mappedBy = "product")
-	@JsonBackReference
+	@JsonIgnore
 	private List<ProductDetail> productDetails;
 
 	@OneToMany(mappedBy = "product")
-	@JsonBackReference
+	@JsonIgnore
 	private List<ProductReview> productReviews;
 
 }

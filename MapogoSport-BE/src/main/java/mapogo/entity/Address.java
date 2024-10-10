@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -35,7 +36,7 @@ public class Address implements Serializable{
     private String ward;
 
     @OneToMany(mappedBy = "address", cascade = CascadeType.ALL)
-    @JsonIgnore // Ngăn vòng lặp tuần tự hóa
+    @JsonIgnore
     private List<AddressUser> addressUsers;
 }
 

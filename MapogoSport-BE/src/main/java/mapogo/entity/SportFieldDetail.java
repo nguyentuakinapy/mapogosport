@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -16,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "SportFieldDetails")
+@Table(name = "Sportfielddetails")
 public class SportFieldDetail implements Serializable {
 
 	@Id
@@ -44,12 +46,13 @@ public class SportFieldDetail implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "SportFiledId", nullable = false)
+	@JsonBackReference
 	private SportField sportField;
 
 	@Column(name = "PeakHour", nullable = false)
 	private String peakHour;
 
 	@OneToMany(mappedBy = "sportFieldDetail", cascade = CascadeType.ALL) // corrected from "sportsField"
-	@JsonIgnore
+	@JsonBackReference
 	private List<BookingDetail> bookingDetails;
 }

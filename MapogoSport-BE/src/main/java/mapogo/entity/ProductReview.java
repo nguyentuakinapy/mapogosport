@@ -3,9 +3,6 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -37,14 +34,10 @@ public class ProductReview implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "ProductId", nullable = false)
-//    @JsonBackReference
-    @JsonManagedReference
     private Product product;
 
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
-//    @JsonBackReference
-    @JsonManagedReference
     private User user;
 
     @Column(name = "Rating", nullable = false)
