@@ -193,7 +193,11 @@ const Header = () => {
                     ))}
                 </Container>
             </Navbar>
-            <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></LoginModal>
+            <LoginModal
+                showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}
+                showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
+                showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}>
+            </LoginModal>
             <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
             <ForgotPassword showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}></ForgotPassword>
         </main >
