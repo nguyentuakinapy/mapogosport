@@ -8,7 +8,6 @@ import Modal from 'react-bootstrap/Modal';
 import Collapse from 'react-bootstrap/Collapse';
 import HomeLayout from '@/components/HomeLayout';
 import axios from 'axios';
-import { toast } from "react-toastify";
 
 const StarRating = ({ setRating }) => {
     const [rating, localSetRating] = useState(0); // Trạng thái cho rating hiện tại
@@ -50,21 +49,15 @@ const MyVerticallyCenteredModal = (props) => {
     const user = userSession ? JSON.parse(userSession) : null;
 
     const handleRatingSubmit = async () => {
-        if (!user || !user.username) {
-            // alert("Bạn chưa đăng nhập");
-            toast.warning("Vui lòng đăng nhập!");
-            return;
-        }
-        if (rating === 0) {
-            toast.warning("Bạn chưa chọn sao đánh giá !");
-            return;
-        }
         if (comment.length < 15) {
-            toast.warning("Bình luận cần ít nhất 15 ký tự.");
+            alert("Bình luận cần ít nhất 15 ký tự.");
             return;
         }
 
-
+        if (!user || !user.username) {
+            alert("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+            return;
+        }
 
         const ratingData = {
             user: { // Không dùng mảng nếu chỉ có 1 người dùng
@@ -95,11 +88,10 @@ const MyVerticallyCenteredModal = (props) => {
             const result = await response.json();
             console.log("Đánh giá đã được gửi thành công", result);
             props.onHide(); // Đóng modal sau khi gửi thành công
-            toast.success("Đánh giá đã gửi");
+            alert("Đánh giá đã được gửi thành công!");
         } catch (error) {
             console.error("Lỗi khi gửi đánh giá:", error);
-            toast.error("Hệ thống đang bảo trì ?");
-
+            alert("Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.");
         }
     };
 

@@ -5,9 +5,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.Delegate;
+import mapogo.dao.CartDAO;
 import mapogo.entity.Cart;
 import mapogo.service.CartService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,13 +42,23 @@ public class CartResController {
 		return cartService.CountItem(username);
 	}
 
-    @PutMapping("/update")
-    public Cart updateCart(@RequestBody Cart cart) {
-        // Call service to update cart
-        Cart updatedCart = cartService.updateCart(cart);
+    @PutMapping("/update/{cartId}")
+    public void updateCart(@RequestBody Cart cart, @PathVariable("cartId") Integer cartId) throws Exception {
+    	if (cartService.existedByCartId(cartId)) {
+    	    cartService.updateCart(cart);
+    	} else {
+    	    throw new Exception("Cart with ID " + cartId + " does not exist.");
+    	}
 
-        // Return updated cart as response
-        return updatedCart;
+    }
+    
+    @DeleteMapping("/delete/{cartId}")
+    public void delete(@PathVariable("cartId") Integer cartId) throws Exception {
+    	if (cartService.existedByCartId(cartId)) {
+    	    cartService.deleteCart(cartId);
+    	} else {
+    	    throw new Exception("Cart with ID " + cartId + " does not exist.");
+    	}
     }
 	
 

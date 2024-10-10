@@ -14,10 +14,10 @@ import mapogo.service.ProductReviewService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/rest")
-@CrossOrigin(origins = "http://localhost:3000")
+
 public class ProductReivewRestController {
 
 	@Autowired
@@ -28,13 +28,9 @@ public class ProductReivewRestController {
 		return proReviewService.findReviewsByProductId(id);
 	}
 	
-	@PostMapping("/save")
+	@PostMapping(value = "/save", consumes = "application/json")
 	public ProductReview save(@RequestBody ProductReview review) {
 	    
 	    return proReviewService.save(review);
 	}
-	
-	
-	
-	
 }

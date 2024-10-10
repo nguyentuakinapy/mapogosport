@@ -29,12 +29,12 @@ public class Cart implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
-    @JsonManagedReference("user-cart") // Specify a unique name
+    @JsonManagedReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "ProductDetailSizeId", nullable = false)
-    @JsonManagedReference("product-detail-size-cart") // Specify a unique name
+    @JsonManagedReference
     private ProductDetailSize productDetailSize;
 
     @Column(name = "Date", nullable = false)

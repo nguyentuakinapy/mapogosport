@@ -27,7 +27,7 @@ public class AddressUser implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "Username")
-	@JsonManagedReference // Ngăn vòng lặp tuần tự hóa
+	@JsonBackReference // Ngăn vòng lặp tuần tự hóa
 	private User user;
 
 	@ManyToOne

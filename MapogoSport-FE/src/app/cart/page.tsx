@@ -1,10 +1,11 @@
 "use client";
 import HomeLayout from '@/components/HomeLayout';
 import React, { useState, useEffect } from 'react';
-import { Col, Button, ButtonGroup, Form } from 'react-bootstrap';
+import { Col, Button, ButtonGroup, Form, Spinner } from 'react-bootstrap';
 import './style.css';
 import axios from 'axios';
 import { formatPrice } from '@/components/Utils/Format';
+import { toast } from "react-toastify";
 
 const Cart = () => {
   const [quantities, setQuantities] = useState<number[]>([]);
@@ -28,11 +29,12 @@ const Cart = () => {
   // Hàm cập nhật số lượng lên server
   const updateQuantityOnServer = async (index: number, newQuantity: number) => {
     try {
-      const cartItemId = dataCart[index].id; // Giả sử mỗi mục giỏ hàng có một `id`
-      await axios.put(`http://localhost:8080/rest/cart/update`, {
-        cartItemId,
-        quantity: newQuantity,
-      });
+      const cartItemId = dataCart[index].cartId; // Giả sử mỗi mục giỏ hàng có một `cartId`
+      console.log(">>> check id", dataCart.cartId);
+      // await axios.put(`http://localhost:8080/rest/cart/update`, {
+      //   cartItemId,
+      //   quantity: newQuantity,
+      // });
       console.log(`Cập nhật số lượng cho sản phẩm ${cartItemId} thành ${newQuantity}`);
     } catch (err) {
       console.log("Lỗi khi cập nhật số lượng lên server:", err);
@@ -82,7 +84,22 @@ const Cart = () => {
     }, 0);
     setTotalPrice(total);
   };
+  // delete cart
 
+  const handleDeleCartItem = (index: number) => {
+
+    try {
+      const cartItemId = dataCart[index].cartId;
+      axios.delete(`http://localhost:8080/rest/cart/delete/${cartItemId}`);
+      console.log(`>>> Xóa sản phẩm ${cartItemId} thành công`);
+      // Sau khi xóa, cập nhật lại danh sách giỏ hàng
+      const updatedDataCart = dataCart.filter((_, i) => i !== index);
+      setDataCart(updatedDataCart);
+      toast.success("Xóa thành công !")
+    } catch (err) {
+      console.log("lỗi xóa cart: ", err);
+    }
+  }
 
 
   // Dữ liệu giỏ hàng
@@ -145,7 +162,7 @@ const Cart = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {dataCart.map((cart, index: number) => (
+                      {dataCart && dataCart.map((cart, index: number) => (
                         <tr key={index}>
                           <td>
                             <input
@@ -184,7 +201,9 @@ const Cart = () => {
                             </div>
                           </td>
                           <td>
-                            <button className="btn btn-md rounded-circle bg-light border" style={{ width: '35px', height: '35px', padding: 0 }}>
+                            <button className="btn btn-md rounded-circle bg-light border" style={{ width: '35px', height: '35px', padding: 0 }}
+                              onClick={() => handleDeleCartItem(index)}
+                            >
                               <i className="text-danger bi bi-x"></i>
                             </button>
                           </td>
@@ -203,7 +222,7 @@ const Cart = () => {
               </div>
               <div className="py-4 mb-4 border-top border-bottom border-dark d-flex justify-content-between">
                 <h5 className="mb-0 mx-4">Tổng cộng</h5>
-                <p className="mb-0 mx-4 text-danger fw-bold">{formatPrice(totalPrice)} VND</p> {/* Hiển thị tổng tiền */}
+                <p className="mb-0 mx-4 text-danger fw-bold">{formatPrice(totalPrice)}</p> {/* Hiển thị tổng tiền */}
               </div>
 
               <div className="text-center d-flex ms-4">
