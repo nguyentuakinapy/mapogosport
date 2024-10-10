@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -62,7 +63,7 @@ public class Product implements Serializable {
 	private Double stock;
 
 	@OneToMany(mappedBy = "product")
-	@JsonIgnore
+	@JsonBackReference
 	private List<ProductDetail> productDetails;
 
 	@OneToMany(mappedBy = "product")

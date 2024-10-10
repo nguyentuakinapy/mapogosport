@@ -39,7 +39,6 @@ public class Cart implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "ProductDetailSizeId", nullable = false)
-
     @JsonManagedReference
     private ProductDetailSize productDetailSize;
 
