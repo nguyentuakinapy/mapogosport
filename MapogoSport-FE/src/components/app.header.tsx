@@ -10,18 +10,23 @@ import Navbar from 'react-bootstrap/Navbar';
 import LoginModal from './account/modal/login.modal';
 import RegisterModal from './account/modal/register.modal';
 import axios from 'axios';
+import useSWR from 'swr';
+
+import ForgotPassword from './account/modal/forgotPassword.modal';
 
 
 
-const CartBadge = ({ user }) => {
+
+const CartBadge = ({ username }: { username: string }) => {
     const [cartCount, setCartCount] = useState(0); // Initialize cart count to 0
 
     // Function to fetch the cart count
     const countCartItem = async () => {
-        if (!user) return; // Don't fetch if no user is logged in
+        if (!username) return; // Don't fetch if no user is logged in
         try {
-            const response = await axios.get(`http://localhost:8080/res/cart/count/${user.username}`);
+            const response = await axios.get(`http://localhost:8080/rest/cart/count/${username}`);
             const cartCount = response.data; // assuming the API returns the count directly
+
             setCartCount(cartCount); // Update the cart count in the state
         } catch (error) {
             console.error('Error fetching cart count:', error);
@@ -31,7 +36,7 @@ const CartBadge = ({ user }) => {
     // Fetch cart count on component mount and when the user changes
     useEffect(() => {
         countCartItem();
-    }, [user]);
+    }, [username]);
 
     return (
         <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
@@ -44,19 +49,13 @@ const CartBadge = ({ user }) => {
 const Header = () => {
     const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
+    const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
     const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
 
 
     const [userData, setUserData] = useState<User | null>(null);
 
     useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUserData(parsedUserData);
-            // console.log(parsedUserData); // Kiểm tra dữ liệu
-        }
-
         require('bootstrap/dist/js/bootstrap.bundle.min.js');
 
         const handleScroll = () => {
@@ -98,7 +97,31 @@ const Header = () => {
         fetchData();
     }, [])
 
+    const [username, setUsername] = useState<string>("");
+    useEffect(() => {
+        const user = sessionStorage.getItem('user');
+        if (user) {
+            const parsedUserData = JSON.parse(user) as User;
+            setUsername(parsedUserData.username);
+            // console.log(parsedUserData); // Kiểm tra dữ liệu
+        }
+    })
 
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+    const { data, error, isLoading } = useSWR(
+        username == "" ? null : `http://localhost:8080/rest/user/${username}`, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
+
+    useEffect(() => {
+        if (data) {
+            setUserData(data);
+            console.log(data);
+        }
+    }, [data])
 
     const logOut = () => {
         sessionStorage.removeItem('user');
@@ -132,18 +155,18 @@ const Header = () => {
                             </Nav>
                             <div className="dropdown">
                                 <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i className="bi bi-person-fill me-2"></i>{userData ? userData.fullname : 'Tài khoản'}
+                                    <i className="bi bi-person-fill me-2"></i>{userData ? userData?.fullname : 'Tài khoản'}
                                 </span>
                                 <ul className="dropdown-menu">
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowLoginModal(true)} style={{ cursor: 'pointer' }} >Đăng nhập</a>
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowRegisterModal(true)} style={{ cursor: 'pointer' }}>Đăng ký</a>
-                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#changeEmail" style={{ cursor: 'pointer' }}>Thay đổi Email</a>
-                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-target="#changePassword" style={{ cursor: 'pointer' }}>Thay đổi mật khẩu</a>
-                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#forgotModal" style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
+                                    {/* <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#changeEmail" style={{ cursor: 'pointer' }}>Thay đổi Email</a> */}
+                                    {/* <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-target="#changePassword" style={{ cursor: 'pointer' }}>Thay đổi mật khẩu</a> */}
+                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowForgotPassword(true)} style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
                                     {/* <hr className='m-0' /> */}
-                                    <Link href='/user/profile' className='dropdown-item text-decoration-none text-dark'>Thông tin tài khoản</Link>
-                                    {/* <Link href='/owner' className={`dropdown-item text-decoration-none text-dark ${userData?.authorities[0].role.name == 'Owner' ? '' : 'd-none'}`}>Chủ sân</Link>
-                                    <Link href='/admin' className={`dropdown-item text-decoration-none text-dark ${userData?.authorities[0].role.name == 'Admin' ? '' : 'd-none'}`}>Admin</Link> */}
+                                    <Link href='/user/profile' className={`dropdown-item text-decoration-none text-dark ${userData ? '' : 'd-none'}`}>Thông tin tài khoản</Link>
+                                    <Link href='/owner' className={`dropdown-item text-decoration-none text-dark ${userData ? userData?.authorities[0].role.name == 'ROLE_OWNER' ? '' : 'd-none' : 'd-none'}`}>Chủ sân</Link>
+                                    <Link href='/admin' className={`dropdown-item text-decoration-none text-dark ${userData ? userData?.authorities[0].role.name == 'ROLE_ADMIN' ? '' : 'd-none' : 'd-none'}`}>Admin</Link>
                                     <a className={`dropdown-item ${userData ? '' : 'd-none'}`} onClick={() => logOut()} style={{ cursor: 'pointer' }}>Đăng xuất</a>
                                 </ul>
                             </div>
@@ -153,7 +176,7 @@ const Header = () => {
                                     0
                                     <span className="visually-hidden">unread messages</span>
                                 </span>
-                                {userData && <CartBadge user={userData} />}
+                                {userData && <CartBadge username={userData.username} />}
                             </Nav>
                         </Nav>
                     </Navbar.Collapse>
@@ -170,8 +193,13 @@ const Header = () => {
                     ))}
                 </Container>
             </Navbar>
-            <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></LoginModal>
+            <LoginModal
+                showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}
+                showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
+                showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}>
+            </LoginModal>
             <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
+            <ForgotPassword showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}></ForgotPassword>
         </main >
     );
 }
