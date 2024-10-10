@@ -24,6 +24,7 @@ const CartBadge = ({ username }: { username: string }) => {
         try {
             const response = await axios.get(`http://localhost:8080/rest/cart/count/${username}`);
             const cartCount = response.data; // assuming the API returns the count directly
+
             setCartCount(cartCount); // Update the cart count in the state
         } catch (error) {
             console.error('Error fetching cart count:', error);
