@@ -40,11 +40,11 @@ export default function Register(props: RegisterProps) {
         if (!username) {
             toast.warning("Vui lòng nhập tên đăng nhập!")
             return;
-        } else if (!email) {
-            toast.warning("Vui lòng nhập email!")
-            return;
         } else if (!fullName) {
             toast.warning("Vui lòng nhập họ và tên!")
+            return;
+        } else if (!email) {
+            toast.warning("Vui lòng nhập email!")
             return;
         } else if (!password) {
             toast.warning("Vui lòng nhập mật khẩu!")
@@ -221,20 +221,22 @@ export default function Register(props: RegisterProps) {
                                         value={username} onChange={(e) => setUsername(e.target.value)}
                                     />
                                 </div>
-                                <div className="row mb-3 row">
+                                <div className="mb-3">
+                                    <div className="form-group">
+                                        <input type="text" className={`form-control ${errorFullName ? 'error' : ''} border border-dark`} placeholder="Họ và tên *"
+                                            value={fullName} onChange={(e) => setFullName(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="mb-3">
                                     {/* <div className="form-group col-6">
                                         <input type="text" className="form-control" id="floatingPassword"
                                         placeholder="Số điện thoại *" />
                                         </div> */}
-                                    <div className="form-group col-6">
+                                    <div className="form-group">
                                         <input type="email" className="form-control border border-dark"
                                             value={email} onChange={(e) => setEmail(e.target.value)}
                                             placeholder="Email *" />
-                                    </div>
-                                    <div className="form-group col-6">
-                                        <input type="text" className={`form-control ${errorFullName ? 'error' : ''} border border-dark`} placeholder="Họ và tên *"
-                                            value={fullName} onChange={(e) => setFullName(e.target.value)}
-                                        />
                                     </div>
                                 </div>
                                 <div className="row mb-3">
@@ -277,7 +279,7 @@ export default function Register(props: RegisterProps) {
                         </div>
                     </div>
                 </div>
-            </Modal>
+            </Modal >
         </>
     );
 }

@@ -61,7 +61,7 @@ public class User implements Serializable {
 	private List<AddressUser> addressUsers;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonBackReference
+	@JsonIgnore
 	private List<Cart> carts;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
