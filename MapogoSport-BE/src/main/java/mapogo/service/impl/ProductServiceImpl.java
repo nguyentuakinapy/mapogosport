@@ -28,6 +28,27 @@ public class ProductServiceImpl implements ProductService {
 		return productDAO.findById(id);
 	}
 
+	@Override
+	public Product create(Product product) {
+		// TODO Auto-generated method stub
+		return productDAO.save(product);
+	}
+
+	  @Override
+	    public Product update(Product product) {
+	        Optional<Product> existingProduct = productDAO.findById(product.getProductId());
+	        if (existingProduct.isPresent()) {
+	            return productDAO.save(product);  // Save will update if the product already exists
+	        }
+	        throw new RuntimeException("Product not found with id: " + product.getProductId());
+	    }
+
+	@Override
+	public void deleteById(Integer id) {
+		// TODO Auto-generated method stub
+		 productDAO.deleteById(id);
+	}
+
 
 
 	
