@@ -13,6 +13,10 @@ import mapogo.entity.Cart;
 public class CartService {
 	@Autowired
 	CartDAO cartDao;
+	
+	public List<Cart> findAll(){
+		return cartDao.findAll();
+	}
 
 	public List<Cart> viewCart(String username) {
 		return cartDao.findCartByUsername(username);
