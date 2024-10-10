@@ -64,7 +64,7 @@ const MyVerticallyCenteredModal = (props) => {
                 username: user.username
             },
             product: { // Không dùng mảng nếu chỉ có 1 sản phẩm
-                productId: 1 // Bạn có thể lấy productId từ props hoặc nguồn khác
+                productId: 2 // Bạn có thể lấy productId từ props hoặc nguồn khác
             },
             rating: rating,
             comment: comment,
@@ -72,7 +72,7 @@ const MyVerticallyCenteredModal = (props) => {
         };
 
         try {
-            const response = await fetch('http://localhost:8080/res/save', {
+            const response = await fetch('http://localhost:8080/rest/save', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ const ProductDetail = () => {
         // Fetch data when component is mounted
         const fetchData = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/res/1'); // API route or external URL
+                const response = await axios.get('http://localhost:8080/rest/2'); // API route or external URL
                 setData(response.data); // Assuming the response contains a list of reviews
                 console.log(">>> check data", response.data);
                 response.data.forEach((review) => {
