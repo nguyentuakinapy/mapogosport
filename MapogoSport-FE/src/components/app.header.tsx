@@ -13,6 +13,7 @@ import axios from 'axios';
 import useSWR from 'swr';
 
 import ForgotPassword from './account/modal/forgotPassword.modal';
+import ChangePasswordNew from './account/modal/change-password-new.modal';
 
 
 
@@ -50,6 +51,7 @@ const Header = () => {
     const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
     const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
+    const [showChangePasswordNew, setShowChangePasswordNew] = useState<boolean>(false);
     const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
 
 
@@ -199,7 +201,10 @@ const Header = () => {
                 showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}>
             </LoginModal>
             <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
-            <ForgotPassword showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}></ForgotPassword>
+            <ForgotPassword showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}
+                showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew}
+            ></ForgotPassword>
+            <ChangePasswordNew showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew}></ChangePasswordNew>
         </main >
     );
 }
