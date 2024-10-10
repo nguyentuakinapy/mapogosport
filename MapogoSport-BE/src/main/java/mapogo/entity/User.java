@@ -10,6 +10,7 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -60,7 +61,7 @@ public class User implements Serializable {
 	private List<AddressUser> addressUsers;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonBackReference
 	private List<Cart> carts;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -110,9 +111,10 @@ public class User implements Serializable {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<Owner> owners;
-
+	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<UserVoucher> UserVoucher;
 	
 }
+

@@ -27,10 +27,15 @@ public class CartService {
 		return cartDao.countCart(username);
 	}
 
-	public Cart updateCart(Cart cart) {
-		// Fetch the existing cart from the database using the cart ID
-		Cart existingCart = cartDao.findById(cart.getCartId())
-				.orElseThrow(() -> new RuntimeException("Cart not found"));
-		return cartDao.save(existingCart);
+	public void updateCart(Cart cart) {
+		 cartDao.save(cart);
+	}
+	
+	public void deleteCart(Integer cartId) {
+		cartDao.deleteById(cartId);
+	}
+	
+	public boolean existedByCartId (Integer cartId) {
+		return cartDao.existsById(cartId);
 	}
 }
