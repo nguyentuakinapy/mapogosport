@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -61,6 +62,6 @@ public class ProductDetailSize implements Serializable {
 	private List<OrderDetail> orderDetails;
 	
 	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
-	@JsonBackReference
+	@JsonIgnore
 	private List<Cart> carts;
 }

@@ -26,7 +26,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class CartResController {
 	@Autowired
 	CartService cartService;
-
+	
+	@GetMapping()
+	public List<Cart> findAll() {
+		return cartService.findAll();
+	}
 	@GetMapping("/{username}")
 	public List<Cart> viewCart(@PathVariable("username") String username) {
 		return cartService.viewCart(username);
@@ -49,7 +53,6 @@ public class CartResController {
     	} else {
     	    throw new Exception("Cart with ID " + cartId + " does not exist.");
     	}
-
     }
     
     @DeleteMapping("/delete/{cartId}")
