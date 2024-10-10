@@ -40,12 +40,18 @@ public class UserRestController {
 		return userService.findAll();
 	}
 
+	@GetMapping("/user/getbyemail/{email}")
+	public User getByEmail(@PathVariable("email") String email) {
+		System.out.println(email);
+		return userService.findByEmail(email);
+	}
+	
 	@PostMapping("/user")
 	public User saveStudents(@RequestBody User u) {
 		System.out.println(u.getFullname());
 		return userService.createUser(u);
 	}
-	
+
 	@PutMapping("/user/{username}")
 	public void putStudent(@PathVariable("username") String username, @RequestBody User u) {
 		System.out.println(u.getUsername());
@@ -55,15 +61,15 @@ public class UserRestController {
 	@PostMapping("/user/sendMail")
 	public String sendMail(@RequestBody String username) {
 		String otp = RandomUtils.generateOTP();
-		emailService.sendEmail(username, "MapogoSport", otp);
+		emailService.sendEmail(username, "MapogoSport", "Bạn đã yêu cầu gửi mã xác nhận mới! Mã của bạn là: " + otp);
 		return otp;
 	}
-	
+
 	@Autowired
 	ProductDAO productDAO;
-	
+
 	@GetMapping("/product")
-	public List<Product> findAll(){
+	public List<Product> findAll() {
 		return productDAO.findAll();
 	}
 }
