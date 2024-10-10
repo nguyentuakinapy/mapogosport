@@ -162,7 +162,7 @@ const Cart = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {dataCart.map((cart, index: number) => (
+                      {dataCart && dataCart.map((cart, index: number) => (
                         <tr key={index}>
                           <td>
                             <input
