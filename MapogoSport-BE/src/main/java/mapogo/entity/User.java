@@ -65,7 +65,7 @@ public class User implements Serializable {
 	private List<Cart> carts;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonIgnore//
 	private List<ProductReview> productReviews;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
