@@ -5,7 +5,10 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,6 +30,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "productId")
 @Table(name = "Products")
 public class Product implements Serializable {
 	@Id
@@ -63,11 +67,9 @@ public class Product implements Serializable {
 	private Double stock;
 
 	@OneToMany(mappedBy = "product")
-	@JsonIgnore // phai JsonIgnore moi them review dc
 	private List<ProductDetail> productDetails;
 
 	@OneToMany(mappedBy = "product")
-	@JsonIgnore//da sua
 	private List<ProductReview> productReviews;
 
 }
