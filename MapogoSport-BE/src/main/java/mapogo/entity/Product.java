@@ -63,11 +63,11 @@ public class Product implements Serializable {
 	private Double stock;
 
 	@OneToMany(mappedBy = "product")
-	@JsonBackReference
+	@JsonIgnore // phai JsonIgnore moi them review dc
 	private List<ProductDetail> productDetails;
 
 	@OneToMany(mappedBy = "product")
-	@JsonIgnore
+	@JsonIgnore//da sua
 	private List<ProductReview> productReviews;
 
 }

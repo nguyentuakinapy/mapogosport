@@ -62,6 +62,6 @@ public class ProductDetailSize implements Serializable {
 	private List<OrderDetail> orderDetails;
 	
 	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonBackReference
 	private List<Cart> carts;
 }
