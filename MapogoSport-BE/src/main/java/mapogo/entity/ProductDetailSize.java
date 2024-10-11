@@ -34,7 +34,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "productDetailSizeId")
 @Table(name = "Productdetailsize")
 public class ProductDetailSize implements Serializable {
 
@@ -45,10 +44,12 @@ public class ProductDetailSize implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductDetailId", nullable = false)
+	@JsonManagedReference
 	private ProductDetail productDetail;
 
 	@ManyToOne
 	@JoinColumn(name = "SizeId", nullable = false)
+	@JsonManagedReference
 	private Size size;
 
 	@Column(name = "Price", nullable = false)
@@ -58,8 +59,10 @@ public class ProductDetailSize implements Serializable {
 	private int quantity;
 	
 	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<OrderDetail> orderDetails;
 	
 	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<Cart> carts;
 }

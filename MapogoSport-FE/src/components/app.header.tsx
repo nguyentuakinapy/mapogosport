@@ -21,23 +21,30 @@ import ChangePasswordNew from './account/modal/change-password-new.modal';
 const CartBadge = ({ username }: { username: string }) => {
     const [cartCount, setCartCount] = useState(0); // Initialize cart count to 0
 
-    // Function to fetch the cart count
-    const countCartItem = async () => {
-        if (!username) return; // Don't fetch if no user is logged in
-        try {
-            const response = await axios.get(`http://localhost:8080/rest/cart/count/${username}`);
-            const cartCount = response.data; // assuming the API returns the count directly
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-            setCartCount(cartCount); // Update the cart count in the state
-        } catch (error) {
-            console.error('Error fetching cart count:', error);
-        }
-    };
+    // // Function to fetch the cart count
+    // const countCartItem = async () => {
+    //     if (!username) return; // Don't fetch if no user is logged in
 
-    // Fetch cart count on component mount and when the user changes
+    //     // const response = await axios.get(`http://localhost:8080/rest/cart/count/${username}`);
+    // };
+    const { data, error, isLoading } = useSWR(
+        username == "" ? null : `http://localhost:8080/rest/cart/count/${username}`, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
+
     useEffect(() => {
-        countCartItem();
-    }, [username]);
+        const cartCount = data; // assuming the API returns the count directly
+        setCartCount(cartCount); // Update the cart count in the state
+    }, [data])
+
+    // // Fetch cart count on component mount and when the user changes
+    // useEffect(() => {
+    //     countCartItem();
+    // }, [username]);
 
     return (
         <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
