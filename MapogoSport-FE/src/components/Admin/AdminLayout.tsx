@@ -4,6 +4,9 @@ import Nav from "./app.nav";
 import '../globals.css'
 import Header from "./app.header";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 
 export default function AdminLayout({
@@ -88,6 +91,7 @@ export default function AdminLayout({
                     {children}
                 </div>
             </main>
+            <ToastContainer></ToastContainer>
         </>
     )
 }

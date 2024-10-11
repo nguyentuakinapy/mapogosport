@@ -63,7 +63,7 @@ public class Product implements Serializable {
 	private String image;
 
 	@Column(name = "Stock", nullable = false)
-	private Double stock;
+	private int stock;  // thay đổi thành kiểu int
 
 	@OneToMany(mappedBy = "product")
 	@JsonIgnore
