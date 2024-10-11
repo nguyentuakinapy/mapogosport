@@ -4,6 +4,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,12 +20,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.springframework.util.StringUtils;
+
 
 import mapogo.entity.CategoryProduct;
 import mapogo.entity.Product;
 import mapogo.service.CategoryProductService;
 import mapogo.service.ProductService;
+import mapogo.utils.RemoveSpaceUtils;
 
 @CrossOrigin("*")
 @RestController
@@ -29,6 +45,8 @@ public class ProductRestController {
 	@Autowired
 	CategoryProductService categoryProductService;
 	
+    private static final String IMAGE_DIRECTORY = "src/main/resources/static/images/product-images/";
+
 	@GetMapping()
 	public List<Product> findAll()
 	{
@@ -39,21 +57,49 @@ public class ProductRestController {
 	public Optional<Product> findById(@PathVariable Integer id) { // Thêm @PathVariable
 		return productService.findById(id); // Sửa lại tên phương thức
 	}
-	
-	 // POST: Tạo mới sản phẩm
+	   // Hàm hỗ trợ lấy phần mở rộng của file
+    private String getFileExtension(String fileName) {
+        if (fileName == null) return "";
+        int dotIndex = fileName.lastIndexOf('.');
+        return dotIndex == -1 ? "" : fileName.substring(dotIndex + 1);
+    }
+
     @PostMapping
-    public Product createProduct(@RequestBody Product product) {
+    public Product createProduct(@RequestPart("product") String productJson, @RequestPart("fileimage") MultipartFile image) {
         try {
-        	  // Lấy đối tượng CategoryProduct từ cơ sở dữ liệu
+            // Chuyển đổi chuỗi JSON thành đối tượng Product
+            ObjectMapper objectMapper = new ObjectMapper();
+            Product product = objectMapper.readValue(productJson, Product.class);
+
+            System.err.println("Received fileimage: " + image);
+            System.err.println("Received product: " + product);
+            
+        	
+
+            // Lấy đối tượng CategoryProduct từ cơ sở dữ liệu
             if (product.getCategoryProduct() != null && product.getCategoryProduct().getCategoryProductId() != null) {
                 Optional<CategoryProduct> categoryProduct = categoryProductService.findById(product.getCategoryProduct().getCategoryProductId());
-                System.err.println("category product "+ categoryProduct);
                 product.setCategoryProduct(categoryProduct.get());
-            }else {
-            	System.err.println("ko lay đc cate");
             }
-        	product.setCreateDate(new Date());
-        	System.err.println("Sản phẩm: " + product);
+
+            product.setCreateDate(new Date());
+            
+         // Định dạng ngày tạo thành chuỗi không có ký tự đặc biệt
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+            String formattedDate = dateFormat.format(product.getCreateDate());
+            
+            // Xử lý và lưu file ảnh
+            if (!image.isEmpty()) {
+            	 String fileName = StringUtils.cleanPath(RemoveSpaceUtils.removeVietnameseAccent(product.getName().toLowerCase()) 
+                         + "_" + formattedDate 
+                         + "." + getFileExtension(image.getOriginalFilename()));
+                Path imagePath = Paths.get(IMAGE_DIRECTORY, fileName);
+                Files.createDirectories(imagePath.getParent());
+                Files.write(imagePath, image.getBytes());
+                System.err.println("imagePath: "+imagePath);
+                product.setImage(fileName); // Lưu tên file ảnh trong cơ sở dữ liệu
+            }
+            System.err.println("Sản phẩm: " + product);
         	System.err.println("ID: " + product.getProductId()); // null
         	System.err.println("Tên sản phẩm: " + product.getName());
             System.err.println("Danh mục: " + product.getCategoryProduct() != null ? product.getCategoryProduct().getName() : "Loại hàng: null");
@@ -64,11 +110,12 @@ public class ProductRestController {
         	System.err.println("Xuất xứ: " + product.getCountry());
         	System.err.println("Hình ảnh: " + product.getImage());
         	System.err.println("Tồn kho: " + product.getStock());
+
             Product createdProduct = productService.create(product);
-            System.err.println("Tạo sản phẩm thành công: " + createdProduct);
             return createdProduct;
-        } catch (Exception e) {
-            System.err.println("Không thể tạo sản phẩm: " + e.getMessage());
+
+        } catch (IOException e) {
+            System.err.println("Lỗi khi lưu ảnh sản phẩm: " + e.getMessage());
             return null;
         }
     }

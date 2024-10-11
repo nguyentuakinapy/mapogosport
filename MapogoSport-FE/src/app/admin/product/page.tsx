@@ -18,6 +18,8 @@ const AdminProduct = () => {
 
     const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
     const [selectAllProduct, setSelectAllProduct] = useState(false);
+    
+    const BASE_URL = 'http://localhost:8080';
 
     useEffect(() => {
         const fetchData = async () => {
@@ -123,8 +125,8 @@ const AdminProduct = () => {
                                     <Link href="#">
                                    
                                  <Image 
-                                    src={`/images/product_images/${product.image}`} 
-                                    style={{ width: '150px', height: 'auto' }} 
+                                     src={`${BASE_URL}/images/product-images/${product.image}`} 
+                                     style={{ width: '150px', height: 'auto' }} 
                                     className="mx-2" 
                                     alt={product.image} 
                                 />
