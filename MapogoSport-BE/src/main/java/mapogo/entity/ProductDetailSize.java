@@ -4,9 +4,11 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.CascadeType;
 
@@ -32,7 +34,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "productDetailSizeId")
 @Table(name = "Productdetailsize")
 public class ProductDetailSize implements Serializable {
 
@@ -43,12 +45,10 @@ public class ProductDetailSize implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductDetailId", nullable = false)
-	@JsonManagedReference
 	private ProductDetail productDetail;
 
 	@ManyToOne
 	@JoinColumn(name = "SizeId", nullable = false)
-	@JsonManagedReference
 	private Size size;
 
 	@Column(name = "Price", nullable = false)
@@ -58,10 +58,8 @@ public class ProductDetailSize implements Serializable {
 	private int quantity;
 	
 	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
-	@JsonIgnore
 	private List<OrderDetail> orderDetails;
 	
 	@OneToMany(mappedBy = "productDetailSize", cascade = CascadeType.ALL)
-	@JsonIgnore
 	private List<Cart> carts;
 }
