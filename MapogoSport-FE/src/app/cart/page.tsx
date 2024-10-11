@@ -137,7 +137,7 @@ const Cart = () => {
   return (
     <HomeLayout>
       <h1 className="text-center pt-4 mb-">Giỏ hàng</h1>
-      <div className="container-fluid" style={{ width: '1750px' }}>
+      <div className="container" >
         <div className="d-flex">
           <Col className={`col-md-9 p-3 mb-5 rounded ${user ? 'shadow bg-body' : ' '}`}>
             {user && (

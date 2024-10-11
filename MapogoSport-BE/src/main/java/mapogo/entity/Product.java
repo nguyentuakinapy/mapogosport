@@ -30,7 +30,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "productId")
 @Table(name = "Products")
 public class Product implements Serializable {
 	@Id
@@ -67,9 +66,11 @@ public class Product implements Serializable {
 	private Double stock;
 
 	@OneToMany(mappedBy = "product")
+	@JsonIgnore
 	private List<ProductDetail> productDetails;
 
 	@OneToMany(mappedBy = "product")
+	@JsonIgnore
 	private List<ProductReview> productReviews;
 
 }
