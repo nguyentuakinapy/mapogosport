@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -181,16 +183,38 @@ public class ProductRestController {
         }
     }
 
-    // DELETE: Xóa sản phẩm theo ID
     @DeleteMapping("/{id}")
-    public String deleteProduct(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteProduct(@PathVariable Integer id) {
         try {
-            productService.deleteById(id);
-            System.err.println("Đã xóa sản phẩm với ID " + id + " thành công.");
-            return "Sản phẩm đã được xóa";
-        } catch (RuntimeException e) {
-            System.err.println("Không thể xóa sản phẩm với ID " + id + ": " + e.getMessage());
-            return "Xóa sản phẩm thất bại";
+            // Tìm sản phẩm theo ID
+            Optional<Product> productOptional = productService.findById(id);
+            if (productOptional.isPresent()) {
+                Product product = productOptional.get();
+
+                // Lấy đường dẫn ảnh từ sản phẩm
+                String imagePath = Paths.get(IMAGE_DIRECTORY, product.getImage()).toString();
+                System.out.println("Path ảnh sản phẩm: " + imagePath);
+
+                // Xóa ảnh nếu tồn tại
+                File imageFile = new File(imagePath);
+                if (imageFile.exists()) {
+                    if (imageFile.delete()) {
+                        System.out.println("Ảnh đã được xóa thành công: " + imagePath);
+                    } else {
+                        System.out.println("Không thể xóa ảnh: " + imagePath);
+                    }
+                }
+
+                // Xóa sản phẩm khỏi database
+                productService.deleteById(id);
+
+                return ResponseEntity.ok().body("Sản phẩm và hình ảnh đã được xóa thành công.");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sản phẩm không tồn tại.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Có lỗi xảy ra khi xóa sản phẩm.");
         }
     }
+
 }
