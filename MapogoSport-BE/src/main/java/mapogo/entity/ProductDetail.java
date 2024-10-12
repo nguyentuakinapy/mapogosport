@@ -39,7 +39,6 @@ public class ProductDetail implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductId", nullable = false)
-	@JsonManagedReference
 	private Product product;
 
 	@Column(name = "Color", nullable = false)
@@ -52,6 +51,5 @@ public class ProductDetail implements Serializable {
 	private List<Gallery> galleries;
 
 	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-	@JsonBackReference
 	private List<ProductDetailSize> productDetailSizes;
 }

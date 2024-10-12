@@ -8,6 +8,7 @@ import Modal from 'react-bootstrap/Modal';
 import Collapse from 'react-bootstrap/Collapse';
 import HomeLayout from '@/components/HomeLayout';
 import axios from 'axios';
+import { toast } from "react-toastify";
 
 const StarRating = ({ setRating }) => {
     const [rating, localSetRating] = useState(0); // Trạng thái cho rating hiện tại
@@ -45,25 +46,31 @@ const StarRating = ({ setRating }) => {
 const MyVerticallyCenteredModal = (props) => {
     const [rating, setRating] = useState(0); // Trạng thái cho rating
     const [comment, setComment] = useState(''); // Trạng thái cho bình luận
-    const userSession = sessionStorage.getItem('user');
-    const user = userSession ? JSON.parse(userSession) : null;
+    const [user, setUser] = useState(null); // Trạng thái cho thông tin người dùng
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            // Kiểm tra nếu đang chạy trên client-side
+            const userSession = sessionStorage.getItem('user');
+            setUser(userSession ? JSON.parse(userSession) : null);
+        }
+    }, []);
 
     const handleRatingSubmit = async () => {
-        if (comment.length < 15) {
-            alert("Bình luận cần ít nhất 15 ký tự.");
-            return;
-        }
 
         if (!user || !user.username) {
-            alert("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+            toast.warning("Bạn chưa đăng nhập !")
             return;
         }
-
+        if (comment.length < 15) {
+            toast.warning("Cần phải nhập ít nhất 15 ký tự")
+            return;
+        }
         const ratingData = {
-            user: { // Không dùng mảng nếu chỉ có 1 người dùng
+            user: {
                 username: user.username
             },
-            product: { // Không dùng mảng nếu chỉ có 1 sản phẩm
+            product: {
                 productId: 2 // Bạn có thể lấy productId từ props hoặc nguồn khác
             },
             rating: rating,
@@ -88,14 +95,12 @@ const MyVerticallyCenteredModal = (props) => {
             const result = await response.json();
             console.log("Đánh giá đã được gửi thành công", result);
             props.onHide(); // Đóng modal sau khi gửi thành công
-            alert("Đánh giá đã được gửi thành công!");
+            toast.success("Gửi đánh giá thành công !")
         } catch (error) {
             console.error("Lỗi khi gửi đánh giá:", error);
             alert("Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.");
         }
     };
-
-
 
     return (
         <Modal
@@ -145,7 +150,6 @@ const MyVerticallyCenteredModal = (props) => {
         </Modal>
     );
 };
-
 
 
 
@@ -330,30 +334,32 @@ const ProductDetail = () => {
                         onHide={() => setModalShow(false)}
                     />
                     <h5 className='ms-3'>Bình luận</h5>
-                    {data.map((review) => (
-                        <Row className="mt-5 ms-5" key={review.productReviewId}>
-                            <Col>
-                                <Image
-                                    src="/img/avatar.jpg"
-                                    alt="Hình ảnh thu nhỏ"
-                                    width={35} // Kích thước hình ảnh thu nhỏ
-                                    height={35}
-                                    className="rounded-circle" // Sử dụng lớp tiện ích Bootstrap để tạo hình tròn
-                                />
-                                <span className='me-4'>{review.user.fullname}</span> {/* Truy cập fullname từ user */}
-                                <i className="bi bi-calendar me-2"></i>
-                                <span>{new Date(review.datedAt).toLocaleDateString('vi-VN')}</span> {/* Định dạng ngày */}
-                                <div>
-                                    {/* Hiển thị đánh giá sao dựa trên giá trị rating */}
-                                    <span className="text-warning ms-5 fs-3">
-                                        {'★'.repeat(review.rating)} {/* Hiển thị sao đầy */}
-                                    </span>
-                                    <br />
-                                    <span className='ms-5'>{review.comment}</span> {/* Hiển thị bình luận đánh giá */}
-                                </div>
-                            </Col>
-                        </Row>
-                    ))}
+                    {data
+                        .sort((a, b) => new Date(b.datedAt) - new Date(a.datedAt)) // Sắp xếp theo ngày từ mới đến cũ
+                        .map((review) => (
+                            <Row className="mt-5 ms-5" key={review.productReviewId}>
+                                <Col>
+                                    <Image
+                                        src="/img/avatar.jpg"
+                                        alt="Hình ảnh thu nhỏ"
+                                        width={35} // Kích thước hình ảnh thu nhỏ
+                                        height={35}
+                                        className="rounded-circle" // Sử dụng lớp tiện ích Bootstrap để tạo hình tròn
+                                    />
+                                    <span className='me-4'>{review.user.fullname}</span> {/* Truy cập fullname từ user */}
+                                    <i className="bi bi-calendar me-2"></i>
+                                    <span>{new Date(review.datedAt).toLocaleDateString('vi-VN')}</span> {/* Định dạng ngày */}
+                                    <div>
+                                        {/* Hiển thị đánh giá sao dựa trên giá trị rating */}
+                                        <span className="text-warning ms-5 fs-3">
+                                            {'★'.repeat(review.rating)} {/* Hiển thị sao đầy */}
+                                        </span>
+                                        <br />
+                                        <span className='ms-5'>{review.comment}</span> {/* Hiển thị bình luận đánh giá */}
+                                    </div>
+                                </Col>
+                            </Row>
+                        ))}
 
 
 

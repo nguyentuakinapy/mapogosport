@@ -139,7 +139,7 @@ const Cart = () => {
       <h1 className="text-center pt-4 mb-">Giỏ hàng</h1>
       <div className="container" >
         <div className="d-flex">
-          <Col className={`col-md-9 p-3 mb-5 rounded ${user ? 'shadow bg-body' : ' '}`}>
+          <Col className={`col-md-8 p-3 mb-5 rounded ${user ? 'shadow bg-body' : ' '}`}>
             {user && (
               <>
                 <div className="table-responsive">
@@ -180,7 +180,7 @@ const Cart = () => {
                             />
                           </td>
                           <td>
-                            <p className="mb-0">{cart.productDetailSize.productDetail.product.name} ({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})</p>
+                            <p className="mb-0">{cart.productDetailSize.productDetail.product.name} <br /> ({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})</p>
                           </td>
                           <td>
                             <p className="mb-0">{formatPrice(cart.productDetailSize.price)}</p>
@@ -215,7 +215,7 @@ const Cart = () => {
               </>
             )}
           </Col>
-          <Col className="col-md-3 ms-3 shadow bg-body p-3 mb-5 rounded">
+          <Col className="col-md-4 ms-3 shadow bg-body p-3 mb-5 rounded">
             <div className="rounded">
               <div className="p-4">
                 <h1 className="display-6 mb-4">Tổng tiền</h1>
