@@ -3,6 +3,8 @@ import "../admin.scss";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+// import { useMutation, useQueryClient } from 'react-query';
+
 
 interface UserProps {
   showAddProduct: boolean;
@@ -34,6 +36,7 @@ const ProductAddNew = ({
       name: categoryProducts[0]?.name || "",
     },
     description: "",
+    price: 0,
     status: option[0].value,
     brand: "",
     country: "",
@@ -60,6 +63,7 @@ const ProductAddNew = ({
           name: categoryProducts[0]?.name || "",
         },
         description: "",
+        price: 0,
         status: option[0].value,
         brand: "",
         country: "",
@@ -79,6 +83,7 @@ const ProductAddNew = ({
 
     console.log('selected Input change value: ', value);
   };
+
 
   const handleSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target;
@@ -104,77 +109,43 @@ const handleCategorySelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setShowAddProduct(false);
   };
 
-  // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //     if(modalType === 'add' ){
-  //           if (e.target.files && e.target.files[0]) {
-  //         const file = e.target.files[0];
-  //         // // setFormValues({ ...formValues, image: file.name }); // Chỉ lưu tên tệp hình ảnh
-  //         // setPreviewImage(URL.createObjectURL(file)); // Tạo đường dẫn xem trước ảnh
-  //         setPreviewImage(URL.createObjectURL(file)); // Tạo đường dẫn xem trước ảnh
-
-  //         // Cập nhật formValues với tên tệp hình ảnh thực tế
-  //         setFormValues({ ...formValues, image: file.name });
-  //     } else {
-  //         setFormValues({ ...formValues, image: '' });
-  //         setPreviewImage(null); // Xóa ảnh xem trước nếu không có ảnh được chọn
-  //     }
-  //     }else{
-  //     if (e.target.files && e.target.files[0]) {
-  //                     const file = e.target.files[0];
-  //                     // // setFormValues({ ...formValues, image: file.name }); // Chỉ lưu tên tệp hình ảnh
-  //                     // setPreviewImage(URL.createObjectURL(file)); // Tạo đường dẫn xem trước ảnh
-  //                     setPreviewImage(URL.createObjectURL(file)); // Tạo đường dẫn xem trước ảnh
-
-  //                     // Cập nhật formValues với tên tệp hình ảnh thực tế
-  //                     // setFormValues({ ...formValues, image: file.name });
-  //                 } else {
-  //                     setFormValues({ ...formValues, image: '' });
-  //                     setPreviewImage(null); // Xóa ảnh xem trước nếu không có ảnh được chọn
-  //                 }
-  //     }
-
-  // };
-//   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     if (e.target.files && e.target.files[0]) {
-//       const file = e.target.files[0];
-//       setPreviewImage(URL.createObjectURL(file)); // Tạo đường dẫn xem trước ảnh
-//         console.log('type of preview image',typeof previewImage); // object file
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (modalType === 'add') {
+        console.log('modal type add');
         
+      // Chế độ thêm: chỉ hiển thị ảnh xem trước của tệp đã chọn
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        setPreviewImage(URL.createObjectURL(file)); // Tạo URL xem trước
+        setFormValues((prevFormValues) => ({
+          ...prevFormValues,
+          image: file, // Lưu đối tượng File
+        }));
+      } else {
+        setFormValues((prevFormValues) => ({
+          ...prevFormValues,
+          image: '', // Đặt hình ảnh thành rỗng nếu không có tệp được chọn
+        }));
+        setPreviewImage(null); // Xóa ảnh xem trước
+      }
+    } else if (modalType === 'edit') {
+        console.log('modal type edit');
 
-//       // Lưu đối tượng File vào formValues
-//       setFormValues({ ...formValues, image: file }); // Lưu đối tượng File
-//       console.log("type of form value.file", typeof formValues.image);
-
-
-//     } else {
-//       setFormValues({ ...formValues, image: "" });
-//       setPreviewImage(null); // Xóa ảnh xem trước nếu không có ảnh được chọn
-//     }
-//   };
-
-
-const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]; // Lấy đối tượng File đầu tiên
-      setPreviewImage(URL.createObjectURL(file)); // Tạo đường dẫn xem trước ảnh
-        
-      // Lưu đối tượng File vào formValues
-      setFormValues((prevFormValues) => ({
-        ...prevFormValues,
-        image: file, // Lưu đối tượng File
-      }));
-  
-      console.log("type of form value.file:", typeof file); // In ra kiểu của file
-      console.log("type of form Preview File:", typeof previewImage); // In ra kiểu của file
-      console.log("type of form FormValues.image:", typeof formValues.image); // In ra kiểu của file
-    } else {
-      setFormValues((prevFormValues) => ({
-        ...prevFormValues,
-        image: '', // Đặt về null nếu không có file
-      }));
-      setPreviewImage(null); // Xóa ảnh xem trước nếu không có ảnh được chọn
+      // Chế độ chỉnh sửa: giữ lại ảnh gốc trừ khi có tệp mới được chọn
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        setPreviewImage(URL.createObjectURL(file)); // Hiển thị ảnh xem trước của tệp mới
+        setFormValues((prevFormValues) => ({
+          ...prevFormValues,
+          image: file, // Cập nhật formValues với tệp mới
+        })
+    );
+      } else {
+        setPreviewImage(null); // Không có ảnh xem trước, giữ lại ảnh gốc
+      }
     }
   };
+  
 const handleSave = async () => {
     try {
       const formData = new FormData();
@@ -204,6 +175,7 @@ const handleSave = async () => {
         },
         status: formValues.status,
         country: formValues.country,
+        price: formValues.price,
         description: formValues.description,
         image: imageUrl,
         stock: formValues.stock,
@@ -239,7 +211,7 @@ const handleSave = async () => {
         toast.success("Sản phẩm đã được cập nhật");
       }
     } catch (error) {
-      toast.error("Lỗi khi lưu sản phẩm");
+      toast.error(`Lỗi khi lưu sản phẩm: ${error}`);
       console.error("Lỗi khi lưu sản phẩm:", error);
     }
     handleClose();
@@ -295,6 +267,20 @@ const handleSave = async () => {
                         />
                         <Form.Label htmlFor="stock">
                           Số lượng <b className="text-danger">*</b>
+                        </Form.Label>
+                      </Form.Floating>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Floating>
+                        <Form.Control
+                          type="number"
+                          placeholder="Giá"
+                          name="price"
+                          value={formValues.price}
+                          onChange={handleInputChange}
+                        />
+                        <Form.Label htmlFor="stock">
+                          Giá <b className="text-danger">*</b>
                         </Form.Label>
                       </Form.Floating>
                     </Form.Group>
