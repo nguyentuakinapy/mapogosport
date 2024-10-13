@@ -170,26 +170,23 @@ const ProductDetail = () => {
 
     // product_review
     const [data, setData] = useState([]);
-    useEffect(() => {
-        // Fetch data when component is mounted
-        const fetchData = async () => {
-            try {
-                const response = await axios.get('http://localhost:8080/rest/2'); // API route or external URL
-                setData(response.data); // Assuming the response contains a list of reviews
-                console.log(">>> check data", response.data);
-                response.data.forEach((review) => {
-                    console.log("Rating:", review.rating);
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        };
+    // Hàm fetchData để lấy dữ liệu đánh giá
+    const fetchData = async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/rest/2'); // API route
+            setData(response.data); // Lưu đánh giá vào trạng thái
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
-        fetchData();
+    useEffect(() => {
+        fetchData(); // Gọi hàm fetchData khi component mount
     }, []);
 
-
-
+    const addReview = (newReview) => {
+        setData(prevData => [newReview, ...prevData]); // Thêm đánh giá mới vào đầu danh sách
+    };
 
 
     return (
@@ -332,6 +329,7 @@ const ProductDetail = () => {
                     <MyVerticallyCenteredModal
                         show={modalShow}
                         onHide={() => setModalShow(false)}
+                        onReviewSubmitted={addReview} // Truyền hàm thêm đánh giá vào modal
                     />
                     <h5 className='ms-3'>Bình luận</h5>
                     {data
@@ -360,12 +358,6 @@ const ProductDetail = () => {
                                 </Col>
                             </Row>
                         ))}
-
-
-
-
-
-
                 </Container>
             </HomeLayout>
         </>

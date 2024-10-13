@@ -10,31 +10,39 @@ import { toast } from "react-toastify";
 const Cart = () => {
   const [quantities, setQuantities] = useState<number[]>([]);
 
-  // Hàm tăng số lượng sản phẩm
+  // Cập nhật hàm tăng số lượng
   const increaseQuantity = (index: number) => {
     const newQuantities = [...quantities]; // Tạo bản sao của mảng quantities
     newQuantities[index] += 1; // Tăng số lượng sản phẩm tại vị trí index
     setQuantities(newQuantities); // Cập nhật lại state quantities
     updateQuantityOnServer(index, newQuantities[index]); // Cập nhật số lượng trên server
+    updateTotalPrice(newQuantities); // Cập nhật tổng tiền
   };
 
-  // Hàm giảm số lượng sản phẩm
+  // Cập nhật hàm giảm số lượng
   const decreaseQuantity = (index: number) => {
     const newQuantities = [...quantities]; // Tạo bản sao của mảng quantities
     newQuantities[index] = newQuantities[index] > 1 ? newQuantities[index] - 1 : 1; // Giảm số lượng nhưng không nhỏ hơn 1
     setQuantities(newQuantities); // Cập nhật lại state quantities
     updateQuantityOnServer(index, newQuantities[index]); // Cập nhật số lượng trên server
+    updateTotalPrice(newQuantities); // Cập nhật tổng tiền
+  };
+
+  // Hàm cập nhật tổng tiền
+  const updateTotalPrice = (updatedQuantities: number[]) => {
+    const total = updatedQuantities.reduce((sum, quantity, index) => {
+      return sum + dataCart[index].productDetailSize.price * quantity;
+    }, 0);
+    setTotalPrice(total);
   };
 
   // Hàm cập nhật số lượng lên server
   const updateQuantityOnServer = async (index: number, newQuantity: number) => {
     try {
       const cartItemId = dataCart[index].cartId; // Giả sử mỗi mục giỏ hàng có một `cartId`
-      console.log(">>> check id", dataCart.cartId);
-      // await axios.put(`http://localhost:8080/rest/cart/update`, {
-      //   cartItemId,
-      //   quantity: newQuantity,
-      // });
+      await axios.put(`http://localhost:8080/rest/cart/update/${cartItemId}`, {
+        quantity: newQuantity,
+      });
       console.log(`Cập nhật số lượng cho sản phẩm ${cartItemId} thành ${newQuantity}`);
     } catch (err) {
       console.log("Lỗi khi cập nhật số lượng lên server:", err);
