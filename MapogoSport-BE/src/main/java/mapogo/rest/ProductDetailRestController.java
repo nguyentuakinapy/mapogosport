@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.RestController;
 import mapogo.entity.ProductDetail;
 import mapogo.service.ProductDetailService;
 
-@RequestMapping("/rest")
+@RequestMapping("/rest/product-detail")
 @CrossOrigin("*")
 @RestController
 public class ProductDetailRestController {
 	@Autowired
 	ProductDetailService productDetailService;
 	
-	@GetMapping("/product-detail")
+	@GetMapping()
 	public List<ProductDetail> findAll(){
 		return productDetailService.findAll();
 	}
 	
-	@GetMapping("/product-detail/{id}")
+	@GetMapping("/{id}")
 	public List<ProductDetail> findById(@PathVariable Integer id)
 	{
 		return productDetailService.findById(id);

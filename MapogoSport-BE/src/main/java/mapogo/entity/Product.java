@@ -64,6 +64,9 @@ public class Product implements Serializable {
 
 	@Column(name = "Stock", nullable = false)
 	private int stock;  // thay đổi thành kiểu int
+	
+	@Column(name = "Price", nullable = false)
+	private Double price;  
 
 	@OneToMany(mappedBy = "product")
 	@JsonIgnore

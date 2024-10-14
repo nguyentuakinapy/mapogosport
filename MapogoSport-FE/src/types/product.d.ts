@@ -11,7 +11,7 @@ interface Product {
     createDate: Date;
     brand: string;
     country: string;
-    // image: string;
+    price: double;
     image:  File | string;
     stock: double;
 }

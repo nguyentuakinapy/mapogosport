@@ -6,6 +6,7 @@ import '../adminStyle.scss';
 import { useState, useEffect } from "react";
 import ProductAddNew from "@/components/Admin/Modal/product.addNew";
 import axios from 'axios';
+import { toast } from "react-toastify";
 
 const AdminProduct = () => {
     const [activeTab, setActiveTab] = useState<string>('all');
@@ -88,10 +89,16 @@ const AdminProduct = () => {
          }
      };
 
-     const handleDelete = (id: number) => {
-         setProducts(products.filter(product => product.productId !== id));
-     };
-
+    const handleDelete = async (id: number) => {
+        try {
+            await axios.delete(`${BASE_URL}/rest/products/${id}`)
+            setProducts(products.filter(product => product.productId !== id));
+            toast.success('Xóa sản phẩm thành công')
+        } catch (error) {
+            toast.success('Xóa sản phẩm không thành công')
+            console.error('Error deleting product:', error);
+        }
+    };
     const renderContent = () => {
         return (
             <div className="box-table-border mb-4">

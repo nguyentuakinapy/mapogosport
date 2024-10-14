@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -99,17 +101,7 @@ public class ProductRestController {
                 System.err.println("imagePath: "+imagePath);
                 product.setImage(fileName); // Lưu tên file ảnh trong cơ sở dữ liệu
             }
-            System.err.println("Sản phẩm: " + product);
-        	System.err.println("ID: " + product.getProductId()); // null
-        	System.err.println("Tên sản phẩm: " + product.getName());
-            System.err.println("Danh mục: " + product.getCategoryProduct() != null ? product.getCategoryProduct().getName() : "Loại hàng: null");
-        	System.err.println("Mô tả: " + product.getDescription());
-        	System.err.println("Trạng thái: " + product.getStatus()); // chưa có
-        	System.err.println("Ngày tạo: " + product.getCreateDate());
-        	System.err.println("Thương hiệu: " + product.getBrand());
-        	System.err.println("Xuất xứ: " + product.getCountry());
-        	System.err.println("Hình ảnh: " + product.getImage());
-        	System.err.println("Tồn kho: " + product.getStock());
+         
 
             Product createdProduct = productService.create(product);
             return createdProduct;
@@ -120,30 +112,109 @@ public class ProductRestController {
         }
     }
 
-    // PUT: Cập nhật sản phẩm
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable Integer id, @RequestBody Product product) {
-        product.setProductId(id);
+    public Product updateProduct(@PathVariable Integer id, @RequestPart("product") String productJson, @RequestPart(value = "fileimage", required = false) MultipartFile image) {
         try {
+            // Chuyển đổi chuỗi JSON thành đối tượng Product
+            ObjectMapper objectMapper = new ObjectMapper();
+            Product product = objectMapper.readValue(productJson, Product.class);
+            product.setProductId(id); // Đặt ID cho sản phẩm
+            
+            Optional<Product> productOriginal = Optional.ofNullable(productService.findById(id).get());
+            System.err.println("sản phẩm 2: " + productOriginal.get().getCreateDate());
+            System.err.println("path ảnh sản phẩm: "+ productOriginal.get().getImage());
+
+            
+            product.setCreateDate( productOriginal.get().getCreateDate());
+            // Lấy đối tượng CategoryProduct từ cơ sở dữ liệu
+            if (product.getCategoryProduct() != null && product.getCategoryProduct().getCategoryProductId() != null) {
+                Optional<CategoryProduct> categoryProduct = categoryProductService.findById(product.getCategoryProduct().getCategoryProductId());
+                product.setCategoryProduct(categoryProduct.get());
+            }
+
+         // Xử lý và lưu file ảnh mới (nếu có)
+            if (image != null && !image.isEmpty()) {
+                // Xóa ảnh cũ nếu tồn tại
+                String oldImagePath = productOriginal.get().getImage();
+                if (oldImagePath != null && !oldImagePath.isEmpty()) {
+                    Path oldImageFullPath = Paths.get(IMAGE_DIRECTORY, oldImagePath); // lấy path cũ
+                    try {
+                        Files.deleteIfExists(oldImageFullPath); // Xóa ảnh cũ bằng Path
+                        System.err.println("Đã xóa ảnh cũ: " + oldImageFullPath);
+                    } catch (IOException e) {
+                        System.err.println("Không thể xóa ảnh cũ: " + oldImageFullPath + ". Lỗi: " + e.getMessage());
+                    }
+                }
+
+                // Tạo tên file mới cho ảnh
+                String fileName = StringUtils.cleanPath(RemoveSpaceUtils.removeVietnameseAccent(product.getName().toLowerCase())
+                        + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date())
+                        + "." + getFileExtension(image.getOriginalFilename()));
+                Path imagePath = Paths.get(IMAGE_DIRECTORY, fileName);
+                Files.createDirectories(imagePath.getParent());
+                Files.write(imagePath, image.getBytes());
+                product.setImage(fileName); // Cập nhật tên file ảnh trong cơ sở dữ liệu
+                System.err.println("đường dẫn file ảnh mới: "+ product.getImage());
+            } else {
+                // Nếu không có ảnh mới, giữ nguyên ảnh cũ
+                product.setImage(productOriginal.get().getImage());
+            }
+            System.err.println("Sản phẩm: " + product);
+        	System.err.println("ID: " + product.getProductId()); // null
+        	System.err.println("Tên sản phẩm: " + product.getName());
+            System.err.println("Danh mục: " + product.getCategoryProduct() != null ? product.getCategoryProduct().getName() : "Loại hàng: null");
+        	System.err.println("Mô tả: " + product.getDescription());
+        	System.err.println("Trạng thái: " + product.getStatus()); // chưa có
+        	
+        	System.err.println("Ngày tạo: " + product.getCreateDate());
+        	System.err.println("Thương hiệu: " + product.getBrand());
+        	System.err.println("Xuất xứ: " + product.getCountry());
+        	System.err.println("Hình ảnh: " + product.getImage());
+        	System.err.println("Tồn kho: " + product.getStock());
+        	System.err.println("Giá tiền: " + product.getPrice());
+            // Cập nhật sản phẩm
             Product updatedProduct = productService.update(product);
             System.err.println("Cập nhật sản phẩm thành công: " + updatedProduct);
             return updatedProduct;
-        } catch (RuntimeException e) {
-            System.err.println("Không thể cập nhật sản phẩm với ID " + id + ": " + e.getMessage());
+
+        } catch (IOException e) {
+            System.err.println("Lỗi khi cập nhật sản phẩm: " + e.getMessage());
             return null;
         }
     }
 
-    // DELETE: Xóa sản phẩm theo ID
     @DeleteMapping("/{id}")
-    public String deleteProduct(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteProduct(@PathVariable Integer id) {
         try {
-            productService.deleteById(id);
-            System.err.println("Đã xóa sản phẩm với ID " + id + " thành công.");
-            return "Sản phẩm đã được xóa";
-        } catch (RuntimeException e) {
-            System.err.println("Không thể xóa sản phẩm với ID " + id + ": " + e.getMessage());
-            return "Xóa sản phẩm thất bại";
+            // Tìm sản phẩm theo ID
+            Optional<Product> productOptional = productService.findById(id);
+            if (productOptional.isPresent()) {
+                Product product = productOptional.get();
+
+                // Lấy đường dẫn ảnh từ sản phẩm
+                String imagePath = Paths.get(IMAGE_DIRECTORY, product.getImage()).toString();
+                System.out.println("Path ảnh sản phẩm: " + imagePath);
+
+                // Xóa ảnh nếu tồn tại
+                File imageFile = new File(imagePath);
+                if (imageFile.exists()) {
+                    if (imageFile.delete()) {
+                        System.out.println("Ảnh đã được xóa thành công: " + imagePath);
+                    } else {
+                        System.out.println("Không thể xóa ảnh: " + imagePath);
+                    }
+                }
+
+                // Xóa sản phẩm khỏi database
+                productService.deleteById(id);
+
+                return ResponseEntity.ok().body("Sản phẩm và hình ảnh đã được xóa thành công.");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sản phẩm không tồn tại.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Có lỗi xảy ra khi xóa sản phẩm.");
         }
     }
+
 }
