@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -37,7 +38,7 @@ public class ProductDetail implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductId", nullable = false)
-	@JsonManagedReference
+  @JsonManagedReference
 	private Product product;
 
 	@Column(name = "Color", nullable = false)
@@ -45,7 +46,7 @@ public class ProductDetail implements Serializable {
 
 	@Column(name = "Image", nullable = false)
 	private String image;
-
+	
 	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private List<Gallery> galleries;

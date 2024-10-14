@@ -6,18 +6,21 @@ import '../adminStyle.scss';
 import { useState, useEffect } from "react";
 import ProductAddNew from "@/components/Admin/Modal/product.addNew";
 import axios from 'axios';
+import { toast } from "react-toastify";
 
 const AdminProduct = () => {
     const [activeTab, setActiveTab] = useState<string>('all');
     const [showModal, setShowModal] = useState<boolean>(false);
     const [modalType, setModalType] = useState<'add' | 'edit'>('add'); // 'add' hoặc 'edit'
-    const [currentProduct, setCurrentProduct] = useState<any>(null); // Sản phẩm hiện tại
+    const [currentProduct, setCurrentProduct] = useState<Product[]>(null); // Sản phẩm hiện tại
 
     const [products, setProducts] = useState<Product[]>([]);
-    const [categoryProducts, setCategoryProducts] = useState<any[]>([]);
+    const [categoryProducts, setCategoryProducts] = useState<CategoryProduct[]>([]);
 
     const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
     const [selectAllProduct, setSelectAllProduct] = useState(false);
+    
+    const BASE_URL = 'http://localhost:8080';
 
     useEffect(() => {
         const fetchData = async () => {
@@ -45,7 +48,14 @@ const AdminProduct = () => {
         fetchData();
     }, []);
 
+      // Hàm thêm sản phẩm mới vào danh sách
+      const handleAddProduct = (newProduct: Product) => {
+        setProducts(prevProducts => [...prevProducts, newProduct]);
+    };
+
     const handleEditClick = (product) => {
+        console.log('product ht ',product);
+        
         setCurrentProduct(product); // Cập nhật sản phẩm hiện tại
         setModalType('edit'); // Đặt loại modal thành 'edit'
         setShowModal(true); // Hiển thị modal
@@ -79,10 +89,16 @@ const AdminProduct = () => {
          }
      };
 
-     const handleDelete = (id: number) => {
-         setProducts(products.filter(product => product.productId !== id));
-     };
-
+    const handleDelete = async (id: number) => {
+        try {
+            await axios.delete(`${BASE_URL}/rest/products/${id}`)
+            setProducts(products.filter(product => product.productId !== id));
+            toast.success('Xóa sản phẩm thành công')
+        } catch (error) {
+            toast.success('Xóa sản phẩm không thành công')
+            console.error('Error deleting product:', error);
+        }
+    };
     const renderContent = () => {
         return (
             <div className="box-table-border mb-4">
@@ -114,10 +130,14 @@ const AdminProduct = () => {
                                 <td className="text-center align-middle">{index + 1}</td>
                                 <td className="text-center align-middle">
                                     <Link href="#">
-                                        {/* <Image src={product.image} style={{ width: '150px', height: 'auto' }} 
-                                        className="mx-2" /> */}
-                                        <Image src={''} style={{ width: '150px', height: 'auto' }} 
-                                        className="mx-2" alt={product.image} />
+                                   
+                                 <Image 
+                                     src={`${BASE_URL}/images/product-images/${product.image}`} 
+                                     style={{ width: '150px', height: 'auto' }} 
+                                    className="mx-2" 
+                                    alt={product.image} 
+                                />
+
                                     </Link>
                                 </td>
                                 <td className="text-start align-middle">
@@ -220,7 +240,8 @@ const AdminProduct = () => {
             setShowAddProduct={handleCloseModal}
              currentProduct={currentProduct} 
              modalType={modalType} 
-             categoryProducts={categoryProducts} />
+             categoryProducts={categoryProducts} 
+             onAddProduct={handleAddProduct} />
         </div>
     );
 }

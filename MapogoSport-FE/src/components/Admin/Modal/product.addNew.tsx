@@ -1,313 +1,453 @@
-///////// product add new 
-
-
-import { Button, Col, Form, Modal, Row, FloatingLabel, Image } from "react-bootstrap";
-import '../admin.scss';
+import { Button, Col, Form, Modal, Row, Image } from "react-bootstrap";
+import "../admin.scss";
 import { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+// import { useMutation, useQueryClient } from 'react-query';
 
-// Định nghĩa kiểu cho props
+
 interface UserProps {
-    showAddProduct: boolean;
-    setShowAddProduct: (v: boolean) => void;
-    currentProduct: any; // Sản phẩm hiện tại hoặc null nếu thêm mới
-    modalType: 'add' | 'edit'; // Loại modal
-    categoryProducts: any[]; // loại sản phẩm
+  showAddProduct: boolean;
+  setShowAddProduct: (v: boolean) => void;
+  currentProduct: Product | null;
+  modalType: "add" | "edit";
+  categoryProducts: CategoryProduct[];
+  // onAddProduct: (product: Product) => void;
 }
+const BASE_URL = 'http://localhost:8080';
 
-// Modal hiển thị chi tiết sản phẩm
-const ProductDetailModal = ({ showDetail, setShowDetail, product }: any) => {
-    return (
-        <Modal show={showDetail} onHide={() => setShowDetail(false)} centered>
-            <Modal.Header closeButton>
-                <Modal.Title className="text-uppercase text-danger">Chi tiết sản phẩm</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <h5>Tên: {product.name}</h5>
-                <p>Giá: {product.price}</p>
-                <p>Hãng: {product.brand}</p>
-                <p>Loại: {product.categoryProduct?.name}</p>
-                <p>Trạng thái: {product.status}</p>
-                <p>Xuất xứ: {product.country}</p>
-                <p>Mô tả: {product.stock}</p>
-                {product.image && (
-                    <Image src={product.image} style={{ width: '150px', height: 'auto' }} />
-                )}
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={() => setShowDetail(false)}>
-                    Đóng
-                </Button>
-            </Modal.Footer>
-        </Modal>
-    );
+const ProductAddNew = ({
+  showAddProduct,
+  setShowAddProduct,
+  currentProduct,
+  modalType,
+  categoryProducts,
+}: UserProps) => {
+  const [value, setValue] = useState("");
+  const option = [
+    { label: "Còn hàng", value: "Còn hàng" },
+    { label: "Hết hàng", value: "Hết hàng" },
+  ];
+
+  const [formValues, setFormValues] = useState<Product>({
+    name: "",
+    categoryProduct: {
+      categoryProductId: categoryProducts[0]?.categoryProductId || 0,
+      name: categoryProducts[0]?.name || "",
+    },
+    description: "",
+    price: 0,
+    status: option[0].value,
+    brand: "",
+    country: "",
+    image: "",
+    stock: 0,
+  });
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null); // Dùng để lưu đường dẫn ảnh xem trước
+
+  useEffect(() => {
+    if (modalType === "edit" && currentProduct) {
+      setFormValues({
+        ...currentProduct,
+        categoryProduct: {
+          ...currentProduct.categoryProduct,
+        },
+        image: currentProduct.image || "", // Hiển thị ảnh hiện có từ sản phẩm
+      });
+    } else {  // trường hợp này là thêm mới nên set form thành rỗng
+      setFormValues({
+        name: "",
+        categoryProduct: {
+          categoryProductId: categoryProducts[0]?.categoryProductId || 0,
+          name: categoryProducts[0]?.name || "",
+        },
+        description: "",
+        price: 0,
+        status: option[0].value,
+        brand: "",
+        country: "",
+        image: "",
+        stock: 1,
+      });
+    }
+  }, [modalType, currentProduct, categoryProducts]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormValues({ ...formValues, [name]: value });
+
+    console.log('selected Input change value: ', value);
+  };
+
+
+  const handleSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = event.target;
+    setValue(value);
+    setFormValues((prevValues) => ({ ...prevValues, status: value }));
+
+    console.log('selected value: ', value);
+    
+  };
+  // Cập nhật hàm handleSelect cho loại sản phẩm
+const handleCategorySelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = event.target.value; // Lấy ID của loại sản phẩm đã chọn
+    setFormValues((prevValues) => ({
+        ...prevValues,
+        categoryProduct: {
+            categoryProductId: Number(selectedId), // Cập nhật ID của loại sản phẩm
+            name: categoryProducts.find(cat => cat.categoryProductId === Number(selectedId))?.name || "",
+            imgae: null || ""
+        }
+    }));
 };
+  const handleClose = () => {
+    setShowAddProduct(false);
+  };
 
-// Component chính để thêm hoặc chỉnh sửa sản phẩm
-const ProductAddNew = ({ showAddProduct, setShowAddProduct, currentProduct, modalType, categoryProducts }: UserProps) => {
-    // State để lưu các giá trị nhập từ form
-    const [formValues, setFormValues] = useState({
-        name: '',
-        price: '',
-        brand: '',
-        category: '',
-        status: '',
-        country: '',
-        description: '',
-        image: null
-    });
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (modalType === 'add') {
+        console.log('modal type add');
+        
+      // Chế độ thêm: chỉ hiển thị ảnh xem trước của tệp đã chọn
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        setPreviewImage(URL.createObjectURL(file)); // Tạo URL xem trước
+        setFormValues((prevFormValues) => ({
+          ...prevFormValues,
+          image: file, // Lưu đối tượng File
+        }));
+      } else {
+        setFormValues((prevFormValues) => ({
+          ...prevFormValues,
+          image: '', // Đặt hình ảnh thành rỗng nếu không có tệp được chọn
+        }));
+        setPreviewImage(null); // Xóa ảnh xem trước
+      }
+    } else if (modalType === 'edit') {
+        console.log('modal type edit');
 
-    // State để hiển thị modal chi tiết
-    const [showDetail, setShowDetail] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState<any>(null);
-
-    useEffect(() => {
-        if (modalType === 'edit' && currentProduct) {
-            // Điền dữ liệu sản phẩm hiện tại vào form khi chỉnh sửa
-            setFormValues({
-                name: currentProduct.name || '',
-                price: currentProduct.price || '',
-                brand: currentProduct.brand || '',
-                category: currentProduct.categoryProduct?.categoryProductId || '',
-                status: currentProduct.status || '',
-                country: currentProduct.country || '',
-                description: currentProduct.description || '',
-                image: currentProduct.image || null
-            });
-        } else {
-            // Reset form nếu thêm sản phẩm mới
-            setFormValues({
-                name: '',
-                price: '',
-                brand: '',
-                category: '',
-                status: '',
-                country: '',
-                description: '',
-                image: null
-            });
-        }
-    }, [modalType, currentProduct]);
-
-    // Xử lý khi người dùng thay đổi giá trị trong form
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormValues({ ...formValues, [name]: value });
-    };
-
-    // Xử lý khi người dùng chọn ảnh mới
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            setFormValues({ ...formValues, image: file });
-        }
-    };
-
-    const handleClose = () => {
-        setShowAddProduct(false);
-    };
-
-    const handleSave = async () => {
-        const formData = new FormData();
-        formData.append('name', formValues.name);
-        formData.append('price', formValues.price);
-        formData.append('brand', formValues.brand);
-        formData.append('category', formValues.category);
-        formData.append('status', formValues.status);
-        formData.append('country', formValues.country);
-        formData.append('description', formValues.description);
-        if (formValues.image) {
-            formData.append('image', formValues.image);
-        }
-
-        try {
-            if (modalType === 'add') {
-                // Gọi API thêm sản phẩm mới
-                const response = await fetch(`http://localhost:8080/api/products`, {
-                    method: 'POST',
-                    body: formData,
-                });
-                const result = await response.json();
-                console.log('Sản phẩm mới đã được thêm:', result);
-            } else if (modalType === 'edit' && currentProduct) {
-                // Gọi API cập nhật sản phẩm
-                const response = await fetch(`http://localhost:8080/api/products/${currentProduct.productId}`, {
-                    method: 'PUT',
-                    body: formData,
-                });
-                const result = await response.json();
-                console.log('Sản phẩm đã được cập nhật:', result);
-            }
-        } catch (error) {
-            console.error('Lỗi khi lưu sản phẩm:', error);
-        }
-
-        handleClose(); // Đóng modal sau khi lưu xong
-    };
-
-    const handleShowDetail = () => {
-        setSelectedProduct(currentProduct);
-        setShowDetail(true);
-    };
-
-    return (
-        <>
-            <Modal show={showAddProduct} onHide={handleClose} centered backdrop="static" keyboard={false} size="xl">
-                <Modal.Header closeButton>
-                    <Modal.Title className="text-uppercase text-danger">{modalType === 'add' ? 'Thêm sản phẩm' : 'Chỉnh sửa sản phẩm'}</Modal.Title>
-                </Modal.Header>
-
-                <Modal.Body>
-                    <Form>
-                        <Row>
-                            <Col xs={8}>
-                                <Row>
-                                    <Col>
-                                        <Form.Group className="mb-3">
-                                            <Form.Floating>
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Tên"
-                                                    name="name"
-                                                    value={formValues.name}
-                                                    onChange={handleInputChange}
-                                                />
-                                                <Form.Label htmlFor="name">Tên sản phẩm <b className="text-danger">*</b></Form.Label>
-                                            </Form.Floating>
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <Form.Floating>
-                                                <Form.Control
-                                                    type="number"
-                                                    placeholder="Giá"
-                                                    name="price"
-                                                    value={formValues.price}
-                                                    onChange={handleInputChange}
-                                                />
-                                                <Form.Label htmlFor="price">Giá <b className="text-danger">*</b></Form.Label>
-                                            </Form.Floating>
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <Form.Floating>
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Hãng"
-                                                    name="brand"
-                                                    value={formValues.brand}
-                                                    onChange={handleInputChange}
-                                                />
-                                                <Form.Label htmlFor="brand">Hãng <b className="text-danger">*</b></Form.Label>
-                                            </Form.Floating>
-                                        </Form.Group>
-                                    </Col>
-                                    <Col>
-                                        <Form.Group className="mb-3">
-                                            <FloatingLabel controlId="category" label={<span>Loại <b className="text-danger">*</b></span>}>
-                                                <Form.Select
-                                                    name="category"
-                                                    value={formValues.category}
-                                                    onChange={handleInputChange}>
-                                                    {/* Thêm danh mục sản phẩm nếu có */}
-                                                    {categoryProducts.map((category) => (
-                                                        <option key={category.categoryProductId} value={category.categoryProductId}>
-                                                            {category.name}
-                                                        </option>
-                                                    ))}
-                                                </Form.Select>
-                                            </FloatingLabel>
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <FloatingLabel controlId="status" label={<span>Trạng thái <b className="text-danger">*</b></span>}>
-                                                <Form.Select
-                                                    name="status"
-                                                    value={formValues.status}
-                                                    onChange={handleInputChange}
-                                                >
-                                                    <option>-- Nhấn để chọn --</option>
-                                                    <option value="Còn hàng">Còn hàng</option>
-                                                    <option value="Hết hàng">Hết hàng</option>
-                                                </Form.Select>
-                                            </FloatingLabel>
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <Form.Floating>
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Xuất xứ"
-                                                    name="country"
-                                                    value={formValues.country}
-                                                    onChange={handleInputChange}
-                                                />
-                                                <Form.Label htmlFor="country">Xuất xứ <b className="text-danger">*</b></Form.Label>
-                                            </Form.Floating>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <Form.Group className="mb-3">
-                                    <Form.Label htmlFor="description" className="text-secondary fs-6">Mô tả <b className="text-danger">*</b></Form.Label>
-                                    <Form.Floating>
-                                        <Form.Control
-                                            as="textarea"
-                                            style={{ height: '100px' }}
-                                            name="description"
-                                            value={formValues.description}
-                                            rows={10}
-                                            onChange={handleInputChange}
-                                        />
-                                    </Form.Floating>
-                                </Form.Group>
-                            </Col>
-                            <Col xs={4}>
-                                <div className="text-center">
-                                    <div className="avatar-upload">
-                                        <div className="avatar-edit">
-                                            <input
-                                                type="file"
-                                                name="image"
-                                                id="imageUpload"
-                                                accept="image/jpeg, image/png"
-                                                style={{ display: 'none' }}
-                                                onChange={handleImageChange}
-                                            />
-                                            <label htmlFor="imageUpload" className="btn btn-link"> Sửa </label>
-                                        </div>
-                                        <div className="avatar-preview">
-                                            <Image
-                                                // src={formValues.image ? URL.createObjectURL(formValues.image) : '/images/avatar-init.gif'}
-                                                src={formValues.image?.name}
-                                                style={{ width: '150px', height: 'auto' }}
-                                                className="mx-2"
-                                                alt={formValues.image?.name || "Avatar"}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </Col>
-                        </Row>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="info" onClick={handleShowDetail}>
-                        Chi tiết
-                    </Button>
-                    <Button variant="secondary" onClick={handleClose}>
-                        Hủy
-                    </Button>
-                    <Button style={{ backgroundColor: "#142239" }} onClick={handleSave}>
-                        {modalType === 'add' ? 'Xác nhận' : 'Lưu thay đổi'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* Modal chi tiết sản phẩm */}
-            {selectedProduct && (
-                <ProductDetailModal
-                    showDetail={showDetail}
-                    setShowDetail={setShowDetail}
-                    product={selectedProduct}
-                />
-            )}
-        </>
+      // Chế độ chỉnh sửa: giữ lại ảnh gốc trừ khi có tệp mới được chọn
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        setPreviewImage(URL.createObjectURL(file)); // Hiển thị ảnh xem trước của tệp mới
+        setFormValues((prevFormValues) => ({
+          ...prevFormValues,
+          image: file, // Cập nhật formValues với tệp mới
+        })
     );
+      } else {
+        setPreviewImage(null); // Không có ảnh xem trước, giữ lại ảnh gốc
+      }
+    }
+  };
+  
+const handleSave = async () => {
+    try {
+      const formData = new FormData();
+  
+      // Giữ nguyên hình ảnh gốc nếu không có hình mới
+      let imageUrl = currentProduct?.image;
+  
+      // Kiểm tra nếu có hình ảnh mới được chọn
+      if (previewImage) {
+        const file = formValues.image; // Đây là file đã được chọn
+  
+        if (file instanceof File) {
+          const fileName = `${file.name.replace(/\s+/g, "_")}`;
+          imageUrl = fileName; // Cập nhật tên file hình ảnh
+          formData.append("fileimage", file); // Thêm file hình ảnh vào FormData
+        } else {
+          console.error("file không phải là một đối tượng File:", file);
+        }
+      }
+  
+      // Tạo đối tượng product với các thuộc tính
+      const productData = {
+        name: formValues.name,
+        brand: formValues.brand,
+        categoryProduct: {
+          categoryProductId: formValues.categoryProduct.categoryProductId,
+        },
+        status: formValues.status,
+        country: formValues.country,
+        price: formValues.price,
+        description: formValues.description,
+        image: imageUrl,
+        stock: formValues.stock,
+      };
+  
+      // Thêm product vào FormData dưới dạng chuỗi JSON
+      formData.append("product", JSON.stringify(productData));
+  
+      // Log ra FormData để kiểm tra
+      let index = 0;
+      for (let [key, value] of formData.entries()) {
+        console.log(`${index++} Key: ${key}, Type of: ${typeof value}, Value:`, value);
+      }
+  
+      // Gửi dữ liệu lên backend
+      if (modalType === "add") {
+        const response = await axios.post(
+          `http://localhost:8080/rest/products`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+        toast.success("Thêm sản phẩm thành công");
+      } else if (modalType === "edit" && currentProduct) {
+        const response = await axios.put(
+          `http://localhost:8080/rest/products/${currentProduct.productId}`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+        toast.success("Sản phẩm đã được cập nhật");
+      }
+    } catch (error) {
+      toast.error(`Lỗi khi lưu sản phẩm: ${error}`);
+      console.error("Lỗi khi lưu sản phẩm:", error);
+    }
+    handleClose();
+  };
+  
+  
+  
+  
+  return (
+    <>
+      <Modal
+        show={showAddProduct}
+        onHide={handleClose}
+        centered
+        backdrop="static"
+        keyboard={true}
+        size="xl"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="text-uppercase text-danger">
+            {modalType === "add" ? "Thêm sản phẩm" : "Chỉnh sửa sản phẩm"}
+          </Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <Form>
+            <Row>
+              <Col xs={8}>
+                <Row>
+                  <Col>
+                    <Form.Group className="mb-3">
+                      <Form.Floating>
+                        <Form.Control
+                          type="text"
+                          placeholder="Tên"
+                          name="name"
+                          value={formValues.name}
+                          onChange={handleInputChange}
+                        />
+                        <Form.Label htmlFor="name">
+                          Tên sản phẩm <b className="text-danger">*</b>
+                        </Form.Label>
+                      </Form.Floating>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Floating>
+                        <Form.Control
+                          type="number"
+                          placeholder="Số lượng"
+                          name="stock"
+                          value={formValues.stock}
+                          onChange={handleInputChange}
+                        />
+                        <Form.Label htmlFor="stock">
+                          Số lượng <b className="text-danger">*</b>
+                        </Form.Label>
+                      </Form.Floating>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Floating>
+                        <Form.Control
+                          type="number"
+                          placeholder="Giá"
+                          name="price"
+                          value={formValues.price}
+                          onChange={handleInputChange}
+                        />
+                        <Form.Label htmlFor="stock">
+                          Giá <b className="text-danger">*</b>
+                        </Form.Label>
+                      </Form.Floating>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Floating>
+                        <Form.Control
+                          type="text"
+                          placeholder="Hãng"
+                          name="brand"
+                          value={formValues.brand}
+                          onChange={handleInputChange}
+                        />
+                        <Form.Label htmlFor="brand">
+                          Hãng <b className="text-danger">*</b>
+                        </Form.Label>
+                      </Form.Floating>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Floating>
+                        <Form.Control
+                          as="select"
+                          name="categoryProduct"
+                          value={formValues.categoryProduct.categoryProductId}
+                          onChange={handleCategorySelect}
+                        >
+                          {categoryProducts.map((category) => (
+                            <option
+                              key={category.categoryProductId}
+                              value={category.categoryProductId}
+                            >
+                              {category.name}
+                            </option>
+                          ))}
+                        </Form.Control>
+                        <Form.Label htmlFor="category">
+                          Loại sản phẩm <b className="text-danger">*</b>
+                        </Form.Label>
+                      </Form.Floating>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Floating>
+                        <Form.Control
+                          as="select"
+                          name="status"
+                          value={formValues.status}
+                          onChange={handleSelect}>
+                          {option.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </Form.Control>
+                        <Form.Label htmlFor="status">
+                          Trạng thái <b className="text-danger">*</b>
+                        </Form.Label>
+                      </Form.Floating>
+                    </Form.Group>
+                  </Col>
+                  <Col>
+                    <Form.Group className="mb-3">
+                      <Form.Floating>
+                        <Form.Control
+                          type="text"
+                          placeholder="country"
+                          name="country"
+                          value={formValues.country}
+                          onChange={handleInputChange}
+                        />
+                        <Form.Label htmlFor="country">
+                          Xuất sứ <b className="text-danger">*</b>
+                        </Form.Label>
+                      </Form.Floating>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label htmlFor="description">
+                        Mô tả <b className="text-danger">*</b>
+                      </Form.Label>
+                      <Form.Floating>
+                        <Form.Control
+                          as="textarea"
+                          placeholder="Mô tả"
+                          name="description"
+                          rows={6}
+                          value={formValues.description}
+                          onChange={handleInputChange}
+                          style={{
+                            width: "100%",
+                            height: "150px",
+                            padding: "10px",
+                          }}
+                        />
+                      </Form.Floating>
+                    </Form.Group>
+                    {/* Hình ảnh chọn từ file */}
+                    <Form.Group className="mb-3">
+                      <Form.Label htmlFor="image" className="text-danger">
+                        Chọn hình ảnh
+                      </Form.Label>
+                      <Form.Control
+                        type="file"
+                        name="image"
+                        onChange={handleImageChange}
+                        accept="image/png, image/jpeg, image/jpg"
+                      />
+                      {previewImage && (
+                        <div
+                          className="preview-image"
+                          style={{ marginTop: "10px", display: "flex" }}
+                        >
+                          <Image
+                            src={previewImage}
+                            alt="Preview"
+                            fluid
+                            style={{
+                              objectFit: "cover",
+                              maxHeight: "70px",
+                              maxWidth: "100px",
+                              borderRadius: "5px",
+                            }}
+                          />
+                        </div>
+                      )}
+                    </Form.Group>
+                  </Col>
+                </Row>
+              </Col>
+              <Col xs={4}>
+                {/* Hình ảnh từ server */}
+                <div>
+                  {formValues.image && modalType === "edit" && (
+                    <Image
+                      src={`${BASE_URL}/images/product-images/${formValues.image}`}
+                      alt={formValues.image}
+                      fluid
+                      style={{ objectFit: "cover", maxHeight: "300px" }}
+                    />
+                  )}
+                </div>
+                <div>
+                  {previewImage && modalType === "add" && (
+                    <div style={{ marginTop: "10px" }}>
+                      <p>Hình ảnh minh họa:</p>
+                      <Image
+                        src={previewImage}
+                        alt="Preview"
+                        fluid
+                        style={{ objectFit: "cover", maxHeight: "300px" }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </Col>
+            </Row>
+          </Form>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Đóng
+          </Button>
+          <Button variant="danger" onClick={handleSave}>
+            Lưu
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
 };
 
 export default ProductAddNew;

@@ -86,10 +86,13 @@ const VerificationCodeInput: React.FC<VerificationCodeInputProps> = ({ onCodeCha
 interface ForgotPasswordProps {
     showForgotPassword: boolean;
     setShowForgotPassword: (v: boolean) => void;
+    showChangePasswordNew: boolean;
+    setShowChangePasswordNew: (v: boolean) => void;
 }
 
 export default function ForgotPassword(props: ForgotPasswordProps) {
     const { showForgotPassword, setShowForgotPassword } = props;
+    const { showChangePasswordNew, setShowChangePasswordNew } = props;
 
     const [timeLeft, setTimeLeft] = useState(0);
 
@@ -108,6 +111,7 @@ export default function ForgotPassword(props: ForgotPasswordProps) {
                     toast.warning("Email bạn nhập không đúng!")!
                 }
                 const dataUser = await response.json();
+                sessionStorage.setItem('usernameNewPass', dataUser.username);
                 if (dataUser.email == email) {
                     if (timeLeft) {
                         clearInterval(timeLeft);
@@ -124,7 +128,7 @@ export default function ForgotPassword(props: ForgotPasswordProps) {
                         });
                     }, 1000);
                     if (dataUser.email) {
-
+                        toast.success("Mã xác nhận đang được gửi về email!");
                         const response = await fetch('http://localhost:8080/rest/user/sendMail', {
                             method: 'POST',
                             headers: {
@@ -181,6 +185,8 @@ export default function ForgotPassword(props: ForgotPasswordProps) {
         } else if (codeOtp) {
             if (otp == codeOtp) {
                 toast.success("Hoàn tất xác minh tài khoản!")!
+                setShowChangePasswordNew(true);
+                setShowForgotPassword(false);
             } else {
                 toast.error("Mã xác nhận không đúng!")!
             }
@@ -194,6 +200,7 @@ export default function ForgotPassword(props: ForgotPasswordProps) {
         setEmail("");
         setOtp("");
         setOtpValue("");
+        sessionStorage.removeItem('usernameNewPass');
     }
 
     return (
@@ -243,5 +250,6 @@ export default function ForgotPassword(props: ForgotPasswordProps) {
                 </div>
             </Modal.Body>
         </Modal >
+
     );
 }
