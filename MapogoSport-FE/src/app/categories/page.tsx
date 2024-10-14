@@ -110,7 +110,7 @@ const Categories = () => {
                                             <div className="img ratio-1-1">
                                                 <Link href="">
                                                     <img nh-lazy="image" className="img-fluid" alt={product.name}
-                                                        src={product.image} />
+                                                        src={`/images/Images_product/${product.image}`} />
                                                 </Link>
                                             </div>
                                             <div className="product-action-wishlist">
@@ -137,7 +137,7 @@ const Categories = () => {
                                             </div>
                                             <div className="product-category ms-1">
                                                 <Link href="">Lưới &amp; Khung thành</Link>
-                                            </div>
+                                            </div>  
                                             <div className="product-title ms-1">
                                                 <Link href="">{product.name}</Link>
                                             </div>
