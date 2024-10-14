@@ -137,8 +137,13 @@ const Categories = () => {
                                                 {/* <span className="price-amount old-price me-1">{product.oldPrice}</span> */}
                                             </div>
                                             <div className="product-category ms-1">
+<<<<<<< HEAD
                                                 <Link href="">{product.categoryProduct.name}</Link>
                                             </div>
+=======
+                                                <Link href="">Lưới &amp; Khung thành</Link>
+                                            </div>  
+>>>>>>> 694153278c3ccd2dde41bedc463eef678e28fe02
                                             <div className="product-title ms-1">
                                                 <Link href="">{product.name}</Link>
                                             </div>

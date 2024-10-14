@@ -14,7 +14,7 @@ import mapogo.entity.ProductDetail;
 import mapogo.entity.ProductDetailSize;
 import mapogo.service.ProductDetailService;
 
-@RequestMapping("/rest")
+@RequestMapping("/rest/product-detail")
 @CrossOrigin("*")
 @RestController
 public class ProductDetailRestController {
@@ -28,6 +28,17 @@ public class ProductDetailRestController {
 
 	@GetMapping("/product-detail/{id}")
 	public List<ProductDetail> findById(@PathVariable Integer id) {
+//=======
+	
+//	@GetMapping()
+//	public List<ProductDetail> findAll(){
+//		return productDetailService.findAll();
+//	}
+//	
+//	@GetMapping("/{id}")
+//	public List<ProductDetail> findById(@PathVariable Integer id)
+//	{
+//>>>>>>> 694153278c3ccd2dde41bedc463eef678e28fe02
 		return productDetailService.findById(id);
 	}
 

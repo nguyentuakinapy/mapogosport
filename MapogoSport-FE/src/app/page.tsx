@@ -219,6 +219,11 @@ export default function Home() {
           </div>
         </div>
         {/* Sân thể thao mới */}
+        {sportFields.length > 8 && (
+          <div className="text-center mt-3">
+            <Link href="/all-sport-fields" className="btn btn-primary">Xem thêm</Link>
+          </div>
+        )}
         <div>
           <h3 className="fw-bold mt-5">SÂN THỂ THAO MỚI</h3>
           <div style={{ fontSize: '15px' }}>

@@ -8,8 +8,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -64,13 +64,12 @@ public class Product implements Serializable {
 
 	@Column(name = "Stock", nullable = false)
 	private int stock;  // thay đổi thành kiểu int
-
 	
 	@Column(name = "Price", nullable = false)
 	private Double price;  
-	
-	@OneToMany(mappedBy = "product")
-	@JsonIgnore
+
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+	@JsonBackReference
 	private List<ProductDetail> productDetails;
 
 	@OneToMany(mappedBy = "product")

@@ -1,7 +1,8 @@
 interface Product {
     productId: number;
     name: string;
-    categoryProduct:{
+    price: number;
+    categoryProduct: {
         categoryProductId: number,
         name: string;
         imgae: string;
@@ -11,9 +12,34 @@ interface Product {
     createDate: Date;
     brand: string;
     country: string;
-    // image: string;
-    image:  File | string;
+    image: string;
     stock: number;
-    price: number
+    productDetails: [
+        {
+            productDetailId: number
+            color: string;
+            size: number;
+            quantity: double;
+            image: string;
+            galleries: [
+                {
+                    galleryId: number;
+                    name: string;
+                }
+            ]
+        }]
 }
-// HuuThanh
+
+interface ProductDetail {
+    productDetailId: number
+    color: string;
+    size: string;
+    quantity: number;
+    image: string;
+    galleries: [
+        {
+            galleryId: number;
+            name: string;
+        }
+    ]
+}

@@ -48,8 +48,6 @@ export default function ViewListDetail() {
                     <tr>
                         <th>#</th>
                         <th>Màu sắc</th>
-                        <th>Kích cỡ</th>
-                        <th>Số lượng</th>
                         <th>Hình ảnh</th>
                         <th>Hành động</th>
                     </tr>
@@ -59,10 +57,9 @@ export default function ViewListDetail() {
                     {productDetails.map((detail, index) => (
                         <tr key={detail.productDetailId}>
                             <td>{index + 1}</td>
-                            <td>{detail.color}</td>
-                            <td>{detail.size}</td>
-                            <td>{detail.quantity}</td>
+                            <td>{detail.color}</td>                        
                             <td><img src={detail.image} alt={detail.color} style={{ width: '50px' }} /></td>
+                            {/* <td>{detail.image}</td> */}
                             <td className="text-center align-middle">
                                 <OverlayTrigger overlay={<Tooltip>Xem</Tooltip>}>
                                     <Button variant="primary" className="m-1">

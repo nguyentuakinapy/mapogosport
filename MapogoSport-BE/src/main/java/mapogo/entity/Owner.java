@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -39,7 +40,7 @@ public class Owner implements Serializable {
 	private String vnpayAccount;
 
 	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonBackReference
 	private List<SportField> sportsFields;
 
 	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)

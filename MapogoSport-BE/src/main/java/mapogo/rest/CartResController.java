@@ -1,8 +1,10 @@
 package mapogo.rest;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,13 +48,26 @@ public class CartResController {
 		return cartService.CountItem(username);
 	}
 
+//    @PutMapping("/update/{cartId}")
+//    public void updateCart(@RequestBody Cart cart, @PathVariable("cartId") Integer cartId) throws Exception {
+//    	if (cartService.existedByCartId(cartId)) {
+//    	    cartService.updateCart(cart);
+//    	} else {
+//    	    throw new Exception("Cart with ID " + cartId + " does not exist.");
+//    	}
+//    }
+	
+	 // Phương thức cập nhật giỏ hàng
     @PutMapping("/update/{cartId}")
-    public void updateCart(@RequestBody Cart cart, @PathVariable("cartId") Integer cartId) throws Exception {
-    	if (cartService.existedByCartId(cartId)) {
-    	    cartService.updateCart(cart);
-    	} else {
-    	    throw new Exception("Cart with ID " + cartId + " does not exist.");
-    	}
+    public ResponseEntity<String> updateCart(@PathVariable("cartId") Integer cartId, @RequestBody Map<String, Integer> requestBody) {
+        try {
+            // Lấy giá trị quantity từ body
+            Integer quantity = requestBody.get("quantity");
+            cartService.updateCartQuantity(cartId, quantity); // Gọi phương thức cập nhật trong service
+            return ResponseEntity.ok("Cập nhật giỏ hàng thành công!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật giỏ hàng: " + e.getMessage());
+        }
     }
     
     @DeleteMapping("/delete/{cartId}")
