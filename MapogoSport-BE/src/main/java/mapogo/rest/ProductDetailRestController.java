@@ -14,7 +14,7 @@ import mapogo.entity.ProductDetail;
 import mapogo.entity.ProductDetailSize;
 import mapogo.service.ProductDetailService;
 
-@RequestMapping("/rest/product-detail")
+@RequestMapping("/rest")
 @CrossOrigin("*")
 @RestController
 public class ProductDetailRestController {
