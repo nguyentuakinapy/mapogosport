@@ -13,7 +13,7 @@ interface Product {
     country: string;
     // image: string;
     image:  File | string;
-    stock: double;
+    stock: number;
+    price: number
 }
-
-
+// HuuThanh
