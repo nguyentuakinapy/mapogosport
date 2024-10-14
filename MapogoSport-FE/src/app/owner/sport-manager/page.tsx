@@ -1,11 +1,33 @@
 'use client'
+import axios from 'axios';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Table } from 'react-bootstrap';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 
-export default function SportManager() {
+const SportFieldList = () => {
+    const [sportFields, setSportFields] = useState([]);
+    const userSession = sessionStorage.getItem('user');
+    const user = userSession ? JSON.parse(userSession) : null;
+
+    useEffect(() => {
+        const fetchDataCart = async () => {
+            try {
+                // Đảm bảo người dùng tồn tại trước khi gọi API
+                if (user && user.username) {
+                    const response = await axios.get(`http://localhost:8080/api/sportfields/lists/${user.username}`);
+                    setSportFields(response.data);
+                    console.log(">>> check data Cart: ", response.data);
+                } else {
+                    console.log('Không tìm thấy người dùng');
+                }
+            } catch (err) {
+                console.log('Lỗi:', err);
+            }
+        };
+    }, []);
+
     return (
         <>
             <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>QUẢN LÝ SÂN</h3>
@@ -48,5 +70,7 @@ export default function SportManager() {
                 <Link href={'/owner?check=withdraw'} className='btn btn-danger'><i className="bi bi-plus-circle me-2"></i>Thêm khu vực</Link>
             </div>
         </>
-    )
-}
+    );
+};
+
+export default SportFieldList;

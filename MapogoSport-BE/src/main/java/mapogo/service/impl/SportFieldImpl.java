@@ -28,7 +28,7 @@ public class SportFieldImpl implements SportFieldService{
 	}
 
 	@Override
-	public List<SportField> findSportFeildByOwner(Integer id) {
+	public List<SportField> findSportFieldByOwner(Integer id) {
 		return sportFieldDao.findSportFieldByOwner(id);
 	}
 
