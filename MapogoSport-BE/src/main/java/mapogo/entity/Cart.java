@@ -1,11 +1,9 @@
 package mapogo.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Column;
@@ -45,7 +43,7 @@ public class Cart implements Serializable {
     private ProductDetailSize productDetailSize;
 
     @Column(name = "Date", nullable = false)
-    private Date date;
+    private LocalDateTime date;
 
     @Column(name = "TotalAmount", nullable = false)
     private Double totalAmount;

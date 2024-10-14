@@ -7,11 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -27,9 +25,8 @@ public class Booking implements Serializable{
     @Column(name = "BookingId")
     private Integer bookingId;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "Date", nullable = false)
-    private Date date = new Date();
+    private LocalDateTime date;
 
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)

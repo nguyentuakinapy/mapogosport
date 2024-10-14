@@ -8,26 +8,22 @@ import Tabs from 'react-bootstrap/Tabs';
 
 const SportFieldList = () => {
     const [sportFields, setSportFields] = useState([]);
-    const userSession = sessionStorage.getItem('user');
-    const user = userSession ? JSON.parse(userSession) : null;
-
+    const [user, setUser] = useState(null);
+    
     useEffect(() => {
-        const fetchDataCart = async () => {
-            try {
-                // Đảm bảo người dùng tồn tại trước khi gọi API
-                if (user && user.username) {
-                    const response = await axios.get(`http://localhost:8080/api/sportfields/lists/${user.username}`);
-                    setSportFields(response.data);
-                    console.log(">>> check data Cart: ", response.data);
-                } else {
-                    console.log('Không tìm thấy người dùng');
-                }
-            } catch (err) {
-                console.log('Lỗi:', err);
-            }
-        };
-    }, []);
+        const userSession = sessionStorage.getItem('user');
+        const user = userSession ? JSON.parse(userSession) : null;
+        setUser(user); // Cập nhật user từ sessionStorage
 
+        if (user) {
+            // Gọi API từ Spring Boot
+            axios.get(`http://localhost:8080/api/sportfields/lists/${user.username}`)
+                .then(response => {
+                    setSportFields(response.data); // Cập nhật state với dữ liệu từ API
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }, []);
     return (
         <>
             <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>QUẢN LÝ SÂN</h3>
