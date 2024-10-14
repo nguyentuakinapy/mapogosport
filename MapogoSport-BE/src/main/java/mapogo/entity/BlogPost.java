@@ -13,8 +13,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,11 +42,9 @@ public class BlogPost implements Serializable{
     @Column(name = "Content", nullable = false)
     private String content;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "CreatedAt", nullable = false)
     private LocalDateTime createdAt;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "UpdateAt")
     private LocalDateTime updateAt;
 
