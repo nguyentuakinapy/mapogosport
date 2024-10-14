@@ -3,7 +3,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
-import {formatPrice} from "@/components/Utils/Format"
+import { formatPrice } from "@/components/Utils/Format"
 
 
 const Categories = () => {
@@ -133,17 +133,15 @@ const Categories = () => {
                                         </div>
                                         <div className="inner-content">
                                             <div className="price">
-                                                <span className="price-amount ms-1"> {formatPrice(product.price) }</span>
+                                                <span className="price-amount ms-1"> {formatPrice(product.price)}</span>
                                                 {/* <span className="price-amount old-price me-1">{product.oldPrice}</span> */}
                                             </div>
                                             <div className="product-category ms-1">
-<<<<<<< HEAD
                                                 <Link href="">{product.categoryProduct.name}</Link>
                                             </div>
-=======
+                                            <div>
                                                 <Link href="">Lưới &amp; Khung thành</Link>
-                                            </div>  
->>>>>>> 694153278c3ccd2dde41bedc463eef678e28fe02
+                                            </div>
                                             <div className="product-title ms-1">
                                                 <Link href="">{product.name}</Link>
                                             </div>
