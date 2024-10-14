@@ -18,7 +18,7 @@ export default function BookingSport() {
 
     });
     const [selectTime, setSelectTime] = useState('');
-    const [selectDate, setSelectDate] = useState('');
+    const [selectDate, setSelectDate] = useState("0");
     const [selectSport, setSelectSport] = useState<number>(0);
 
     const [dataSport, setDataSport] = useState<SportField[]>([])
@@ -67,7 +67,6 @@ export default function BookingSport() {
     const [closing, setClosing] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);
 
-
     const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
 
     useEffect(() => {
@@ -88,6 +87,7 @@ export default function BookingSport() {
                 }
             });
             setBookings(newBookings); // Cập nhật state bookings
+            setCheckDataBooking1(!checkDataBooking1)
         }
     }, [dataTimeSport])
 
@@ -143,7 +143,86 @@ export default function BookingSport() {
         }
     }
 
+    const [days, setDays] = useState<string[]>();
 
+    useEffect(() => {
+        const today = new Date(); // Ngày hiện tại
+        const days = [];
+        const weekdays = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']; // Mảng các thứ trong tuần
+
+        for (let i = 0; i < 7; i++) {
+            const nextDay = new Date(today);
+            nextDay.setDate(today.getDate() + i);
+
+            const day = nextDay.getDate().toString().padStart(2, '0');
+            const month = (nextDay.getMonth() + 1).toString().padStart(2, '0');
+            // const year = nextDay.getFullYear();
+            const weekday = weekdays[nextDay.getDay()];
+
+            days.push(`${weekday}, ${day}-${month}`);
+        }
+
+        setDays(days);
+    }, [])
+    // SET STATUS
+    const targetTimes = ["5h00", "6h00", "6h30", "7h00", "7h30", "8h00"];
+    const targetSport = ["Sân 1", "Sân 2", "Sân 3", "Sân 4", "Sân 5", "Sân 6"];
+
+    const [checkDataBooking, setCheckDataBooking] = useState<boolean>(false);
+    const [checkDataBooking1, setCheckDataBooking1] = useState<boolean>(false);
+
+    useEffect(() => {
+        console.log("Bookings đã được cập nhật:", bookings);
+        for (let index = 0; index < 1; index++) {
+            setCheckDataBooking(!checkDataBooking);
+        }
+    }, [checkDataBooking1]);
+
+    useEffect(() => {
+        const i = Number(dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails.length);
+
+        const sportDetails = dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails;
+        console.log("Booking ", bookings);
+        // for (let index = 0; index < i; index++) {
+        Object.entries(bookings).forEach(([time, statuses]) => {
+            console.log(`Thời gian: ${time}, Trạng thái: ${statuses.join(", ")}`);
+
+
+            for (let index = 0; index < targetSport.length - 1; index++) {
+                const nameSport = sportDetails && sportDetails[index].name;
+                if (targetSport[index] == nameSport) {
+                    const targetIndex = targetTimes.indexOf(time);
+
+                    console.log(nameSport);
+
+                    if (targetTimes[index] == time) {
+                        checkAndAddStatus(time, "Đã đặt")
+                        console.log("ok ", targetIndex);
+                    } else {
+                        checkAndAddStatus(time, "Còn trống")
+                    }
+
+                }
+            }
+
+        })
+        // }
+        console.log("Ngon" + i);
+    }, [checkDataBooking])
+
+    const setStatus = (targetTimes: string[]) => {
+        dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails &&
+            dataSport[selectSport].sportFielDetails.map(sportDetail => {
+                Object.entries(bookings).map(([time, statuses]) => {
+                    const targetIndex = targetTimes.indexOf(time);
+                    if (targetIndex !== -1) {
+                        checkAndAddStatus(time, "Còn trống")
+                    }
+                })
+            })
+    }
+
+    // LOAD TABLE
     const renderTableRows = () => {
         return Object.entries(bookings).map(([time, statuses]) => (
             <tr key={time}>
@@ -155,6 +234,38 @@ export default function BookingSport() {
                 ))}
             </tr>
         ));
+    };
+
+    const renderTableRowsByWeek = () => {
+        return Object.entries(bookings).map(([time, statuses]) => {
+            if (dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails) {
+                const sportFielDetails = dataSport[selectSport].sportFielDetails;
+                const rowSpan = sportFielDetails.length;
+
+                return sportFielDetails.map((item, index) => (
+                    <tr key={`${time}-${item.sportFielDetailId}`} style={{ border: '1px solid #a1a1a1' }}>
+                        {/* Hiển thị ô time chỉ ở hàng đầu tiên */}
+                        {index === 0 && (
+                            <td className="title" style={{ textAlign: 'center' }} rowSpan={rowSpan}>
+                                {time}
+                            </td>
+                        )}
+                        <td>{item.name}</td>
+                        {statuses.map((status, i) => (
+                            <td key={i} className={`w-10 ${getBadgeClass(status)}`}>
+                                <span
+                                    onClick={() => setShowBookingModal(true)}
+                                    className={`badge ${getBadgeClass(status)}`}
+                                >
+                                    {status}
+                                </span>
+                            </td>
+                        ))}
+                    </tr>
+                ));
+            }
+            return null;
+        });
     };
 
     const getBadgeClass = (status: string) => {
@@ -182,15 +293,15 @@ export default function BookingSport() {
 
     return (
         <>
-            <button onClick={() => checkAndAddStatus("8h00", "Tạm đóng")
+            {/* <button onClick={() => setStatus(targetTimes)
             }></button >
-            {selectDate} - {selectSport} - {selectTime}
+            {selectDate} - {selectSport} - {selectTime} */}
             <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}> LỊCH ĐẶT SÂN</h3>
             <div className="input-group my-2">
                 <select defaultValue={selectDate} onChange={(e) => setSelectDate(e.target.value)}
                     className="form-select" aria-label="Default select example">
-                    <option value="Một ngày">Một ngày</option>
-                    <option value="Một tuần">Một tuần</option>
+                    <option value="0">Một ngày</option>
+                    <option value="1">Một tuần</option>
                 </select>
                 <input type="time" className="form-control" value={selectTime}
                     onChange={(e) => setSelectTime(e.target.value)} />
@@ -203,23 +314,42 @@ export default function BookingSport() {
                     ))}
                 </select>
             </div>
-            <div className="div-tb">
-                <Table >
-                    <thead className="tb-head">
-                        <tr>
-                            <th>Thời gian</th>
-                            {dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails &&
-                                dataSport[selectSport].sportFielDetails.map(item => (
-                                    <th key={item.sportFielDetailId}>{item.name}</th>
-                                ))
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {renderTableRows()}
-                    </tbody>
-                </Table>
-            </div>
+            {selectDate == "0" ?
+                <div className="div-tb">
+                    <Table >
+                        <thead className="tb-head">
+                            <tr>
+                                <th>Thời gian</th>
+                                {dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails &&
+                                    dataSport[selectSport].sportFielDetails.map(item => (
+                                        <th key={item.sportFielDetailId}>{item.name}</th>
+                                    ))
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {renderTableRows()}
+                        </tbody>
+                    </Table>
+                </div>
+                :
+                <div className="div-tb">
+                    <Table bordered>
+                        <thead className="tb-head">
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Sân</th>
+                                {days?.map(day => (
+                                    <th>{day}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {renderTableRowsByWeek()}
+                        </tbody>
+                    </Table>
+                </div>
+            }
             <BookingModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}></BookingModal>
         </>
     );
