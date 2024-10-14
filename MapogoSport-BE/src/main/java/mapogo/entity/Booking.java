@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -20,10 +22,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @AllArgsConstructor
 @Table(name = "Bookings")
 public class Booking implements Serializable{
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "BookingId", nullable = false, unique = true)
+    @Column(name = "BookingId")
     private Integer bookingId;
 
     @Temporal(TemporalType.DATE)
@@ -42,7 +43,6 @@ public class Booking implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "PaymentMethodId", nullable = false)
-    @JsonManagedReference
     private PaymentMethod paymentMethod;
 
     @ManyToOne
@@ -50,17 +50,16 @@ public class Booking implements Serializable{
     private Owner owner;
     
     @ManyToOne
-    @JoinColumn(name = "VoucherId", nullable = false)
-    @JsonManagedReference
+    @JoinColumn(name = "VoucherId")
     private Voucher voucher;
 
 	@Column(name = "Note")
     private String note;
 
-	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<BookingPayment> bookingPayments;
 
-	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JsonManagedReference
 	private List<BookingDetail> bookingDetails;
 	

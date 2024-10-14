@@ -1,8 +1,8 @@
 interface Product {
     productId: number;
     name: string;
-    price: double;
-    categoryProduct:{
+    price: number;
+    categoryProduct: {
         categoryProductId: number,
         name: string;
         imgae: string;
@@ -13,10 +13,10 @@ interface Product {
     brand: string;
     country: string;
     image: string;
-    stock: double;
+    stock: number;
     productDetails: [
         {
-            productDetailId: number 
+            productDetailId: number
             color: string;
             size: number;
             quantity: double;
@@ -27,11 +27,11 @@ interface Product {
                     name: string;
                 }
             ]
-    }]
+        }]
 }
 
 interface ProductDetail {
-    productDetailId: number 
+    productDetailId: number
     color: string;
     size: string;
     quantity: number;
