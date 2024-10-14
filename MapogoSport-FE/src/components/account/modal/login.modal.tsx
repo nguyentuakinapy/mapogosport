@@ -7,6 +7,10 @@ import Cookies from 'js-cookie';
 interface LoginProps {
     showLoginModal: boolean;
     setShowLoginModal: (v: boolean) => void;
+    showRegisterModal: boolean;
+    setShowRegisterModal: (v: boolean) => void;
+    showForgotPassword: boolean;
+    setShowForgotPassword: (v: boolean) => void;
 }
 
 export default function Login(props: LoginProps) {
@@ -64,8 +68,8 @@ export default function Login(props: LoginProps) {
                     sessionStorage.setItem('user', JSON.stringify(dataUser));
                     if (dataUser.authorities[0].role.name == "ROLE_ADMIN") {
                         window.location.href = "/admin";
-                    } else if (dataUser.authorities[0].role.name == "ROLE_EMPLOYEE") {
-                        window.location.href = "/owner";
+                    } else if (dataUser.authorities[0].role.name == "ROLE_STAFF") {
+                        window.location.href = "/admin";
                     } else if (dataUser.authorities[0].role.name == "ROLE_OWNER") {
                         window.location.href = "/owner";
                     } else {
@@ -81,6 +85,8 @@ export default function Login(props: LoginProps) {
 
     }
     const { showLoginModal, setShowLoginModal } = props;
+    const { showRegisterModal, setShowRegisterModal } = props;
+    const { showForgotPassword, setShowForgotPassword } = props;
 
     const handleClose = () => {
         setShowLoginModal(false);
@@ -137,7 +143,12 @@ export default function Login(props: LoginProps) {
                         <div className="d-flex justify-content-between align-items-center mt-3 mb-4">
                             <Form.Check type="checkbox" label="Nhớ mật khẩu" checked={checkRememberMe}
                                 onChange={(e) => setCheckRememberMe(e.target.checked)} />
-                            <a className="forgot d-block text-dark text-decoration-none" href="/forgot-password">
+                            <a className="forgot d-block text-dark text-decoration-none"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => {
+                                    setShowForgotPassword(true);
+                                    setShowLoginModal(false);
+                                }}>
                                 Quên mật khẩu?
                             </a>
                         </div>
@@ -148,8 +159,10 @@ export default function Login(props: LoginProps) {
                             <span>Bạn chưa có tài khoản?</span>
                             <a
                                 style={{ cursor: 'pointer' }}
-                                data-bs-toggle="modal"
-                                data-bs-target="#registerModal"
+                                onClick={() => {
+                                    setShowLoginModal(false);
+                                    setShowRegisterModal(true);
+                                }}
                                 className="fw-bold text-danger ms-2 text-decoration-none"
                             >
                                 Đăng ký ngay!

@@ -35,11 +35,10 @@ export default function RootLayout({
         {children}
         <ChangeEmailModel></ChangeEmailModel>
         <ChangePassword></ChangePassword>
-        <ForgotPassword></ForgotPassword>
         <ChatMessenger></ChatMessenger>
         <ToastContainer
           position="top-right"
-          autoClose={2000}
+          autoClose={3000}
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick

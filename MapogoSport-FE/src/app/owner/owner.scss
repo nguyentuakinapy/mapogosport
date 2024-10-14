@@ -152,7 +152,7 @@
 }
 
 .div-tb {
-    max-height: 480px;
+    max-height: 455px;
     overflow-y: auto;
     overflow-x: auto;
     border: 1px solid #142239;
@@ -178,7 +178,8 @@
     table {
         width: 100%;
         border-collapse: collapse;
-        margin: 0;
+        margin: 0; 
+       
 
         .tb-head {
             font-weight: bold;
@@ -189,7 +190,7 @@
 
             th {
                 border: none;
-                text-transform: uppercase;
+                // text-transform: uppercase;
                 background-color: #142239;
                 color: white;
                 font-weight: normal;
