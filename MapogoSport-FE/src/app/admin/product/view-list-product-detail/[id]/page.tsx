@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react'; // Bổ sung useEffect
 import { Table, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import axios from 'axios'; // Đảm bảo rằng bạn đã cài axios
-import ProductDetail from '@/app/product-detail/page';
+import ProductDetail from '@/app/product-detail/[idProduct]/page';
 
 
 export default function ViewListDetail() {
