@@ -1,7 +1,7 @@
 package mapogo.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -34,9 +34,8 @@ public class UserVoucher implements Serializable{
     @Column(name = "Status", nullable = false)
     private String status;
     
-    @Temporal(TemporalType.DATE)
     @Column(name = "Date", nullable = false)
-    private Date date = new Date();
+    private LocalDateTime date;
 
 
 }

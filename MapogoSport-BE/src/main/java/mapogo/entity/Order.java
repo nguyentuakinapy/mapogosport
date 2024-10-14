@@ -1,7 +1,7 @@
 package mapogo.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -49,7 +49,7 @@ public class Order implements Serializable {
 
 	@Temporal(TemporalType.DATE)
 	@Column(name = "Date")
-	private Date date = new Date();
+	private LocalDateTime date;
 
 	@Column(name = "Status", nullable = false)
 	private String status;

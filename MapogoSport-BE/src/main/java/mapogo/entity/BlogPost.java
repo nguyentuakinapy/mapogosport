@@ -1,7 +1,7 @@
 package mapogo.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -46,11 +46,11 @@ public class BlogPost implements Serializable{
 
     @Temporal(TemporalType.DATE)
     @Column(name = "CreatedAt", nullable = false)
-    private Date createdAt = new Date();
+    private LocalDateTime createdAt;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "UpdateAt")
-    private Date updateAt = new Date();
+    private LocalDateTime updateAt;
 
     @Column(name = "Status", nullable = false)
     private String status;

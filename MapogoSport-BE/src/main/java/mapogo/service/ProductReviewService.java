@@ -1,14 +1,12 @@
 package mapogo.service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.ProductReviewDAO;
-import mapogo.dto.ProductReviewDTO;
-import mapogo.entity.Product;
 import mapogo.entity.ProductReview;
 
 @Service
@@ -21,7 +19,8 @@ public class ProductReviewService {
 	}
 
 	public ProductReview save(ProductReview review) {
-		review.setDatedAt(new Date());
+		//Mỵ
+		review.setDatedAt(LocalDateTime.now());
 		return proReviewDao.save(review);
 	}
 
