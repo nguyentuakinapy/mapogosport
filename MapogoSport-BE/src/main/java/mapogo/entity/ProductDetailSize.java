@@ -30,7 +30,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 
-@Table(name = "ProductDetailSize")
+@Table(name = "productdetailsize") //  ProductDetailSize  -> productdetailsize để tránh lỗi invalid name
 public class ProductDetailSize implements Serializable {
 
 	@Id
