@@ -4,13 +4,14 @@ import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';
 
 interface UserProps {
-    showAddAddress: boolean;
-    setShowAddAddress: (v: boolean) => void;
+    showUpdateAddress: boolean;
+    setShowUpdateAddress: (v: boolean) => void;
+    addressUser: any;
 }
 
 const ModalAddAddress = (props: UserProps) => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
-    const { showAddAddress, setShowAddAddress } = props;
+    const { showUpdateAddress, setShowUpdateAddress, addressUser } = props;
 
     const { data, error } = useSWR("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
         revalidateIfStale: false,
@@ -25,6 +26,21 @@ const ModalAddAddress = (props: UserProps) => {
     const [selectedWard, setSelectedWard] = useState<string>('');
     const [phone, setPhone] = useState<string>('');
     const [addressDetail, setAddressDetail] = useState<string>('');
+
+    useEffect(() => {
+        if (addressUser) {
+            setSelectedProvince(addressUser.address.province);
+            setSelectedDistrict(addressUser.address.district);
+            setSelectedWard(addressUser.address.ward);
+            setPhone(addressUser.phoneNumber);
+            setAddressDetail(addressUser.addressDetail);
+
+            const selectedProvinceData = data?.find((province: any) => province.Name === addressUser.address.province);
+            setDistricts(selectedProvinceData?.Districts || []);
+            const selectedDistrictData = selectedProvinceData?.Districts.find((district: any) => district.Name === addressUser.address.district);
+            setWards(selectedDistrictData?.Wards || []);
+        }
+    }, [addressUser, data]);
 
     const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const provinceName = e.target.value;
@@ -53,10 +69,10 @@ const ModalAddAddress = (props: UserProps) => {
         setSelectedProvince('');
         setSelectedDistrict('');
         setSelectedWard('');
-        setShowAddAddress(false);
+        setShowUpdateAddress(false);
     };
 
-    const handleSave = () => {
+    const handleUpdate = () => {
         if (!selectedProvince || !selectedDistrict || !selectedWard || !phone || !addressDetail) {
             toast.error("Hãy điền đầy đủ thông tin!");
             return;
@@ -64,13 +80,13 @@ const ModalAddAddress = (props: UserProps) => {
         const user = sessionStorage.getItem('user');
         if (user) {
             const parsedUserData = JSON.parse(user) as User;
-            fetch(`http://localhost:8080/rest/user/address/${parsedUserData.username}`, {
-                method: 'POST',
+            fetch(`http://localhost:8080/rest/user/address/${addressUser.addressUserId}`, {
+                method: 'PUT',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify([{
+                body: JSON.stringify({
                     address: {
                         province: selectedProvince,
                         district: selectedDistrict,
@@ -78,22 +94,24 @@ const ModalAddAddress = (props: UserProps) => {
                     },
                     phoneNumber: phone,
                     addressDetail: addressDetail
-                }]),
-            }).then(res => res.json()).then(res => {
-                if (res) {
-                    toast.success("Thêm địa chỉ mới thành công!")
-                    handleClose();
-                    mutate(`http://localhost:8080/rest/user/${parsedUserData.username}`);
-                } else {
-                    toast.error("Thêm địa chỉ mới thất bại!")
+                }),
+            }).then(async (res) => {
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
+                    return
                 }
+                handleClose();
+                mutate(`http://localhost:8080/rest/user/${parsedUserData.username}`);
+                toast.success('Cập nhật thành công!');
+            }).catch((error) => {
+                toast.error(`Đã xảy ra lỗi: ${error.message}`);
             });
         }
-
     };
     if (error) {
         return (
-            <Modal show={showAddAddress} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
+            <Modal show={showUpdateAddress} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
                 centered backdrop="static" keyboard={false}>
                 <Modal.Header closeButton>
                     <Modal.Title className="text-uppercase text-danger">Thêm địa chỉ</Modal.Title>
@@ -108,10 +126,10 @@ const ModalAddAddress = (props: UserProps) => {
         )
     }
     return (
-        <Modal show={showAddAddress} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
+        <Modal show={showUpdateAddress} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
             centered backdrop="static" keyboard={false}>
             <Modal.Header closeButton>
-                <Modal.Title className="text-uppercase text-danger">Thêm địa chỉ</Modal.Title>
+                <Modal.Title className="text-uppercase text-danger">Cập nhật địa chỉ</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form>
@@ -157,7 +175,7 @@ const ModalAddAddress = (props: UserProps) => {
                             <Form.Group className="mb-3">
                                 <Form.Floating>
                                     <Form.Control size="sm" type="text" placeholder="Số điện thoại"
-                                        onChange={(e) => setPhone(e.target.value)} />
+                                        value={phone} onChange={(e) => setPhone(e.target.value)} />
                                     <Form.Label htmlFor="phone">Số điện thoại <b className="text-danger">*</b></Form.Label>
                                 </Form.Floating>
                             </Form.Group>
@@ -167,7 +185,7 @@ const ModalAddAddress = (props: UserProps) => {
                     <Form.Group>
                         <Form.Floating>
                             <Form.Control size="sm" type="text" placeholder="Địa chỉ chi tiết"
-                                onChange={(e) => setAddressDetail(e.target.value)} />
+                                value={addressDetail} onChange={(e) => setAddressDetail(e.target.value)} />
                             <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
                         </Form.Floating>
                     </Form.Group>
@@ -175,7 +193,7 @@ const ModalAddAddress = (props: UserProps) => {
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={() => handleClose()}>Hủy</Button>
-                <Button style={{ backgroundColor: "#142239" }} onClick={() => handleSave()}>Xác nhận</Button>
+                <Button style={{ backgroundColor: "#142239" }} onClick={() => handleUpdate()}>Xác nhận</Button>
             </Modal.Footer>
         </Modal >
     );

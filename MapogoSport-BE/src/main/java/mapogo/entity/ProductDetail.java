@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -39,6 +38,7 @@ public class ProductDetail implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductId", nullable = false)
+  @JsonManagedReference
 	private Product product;
 
 	@Column(name = "Color", nullable = false)
@@ -48,8 +48,10 @@ public class ProductDetail implements Serializable {
 	private String image;
 	
 	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
+	@JsonManagedReference
 	private List<Gallery> galleries;
 
 	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
+	@JsonBackReference
 	private List<ProductDetailSize> productDetailSizes;
 }

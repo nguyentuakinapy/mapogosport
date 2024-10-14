@@ -38,7 +38,6 @@ public class Gallery implements Serializable{
     @ManyToOne
     @JoinColumn(name = "ProductDetailId", nullable = false)
     @JsonBackReference
-
     private ProductDetail productDetail;
 
 }
