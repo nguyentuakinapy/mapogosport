@@ -219,16 +219,12 @@ export default function Home() {
           </div>
         </div>
         {/* Sân thể thao mới */}
-        {sportFields.length > 8 && (
-          <div className="text-center mt-3">
-            <Link href="/all-sport-fields" className="btn btn-primary">Xem thêm</Link>
-          </div>
-        )}
+
         <div>
           <h3 className="fw-bold mt-5">SÂN THỂ THAO MỚI</h3>
           <div style={{ fontSize: '15px' }}>
             <Row className="my-3">
-              {sportFields.map((field: SportField) => (
+              {sportFields.slice(0, 8).map((field: SportField) => (
                 <Col xs={3} key={field.sportFieldId}>
                   <div className="user-border">
                     <div className="mb-3">
@@ -256,6 +252,12 @@ export default function Home() {
                 </Col>
               ))}
             </Row>
+            
+            {/* {sportFields.length > 8 && (
+              <div className="text-end">
+                <Link href="/more-sports" className="btn btn btn-dark">Xem thêm<i className="bi bi-chevron-compact-right"></i></Link>
+              </div>
+            )} */}
           </div>
         </div>
         {/* Sản phẩm mới */}
