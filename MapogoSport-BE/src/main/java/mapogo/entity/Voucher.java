@@ -1,10 +1,9 @@
 package mapogo.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -18,8 +17,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,13 +44,11 @@ public class Voucher implements Serializable {
 	@Column(name = "Quantity", nullable = false)
 	private Integer quantity;
 
-	@Temporal(TemporalType.DATE)
 	@Column(name = "CreateDate", nullable = false)
-	private Date createDate = new Date();
+	private LocalDateTime createDate;
 
-	@Temporal(TemporalType.DATE)
 	@Column(name = "EndDate", nullable = false)
-	private Date endDate = new Date();
+	private LocalDateTime endDate;
 
 	@ManyToOne
 	@JoinColumn(name = "CreatedBy", nullable = false)
@@ -66,16 +61,15 @@ public class Voucher implements Serializable {
 	@Column(name = "discountCode", nullable = false)
 	private String discountCode;
 
-	@Temporal(TemporalType.DATE)
 	@Column(name = "ActiveDate", nullable = false)
-	private Date activeDate;
+	private LocalDateTime activeDate;
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JsonIgnore
 	private List<Order> orders;
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JsonBackReference
+	@JsonIgnore
 	private List<Booking> bookings;
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @SuppressWarnings("serial")
@@ -46,7 +46,7 @@ public class SportFieldDetail implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "SportFiledId", nullable = false)
-	@JsonBackReference
+	@JsonManagedReference
 	private SportField sportField;
 
 	@Column(name = "PeakHour", nullable = false)

@@ -20,4 +20,9 @@ public class BookingServiceImpl implements BookingService{
 		return bookingDAO.findAll();
 	}
 
+	@Override
+	public List<Booking> findByUser_Username(String username) {
+		return bookingDAO.findByUser_Username(username);
+	}
+
 }

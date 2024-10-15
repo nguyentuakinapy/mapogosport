@@ -3,8 +3,8 @@ interface User {
     fullname: string;
     password: string;
     enabled: number;
-    gender: number | null;
     createdAt: Date;
+    gender: number | null;
     birthday: Date | null;
     email: string;
     avatar: string | null;
@@ -17,4 +17,17 @@ interface User {
             }
         }
     ];
+    addressUsers: [
+        {
+            addressUserId: number;
+            address: {
+                addressId: number;
+                province: string;
+                district: string;
+                ward: string;
+            },
+            phoneNumber: string;
+            addressDetail: string;
+        }
+    ]
 }

@@ -1,6 +1,6 @@
 package mapogo.service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class CartService {
 	}
 
 	public Cart addToCart(Cart cart) {
-		cart.setDate(new Date());
+		cart.setDate(LocalDateTime.now());
 		return cartDao.save(cart);
 	}
 

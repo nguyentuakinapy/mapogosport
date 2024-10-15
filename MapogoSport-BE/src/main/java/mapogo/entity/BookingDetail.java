@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,11 +26,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Table(name = "Bookingdetails")
 public class BookingDetail implements Serializable{
-
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "BookingDetailId", nullable = false, unique = true)
-    private Integer bookingId;
+    @Column(name = "BookingDetailId")
+    private Integer bookingDetailId;
 
 	@Column(name = "StartTime", nullable = false)
     private LocalTime startTime;
@@ -41,7 +39,6 @@ public class BookingDetail implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "SportFieldDetailId", nullable = false)
-    @JsonManagedReference
     private SportFieldDetail sportFieldDetail;
     
     @Column(name = "Price", nullable = false)

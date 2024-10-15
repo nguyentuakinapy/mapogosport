@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @SuppressWarnings("serial")
@@ -41,9 +41,8 @@ public class SubscriptionPayment implements Serializable {
 	@Column(name = "Status", nullable = false)
 	private String status;
 
-	@Temporal(TemporalType.DATE)
 	@Column(name = "PaymentDate", nullable = false)
-	private Date paymentDate = new Date();
+	private LocalDateTime paymentDate;
 
 	@Column(name = "ReferenceCode")
 	private String referenceCode;

@@ -3,6 +3,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
+import { formatPrice } from "@/components/Utils/Format"
 
 
 const Categories = () => {
@@ -110,7 +111,7 @@ const Categories = () => {
                                             <div className="img ratio-1-1">
                                                 <Link href="">
                                                     <img nh-lazy="image" className="img-fluid" alt={product.name}
-                                                        src={`/images/Images_product/${product.image}`} />
+                                                        src={`/images/Images_product/${typeof product.image === 'string' ? product.image : ''}`} />
                                                 </Link>
                                             </div>
                                             <div className="product-action-wishlist">
@@ -132,18 +133,18 @@ const Categories = () => {
                                         </div>
                                         <div className="inner-content">
                                             <div className="price">
-                                                <span className="price-amount ms-1">{product.price}</span>
+                                                <span className="price-amount ms-1"> {formatPrice(product.price)}</span>
                                                 {/* <span className="price-amount old-price me-1">{product.oldPrice}</span> */}
                                             </div>
                                             <div className="product-category ms-1">
-                                                <Link href="">Lưới &amp; Khung thành</Link>
-                                            </div>  
-                                            <div className="product-title ms-1">
+                                                <Link href="">{product.categoryProduct.name}</Link>
+                                            </div>
+                                            <div className="product-title ms-1" style={{overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px'}}>
                                                 <Link href="">{product.name}</Link>
                                             </div>
                                             <div className="d-flex mt-2" style={{ justifyContent: 'space-between', width: '100%' }}>
-                                                <Link href='' className='btn btn-danger ms-1' style={{ fontSize: '15px', flexGrow: 1 }}>Mua Ngay</Link>
-                                                <Link href='' className='btn btn-warning ms-2 me-1' style={{ fontSize: '15px', flexGrow: 1 }}>Thêm Giỏ Hàng</Link>
+                                                <Link href={`/product-detail/${product.productId}`} className='btn btn-danger ms-1' style={{ fontSize: '14px', flexGrow: 1 }}>Mua Ngay</Link>
+                                                <Link href='' className='btn btn-warning ms-2 me-1' style={{ fontSize: '14px', flexGrow: 1 }}>Thêm Giỏ Hàng</Link>
                                             </div>
                                             <div className="star-item star d-flex mt-1 ms-1">
                                                 <div className="icon text-warning mb-2">

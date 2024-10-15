@@ -1,11 +1,29 @@
 'use client'
+import axios from 'axios';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Table } from 'react-bootstrap';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 
-export default function SportManager() {
+const SportFieldList = () => {
+    const [sportFields, setSportFields] = useState([]);
+    const [user, setUser] = useState(null);
+    
+    useEffect(() => {
+        const userSession = sessionStorage.getItem('user');
+        const user = userSession ? JSON.parse(userSession) : null;
+        setUser(user); // Cập nhật user từ sessionStorage
+
+        if (user) {
+            // Gọi API từ Spring Boot
+            axios.get(`http://localhost:8080/api/sportfields/lists/${user.username}`)
+                .then(response => {
+                    setSportFields(response.data); // Cập nhật state với dữ liệu từ API
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }, []);
     return (
         <>
             <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>QUẢN LÝ SÂN</h3>
@@ -48,5 +66,7 @@ export default function SportManager() {
                 <Link href={'/owner?check=withdraw'} className='btn btn-danger'><i className="bi bi-plus-circle me-2"></i>Thêm khu vực</Link>
             </div>
         </>
-    )
-}
+    );
+};
+
+export default SportFieldList;
