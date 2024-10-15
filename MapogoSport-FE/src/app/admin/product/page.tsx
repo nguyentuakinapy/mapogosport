@@ -1,6 +1,6 @@
 ////// page 	product
 'use client'
-import Link from "next/link";
+import Link from 'next/link';
 import { Row, Col, Form, FormCheck, Button, Table, Badge, Image, OverlayTrigger, Tooltip, Nav } from "react-bootstrap";
 import '../adminStyle.scss';
 import { useState, useEffect } from "react";
@@ -34,8 +34,8 @@ const AdminProduct = () => {
                 axios.get(apiCategoriesProducts),
             ]);
 
-        console.log('Products:', productsRes.data); // Ghi lại sản phẩm
-        console.log('Category Products:', categoriesRes.data); // Ghi lại danh mục sản phẩm
+        // console.log('Products:', productsRes.data); // Ghi lại sản phẩm
+        // console.log('Category Products:', categoriesRes.data); // Ghi lại danh mục sản phẩm
                 
                  // Lưu dữ liệu vào state
             setProducts(productsRes.data);      // Dữ liệu từ API products
