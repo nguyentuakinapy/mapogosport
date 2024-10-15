@@ -66,15 +66,15 @@ export default function Login(props: LoginProps) {
                     }
                     handleClose();
                     sessionStorage.setItem('user', JSON.stringify(dataUser));
-                    if (dataUser.authorities[0].role.name == "ROLE_ADMIN") {
-                        window.location.href = "/admin";
-                    } else if (dataUser.authorities[0].role.name == "ROLE_STAFF") {
-                        window.location.href = "/admin";
-                    } else if (dataUser.authorities[0].role.name == "ROLE_OWNER") {
-                        window.location.href = "/owner";
-                    } else {
-                        window.location.href = "/";
-                    }
+                    // if (dataUser.authorities[0].role.name == "ROLE_ADMIN") {
+                    //     window.location.href = "/admin";
+                    // } else if (dataUser.authorities[0].role.name == "ROLE_STAFF") {
+                    //     window.location.href = "/admin";
+                    // } else if (dataUser.authorities[0].role.name == "ROLE_OWNER") {
+                    //     window.location.href = "/owner";
+                    // } else {
+                    //     window.location.href = "/";
+                    // }
                 } else {
                     toast.error("Thông tin đăng nhập không đúng!");
                 }

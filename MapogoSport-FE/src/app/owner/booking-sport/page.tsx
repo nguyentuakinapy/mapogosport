@@ -179,47 +179,55 @@ export default function BookingSport() {
     }, [checkDataBooking1]);
 
     useEffect(() => {
+        setStatus();
+    }, [checkDataBooking])
+
+    const setStatus = async () => {
         const i = Number(dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails.length);
 
         const sportDetails = dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails;
         console.log("Booking ", bookings);
-        // for (let index = 0; index < i; index++) {
-        Object.entries(bookings).forEach(([time, statuses]) => {
-            console.log(`Thời gian: ${time}, Trạng thái: ${statuses.join(", ")}`);
+        for (let index = 0; index < i; index++) {
+            const response = await
+                fetch(`http://localhost:8080/rest/user/booking/detail/gettoday/${sportDetails && sportDetails[index].sportFielDetailId}`);
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+            const dataBooking = await response.json() as BookingDetail[];
+            dataBooking.forEach(item => {
+                console.log("DATA BOOKING", item);
 
+                Object.entries(bookings).forEach(([time, statuses]) => {
+                    // console.log(`Thời gian: ${time}, Trạng thái: ${statuses.join(", ")}`);
+                    // if (targetSport[index] == nameSport) {
+                    const timeIndex = item.startTime.indexOf(time)
 
-            for (let index = 0; index < targetSport.length - 1; index++) {
-                const nameSport = sportDetails && sportDetails[index].name;
-                if (targetSport[index] == nameSport) {
-                    const targetIndex = targetTimes.indexOf(time);
-
-                    console.log(nameSport);
-
-                    if (targetTimes[index] == time) {
+                    if (timeIndex >= 0) {
                         checkAndAddStatus(time, "Đã đặt")
-                        console.log("ok ", targetIndex);
                     } else {
                         checkAndAddStatus(time, "Còn trống")
                     }
-
                 }
-            }
+                )
+                // for (let index = 0; index < targetSport.length - 1; index++) {
+                //     const nameSport = sportDetails && sportDetails[1].name;
+                //     if (targetSport[index] == nameSport) {
+                //         const targetIndex = targetTimes.indexOf(time);
 
-        })
-        // }
-        console.log("Ngon" + i);
-    }, [checkDataBooking])
+                //         console.log(nameSport);
 
-    const setStatus = (targetTimes: string[]) => {
-        dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails &&
-            dataSport[selectSport].sportFielDetails.map(sportDetail => {
-                Object.entries(bookings).map(([time, statuses]) => {
-                    const targetIndex = targetTimes.indexOf(time);
-                    if (targetIndex !== -1) {
-                        checkAndAddStatus(time, "Còn trống")
-                    }
-                })
+                //         if (targetTimes[index] == time) {
+                //             checkAndAddStatus(time, "Đã đặt")
+                //             console.log("ok ", targetIndex);
+                //         } else {
+                //             checkAndAddStatus(time, "Còn trống")
+                //         }
+
+                //     }
+                // }
+
             })
+        }
     }
 
     // LOAD TABLE
