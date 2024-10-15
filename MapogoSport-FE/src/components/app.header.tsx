@@ -139,7 +139,7 @@ const Header = () => {
 
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
-            <Navbar expand="lg" className='header-area bg-light' style={{ position: 'sticky', zIndex: '1001' }}>
+            <Navbar expand="lg" className='header-area bg-light' style={{ position: 'sticky', zIndex: '1001', borderBottom: '2px solid #143962' }}>
                 <Container>
                     <Navbar><Link href={'/'} ><img src="/images/logo.png" style={{ width: '100px' }} alt="" /></Link></Navbar>
                     <Navbar.Toggle aria-controls="navbarScroll" />
@@ -157,10 +157,10 @@ const Header = () => {
                             navbarScroll
                         >
                             <Nav>
-                                <a href="/categories" className='head-hv-nav text-decoration-none '><i className="bi bi-tools me-2"></i>Sản phẩm</a>
+                                <a href="/categories/products" className='head-hv-nav text-decoration-none '><i className="bi bi-tools me-2"></i>Sản phẩm</a>
                             </Nav>
                             <Nav>
-                                <Link href="/product-detail" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
+                                <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
                             </Nav>
                             <div className="dropdown">
                                 <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
@@ -191,7 +191,7 @@ const Header = () => {
                     </Navbar.Collapse>
                 </Container>
             </Navbar>
-            <Navbar className="bg-body-secondary" style={{ boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
+            {/* <Navbar className="bg-body-secondary" style={{ boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
                 <Container>
                     {categoryFields.map((categoryFields: CategoryField) => (
                         <Nav className='hv-nav' key={categoryFields.categoriesFieldId}>
@@ -201,7 +201,7 @@ const Header = () => {
                         </Nav>
                     ))}
                 </Container>
-            </Navbar>
+            </Navbar> */}
             <LoginModal
                 showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}
                 showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}

@@ -139,10 +139,7 @@ const Categories = () => {
                                             <div className="product-category ms-1">
                                                 <Link href="">{product.categoryProduct.name}</Link>
                                             </div>
-                                            <div>
-                                                <Link href="">Lưới &amp; Khung thành</Link>
-                                            </div>
-                                            <div className="product-title ms-1">
+                                            <div className="product-title ms-1" style={{overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px'}}>
                                                 <Link href="">{product.name}</Link>
                                             </div>
                                             <div className="d-flex mt-2" style={{ justifyContent: 'space-between', width: '100%' }}>
