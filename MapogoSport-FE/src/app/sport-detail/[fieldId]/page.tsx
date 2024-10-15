@@ -1,20 +1,79 @@
 
 "use client";
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css"; // Import the styles
 import Image from 'next/image';
 import Carousel from 'react-bootstrap/Carousel';
 import Link from 'next/link'
 import HomeLayout from '@/components/HomeLayout';
+import { useParams } from 'next/navigation';
 
 const SportDetail = () => {
     const [selectedDate, setSelectedDate] = useState(null);
+    const [sportField, setSportFields] = useState<SportField>();
+    const [sizeSportField, setSizeSportField] = useState<string[]>([]);
+    const [selectedSize, setSelectedSize] = useState<string>('');
+    const [priceBySizeSp, setPriceBySizeSp] = useState({ price: '', peakHourPrices: '' });
+    const { fieldId } = useParams();
     // const [selected, setSelected] = useState(false);
     const handleDateChange = (date) => {
         setSelectedDate(date);
     };
+
+
+    // Fetch sportField by fieldId
+    useEffect(() => {
+
+        if (fieldId) {
+            const fetchData = async () => {
+                try {
+                    const response = await fetch(`http://localhost:8080/rest/sport_field/${fieldId}`);
+                    const data = await response.json();
+                    setSportFields(data);
+                } catch (error) {
+                    console.log("Error fetching sport field data", error);
+                }
+            };
+            fetchData();
+        }
+    }, [fieldId]);
+
+    
+    // Fetch size of sportFieldDetail by fieldId
+    useEffect(() => {
+        if (fieldId) {
+            const fetchData = async () => {
+                try {
+                    const response = await fetch(`http://localhost:8080/rest/sport_field_detail/size/${fieldId}`);
+                    const data = await response.json();
+                    setSizeSportField(data);
+                } catch (error) {
+                    console.log("Error fetching size data", error);
+                }
+            };
+            fetchData();
+        }
+    }, [fieldId]);
+
+    // Fetch price by selected size
+    useEffect(() => {
+        const fetchPrice = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/rest/sport_field_detail/price/${fieldId}/${selectedSize}`);
+                const data = await response.json();
+                console.log("Price Data:", data);  // Log to check the data structure
+                setPriceBySizeSp({
+                    price: data[0][0],
+                    peakHourPrices: data[0][1],
+                });
+            } catch (error) {
+                console.log("Error fetching price data", error);
+            }
+        };
+        fetchPrice();
+    }, [selectedSize, fieldId]);
 
     return (
 
@@ -22,10 +81,10 @@ const SportDetail = () => {
             <Container className='pt-2'>
                 <Row>
                     <Col>
-                        <h1 className="fs-3 ">Sân bóng bóng bóng bang bang</h1>
+                        <h1 className="fs-3 ">{sportField?.name}</h1>
                         <div className='mb-3'>
                             <i className="bi bi-geo-alt-fill fs-3 ms-3"></i>
-                            <span>Công Viên phần mềm Quang Trung, Q12</span>
+                            <span>{sportField?.address}</span>
                         </div>
                     </Col>
                 </Row>
@@ -50,29 +109,51 @@ const SportDetail = () => {
                         </div>
                         <div className="ms-4 mt-3">
                             <span>Giờ mở cửa: </span>
-                            <span style={{ float: 'right' }} className="me-4">8:00 AM</span>
+                            <span style={{ float: 'right' }} className="me-4">{sportField?.opening}</span>
                         </div>
                         <div className="ms-4 mt-3">
-                            <span>Số Sân thi đấu: </span>
-                            <span style={{ float: 'right' }} className="me-4">3 Sân</span>
+                            <span>Số sân thi đấu: </span>
+                            <span style={{ float: 'right' }} className="me-4">{sportField?.quantity}</span>
                         </div>
                         <div className="ms-4 mt-3">
+                            <span>Loại sân: </span>
+                            <select
+                                id="selectBox"
+                                className="form-select me-4"
+                                style={{ float: 'right', width: '40%' }}
+                                onChange={(e) => {
+                                    setSelectedSize(e.target.value);
+                                    console.log("Selected Size:", e.target.value);
+                                }}>
+                                <>
+                                    <option value="Chọn loại sân">Chọn loại sân</option>
+                                    {sizeSportField.map((size: string, index: number) => (
+                                        <option key={index} value={size}>
+                                            {size}
+                                        </option>
+                                    ))}
+                                </>
+                            </select>
+
+                        </div>
+                        <div className="ms-4 mt-4">
                             <span>Giá Sân: </span>
-                            <span style={{ float: 'right' }} className="me-4">100 tỷ</span>
+                            <span style={{ float: 'right' }} className="me-4">{priceBySizeSp.price || 'Chưa có giá'}</span>
                         </div>
                         <div className="ms-4 mt-3">
                             <span>Giá Sân giờ vàng: </span>
-                            <span style={{ float: 'right' }} className="me-4">1000 tỷ</span>
+                            <span style={{ float: 'right' }} className="me-4">{priceBySizeSp.peakHourPrices || 'Chưa có giá'}</span>
                         </div>
-                        <div className="extends mt-2 mb-2">
+
+                        <div className="extends mt-2 mb-2" style={{ background: '#dee2e6', height: '150px' }}>
                             <div className="title ms-2">Dịch vụ tiện ích</div>
-                            <div className="list-extends mt-3">
-                                <span className="item-extends"><i className="bi bi-wifi"></i>wifi</span>
-                                <span className="item-extends"><i className="bi bi-car-front-fill"></i>Bãi đổ oto My lo lo lo lo lo lo</span>
-                                <span className="item-extends"><i className="bi bi-wifi"></i>wifi</span>
-                                <span className="item-extends"><i className="bi bi-car-front-fill"></i>Bãi đổ oto My lo lo lo lo lo lo</span>
-                                <span className="item-extends"><i className="bi bi-wifi"></i>wifi</span>
-                                <span className="item-extends"><i className="bi bi-car-front-fill"></i>Bãi đổ oto My lo lo lo lo lo lo</span>
+                            <div className="list-extends mt-3 ms-2" style={{
+                                display: 'block',
+                                width: '100%',
+                                wordWrap: 'break-word',
+                                whiteSpace: 'normal'
+                            }}>
+                                {sportField?.decription}
                             </div>
                         </div>
                     </div>

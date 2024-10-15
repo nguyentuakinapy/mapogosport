@@ -21,8 +21,8 @@ export default function Register(props: RegisterProps) {
     const [email, setEmail] = useState<string>("");
     const [fullName, setFullName] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const [forgotPassword, setForgotPassword] = useState<string>("");
-    const [authority, setAuthority] = useState<number>(1);
+    const [newPassword, setNewPassword] = useState<string>("");
+    const [authority, setAuthority] = useState<number>(4);
 
     const [otp, setOtp] = useState<string>("");
     const [otpValue, setOtpValue] = useState<string>("");
@@ -40,19 +40,19 @@ export default function Register(props: RegisterProps) {
         if (!username) {
             toast.warning("Vui lòng nhập tên đăng nhập!")
             return;
-        } else if (!email) {
-            toast.warning("Vui lòng nhập email!")
-            return;
         } else if (!fullName) {
             toast.warning("Vui lòng nhập họ và tên!")
+            return;
+        } else if (!email) {
+            toast.warning("Vui lòng nhập email!")
             return;
         } else if (!password) {
             toast.warning("Vui lòng nhập mật khẩu!")
             return;
-        } else if (!forgotPassword) {
+        } else if (!newPassword) {
             toast.warning("Vui lòng xác nhận mật khẩu!")
             return;
-        } else if (password != forgotPassword) {
+        } else if (password != newPassword) {
             toast.warning("Mật khẩu bạn nhập không chính xác!")
             return;
         } else if (!otp) {
@@ -122,27 +122,25 @@ export default function Register(props: RegisterProps) {
         }
     }
 
-    const coolDownTime = () => {
-        setCheckButton(true);
-        if (timeLeft) {
-            clearInterval(timeLeft);
-        }
-
-        setTimeLeft(60);
-
-        const newTimerId = setInterval(() => {
-            setTimeLeft((prevTime) => {
-                if (prevTime === 1) {
-                    clearInterval(newTimerId); // Dừng bộ đếm khi thời gian bằng 0
-                    setCheckButton(false);
-                }
-                return prevTime - 1;
-            });
-        }, 1000);
-    }
-
-    const checkEmail = async () => {
+    const coolDownTime = async () => {
         if (email) {
+            setCheckButton(true);
+            if (timeLeft) {
+                clearInterval(timeLeft);
+            }
+
+            setTimeLeft(60);
+
+            const newTimerId = setInterval(() => {
+                setTimeLeft((prevTime) => {
+                    if (prevTime === 1) {
+                        clearInterval(newTimerId); // Dừng bộ đếm khi thời gian bằng 0
+                        setCheckButton(false);
+                    }
+                    return prevTime - 1;
+                });
+            }, 1000);
+            toast.success("Mã xác nhận đang được gửi về email!");
             const response = await fetch('http://localhost:8080/rest/user/sendMail', {
                 method: 'POST',
                 headers: {
@@ -157,9 +155,13 @@ export default function Register(props: RegisterProps) {
 
             const res = await response.text(); // Bạn đang trả về chuỗi OTP từ backend
             setOtp(res);
-            toast.success(`OTP is: ${res}`);
+            // toast.success(`OTP is: ${res}`);
+        } else {
+            toast.warning("Vui lòng nhập Email!");
         }
     }
+
+
 
     const handleClose = () => {
         setShowRegisterModal(false);
@@ -167,7 +169,7 @@ export default function Register(props: RegisterProps) {
         setEmail("");
         setPassword("");
         setFullName("");
-        setForgotPassword("");
+        setNewPassword("");
         setOtp("");
         setOtpValue("");
     }
@@ -221,20 +223,22 @@ export default function Register(props: RegisterProps) {
                                         value={username} onChange={(e) => setUsername(e.target.value)}
                                     />
                                 </div>
-                                <div className="row mb-3 row">
+                                <div className="mb-3">
+                                    <div className="form-group">
+                                        <input type="text" className={`form-control ${errorFullName ? 'error' : ''} border border-dark`} placeholder="Họ và tên *"
+                                            value={fullName} onChange={(e) => setFullName(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="mb-3">
                                     {/* <div className="form-group col-6">
                                         <input type="text" className="form-control" id="floatingPassword"
                                         placeholder="Số điện thoại *" />
                                         </div> */}
-                                    <div className="form-group col-6">
+                                    <div className="form-group">
                                         <input type="email" className="form-control border border-dark"
                                             value={email} onChange={(e) => setEmail(e.target.value)}
                                             placeholder="Email *" />
-                                    </div>
-                                    <div className="form-group col-6">
-                                        <input type="text" className={`form-control ${errorFullName ? 'error' : ''} border border-dark`} placeholder="Họ và tên *"
-                                            value={fullName} onChange={(e) => setFullName(e.target.value)}
-                                        />
                                     </div>
                                 </div>
                                 <div className="row mb-3">
@@ -245,7 +249,7 @@ export default function Register(props: RegisterProps) {
                                     </div>
                                     <div className="form-group col-6">
                                         <input type="password" className="form-control border border-dark"
-                                            value={forgotPassword} onChange={(e) => setForgotPassword(e.target.value)}
+                                            value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
                                             placeholder="Nhập lại mật khẩu *" />
                                     </div>
                                 </div>
@@ -254,7 +258,6 @@ export default function Register(props: RegisterProps) {
                                         value={otpValue} onChange={(e) => setOtpValue(e.target.value)}
                                         aria-label="Mã OTP ######" aria-describedby="button-addon2" />
                                     <button onClick={() => {
-                                        checkEmail();
                                         coolDownTime();
                                     }}
                                         disabled={checkButton}
@@ -277,7 +280,7 @@ export default function Register(props: RegisterProps) {
                         </div>
                     </div>
                 </div>
-            </Modal>
+            </Modal >
         </>
     );
 }
