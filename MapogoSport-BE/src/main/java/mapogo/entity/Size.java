@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -37,6 +37,6 @@ public class Size implements Serializable {
 	private String sizeName;
 
 	@OneToMany(mappedBy = "size", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonBackReference
 	private List<ProductDetailSize> productDetailSizes;
 }

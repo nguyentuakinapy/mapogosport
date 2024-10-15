@@ -23,9 +23,9 @@ public class ProductDetailSizeServiceImpl implements ProductDetailSizeService{
 	}
 
 	@Override
-	public Optional<ProductDetailSize> findById(Integer id) {
+	public List<ProductDetailSize> findProductDetailSize_By_ProductDetailId(Integer id) {
 		// TODO Auto-generated method stub
-		return productDetailSizeDAO.findById(id);
+		return productDetailSizeDAO.findByProductDetailId(id);
 	}
 
 	@Override

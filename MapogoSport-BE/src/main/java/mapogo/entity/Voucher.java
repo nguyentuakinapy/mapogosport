@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,6 +57,7 @@ public class Voucher implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "CreatedBy", nullable = false)
+	@JsonIgnore
 	private User user;
 
 	@Column(name = "Status", nullable = false)
@@ -67,12 +71,15 @@ public class Voucher implements Serializable {
 	private Date activeDate;
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonIgnore
 	private List<Order> orders;
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonBackReference
 	private List<Booking> bookings;
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonIgnore
 	private List<UserVoucher> userVoucher;
 
 }
