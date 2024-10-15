@@ -10,13 +10,18 @@ import mapogo.entity.BookingDetail;
 import mapogo.service.BookingDetailService;
 
 @Service
-public class BookingDetailServiceImpl implements BookingDetailService{
+public class BookingDetailServiceImpl implements BookingDetailService {
 	@Autowired
 	BookingDetailDAO bookingDetailDAO;
-	
+
 	@Override
 	public BookingDetail findByBooking_BookingId(Integer bookingId) {
 		return bookingDetailDAO.findByBooking_BookingId(bookingId);
+	}
+
+	@Override
+	public List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId) {
+		return bookingDetailDAO.findBySportFieldDetailAndToday(sportDetailId);
 	}
 
 }
