@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
+import { hashPassword } from "@/components/Utils/Format";
 
 interface LoginProps {
     showLoginModal: boolean;
@@ -57,7 +58,8 @@ export default function Login(props: LoginProps) {
                     throw new Error('Error fetching data');
                 }
                 const dataUser = await responseUser.json();
-                if (dataUser.password == password) {
+                // console.log(hashPassword(password));
+                if (dataUser.password == hashPassword(password)) {
                     if (checkRememberMe) {
                         const user = { username, password };
                         Cookies.set('user', JSON.stringify(user), { expires: 7 });

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Form, Modal } from "react-bootstrap"
 import { toast } from "react-toastify";
 import "./account.scss"
+import { hashPassword } from "@/components/Utils/Format";
 
 
 interface RegisterProps {
@@ -22,6 +23,7 @@ export default function Register(props: RegisterProps) {
     const [fullName, setFullName] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
+    const [createPassword, setCreatePassword] = useState<string>("");
     const [authority, setAuthority] = useState<number>(4);
 
     const [otp, setOtp] = useState<string>("");
@@ -36,11 +38,21 @@ export default function Register(props: RegisterProps) {
     const [timeLeft, setTimeLeft] = useState(5);
     const [checkButton, setCheckButton] = useState<boolean>(false);
 
+    useEffect(() => {
+        setPassword(hashPassword(createPassword));
+    }, [createPassword])
+
     const handleSubmit = async () => {
         if (!username) {
             toast.warning("Vui lòng nhập tên đăng nhập!")
             return;
-        } else if (!fullName) {
+        }
+        const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
+        if (responseUser.ok) {
+            toast.warning("Tên đăng nhập đã tồn tại!");
+            return;
+        }
+        if (!fullName) {
             toast.warning("Vui lòng nhập họ và tên!")
             return;
         } else if (!email) {
@@ -52,7 +64,7 @@ export default function Register(props: RegisterProps) {
         } else if (!newPassword) {
             toast.warning("Vui lòng xác nhận mật khẩu!")
             return;
-        } else if (password != newPassword) {
+        } else if (createPassword != newPassword) {
             toast.warning("Mật khẩu bạn nhập không chính xác!")
             return;
         } else if (!otp) {
@@ -124,38 +136,48 @@ export default function Register(props: RegisterProps) {
 
     const coolDownTime = async () => {
         if (email) {
-            setCheckButton(true);
-            if (timeLeft) {
-                clearInterval(timeLeft);
-            }
+            try {
+                const responseEmail = await fetch(`http://localhost:8080/rest/user/getbyemail/${email}`);
+                const dataUser = await responseEmail.json();
+                if (dataUser.email == email) {
+                    toast.warning("Email bạn nhập đã tồn tại!")!
+                }
+            } catch (error: any) {
+                setCheckButton(true);
+                if (timeLeft) {
+                    clearInterval(timeLeft);
+                }
 
-            setTimeLeft(60);
+                setTimeLeft(60);
 
-            const newTimerId = setInterval(() => {
-                setTimeLeft((prevTime) => {
-                    if (prevTime === 1) {
-                        clearInterval(newTimerId); // Dừng bộ đếm khi thời gian bằng 0
-                        setCheckButton(false);
-                    }
-                    return prevTime - 1;
+                const newTimerId = setInterval(() => {
+                    setTimeLeft((prevTime) => {
+                        if (prevTime === 1) {
+                            clearInterval(newTimerId); // Dừng bộ đếm khi thời gian bằng 0
+                            setCheckButton(false);
+                        }
+                        return prevTime - 1;
+                    });
+                }, 1000);
+                toast.success("Mã xác nhận đang được gửi về email!");
+                const response = await fetch('http://localhost:8080/rest/user/sendMail', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(email)
                 });
-            }, 1000);
-            toast.success("Mã xác nhận đang được gửi về email!");
-            const response = await fetch('http://localhost:8080/rest/user/sendMail', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(email)
-            });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const res = await response.text(); // Bạn đang trả về chuỗi OTP từ backend
+                setOtp(res);
+                // toast.success(`OTP is: ${res}`);
             }
 
-            const res = await response.text(); // Bạn đang trả về chuỗi OTP từ backend
-            setOtp(res);
-            // toast.success(`OTP is: ${res}`);
+
         } else {
             toast.warning("Vui lòng nhập Email!");
         }
@@ -244,7 +266,7 @@ export default function Register(props: RegisterProps) {
                                 <div className="row mb-3">
                                     <div className="form-group col-6">
                                         <input type="password" className="form-control border border-dark"
-                                            value={password} onChange={(e) => setPassword(e.target.value)}
+                                            value={createPassword} onChange={(e) => setCreatePassword(e.target.value)}
                                             placeholder="Mật khẩu *" />
                                     </div>
                                     <div className="form-group col-6">
