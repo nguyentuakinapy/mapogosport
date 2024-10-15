@@ -10,10 +10,17 @@ const formatDate = (dateString) => {
 };
 
 const formatPrice = (price) => {
+  // Kiểm tra nếu price không hợp lệ hoặc không phải là số
+  if (typeof price !== "number" || isNaN(price)) {
+    return "Giá không hợp lệ"; // Hoặc bất kỳ thông báo mặc định nào
+  }
+
+  // Định dạng giá trị nếu hợp lệ
   return price.toLocaleString("vi-VN", {
     style: "currency",
     currency: "VND",
   });
 };
+
 
 export { formatDate, formatPrice };
