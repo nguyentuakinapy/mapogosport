@@ -10,9 +10,6 @@ import org.springframework.stereotype.Repository;
 import mapogo.entity.BookingDetail;
 
 @Repository
-public interface BookingDetailDAO extends JpaRepository<BookingDetail, Integer> {
-	BookingDetail findByBooking_BookingId(Integer bookingId);
+public interface BookingDetailDAO extends JpaRepository<BookingDetail, Integer>{
 
-	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId AND b.date = CURRENT_DATE")
-	List<BookingDetail> findBySportFieldDetailAndToday(@Param("sportFieldDetailId") Integer sportFieldDetailId);
 }

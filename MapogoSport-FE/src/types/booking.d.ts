@@ -1,7 +1,6 @@
 interface Booking {
     bookingId: number;
     date: Date;
-    user: User;
     totalAmount: float;
     status: string;
     paymentMethod: {
@@ -29,7 +28,14 @@ interface Booking {
     };
     note: string;
     bookingPayments: bookingPayment[];
-    bookingDetails: BookingDetail;
+    bookingDetails: BookingDetail[];
+    sportFieldInfo: {
+        address: string;
+        closing: string;
+        name: string;
+        sportFieldId: number;
+        opening: string;
+    };
 }
 
 interface bookingPayment {
@@ -42,7 +48,7 @@ interface bookingPayment {
 }
 
 interface BookingDetail {
-    bookingId: number;
+    bookingDetailId: number;
     startTime: string;
     endTime: string;
     sportFieldDetail: {
@@ -53,7 +59,6 @@ interface BookingDetail {
         size: string;
         status: string;
         percentDeposit: number;
-        sportField: SportField;
         peakHour: string;
     };
     price: number;

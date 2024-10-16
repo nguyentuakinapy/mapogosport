@@ -8,8 +8,11 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -30,6 +33,7 @@ public class Booking implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
+    @JsonIgnore
     private User user;
 
     @Column(name = "TotalAmount", nullable = false)
@@ -60,5 +64,7 @@ public class Booking implements Serializable{
 	@JsonManagedReference
 	private List<BookingDetail> bookingDetails;
 	
+	@Transient
+    private Map<String, Object> sportFieldInfo;
 }
 

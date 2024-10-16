@@ -189,24 +189,26 @@ a {
 /*======================================================Detail Booking CSS Start======================================================*/
 .booking-container {
     font-size: 15px;
-    .col {
-        .bill-booking {
-            background: #ffe0f4;
-            margin: 0 -10px;
-            padding: 0 8px;
-            border-bottom: 2px dashed black;
-        }
-
-        .row {
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba($color: rgb(108, 117, 125), $alpha: 1.0);
-        }
-
+    .bill-booking {
+        background: #ffe0f4;
+        border-bottom: 2px dashed black;
         .table {
+            thead {
+                tr {
+                    border-bottom: 1px solid black;
+                    th {
+                        background: #ffe0f4 !important;
+                    }
+                }
+            }
             tbody {
                 tr {
+                    &:last-child {
+                        border-bottom: 1px solid black;
+                    }
                     td {
                         font-size: 15px;
+                        background: #ffe0f4 !important;
                     }
                     .title {
                         overflow: hidden;
@@ -217,20 +219,19 @@ a {
                 }
             }
         }
+    }
+    .map-container {
+        .note-map {
+            text-align: center;
+            background: #142239;
+            color: white;
+            padding: 5px 0;
+        }
 
-        .map-container {
-            .note-map {
-                text-align: center;
-                background: #142239;
-                color: white;
-                padding: 5px 0;
-            }
-
-            .map-border {
-                width: 100%;
-                height: 310px;
-                border: 1px solid #142239;
-            }
+        .map-border {
+            width: 100%;
+            height: 310px;
+            border: 1px solid #142239;
         }
     }
 }
