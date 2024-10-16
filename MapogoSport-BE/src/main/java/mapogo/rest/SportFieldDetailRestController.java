@@ -12,6 +12,7 @@ import mapogo.entity.SportFieldDetail;
 import mapogo.service.SportFieldDetailService;
 
 
+
 @CrossOrigin("*")
 @RequestMapping("/rest")
 @RestController
@@ -34,4 +35,5 @@ public class SportFieldDetailRestController {
 	public List<Object[]> getPriceBySize(@PathVariable Integer sportFieldId, @PathVariable String size){
 		return sportFieldDetailService.findPriceBySize(sportFieldId, size);
 	}
+	
 }
