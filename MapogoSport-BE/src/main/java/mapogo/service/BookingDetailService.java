@@ -6,4 +6,6 @@ import mapogo.entity.BookingDetail;
 
 public interface BookingDetailService {
 
+	List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId);
+
 }
