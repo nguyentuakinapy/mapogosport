@@ -39,9 +39,15 @@ public class CartResController {
 	}
 	
 	@PostMapping("/add")
-	public Cart addToCart(@RequestBody Cart cart) {
-		return cartService.addToCart(cart);
+	public ResponseEntity<Cart> addToCart(@RequestBody Cart cart) {
+	    Cart savedCart = cartService.addToCart(cart);
+	    if (savedCart != null) {
+	        return ResponseEntity.ok(savedCart); // Trả về status 200 OK cùng với đối tượng Cart đã lưu
+	    } else {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Trả về status 400 Bad Request nếu không lưu được
+	    }
 	}
+
 	
 	@GetMapping("/count/{username}")
 	public Integer getCountItem(@PathVariable("username") String username) {
