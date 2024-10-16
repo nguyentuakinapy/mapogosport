@@ -29,12 +29,8 @@ export default function Profile() {
 
     const [userData, setUserData] = useState<User | null>(null);
 
-    const handleSave = (username: string) => {
-        if (!fullName) {
-            console.log('Fullname đang trống!');
-            return;
-        }
-        fetch(`http://localhost:8080/rest/user/${username}`, {
+    const handleSave = () => {
+        fetch(usernameFetchApi, {
             method: 'PUT',
             headers: {
                 Accept: 'application/json, text/plain, */*',
@@ -47,7 +43,7 @@ export default function Profile() {
                 toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
                 return
             }
-            mutate(`http://localhost:8080/rest/user/${username}`);
+            mutate(usernameFetchApi);
             toast.success('Cập nhật thành công!');
         }).catch((error) => {
             toast.error(`Đã xảy ra lỗi: ${error.message}`);
@@ -157,7 +153,7 @@ export default function Profile() {
                     </Col>
                 </Row>
 
-                <Button className='btn btn-profile' onClick={() => handleSave(username)}>
+                <Button className='btn btn-profile' onClick={() => handleSave()}>
                     <i className="bi bi-floppy2"></i> Lưu
                 </Button>
             </Form>

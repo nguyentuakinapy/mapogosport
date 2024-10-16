@@ -1,7 +1,9 @@
 package mapogo.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,8 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,6 +34,7 @@ public class BookingPayment implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "BookingId", nullable = false)
+    @JsonBackReference
     private Booking booking;
 
     @Column(name = "Amount", nullable = false)
@@ -42,9 +43,8 @@ public class BookingPayment implements Serializable{
     @Column(name = "Status", nullable = false)
     private String status;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "Date", nullable = false)
-    private Date date = new Date();
+    private LocalDateTime date;
 
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)

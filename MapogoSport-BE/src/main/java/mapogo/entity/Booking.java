@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -20,15 +20,13 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @AllArgsConstructor
 @Table(name = "Bookings")
 public class Booking implements Serializable{
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "BookingId", nullable = false, unique = true)
+    @Column(name = "BookingId")
     private Integer bookingId;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "Date", nullable = false)
-    private Date date = new Date();
+    private LocalDateTime date;
 
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
@@ -42,7 +40,6 @@ public class Booking implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "PaymentMethodId", nullable = false)
-    @JsonManagedReference
     private PaymentMethod paymentMethod;
 
     @ManyToOne
@@ -50,17 +47,16 @@ public class Booking implements Serializable{
     private Owner owner;
     
     @ManyToOne
-    @JoinColumn(name = "VoucherId", nullable = false)
-    @JsonManagedReference
+    @JoinColumn(name = "VoucherId")
     private Voucher voucher;
 
 	@Column(name = "Note")
     private String note;
 
-	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<BookingPayment> bookingPayments;
 
-	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JsonManagedReference
 	private List<BookingDetail> bookingDetails;
 	

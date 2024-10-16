@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -53,14 +54,14 @@ public class SportField implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "OwnerId", nullable = false)
-    @JsonIgnore
+    @JsonManagedReference
     private Owner owner;
 
     @Column(name = "Decription", nullable = false)
     private String decription;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonBackReference
     private List<SportFieldDetail> sportFielDetails;
 
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL) // corrected from "sportsField"

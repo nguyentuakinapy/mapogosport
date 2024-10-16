@@ -6,6 +6,7 @@ import { Table, Button, Collapse } from "react-bootstrap";
 import { useState } from "react";
 import ProductDetailModalProps from "@/components/Admin/Modal/product.detail.addNew";
 
+
 // Fetcher function
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 

@@ -38,7 +38,7 @@ public class SportFieldRestController {
 	
 	@GetMapping("/sport_field_by_owner/{id}")
 	public List<SportField> findSportFieldByOwner(@PathVariable("id") Integer id) {
-		return sportFieldService.findSportFeildByOwner(id);	
+		return sportFieldService.findSportFieldByOwner(id);	
 	}
 
 }
