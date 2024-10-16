@@ -15,6 +15,7 @@ import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
 import mapogo.entity.SportField;
 import mapogo.entity.SportFieldDetail;
+import mapogo.service.BookingDetailService;
 import mapogo.service.BookingService;
 
 @CrossOrigin("*")
@@ -23,6 +24,9 @@ import mapogo.service.BookingService;
 public class BookingRestController {
 	@Autowired
 	BookingService bookingService;
+	
+	@Autowired
+	BookingDetailService bookingDetailService;
 
 	@GetMapping("/booking")
 	public List<Booking> findAll() {
