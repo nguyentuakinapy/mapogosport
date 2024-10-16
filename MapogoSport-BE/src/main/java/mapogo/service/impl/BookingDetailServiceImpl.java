@@ -11,12 +11,5 @@ import mapogo.service.BookingDetailService;
 
 @Service
 public class BookingDetailServiceImpl implements BookingDetailService{
-	@Autowired
-	BookingDetailDAO bookingDetailDAO;
 	
-	@Override
-	public BookingDetail findByBooking_BookingId(Integer bookingId) {
-		return bookingDetailDAO.findByBooking_BookingId(bookingId);
-	}
-
 }

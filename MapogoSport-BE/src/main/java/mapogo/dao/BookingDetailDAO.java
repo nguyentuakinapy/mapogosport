@@ -9,5 +9,4 @@ import mapogo.entity.BookingDetail;
 
 @Repository
 public interface BookingDetailDAO extends JpaRepository<BookingDetail, Integer>{
-	BookingDetail findByBooking_BookingId(Integer bookingId);
 }

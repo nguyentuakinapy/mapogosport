@@ -25,4 +25,9 @@ public class BookingServiceImpl implements BookingService{
 		return bookingDAO.findByUser_Username(username);
 	}
 
+	@Override
+	public List<Booking> findById(Integer id) {
+		return bookingDAO.findByBookingId(id);
+	}
+
 }
