@@ -1,19 +1,16 @@
 interface Product {
     productId: number;
     name: string;
-    categoryProduct:{
-        categoryProductId: number,
-        name: string;
-        imgae: string;
-    };
+    categoryProduct: CategoryProduct;
     description: string;
     status: string;
     createDate: Date;
     brand: string;
     country: string;
-    price: double;
+    price: number;
     image:  File | string;
     stock: double;
 }
+
 
 

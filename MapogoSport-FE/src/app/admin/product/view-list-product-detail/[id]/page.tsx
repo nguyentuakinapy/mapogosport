@@ -2,57 +2,12 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
-import { Table, Button, Collapse, Modal } from "react-bootstrap";
+import { Table, Button, Collapse } from "react-bootstrap";
 import { useState } from "react";
 import ProductDetailModalProps from "@/components/Admin/Modal/product.detail.addNew";
 
 // Fetcher function
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-// Interfaces
-interface Gallery {
-  galleryId: number;
-  name: string;
-}
-
-interface Product {
-  productId: number;
-  name: string;
-  categoryProduct: {
-    categoryProductId: number;
-    name: string;
-    image: string;
-  };
-  description: string;
-  status: string;
-  createDate: Date;
-  brand: string;
-  country: string;
-  price: number;
-  image: File | string;
-  stock: number;
-}
-
-interface ProductDetail {
-  productDetailId: number;
-  color: string;
-  image: string;
-  galleries: Gallery[];
-  product: Product;
-}
-
-interface Size {
-  sizeId: number;
-  sizeName: string;
-}
-
-interface ProductDetailSize {
-  productDetailSizeId: number;
-  productDetail: ProductDetail;
-  size: Size;
-  price: number;
-  quantity: number;
-}
 
 export default function ViewListDetail() {
   const { id } = useParams(); // Lấy productId từ URL
@@ -63,7 +18,7 @@ export default function ViewListDetail() {
   );
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedProductDetail, setSelectedProductDetail] =
-    useState<ProductDetail | null>(null);
+    useState<ProductDetail[]>([]);
 
   // Fetch ProductDetail dựa vào productId
   const { data: productDetails, error: errorProductDetails } = useSWR<
@@ -89,16 +44,16 @@ export default function ViewListDetail() {
     return <div>Đang loading dữ liệu chi tiết sản phẩm...</div>;
 
   // Tính tổng số lượng cho từng sản phẩm chi tiết
-  const totalQuantities = productDetailSizes
-    ? productDetailSizes.reduce((acc, detailSize) => {
-        if (detailSize.productDetail.productDetailId) {
-          acc[detailSize.productDetail.productDetailId] =
-            (acc[detailSize.productDetail.productDetailId] || 0) +
-            (detailSize.quantity || 0);
-        }
-        return acc;
-      }, {} as Record<number, number>)
-    : {};
+  // const totalQuantities = productDetailSizes
+  //   ? productDetailSizes.reduce((acc, detailSize) => {
+  //       if (detailSize.productDetail.productDetailId) {
+  //         acc[detailSize.productDetail.productDetailId] =
+  //           (acc[detailSize.productDetail.productDetailId] || 0) +
+  //           (detailSize.quantity || 0);
+  //       }
+  //       return acc;
+  //     }, {} as Record<number, number>)
+  //   : {};
 
   // Hàm để mở modal chi tiết sản phẩm
   const handleShowDetail = (productDetail: ProductDetail) => {
@@ -130,7 +85,7 @@ export default function ViewListDetail() {
             <th>Màu sắc</th>
             <th>Hình ảnh</th>
             <th>Galleries</th>
-            <th>Số lượng tổng</th>
+            {/* <th>Số lượng tổng</th> */}
             <th>Hành động</th>
           </tr>
         </thead>
@@ -193,11 +148,11 @@ export default function ViewListDetail() {
                         ))
                       : "Không có gallery"}
                   </td>
-                  <td>
+                 {/*  <td>
                     {totalQuantities[detail.productDetailId] ||
                       "Đang load số lượng"}{" "}
-                    {/* Hiển thị tổng số lượng */}
-                  </td>
+                    Hiển thị tổng số lượng
+                  </td> */}
                   <td className="text-center align-middle">
                     <Button
                       variant="primary"

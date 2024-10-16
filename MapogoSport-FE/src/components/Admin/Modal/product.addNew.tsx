@@ -152,7 +152,7 @@ const handleSave = async () => {
   
       // Giữ nguyên hình ảnh gốc nếu không có hình mới
       let imageUrl = currentProduct?.image;
-  
+      
       // Kiểm tra nếu có hình ảnh mới được chọn
       if (previewImage) {
         const file = formValues.image; // Đây là file đã được chọn
@@ -161,6 +161,10 @@ const handleSave = async () => {
           const fileName = `${file.name.replace(/\s+/g, "_")}`;
           imageUrl = fileName; // Cập nhật tên file hình ảnh
           formData.append("fileimage", file); // Thêm file hình ảnh vào FormData
+          console.log('image u: ',imageUrl);
+          console.log('form value image: ',formValues.image);
+          
+          
         } else {
           console.error("file không phải là một đối tượng File:", file);
         }

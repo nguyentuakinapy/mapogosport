@@ -26,6 +26,7 @@ const AdminProduct = () => {
         const fetchData = async () => {
             try {
                 const apiProducts = 'http://localhost:8080/rest/products';
+                
                 const apiCategoriesProducts  = 'http://localhost:8080/rest/category-products';
 
                  // Gọi cả hai API cùng lúc

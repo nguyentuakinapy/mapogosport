@@ -51,5 +51,6 @@ public class ProductDetail implements Serializable {
 	private List<Gallery> galleries;
 
 	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
+	@JsonManagedReference
 	private List<ProductDetailSize> productDetailSizes;
 }
