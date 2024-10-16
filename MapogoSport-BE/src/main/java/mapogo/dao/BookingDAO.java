@@ -8,4 +8,6 @@ import mapogo.entity.Booking;
 
 public interface BookingDAO extends JpaRepository<Booking, Integer>{
 	List<Booking> findByUser_Username(String username);
+	
+	List<Booking> findByBookingId(Integer bookingId);
 }

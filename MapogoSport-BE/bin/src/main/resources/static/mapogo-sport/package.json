@@ -1,0 +1,54 @@
+{
+  "name": "mapogo-sport",
+  "version": "0.1.0",
+  "contributors": [
+    {
+      "name": "Nguyễn Thị Diệu Mỵ",
+      "url": "https://www.facebook.com/profile.php?id=100022722909354"
+    },
+    {
+      "name": "Nguyễn Tú",
+      "url": "https://www.facebook.com/akinagi.1307"
+    },
+    {
+      "name": "Hoàng Hữu Thành",
+      "url": "https://www.facebook.com/profile.php?id=100063484203792"
+    },
+    {
+      "name": "Võ Tấn Thành",
+      "url": "https://www.facebook.com/profile.php?id=100068618046947"
+    },
+    {
+      "name": "Nguyễn Võ Quốc Anh",
+      "url": "https://www.facebook.com/profile.php?id=100067122638754"
+    },
+    {
+      "name": "Nguyễn Phi Hùng",
+      "url": "https://www.facebook.com/phihung.devka/"
+    }
+  ],
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "bootstrap": "5.3.3",
+    "bootstrap-icons": "1.11.3",
+    "next": "14.2.11",
+    "react": "18.3.1",
+    "react-bootstrap": "2.10.4",
+    "react-dom": "18.3.1",
+    "react-toastify": "10.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.2",
+    "@types/react": "18.3.5",
+    "@types/react-dom": "18.3.0",
+    "eslint": "8.57.0",
+    "eslint-config-next": "14.2.11",
+    "typescript": "5.6.2"
+  }
+}

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.SportFieldDetailDAO;
+import mapogo.entity.SportField;
 import mapogo.entity.SportFieldDetail;
 import mapogo.service.SportFieldDetailService;
 
@@ -32,6 +33,19 @@ public class SportFieldDetailImpl implements SportFieldDetailService{
 		// TODO Auto-generated method stub
 		return sportFieldDetailDAO.findPriceBySize(sportFieldId, size);
 	}
+
+	@Override
+	public List<SportFieldDetail> findBySportField(SportField sportField) {
+		return sportFieldDetailDAO.findBySportField(sportField);
+	}
+
+	@Override
+	public SportFieldDetail findBySportFielDetailId(Integer id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
 
 
 }

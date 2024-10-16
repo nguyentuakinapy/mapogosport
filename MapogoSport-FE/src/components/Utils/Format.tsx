@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { createHash } from 'crypto';
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -22,5 +23,10 @@ const formatPrice = (price) => {
   });
 };
 
+const hashPassword = (password: string): string => {
+  const hash = createHash('sha256').update(password + 'YOUR_FIXED_SALT').digest('hex');
+  return hash;
+};
 
-export { formatDate, formatPrice };
+export { formatDate, formatPrice, hashPassword };
+

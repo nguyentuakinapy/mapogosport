@@ -46,7 +46,7 @@ public class SportFieldDetail implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "SportFiledId", nullable = false)
-	@JsonManagedReference
+	@JsonBackReference
 	private SportField sportField;
 
 	@Column(name = "PeakHour", nullable = false)

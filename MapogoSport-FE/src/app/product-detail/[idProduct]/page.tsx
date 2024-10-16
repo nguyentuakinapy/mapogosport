@@ -266,12 +266,14 @@ const ProductDetail = () => {
 
     useEffect(() => {
         if (selectedProductDetailId && idSize) {
+            console.log("idSize: ", idSize)
             const fetchData = async () => {
                 try {
                     const response = await fetch(`http://localhost:8080/rest/product-detail/price-by-size/${selectedProductDetailId}/${idSize}`)
                     const data = await response.json()
                     setPrice(data)
                     console.log("data price", data)
+                    console.log("price")
                 } catch (error) {
                     console.log("error price by size", error)
                 }
@@ -411,7 +413,7 @@ const ProductDetail = () => {
 
 
                             <h5 className='mb-3'>
-                                Giá sản phẩm: {selectedSize ? formatPrice(price) : formatPrice(findByIdProduct.price)}
+                                Giá sản phẩm: {selectedSize ? price : findByIdProduct.price}
                             </h5>
 
 

@@ -16,7 +16,7 @@ const Bookings = () => {
         const user = sessionStorage.getItem('user');
         if (user) {
             const parsedUserData = JSON.parse(user) as User;
-            setUsernameFetchApi(`http://localhost:8080/rest/booking/${parsedUserData.username}`);
+            setUsernameFetchApi(`http://localhost:8080/rest/user/booking/${parsedUserData.username}`);
         }
     }, []);
 
@@ -36,12 +36,8 @@ const Bookings = () => {
         }
     }, [data]);
 
-    const handleViewDetail = (booking: Booking) => {
-        sessionStorage.setItem('selectedBooking', JSON.stringify(booking));
-    }
-
-    if (isLoading) return <div>Đang tải...</div>;
-    if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
+    if (isLoading) return <UserLayout><div>Đang tải...</div></UserLayout>;
+    if (error) return <UserLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></UserLayout>;
 
     return (
         <UserLayout>
@@ -105,7 +101,7 @@ const Bookings = () => {
                             bookingUser.map((booking) => (
                                 <tr key={booking.bookingId}>
                                     <td className="ps-3 text-start">
-                                        <Link href={`/user/bookings/detail/${booking.bookingId}`} onClick={() => handleViewDetail(booking)}>
+                                        <Link href={`/user/bookings/detail/${booking.bookingId}`}>
                                             #{booking.bookingId}
                                         </Link>
                                     </td>
@@ -116,7 +112,7 @@ const Bookings = () => {
                                         </Badge>
                                     </td>
                                     <td>
-                                        <Link href={`/user/bookings/detail/${booking.bookingId}`} onClick={() => handleViewDetail(booking)}>
+                                        <Link href={`/user/bookings/detail/${booking.bookingId}`}>
                                             Xem
                                         </Link>
                                     </td>
