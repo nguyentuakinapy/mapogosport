@@ -165,8 +165,6 @@ export default function BookingSport() {
         setDays(days);
     }, [])
     // SET STATUS
-    const targetTimes = ["5h00", "6h00", "6h30", "7h00", "7h30", "8h00"];
-    const targetSport = ["Sân 1", "Sân 2", "Sân 3", "Sân 4", "Sân 5", "Sân 6"];
 
     const [checkDataBooking, setCheckDataBooking] = useState<boolean>(false);
     const [checkDataBooking1, setCheckDataBooking1] = useState<boolean>(false);
@@ -179,47 +177,58 @@ export default function BookingSport() {
     }, [checkDataBooking1]);
 
     useEffect(() => {
-        const i = Number(dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails.length);
+        setStatus();
+    }, [checkDataBooking, selectSport])
 
+    const setStatus = async () => {
         const sportDetails = dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails;
+        const numFields = sportDetails ? sportDetails.length : 0;
+
         console.log("Booking ", bookings);
-        // for (let index = 0; index < i; index++) {
-        Object.entries(bookings).forEach(([time, statuses]) => {
-            console.log(`Thời gian: ${time}, Trạng thái: ${statuses.join(", ")}`);
+        for (let index = 0; index < numFields; index++) {
 
+            const response = await
+                fetch(`http://localhost:8080/rest/user/booking/detail/gettoday/${sportDetails && sportDetails[index].sportFielDetailId}`);
 
-            for (let index = 0; index < targetSport.length - 1; index++) {
-                const nameSport = sportDetails && sportDetails[index].name;
-                if (targetSport[index] == nameSport) {
-                    const targetIndex = targetTimes.indexOf(time);
-
-                    console.log(nameSport);
-
-                    if (targetTimes[index] == time) {
-                        checkAndAddStatus(time, "Đã đặt")
-                        console.log("ok ", targetIndex);
-                    } else {
-                        checkAndAddStatus(time, "Còn trống")
-                    }
-
-                }
+            if (!response.ok) {
+                throw new Error('Error fetching data');
             }
 
-        })
-        // }
-        console.log("Ngon" + i);
-    }, [checkDataBooking])
+            const dataBooking = await response.json() as BookingDetail[];
+            if (dataBooking.length === 0) {
+                Object.entries(bookings).forEach(([time, statuses]) => {
+                    statuses[index] = "Còn trống"; // Thiết lập trạng thái là "Còn trống"
+                    setBookings(prevBookings => ({
+                        ...prevBookings,
+                        [time]: statuses
+                    }));
+                });
+                continue;
+            }
+            dataBooking.forEach(item => {
+                Object.entries(bookings).forEach(([time, statuses]) => {
+                    if (sportDetails && sportDetails[index].sportFielDetailId == item.sportFieldDetail.sportFielDetailId) {
+                        let timeIndex = item.startTime.indexOf(time)
 
-    const setStatus = (targetTimes: string[]) => {
-        dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails &&
-            dataSport[selectSport].sportFielDetails.map(sportDetail => {
-                Object.entries(bookings).map(([time, statuses]) => {
-                    const targetIndex = targetTimes.indexOf(time);
-                    if (targetIndex !== -1) {
-                        checkAndAddStatus(time, "Còn trống")
+                        if (timeIndex >= 0) {
+                            statuses[index] = "Đã đặt";
+                        } else {
+                            if (statuses[index] == "Đã đặt") {
+                                statuses[index] = "Đã đặt";
+                            } else {
+                                statuses[index] = "Còn trống";
+                            }
+                        }
+                    } else {
+                        statuses[index] = "Còn trống";
                     }
+                    setBookings(prevBookings => ({
+                        ...prevBookings,
+                        [time]: statuses
+                    }));
                 })
             })
+        }
     }
 
     // LOAD TABLE

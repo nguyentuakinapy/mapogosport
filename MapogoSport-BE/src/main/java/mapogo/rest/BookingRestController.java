@@ -56,4 +56,9 @@ public class BookingRestController {
 	    }
 	    return booking; 
 	}
+	
+	@GetMapping("/user/booking/detail/gettoday/{sportDetailId}")
+	public List<BookingDetail> findBySportFieldDetailAndToday(@PathVariable("sportDetailId") Integer sportDetailId) {
+		return bookingDetailService.findBySportFieldDetailAndToday(sportDetailId);
+	}
 }

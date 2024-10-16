@@ -4,15 +4,24 @@ import { useEffect, useState } from "react";
 import { Form, Modal } from "react-bootstrap"
 import { toast } from "react-toastify";
 import "./account.scss"
+import { hashPassword } from "@/components/Utils/Format";
 interface ChangeNewPasswordProps {
     showChangePasswordNew: boolean;
     setShowChangePasswordNew: (v: boolean) => void;
+    showLoginModal: boolean;
+    setShowLoginModal: (v: boolean) => void;
 }
 export default function ChangePasswordNew(props: ChangeNewPasswordProps) {
     const { showChangePasswordNew, setShowChangePasswordNew } = props;
+    const { showLoginModal, setShowLoginModal } = props;
 
-    const [password, setPassword] = useState<string>("");
+    const [createPassword, setCreatePassword] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+
+    useEffect(() => {
+        setPassword(hashPassword(createPassword));
+    }, [createPassword])
 
     const handleSubmit = async () => {
         const username = sessionStorage.getItem('usernameNewPass');
@@ -23,12 +32,12 @@ export default function ChangePasswordNew(props: ChangeNewPasswordProps) {
             }
             const dataUser = await responseUser.json();
 
-            if (!password) {
+            if (!createPassword) {
                 toast.warning(`Vui lòng nhâp mật khẩu!`);
             } else if (!newPassword) {
                 toast.warning(`Vui lòng nhâp lại mật khẩu mới!`);
-            } else if (password == newPassword) {
-                dataUser.password = newPassword;
+            } else if (createPassword == newPassword) {
+                dataUser.password = password;
                 fetch(`http://localhost:8080/rest/user/${username}`, {
                     method: 'PUT',
                     headers: {
@@ -44,7 +53,8 @@ export default function ChangePasswordNew(props: ChangeNewPasswordProps) {
                     }
                     toast.success('Đổi mật khẩu thành công!');
                     sessionStorage.removeItem('usernameNewPass');
-                    window.location.href = "/";
+                    setShowChangePasswordNew(false);
+                    setShowLoginModal(true);
                 }).catch((error) => {
                     toast.error(`Đã xảy ra lỗi: ${error.message}`);
                 });
@@ -78,7 +88,7 @@ export default function ChangePasswordNew(props: ChangeNewPasswordProps) {
                                 <div className="row mb-3">
                                     <div className="form-group">
                                         <input type="password" className="form-control border border-dark"
-                                            value={password} onChange={(e) => setPassword(e.target.value)}
+                                            value={createPassword} onChange={(e) => setCreatePassword(e.target.value)}
                                             placeholder="Mật khẩu mới*" />
                                     </div>
 

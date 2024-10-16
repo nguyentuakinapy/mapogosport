@@ -11,5 +11,5 @@ import mapogo.service.BookingDetailService;
 
 @Service
 public class BookingDetailServiceImpl implements BookingDetailService{
-	
+
 }

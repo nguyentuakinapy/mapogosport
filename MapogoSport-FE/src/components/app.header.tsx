@@ -137,6 +137,29 @@ const Header = () => {
         window.location.href = "/";
     }
 
+    useEffect(() => {
+        checkRoleByAuthority();
+    }, [userData])
+
+    const checkRoleByAuthority = () => {
+        userData?.authorities.map(item => {
+            if (item.role.name == "ROLE_OWNER") {
+                return (
+                    <Link href='/owner' className={`dropdown-item text-decoration-none text-dark`}>Chủ sân</Link>
+                )
+            } else if (item.role.name == "ROLE_OWNER") {
+                return (
+                    <Link href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</Link>
+                )
+            }
+        })
+        return (
+            <>
+                ok
+            </>
+        )
+    }
+
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
             <Navbar expand="lg" className='header-area bg-light' style={{ position: 'sticky', zIndex: '1001', borderBottom: '2px solid #143962' }}>
@@ -174,8 +197,23 @@ const Header = () => {
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowForgotPassword(true)} style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
                                     {/* <hr className='m-0' /> */}
                                     <Link href='/user/profile' className={`dropdown-item text-decoration-none text-dark ${userData ? '' : 'd-none'}`}>Thông tin tài khoản</Link>
-                                    <Link href='/owner' className={`dropdown-item text-decoration-none text-dark ${userData ? userData?.authorities[0].role.name == 'ROLE_OWNER' ? '' : 'd-none' : 'd-none'}`}>Chủ sân</Link>
-                                    <Link href='/admin' className={`dropdown-item text-decoration-none text-dark ${userData ? userData?.authorities[0].role.name == 'ROLE_ADMIN' ? '' : 'd-none' : 'd-none'}`}>Admin</Link>
+                                    {userData?.authorities.map((item, index) => {
+                                        if (item.role.name === "ROLE_USER") {
+                                            return null;
+                                        }
+                                        if (item.role.name === "ROLE_OWNER") {
+                                            return (
+                                                <Link key={index} href='/owner' className={`dropdown-item text-decoration-none text-dark`}>Chủ sân</Link>
+                                            );
+                                        }
+                                        if (item.role.name === "ROLE_ADMIN") {
+                                            return (
+                                                <Link key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</Link>
+                                            );
+                                        }
+                                        return null;
+                                    })}
+
                                     <a className={`dropdown-item ${userData ? '' : 'd-none'}`} onClick={() => logOut()} style={{ cursor: 'pointer' }}>Đăng xuất</a>
                                 </ul>
                             </div>
@@ -211,7 +249,7 @@ const Header = () => {
             <ForgotPassword showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}
                 showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew}
             ></ForgotPassword>
-            <ChangePasswordNew showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew}></ChangePasswordNew>
+            <ChangePasswordNew showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></ChangePasswordNew>
         </main >
     );
 }
