@@ -17,7 +17,7 @@ const SportFieldList = () => {
 
         if (user) {
             // Gọi API từ Spring Boot
-            axios.get(`http://localhost:8080/api/sportfields/lists/${user.username}`)
+            axios.get(`http://localhost:8080/rest/sportfields/lists/${user.username}`)
                 .then(response => {
                     setSportFields(response.data); // Cập nhật state với dữ liệu từ API
                 })
@@ -60,7 +60,7 @@ const SportFieldList = () => {
                                 <div className='me-3 d-flex align-items-center'>
                                     <div className='btn-group'>
                                         <Link href={`/owner/sport-manager/view-list-sports/${sf.sportFieldId}`} className='btn btn-secondary btn-hv'><i className="bi bi-eye"></i></Link>
-                                        <Link href={'/owner/sport-manager/edit-sport/2'} className='btn btn-warning btn-hv'><i className="bi bi-pencil-square"></i></Link>
+                                        <Link href={`/owner/sport-manager/edit-sport/${sf.sportFieldId}`} className='btn btn-warning btn-hv'><i className="bi bi-pencil-square"></i></Link>
                                     </div>
                                 </div>
                             </div>
