@@ -6,8 +6,12 @@ import './style.css';
 import axios from 'axios';
 import { formatPrice } from '@/components/Utils/Format';
 import { toast } from "react-toastify";
+import useSWR, { mutate } from 'swr';
+
 
 const Cart = () => {
+
+
   const [quantities, setQuantities] = useState<number[]>([]);
 
   // Cập nhật hàm tăng số lượng
@@ -92,22 +96,37 @@ const Cart = () => {
     }, 0);
     setTotalPrice(total);
   };
-  // delete cart
 
-  const handleDeleCartItem = (index: number) => {
+  const handleDeleCartItem = async (index: number) => {
+    if (!user) {
+      console.log("Người dùng chưa đăng nhập.");
+      return; // Không thực hiện nếu người dùng chưa đăng nhập
+    }
 
     try {
-      const cartItemId = dataCart[index].cartId;
-      axios.delete(`http://localhost:8080/rest/cart/delete/${cartItemId}`);
+      const cartItemId = dataCart[index].cartId; // Lấy ID của sản phẩm muốn xóa
+      await axios.delete(`http://localhost:8080/rest/cart/delete/${cartItemId}`);
+
       console.log(`>>> Xóa sản phẩm ${cartItemId} thành công`);
-      // Sau khi xóa, cập nhật lại danh sách giỏ hàng
+
+      // Cập nhật lại danh sách giỏ hàng
       const updatedDataCart = dataCart.filter((_, i) => i !== index);
       setDataCart(updatedDataCart);
-      toast.success("Xóa thành công !")
+
+      // Cập nhật tổng tiền sau khi xóa sản phẩm
+      const updatedQuantities = updatedDataCart.map(item => item.quantity); // Lấy số lượng sản phẩm còn lại
+      updateTotalPrice(updatedQuantities); // Cập nhật tổng tiền
+
+      // Cập nhật lại số lượng giỏ hàng
+      mutate(`http://localhost:8080/rest/cart/count/${user.username}`); // Tái tải dữ liệu
+      toast.success("Xóa thành công !");
+
     } catch (err) {
-      console.log("lỗi xóa cart: ", err);
+      console.error("Lỗi xóa cart:", err);
+      toast.error("Có lỗi xảy ra khi xóa sản phẩm.");
     }
-  }
+  };
+
 
 
   // Dữ liệu giỏ hàng
