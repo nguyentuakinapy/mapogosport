@@ -93,18 +93,22 @@ const ProductAddNew = ({
     console.log('selected value: ', value);
     
   };
-  // Cập nhật hàm handleSelect cho loại sản phẩm
+
 const handleCategorySelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = event.target.value; // Lấy ID của loại sản phẩm đã chọn
-    setFormValues((prevValues) => ({
-        ...prevValues,
-        categoryProduct: {
-            categoryProductId: Number(selectedId), // Cập nhật ID của loại sản phẩm
-            name: categoryProducts.find(cat => cat.categoryProductId === Number(selectedId))?.name || "",
-            imgae: null || ""
-        }
-    }));
+  const selectedId = event.target.value; // Lấy ID của loại sản phẩm đã chọn
+  const selectedCategory = categoryProducts.find(cat => cat.categoryProductId === Number(selectedId));
+
+  setFormValues((prevValues) => ({
+      ...prevValues,
+      categoryProduct: {
+          categoryProductId: Number(selectedId), // Cập nhật ID của loại sản phẩm
+          name: selectedCategory?.name || "", // Lấy tên từ loại sản phẩm đã chọn
+          image: selectedCategory?.image || "" // Cung cấp thuộc tính image
+      }
+  }));
 };
+
+
   const handleClose = () => {
     setShowAddProduct(false);
   };
@@ -227,6 +231,7 @@ const handleSave = async () => {
   return (
     <>
       <Modal
+      
         show={showAddProduct}
         onHide={handleClose}
         centered
@@ -416,12 +421,19 @@ const handleSave = async () => {
                 <div>
                   {formValues.image && modalType === "edit" && (
                     <Image
+                      src={`${formValues.image}`}
+                      alt={`formValues.image`}
+                      fluid
+                      style={{ objectFit: "cover", maxHeight: "300px" }}
+                    />
+                  )}
+                    {/* <Image
                       src={`${BASE_URL}/images/product-images/${formValues.image}`}
                       alt={formValues.image}
                       fluid
                       style={{ objectFit: "cover", maxHeight: "300px" }}
                     />
-                  )}
+                  )} */}
                 </div>
                 <div>
                   {previewImage && modalType === "add" && (

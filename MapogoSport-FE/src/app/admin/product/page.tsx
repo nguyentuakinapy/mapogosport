@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import ProductAddNew from "@/components/Admin/Modal/product.addNew";
 import axios from 'axios';
 import { toast } from "react-toastify";
+import useSWR from 'swr';
 
 const AdminProduct = () => {
     const [activeTab, setActiveTab] = useState<string>('all');
@@ -22,32 +23,54 @@ const AdminProduct = () => {
     
     const BASE_URL = 'http://localhost:8080';
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const apiProducts = 'http://localhost:8080/rest/products';
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             const apiProducts = 'http://localhost:8080/rest/products';
                 
-                const apiCategoriesProducts  = 'http://localhost:8080/rest/category-products';
+    //             const apiCategoriesProducts  = 'http://localhost:8080/rest/category-products';
 
-                 // Gọi cả hai API cùng lúc
-            const [productsRes, categoriesRes] = await Promise.all([
-                axios.get(apiProducts),
-                axios.get(apiCategoriesProducts),
-            ]);
+    //              // Gọi cả hai API cùng lúc
+    //         const [productsRes, categoriesRes] = await Promise.all([
+    //             axios.get(apiProducts),
+    //             axios.get(apiCategoriesProducts),
+    //         ]);
 
-        // console.log('Products:', productsRes.data); // Ghi lại sản phẩm
-        // console.log('Category Products:', categoriesRes.data); // Ghi lại danh mục sản phẩm
+    //     // console.log('Products:', productsRes.data); // Ghi lại sản phẩm
+    //     // console.log('Category Products:', categoriesRes.data); // Ghi lại danh mục sản phẩm
                 
-                 // Lưu dữ liệu vào state
-            setProducts(productsRes.data);      // Dữ liệu từ API products
-            setCategoryProducts(categoriesRes.data);  // Dữ liệu từ API category_products
+    //              // Lưu dữ liệu vào state
+    //         setProducts(productsRes.data);      // Dữ liệu từ API products
+    //         setCategoryProducts(categoriesRes.data);  // Dữ liệu từ API category_products
             
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-        fetchData();
-    }, []);
+    //         } catch (error) {
+    //             console.error('Error fetching data:', error);
+    //         }
+    //     };
+    //     fetchData();
+    // }, []);
+
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+    const { data: productData, error: productError, isLoading: productIsLoading } = useSWR("http://localhost:8080/rest/products", fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
+    const { data: categoryData, error: categoryError, isLoading: categoryIsLoading } = useSWR("http://localhost:8080/rest/category-products", fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
+
+    useEffect(() => {
+        setProducts(productData);
+        setCategoryProducts(categoryData);
+        console.log(productData);
+        
+    }, [productData, categoryData]);
+
+  
 
       // Hàm thêm sản phẩm mới vào danh sách
       const handleAddProduct = (newProduct: Product) => {
@@ -119,7 +142,8 @@ const AdminProduct = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map((product, index) => (
+                      
+                        {products && products.length > 0 && products.map((product, index) => (
                             <tr key={product.productId}>
                                  <td className="text-center align-middle">
                                      <FormCheck
@@ -133,11 +157,17 @@ const AdminProduct = () => {
                                     <Link href="#">
                                    
                                  <Image 
+                                     src={`${product.image}`} 
+                                     style={{ width: '150px', height: 'auto' }} 
+                                    className="mx-2" 
+                                    alt={`product.image`} 
+                                />
+                                 {/* <Image 
                                      src={`${BASE_URL}/images/product-images/${product.image}`} 
                                      style={{ width: '150px', height: 'auto' }} 
                                     className="mx-2" 
                                     alt={product.image} 
-                                />
+                                /> */}
 
                                     </Link>
                                 </td>
@@ -196,6 +226,12 @@ const AdminProduct = () => {
             </div>
         );
     };
+
+    if (productIsLoading) return <div>Đang tải...</div>;
+    if (productError) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
+    
+    if (categoryIsLoading) return <div>Đang tải...</div>;
+    if (categoryError) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
     return (
         <div style={{ fontSize: '14px' }}>
