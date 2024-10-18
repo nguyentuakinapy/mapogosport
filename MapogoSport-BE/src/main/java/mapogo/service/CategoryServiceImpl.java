@@ -26,4 +26,20 @@ public class CategoryServiceImpl implements CategoryProductService{
 		return categoryProductDAO.findById(id);
 	}
 
+	@Override
+	public CategoryProduct createCategoryProduct(CategoryProduct categoryProduct) {
+		
+		return categoryProductDAO.save(categoryProduct);
+	}
+
+	@Override
+	public CategoryProduct updateCategoryProduct(Integer id, CategoryProduct categoryProduct) {
+		return categoryProductDAO.save(categoryProduct);
+	}
+
+	@Override
+	public void deleteCategoryProduct(Integer id) {
+		categoryProductDAO.deleteById(id);
+	}
+
 }
