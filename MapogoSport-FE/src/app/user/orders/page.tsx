@@ -40,8 +40,8 @@ const Orders = () => {
         sessionStorage.setItem('selectedOrder', JSON.stringify(order));
     };
 
-    if (isLoading) return <div>Đang tải...</div>;
-    if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
+    if (isLoading) return <UserLayout><div>Đang tải...</div></UserLayout>;
+    if (error) return <UserLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></UserLayout>;
 
     return (
         <UserLayout>

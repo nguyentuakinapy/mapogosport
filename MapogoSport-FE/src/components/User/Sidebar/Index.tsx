@@ -24,7 +24,6 @@ const menuGroups = [
                 route: "#",
                 children: [
                     { label: "Sân yêu thích", route: "/user/wishlist/sportfield" },
-                    { label: "Sản phẩm yêu thích", route: "/user/wishlist/product" },
                     { label: "Bình luận và đánh giá", route: "/user/wishlist/comment" },
                     { label: "Phiếu giảm giá", route: "/user/coupon" }
                 ],

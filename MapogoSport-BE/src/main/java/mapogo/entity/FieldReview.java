@@ -37,7 +37,6 @@ public class FieldReview implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
-    @JsonIgnore //phihung đã ở đây, có thể mở ra khi cần, hiện tại đóng để giảm dữ liệu từ get
     private User user;
 
     @Column(name = "Rating", nullable = false)

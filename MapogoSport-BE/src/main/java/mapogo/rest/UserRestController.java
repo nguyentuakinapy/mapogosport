@@ -1,6 +1,7 @@
 package mapogo.rest;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -64,6 +65,12 @@ public class UserRestController {
 		emailService.sendEmail(username, "MapogoSport", "Bạn đã yêu cầu gửi mã xác nhận mới! Mã của bạn là: " + otp);
 		return otp;
 	}
+	
+	@PostMapping("/user/changePassword/sendMail")
+	public void passMail(@RequestBody Map<String, String> requestBody) {
+		 String email = requestBody.get("email");
+		 emailService.sendEmail(email, "MapogoSport", "Bạn đã thay đổi mật khẩu tài khoản. Nếu đó không phải là bạn, vui lòng liên hệ với chúng tôi ngay.");
+	}
 
 	@Autowired
 	ProductDAO productDAO;
@@ -72,4 +79,5 @@ public class UserRestController {
 	public List<Product> findAll() {
 		return productDAO.findAll();
 	}
+	// ??? sao nó nằm ở đây?
 }

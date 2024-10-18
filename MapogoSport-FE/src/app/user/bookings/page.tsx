@@ -90,7 +90,7 @@ const Bookings = () => {
                 <Table striped className="mb-0">
                     <thead>
                         <tr>
-                            <th style={{ width: '120px' }}>Mã đặt sân</th>
+                            <th>Mã đặt sân</th>
                             <th>Ngày</th>
                             <th>Tình trạng</th>
                             <th>Thao tác</th>
