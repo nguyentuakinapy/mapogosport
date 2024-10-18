@@ -12,6 +12,13 @@ interface SportField {
     quantity: number;
     status: string;
     image: string;
+    owner: {
+        ownerId: number;
+        user: User;
+        bankAccount: string;
+        momoAccount: string;
+        vnpayAccount: string;
+    }
     decription: string;
     sportFielDetails: SportFieldDetail[];
 }
