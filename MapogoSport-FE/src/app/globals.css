@@ -356,16 +356,6 @@ body {
   box-sizing: border-box;
 }
 
-.row .img-dm {
-  border: 2px solid transparent;
-  transition: box-shadow 0.3s ease, border 0.3s ease;
-}
-
-.row .img-dm:hover {
-  border: 2px solid #FFDD9D;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  border-radius: 15px;
-}
 
 .head-hv-nav {
   letter-spacing: 0.5px;
