@@ -1,10 +1,10 @@
 'use client'
-import { Container, Carousel, Row, Col, Image } from "react-bootstrap";
+import { Container, Carousel, Row, Col, Image, Button } from "react-bootstrap";
 import { useEffect, useState } from 'react';
 import HomeLayout from "@/components/HomeLayout";
 import Link from "next/link";
 import './user/types/user.scss'
-import useSWR from "swr";
+import { formatPrice } from "@/components/Utils/Format";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
@@ -82,55 +82,67 @@ export default function Home() {
         </div>
         {/* Danh mục nổi bật */}
         <div>
-          <h3 className="text-center fw-bold mt-5 mb-1">DANH MỤC NỔI BẬT</h3>
-          <div className="row">
-            <div className="col-3 text-center">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
+          <h3 className="text-center fw-bold mt-5 mb-1">ĐĂNG KÝ TRỞ THÀNH CHỦ SÂN</h3>
+          <Row className="my-3" style={{ fontSize: '15px' }}>
+            <Col xs={4}>
+              <div className="card packageUpdate">
+                <b className="ms-3 mt-3 fs-5">Gói cơ bản</b>
+                <div className="body-package my-3">
+                  <div>
+                    <i className="bi bi-check-circle me-2"></i>
+                    Trở thành một chủ sân
+                  </div>
+                  <div>
+                    <i className="bi bi-check-circle me-2"></i>
+                    Một khu vực để đăng sân mình lên
+                  </div>
+                  <div>
+                    <i className="bi bi-check-circle me-2"></i>
+                    Giới hạn 15 lượt đặt sân / 1 tháng
+                  </div>
+
+                </div>
+                <b className="text-danger ms-3">Miễn phí</b>
+                <Button className='btn-sub'>Đăng ký ngay</Button>
               </div>
-            </div>
-            <div className="col-3 text-center col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
+            </Col>
+            <Col xs={4}>
+              <div className="card packageUpdate">
+                <b className="ms-3 mt-3 fs-5">Gói cao cấp</b>
+                <div className="body-package my-3">
+                  <div >
+                    <i className="bi bi-check-circle me-2">OKE</i>
+                  </div>
+                  <div >
+                    <i className="bi bi-check-circle me-2">OKE</i>
+                  </div>
+                  <div >
+                    <i className="bi bi-check-circle me-2">OKE</i>
+                  </div>
+                </div>
+                <b className="text-danger ms-3">{formatPrice(120000)}</b>
+                <Button className='btn-sub'>Đăng ký ngay</Button>
               </div>
-            </div><div className="col-3 text-center col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
+            </Col>
+            <Col xs={4}>
+              <div className="card packageUpdate">
+                <b className="ms-3 mt-3 fs-5">Gói siêu cấp vip pro</b>
+                <div className="body-package my-3">
+                  <div >
+                    <i className="bi bi-check-circle me-2">OKE</i>
+                  </div>
+                  <div >
+                    <i className="bi bi-check-circle me-2">OKE</i>
+                  </div>
+                  <div >
+                    <i className="bi bi-check-circle me-2">OKE</i>
+                  </div>
+                </div>
+                <b className="text-danger ms-3">{formatPrice(300000)}</b>
+                <Button className='btn-sub'>Đăng ký ngay</Button>
               </div>
-            </div><div className="col-3 text-center col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div>
-            <div className="col-3 text-center mt-2 col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div>
-            <div className="col-3 text-center mt-2 col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div>
-            <div className="col-3 text-center mt-2 col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div>
-            <div className="col-3 text-center mt-2 col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div>
-          </div>
+            </Col>
+          </Row>
         </div>
         {/* Deal hot cho bạn */}
         <div>
@@ -252,7 +264,7 @@ export default function Home() {
                 </Col>
               ))}
             </Row>
-            
+
             {/* {sportFields.length > 8 && (
               <div className="text-end">
                 <Link href="/more-sports" className="btn btn btn-dark">Xem thêm<i className="bi bi-chevron-compact-right"></i></Link>

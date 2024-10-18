@@ -183,7 +183,19 @@ export default function Register(props: RegisterProps) {
         }
     }
 
+    useEffect(() => {
+        const handleKeyDown = (event: any) => {
+            if (event.key == "Escape") {
+                handleClose();
+            }
+        };
 
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
 
     const handleClose = () => {
         setShowRegisterModal(false);

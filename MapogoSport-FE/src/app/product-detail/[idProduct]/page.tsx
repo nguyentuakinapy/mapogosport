@@ -265,8 +265,9 @@ const ProductDetail = () => {
     // select price by size and productDetailId
 
     useEffect(() => {
+        console.log("idSize", idSize)
         if (selectedProductDetailId && idSize) {
-            console.log("idSize: ", idSize)
+            // console.log("idSize: ", idSize)
             const fetchData = async () => {
                 try {
                     const response = await fetch(`http://localhost:8080/rest/product-detail/price-by-size/${selectedProductDetailId}/${idSize}`)
