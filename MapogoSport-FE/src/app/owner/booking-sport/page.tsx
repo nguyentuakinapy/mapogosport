@@ -52,36 +52,33 @@ export default function BookingSport() {
     });
 
     useEffect(() => {
-        // console.log(data);
         setDataSport(data);
     }, [data])
 
     useEffect(() => {
-        console.log(dataSport);
         getTime();
-    }, [dataSport])
+    }, [dataSport, selectSport])
 
-    const checkAndAddStatus = (time: string, newStatus: string) => {
-        let checkAdd = true;
-        // alert('Check checkAndAddStatus')
+    // const checkAndAddStatus = (time: string, newStatus: string) => {
+    //     let checkAdd = true;
+    //     // alert('Check checkAndAddStatus')
 
-        setBookingsOnDay((prevBookingsOnDay) => {
-            if (checkAdd) {
-                const updatedBookingsOnDay = { ...prevBookingsOnDay };
-                if (!updatedBookingsOnDay[time]) {
-                    updatedBookingsOnDay[time] = [];
-                }
-                updatedBookingsOnDay[time].push(newStatus);
-                // alert('Check setBookings')
-                checkAdd = false;
-                return updatedBookingsOnDay;
-            } else {
-                const updatedBookingsOnDay = { ...prevBookingsOnDay };
-                return updatedBookingsOnDay;
-            }
-        });
-    };
-
+    //     setBookingsOnDay((prevBookingsOnDay) => {
+    //         if (checkAdd) {
+    //             const updatedBookingsOnDay = { ...prevBookingsOnDay };
+    //             if (!updatedBookingsOnDay[time]) {
+    //                 updatedBookingsOnDay[time] = [];
+    //             }
+    //             updatedBookingsOnDay[time].push(newStatus);
+    //             // alert('Check setBookings')
+    //             checkAdd = false;
+    //             return updatedBookingsOnDay;
+    //         } else {
+    //             const updatedBookingsOnDay = { ...prevBookingsOnDay };
+    //             return updatedBookingsOnDay;
+    //         }
+    //     });
+    // };
 
     const [opening, setOpening] = useState<number>();
     const [closing, setClosing] = useState<number>();
@@ -90,16 +87,13 @@ export default function BookingSport() {
     const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
 
     useEffect(() => {
-        getTime();
-        console.log(selectSport);
-    }, [selectSport])
-
-    useEffect(() => {
         if (dataTimeSport.length > 0) {
             const newBookingsOnDay = { ...bookingsOnDay };
+            const newBookingsOnWeek = { ...bookingsOnWeek };
 
             const validTimes = dataTimeSport.filter(time => time !== "undefinedh00" && time !== null);
 
+            // if (selectSport == 0) {
             validTimes.forEach((time) => {
                 if (!newBookingsOnDay[time]) {
                     newBookingsOnDay[time] = [];
@@ -107,10 +101,8 @@ export default function BookingSport() {
                 }
             });
             setBookingsOnDay(newBookingsOnDay); // Cập nhật state bookings
-            const newBookingsOnWeek = { ...bookingsOnWeek };
-
+            // } else {
             const sportDetails = dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails;
-
             if (sportDetails) {
                 sportDetails.forEach((item) => {
                     validTimes.forEach((time) => {
@@ -122,9 +114,9 @@ export default function BookingSport() {
                         }
                     });
                 });
+                // }
+                setBookingsOnWeek(newBookingsOnWeek);
             }
-
-            setBookingsOnWeek(newBookingsOnWeek);
             setCheckDataBooking1(!checkDataBooking1)
         }
     }, [dataTimeSport])
@@ -154,7 +146,6 @@ export default function BookingSport() {
         }
         setDataTimeSport((prevData) => [...prevData, ...newData]);
     }, [operatingTime])
-
 
     const getTime = () => {
         console.log("Get time");
@@ -217,14 +208,14 @@ export default function BookingSport() {
         setDays(days);
         setDayYears(dayYears);
     }, [])
-    // SET STATUS
 
+    // SET STATUS
     const [checkDataBooking, setCheckDataBooking] = useState<boolean>(false);
     const [checkDataBooking1, setCheckDataBooking1] = useState<boolean>(false);
 
     useEffect(() => {
-        console.log("bookingsOnDay đã được cập nhật:", bookingsOnDay);
-        console.log("bookingsOnWeek đã được cập nhật:", bookingsOnWeek);
+        // console.log("bookingsOnDay đã được cập nhật:", bookingsOnDay);
+        // console.log("bookingsOnWeek đã được cập nhật:", bookingsOnWeek);
         for (let index = 0; index < 1; index++) {
             setCheckDataBooking(!checkDataBooking);
         }
@@ -233,13 +224,6 @@ export default function BookingSport() {
     const isFirstRun = useRef(true);
 
     useEffect(() => {
-        // Nếu là lần render đầu tiên, bỏ qua
-        if (isFirstRun.current) {
-            isFirstRun.current = false;
-            return;
-        }
-
-        console.log("selectDate ", selectDate);
         if (selectDate === 0) {
             setStatusOnDay();
         } else {
@@ -251,7 +235,6 @@ export default function BookingSport() {
         const sportDetails = dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails;
         const numFields = sportDetails ? sportDetails.length : 0;
 
-        // console.log("Booking ", bookingsOnDay);
         for (let index = 0; index < numFields; index++) {
 
             const response = await
@@ -265,9 +248,9 @@ export default function BookingSport() {
             if (dataBooking.length === 0) {
                 Object.entries(bookingsOnDay).forEach(([time, statuses]) => {
                     if (sportDetails && sportDetails[index].status == "Hoạt động") {
-                        statuses[index] = "Còn trống"; // Thiết lập trạng thái là "Còn trống"
+                        statuses[index] = "Còn trống";
                     } else {
-                        statuses[index] = "Tạm đóng"; // Thiết lập trạng thái là "Còn trống"
+                        statuses[index] = "Tạm đóng";
                     }
                     setBookingsOnDay(prevBookingsOnDay => ({
                         ...prevBookingsOnDay,
@@ -298,8 +281,6 @@ export default function BookingSport() {
                 }
                 Object.entries(bookingsOnDay).forEach(([time, statuses]) => {
                     if (sportDetails && sportDetails[index].sportFielDetailId == item.sportFieldDetail.sportFielDetailId) {
-                        // console.log(sportDetails[index].status);
-
                         if (sportDetails[index].status == "Hoạt động") {
                             let timeIndex = newData.indexOf(time)
 
@@ -336,11 +317,7 @@ export default function BookingSport() {
         const startTotalMinutes = convertToMinutes(start);
         const endTotalMinutes = convertToMinutes(end);
 
-        const difference = endTotalMinutes - startTotalMinutes;
-
-        // const hours = Math.floor(difference / 60);
-
-        return difference;
+        return endTotalMinutes - startTotalMinutes;
     };
 
     const setStatusOnWeek = async () => {
@@ -403,7 +380,7 @@ export default function BookingSport() {
                                         const timeIndex = newData.indexOf(time);
 
                                         if (timeIndex >= 0) {
-                                            sportDataTemporary[sport][dayIndex] = "Đã đặt"; // Nếu có trong khoảng thời gian đặt, set trạng thái Đã đặt
+                                            sportDataTemporary[sport][dayIndex] = "Đã đặt";
                                         } else if (!sportDataTemporary[sport][dayIndex] || sportDataTemporary[sport][dayIndex] === "Còn trống") {
                                             sportDataTemporary[sport][dayIndex] = "Còn trống"; // Nếu chưa đặt gì, set trạng thái còn trống
                                         }
@@ -413,7 +390,6 @@ export default function BookingSport() {
                                 }
                             });
 
-                            // Cập nhật trạng thái cho bookingsOnWeek
                             setBookingsOnWeek(prevBookingsOnWeek => ({
                                 ...prevBookingsOnWeek,
                                 [time]: sportDataTemporary
@@ -422,7 +398,6 @@ export default function BookingSport() {
                     });
                 }
 
-                // Nếu không có booking nào trong ngày này, set trạng thái mặc định
                 if (!hasBookingForDay) {
                     Object.entries(bookingsOnWeek).forEach(([time, sportData]) => {
                         const sportDataTemporary = { ...sportData };
@@ -446,30 +421,30 @@ export default function BookingSport() {
         }
     }
 
-
-
-
-
-
     // LOAD TABLE
     const renderTableRows = () => {
-        return Object.entries(bookingsOnDay).map(([time, statuses]) => (
+        return Object.entries(bookingsOnDay).map(([time, statuses], i) => (
             <tr key={time}>
                 <td className="title" style={{ textAlign: 'center' }}>{time}</td>
                 {statuses.map((status, index) => (
-                    <td key={index} className={`w-10 ${getBadgeClass(status)}`}>
-                        <span onClick={() => setShowBookingModal(true)} className={`badge ${getBadgeClass(status)}`} style={{ width: '80px' }}>{status}</span>
+                    <td key={index} className={`w-10 ${getBadgeClass(status)}`}
+                        style={{ cursor: 'pointer' }}
+                        time-data={time}
+                        sport-detail={
+                            dataSport &&
+                                dataSport[selectSport] &&
+                                dataSport[selectSport].sportFielDetails &&
+                                dataSport[selectSport].sportFielDetails[index] ?
+                                dataSport[selectSport].sportFielDetails[index].sportFielDetailId : 'N/A'
+                        } onClick={handleGetDataBookingOnDay}
+                    >
+                        <span className={`badge ${getBadgeClass(status)}`} style={{ width: '80px' }}>{status}</span>
                     </td>
                 ))}
             </tr>
         ));
     };
 
-
-
-    useEffect(() => {
-        console.log("bookingsOnWeek đã được cập nhật:", bookingsOnWeek);
-    }, [bookingsOnWeek])
     const renderTableRowsByWeek = () => {
         return (
             <Table bordered>
@@ -483,7 +458,7 @@ export default function BookingSport() {
                     </tr>
                 </thead>
                 <tbody>
-                    {Object.entries(bookingsOnWeek).map(([time, sportData]) => {
+                    {Object.entries(bookingsOnWeek).map(([time, sportData], indexBk) => {
                         if (dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails) {
                             const sportFielDetails = dataSport[selectSport].sportFielDetails;
                             const rowSpan = sportFielDetails.length;
@@ -501,9 +476,12 @@ export default function BookingSport() {
                                         status.map((statusItem, j) => { // Đổi tên `status` thành `statusItem` để tránh nhầm lẫn
                                             if (sport == item.name) {
                                                 return ( // Thêm return
-                                                    <td key={`${sport}-${j}`} className={`w-10 ${getBadgeClass(statusItem)}`}>
+                                                    <td key={`${sport}-${j}`} sport-detail={item.sportFielDetailId}
+                                                        time-data={time} day-data={dayYears && dayYears[j]}
+                                                        onClick={handleGetDataBookingOnWeek}
+                                                        style={{ cursor: 'pointer' }}
+                                                        className={`w-10 ${getBadgeClass(statusItem)}`}>
                                                         <span
-                                                            onClick={() => setShowBookingModal(true)}
                                                             className={`badge ${getBadgeClass(statusItem)}`}
                                                         >
                                                             {statusItem}
@@ -522,6 +500,43 @@ export default function BookingSport() {
             </Table>
         );
     };
+
+    const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
+    const [timeStart, setTimeStart] = useState("");
+    const [dayStartBooking, setDayStartBooking] = useState("");
+
+    const handleGetDataBookingOnDay = (event: React.MouseEvent<HTMLTableCellElement>) => {
+        const sportDetail = event.currentTarget.getAttribute("sport-detail");
+        const timeStart = event.currentTarget.getAttribute("time-data");
+        const dayStartBooking = new Date();
+
+        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
+
+        if (sportDetail && timeStart && dayStartBooking) {
+            setSportDetail(selectedSportDetail);
+            setTimeStart(timeStart);
+            setDayStartBooking(dayStartBooking.toLocaleDateString('en-CA'));
+            setShowBookingModal(true);
+        }
+        // toast.success(sportDetail + " - " + timeStart + " - " + dayStartBooking);
+    }
+
+    const handleGetDataBookingOnWeek = (event: React.MouseEvent<HTMLTableCellElement>) => {
+        const sportDetail = event.currentTarget.getAttribute("sport-detail");
+        const timeStart = event.currentTarget.getAttribute("time-data");
+        const dayStartBooking = event.currentTarget.getAttribute("day-data");
+
+        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
+
+        if (sportDetail && timeStart && dayStartBooking) {
+            setSportDetail(selectedSportDetail);
+            setTimeStart(timeStart);
+            setDayStartBooking(dayStartBooking);
+            setShowBookingModal(true);
+            // toast.success(sportDetail + " - " + timeStart + " - " + dayStartBooking);
+        }
+    };
+
 
 
     const getBadgeClass = (status: string) => {
@@ -593,7 +608,10 @@ export default function BookingSport() {
                     {renderTableRowsByWeek()}
                 </div>
             }
-            <BookingModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}></BookingModal>
+            <BookingModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
+                sportDetail={sportDetail} timeStart={timeStart} dayStartBooking={dayStartBooking}
+                sport={dataSport && dataSport[selectSport]}
+            ></BookingModal>
         </>
     );
 }
