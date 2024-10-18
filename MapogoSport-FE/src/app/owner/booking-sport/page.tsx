@@ -266,13 +266,13 @@ export default function BookingSport() {
                 Object.entries(bookingsOnDay).forEach(([time, statuses]) => {
                     if (sportDetails && sportDetails[index].status == "Hoạt động") {
                         statuses[index] = "Còn trống"; // Thiết lập trạng thái là "Còn trống"
-                        setBookingsOnDay(prevBookingsOnDay => ({
-                            ...prevBookingsOnDay,
-                            [time]: statuses
-                        }));
                     } else {
                         statuses[index] = "Tạm đóng"; // Thiết lập trạng thái là "Còn trống"
                     }
+                    setBookingsOnDay(prevBookingsOnDay => ({
+                        ...prevBookingsOnDay,
+                        [time]: statuses
+                    }));
                 });
                 continue;
             }
