@@ -146,7 +146,7 @@ export default function Login(props: LoginProps) {
                         <Form.Group className="mb-4">
                             <Form.Control
                                 type="text"
-                                placeholder="Vui long nhập Email!"
+                                placeholder="Vui long nhập tên đăng nhập!"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                             />

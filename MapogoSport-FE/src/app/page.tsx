@@ -53,10 +53,35 @@ export default function Home() {
         <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">
           <div className="carousel-inner">
             <div className="carousel-item active" data-bs-interval="2000">
-              <img src="https://img.thegioithethao.vn/media/banner/banner_gio_vang.png" className="d-block w-100" alt="..." />
+              <img src="/images/bannerSport.png" className="d-block w-100" alt="..." />
+              <button style={{
+                position: 'absolute',
+                top: '70%',
+                left: '13%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                borderRadius: '50px',
+              }} className="btn btn-danger">
+                Đăng ký ngay
+              </button>
             </div>
-            <div className="carousel-item" data-bs-interval="2000">
+            {/* <div className="carousel-item" data-bs-interval="2000">
               <img src="https://img.thegioithethao.vn/media/banner/thi-cong-cai-tao.png" className="d-block w-100" alt="..." />
+            </div> */}
+            <div className="carousel-item" data-bs-interval="2000">
+              <img src="/images/registerowner.png" className="w-100" alt="" />
+              <button style={{
+                position: 'absolute',
+                top: '40%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                borderRadius: '50px',
+              }} className="btn btn-danger">
+                Đăng ký ngay
+              </button>
             </div>
             {/* <div className="carousel-item">
             <img src="..." className="d-block w-100" alt="..." />
@@ -81,69 +106,22 @@ export default function Home() {
           </div>
         </div>
         {/* Danh mục nổi bật */}
-        <div>
+        <div style={{ position: 'relative', textAlign: 'center' }}>
           <h3 className="text-center fw-bold mt-5 mb-1">ĐĂNG KÝ TRỞ THÀNH CHỦ SÂN</h3>
-          <Row className="my-3" style={{ fontSize: '15px' }}>
-            <Col xs={4}>
-              <div className="card packageUpdate">
-                <b className="ms-3 mt-3 fs-5">Gói cơ bản</b>
-                <div className="body-package my-3">
-                  <div>
-                    <i className="bi bi-check-circle me-2"></i>
-                    Trở thành một chủ sân
-                  </div>
-                  <div>
-                    <i className="bi bi-check-circle me-2"></i>
-                    Một khu vực để đăng sân mình lên
-                  </div>
-                  <div>
-                    <i className="bi bi-check-circle me-2"></i>
-                    Giới hạn 15 lượt đặt sân / 1 tháng
-                  </div>
-
-                </div>
-                <b className="text-danger ms-3">Miễn phí</b>
-                <Button className='btn-sub'>Đăng ký ngay</Button>
-              </div>
-            </Col>
-            <Col xs={4}>
-              <div className="card packageUpdate">
-                <b className="ms-3 mt-3 fs-5">Gói cao cấp</b>
-                <div className="body-package my-3">
-                  <div >
-                    <i className="bi bi-check-circle me-2">OKE</i>
-                  </div>
-                  <div >
-                    <i className="bi bi-check-circle me-2">OKE</i>
-                  </div>
-                  <div >
-                    <i className="bi bi-check-circle me-2">OKE</i>
-                  </div>
-                </div>
-                <b className="text-danger ms-3">{formatPrice(120000)}</b>
-                <Button className='btn-sub'>Đăng ký ngay</Button>
-              </div>
-            </Col>
-            <Col xs={4}>
-              <div className="card packageUpdate">
-                <b className="ms-3 mt-3 fs-5">Gói siêu cấp vip pro</b>
-                <div className="body-package my-3">
-                  <div >
-                    <i className="bi bi-check-circle me-2">OKE</i>
-                  </div>
-                  <div >
-                    <i className="bi bi-check-circle me-2">OKE</i>
-                  </div>
-                  <div >
-                    <i className="bi bi-check-circle me-2">OKE</i>
-                  </div>
-                </div>
-                <b className="text-danger ms-3">{formatPrice(300000)}</b>
-                <Button className='btn-sub'>Đăng ký ngay</Button>
-              </div>
-            </Col>
-          </Row>
+          <img src="/images/registerowner.png" className="w-100" alt="" />
+          <button style={{
+            position: 'absolute',
+            top: '45%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            borderRadius: '50px',
+          }} className="btn btn-danger">
+            Đăng ký ngay
+          </button>
         </div>
+
         {/* Deal hot cho bạn */}
         <div>
           <h3 className="text-center fw-bold mt-5">DEAL HOT CHO BẠN</h3>
