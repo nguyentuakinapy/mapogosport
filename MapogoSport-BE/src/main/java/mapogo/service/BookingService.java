@@ -11,4 +11,6 @@ public interface BookingService {
 	List<Booking> findByUser_Username(String username);
 	
 	List<Booking> findById(Integer id);
+	
+	Booking createBooking(Booking booking);
 }
