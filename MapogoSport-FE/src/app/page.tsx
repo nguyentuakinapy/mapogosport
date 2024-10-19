@@ -63,7 +63,7 @@ export default function Home() {
                 fontWeight: 'bold',
                 borderRadius: '50px',
               }} className="btn btn-danger">
-                Đăng ký ngay
+                ĐẶT SÂN NGAY
               </button>
             </div>
             {/* <div className="carousel-item" data-bs-interval="2000">
@@ -80,7 +80,7 @@ export default function Home() {
                 fontWeight: 'bold',
                 borderRadius: '50px',
               }} className="btn btn-danger">
-                Đăng ký ngay
+                ĐĂNG KÝ NGAY
               </button>
             </div>
             {/* <div className="carousel-item">
