@@ -28,9 +28,13 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 		LocalDate today = LocalDate.now();
 		LocalDate endDate = today.plusDays(7);
-		
-	    return bookingDetailDAO.findBySportFieldDetailAndDateBetween(sportFieldDetailId, today, endDate);
+
+		return bookingDetailDAO.findBySportFieldDetailAndDateBetween(sportFieldDetailId, today, endDate);
 	}
 
+	@Override
+	public BookingDetail createBookingDetail(BookingDetail bookingDetail) {
+		return bookingDetailDAO.save(bookingDetail);
+	}
 
 }

@@ -10,8 +10,8 @@ import mapogo.entity.Booking;
 import mapogo.service.BookingService;
 
 @Service
-public class BookingServiceImpl implements BookingService{
-	
+public class BookingServiceImpl implements BookingService {
+
 	@Autowired
 	BookingDAO bookingDAO;
 
@@ -28,6 +28,11 @@ public class BookingServiceImpl implements BookingService{
 	@Override
 	public List<Booking> findById(Integer id) {
 		return bookingDAO.findByBookingId(id);
+	}
+
+	@Override
+	public Booking createBooking(Booking booking) {
+		return bookingDAO.save(booking);
 	}
 
 }

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel } from "react-bootstrap";
 import { toast } from "react-toastify";
+import useSWR from "swr";
 
 interface OwnerProps {
     showBookingModal: boolean;
@@ -11,10 +12,40 @@ interface OwnerProps {
     sport?: SportField;
 }
 
-const ModalAddAddress = (props: OwnerProps) => {
+const BookingModal = (props: OwnerProps) => {
     const { showBookingModal, setShowBookingModal, sportDetail, timeStart, dayStartBooking, sport } = props;
 
+    const [selectTime, setSelectTime] = useState<string>("1h");
+
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod[]>();
+
+
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+    const { data, error, isLoading } = useSWR(
+        `http://localhost:8080/rest/paymentMethod`, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
+
+    // BOOKING
     const [username, setUsername] = useState<string>();
+    const [totalAmount, setTotalAmount] = useState<number>();
+    const [status, setStatus] = useState<string>();
+    const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
+    const [owner, setOwner] = useState<number>();
+    const [note, setNote] = useState<string | null>(null);
+
+    useEffect(() => {
+        setPaymentMethod(data);
+    }, [data])
+
+
+    useEffect(() => {
+        console.log(paymentMethod);
+    }, [paymentMethod])
+
     const handleClose = () => {
         setShowBookingModal(false);
     }
@@ -54,17 +85,21 @@ const ModalAddAddress = (props: OwnerProps) => {
                                     onChange={(e) => setUsername(e.target.value)}
                                 />
                             </Form.Group>
-                            <select
+                            <select value={selectTime} onChange={(e) => setSelectTime(e.target.value)}
                                 className="form-select mb-2" aria-label="Default select example">
-                                <option value="0">Chọn giờ đặt *</option>
-                                <option value="0">1h</option>
-                                <option value="1">1h30p</option>
+                                <option value="1h">1h</option>
+                                <option value="1h30">1h30p</option>
                             </select>
-                            <select
+                            <select value={paymentMethodId}
+                                onChange={(e) => setPaymentMethodId(Number(e.target.value))}
                                 className="form-select" aria-label="Default select example">
-                                <option value="0">Phương thức thanh toán *</option>
-                                <option value="0">1h</option>
-                                <option value="1">1h30p</option>
+                                <option value={"0"}
+                                >Phương thức thanh toán *</option>
+                                {paymentMethod && (
+                                    paymentMethod.map((item) => (
+                                        <option key={item.paymentMethodId} value={item.paymentMethodId}>{item.name}</option>
+                                    ))
+                                )}
                             </select>
                         </Col>
                     </Row>
@@ -100,4 +135,4 @@ const ModalAddAddress = (props: OwnerProps) => {
     )
 }
 
-export default ModalAddAddress;
+export default BookingModal;
