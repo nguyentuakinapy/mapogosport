@@ -45,7 +45,7 @@ const BookingModal = (props: OwnerProps) => {
     }, [data])
 
     useEffect(() => {
-        console.log(paymentMethod);
+        // console.log(paymentMethod);
     }, [paymentMethod])
 
     const handleClose = () => {
