@@ -1,8 +1,9 @@
 'use client'
 import UserLayout from "@/components/User/UserLayout";
 import { useEffect, useState } from "react";
-import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
+import { Col, Form, InputGroup, Row } from "react-bootstrap";
 import DatePicker from "react-datepicker";
+import 'react-datepicker/dist/react-datepicker.css';
 import '../../types/user.scss';
 import Link from "next/link";
 import useSWR from "swr";
@@ -88,6 +89,9 @@ const CommentPage = () => {
                     if (selectedOption === '1') {
                         const fieldReview = review as FieldReview;
                         key = `field-${fieldReview.fieldReviewId}`;
+                        if (fieldReview.fieldReviewId === undefined) {
+                            return null;
+                        }
                         return (
                             <div className="box-comment-container mb-2" key={key}>
                                 <div className="d-flex justify-content-between align-items-center">
