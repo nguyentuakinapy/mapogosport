@@ -11,6 +11,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
     const { showCreateOwnerModal, setShowCreateOwnerModal } = props;
 
     const [username, setUsername] = useState<string>();
+    
     const handleClose = () => {
         setShowCreateOwnerModal(false);
     }

@@ -148,7 +148,7 @@ export default function BookingSport() {
     }, [operatingTime])
 
     const getTime = () => {
-        console.log("Get time");
+        // console.log("Get time");
 
         if (dataSport && dataSport.length > selectSport) {
             const open = dataSport[selectSport]?.opening;
@@ -574,7 +574,7 @@ export default function BookingSport() {
                     <option value="0">Một ngày</option>
                     <option value="1">Một tuần</option>
                 </select>
-                <input type="time" className="form-control" value={selectTime}
+                <input type="datetime-local" className="form-control" value={selectTime}
                     onChange={(e) => setSelectTime(e.target.value)} />
                 <select value={selectSport} onChange={(e) => {
                     setSelectSport(Number(e.target.value));
