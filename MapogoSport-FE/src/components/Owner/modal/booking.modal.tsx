@@ -1,5 +1,6 @@
+import { formatPrice } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
-import { Button, Col, Form, Modal, Row, FloatingLabel } from "react-bootstrap";
+import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR from "swr";
 
@@ -16,6 +17,7 @@ const BookingModal = (props: OwnerProps) => {
     const { showBookingModal, setShowBookingModal, sportDetail, timeStart, dayStartBooking, sport } = props;
 
     const [selectTime, setSelectTime] = useState<string>("1h");
+    const [isOffline, setIsOffline] = useState(false);
 
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod[]>();
 
@@ -37,10 +39,10 @@ const BookingModal = (props: OwnerProps) => {
     const [owner, setOwner] = useState<number>();
     const [note, setNote] = useState<string | null>(null);
 
+    // BOOKING DETAIL
     useEffect(() => {
         setPaymentMethod(data);
     }, [data])
-
 
     useEffect(() => {
         console.log(paymentMethod);
@@ -51,8 +53,11 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     const handleSave = () => {
-        toast.success(username)
-        // handleClose();
+        if (isOffline) {
+            toast.success("Đang đặt sân offline.");
+        } else {
+            toast.success("Đang đặt sân online.");
+        }
     }
 
     return (
@@ -67,8 +72,8 @@ const BookingModal = (props: OwnerProps) => {
                         <Col>
                             <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
                             <ul>
-                                <li><span className="fw-bold">Giá đặt sân / 1h:</span> {sportDetail && sportDetail.price}.</li>
-                                <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {sportDetail && sportDetail.peakHourPrices}.</li>
+                                <li><span className="fw-bold">Giá đặt sân / 1h:</span> {formatPrice(sportDetail && sportDetail.price)}.</li>
+                                <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {formatPrice(sportDetail && sportDetail.peakHourPrices)}.</li>
                                 <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>
                                 <li><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}.</li>
                                 <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
@@ -77,14 +82,22 @@ const BookingModal = (props: OwnerProps) => {
                         </Col>
                         <Col>
                             <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
-                            <Form.Group className="mb-2">
-                                <Form.Control
+                            <InputGroup className="mb-2">
+                                <Form.Control disabled={isOffline}
                                     type="text"
-                                    placeholder="Vui long nhập tên đăng nhập!"
+                                    placeholder="Vui lòng nhập tên đăng nhập!"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                 />
-                            </Form.Group>
+                                <InputGroup.Text aria-label="Checkbox for following text input bg-white">
+                                    <Form.Check
+                                        type="checkbox"
+                                        label="Offline"
+                                        checked={isOffline}
+                                        onChange={(e) => setIsOffline(e.target.checked)}
+                                    />
+                                </InputGroup.Text>
+                            </InputGroup>
                             <select value={selectTime} onChange={(e) => setSelectTime(e.target.value)}
                                 className="form-select mb-2" aria-label="Default select example">
                                 <option value="1h">1h</option>
