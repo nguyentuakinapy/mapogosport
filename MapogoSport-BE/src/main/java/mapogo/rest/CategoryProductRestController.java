@@ -56,7 +56,7 @@ public class CategoryProductRestController {
 		try {
 			categoryProduct = objectMapper.readValue(categoryProductJson, CategoryProduct.class);
 		} catch (Exception e) {
-			 throw new Error("Có lỗi xảy ra khi chuyển đổi categoryProductJson");
+			throw new Error("Có lỗi xảy ra khi chuyển đổi categoryProductJson");
 		}
 		// resolve file image
 		if (!file.isEmpty()) {
@@ -68,33 +68,39 @@ public class CategoryProductRestController {
 
 	@PutMapping("/update/{id}")
 	public CategoryProduct updateCategoryProduct(@PathVariable("id") Integer id,
-			@RequestParam("category") String categoryProductJson,@RequestParam("fileImage")MultipartFile file) {
-		//chuyển từ categoryProductJson thành categoryProduct
+			@RequestParam("category") String categoryProductJson,
+			@RequestParam(value = "fileImage", required = false) MultipartFile file) {
+		// Chuyển từ categoryProductJson thành categoryProduct
 		ObjectMapper objectMapper = new ObjectMapper();
 		CategoryProduct categoryProduct;
 		try {
 			categoryProduct = objectMapper.readValue(categoryProductJson, CategoryProduct.class);
 		} catch (Exception e) {
-			// TODO: handle exception
 			throw new Error("Có lỗi xảy ra khi chuyển đổi categoryProductJson");
 		}
-		//Resolve file image
-		 // Xử lý tệp hình ảnh
-	    if (!file.isEmpty()) {
-	        try {
-	            // Chuyển đổi hình ảnh thành Base64 nếu bạn cần
-	            byte[] imageBytes = file.getBytes();
-	            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-	            categoryProduct.setImage(base64Image); // Cập nhật thuộc tính hình ảnh với Base64
-	        } catch (IOException e) {
-	        	throw new Error("Có lỗi xảy ra khi lưu tệp");
-	        }
-	    }else {
-	    	Optional<CategoryProduct> existingProduct = categoryProductService.findById(id);
-	    	CategoryProduct categoryProduct1 = existingProduct.get();
-	        String image = categoryProduct1.getImage();
-	    }
-		return categoryProductService.updateCategoryProduct(id, categoryProduct);
+
+		// Lấy thông tin CategoryProduct từ database hiện tại
+		CategoryProduct existingCategoryProduct = categoryProductService.getCategoryProductById(id);
+		if (existingCategoryProduct == null) {
+			throw new Error("Không tìm thấy danh mục với id: " + id);
+		}
+
+		// Cập nhật các thuộc tính từ categoryProduct mới vào existingCategoryProduct
+		existingCategoryProduct.setName(categoryProduct.getName()); // Hoặc thuộc tính bạn muốn cập nhật
+
+		// Xử lý tệp hình ảnh nếu có
+		if (file != null && !file.isEmpty()) {
+			try {
+				byte[] imageBytes = file.getBytes();
+				String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+				existingCategoryProduct.setImage(base64Image); // Cập nhật thuộc tính hình ảnh với Base64
+			} catch (IOException e) {
+				throw new Error("Có lỗi xảy ra khi lưu tệp");
+			}
+		}
+
+		// Giữ nguyên thông tin ảnh cũ nếu không có tệp mới
+		return categoryProductService.updateCategoryProduct(id, existingCategoryProduct);
 	}
 
 	@DeleteMapping("/delete/{id}")

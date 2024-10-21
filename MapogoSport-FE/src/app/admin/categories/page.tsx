@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 
 const AdminProduct = () => {
 
-    
+
     const [showModal, setShowModal] = useState<boolean>(false);
     const [modalType, setModalType] = useState<'add' | 'edit'>('add');
     const [currentCategoryProduct, setCurrentCategoryProduct] = useState<CategoryProduct | null>(null); // Updated type to allow null
@@ -43,12 +43,12 @@ const AdminProduct = () => {
         // Cập nhật giao diện trước khi có phản hồi từ server
         const originalProducts = categoryProducts;
         setCategoryProducts(prevProducts => prevProducts.filter(product => product.categoryProductId !== id));
-    
+
         try {
             const response = await fetch(`http://localhost:8080/rest/delete/${id}`, {
                 method: 'DELETE',
             });
-    
+
             if (!response.ok) {
                 // Nếu việc xóa thất bại, khôi phục lại danh sách ban đầu
                 setCategoryProducts(originalProducts);
@@ -65,10 +65,21 @@ const AdminProduct = () => {
     };
 
     const handleAddNewCategory = (newCategory: CategoryProduct) => {
-        setCategoryProducts(prevCategories => [...prevCategories, newCategory]);
-        setTimeout(() => scrollToNewCategory(newCategory.categoryProductId), 0); 
+        if (newCategory.categoryProductId===currentCategoryProduct?.categoryProductId) {
+            // Edit mode: update the existing category
+            setCategoryProducts(prevCategories =>
+                prevCategories.map(category =>
+                    category.categoryProductId === newCategory.categoryProductId ? newCategory : category
+                )
+            );
+        } else {
+            // Add mode: add the new category
+            setCategoryProducts(prevCategories => [...prevCategories, newCategory]);
+            setTimeout(() => scrollToNewCategory(newCategory.categoryProductId), 0);
+        }
     };
-    
+
+
 
     const scrollToNewCategory = (id: number) => {
         const newRow = document.getElementById(`category-${id}`);
@@ -79,14 +90,14 @@ const AdminProduct = () => {
             console.warn(`Element with id category-${id} not found.`);
         }
     };
-    
+
     //cuộn khi thay đổi
     useEffect(() => {
         if (currentCategoryProduct) {
             scrollToNewCategory(currentCategoryProduct.categoryProductId);
         }
     }, [categoryProducts, currentCategoryProduct]);
-        
+
 
     const renderContent = () => {
         return (
