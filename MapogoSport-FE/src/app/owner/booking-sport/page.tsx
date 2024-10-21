@@ -144,7 +144,13 @@ export default function BookingSport() {
                 }
             }
         }
+        const index = newData.indexOf(dataSport[selectSport]?.opening);
+        if (index !== -1) {
+            newData.splice(0, index);  // Xóa từ vị trí 0 đến index-1
+        }
+
         setDataTimeSport((prevData) => [...prevData, ...newData]);
+
     }, [operatingTime])
 
     const getTime = () => {
