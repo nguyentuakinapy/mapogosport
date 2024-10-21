@@ -84,7 +84,7 @@ export default function Home() {
                 fontSize: '18px',
                 fontWeight: 'bold',
                 borderRadius: '50px',
-                zIndex: '1001'
+                zIndex: '1000'
               }} className="btn btn-danger">
                 ĐẶT SÂN NGAY
               </Link>
