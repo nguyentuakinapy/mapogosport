@@ -25,33 +25,32 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "Bookingpayments")
-public class BookingPayment implements Serializable{
+public class BookingPayment implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "BookingPaymentId")
-    private Integer bookingPaymentId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "BookingPaymentId")
+	private Integer bookingPaymentId;
 
-    @ManyToOne
-    @JoinColumn(name = "BookingId", nullable = false)
-    @JsonBackReference
-    private Booking booking;
+	@ManyToOne
+	@JoinColumn(name = "BookingId", nullable = false)
+	@JsonBackReference
+	private Booking booking;
 
-    @Column(name = "Amount", nullable = false)
-    private Double amount;
+	@Column(name = "Amount", nullable = false)
+	private Double amount;
 
-    @Column(name = "Status", nullable = false)
-    private String status;
+	@Column(name = "Status", nullable = false)
+	private String status;
 
-    @Column(name = "Date", nullable = false)
-    private LocalDateTime date;
+	@Column(name = "Date", nullable = false)
+	private LocalDateTime date = LocalDateTime.now();
 
-    @ManyToOne
-    @JoinColumn(name = "Username", nullable = false)
-    private User user;
+	@ManyToOne
+	@JoinColumn(name = "Username", nullable = false)
+	private User user;
 
-    @Column(name = "ReferenceCode")
-    private String referenceCode;
+	@Column(name = "ReferenceCode")
+	private String referenceCode;
 
 }
-

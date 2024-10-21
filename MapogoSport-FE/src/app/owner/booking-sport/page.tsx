@@ -144,11 +144,17 @@ export default function BookingSport() {
                 }
             }
         }
+        const index = newData.indexOf(dataSport[selectSport]?.opening);
+        if (index !== -1) {
+            newData.splice(0, index);  // Xóa từ vị trí 0 đến index-1
+        }
+
         setDataTimeSport((prevData) => [...prevData, ...newData]);
+
     }, [operatingTime])
 
     const getTime = () => {
-        console.log("Get time");
+        // console.log("Get time");
 
         if (dataSport && dataSport.length > selectSport) {
             const open = dataSport[selectSport]?.opening;
@@ -162,13 +168,13 @@ export default function BookingSport() {
                     setClosing(Number(numberClose[0]));
                     setOperatingTime(Number(numberClose[0]) - Number(numberOpen[0]));
                 } else {
-                    console.log('Không tìm thấy số trong chuỗi mở cửa.');
+                    // console.log('Không tìm thấy số trong chuỗi mở cửa.');
                 }
             } else {
-                console.log('Giá trị mở cửa không hợp lệ:', open);
+                // console.log('Giá trị mở cửa không hợp lệ:', open);
             }
         } else {
-            console.log('Không có dữ liệu thể thao hợp lệ hoặc selectSport không hợp lệ:', selectSport);
+            // console.log('Không có dữ liệu thể thao hợp lệ hoặc selectSport không hợp lệ:', selectSport);
         }
     }
 
@@ -335,7 +341,7 @@ export default function BookingSport() {
             }
 
             const dataBooking = await response.json() as BookingDetail[];
-            console.log("dataBooking", dataBooking);
+            // console.log("dataBooking", dataBooking);
 
             for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
                 const dayYear = dayYears && dayYears[dayIndex];
@@ -556,17 +562,10 @@ export default function BookingSport() {
         setBookingsOnDay({});
     }
 
-    if (isLoading) {
-        return (
-            <h2>Data is comming</h2>
-        )
-    }
+    if (isLoading) return <h2>Data is comming</h2>
 
     return (
         <>
-            {/* <button onClick={() => setStatus(targetTimes)
-            }></button >
-            {selectDate} - {selectSport} - {selectTime} */}
             <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}> LỊCH ĐẶT SÂN</h3>
             <div className="input-group my-2">
                 <select value={selectDate} onChange={(e) => setSelectDate(Number(e.target.value))}
@@ -574,7 +573,7 @@ export default function BookingSport() {
                     <option value="0">Một ngày</option>
                     <option value="1">Một tuần</option>
                 </select>
-                <input type="time" className="form-control" value={selectTime}
+                <input type="datetime-local" className="form-control" value={selectTime}
                     onChange={(e) => setSelectTime(e.target.value)} />
                 <select value={selectSport} onChange={(e) => {
                     setSelectSport(Number(e.target.value));

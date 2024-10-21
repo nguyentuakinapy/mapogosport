@@ -1,7 +1,6 @@
 import { Button, Col, Form, Modal, Row, Image } from "react-bootstrap";
 import "../admin.scss";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
 
 interface CategoryProduct {
@@ -25,6 +24,7 @@ const CategoryAddNew = ({
     modalType,
     onSave,
 }: CategoryProductProps) => {
+
     const [formValues, setFormValues] = useState<CategoryProduct>({
         name: "",
         image: "",
@@ -55,6 +55,11 @@ const CategoryAddNew = ({
 
     const handleClose = () => {
         setShowAddCategory(false);
+        setFormValues({
+            name: "",
+            image: "",
+        });
+        setPreviewImage(null); // Reset preview for new category
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,9 +108,8 @@ const CategoryAddNew = ({
             }
 
             // Send data to backend
-            let response;
             const apiUrl = `http://localhost:8080/rest/${modalType === "add" ? "create" : `update/${currentCategory?.categoryProductId}`}`;
-            response = await fetch(apiUrl, {
+            const response = await fetch(apiUrl, {
                 method: modalType === "add" ? 'POST' : 'PUT',
                 body: formData, // FormData already sets content type
             });
@@ -119,7 +123,6 @@ const CategoryAddNew = ({
             }
         } catch (error) {
             toast.error(`Lỗi khi lưu loại sản phẩm: ${error.message}`);
-            console.error("Lỗi khi lưu loại sản phẩm:", error);
         }
 
         handleClose(); // Close modal after saving
