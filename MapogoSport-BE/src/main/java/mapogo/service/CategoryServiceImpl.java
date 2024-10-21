@@ -42,4 +42,11 @@ public class CategoryServiceImpl implements CategoryProductService{
 		categoryProductDAO.deleteById(id);
 	}
 
+	@Override
+	public CategoryProduct getCategoryProductById(Integer id) {
+		// TODO Auto-generated method stub
+		return categoryProductDAO.findById(id).orElse(null);
+	}
+
+
 }

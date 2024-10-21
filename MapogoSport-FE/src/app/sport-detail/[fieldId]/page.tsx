@@ -40,7 +40,7 @@ const SportDetail = () => {
         }
     }, [fieldId]);
 
-    
+
     // Fetch size of sportFieldDetail by fieldId
     useEffect(() => {
         if (fieldId) {
@@ -49,6 +49,10 @@ const SportDetail = () => {
                     const response = await fetch(`http://localhost:8080/rest/sport_field_detail/size/${fieldId}`);
                     const data = await response.json();
                     setSizeSportField(data);
+                    if (data.length > 0) {
+                        // Set the first size as the default selected size after sizeSportField is updated
+                        setSelectedSize(data[0]);
+                    }
                 } catch (error) {
                     console.log("Error fetching size data", error);
                 }
@@ -59,21 +63,25 @@ const SportDetail = () => {
 
     // Fetch price by selected size
     useEffect(() => {
-        const fetchPrice = async () => {
-            try {
-                const response = await fetch(`http://localhost:8080/rest/sport_field_detail/price/${fieldId}/${selectedSize}`);
-                const data = await response.json();
-                console.log("Price Data:", data);  // Log to check the data structure
-                setPriceBySizeSp({
-                    price: data[0][0],
-                    peakHourPrices: data[0][1],
-                });
-            } catch (error) {
-                console.log("Error fetching price data", error);
-            }
-        };
-        fetchPrice();
+        if (selectedSize && fieldId) {
+            const fetchPrice = async () => {
+                try {
+                    const response = await fetch(`http://localhost:8080/rest/sport_field_detail/price/${fieldId}/${selectedSize}`);
+                    const data = await response.json();
+                    console.log("Price Data:", data);  // Log to check the data structure
+                    setPriceBySizeSp({
+                        price: data[0][0],
+                        peakHourPrices: data[0][1],
+                    });
+                } catch (error) {
+                    console.log("Error fetching price data", error);
+                }
+            };
+
+            fetchPrice();
+        }
     }, [selectedSize, fieldId]);
+
 
     return (
 
@@ -126,7 +134,6 @@ const SportDetail = () => {
                                     console.log("Selected Size:", e.target.value);
                                 }}>
                                 <>
-                                    <option value="Chọn loại sân">Chọn loại sân</option>
                                     {sizeSportField.map((size: string, index: number) => (
                                         <option key={index} value={size}>
                                             {size}
