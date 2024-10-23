@@ -23,12 +23,7 @@ const CartBadge = ({ username }: { username: string }) => {
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-    // // Function to fetch the cart count
-    // const countCartItem = async () => {
-    //     if (!username) return; // Don't fetch if no user is logged in
 
-    //     // const response = await axios.get(`http://localhost:8080/rest/cart/count/${username}`);
-    // };
     const { data, error, isLoading } = useSWR(
         username == "" ? null : `http://localhost:8080/rest/cart/count/${username}`, fetcher, {
         revalidateIfStale: false,
@@ -41,14 +36,11 @@ const CartBadge = ({ username }: { username: string }) => {
         setCartCount(cartCount); // Update the cart count in the state
     }, [data])
 
-    // // Fetch cart count on component mount and when the user changes
-    // useEffect(() => {
-    //     countCartItem();
-    // }, [username]);
+
 
     return (
         <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
-            {cartCount} {/* Display the cart count here */}
+            {cartCount}
             <span className="visually-hidden">items in cart</span>
         </span>
     );

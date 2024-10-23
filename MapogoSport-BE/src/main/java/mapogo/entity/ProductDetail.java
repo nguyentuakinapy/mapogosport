@@ -50,6 +50,6 @@ public class ProductDetail implements Serializable {
 	private List<Gallery> galleries;
 
 	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-	@JsonBackReference
+	@JsonBackReference // tanthanh 
 	private List<ProductDetailSize> productDetailSizes;
 }

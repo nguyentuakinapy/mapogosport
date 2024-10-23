@@ -15,4 +15,6 @@ public interface ProductReviewDAO extends JpaRepository<ProductReview, Integer>{
 		     + "JOIN re.user u "
 		     + "WHERE p.productId = :productId")
 		List<ProductReview> findReviewsByProductId(@Param("productId") int productId);
+	
+	List<ProductReview> findByUser_Username(String username);
 }

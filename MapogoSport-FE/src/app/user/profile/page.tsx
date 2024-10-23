@@ -9,10 +9,17 @@ import useSWR, { mutate } from 'swr';
 import { toast } from 'react-toastify';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import ModalChangePassword from '@/components/User/modal/user.changePassword';
 
 export default function Profile() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
+    const [userData, setUserData] = useState<User | null>(null);
+
+    const [fullName, setFullName] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
+    const [birthday, setBirthday] = useState<Date | null>(null);
+    const [gender, setGender] = useState<number | null>(null);
 
     useEffect(() => {
         const user = sessionStorage.getItem('user');
@@ -21,46 +28,14 @@ export default function Profile() {
             setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`);
         }
     }, []);
-    const { data, error, isLoading } = useSWR(usernameFetchApi ? usernameFetchApi : null, fetcher, {
+    const { data, error, isLoading } = useSWR(usernameFetchApi, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
 
-    const [userData, setUserData] = useState<User | null>(null);
-
-    const handleSave = () => {
-        fetch(usernameFetchApi, {
-            method: 'PUT',
-            headers: {
-                Accept: 'application/json, text/plain, */*',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData),
-        }).then(async (res) => {
-            if (!res.ok) {
-                const errorText = await res.text();
-                toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
-                return
-            }
-            mutate(usernameFetchApi);
-            toast.success('Cập nhật thành công!');
-        }).catch((error) => {
-            toast.error(`Đã xảy ra lỗi: ${error.message}`);
-        });
-    };
-
-    const [fullName, setFullName] = useState<string>('');
-    const [email, setEmail] = useState<string>('');
-    const [birthday, setBirthday] = useState<Date | null>(null);
-    const [gender, setGender] = useState<number | null>(null);
-    const [username, setUsername] = useState<string>('');
-
-    const [showUpdateEmail, setShowUpdateEmail] = useState<boolean>(false);
-
     useEffect(() => {
         if (data) {
-            setUsername(data.username);
             setFullName(data.fullname);
             setEmail(data.email);
             setBirthday(data.birthday ? new Date(data.birthday) : null);
@@ -84,13 +59,40 @@ export default function Profile() {
         });
     };
 
+    const handleSave = () => {
+        if (!fullName) {
+            toast.error("Bắt buộc phải nhập họ và tên!");
+            return
+        }
+        fetch(usernameFetchApi, {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+        }).then(async (res) => {
+            if (!res.ok) {
+                const errorText = await res.text();
+                toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
+                return
+            }
+            mutate(usernameFetchApi);
+            toast.success('Cập nhật thành công!');
+        }).catch((error) => {
+            toast.error(`Đã xảy ra lỗi: ${error.message}`);
+        });
+    };
+
     useEffect(() => {
         updateUserData();
-        console.log('Dữ liệu người dùng đã được cập nhật:', { username, fullName, email, birthday, gender });
     }, [fullName, email, birthday, gender]);
 
-    if (isLoading) return <UserLayout>Đang tải...</UserLayout>;
-    if (error) return <UserLayout>Error loading data</UserLayout>;
+    const [showUpdateEmail, setShowUpdateEmail] = useState<boolean>(false);
+    const [showChangePassword, setShowChangePassword] = useState<boolean>(false);
+
+    if (isLoading) return <UserLayout><div>Đang tải...</div></UserLayout>;
+    if (error) return <UserLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></UserLayout>;
 
     return (
         <UserLayout>
@@ -122,18 +124,9 @@ export default function Profile() {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Email:</Form.Label>
-                            {!email ? (
-                                <div>
-                                    Chưa có thông tin
-                                    <Link href="#" onClick={() => setShowUpdateEmail(true)}>(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
-                                </div>
-                            ) : (
-                                <div>
-                                    {email}
-                                    <Link href="#" onClick={() => setShowUpdateEmail(true)}>(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
-                                </div>
-                            )}
+                            <Form.Label className='me-1'><b>Email:</b></Form.Label>
+                            {email}
+                            <Link href="#" className='ms-1' onClick={() => setShowUpdateEmail(true)}>(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
                         </Form.Group>
                     </Col>
 
@@ -150,6 +143,11 @@ export default function Profile() {
                                 </Form.Select>
                             </FloatingLabel>
                         </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label><b>Đổi mật khẩu:</b></Form.Label>
+                            <Link href="#" className='ms-1' onClick={() => setShowChangePassword(true)}>(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
+                        </Form.Group>
                     </Col>
                 </Row>
 
@@ -158,6 +156,7 @@ export default function Profile() {
                 </Button>
             </Form>
             <ModalUpdateEmail showUpdateEmail={showUpdateEmail} setShowUpdateEmail={setShowUpdateEmail} email={email} setEmail={setEmail} />
+            <ModalChangePassword showChangePassword={showChangePassword} setShowChangePassword={setShowChangePassword} userData={userData} />
         </UserLayout>
     );
 }

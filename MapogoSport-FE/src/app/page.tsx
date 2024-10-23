@@ -1,14 +1,26 @@
 'use client'
-import { Container, Carousel, Row, Col, Image } from "react-bootstrap";
+import { Container, Carousel, Row, Col, Image, Button } from "react-bootstrap";
 import { useEffect, useState } from 'react';
 import HomeLayout from "@/components/HomeLayout";
 import Link from "next/link";
 import './user/types/user.scss'
-import useSWR from "swr";
+import { formatPrice } from "@/components/Utils/Format";
+import CreateOwnerModal from "@/components/Owner/modal/create-owner.modal";
+import LoginModal from "@/components/account/modal/login.modal";
+import { toast } from "react-toastify";
+import RegisterModal from "@/components/account/modal/register.modal";
+import ForgotPassword from "@/components/account/modal/forgotPassword.modal";
+import ChangePasswordNew from "@/components/account/modal/change-password-new.modal";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
   const [sportFields, setSportFields] = useState<SportField[]>([]);
+
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
+  const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
+  const [showChangePasswordNew, setShowChangePasswordNew] = useState<boolean>(false);
+  const [showCreateOwnerModal, setShowCreateOwnerModal] = useState<boolean>(false);
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -46,6 +58,16 @@ export default function Home() {
     fetchData();
   }, []);
 
+  const createOwnerSubmit = () => {
+    const user = sessionStorage.getItem('user');
+    if (user) {
+      setShowCreateOwnerModal(true);
+    } else {
+      toast.warning("Bạn chưa đăng nhập, vui lòng đăng nhập hoặc đăng ký tài khoản!")
+      setShowLoginModal(true);
+    }
+
+  }
 
   return (
     <HomeLayout>
@@ -53,10 +75,36 @@ export default function Home() {
         <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">
           <div className="carousel-inner">
             <div className="carousel-item active" data-bs-interval="2000">
-              <img src="https://img.thegioithethao.vn/media/banner/banner_gio_vang.png" className="d-block w-100" alt="..." />
+              <img src="/images/bannerSport.png" className="d-block w-100" alt="..." />
+              <Link href={'/categories/sport_field'} style={{
+                position: 'absolute',
+                top: '70%',
+                left: '13%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                borderRadius: '50px',
+                zIndex: '1000'
+              }} className="btn btn-danger">
+                ĐẶT SÂN NGAY
+              </Link>
             </div>
-            <div className="carousel-item" data-bs-interval="2000">
+            {/* <div className="carousel-item" data-bs-interval="2000">
               <img src="https://img.thegioithethao.vn/media/banner/thi-cong-cai-tao.png" className="d-block w-100" alt="..." />
+            </div> */}
+            <div className="carousel-item" data-bs-interval="2000">
+              <img src="/images/registerowner.png" className="w-100" alt="" />
+              <button style={{
+                position: 'absolute',
+                top: '40%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                borderRadius: '50px',
+              }} className="btn btn-danger" onClick={() => createOwnerSubmit()}>
+                ĐĂNG KÝ NGAY
+              </button>
             </div>
             {/* <div className="carousel-item">
             <img src="..." className="d-block w-100" alt="..." />
@@ -78,58 +126,6 @@ export default function Home() {
           </div>
           <div className="col">
             <img src="https://img.thegioithethao.vn/media/banner/thi-cong-cai-tao.png" className="w-100" alt="" />
-          </div>
-        </div>
-        {/* Danh mục nổi bật */}
-        <div>
-          <h3 className="text-center fw-bold mt-5 mb-1">DANH MỤC NỔI BẬT</h3>
-          <div className="row">
-            <div className="col-3 text-center">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div>
-            <div className="col-3 text-center col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div><div className="col-3 text-center col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div><div className="col-3 text-center col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div>
-            <div className="col-3 text-center mt-2 col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div>
-            <div className="col-3 text-center mt-2 col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div>
-            <div className="col-3 text-center mt-2 col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div>
-            <div className="col-3 text-center mt-2 col-img">
-              <div className="img-dm m-auto" style={{ width: '80%' }}>
-                <img src="/images/danhmucnoibat.png" style={{ width: '65%' }} alt="" />
-                <h3>Test</h3>
-              </div>
-            </div>
           </div>
         </div>
         {/* Deal hot cho bạn */}
@@ -252,7 +248,7 @@ export default function Home() {
                 </Col>
               ))}
             </Row>
-            
+
             {/* {sportFields.length > 8 && (
               <div className="text-end">
                 <Link href="/more-sports" className="btn btn btn-dark">Xem thêm<i className="bi bi-chevron-compact-right"></i></Link>
@@ -367,6 +363,16 @@ export default function Home() {
           </div>
         </div>
       </Container>
+      <CreateOwnerModal showCreateOwnerModal={showCreateOwnerModal} setShowCreateOwnerModal={setShowCreateOwnerModal}></CreateOwnerModal>
+      <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}
+        showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
+        showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}></LoginModal>
+      <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
+      <ForgotPassword showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}
+        showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew}
+      ></ForgotPassword>
+      <ChangePasswordNew showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></ChangePasswordNew>
+
     </HomeLayout>
   )
 }
