@@ -3,6 +3,7 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -33,6 +34,7 @@ public class FieldReview implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "SportFieldId", nullable = false)
+    @JsonBackReference
     private SportField sportField;
 
     @ManyToOne

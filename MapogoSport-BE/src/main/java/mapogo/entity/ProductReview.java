@@ -38,7 +38,7 @@ public class ProductReview implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "ProductId", nullable = false)
-    @JsonBackReference
+    @JsonBackReference //tanthanh
     private Product product;
 
     @ManyToOne
