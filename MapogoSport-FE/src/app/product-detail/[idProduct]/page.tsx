@@ -190,7 +190,7 @@ const ProductDetail = () => {
                         height={100}
                         className="rounded-circle" // Hình tròn
                     />
-                    <span className='fs-4'>Vợt cầu lông siêu xịn</span>
+                    <span className='fs-4'>Hãy gửi đánh giá của bạn về chúng tôi</span>
 
                     <div className='mt-3 ms-3'>
                         <span className='fs-5'>Đánh giá chung</span>
