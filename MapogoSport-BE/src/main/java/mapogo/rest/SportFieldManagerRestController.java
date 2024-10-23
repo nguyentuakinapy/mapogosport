@@ -3,9 +3,11 @@ package mapogo.rest;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
+import mapogo.dto.SportFieldDTO;
 import mapogo.entity.Owner;
 import mapogo.entity.SportField;
 import mapogo.entity.SportFieldDetail;
@@ -18,6 +20,8 @@ import mapogo.service.UserService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -53,6 +57,20 @@ public class SportFieldManagerRestController {
 	public SportField getSportField(@PathVariable Integer sportFieldId) {
 		return sportService.findBySportFieldId(sportFieldId);
 	}
+	
+	@PostMapping("/sportfield/create")
+	public ResponseEntity<SportField> createSportField(@RequestBody SportFieldDTO sportField) {
+		System.out.println(sportField.getAddress());
+		System.out.println(sportField.getClosing());
+		System.out.println(sportField.getDecription());
+		System.out.println(sportField.getImage());
+		System.out.println(sportField.getName());
+		System.out.println(sportField.getOpening());
+		System.out.println(sportField.getStatus());
+SportField sportField1 = new SportField();
+        return ResponseEntity.ok(sportField1);
+    }
+	
 	
 	//SportFieldDetail
 	@GetMapping("/sportfielddetail/lists/{sportFieldId}")
