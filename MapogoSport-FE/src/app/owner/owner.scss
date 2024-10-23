@@ -152,7 +152,7 @@
 }
 
 .div-tb {
-    max-height: 455px;
+    max-height: 440px;
     overflow-y: auto;
     overflow-x: auto;
     border: 1px solid #142239;
@@ -178,8 +178,8 @@
     table {
         width: 100%;
         border-collapse: collapse;
-        margin: 0; 
-       
+        margin: 0;
+
 
         .tb-head {
             font-weight: bold;
@@ -229,7 +229,39 @@
     }
 }
 
-// .border-head-bold {
-//     border-bottom: 5px solid #142239;
-//     margin-bottom: 1rem;
-// }
+.header-date {
+    align-items: center;
+    justify-content: space-between;
+    display: flex;
+    border-radius: 8px;
+    border: 1px solid #142239;
+    background: #142239;
+    color: white;
+    padding: 6px 20px;
+    cursor: pointer;
+}
+
+.toggle-row {
+    display: flex;
+    gap: 10px;
+
+    .toggle-col {
+        border: 1px solid;
+        border-radius: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+
+        &.active {
+            background-color: #f77b29;
+            color: white;
+            font-weight: bold;
+        }
+
+        &:hover {
+            background-color: #142239;
+            color: white;
+            border: 1px solid;
+        }
+    }
+}

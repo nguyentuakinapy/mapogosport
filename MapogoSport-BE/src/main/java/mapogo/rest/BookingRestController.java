@@ -26,7 +26,7 @@ import mapogo.service.BookingService;
 public class BookingRestController {
 	@Autowired
 	BookingService bookingService;
-	
+
 	@Autowired
 	BookingDetailService bookingDetailService;
 
@@ -34,53 +34,53 @@ public class BookingRestController {
 	public List<Booking> findAll() {
 		return bookingService.findAll();
 	}
-	
+
 	@GetMapping("/user/booking/{username}")
 	public List<Booking> getByUser(@PathVariable("username") String username) {
 		return bookingService.findByUser_Username(username);
 	}
-	
-	@GetMapping("/user/booking/detail/{bookingId}")
-	public Booking getById(@PathVariable("bookingId") Integer bookingId) { 
-	    Booking booking = bookingService.findById(bookingId).stream().findFirst().orElse(null);
 
-	    if (booking != null && !booking.getBookingDetails().isEmpty()) {
-	        BookingDetail firstBookingDetail = booking.getBookingDetails().get(0);
-	        SportFieldDetail sportFieldDetail = firstBookingDetail.getSportFieldDetail();
-	        if (sportFieldDetail != null) {
-	            SportField sportField = sportFieldDetail.getSportField();
-	            if (sportField != null) {
-	                Map<String, Object> sportFieldInfo = new HashMap<>(); //Tạo Map để chứa thông tin sportField
-	                sportFieldInfo.put("sportFieldId", sportField.getSportFieldId());
-	                sportFieldInfo.put("name", sportField.getName());
-	                sportFieldInfo.put("address", sportField.getAddress());
-	                sportFieldInfo.put("opening", sportField.getOpening());
-	                sportFieldInfo.put("closing", sportField.getClosing());
-	                booking.setSportFieldInfo(sportFieldInfo);
-	            }
-	        }
-	    }
-	    return booking; 
+	@GetMapping("/user/booking/detail/{bookingId}")
+	public Booking getById(@PathVariable("bookingId") Integer bookingId) {
+		Booking booking = bookingService.findById(bookingId).stream().findFirst().orElse(null);
+
+		if (booking != null && !booking.getBookingDetails().isEmpty()) {
+			BookingDetail firstBookingDetail = booking.getBookingDetails().get(0);
+			SportFieldDetail sportFieldDetail = firstBookingDetail.getSportFieldDetail();
+			if (sportFieldDetail != null) {
+				SportField sportField = sportFieldDetail.getSportField();
+				if (sportField != null) {
+					Map<String, Object> sportFieldInfo = new HashMap<>(); // Tạo Map để chứa thông tin sportField
+					sportFieldInfo.put("sportFieldId", sportField.getSportFieldId());
+					sportFieldInfo.put("name", sportField.getName());
+					sportFieldInfo.put("address", sportField.getAddress());
+					sportFieldInfo.put("opening", sportField.getOpening());
+					sportFieldInfo.put("closing", sportField.getClosing());
+					booking.setSportFieldInfo(sportFieldInfo);
+				}
+			}
+		}
+		return booking;
 	}
-	
+
 	@GetMapping("/user/booking/detail/gettoday/{sportDetailId}")
 	public List<BookingDetail> findBySportFieldDetailAndToday(@PathVariable("sportDetailId") Integer sportDetailId) {
 		return bookingDetailService.findBySportFieldDetailAndToday(sportDetailId);
 	}
-	
+
 	@GetMapping("/user/booking/detail/getnextweek/{sportDetailId}")
 	public List<BookingDetail> findBySportFieldDetailAndNextWeek(@PathVariable("sportDetailId") Integer sportDetailId) {
-	    return bookingDetailService.findBySportFieldDetailAndNextWeek(sportDetailId);
+		return bookingDetailService.findBySportFieldDetailAndNextWeek(sportDetailId);
 	}
-	
+
 	@PostMapping("/booking")
-	public Booking saveBooking(@RequestBody Booking booking) {
-		return bookingService.createBooking(booking);
+	public Booking saveBooking(@RequestBody Map<String, Object> b) {
+		return bookingService.createBooking(b);
 	}
 
 	@PostMapping("/booking/detail")
-	public BookingDetail saveBookingDetail(@RequestBody BookingDetail bookingDetail) {
-		return bookingDetailService.createBookingDetail(bookingDetail);
+	public BookingDetail saveBookingDetail(@RequestBody Map<String, Object> bd) {
+		return bookingDetailService.createBookingDetail(bd);
 	}
 
 }
