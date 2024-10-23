@@ -27,8 +27,9 @@ export default function Nav({ isAniActive, isActive, setIsActive }: NavProps) {
                             <li><Link className={`link ${isActive == 5 ? 'active' : ''}`} href={"/admin/order"} onClick={() => setIsActive(5)}><i className="bi bi-receipt-cutoff me-2"></i>QUẢN LÝ HÓA ĐƠN</Link></li>
                             <li><Link className={`link ${isActive == 6 ? 'active' : ''}`} href={"/admin/subcription"} onClick={() => setIsActive(6)}><i className="bi bi-ticket-detailed me-2"></i>QUẢN LÝ GÓI</Link></li>
                             <li><Link className={`link ${isActive == 7 ? 'active' : ''}`} href={"/admin/voucher"} onClick={() => setIsActive(7)}><i className="bi bi-ticket-detailed me-2"></i>QUẢN LÝ VOUCHER</Link></li>
-                            <li><a className={`link ${isActive == 8 ? 'active' : ''}`} href="/admin/statistics" onClick={() => setIsActive(8)}><i className="bi bi-bar-chart me-2"></i>THỐNG KÊ</a>
-                            </li>
+                            <li><Link className={`link ${isActive == 8 ? 'active' : ''}`} href="/admin/statistics" onClick={() => setIsActive(8)}><i className="bi bi-bar-chart me-2"></i>THỐNG KÊ</Link></li>
+                            <li><Link className={`link ${isActive == 9 ? 'active' : ''}`} href="/admin/categories" onClick={() => setIsActive(9)}><i className="bi bi-box-seam me-2"></i>QUẢN LÝ LOẠI</Link></li>
+
                         </ul>
                     </nav>
                 </div>

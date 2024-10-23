@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Column;
@@ -45,7 +46,7 @@ public class Cart implements Serializable {
     @Column(name = "Date", nullable = false)
     private LocalDateTime date;
 
-    @Column(name = "TotalAmount", nullable = false)
+    @Column(name = "TotalAmount")
     private Double totalAmount;
     
     @Column(name = "Quantity", nullable = false)

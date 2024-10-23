@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import mapogo.entity.Cart;
+import mapogo.entity.ProductDetailSize;
+import mapogo.entity.User;
 
 public interface CartDAO extends JpaRepository<Cart, Integer> {
 
@@ -28,6 +30,8 @@ public interface CartDAO extends JpaRepository<Cart, Integer> {
     @Transactional
     @Query("UPDATE Cart c SET c.quantity = :quantity WHERE c.cartId = :cartId")
     int updateQuantity(@Param("quantity") Integer quantity, @Param("cartId") Integer cartId);
+    
+    Cart findByUserAndProductDetailSize(User user, ProductDetailSize productDetailSize);
     	
 
 	

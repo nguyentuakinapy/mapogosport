@@ -67,7 +67,7 @@ public class Product implements Serializable {
 	private Double price;  
 
 	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-	@JsonBackReference
+	@JsonIgnore
 	private List<ProductDetail> productDetails;
 
 	@OneToMany(mappedBy = "product")

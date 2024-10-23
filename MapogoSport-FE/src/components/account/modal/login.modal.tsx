@@ -106,6 +106,23 @@ export default function Login(props: LoginProps) {
         }
     }
 
+    useEffect(() => {
+        const handleKeyDown = (event: any) => {
+            if (event.key === 'Enter') {
+                handleSubmit();
+            }
+            if (event.key == "Escape") {
+                handleClose();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
     return (
         <>
             <Modal show={showLoginModal} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
@@ -129,7 +146,7 @@ export default function Login(props: LoginProps) {
                         <Form.Group className="mb-4">
                             <Form.Control
                                 type="text"
-                                placeholder="Vui long nhập Email!"
+                                placeholder="Vui long nhập tên đăng nhập!"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                             />

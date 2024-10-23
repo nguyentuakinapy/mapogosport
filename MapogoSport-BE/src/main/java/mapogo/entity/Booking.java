@@ -29,7 +29,7 @@ public class Booking implements Serializable{
     private Integer bookingId;
 
     @Column(name = "Date", nullable = false)
-    private LocalDateTime date;
+    private LocalDateTime date = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
@@ -52,10 +52,10 @@ public class Booking implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "VoucherId")
-    private Voucher voucher;
+    private Voucher voucher = null;
 
 	@Column(name = "Note")
-    private String note;
+    private String note = null;
 
 	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<BookingPayment> bookingPayments;

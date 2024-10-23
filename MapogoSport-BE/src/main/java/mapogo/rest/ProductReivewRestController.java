@@ -33,4 +33,10 @@ public class ProductReivewRestController {
 	    
 	    return proReviewService.save(review);
 	}
+	
+	@GetMapping("/user/productReview/{username}")
+	public List<ProductReview> getByUser(@PathVariable("username") String username) {
+		return proReviewService.findByUser_Username(username);
+	}
+	
 }

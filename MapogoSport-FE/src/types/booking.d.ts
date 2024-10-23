@@ -62,4 +62,5 @@ interface BookingDetail {
         peakHour: string;
     };
     price: number;
+    date: string;
 }

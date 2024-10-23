@@ -8,4 +8,7 @@ public interface BookingDetailService {
 
 	List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId);
 
+	List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportDetailId);
+
+	BookingDetail createBookingDetail(BookingDetail bookingDetail);
 }

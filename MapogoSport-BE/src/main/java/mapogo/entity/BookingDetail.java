@@ -1,7 +1,7 @@
 package mapogo.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -45,7 +45,7 @@ public class BookingDetail implements Serializable{
     private Double price;
     
     @Column(name = "date")
-    private Date date;
+    private LocalDate date;
     
     @ManyToOne
     @JoinColumn(name = "BookingId", nullable = false)

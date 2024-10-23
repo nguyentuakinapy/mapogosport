@@ -10,7 +10,8 @@ import HomeLayout from '@/components/HomeLayout';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from "react-toastify";
-
+import { formatPrice } from '@/components/Utils/Format'
+import useSWR, { mutate } from 'swr';
 const StarRating = ({ setRating }) => {
     const [rating, localSetRating] = useState(0); // Trạng thái cho rating hiện tại
     const [hover, setHover] = useState(0); // Trạng thái cho sao đang được hover
@@ -44,115 +45,6 @@ const StarRating = ({ setRating }) => {
 };
 
 
-const MyVerticallyCenteredModal = (props) => {
-    const [rating, setRating] = useState(0); // Trạng thái cho rating
-    const [comment, setComment] = useState(''); // Trạng thái cho bình luận
-    const [user, setUser] = useState(null); // Trạng thái cho thông tin người dùng
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            // Kiểm tra nếu đang chạy trên client-side
-            const userSession = sessionStorage.getItem('user');
-            setUser(userSession ? JSON.parse(userSession) : null);
-        }
-    }, []);
-
-    const handleRatingSubmit = async () => {
-
-        if (!user || !user.username) {
-            toast.warning("Bạn chưa đăng nhập !")
-            return;
-        }
-        if (comment.length < 15) {
-            toast.warning("Cần phải nhập ít nhất 15 ký tự")
-            return;
-        }
-        const ratingData = {
-            user: {
-                username: user.username
-            },
-            product: {
-                productId: 2 // Bạn có thể lấy productId từ props hoặc nguồn khác
-            },
-            rating: rating,
-            comment: comment,
-            datedAt: new Date()
-        };
-
-        try {
-            const response = await fetch('http://localhost:8080/rest/save', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(ratingData)
-            });
-
-            if (!response.ok) {
-                const errorMessage = await response.text(); // Nhận thông tin chi tiết từ lỗi
-                throw new Error(`Có lỗi xảy ra khi gửi đánh giá: ${errorMessage}`);
-            }
-
-            const result = await response.json();
-            console.log("Đánh giá đã được gửi thành công", result);
-            props.onHide(); // Đóng modal sau khi gửi thành công
-            toast.success("Gửi đánh giá thành công !")
-        } catch (error) {
-            console.error("Lỗi khi gửi đánh giá:", error);
-            alert("Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.");
-        }
-    };
-
-    return (
-        <Modal
-            {...props}
-            size="lg"
-            aria-labelledby="contained-modal-title-vcenter"
-            centered
-        >
-            <Modal.Header closeButton>
-                <Modal.Title id="contained-modal-title-vcenter" className='ms-3'>
-                    Đánh giá & nhận xét
-                </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Image
-                    src="/img/cps-ant.webp"
-                    alt="Hình ảnh thu nhỏ"
-                    width={100} // Kích thước hình ảnh thu nhỏ
-                    height={100}
-                    className="rounded-circle" // Hình tròn
-                />
-                <span className='fs-4'>Vợt cầu lông siêu xịn</span>
-
-                <div className='mt-3 ms-3'>
-                    <span className='fs-5'>Đánh giá chung</span>
-                </div>
-
-                {/* Đánh giá */}
-                <StarRating setRating={setRating} />
-                <hr />
-
-                <span className='fs-5 ms-3'>Bình Luận</span><br />
-                <div className="mb-3 mt-3 ms-5 me-5">
-                    <textarea
-                        className="form-control"
-                        placeholder="Xin mời chia sẻ một số cảm nhận về sản phẩm (nhập tối thiểu 15 ký tự)"
-                        rows={4}
-                        cols={40}
-                        style={{ borderRadius: '8px' }}
-                        onChange={(e) => setComment(e.target.value)} // Cập nhật bình luận
-                    ></textarea>
-                </div>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button onClick={handleRatingSubmit} className='m-auto btn btn-danger'>Gửi đánh giá</Button>
-            </Modal.Footer>
-        </Modal>
-    );
-};
-
-
 
 const ProductDetail = () => {
     const [quantity, setQuantity] = useState(1);
@@ -160,6 +52,7 @@ const ProductDetail = () => {
     const increaseQuantity = () => setQuantity(quantity + 1);
     const decreaseQuantity = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
     const [modalShow, setModalShow] = useState(false);
+    const [selectedProductDetailSizeId, setSelectedProductDetailSizeId] = useState(null);
     const [color, setColor] = useState([]);
     const [size, setSizeByColor] = useState([]);
     const [selectedColor, setSelectedColor] = useState(null);
@@ -169,8 +62,20 @@ const ProductDetail = () => {
     const [price, setPrice] = useState([]);
     const [selectedProductDetailId, setSelectedProductDetailId] = useState(null);
     const { idProduct } = useParams();
+    const [visibleCount, setVisibleCount] = useState(5);
+    const [user, setUser] = useState(null); // Trạng thái cho thông tin người dùng
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            // Kiểm tra nếu đang chạy trên client-side
+            const userSession = sessionStorage.getItem('user');
+            setUser(userSession ? JSON.parse(userSession) : null);
 
+        }
+    }, []);
 
+    const loadMoreReviews = () => {
+        setVisibleCount(visibleCount + 5); // Tăng số bình luận hiển thị thêm 5
+    };
     // Example options
     const handleClickBtn = () => {
         setOpen(true);
@@ -197,11 +102,12 @@ const ProductDetail = () => {
     }, [idProduct])
 
     // product_review
-    const [data, setData] = useState([]);
+    const [data, setData] = useState<Review[]>([]); // Khai báo kiểu dữ liệu cho data
+
     // Hàm fetchData để lấy dữ liệu đánh giá
     const fetchData = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/rest/2'); // API route
+            const response = await axios.get(`http://localhost:8080/rest/${idProduct}`); // API route
             setData(response.data); // Lưu đánh giá vào trạng thái
         } catch (error) {
             console.log(error);
@@ -211,6 +117,107 @@ const ProductDetail = () => {
     useEffect(() => {
         fetchData(); // Gọi hàm fetchData khi component mount
     }, []);
+
+    const MyVerticallyCenteredModal = (props) => {
+        const [rating, setRating] = useState(0); // Trạng thái cho rating
+        const [comment, setComment] = useState(''); // Trạng thái cho bình luận
+
+        const handleRatingSubmit = async () => {
+
+            if (!user || !user.username) {
+                toast.warning("Bạn chưa đăng nhập !")
+                return;
+            }
+            if (comment.length < 15) {
+                toast.warning("Cần phải nhập ít nhất 15 ký tự")
+                return;
+            }
+            const ratingData = {
+                user: {
+                    username: user.username,
+                    fullname: user.fullname
+                },
+                product: {
+                    productId: idProduct
+                },
+                rating: rating,
+                comment: comment,
+                datedAt: new Date()
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/rest/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(ratingData)
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text(); // Nhận thông tin chi tiết từ lỗi
+                    throw new Error(`Có lỗi xảy ra khi gửi đánh giá: ${errorMessage}`);
+                }
+
+                const result = await response.json();
+                setData(data => [...data, result]);
+                console.log("Đánh giá đã được gửi thành công", result);
+                props.onHide(); // Đóng modal sau khi gửi thành công
+                toast.success("Gửi đánh giá thành công !")
+            } catch (error) {
+                console.error("Lỗi khi gửi đánh giá:", error);
+                alert("Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.");
+            }
+        };
+
+        return (
+            <Modal
+                {...props}
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title id="contained-modal-title-vcenter" className='ms-3'>
+                        Đánh giá & nhận xét
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Image
+                        src="/img/cps-ant.webp"
+                        alt="Hình ảnh thu nhỏ"
+                        width={100} // Kích thước hình ảnh thu nhỏ
+                        height={100}
+                        className="rounded-circle" // Hình tròn
+                    />
+                    <span className='fs-4'>Hãy gửi đánh giá của bạn về chúng tôi</span>
+
+                    <div className='mt-3 ms-3'>
+                        <span className='fs-5'>Đánh giá chung</span>
+                    </div>
+
+                    {/* Đánh giá */}
+                    <StarRating setRating={setRating} />
+                    <hr />
+
+                    <span className='fs-5 ms-3'>Bình Luận</span><br />
+                    <div className="mb-3 mt-3 ms-5 me-5">
+                        <textarea
+                            className="form-control"
+                            placeholder="Xin mời chia sẻ một số cảm nhận về sản phẩm (nhập tối thiểu 15 ký tự)"
+                            rows={4}
+                            cols={40}
+                            style={{ borderRadius: '8px' }}
+                            onChange={(e) => setComment(e.target.value)} // Cập nhật bình luận
+                        ></textarea>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button onClick={handleRatingSubmit} className='m-auto btn btn-danger'>Gửi đánh giá</Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    };
 
     // Fetch colors based on product ID
     useEffect(() => {
@@ -234,43 +241,40 @@ const ProductDetail = () => {
     }, [idProduct]);
 
 
-    const addReview = (newReview) => {
-        setData(prevData => [newReview, ...prevData]); // Thêm đánh giá mới vào đầu danh sách
-    };
-
-    //Select Size by color to productdetail
-
+    // Select Size by color to product detail
     useEffect(() => {
         if (selectedProductDetailId) {
             const fetchData = async () => {
                 try {
-                    const response = await fetch(`http://localhost:8080/rest/product-detail/size/${selectedProductDetailId}`)
-                    const data = await response.json()
-                    setSizeByColor(data)
-                    console.log("màu", data)
+                    const response = await fetch(`http://localhost:8080/rest/product-detail/size/${selectedProductDetailId}`);
+                    const data = await response.json();
+                    setSizeByColor(data);
+                    console.log("màu", data);
                     if (data.length > 0) {
-                        setSelectedSize(data[0].size.sizeName)
-                        setIdSize(data[0].size.sizeId)
+                        // Đặt kích thước mặc định đầu tiên
+                        setSelectedSize(data[0].size.sizeName);
+                        setSelectedProductDetailSizeId(data[0].productDetailSizeId); // Sử dụng ID từ dữ liệu trả về
                     }
                 } catch (error) {
-                    console.log("error size", error)
+                    console.log("error size", error);
                 }
             }
-            fetchData()
+            fetchData();
         }
-
-    }, [selectedProductDetailId])
-
+    }, [selectedProductDetailId]);
     // select price by size and productDetailId
 
     useEffect(() => {
+        console.log("idSize", idSize)
         if (selectedProductDetailId && idSize) {
+            // console.log("idSize: ", idSize)
             const fetchData = async () => {
                 try {
                     const response = await fetch(`http://localhost:8080/rest/product-detail/price-by-size/${selectedProductDetailId}/${idSize}`)
                     const data = await response.json()
                     setPrice(data)
                     console.log("data price", data)
+                    console.log("price")
                 } catch (error) {
                     console.log("error price by size", error)
                 }
@@ -298,9 +302,55 @@ const ProductDetail = () => {
     }, [selectedProductDetailId])
 
     // cập nhật màu và trạng thái
-    const handleColorSelect = (color) => {
-        setSelectedColor(color[0]);  // Cập nhật màu
-        setSelectedProductDetailId(color[1]);  // Cập nhật idProductDetail
+    const handleColorSelect = (colorItem) => {
+        setSelectedColor(colorItem[0]); // Đặt màu đã chọn
+        setSelectedProductDetailId(colorItem[1]); // Đặt ID chi tiết sản phẩm
+    };
+    // Hàm fetcher để lấy dữ liệu từ API
+    const fetcher = (url) => fetch(url).then((res) => {
+        if (!res.ok) {
+            throw new Error('Lỗi khi lấy dữ liệu');
+        }
+        return res.json();
+    });
+    const { data: cartCount, error } = useSWR(user ? `http://localhost:8080/rest/cart/count/${user.username}` : null, fetcher);
+    const handleAddToCart = async () => {
+        if (user && user.username) {
+            const dataAddCart = {
+                username: user.username,
+                productDetailSizeId: selectedProductDetailSizeId,
+                date: new Date(),
+                totalAmount: 150.00,
+                quantity: quantity
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/rest/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataAddCart)
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    throw new Error(`Có lỗi xảy ra khi thêm giỏ hàng: ${errorMessage}`);
+                }
+
+                toast.success("Thêm sản phẩm vào giỏ hàng thành công!");
+
+                // Cập nhật lại số lượng giỏ hàng
+                mutate(`http://localhost:8080/rest/cart/count/${user.username}`); // Tái tải dữ liệu
+
+            } catch (error) {
+                console.error("Lỗi khi gửi yêu cầu:", error);
+                alert("Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.");
+            }
+
+        } else {
+            console.log("Người dùng chưa đăng nhập");
+        }
     };
 
 
@@ -313,15 +363,17 @@ const ProductDetail = () => {
                             {imageGallery.length > 0 ? (
                                 <>
                                     <img
-                                        src={`/images/${imageGallery[0][0].image}`}
-                                        className='w-100'
+                                        src={`/images/images_product/${imageGallery[0][0].image}`}
+                                        className='w-75'
                                         alt="Main product"
                                         id="main-product-image"
                                         title={imageGallery[0][0].image}
+                                        style={{ width: '300px', height: '300px', objectFit: 'contain' }}
                                     />
-                                    <div>
+
+                                    {/* <div>
                                         <p>Current image: {imageGallery[0][0].image}</p>
-                                    </div>
+                                    </div> */}
                                     <div className="d-flex mt-3">
                                         {imageGallery[0][0].galleries.map((galleryItem, index) => (
                                             <img
@@ -347,53 +399,57 @@ const ProductDetail = () => {
                         {/* Thông tin sản phẩm */}
                         <Col className='ms-5' style={{ marginLeft: '100px' }}>
                             <h4 className='mb-4'>{findByIdProduct.name}</h4>
+
                             <div>
                                 <span className='fs-4'>Màu:</span>
-                                {color.map((color, index) => {
+                                {color.map((colorItem, index) => {
                                     return (
                                         <Button
                                             key={index}
-                                            className={`ms-2 mb-4 ${selectedColor === color[0] ? 'border-3 border-dark' : ''}`}  // Thêm viền cho màu được chọn
-                                            variant={selectedColor === color[0] ? "primary" : "outline-secondary"}  // Thay đổi kiểu dựa trên trạng thái chọn
+                                            className="ms-2 mb-4"
+                                            variant={selectedColor === colorItem[0] ? "primary" : "secondary"}
                                             style={{
-                                                backgroundColor: color[0],
+                                                backgroundColor: colorItem[0],
                                                 color: 'white',
                                                 borderRadius: '5px',
                                                 padding: '5px 10px',
-                                                opacity: selectedColor === color[0] ? 1 : 0.7  // Làm nổi bật nút đã chọn
+                                                opacity: selectedColor === colorItem[0] ? 1 : 0.7
                                             }}
-                                            onClick={() => handleColorSelect(color)}  // Cập nhật màu khi nhấp vào
+                                            onClick={() => handleColorSelect(colorItem)}
                                         >
-                                            {color[0]}
+                                            {colorItem[0]}
                                         </Button>
+                                    );
+                                })}
+                            </div>
+                            <div className='d-flex'>
+                                <span className='fs-4'>Size:</span>
+                                {size.map((item) => {
+                                    return (
+                                        <div key={item.size.sizeId}>
+                                            <Button
+                                                className={`ms-2 mb-4 ${selectedSize === item.size.sizeName ? 'text-white' : ''}`}
+                                                variant="outline-secondary"
+                                                style={{
+                                                    borderRadius: '5px',
+                                                    padding: '5px 10px',
+                                                    backgroundColor: selectedSize === item.size.sizeName ? 'gray' : ''
+                                                }}
+                                                onClick={() => {
+                                                    setSelectedSize(item.size.sizeName);
+                                                    setSelectedProductDetailSizeId(item.productDetailSizeId);
+                                                    setIdSize(item.size.sizeId);
+                                                }}>
+                                                {item.size.sizeName}
+                                            </Button>
+                                        </div>
                                     );
                                 })}
 
                             </div>
-                            <div>
-                                <span className='fs-4'>Size:</span>
-                                {size.map((item) => {
-                                    return (
-                                        <Button key={item.size.sizeId}
-                                            className={`ms-2 mb-4 ${selectedSize === item.size.sizeName ? 'text-white' : ''}`}
-                                            variant="outline-secondary"
-                                            style={{
-                                                borderRadius: '5px',
-                                                padding: '5px 10px',
-                                                backgroundColor: selectedSize === item.size.sizeName ? 'gray' : ''
-                                            }}
-                                            onClick={() => {
-                                                setSelectedSize(item.size.sizeName)
-                                                setIdSize(item.size.sizeId)
-                                            }}>
-                                            {item.size.sizeName}
-                                        </Button>
-                                    )
-                                })}
-                            </div>
-
-                            <h5 className='mb-3'>Giá sản phẩm: {selectedSize ? price : findByIdProduct.price}</h5>
-
+                            <h5 className='mb-3'>
+                                Giá sản phẩm: {findByIdProduct.price || price}
+                            </h5>
 
                             <div className="d-flex align-items-center mb-4">
                                 <span>Số lượng</span>
@@ -406,7 +462,7 @@ const ProductDetail = () => {
 
                             {/* Nút hành động */}
                             <div className="d-flex">
-                                <Button variant="danger">Thêm vào giỏ hàng</Button>
+                                <Button variant="danger" onClick={() => handleAddToCart()}>Thêm vào giỏ hàng</Button>
                             </div>
                         </Col>
                     </Row>
@@ -432,8 +488,7 @@ const ProductDetail = () => {
                 </Container>
                 {/*=================    */}
 
-                <Container className="p-3 container ">
-
+                <Container className="p-3 container">
                     <Row className="mt-2 text-center">
                         <Col>
                             <p>Bạn đánh giá sao về sản phẩm này?</p>
@@ -441,15 +496,16 @@ const ProductDetail = () => {
                                 Đánh giá ngay
                             </Button>
                         </Col>
-                    </Row><br /><br />
+                    </Row>
+                    <br /><br />
                     <MyVerticallyCenteredModal
                         show={modalShow}
                         onHide={() => setModalShow(false)}
-                        onReviewSubmitted={addReview} // Truyền hàm thêm đánh giá vào modal
                     />
                     <h5 className='ms-3'>Bình luận</h5>
                     {data
                         .sort((a, b) => new Date(b.datedAt) - new Date(a.datedAt)) // Sắp xếp theo ngày từ mới đến cũ
+                        .slice(0, visibleCount) // Hiển thị số bình luận theo visibleCount
                         .map((review) => (
                             <Row className="mt-5 ms-5" key={review.productReviewId}>
                                 <Col>
@@ -462,7 +518,8 @@ const ProductDetail = () => {
                                     />
                                     <span className='me-4'>{review.user.fullname}</span> {/* Truy cập fullname từ user */}
                                     <i className="bi bi-calendar me-2"></i>
-                                    <span>{new Date(review.datedAt).toLocaleDateString('vi-VN')}</span> {/* Định dạng ngày */}
+                                    <span>{new Date(review.datedAt).toLocaleString('vi-VN')}</span>
+
                                     <div>
                                         {/* Hiển thị đánh giá sao dựa trên giá trị rating */}
                                         <span className="text-warning ms-5 fs-3">
@@ -474,6 +531,15 @@ const ProductDetail = () => {
                                 </Col>
                             </Row>
                         ))}
+                    {visibleCount < data.length && ( // Kiểm tra nếu còn bình luận để tải thêm
+                        <Row className="mt-4 text-center">
+                            <Col>
+                                <Button variant="primary" onClick={loadMoreReviews}>
+                                    Tải thêm bình luận
+                                </Button>
+                            </Col>
+                        </Row>
+                    )}
                 </Container>
             </HomeLayout>
         </>
