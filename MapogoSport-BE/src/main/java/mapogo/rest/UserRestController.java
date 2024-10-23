@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.dao.ProductDAO;
+import mapogo.entity.Owner;
 import mapogo.entity.Product;
 import mapogo.entity.User;
 import mapogo.service.EmailService;
+import mapogo.service.OwnerService;
 import mapogo.service.UserService;
 import mapogo.utils.RandomUtils;
 
@@ -50,7 +52,6 @@ public class UserRestController {
 	
 	@PostMapping("/user")
 	public User saveStudents(@RequestBody User u) {
-		System.out.println(u.getFullname());
 		return userService.createUser(u);
 	}
 
@@ -70,6 +71,14 @@ public class UserRestController {
 	public void passMail(@RequestBody Map<String, String> requestBody) {
 		 String email = requestBody.get("email");
 		 emailService.sendEmail(email, "MapogoSport", "Bạn đã thay đổi mật khẩu tài khoản. Nếu đó không phải là bạn, vui lòng liên hệ với chúng tôi ngay.");
+	}
+	
+	@Autowired
+	OwnerService ownerService;
+	
+	@GetMapping("/owner/{id}")
+	public Owner findByUser(@PathVariable("id") String username) {
+		return ownerService.findByUsername(username);
 	}
 
 	@Autowired

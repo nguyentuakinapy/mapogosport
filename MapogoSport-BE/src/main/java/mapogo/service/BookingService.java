@@ -1,6 +1,7 @@
 package mapogo.service;
 
 import java.util.List;
+import java.util.Map;
 
 import mapogo.entity.Booking;
 
@@ -12,5 +13,5 @@ public interface BookingService {
 	
 	List<Booking> findById(Integer id);
 	
-	Booking createBooking(Booking booking);
+	Booking createBooking(Map<String, Object> booking);
 }

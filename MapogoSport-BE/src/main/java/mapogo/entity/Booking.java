@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -33,35 +34,39 @@ public class Booking implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
-    @JsonIgnore
+    @JsonBackReference
     private User user;
 
     @Column(name = "TotalAmount", nullable = false)
     private double totalAmount;
 
     @Column(name = "Status", nullable = false)
-    private String status;
+    private String status = "Đã thanh toán";
 
     @ManyToOne
     @JoinColumn(name = "PaymentMethodId", nullable = false)
+    @JsonBackReference
     private PaymentMethod paymentMethod;
 
     @ManyToOne
     @JoinColumn(name = "OwnerId", nullable = false)
+    @JsonBackReference
     private Owner owner;
     
     @ManyToOne
     @JoinColumn(name = "VoucherId")
+    @JsonBackReference
     private Voucher voucher = null;
 
 	@Column(name = "Note")
     private String note = null;
 
 	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonManagedReference("booking-bookingpayment")
 	private List<BookingPayment> bookingPayments;
 
 	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JsonManagedReference
+	@JsonManagedReference("booking-bookingdetail")
 	private List<BookingDetail> bookingDetails;
 	
 	@Transient

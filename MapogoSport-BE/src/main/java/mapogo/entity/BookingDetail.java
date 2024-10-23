@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,6 +40,8 @@ public class BookingDetail implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "SportFieldDetailId", nullable = false)
+    @JsonManagedReference
+//    @JsonBackReference
     private SportFieldDetail sportFieldDetail;
     
     @Column(name = "Price", nullable = false)
