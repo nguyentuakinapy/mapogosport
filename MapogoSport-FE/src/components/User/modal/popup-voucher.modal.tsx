@@ -80,44 +80,55 @@ const Popup = ({ voucher }: { voucher: Voucher }) => {
 
   const handelSubmitGetVoucher = async (voucherId: number) => {
     if (!user || !user.username) {
-        toast.warning("Bạn chưa đăng nhập!");
-        return;
+      toast.warning("Bạn chưa đăng nhập!");
+      return;
+    }
+    
+    const checkResponse = await fetch(`http://localhost:8080/rest/userVoucher/check/${user.username}/${voucherId}`);
+    const alreadyHasVoucher = await checkResponse.json();
+    console.log("check",alreadyHasVoucher)
+
+    if (alreadyHasVoucher) {
+      toast.warning("Bạn đã nhận Voucher này rồi!");
+      return;
     }
 
+    console.log("user", user.UserVoucher)
     const UserVoucher = {
-        user: {
-            username: user.username, 
-        },
-        voucher: {
-            voucherId: voucherId 
-        },
-        status: 'Đang còn hạn',
-        date: new Date(),
+      user: {
+        username: user.username,
+      },
+      voucher: {
+        voucherId: voucherId
+      },
+      status: 'Đang còn hạn',
+      date: new Date(),
     };
 
     console.log("Dữ liệu User Voucher:", UserVoucher); // Đầu ra để kiểm tra
 
     try {
-        const response = await fetch('http://localhost:8080/rest/userVoucher/create', {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(UserVoucher),
-        });
+      const response = await fetch('http://localhost:8080/rest/userVoucher/create', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(UserVoucher),
+      });
 
-        if (!response.ok) {
-            const errorMessage = await response.text();
-            throw new Error(`Có lỗi xảy ra khi nhận voucher: ${errorMessage}`);
-        }
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`Có lỗi xảy ra khi nhận voucher: ${errorMessage}`);
+      }
 
-        const result = await response.json();
-        toast.success("Nhận Voucher giá thành công!");
+      const result = await response.json();
+      toast.success("Nhận Voucher giá thành công!");
     } catch (error) {
-        console.error("Lỗi khi nhận Voucher:", error);
-        alert("Có lỗi xảy ra khi nhận Voucher. Vui lòng thử lại sau.");
+      console.error("Lỗi khi nhận Voucher:", error);
+      alert("Có lỗi xảy ra khi nhận Voucher. Vui lòng thử lại sau.");
     }
-};
+    closePopup();
+  };
 
 
 

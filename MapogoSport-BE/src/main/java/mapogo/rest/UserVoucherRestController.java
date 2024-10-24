@@ -5,9 +5,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import mapogo.entity.User;
 import mapogo.entity.UserVoucher;
 import mapogo.service.UserVoucherService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,5 +34,12 @@ public class UserVoucherRestController {
 	public UserVoucher createUserVoucher(@RequestBody UserVoucher userVoucher) {
 		return userVoucherService.createUserVoucher(userVoucher);
 	}
+	
+	@GetMapping("/userVoucher/check/{username}/{voucherId}")
+	public Boolean checkUserHasVoucher(@PathVariable String username, @PathVariable Integer voucherId) {
+	    return userVoucherService.checkUserVoucher(username, voucherId);
+	}
+
+
 	
 }
