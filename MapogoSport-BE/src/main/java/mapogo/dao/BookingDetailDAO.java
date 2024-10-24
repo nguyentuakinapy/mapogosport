@@ -21,4 +21,7 @@ public interface BookingDetailDAO extends JpaRepository<BookingDetail, Integer> 
 	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId AND b.date BETWEEN :startDate AND :endDate")
 	List<BookingDetail> findBySportFieldDetailAndDateBetween(@Param("sportFieldDetailId") Integer sportFieldDetailId,
 			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+	
+	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId AND b.date = :date")
+	List<BookingDetail> findBySportFieldDetailAndDay(@Param("sportFieldDetailId") Integer sportFieldDetailId,@Param("date") LocalDate date);
 }

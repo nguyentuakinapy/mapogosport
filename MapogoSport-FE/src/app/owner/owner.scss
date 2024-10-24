@@ -265,3 +265,35 @@
         }
     }
 }
+
+.frame-info-secondary {
+    background: #f3f3f3 !important;
+    cursor: not-allowed;
+
+    .status-label {
+        cursor: not-allowed !important;
+        color: #8b8b8b !important;
+    }
+
+    .status-label {
+        font-weight: 700 !important;
+    }
+}
+
+.frame-info-available {
+    background: #90b3ff !important;
+    cursor: pointer;
+
+    .status-label {
+        font-weight: 700 !important;
+    }
+}
+
+.frame-info-danger {
+    background: #f7959f !important;
+    cursor: not-allowed;
+
+    .status-label {
+        color: white !important;
+    }
+}
