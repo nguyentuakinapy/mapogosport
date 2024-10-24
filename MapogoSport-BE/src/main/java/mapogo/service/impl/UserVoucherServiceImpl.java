@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.UserVoucherDAO;
+import mapogo.entity.User;
 import mapogo.entity.UserVoucher;
 import mapogo.service.UserVoucherService;
 
@@ -25,6 +26,11 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 	public List<UserVoucher> findUserVoucher() {
 		// TODO Auto-generated method stub
 		return userVoucherDao.findAll();
+	}
+
+	@Override
+	public boolean checkUserVoucher(String username, Integer voucherId) {
+		return userVoucherDao.existsByUser_UsernameAndVoucher_VoucherId(username, voucherId);	
 	}
 	
 }
