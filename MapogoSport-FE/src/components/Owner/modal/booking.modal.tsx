@@ -2,7 +2,7 @@ import { formatPrice } from "@/components/Utils/Format";
 import { use, useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 interface OwnerProps {
     showBookingModal: boolean;
@@ -12,10 +12,12 @@ interface OwnerProps {
     dayStartBooking: string;
     sport?: SportField;
     owner?: Owner;
+    checkDataStatus: boolean
+    setCheckDataStatus: (v: boolean) => void;
 }
 
 const BookingModal = (props: OwnerProps) => {
-    const { showBookingModal, setShowBookingModal, sportDetail, startTime, dayStartBooking, sport, owner } = props;
+    const { showBookingModal, setShowBookingModal, sportDetail, startTime, dayStartBooking, sport, owner, checkDataStatus, setCheckDataStatus } = props;
 
     const [selectTime, setSelectTime] = useState<string>("Chọn thời gian");
     const [isOffline, setIsOffline] = useState(false);
@@ -110,6 +112,7 @@ const BookingModal = (props: OwnerProps) => {
     const handleClose = () => {
         setShowBookingModal(false);
     }
+
     const handleSave = async () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
         if (!paymentMethod) {
@@ -132,6 +135,8 @@ const BookingModal = (props: OwnerProps) => {
             const dataUser = await responseUser.json() as User;
             createBooking(paymentMethod, dataUser);
         }
+        setCheckDataStatus(!checkDataStatus);
+        handleClose();
     }
 
     const createBooking = async (paymentMethod: PaymentMethod, dataUser: User) => {
@@ -158,7 +163,8 @@ const BookingModal = (props: OwnerProps) => {
                 voucher: null,
                 note
             })
-        });
+        })
+
         const resBooking = await responseBooking.json() as Booking;
 
         const responseBookingDetail = await fetch('http://localhost:8080/rest/booking/detail', {

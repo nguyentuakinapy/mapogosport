@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import HomeLayout from '@/components/HomeLayout';
-import Modal from 'react-bootstrap/Modal';
 import { useParams } from 'next/navigation';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'react-toastify';
@@ -592,8 +591,7 @@ const SportDetail = () => {
                     onHide={() => setModalShow(false)}
                 />
                 <h5 className='ms-3'>Bình luận</h5>
-                {data
-                    .sort((a: any, b: any) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime()) // Sắp xếp theo ngày từ mới đến cũ
+                {dataReview.sort((a: any, b: any) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime()) // Sắp xếp theo ngày từ mới đến cũ
                     .slice(0, visibleCount) // Hiển thị số bình luận theo visibleCount
                     .map((review: any) => (
                         <Row className="mt-5 ms-5" key={review.fieldReviewId}>

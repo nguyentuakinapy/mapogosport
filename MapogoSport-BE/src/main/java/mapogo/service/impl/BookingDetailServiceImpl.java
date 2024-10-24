@@ -36,10 +36,10 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		return bookingDetailDAO.findBySportFieldDetailAndToday(sportDetailId);
 	}
 
-	public List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportFieldDetailId) {
+	public List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportFieldDetailId, LocalDate today, LocalDate endDate) {
 
-		LocalDate today = LocalDate.now();
-		LocalDate endDate = today.plusDays(7);
+//		LocalDate today = LocalDate.now();
+//		LocalDate endDate = today.plusDays(7);
 
 		return bookingDetailDAO.findBySportFieldDetailAndDateBetween(sportFieldDetailId, today, endDate);
 	}
@@ -70,6 +70,11 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bookingDetail.setBooking(b);
 
 		return bookingDetailDAO.save(bookingDetail);
+	}
+
+	@Override
+	public List<BookingDetail> findBySportFieldDetailAndDay(Integer sportDetailId, LocalDate date) {
+		return bookingDetailDAO.findBySportFieldDetailAndDay(sportDetailId, date);
 	}
 
 }

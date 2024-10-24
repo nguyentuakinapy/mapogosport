@@ -1,10 +1,12 @@
 package mapogo.rest;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,9 +70,18 @@ public class BookingRestController {
 		return bookingDetailService.findBySportFieldDetailAndToday(sportDetailId);
 	}
 
-	@GetMapping("/user/booking/detail/getnextweek/{sportDetailId}")
-	public List<BookingDetail> findBySportFieldDetailAndNextWeek(@PathVariable("sportDetailId") Integer sportDetailId) {
-		return bookingDetailService.findBySportFieldDetailAndNextWeek(sportDetailId);
+	@GetMapping("/user/booking/detail/getbyday/{sportDetailId}/{date}")
+	public List<BookingDetail> findBySportFieldDetailAndday(@PathVariable("sportDetailId") Integer sportDetailId,
+			@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+		System.out.println(date);
+		return bookingDetailService.findBySportFieldDetailAndDay(sportDetailId, date);
+	}
+
+	@GetMapping("/user/booking/detail/getnextweek/{sportDetailId}/{startDay}/{endDay}")
+	public List<BookingDetail> findBySportFieldDetailAndNextWeek(@PathVariable("sportDetailId") Integer sportDetailId,
+			@PathVariable("startDay") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDay,
+			@PathVariable("endDay") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDay) {
+		return bookingDetailService.findBySportFieldDetailAndNextWeek(sportDetailId, startDay, endDay);
 	}
 
 	@PostMapping("/booking")
