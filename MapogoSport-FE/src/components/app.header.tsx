@@ -172,7 +172,7 @@ const Header = () => {
                             navbarScroll
                         >
                             <Nav>
-                                <a href="/categories/products" className='head-hv-nav text-decoration-none '><i className="bi bi-tools me-2"></i>Sản phẩm</a>
+                                <Link href="/categories/products" className='head-hv-nav text-decoration-none '><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
                             </Nav>
                             <Nav>
                                 <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
@@ -195,12 +195,12 @@ const Header = () => {
                                         }
                                         if (item.role.name === "ROLE_OWNER") {
                                             return (
-                                                <Link key={index} href='/owner' className={`dropdown-item text-decoration-none text-dark`}>Chủ sân</Link>
+                                                <a key={index} href='/owner' className={`dropdown-item text-decoration-none text-dark`}>Chủ sân</a>
                                             );
                                         }
                                         if (item.role.name === "ROLE_ADMIN") {
                                             return (
-                                                <Link key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</Link>
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</a>
                                             );
                                         }
                                         return null;
@@ -210,7 +210,7 @@ const Header = () => {
                                 </ul>
                             </div>
                             <Nav className='position-relative'>
-                                <a href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</a>
+                                <Link href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</Link>
                                 <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
                                     0
                                     <span className="visually-hidden">unread messages</span>

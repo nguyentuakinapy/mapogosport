@@ -12,9 +12,9 @@ export default function Nav({ isAniActive, isActive, setIsActive }: NavProps) {
         <>
             <div className={`nav-left ${isAniActive ? 'hidden' : 'hiddenRep'}`}>
                 <div className="logo text-center p-2">
-                    <Link href='/'>
+                    <a href='/'>
                         <img src="/images/logo.png" style={{ width: '60%' }} alt="Logo" />
-                    </Link>
+                    </a>
 
                 </div>
                 <div className="mt-5">
