@@ -18,10 +18,6 @@ body {
   /* Làm tròn các góc */
 }
 
-.container1 {
-  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .1), 0 2px 6px 2px rgba(60, 64, 67, .15);
-}
-
 /* sport detail========================================*/
 
 .grid {
@@ -55,57 +51,6 @@ body {
   color: white;
   max-width: 275px;
   border-radius: 10px;
-}
-
-.info-header {
-  display: flex;
-  align-items: center;
-  font-size: 1.5rem;
-  /* Adjust as needed */
-  font-weight: bold;
-  color: #1b2b46;
-  /* Dark blue color as shown in the image */
-}
-
-.info-line {
-  width: 5px;
-  height: 30px;
-  background-color: #FFD36E;
-  /* Yellow vertical line color */
-  margin-right: 10px;
-}
-
-.info-text {
-  font-size: 1.25rem;
-  /* Adjust the text size to match the design */
-}
-
-.extends {
-  flex-wrap: wrap;
-  border-radius: 8px;
-  background: #F3F3F3;
-  padding: 10px 15px;
-}
-
-.list-extends {
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-}
-
-.item-extends {
-
-  flex: 0 0 50%;
-  display: flex;
-  align-items: center;
-  margin-top: 10px;
-  /* Adds vertical space between rows */
-}
-
-
-.title {
-  font-size: 16px;
-  font-weight: 700;
 }
 
 .mb-3 {

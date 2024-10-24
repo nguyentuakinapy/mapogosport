@@ -28,15 +28,16 @@ a {
 }
 .row {
     .col-6 {
-        .react-datepicker-wrapper {
-            display: block !important;
-            .react-datepicker__input-container {
-                .form-control {
-                    padding-top: 1.625rem;
-                    padding-bottom: .4rem;
+        .form-floating {
+            .react-datepicker-wrapper {
+                display: block !important;
+                .react-datepicker__input-container {
+                    .form-control {
+                        padding-top: 1.625rem;
+                        padding-bottom: .4rem;
+                    }
                 }
             }
-            
         }
         .dateLabel {
             color: rgba($color: rgb(33, 37, 41), $alpha: 0.65);

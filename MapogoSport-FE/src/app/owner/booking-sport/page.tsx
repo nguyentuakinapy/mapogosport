@@ -407,10 +407,13 @@ export default function BookingSport() {
                 if (!hasBookingForDay) {
                     Object.entries(bookingsOnWeek).forEach(([time, sportData]) => {
                         const sportDataTemporary = { ...sportData };
+
                         Object.entries(sportDataTemporary).forEach(([sport, statuses], j) => {
                             if (sportDetails && sport == sportDetails[index].name) {
                                 if (sportDetails[index].status == "Hoạt động") {
                                     sportDataTemporary[sport][dayIndex] = "Còn trống";
+                                    console.log("sportDataTemporary[sport][dayIndex]: ", sportDataTemporary[sport][dayIndex]);
+
                                 } else {
                                     sportDataTemporary[sport][dayIndex] = "Tạm đóng";
                                 }
@@ -487,8 +490,7 @@ export default function BookingSport() {
                                                         onClick={handleGetDataBookingOnWeek}
                                                         style={{ cursor: 'pointer' }}
                                                         className={`w-10 ${getBadgeClass(statusItem)}`}>
-                                                        <span
-                                                            className={`badge ${getBadgeClass(statusItem)}`}
+                                                        <span className={`badge ${getBadgeClass(statusItem)}`}
                                                         >
                                                             {statusItem}
                                                         </span>

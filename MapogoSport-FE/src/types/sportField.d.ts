@@ -32,4 +32,5 @@ interface SportFieldDetail {
     status: string;
     percentDeposit: number;
     peakHour: string;
+    availableTimes: string[];
 }
