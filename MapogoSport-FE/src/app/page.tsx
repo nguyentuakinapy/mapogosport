@@ -11,10 +11,13 @@ import { toast } from "react-toastify";
 import RegisterModal from "@/components/account/modal/register.modal";
 import ForgotPassword from "@/components/account/modal/forgotPassword.modal";
 import ChangePasswordNew from "@/components/account/modal/change-password-new.modal";
+import Popup from "@/components/User/modal/popup-voucher.modal";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
   const [sportFields, setSportFields] = useState<SportField[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
 
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
@@ -58,6 +61,21 @@ export default function Home() {
     fetchData();
   }, []);
 
+  // Fetch base product
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/rest/products');
+        const data = await response.json();
+        console.log(data);
+        setProducts(data);
+      } catch (error) {
+        console.log("Lỗi khi gọi API: ", error);
+      }
+    };
+    fetchData();
+  }, []);
+
   const createOwnerSubmit = () => {
     const user = sessionStorage.getItem('user');
     if (user) {
@@ -68,6 +86,21 @@ export default function Home() {
     }
 
   }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/rest/voucher/active`);
+        const data = await response.json();
+        setVouchers(data)
+        console.log("voucher", data)
+      } catch (error) {
+        console.log("lỗi voucher", error)
+      }
+    }
+    fetchData()
+  }, [])
+
 
   return (
     <HomeLayout>
@@ -217,7 +250,12 @@ export default function Home() {
         {/* Sân thể thao mới */}
 
         <div>
-          <h3 className="fw-bold mt-5">SÂN THỂ THAO MỚI</h3>
+          <div className="row a-more">
+            <h3 className="fw-bold col-10">SÂN THỂ THAO MỚI</h3>
+            <div className="col-2 text-end">
+              <a href="/categories/sport_field" className="see-more-link">Xem Thêm</a>
+            </div>
+          </div>
           <div style={{ fontSize: '15px' }}>
             <Row className="my-3">
               {sportFields.slice(0, 8).map((field: SportField) => (
@@ -258,89 +296,36 @@ export default function Home() {
         </div>
         {/* Sản phẩm mới */}
         <div>
-          <h3 className="fw-bold mt-5">SẢN PHẨM MỚI</h3>
+          <div className="row a-more">
+            <h3 className="fw-bold col-10">SẢN PHẨM MỚI</h3>
+            <div className="col-2 text-end">
+              <a href="/categories/products" className="see-more-link">Xem Thêm</a>
+            </div>
+          </div>
           <div style={{ fontSize: '15px' }}>
             <Row className="my-3">
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
+              {products.slice(0, 8).map((product: Product) => (
+                <Col xs={3} key={product.productId}>
+                  <div className="user-border">
+                    <div className="mb-3">
+                      <Link href={"#"}>
+                        <Image src={"/images/ck3.jpg"} alt={product.name} />
+                      </Link>
                     </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
+                    <div className="content">
+                      <div className="mb-1 title">
+                        <Link href={"#"}><b>{product.name}</b></Link>
+                      </div>
+                      <div className="d-flex align-items-center justify-content-between">
+                        <div> <b>{formatPrice(product.price)}</b></div>
+                        <div className="star-item text-warning">
+                          {renderStars(rating)}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Col>
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Col>
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Col>
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Col>
+                </Col>
+              ))}
             </Row>
           </div>
         </div>
@@ -362,6 +347,15 @@ export default function Home() {
             </div>
           </div>
         </div>
+        {/* VOUCHER */}
+
+        <div className="App">
+          <h1>Discount Popup Demo</h1>
+          {vouchers.map((voucher) => (
+            <Popup key={voucher.voucherId} voucher={voucher} />
+          ))}
+        </div>
+
       </Container>
       <CreateOwnerModal showCreateOwnerModal={showCreateOwnerModal} setShowCreateOwnerModal={setShowCreateOwnerModal}></CreateOwnerModal>
       <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}

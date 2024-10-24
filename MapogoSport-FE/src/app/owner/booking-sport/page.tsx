@@ -1,7 +1,8 @@
 'use client';
 import BookingModal from "@/components/Owner/modal/booking.modal";
+import { formatDate } from "@/components/Utils/Format";
 import { useEffect, useRef, useState } from "react";
-import { Table } from "react-bootstrap";
+import { Col, Row, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR from "swr";
 
@@ -37,6 +38,22 @@ export default function BookingSport() {
         // }
     })
 
+    const [owner, setOwner] = useState<Owner>();
+    useEffect(() => {
+        getOwner();
+    }, [])
+    const getOwner = async () => {
+        const user = sessionStorage.getItem('user');
+        if (user) {
+            const parsedUserData = JSON.parse(user) as User;
+            const responseOwner = await fetch(`http://localhost:8080/rest/owner/${parsedUserData.username}`);
+            if (!responseOwner.ok) {
+                throw new Error('Error fetching data');
+            }
+            const dataOwner = await responseOwner.json() as Owner;
+            setOwner(dataOwner);
+        }
+    }
     const [selectTime, setSelectTime] = useState('');
     const [selectDate, setSelectDate] = useState<number>(0);
     const [selectSport, setSelectSport] = useState<number>(0);
@@ -45,7 +62,7 @@ export default function BookingSport() {
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/sport_field_by_owner/1`, fetcher, {
+    const { data, error, isLoading } = useSWR(owner && `http://localhost:8080/rest/sport_field_by_owner/${owner.ownerId}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -227,7 +244,31 @@ export default function BookingSport() {
         }
     }, [checkDataBooking1]);
 
-    const isFirstRun = useRef(true);
+    const [onDay, setOnDay] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [startWeek, setStartWeek] = useState<string>(new Date().toISOString().split('T')[0]);
+    const initialEndWeek = new Date();
+    initialEndWeek.setDate(initialEndWeek.getDate() + 7);
+    const [endWeek, setEndWeek] = useState<string>(initialEndWeek.toISOString().split('T')[0]);
+
+    const setOnDayAndOnWeek = (direction: 'forward' | 'backward') => {
+        const currentDate = new Date(onDay);
+        if (selectDate === 0) { // Một ngày
+            currentDate.setDate(currentDate.getDate() + (direction === 'forward' ? 1 : -1));
+            setOnDay(currentDate.toISOString().split('T')[0]);
+            setStatusOnDay();
+        } else {
+            const start = new Date(startWeek);
+            const daysToAdd = direction === 'forward' ? 1 : -1;
+
+            start.setDate(start.getDate() + daysToAdd);
+            setStartWeek(start.toISOString().split('T')[0]);
+
+            const end = new Date(start);
+            end.setDate(end.getDate() + 7);
+            setEndWeek(end.toISOString().split('T')[0]);
+            setStatusOnWeek();
+        }
+    }
 
     useEffect(() => {
         if (selectDate === 0) {
@@ -510,19 +551,19 @@ export default function BookingSport() {
     };
 
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
-    const [timeStart, setTimeStart] = useState("");
+    const [startTime, setStartTime] = useState("");
     const [dayStartBooking, setDayStartBooking] = useState("");
 
     const handleGetDataBookingOnDay = (event: React.MouseEvent<HTMLTableCellElement>) => {
         const sportDetail = event.currentTarget.getAttribute("sport-detail");
-        const timeStart = event.currentTarget.getAttribute("time-data");
+        const startTime = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = new Date();
 
         const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
 
-        if (sportDetail && timeStart && dayStartBooking) {
+        if (sportDetail && startTime && dayStartBooking) {
             setSportDetail(selectedSportDetail);
-            setTimeStart(timeStart);
+            setStartTime(startTime);
             setDayStartBooking(dayStartBooking.toLocaleDateString('en-CA'));
             setShowBookingModal(true);
         }
@@ -531,14 +572,14 @@ export default function BookingSport() {
 
     const handleGetDataBookingOnWeek = (event: React.MouseEvent<HTMLTableCellElement>) => {
         const sportDetail = event.currentTarget.getAttribute("sport-detail");
-        const timeStart = event.currentTarget.getAttribute("time-data");
+        const startTime = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
 
         const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
 
-        if (sportDetail && timeStart && dayStartBooking) {
+        if (sportDetail && startTime && dayStartBooking) {
             setSportDetail(selectedSportDetail);
-            setTimeStart(timeStart);
+            setStartTime(startTime);
             setDayStartBooking(dayStartBooking);
             setShowBookingModal(true);
             // toast.success(sportDetail + " - " + timeStart + " - " + dayStartBooking);
@@ -562,6 +603,7 @@ export default function BookingSport() {
     const clearData = () => {
         setDataTimeSport([]);
         setBookingsOnDay({});
+        setBookingsOnWeek({});
     }
 
     if (isLoading) return <h2>Data is comming</h2>
@@ -569,23 +611,56 @@ export default function BookingSport() {
     return (
         <>
             <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}> LỊCH ĐẶT SÂN</h3>
-            <div className="input-group my-2">
-                <select value={selectDate} onChange={(e) => setSelectDate(Number(e.target.value))}
-                    className="form-select" aria-label="Default select example">
-                    <option value="0">Một ngày</option>
-                    <option value="1">Một tuần</option>
-                </select>
-                <input type="datetime-local" className="form-control" value={selectTime}
-                    onChange={(e) => setSelectTime(e.target.value)} />
-                <select value={selectSport} onChange={(e) => {
-                    setSelectSport(Number(e.target.value));
-                    clearData();
-                }} className="form-select" aria-label="Default select example">
-                    {dataSport && dataSport.length > 0 && dataSport.map((item, index) => (
-                        <option key={item.sportFieldId} value={index}>{item.name}</option>
-                    ))}
-                </select>
-            </div>
+            <Row className="align-items-center my-3 text-center">
+                <Col md={4}>
+                    <Row className="g-0 toggle-row">
+                        <Col className={`toggle-col ${selectDate === 0 ? 'active' : ''}`}
+                            onClick={() => setSelectDate(0)}>
+                            Một ngày
+                        </Col>
+                        <Col className={`toggle-col ${selectDate === 1 ? 'active' : ''}`}
+                            onClick={() => setSelectDate(1)}>
+                            Một tuần
+                        </Col>
+                    </Row>
+                </Col>
+
+                <Col md={4} className="text-center">
+                    {selectDate == 0 ?
+                        <div className="header-date">
+                            <i className="bi bi-arrow-left" onClick={() => setOnDayAndOnWeek('backward')}></i>
+                            <span className="mx-3">{formatDate(onDay)}</span>
+                            <i className="bi bi-arrow-right" onClick={() => setOnDayAndOnWeek('forward')}></i>
+                        </div>
+                        :
+                        <div className="header-date">
+                            <i className="bi bi-arrow-left" onClick={() => setOnDayAndOnWeek('backward')}></i>
+                            <span className="mx-3">Từ {formatDate(startWeek)} đến {formatDate(endWeek)}</span>
+                            <i className="bi bi-arrow-right" onClick={() => setOnDayAndOnWeek('forward')}></i>
+                        </div>
+                    }
+                </Col>
+
+                <Col md={4}>
+                    <select
+                        value={selectSport}
+                        onChange={(e) => {
+                            setSelectSport(Number(e.target.value));
+                            clearData();
+                        }}
+                        className="form-select" style={{ border: '1px solid' }}
+                        aria-label="Default select example"
+                    >
+                        {dataSport &&
+                            dataSport.length > 0 &&
+                            dataSport.map((item, index) => (
+                                <option key={item.sportFieldId} value={index}>
+                                    {item.name}
+                                </option>
+                            ))}
+                    </select>
+                </Col>
+            </Row>
             {selectDate == 0 ?
                 <div className="div-tb">
                     <Table >
@@ -610,8 +685,8 @@ export default function BookingSport() {
                 </div>
             }
             <BookingModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
-                sportDetail={sportDetail} timeStart={timeStart} dayStartBooking={dayStartBooking}
-                sport={dataSport && dataSport[selectSport]}
+                sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
+                sport={dataSport && dataSport[selectSport]} owner={owner}
             ></BookingModal>
         </>
     );

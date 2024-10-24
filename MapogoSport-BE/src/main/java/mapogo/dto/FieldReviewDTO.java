@@ -13,9 +13,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductReviewDTO {
-	@JsonProperty("")
-	private Integer productId;
+public class FieldReviewDTO {
+	private Integer sportFieldId;
 	private String username;
 	private Integer rating;
 	private String comment;

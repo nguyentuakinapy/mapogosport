@@ -1,6 +1,7 @@
 package mapogo.service;
 
 import java.util.List;
+import java.util.Map;
 
 import mapogo.entity.BookingDetail;
 
@@ -10,5 +11,5 @@ public interface BookingDetailService {
 
 	List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportDetailId);
 
-	BookingDetail createBookingDetail(BookingDetail bookingDetail);
+	BookingDetail createBookingDetail(Map<String, Object> bd);
 }

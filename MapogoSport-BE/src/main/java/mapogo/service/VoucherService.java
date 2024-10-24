@@ -7,5 +7,6 @@ import mapogo.entity.Voucher;
 public interface VoucherService {
 	Voucher findByName(String name);
 	List<Voucher> findByDiscountPercent(Integer discountPercent);
+	List<Voucher> selectVoucherActive();
 	
 }

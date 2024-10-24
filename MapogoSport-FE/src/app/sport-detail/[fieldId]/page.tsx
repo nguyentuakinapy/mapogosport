@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import HomeLayout from '@/components/HomeLayout';
+import Modal from 'react-bootstrap/Modal';
 import { useParams } from 'next/navigation';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'react-toastify';
@@ -45,7 +46,6 @@ const StarRating = ({ setRating }: { setRating: any }) => {
         </div>
     );
 };
-
 
 const SportDetail = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
