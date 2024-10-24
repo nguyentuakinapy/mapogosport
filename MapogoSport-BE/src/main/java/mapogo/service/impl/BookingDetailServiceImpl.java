@@ -31,10 +31,10 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	@Autowired
 	SportFieldDetailDAO sportFieldDAO;
 
-	@Override
-	public List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId) {
-		return bookingDetailDAO.findBySportFieldDetailAndToday(sportDetailId);
-	}
+//	@Override
+//	public List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId) {
+//		return bookingDetailDAO.findBySportFieldDetailAndToday(sportDetailId);
+//	}
 
 	public List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportFieldDetailId, LocalDate today, LocalDate endDate) {
 

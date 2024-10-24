@@ -218,11 +218,18 @@ export default function BookingSport() {
         setCheckDataBooking(prev => !prev);
     }, [checkDataBooking1]);
 
-    const [onDay, setOnDay] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [onDay, setOnDay] = useState<string>(() => {
+        const today = new Date();
+        return new Intl.DateTimeFormat('en-CA').format(today);
+    });
 
-    const [startWeek, setStartWeek] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [startWeek, setStartWeek] = useState<string>(() => {
+        const today = new Date();
+        return new Intl.DateTimeFormat('en-CA').format(today);
+    });
+
     const initialEndWeek = new Date();
-    initialEndWeek.setDate(initialEndWeek.getDate() + 6);
+    initialEndWeek.setDate(initialEndWeek.getDate() + 7);
     const [endWeek, setEndWeek] = useState<string>(initialEndWeek.toISOString().split('T')[0]);
 
     const setOnDayAndOnWeek = (direction: 'forward' | 'backward') => {
@@ -483,14 +490,9 @@ export default function BookingSport() {
                                 dataSport[selectSport].sportFielDetails &&
                                 dataSport[selectSport].sportFielDetails[index] ?
                                 dataSport[selectSport].sportFielDetails[index].sportFielDetailId : 'N/A'
-                        }
-                    >
-                        <div className={`badge ${getBadgeClass(status)}`}
-                            style={new Date(onDay).setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0)
-                                && status === 'Còn trống' ? { cursor: 'pointer' } : { cursor: 'not-allowed' }}>
-                            <span className="status-label"
-                                style={new Date(onDay).setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0)
-                                    && status === 'Còn trống' ? { cursor: 'pointer' } : { cursor: 'not-allowed' }}>
+                        }>
+                        <div className={`badge ${getBadgeClass(status)}`}>
+                            <span className="status-label" >
                                 {status}
                             </span>
                         </div>
@@ -520,7 +522,6 @@ export default function BookingSport() {
 
                             return sportFielDetails.map((item, index) => (
                                 <tr key={`${time}-${item.sportFielDetailId}`} style={{ border: '1px solid #a1a1a1' }}>
-                                    {/* Hiển thị ô time chỉ ở hàng đầu tiên */}
                                     {index === 0 && (
                                         <td className="title fw-bold" style={{ textAlign: 'center' }} rowSpan={rowSpan}>
                                             {time}
@@ -528,20 +529,13 @@ export default function BookingSport() {
                                     )}
                                     <td style={{ backgroundColor: '#eed6fa' }}>{item.name}</td>
                                     {Object.entries(sportData).map(([sport, status], i) => (
-                                        status.map((statusItem, j) => { // Đổi tên `status` thành `statusItem` để tránh nhầm lẫn
+                                        status.map((statusItem, j) => {
                                             if (sport === item.name) {
-                                                return ( // Thêm return
+                                                return (
                                                     <td key={`${sport}-${j}`}
                                                         sport-detail={item.sportFielDetailId}
                                                         time-data={time}
                                                         day-data={dayYears && dayYears[j]}
-                                                        style={
-                                                            dayYears && dayYears[j]
-                                                                && new Date().setHours(0, 0, 0, 0) <=
-                                                                new Date(dayYears[j]).setHours(0, 0, 0, 0)
-                                                                ? { cursor: 'pointer' }
-                                                                : { cursor: 'not-allowed' }
-                                                        }
                                                         onClick={
                                                             dayYears && dayYears[j] &&
                                                                 new Date().setHours(0, 0, 0, 0) <=
@@ -550,22 +544,8 @@ export default function BookingSport() {
                                                                 : undefined
                                                         }
                                                         className={`w-10 ${getBadgeClass(statusItem)}`}>
-                                                        <div className={`badge ${getBadgeClass(statusItem)}`}
-                                                            style={
-                                                                dayYears && dayYears[j] &&
-                                                                    new Date().setHours(0, 0, 0, 0) <=
-                                                                    new Date(dayYears[j]).setHours(0, 0, 0, 0)
-                                                                    ? { cursor: 'pointer' }
-                                                                    : { cursor: 'not-allowed' }
-                                                            }>
+                                                        <div className={`badge ${getBadgeClass(statusItem)}`}>
                                                             <span className="status-label"
-                                                                style={
-                                                                    dayYears && dayYears[j] &&
-                                                                        new Date().setHours(0, 0, 0, 0) <=
-                                                                        new Date(dayYears[j]).setHours(0, 0, 0, 0)
-                                                                        ? { cursor: 'pointer' }
-                                                                        : { cursor: 'not-allowed' }
-                                                                }
                                                             >{statusItem}</span>
                                                         </div>
                                                     </td>

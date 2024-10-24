@@ -339,7 +339,7 @@ const SportDetail = () => {
         }
     };
 
-    const setStatusOnWeek = async () => {
+    const setStatusOnWeek = async () => {   
         const response = await fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${sportFieldDetailId}`);
 
         if (!response.ok) {

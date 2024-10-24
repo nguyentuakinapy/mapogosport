@@ -15,8 +15,8 @@ import mapogo.entity.BookingDetail;
 public interface BookingDetailDAO extends JpaRepository<BookingDetail, Integer> {
 	BookingDetail findByBooking_BookingId(Integer bookingId);
 
-	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId AND b.date = CURRENT_DATE")
-	List<BookingDetail> findBySportFieldDetailAndToday(@Param("sportFieldDetailId") Integer sportFieldDetailId);
+//	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId AND b.date = CURRENT_DATE")
+//	List<BookingDetail> findBySportFieldDetailAndToday(@Param("sportFieldDetailId") Integer sportFieldDetailId);
 
 	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId AND b.date BETWEEN :startDate AND :endDate")
 	List<BookingDetail> findBySportFieldDetailAndDateBetween(@Param("sportFieldDetailId") Integer sportFieldDetailId,
