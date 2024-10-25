@@ -120,36 +120,12 @@ const Header = () => {
     useEffect(() => {
         if (data) {
             setUserData(data);
-            console.log(data);
         }
     }, [data])
 
     const logOut = () => {
         sessionStorage.removeItem('user');
         window.location.href = "/";
-    }
-
-    useEffect(() => {
-        checkRoleByAuthority();
-    }, [userData])
-
-    const checkRoleByAuthority = () => {
-        userData?.authorities.map(item => {
-            if (item.role.name == "ROLE_OWNER") {
-                return (
-                    <Link href='/owner' className={`dropdown-item text-decoration-none text-dark`}>Chủ sân</Link>
-                )
-            } else if (item.role.name == "ROLE_OWNER") {
-                return (
-                    <Link href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</Link>
-                )
-            }
-        })
-        return (
-            <>
-                ok
-            </>
-        )
     }
 
     return (
