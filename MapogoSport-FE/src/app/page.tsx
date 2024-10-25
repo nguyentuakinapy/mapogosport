@@ -12,12 +12,14 @@ import RegisterModal from "@/components/account/modal/register.modal";
 import ForgotPassword from "@/components/account/modal/forgotPassword.modal";
 import ChangePasswordNew from "@/components/account/modal/change-password-new.modal";
 import Popup from "@/components/User/modal/popup-voucher.modal";
+import useSWR from "swr";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
   const [sportFields, setSportFields] = useState<SportField[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
+  const [userData, setUserData] = useState<User>();
 
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
@@ -101,13 +103,45 @@ export default function Home() {
     fetchData()
   }, [])
 
+  const [username, setUsername] = useState<string>("");
+  useEffect(() => {
+    const user = sessionStorage.getItem('user');
+    if (user) {
+      const parsedUserData = JSON.parse(user) as User;
+      setUsername(parsedUserData.username);
+      // console.log(parsedUserData); // Kiểm tra dữ liệu
+    }
+  })
+
+  const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+  const { data, error, isLoading } = useSWR(
+    username == "" ? null : `http://localhost:8080/rest/user/${username}`, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
+
+  useEffect(() => {
+    if (data) {
+      setUserData(data);
+    }
+  }, [data])
+
+  const [hasOwnerRole, setHasOwnerRole] = useState(false);
+
+  useEffect(() => {
+    const authorities = userData?.authorities || [];
+    const ownerRoleExists = authorities.some(item => item.role.name === "ROLE_OWNER");
+    setHasOwnerRole(ownerRoleExists);
+  }, [userData]);
 
   return (
     <HomeLayout>
       <Container className="pt-3">
         <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">
           <div className="carousel-inner">
-            <div className="carousel-item active" data-bs-interval="2000">
+            <div className="carousel-item" data-bs-interval="2000">
               <img src="/images/bannerSport.png" className="d-block w-100" alt="..." />
               <Link href={'/categories/sport_field'} style={{
                 position: 'absolute',
@@ -122,26 +156,34 @@ export default function Home() {
                 ĐẶT SÂN NGAY
               </Link>
             </div>
-            {/* <div className="carousel-item" data-bs-interval="2000">
-              <img src="https://img.thegioithethao.vn/media/banner/thi-cong-cai-tao.png" className="d-block w-100" alt="..." />
-            </div> */}
-            <div className="carousel-item" data-bs-interval="2000">
+            <div className="carousel-item active" data-bs-interval="2000">
               <img src="/images/registerowner.png" className="w-100" alt="" />
-              <button style={{
-                position: 'absolute',
-                top: '40%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                borderRadius: '50px',
-              }} className="btn btn-danger" onClick={() => createOwnerSubmit()}>
-                ĐĂNG KÝ NGAY
-              </button>
+              {hasOwnerRole ? (
+                <a style={{
+                  position: 'absolute',
+                  top: '40%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  borderRadius: '50px',
+                }} className="btn btn-danger" href="/owner">
+                  QUẢN LÝ NGAY
+                </a>
+              ) : (
+                <button style={{
+                  position: 'absolute',
+                  top: '40%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  borderRadius: '50px',
+                }} className="btn btn-danger" onClick={() => createOwnerSubmit()}>
+                  ĐĂNG KÝ NGAY
+                </button>
+              )}
             </div>
-            {/* <div className="carousel-item">
-            <img src="..." className="d-block w-100" alt="..." />
-          </div> */}
           </div>
           <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleInterval" data-bs-slide="prev">
             <span className="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -355,9 +397,9 @@ export default function Home() {
             <Popup key={voucher.voucherId} voucher={voucher} />
           ))}
         </div>
-
       </Container>
-      <CreateOwnerModal showCreateOwnerModal={showCreateOwnerModal} setShowCreateOwnerModal={setShowCreateOwnerModal}></CreateOwnerModal>
+      <CreateOwnerModal showCreateOwnerModal={showCreateOwnerModal}
+        setShowCreateOwnerModal={setShowCreateOwnerModal} userData={userData} />
       <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}
         showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
         showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}></LoginModal>

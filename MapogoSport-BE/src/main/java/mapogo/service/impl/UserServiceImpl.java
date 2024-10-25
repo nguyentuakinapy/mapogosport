@@ -1,18 +1,32 @@
 package mapogo.service.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import mapogo.dao.AccountPackageDAO;
 import mapogo.dao.UserDAO;
+import mapogo.dao.UserSubscriptionDAO;
+import mapogo.entity.AccountPackage;
 import mapogo.entity.User;
+import mapogo.entity.UserSubscription;
 import mapogo.service.UserService;
 
 @Service
 public class UserServiceImpl implements UserService {
 	@Autowired
 	UserDAO userDAO;
+	
+	@Autowired
+	AccountPackageDAO accountPackageDAO;
+	
+	@Autowired
+	UserSubscriptionDAO userSubscriptionDAO;
 
 	@Override
 	public User findByUsername(String username) {
@@ -39,4 +53,30 @@ public class UserServiceImpl implements UserService {
 		return userDAO.findByEmail(email);
 	}
 
+	@Override
+	public UserSubscription saveUserSubcription(Map<String, Object> data) {
+		UserSubscription uS = new UserSubscription();
+		
+		AccountPackage ap = accountPackageDAO.findById((Integer) data.get("accountPackageId")).get();
+		User u = userDAO.findById((String) data.get("username")).get();
+	    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+		uS.setAccountPackage(ap);
+		uS.setUser(u);
+
+	    try {
+	        uS.setStartDay(dateFormat.parse((String) data.get("startDay")));
+	        uS.setEndDay(dateFormat.parse((String) data.get("endDay")));
+	    } catch (ParseException e) {
+	        e.printStackTrace();
+	    }
+
+	    uS.setStatus((String) data.get("status"));
+		return userSubscriptionDAO.save(uS);
+	}
+
+	@Override
+	public UserSubscription findUserSubscriptionByUser(String username) {
+		return userSubscriptionDAO.findByUsername(username);
+	}
 }
