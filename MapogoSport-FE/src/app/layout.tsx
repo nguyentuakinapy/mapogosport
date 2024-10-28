@@ -7,7 +7,6 @@ import "./globals.scss";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 const inter = Inter({ subsets: ['latin'] })
-import ForgotPassword from '@/components/account/modal/forgotPassword.modal';
 import ChatMessenger from '@/components/app.chatMessenger';
 
 import 'react-toastify/dist/ReactToastify.css';

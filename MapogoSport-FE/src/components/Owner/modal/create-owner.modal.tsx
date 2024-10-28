@@ -143,10 +143,10 @@ const CreateOwnerModal = (props: OwnerProps) => {
             </Modal.Header>
             <Modal.Body>
                 {page ?
-                    <Row className="my-3" style={{ fontSize: '15px' }}>
+                    <Row className="my-3" style={{ fontSize: '15px', height: '100%', display: 'flex' }}>
                         {accountPackage && accountPackage.map(ap => {
                             return (
-                                <Col xs={4} key={ap.accountPackageId}>
+                                <Col xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div className="card packageUpdate">
                                         <b className="ms-3 mt-3 fs-5">{ap.packageName}</b>
                                         <div className="body-package my-3">
@@ -163,8 +163,9 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                 </Col>
                             )
                         })}
-                        <Button onClick={() => setShowCreateOwnerModal(false)} className="btn btn-secondary">Hủy</Button>
-
+                        <Button onClick={() => {
+                            setShowCreateOwnerModal(false)
+                        }} className="btn btn-secondary mt-3">Hủy</Button>
                     </Row>
                     :
                     <Row>
@@ -308,7 +309,11 @@ const CreateOwnerModal = (props: OwnerProps) => {
                         <div className="d-flex justify-content-around">
                             <Button onClick={() => setPage(true)} className="btn btn-primary">Quay lại</Button>
                             <Button onClick={() => handleSubmit()} className="btn btn-danger">Thanh toán</Button>
-                            <Button onClick={() => setShowCreateOwnerModal(false)} className="btn btn-secondary">Hủy</Button>
+                            <Button onClick={() => {
+                                setShowCreateOwnerModal(false), setTimeout(() => {
+                                    setPage(true)
+                                }, 500);
+                            }} className="btn btn-secondary">Hủy</Button>
                         </div>
                     </Row>
                 }

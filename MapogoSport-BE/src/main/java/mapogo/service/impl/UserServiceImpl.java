@@ -79,4 +79,12 @@ public class UserServiceImpl implements UserService {
 	public UserSubscription findUserSubscriptionByUser(String username) {
 		return userSubscriptionDAO.findByUsername(username);
 	}
+
+	@Override
+	public UserSubscription updateUserSubscription(Map<String, Object> data) {
+		UserSubscription uS = userSubscriptionDAO.findById((Integer) data.get("userSubscriptionId")).get();
+		AccountPackage ap = accountPackageDAO.findById((Integer) data.get("accountPackageId")).get();
+		uS.setAccountPackage(ap);
+		return userSubscriptionDAO.save(uS);
+	}
 }

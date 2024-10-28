@@ -64,8 +64,7 @@ export default function Header({ isAniActive, toggleAni, weather, userData }: He
 
 
     return (
-        <header className={`${isAniActive ? 'aniHead' : ''} 
-        `}>
+        <header className={`${isAniActive ? 'aniHead' : ''}`}>
             <div className="d-flex m-0 justify-content-between align-items-center m-auto">
                 <div className="d-flex justify-content-center align-items-center">
                     <i className={`bi ${isAniActive ? 'bi-list' : 'bi-filter-left'} mx-3`} onClick={() => {

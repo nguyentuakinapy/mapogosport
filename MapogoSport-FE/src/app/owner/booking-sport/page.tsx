@@ -239,7 +239,7 @@ export default function BookingSport() {
             setOnDay(currentDate.toISOString().split('T')[0]);
         } else {
             const currentStart = new Date(startWeek);
-            const daysToAdd = direction === 'forward' ? 1 : -1;
+            const daysToAdd = direction === 'forward' ? 7 : -7;
 
             currentStart.setDate(currentStart.getDate() + daysToAdd);
             const newStartWeek = currentStart.toISOString().split('T')[0];
@@ -570,7 +570,7 @@ export default function BookingSport() {
     const handleGetDataBookingOnDay = (event: React.MouseEvent<HTMLTableCellElement>) => {
         const sportDetail = event.currentTarget.getAttribute("sport-detail");
         const startTime = event.currentTarget.getAttribute("time-data");
-        const dayStartBooking = new Date(onDay);
+        const dayStartBooking = new Date(onDay); 
 
         const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
 

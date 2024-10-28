@@ -138,6 +138,35 @@ export default function Home() {
 
   return (
     <HomeLayout>
+      <div style={{
+        minHeight: '500px',
+        backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(/images/bannerSport.png)',
+        backgroundSize: '100% 100%',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div
+          style={{
+            width: '300px',
+            padding: '10px',
+            fontSize: '16px',
+            borderRadius: '5px',
+            border: 'none',
+            outline: 'none',
+            position: 'absolute',
+            top: '50%',
+            transform: 'translateY(-50%)'
+          }}
+        >
+          <input type="text" />
+          <button></button>
+        </div>
+      </div>
+
       <Container className="pt-3">
         <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">
           <div className="carousel-inner">

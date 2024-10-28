@@ -2,6 +2,7 @@ body {
   background: #F6F6F6 !important
 }
 
+
 .thumbnail-container {
   text-align: center;
   /* Căn giữa hình ảnh thu nhỏ */
@@ -305,8 +306,9 @@ body {
 .head-hv-nav {
   letter-spacing: 0.5px;
   margin: 0px 10px;
-  font-weight: bold !important;
-  color: black !important;
+  font-weight: 600 !important;
+  color: rgb(255, 255, 255) !important;
+  font-size: 16px;
 }
 
 .head-hv-nav:hover {
@@ -456,14 +458,14 @@ body {
 }
 
 .page-item .page-link {
-  color: #000; 
+  color: #000;
   font-weight: 500;
   border: none;
-  background-color: #f3f3f3; 
+  background-color: #f3f3f3;
 }
 
 .page-item.active .page-link {
-  background-color: #ff4500; 
+  background-color: #ff4500;
   border-radius: 5px;
   color: white;
   border: none;
@@ -471,11 +473,13 @@ body {
 
 .page-link:hover {
   text-decoration: none;
-  color: #ff4500; /* Hover color */
+  color: #ff4500;
+  /* Hover color */
 }
 
 .page-item.disabled .page-link {
-  color: #d3d3d3; /* Disabled arrow color */
+  color: #d3d3d3;
+  /* Disabled arrow color */
 }
 
 
@@ -483,7 +487,8 @@ body {
 /* XEM THÊM */
 
 .see-more-link {
-  color: #FF4500; /* Bright orange color */
+  color: #FF4500;
+  /* Bright orange color */
   text-decoration: none;
   font-weight: bold;
   font-size: 16px;
@@ -493,7 +498,8 @@ body {
 }
 
 .see-more-link:hover {
-  color: #FF6347; /* Slightly darker on hover */
+  color: #FF6347;
+  /* Slightly darker on hover */
 }
 
 .see-more-link:hover::before {
@@ -503,11 +509,13 @@ body {
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #FF6347; /* Same color as hover */
+  background-color: #FF6347;
+  /* Same color as hover */
 }
 
 .see-more-link::after {
-  content: '\203A'; /* Unicode for the right arrow */
+  content: '\203A';
+  /* Unicode for the right arrow */
   font-size: 16px;
   position: relative;
   left: 5px;
@@ -622,4 +630,3 @@ body {
   font-weight: bold;
   border: dotted;
 }
-
