@@ -60,7 +60,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                                     <tr key={detail.orderDetailId}>
                                         <td className="text-start title">
                                             <Link href={"#"}>
-                                                <Image src={detail.productDetailSize.productDetail.product.image} width={"15%"} className="mx-2"></Image>
+                                                <Image src={`${detail.productDetailSize.productDetail.product.image}`} width={"15%"} className="mx-2"></Image>
                                                 {detail.productDetailSize.productDetail.product.name}
                                             </Link>
                                         </td>
