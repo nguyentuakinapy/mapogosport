@@ -89,4 +89,10 @@ public class CartService {
 	public boolean existedByCartId(Integer cartId) {
 		return cartDao.existsById(cartId);
 	}
+
+	//Mỵ đây
+	public Cart findById(Integer cartId) {
+		return cartDao.findById(cartId).get();
+	}
+	//đây
 }

@@ -7,6 +7,7 @@ import axios from 'axios';
 import { formatPrice } from '@/components/Utils/Format';
 import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';
+import Link from 'next/link';
 
 
 const Cart = () => {
@@ -98,8 +99,23 @@ const Cart = () => {
 
     // Tính tổng tiền của các sản phẩm đã chọn
     updateTotalPrice(updatedProducts, quantities);
+
   };
 
+  //của Mỵ 
+  const saveCartIdsToLocalStorage = () => {
+    const cartIds = selectedProducts
+      .map((isSelected, index) => (isSelected ? dataCart[index].cartId : null))
+      .filter(id => id !== null);
+    try {
+      localStorage.setItem('CartIds', JSON.stringify(cartIds));
+      console.log(">> Saved to localStorage: ", cartIds);
+    } catch (error) {
+      console.error("Error saving to localStorage:", error);
+    }
+  };
+
+  //
   const handleDeleCartItem = async (index: number) => {
     if (!user) {
       console.log("Người dùng chưa đăng nhập.");
@@ -178,6 +194,7 @@ const Cart = () => {
     };
 
     fetchDataCart();
+
   }, []);
 
   return (
@@ -275,15 +292,18 @@ const Cart = () => {
                 <button className="btn btn-outline-secondary px-3 me-3 py-3 text-dark mb-4" type="button">
                   Tiếp Tục Mua hàng
                 </button>
-                <button className="btn btn-dark px-3 me-3 py-3 text-light mb-4" type="button">
-                  Thanh toán ngay
-                </button>
+                <Button
+                  className="btn btn-dark px-3 me-3 py-3 text-light mb-4"
+                  type="button"
+                  onClick={() => saveCartIdsToLocalStorage()}
+                  href="/checkout-product"
+                > Thanh Toán Ngay</Button>
               </div>
             </div>
           </Col>
         </div>
-      </div>
-    </HomeLayout>
+      </div >
+    </HomeLayout >
   );
 };
 
