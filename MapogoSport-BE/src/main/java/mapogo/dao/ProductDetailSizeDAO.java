@@ -11,4 +11,8 @@ import mapogo.entity.ProductDetailSize;
 public interface ProductDetailSizeDAO extends JpaRepository<ProductDetailSize, Integer>{
 	  @Query("SELECT pds FROM ProductDetailSize pds WHERE pds.productDetail.id = :productDetailId")
 	    List<ProductDetailSize> findByProductDetailId(@Param("productDetailId") Integer productDetailId);
+	  
+	  //Mỵ
+	  ProductDetailSize  findByProductDetailSizeId(Integer productDetailSizeId);
+	  //My
 }

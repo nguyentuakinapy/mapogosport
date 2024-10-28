@@ -67,7 +67,7 @@ public class SportFieldManagerRestController {
 		System.out.println(sportField.getName());
 		System.out.println(sportField.getOpening());
 		System.out.println(sportField.getStatus());
-SportField sportField1 = new SportField();
+		SportField sportField1 = new SportField();
         return ResponseEntity.ok(sportField1);
     }
 	

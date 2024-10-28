@@ -1,4 +1,5 @@
 interface Product {
+    filter(arg0: (_: any, idx: any) => boolean): unknown;
     productId: number;
     name: string;
     categoryProduct: CategoryProduct;
