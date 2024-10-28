@@ -80,7 +80,6 @@ public class AddressUserServiceImpl implements AddressUserService{
 	        currentAddress.setAddress(savedAddress);
 	    }
 
-	    currentAddress.setPhoneNumber(updateAddress.getPhoneNumber());
 	    currentAddress.setAddressDetail(updateAddress.getAddressDetail());
 
 	    return addressUserDAO.save(currentAddress);

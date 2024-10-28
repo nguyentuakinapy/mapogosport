@@ -140,7 +140,7 @@ const Categories = () => {
                                             <div className="img ratio-1-1">
                                                 <Link href="">
                                                     <img nh-lazy="image" className="img-fluid" alt={product.name}
-                                                        src={`/images/Images_product/${typeof product.image === 'string' ? product.image : ''}`} />
+                                                        src={`${typeof product.image === 'string' ? product.image : ''}`} />
                                                 </Link>
                                             </div>
                                             <div className="product-action-wishlist">
