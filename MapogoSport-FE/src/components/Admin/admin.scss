@@ -1,55 +1,94 @@
 /*======================================================Modal Product CSS Start======================================================*/
-.modal-fullscreen {
-    max-width: 100%;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
+/* SCSS màu sản phẩm và nút delete sản phẩm*/
+.color-wrapper {
+  position: relative;
 
-/* Đảm bảo rằng nội dung modal được căn giữa và phù hợp với kích thước fullscreen */
-.modal-fullscreen .modal-content {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-.text-center {
-    .avatar-upload {
-        display: inline-block;
-        position: relative;
-        overflow: hidden;
-        .avatar-edit {
-            position: absolute;
-            bottom: -1px;
-            width: 100%;
-            text-align: center;
-            z-index: 9;
-            input + label {
-                margin-bottom: 0;
-                background-color: #000;
-                cursor: pointer;
-                transition: all 0.2s ease-in-out;
-                width: 100%;
-                color: #fff;
-                text-decoration: none;
-            }
-            input {
-                display: none;
-            }
-        }
-        .avatar-preview {
-            div {
-                width: 20rem; // Có thể thay đổi kích thước theo ý muốn
-                height: 20rem; // Đặt chiều cao cố định để hình ảnh không bị méo
-                margin: 0 auto;
-                background-size: cover; // Đảm bảo hình ảnh được co giãn theo tỷ lệ
-                background-repeat: no-repeat;
-                background-position: center; // Đặt vị trí hình ảnh ở giữa
-                border-radius: 10px; // Thêm bo tròn nếu cần
-                border: 1px solid #ccc; // Thêm viền nếu muốn
-            }
-        }
+  .color-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    // border: 2px solid black;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+        cursor: pointer;
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+
+      // Khi hover vào vòng tròn màu, nút delete cũng nổi bật hơn
+      + .button-delete-color {
+        opacity: 1;
+        transform: scale(1.1);
+      }
     }
+  }
+
+  .button-delete-color {
+    top: -5px;
+    right: -5px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #7e6568; // Background màu đỏ nhạt
+    // background-color: #f8d7da; // Background màu đỏ nhạt
+    border: none;
+    transition: opacity 0.2s, transform 0.2s;
+    opacity: 0.7;
+
+    // Hiệu ứng khi hover
+    &:hover {
+        border: 1px solid #000;
+      background-color: #dc3545; // Màu đỏ đậm
+      opacity: 1;
+    }
+
+    i {
+      font-size: 12px; // Kích thước nhỏ hơn của icon
+    }
+  }
+}
+/*Kết thúc SCSS màu sản phẩm và nút delete sản phẩm*/
+
+.text-center {
+  .avatar-upload {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    .avatar-edit {
+      position: absolute;
+      bottom: -1px;
+      width: 100%;
+      text-align: center;
+      z-index: 9;
+      input + label {
+        margin-bottom: 0;
+        background-color: #000;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        width: 100%;
+        color: #fff;
+        text-decoration: none;
+      }
+      input {
+        display: none;
+      }
+    }
+    .avatar-preview {
+      div {
+        width: 20rem; // Có thể thay đổi kích thước theo ý muốn
+        height: 20rem; // Đặt chiều cao cố định để hình ảnh không bị méo
+        margin: 0 auto;
+        background-size: cover; // Đảm bảo hình ảnh được co giãn theo tỷ lệ
+        background-repeat: no-repeat;
+        background-position: center; // Đặt vị trí hình ảnh ở giữa
+        border-radius: 10px; // Thêm bo tròn nếu cần
+        border: 1px solid #ccc; // Thêm viền nếu muốn
+      }
+    }
+  }
 }
 
 /*======================================================Modal Product CSS End======================================================*/

@@ -9,6 +9,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -37,6 +39,8 @@ public class Size implements Serializable {
 	private String sizeName;
 
 	@OneToMany(mappedBy = "size", cascade = CascadeType.ALL)
-	@JsonBackReference
+//	@JsonBackReference
+//	@JsonManagedReference // QA sửa 23/10
+	@JsonIgnore
 	private List<ProductDetailSize> productDetailSizes;
 }

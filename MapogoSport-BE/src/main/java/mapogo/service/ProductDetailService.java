@@ -3,6 +3,9 @@ package mapogo.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Query;
+
+import mapogo.entity.Product;
 import mapogo.entity.ProductDetail;
 import mapogo.entity.ProductDetailSize;
 
@@ -18,5 +21,12 @@ public interface ProductDetailService {
 	Optional<Double> findPriceByProductDetailIdAndSizeId(Integer productDetailId, Integer sizeId);
 	
 	List<Object[]> findByImageDetailAndGalleryByIdProductDetail(Integer productDetailId);
+
+	Optional<ProductDetail> findByIdProduct(Integer id);// select productDetail by productId
 	
+	ProductDetail create(ProductDetail productDetail);
+	ProductDetail update(ProductDetail productDetail);
+	void delete(Integer id);
+	
+//	ProductDetail findProduct_Id_By_Product_Detail_Id( Integer productDetail_Id);
 }

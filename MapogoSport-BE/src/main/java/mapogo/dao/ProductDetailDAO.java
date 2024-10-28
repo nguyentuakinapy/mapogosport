@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import mapogo.entity.Product;
 import mapogo.entity.ProductDetail;
 import mapogo.entity.ProductDetailSize;
 
@@ -46,5 +47,12 @@ public interface ProductDetailDAO extends JpaRepository<ProductDetail, Integer> 
 //			+ "JOIN Product AS p ON p.productId = pd.product.productId\r\n"
 //			+ "WHERE p.productId = :productId\r\n"
 //			+ "")
+		
+//		  select Product_Id from ProductDetails where Product_Detail_Id = 3
+		
+//		@Query("SELECT o.productId FROM ProductDetails o where o.productDetailId = ?1")
+		
+		@Query("SELECT o.product.productId FROM ProductDetail o WHERE o.productDetailId = :productDetailId")
+		ProductDetail findProduct_Id_By_Product_Detail_Id(@Param("productDetailId") Integer productDetailId);
 
 }

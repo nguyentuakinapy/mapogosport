@@ -10,7 +10,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**") // Thay đổi theo đường dẫn API của bạn
+        registry.addMapping("/**") // Thay đổi theo đường dẫn API của bạn
                 .allowedOrigins("http://localhost:3000") // Thay đổi nếu cần
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Các phương thức cho phép
                 .allowedHeaders("*"); // Cho phép tất cả các headers

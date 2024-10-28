@@ -46,6 +46,12 @@ public class GalleryServiceImpl implements GalleryService{
 	public void deleteById(Integer id) {
 		// TODO Auto-generated method stub
 		galleryDAO.deleteById(id);
+	}
+
+	@Override
+	public List<Gallery> findGalleryByProductDetailId(Integer id) {
+		// TODO Auto-generated method stub
+		return galleryDAO.findGalleryByProductDetailId(id);
 	}  
 
 }
