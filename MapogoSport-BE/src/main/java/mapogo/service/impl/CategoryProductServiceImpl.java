@@ -1,4 +1,4 @@
-package mapogo.service;
+package mapogo.service.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,9 +8,10 @@ import org.springframework.stereotype.Service;
 
 import mapogo.dao.CategoryProductDAO;
 import mapogo.entity.CategoryProduct;
+import mapogo.service.CategoryProductService;
 
 @Service
-public class CategoryServiceImpl implements CategoryProductService{
+public class CategoryProductServiceImpl implements CategoryProductService{
 	@Autowired
 	CategoryProductDAO categoryProductDAO;
 	

@@ -14,4 +14,8 @@ public interface BookingService {
 	List<Booking> findById(Integer id);
 	
 	Booking createBooking(Map<String, Object> booking);
+	
+	Double findTotalAmountByOwnerAndStatus(Integer ownerId);
+	
+	Double findRevenueByDate(Integer ownerId, Integer flag, String startDate, String endDate);
 }

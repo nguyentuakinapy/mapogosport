@@ -91,5 +91,21 @@ public class BookingRestController {
 	public BookingDetail saveBookingDetail(@RequestBody Map<String, Object> bd) {
 		return bookingDetailService.createBookingDetail(bd);
 	}
+	
+	@GetMapping("/booking/successful/revenue/{ownerId}")
+	public Double findTotalAmountByOwnerAndStatus(@PathVariable("ownerId") Integer ownerId) {
+	    return bookingService.findTotalAmountByOwnerAndStatus(ownerId);
+	}
+	
+	@GetMapping("/booking/success/revenue/byDate/{ownerId}/{flag}/{startDate}/{endDate}")
+	public Double findRevenueByDate(@PathVariable("ownerId") Integer ownerId,
+									@PathVariable("flag") Integer flag,
+									@PathVariable("startDate") String startDate,
+									@PathVariable("endDate") String endDate) {
+		
+		return bookingService.findRevenueByDate(ownerId, flag, startDate, endDate);
+		
+	}
+
 
 }
