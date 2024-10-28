@@ -138,7 +138,7 @@ export default function Home() {
 
   return (
     <HomeLayout>
-      {/* <div style={{
+      <div style={{
         minHeight: '500px',
         backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(/images/bannerSport.png)',
         backgroundSize: '100% 100%',
@@ -165,7 +165,7 @@ export default function Home() {
           <input type="text" />
           <button></button>
         </div>
-      </div> */}
+      </div>
 
       <Container className="pt-3">
         <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">

@@ -130,29 +130,25 @@ const Header = () => {
 
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
-            <Navbar expand="lg" className='header-area bg-light' style={{ position: 'sticky', zIndex: '1001', borderBottom: '2px solid #143962' }}>
+            <Navbar expand="lg" style={{ position: 'sticky', zIndex: '1001', backgroundColor: '#090e1e' }}>
                 <Container>
                     <Navbar><Link href={'/'} ><img src="/images/logo.png" style={{ width: '100px' }} alt="" /></Link></Navbar>
                     <Navbar.Toggle aria-controls="navbarScroll" />
                     <Navbar.Collapse id="navbarScroll">
                         <Form className="d-flex m-auto">
                             <div className="input-group">
-                                <input type="search" className='form-control border border-dark' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
+                                <input type="search" className='form-control border border-secondary bg-secondary' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
                                     style={{ width: '300px' }} />
                                 <Button variant="outline-dark"><i className="bi bi-search"></i></Button>
                             </div>
                         </Form>
                         <Nav
-                            className="ms-auto my-2 my-lg-0 d-flex justify-content-center align-items-center"
+                            className="ms-auto my-2 my-lg-0 d-flex justify-content-center align-items-center nav-home"
                             style={{ maxHeight: '100px' }}
                             navbarScroll
                         >
-                            <Nav>
-                                <Link href="/categories/products" className='head-hv-nav text-decoration-none '><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
-                            </Nav>
-                            <Nav>
-                                <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
-                            </Nav>
+                            <Link href="/categories/products" className='head-hv-nav text-decoration-none'><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
+                            <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
                             <div className="dropdown">
                                 <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
                                     <i className="bi bi-person-fill me-2"></i>{userData ? userData?.fullname : 'Tài khoản'}
