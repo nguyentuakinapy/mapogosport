@@ -111,7 +111,7 @@ const Categories = () => {
                                             <div className="img ratio-1-1">
                                                 <Link href="">
                                                     <img nh-lazy="image" className="img-fluid" alt={product.name}
-                                                        src={`/images/Images_product/${typeof product.image === 'string' ? product.image : ''}`} />
+                                                        src={`${typeof product.image === 'string' ? product.image : ''}`} />
                                                 </Link>
                                             </div>
                                             <div className="product-action-wishlist">
@@ -139,7 +139,7 @@ const Categories = () => {
                                             <div className="product-category ms-1">
                                                 <Link href="">{product.categoryProduct.name}</Link>
                                             </div>
-                                            <div className="product-title ms-1" style={{overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px'}}>
+                                            <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
                                                 <Link href="">{product.name}</Link>
                                             </div>
                                             <div className="d-flex mt-2" style={{ justifyContent: 'space-between', width: '100%' }}>

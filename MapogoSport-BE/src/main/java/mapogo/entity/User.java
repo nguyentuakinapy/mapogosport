@@ -111,5 +111,8 @@ public class User implements Serializable {
 	@JsonManagedReference("user-userVoucher-reference")
 	private List<UserVoucher> UserVoucher;
 	
+	@OneToMany(mappedBy = "user")
+	@JsonManagedReference
+	private List<PhoneNumberUser> phoneNumberUsers;
 }
 

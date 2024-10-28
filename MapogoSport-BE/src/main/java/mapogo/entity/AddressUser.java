@@ -33,9 +33,6 @@ public class AddressUser implements Serializable {
 	@JoinColumn(name = "AddressId", nullable = false)
 	private Address address;
 
-	@Column(name = "PhoneNumber")
-	private String phoneNumber;
-
 	@Column(name = "AddressDetail", nullable = false)
 	private String addressDetail;
 
