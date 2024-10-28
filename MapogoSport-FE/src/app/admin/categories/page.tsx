@@ -18,6 +18,15 @@ const AdminProduct = () => {
     const [currentCategoryField, setCurrentCategoryField] = useState<CategoryField | null>(null); // Updated type to allow null
     const [activeTab, setActiveTab] = useState<string>('categoriesProduct');
 
+    // Pagination
+    const itemsPerPage = 8;
+    const [currentPage, setCurrentPage] = useState(1);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+
+
+
     //categoriesProduct
 
     useEffect(() => {
@@ -104,6 +113,13 @@ const AdminProduct = () => {
         }
     }, [categoryProducts, currentCategoryProduct]);
 
+    //pagination CategoryProduct
+    const currentItemsCategoryProduct = categoryProducts.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPagesCategoryProduct = Math.ceil(categoryProducts.length / itemsPerPage);
+    const handlePageChangeCategoryProduct = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+    };
+
 
     //categoriesField
 
@@ -189,6 +205,13 @@ const AdminProduct = () => {
         }
     }, [categoryField, currentCategoryField]);
 
+    //pagination Category Field
+    const currentItemsCategoryField = categoryField.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPagesCategoryField = Math.ceil(categoryField.length / itemsPerPage);
+    const handlePageChangeCategoryField = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+    };
+
 
     const renderContent = () => {
         switch (activeTab) {
@@ -217,7 +240,7 @@ const AdminProduct = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {categoryProducts.map((category, index) => (
+                                {currentItemsCategoryProduct.map((category, index) => (
                                     <tr id={`category-${category.categoryProductId}`} key={category.categoryProductId}>
                                         {/* <td className="text-center align-middle">
                                             <FormCheck
@@ -239,7 +262,7 @@ const AdminProduct = () => {
                                                     src={`http://localhost:8080/images/product-images/${category.image}`}
                                                     style={{ width: '150px', height: 'auto' }}
                                                     className="mx-2"
-                                                    // alt={category.image}
+                                                // alt={category.image}
                                                 />
                                             </Link>
                                         </td>
@@ -268,6 +291,80 @@ const AdminProduct = () => {
                                     </tr>
                                 ))}
                             </tbody>
+                            <>
+                                {totalPagesCategoryProduct > 1 && (
+                                    <nav aria-label="Page navigation example">
+                                        <ul className="pagination justify-content-center">
+                                            {/* Nút về trang đầu tiên */}
+                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                <a
+                                                    className="page-link"
+                                                    href="#"
+                                                    aria-label="First"
+                                                    onClick={() => handlePageChangeCategoryProduct(1)}
+                                                    title="Go to first page"
+                                                >
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+
+                                            {/* Hiển thị 5 trang tùy theo currentPage */}
+                                            {Array.from({ length: totalPagesCategoryProduct }, (_, index) => {
+                                                let startPage = 1;
+                                                let endPage = 5;
+
+                                                // Nếu tổng số trang lớn hơn 5
+                                                if (totalPagesCategoryProduct > 5) {
+                                                    // Điều chỉnh để luôn hiển thị 5 trang
+                                                    if (currentPage > 3) {
+                                                        startPage = currentPage - 2;
+                                                        endPage = currentPage + 2;
+                                                        if (endPage > totalPagesCategoryProduct) {
+                                                            endPage = totalPagesCategoryProduct;
+                                                            startPage = totalPagesCategoryProduct - 4; // Đảm bảo vẫn hiển thị đủ 5 trang
+                                                        }
+                                                    }
+                                                } else {
+                                                    // Nếu tổng số trang ít hơn hoặc bằng 5, hiển thị tất cả
+                                                    endPage = totalPagesCategoryProduct;
+                                                }
+
+                                                // Hiển thị các trang từ startPage đến endPage
+                                                if (index + 1 >= startPage && index + 1 <= endPage) {
+                                                    return (
+                                                        <li
+                                                            key={index + 1}
+                                                            className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
+                                                            title={`Go to page ${index + 1}`}
+                                                        >
+                                                            <a
+                                                                className="page-link"
+                                                                href="#"
+                                                                onClick={() => handlePageChangeCategoryProduct(index + 1)}
+                                                            >
+                                                                {index + 1}
+                                                            </a>
+                                                        </li>
+                                                    );
+                                                }
+
+                                                return null;
+                                            })}
+                                            <li className={`page-item ${currentPage === totalPagesCategoryProduct ? 'disabled' : ''}`}>
+                                                <a
+                                                    className="page-link"
+                                                    href="#"
+                                                    aria-label="Last"
+                                                    onClick={() => handlePageChangeCategoryProduct(totalPagesCategoryProduct)}
+                                                    title="Go to last page"
+                                                >
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                )}
+                            </>
                         </Table>
                         <CategoryAddNew
                             showAddCategory={showModal}
@@ -280,7 +377,7 @@ const AdminProduct = () => {
                 );
             case 'categoriesField':
                 return (
-                    <div className="box-table-border mb-4">
+                    <div className="box-table-border mb-4 text-center">
                         <Table striped className="mb-0">
                             <thead>
                                 <tr>
@@ -325,7 +422,7 @@ const AdminProduct = () => {
                                                     src={`http://localhost:8080/images/product-images/${category.image}`}
                                                     style={{ width: '150px', height: 'auto' }}
                                                     className="mx-2"
-                                                    // alt={category.image}
+                                                // alt={category.image}
                                                 />
                                             </Link>
                                         </td>
@@ -354,7 +451,82 @@ const AdminProduct = () => {
                                     </tr>
                                 ))}
                             </tbody>
+
                         </Table>
+                        
+                            {totalPagesCategoryField > 1 && (
+                                <nav aria-label="Page navigation example" style={{ textAlign: 'center' }}>
+                                    <ul className="pagination justify-content-center">
+                                        {/* Nút về trang đầu tiên */}
+                                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                            <a
+                                                className="page-link"
+                                                href="#"
+                                                aria-label="First"
+                                                onClick={() => handlePageChangeCategoryField(1)}
+                                                title="Go to first page"
+                                            >
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+
+                                        {/* Hiển thị 5 trang tùy theo currentPage */}
+                                        {Array.from({ length: totalPagesCategoryField }, (_, index) => {
+                                            let startPage = 1;
+                                            let endPage = 5;
+
+                                            // Nếu tổng số trang lớn hơn 5
+                                            if (totalPagesCategoryField > 5) {
+                                                // Điều chỉnh để luôn hiển thị 5 trang
+                                                if (currentPage > 3) {
+                                                    startPage = currentPage - 2;
+                                                    endPage = currentPage + 2;
+                                                    if (endPage > totalPagesCategoryField) {
+                                                        endPage = totalPagesCategoryField;
+                                                        startPage = totalPagesCategoryField - 4; // Đảm bảo vẫn hiển thị đủ 5 trang
+                                                    }
+                                                }
+                                            } else {
+                                                // Nếu tổng số trang ít hơn hoặc bằng 5, hiển thị tất cả
+                                                endPage = totalPagesCategoryField;
+                                            }
+
+                                            // Hiển thị các trang từ startPage đến endPage
+                                            if (index + 1 >= startPage && index + 1 <= endPage) {
+                                                return (
+                                                    <li
+                                                        key={index + 1}
+                                                        className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
+                                                        title={`Go to page ${index + 1}`}
+                                                    >
+                                                        <a
+                                                            className="page-link"
+                                                            href="#"
+                                                            onClick={() => handlePageChangeCategoryField(index + 1)}
+                                                        >
+                                                            {index + 1}
+                                                        </a>
+                                                    </li>
+                                                );
+                                            }
+
+                                            return null;
+                                        })}
+                                        <li className={`page-item ${currentPage === totalPagesCategoryField ? 'disabled' : ''}`}>
+                                            <a
+                                                className="page-link"
+                                                href="#"
+                                                aria-label="Last"
+                                                onClick={() => handlePageChangeCategoryField(totalPagesCategoryField)}
+                                                title="Go to last page"
+                                            >
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            )}
+                        
                         <CategoryFieldAddNew
                             showAddCategory={showModal}
                             setShowAddCategory={handleCloseModalField}
