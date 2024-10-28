@@ -1,12 +1,15 @@
 'use client'
+import ModalAddAddress from '@/components/Owner/modal/booking.modal';
+import ModalCreateSportField from '@/components/Owner/modal/owner.createSportField';
 import axios from 'axios';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Table } from 'react-bootstrap';
+import { Button, Table } from 'react-bootstrap';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 
 const SportFieldList = () => {
+    const [showSportFieldModal, setShowSportFieldModal] = useState<boolean>(false)
     const [sportFields, setSportFields] = useState([]);
     const [user, setUser] = useState(null);
 
@@ -24,6 +27,8 @@ const SportFieldList = () => {
                 .catch(error => console.error('Error:', error));
         }
     }, []);
+
+
     return (
         <>
             <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>QUẢN LÝ SÂN</h3>
@@ -70,9 +75,12 @@ const SportFieldList = () => {
                 </div>
 
             ))}
-            <div className="card">
-                <Link href={'/owner?check=withdraw'} className='btn btn-danger'><i className="bi bi-plus-circle me-2"></i>Thêm khu vực</Link>
-            </div>
+
+            <Button style={{ width: "100%" }} variant='danger' className='' onClick={() => setShowSportFieldModal(true)}>
+                <i className="bi bi-plus-circle"></i> Thêm khu vực
+            </Button>
+            <ModalCreateSportField showSportFieldModal={showSportFieldModal} setShowSportFieldModal={setShowSportFieldModal} />
+
         </>
     );
 };

@@ -1,16 +1,60 @@
 'use client'
 import HomeLayout from '@/components/HomeLayout';
-import React from 'react';
+import axios from 'axios';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
-import { InputGroup } from 'react-bootstrap';
+import { Button, InputGroup } from 'react-bootstrap';
+import { formatPrice } from '@/components/Utils/Format';
 
 // import Button from 'react-bootstrap/Button';
 import Collapse from 'react-bootstrap/Collapse';
 const CheckoutPage = () => {
-
   const [open, setOpen] = useState(false);
   const [open_1, setOpen_1] = useState(false);
 
+  // Dữ liệu giỏ hàng
+  const [data, setData] = useState([]);
+  const [cartIds, setCartIds] = useState([]);
+  const userSession = sessionStorage.getItem('user');
+  const user = userSession ? JSON.parse(userSession) : null;
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  // const products = localStorage.getItem('productIds');
+  useEffect(() => {
+    const storedCartIds = localStorage.getItem('CartIds');
+    if (storedCartIds) {
+      setCartIds(JSON.parse(storedCartIds));
+    }
+  }, []);
+  console.log("Checkout cartIds: ", cartIds);
+
+
+  useEffect(() => {
+    // Hàm lấy dữ liệu giỏ hàng
+    const fetchData = async () => {
+      if (cartIds && cartIds.length > 0) { // Chỉ thực hiện khi cartIds có dữ liệu
+        try {
+          // Tạo đường dẫn với cartIds được nối thành chuỗi, giả sử API yêu cầu dạng này
+          const response = await axios.get(`http://localhost:8080/rest/checkout_product/${cartIds.join(",")}`);
+          setData(response.data); // Lưu dữ liệu giỏ hàng vào state
+          console.log(">>> check data checkout: ", response.data);
+        } catch (err) {
+          console.log('Lỗi:', err);
+        }
+
+      }
+    }
+
+    fetchData();
+  }, [cartIds]);
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      const total = data.reduce((sum, cart) => sum + cart.productDetailSize.price * cart.quantity, 0);
+      setTotalPrice(total);
+      console.log("Tổng giá trị của giỏ hàng:", total);
+    }
+  }, [data]);
 
   return (
     <HomeLayout>
@@ -183,69 +227,33 @@ const CheckoutPage = () => {
 
           {/* Cột phải: Order Summary */}
           <div className="col-lg-5 col-md-12 col-12 rounded">
-            <h5 className='text-primary'>Đơn hàng (8 sản phẩm)</h5>
+            <h5 className='text-primary'>Đơn hàng ({data.length} sản phẩm)</h5>
             <hr />
             <div className="order-summary">
               {/* Order Items */}
-              <div style={{ maxHeight: '130px', overflowY: 'auto' }}>
-                <div className="order-item d-flex align-items-center my-3">
-                  <div className="product-image me-3 position-relative">
-                    <img
-                      src="https://www.racquetpoint.com/cdn/shop/articles/what-is-badminton-racquet-point.jpg?v=1654120169"
-                      className="img-fluid rounded-circle"
-                      style={{ width: "50px", height: "50px" }}
-                      alt=""
-                    />
-                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                      4
-                      {/* <span className="visually-hidden">quantity</span> */}
-                    </span>
+              {data && data.map((cart, index: number) => (
+                <div style={{ maxHeight: '130px', overflowY: 'auto' }}>
+                  <div className="order-item d-flex align-items-center my-3">
+                    <div className="product-image me-3 position-relative">
+                      <img
+                        src="{cart.productDetailSize.productDetail.image}"
+                        className="img-fluid rounded-circle"
+                        style={{ width: "50px", height: "50px" }}
+                        alt=""
+                      />
+                      <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {cart.quantity}
+                        {/* <span className="visually-hidden">quantity</span> */}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="mb-0">{cart.productDetailSize.productDetail.product.name}</p>
+                      <small>({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})</small>
+                    </div>
+                    <span className="ms-auto fw-bold ">{formatPrice(cart.productDetailSize.price * cart.quantity)}</span>
                   </div>
-                  <div>
-                    <p className="mb-0">Ống cầu Yonex quốc tế</p>
-                    <small>160 x 230</small>
-                  </div>
-                  <span className="ms-auto fw-bold ">4.490.000 VND</span>
                 </div>
-                <div className="order-item d-flex align-items-center my-3">
-                  <div className="product-image me-3 position-relative">
-                    <img
-                      src="https://www.racquetpoint.com/cdn/shop/articles/what-is-badminton-racquet-point.jpg?v=1654120169"
-                      className="img-fluid rounded-circle"
-                      style={{ width: "50px", height: "50px" }}
-                      alt=""
-                    />
-                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                      4
-                      {/* <span className="visually-hidden">quantity</span> */}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="mb-0">Ống cầu Yonex quốc tế</p>
-                    <small>160 x 230</small>
-                  </div>
-                  <span className="ms-auto fw-bold">4.490.000 VND</span>
-                </div>
-                <div className="order-item d-flex align-items-center my-3">
-                  <div className="product-image me-3 position-relative">
-                    <img
-                      src="https://www.racquetpoint.com/cdn/shop/articles/what-is-badminton-racquet-point.jpg?v=1654120169"
-                      className="img-fluid rounded-circle"
-                      style={{ width: "50px", height: "50px" }}
-                      alt=""
-                    />
-                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                      4
-                      {/* <span className="visually-hidden">quantity</span> */}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="mb-0">Ống cầu Yonex quốc tế</p>
-                    <small>160 x 230</small>
-                  </div>
-                  <span className="ms-auto fw-bold">4.490.000 VND</span>
-                </div>
-              </div>
+              ))}
               <hr />
               {/* Discount code */}
               <div className="my-3">
@@ -264,7 +272,7 @@ const CheckoutPage = () => {
               {/* Order Summary */}
               <div className="d-flex justify-content-between my-3 fw-light">
                 <span className='fw-bold'>Tạm tính</span>
-                <span className="fw-light">4.490.000 VND</span>
+                <span className="fw-light fw-bold">{formatPrice(totalPrice)}</span>
               </div>
               {/* {Phần trăm tính tiền} */}
               <div className="d-flex justify-content-between my-3 fw-light">
@@ -281,16 +289,17 @@ const CheckoutPage = () => {
                 <span className="fw-bold text-primary">4.490.000 VND</span>
               </div>
               <div className="order-total d-flex justify-content-between my-4">
-                <a href="#" className="text-reset text-decoration-none">
+                <a href="/cart" className="text-reset text-decoration-none">
                   <span className="fst-italic">
                     <i className="bi bi-chevron-left"></i> Trở về giỏ hàng
                   </span>
                 </a>
 
-                <span className="btn btn-success px-3">Thanh toán</span>
+                <Button href='' className="btn btn-success px-3">Thanh toán</Button>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </HomeLayout>

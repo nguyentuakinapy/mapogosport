@@ -12,6 +12,7 @@ interface SportField {
     quantity: number;
     status: string;
     image: string;
+    owner: Owner;
     decription: string;
     sportFielDetails: SportFieldDetail[];
 }
@@ -25,4 +26,5 @@ interface SportFieldDetail {
     status: string;
     percentDeposit: number;
     peakHour: string;
+    availableTimes: string[];
 }

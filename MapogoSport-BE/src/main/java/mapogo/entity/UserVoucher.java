@@ -3,6 +3,9 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,10 +28,12 @@ public class UserVoucher implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
+    @JsonBackReference("user-userVoucher-reference")
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "VoucherId", nullable = false)
+    @JsonBackReference("userVoucher-voucher-reference")
     private Voucher voucher;
 
     @Column(name = "Status", nullable = false)

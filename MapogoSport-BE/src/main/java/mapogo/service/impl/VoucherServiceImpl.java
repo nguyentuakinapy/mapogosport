@@ -3,10 +3,13 @@ package mapogo.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import mapogo.dao.VoucherDAO;
 import mapogo.entity.Voucher;
 import mapogo.service.VoucherService;
+
+@Service
 public class VoucherServiceImpl implements VoucherService{
 
 	@Autowired
@@ -19,6 +22,11 @@ public class VoucherServiceImpl implements VoucherService{
 	@Override
 	public List<Voucher> findByDiscountPercent(Integer discountPercent) {
 		return dao.findByDiscountPercent(discountPercent);
+	}
+
+	@Override
+	public List<Voucher> selectVoucherActive() {
+		return dao.selectVoucherActive();
 	}
 
 }

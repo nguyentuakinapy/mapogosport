@@ -24,7 +24,6 @@ const menuGroups = [
                 route: "#",
                 children: [
                     { label: "Sân yêu thích", route: "/user/wishlist/sportfield" },
-                    { label: "Sản phẩm yêu thích", route: "/user/wishlist/product" },
                     { label: "Bình luận và đánh giá", route: "/user/wishlist/comment" },
                     { label: "Phiếu giảm giá", route: "/user/coupon" }
                 ],
@@ -62,7 +61,7 @@ const Sidebar = () => {
     // );
 
     const [name, setName] = useState('');
-    const [avatar, setAvatar] = useState('');
+    const [avatar, setAvatar] = useState();
 
     useEffect(() => {
         const activeItem = menuGroups.flatMap(group => group.menuItems)
@@ -75,7 +74,7 @@ const Sidebar = () => {
     useEffect(() => {
         if (data) {
             setName(data.fullname || '');
-            setAvatar(data.image ? data.image : 'avatar-init.gif');
+            setAvatar(data.avatar ? data.avatar : 'avatar-init.gif');
         }
     }, [data]);
 
@@ -88,9 +87,8 @@ const Sidebar = () => {
                             accept="image/jpeg, image/png" style={{ display: 'none' }} />
                         <label htmlFor="imageUpload" className="btn btn-link"> Sửa </label>
                     </div>
-
                     <div className="avatar-preview">
-                        <div style={{ backgroundImage: `url("/images/${avatar}")` }}></div>
+                        <div style={data ? { backgroundImage: `url("/images/${avatar}")` } : { backgroundImage: `url("/images/avatar-init.gif")` }}></div>
                     </div>
                 </div>
                 <div className="text-dark fw-bold mb-3">{name}</div>

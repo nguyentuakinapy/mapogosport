@@ -49,7 +49,7 @@ public class User implements Serializable {
 	private String email;
 	
 	@Column(name = "Avatar", nullable = true)
-	private String avatar = null;
+	private String avatar = "avatar-init.gif";
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonManagedReference
@@ -92,12 +92,8 @@ public class User implements Serializable {
 	private List<UserSubscription> userSubscriptions;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonManagedReference("user-voucher-reference")
 	private List<Voucher> vouchers;
-	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<UserVoucher> UserVouchers;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
@@ -112,7 +108,7 @@ public class User implements Serializable {
 	private List<Owner> owners;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonManagedReference("user-userVoucher-reference")
 	private List<UserVoucher> UserVoucher;
 	
 }

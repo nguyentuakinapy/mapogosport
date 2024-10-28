@@ -6,8 +6,13 @@ import './style.css';
 import axios from 'axios';
 import { formatPrice } from '@/components/Utils/Format';
 import { toast } from "react-toastify";
+import useSWR, { mutate } from 'swr';
+import Link from 'next/link';
+
 
 const Cart = () => {
+
+
   const [quantities, setQuantities] = useState<number[]>([]);
 
   // Cập nhật hàm tăng số lượng
@@ -16,8 +21,11 @@ const Cart = () => {
     newQuantities[index] += 1; // Tăng số lượng sản phẩm tại vị trí index
     setQuantities(newQuantities); // Cập nhật lại state quantities
     updateQuantityOnServer(index, newQuantities[index]); // Cập nhật số lượng trên server
-    updateTotalPrice(newQuantities); // Cập nhật tổng tiền
+
+    // Cập nhật tổng tiền ngay lập tức
+    updateTotalPrice(selectedProducts, newQuantities);
   };
+
 
   // Cập nhật hàm giảm số lượng
   const decreaseQuantity = (index: number) => {
@@ -25,14 +33,20 @@ const Cart = () => {
     newQuantities[index] = newQuantities[index] > 1 ? newQuantities[index] - 1 : 1; // Giảm số lượng nhưng không nhỏ hơn 1
     setQuantities(newQuantities); // Cập nhật lại state quantities
     updateQuantityOnServer(index, newQuantities[index]); // Cập nhật số lượng trên server
-    updateTotalPrice(newQuantities); // Cập nhật tổng tiền
+
+    // Cập nhật tổng tiền ngay lập tức
+    updateTotalPrice(selectedProducts, newQuantities);
   };
 
   // Hàm cập nhật tổng tiền
-  const updateTotalPrice = (updatedQuantities: number[]) => {
-    const total = updatedQuantities.reduce((sum, quantity, index) => {
-      return sum + dataCart[index].productDetailSize.price * quantity;
+  const updateTotalPrice = (updatedProducts: boolean[], updatedQuantities: number[]) => {
+    const total = updatedProducts.reduce((sum, selected, index) => {
+      if (selected) {
+        return sum + dataCart[index].productDetailSize.price * updatedQuantities[index]; // Sử dụng quantities mới
+      }
+      return sum;
     }, 0);
+
     setTotalPrice(total);
   };
 
@@ -52,62 +66,102 @@ const Cart = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<boolean[]>([]);
   const [totalPrice, setTotalPrice] = useState(0); // Khởi tạo state để lưu tổng tiền
+
   // Hàm chọn tất cả sản phẩm
   const handleSelectAll = () => {
-    const newSelectAll = !selectAll;  // Đảo ngược trạng thái "chọn tất cả"
+    const newSelectAll = !selectAll; // Đảo ngược trạng thái "chọn tất cả"
 
     // Cập nhật trạng thái selectedProducts cho tất cả sản phẩm thành true hoặc false
     const updatedSelectedProducts = dataCart.map(() => newSelectAll);
 
-    setSelectedProducts(updatedSelectedProducts);  // Cập nhật state các sản phẩm đã chọn
-    setSelectAll(newSelectAll);  // Cập nhật state "chọn tất cả"
+    setSelectedProducts(updatedSelectedProducts); // Cập nhật state các sản phẩm đã chọn
+    setSelectAll(newSelectAll); // Cập nhật state "chọn tất cả"
 
     // Tính tổng tiền cho tất cả sản phẩm nếu chúng được chọn
     if (newSelectAll) {
-      const total = dataCart.reduce((sum, cart) => sum + cart.productDetailSize.price * cart.quantity, 0);
-      setTotalPrice(total);
+      updateTotalPrice(updatedSelectedProducts, quantities);
     } else {
-      setTotalPrice(0);  // Nếu bỏ chọn tất cả thì tổng tiền là 0
+      setTotalPrice(0); // Nếu bỏ chọn tất cả thì tổng tiền là 0
     }
   };
 
   // Hàm chọn từng sản phẩm
   const handleProductSelect = (index: number) => {
-    const updatedProducts = [...selectedProducts];  // Tạo bản sao của danh sách các sản phẩm đã chọn
+    const updatedProducts = [...selectedProducts]; // Tạo bản sao của danh sách sản phẩm đã chọn
 
-    // Đảo ngược trạng thái của sản phẩm tại index (true -> false, false -> true)
+    // Đảo ngược trạng thái của sản phẩm tại index
     updatedProducts[index] = !updatedProducts[index];
 
-    setSelectedProducts(updatedProducts);  // Cập nhật danh sách sản phẩm đã chọn
+    setSelectedProducts(updatedProducts); // Cập nhật danh sách sản phẩm đã chọn
 
-    // Kiểm tra nếu tất cả các sản phẩm đều được chọn thì `selectAll` sẽ là true
-    setSelectAll(updatedProducts.every(Boolean));  // every(Boolean) sẽ kiểm tra nếu tất cả các phần tử là true
+    // Kiểm tra nếu tất cả các sản phẩm đều được chọn thì selectAll sẽ là true
+    setSelectAll(updatedProducts.every(Boolean)); // Kiểm tra nếu tất cả các phần tử là true
 
     // Tính tổng tiền của các sản phẩm đã chọn
-    const total = updatedProducts.reduce((sum, selected, idx) => {
-      if (selected) {
-        return sum + dataCart[idx].productDetailSize.price * dataCart[idx].quantity;
-      }
-      return sum;
-    }, 0);
-    setTotalPrice(total);
-  };
-  // delete cart
+    updateTotalPrice(updatedProducts, quantities);
 
-  const handleDeleCartItem = (index: number) => {
+  };
+
+  //của Mỵ 
+  const saveCartIdsToLocalStorage = () => {
+    const cartIds = selectedProducts
+      .map((isSelected, index) => (isSelected ? dataCart[index].cartId : null))
+      .filter(id => id !== null);
+    try {
+      localStorage.setItem('CartIds', JSON.stringify(cartIds));
+      console.log(">> Saved to localStorage: ", cartIds);
+    } catch (error) {
+      console.error("Error saving to localStorage:", error);
+    }
+  };
+
+  //
+  const handleDeleCartItem = async (index: number) => {
+    if (!user) {
+      console.log("Người dùng chưa đăng nhập.");
+      return; // Không thực hiện nếu người dùng chưa đăng nhập
+    }
 
     try {
-      const cartItemId = dataCart[index].cartId;
-      axios.delete(`http://localhost:8080/rest/cart/delete/${cartItemId}`);
+      const cartItemId = dataCart[index].cartId; // Lấy ID của sản phẩm muốn xóa
+      await axios.delete(`http://localhost:8080/rest/cart/delete/${cartItemId}`);
+
       console.log(`>>> Xóa sản phẩm ${cartItemId} thành công`);
-      // Sau khi xóa, cập nhật lại danh sách giỏ hàng
+
+      // Cập nhật lại danh sách giỏ hàng
       const updatedDataCart = dataCart.filter((_, i) => i !== index);
       setDataCart(updatedDataCart);
-      toast.success("Xóa thành công !")
+
+      // Cập nhật danh sách selectedProducts (bỏ sản phẩm bị xóa ra khỏi danh sách)
+      const updatedSelectedProducts = selectedProducts.filter((_, i) => i !== index);
+      setSelectedProducts(updatedSelectedProducts);
+
+      // Cập nhật số lượng còn lại
+      const updatedQuantities = updatedDataCart.map(item => item.quantity);
+      setQuantities(updatedQuantities);
+
+      // Nếu sản phẩm bị xóa đang được chọn, cập nhật lại tổng tiền
+      if (selectedProducts[index]) {
+        const total = updatedSelectedProducts.reduce((sum, selected, idx) => {
+          if (selected) {
+            return sum + updatedDataCart[idx].productDetailSize.price * updatedQuantities[idx];
+          }
+          return sum;
+        }, 0);
+        setTotalPrice(total); // Cập nhật tổng tiền
+      }
+
+      // Cập nhật lại số lượng giỏ hàng
+      mutate(`http://localhost:8080/rest/cart/count/${user.username}`); // Tái tải dữ liệu
+      toast.success("Xóa thành công !");
+
     } catch (err) {
-      console.log("lỗi xóa cart: ", err);
+      console.error("Lỗi xóa cart:", err);
+      toast.error("Có lỗi xảy ra khi xóa sản phẩm.");
     }
-  }
+  };
+
+
 
 
   // Dữ liệu giỏ hàng
@@ -140,6 +194,7 @@ const Cart = () => {
     };
 
     fetchDataCart();
+
   }, []);
 
   return (
@@ -237,15 +292,18 @@ const Cart = () => {
                 <button className="btn btn-outline-secondary px-3 me-3 py-3 text-dark mb-4" type="button">
                   Tiếp Tục Mua hàng
                 </button>
-                <button className="btn btn-dark px-3 me-3 py-3 text-light mb-4" type="button">
-                  Thanh toán ngay
-                </button>
+                <Button
+                  className="btn btn-dark px-3 me-3 py-3 text-light mb-4"
+                  type="button"
+                  onClick={() => saveCartIdsToLocalStorage()}
+                  href="/checkout-product"
+                > Thanh Toán Ngay</Button>
               </div>
             </div>
           </Col>
         </div>
-      </div>
-    </HomeLayout>
+      </div >
+    </HomeLayout >
   );
 };
 

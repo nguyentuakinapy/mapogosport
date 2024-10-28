@@ -23,12 +23,7 @@ const CartBadge = ({ username }: { username: string }) => {
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-    // // Function to fetch the cart count
-    // const countCartItem = async () => {
-    //     if (!username) return; // Don't fetch if no user is logged in
 
-    //     // const response = await axios.get(`http://localhost:8080/rest/cart/count/${username}`);
-    // };
     const { data, error, isLoading } = useSWR(
         username == "" ? null : `http://localhost:8080/rest/cart/count/${username}`, fetcher, {
         revalidateIfStale: false,
@@ -41,14 +36,11 @@ const CartBadge = ({ username }: { username: string }) => {
         setCartCount(cartCount); // Update the cart count in the state
     }, [data])
 
-    // // Fetch cart count on component mount and when the user changes
-    // useEffect(() => {
-    //     countCartItem();
-    // }, [username]);
+
 
     return (
         <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
-            {cartCount} {/* Display the cart count here */}
+            {cartCount}
             <span className="visually-hidden">items in cart</span>
         </span>
     );
@@ -128,7 +120,6 @@ const Header = () => {
     useEffect(() => {
         if (data) {
             setUserData(data);
-            console.log(data);
         }
     }, [data])
 
@@ -137,54 +128,27 @@ const Header = () => {
         window.location.href = "/";
     }
 
-    useEffect(() => {
-        checkRoleByAuthority();
-    }, [userData])
-
-    const checkRoleByAuthority = () => {
-        userData?.authorities.map(item => {
-            if (item.role.name == "ROLE_OWNER") {
-                return (
-                    <Link href='/owner' className={`dropdown-item text-decoration-none text-dark`}>Chủ sân</Link>
-                )
-            } else if (item.role.name == "ROLE_OWNER") {
-                return (
-                    <Link href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</Link>
-                )
-            }
-        })
-        return (
-            <>
-                ok
-            </>
-        )
-    }
-
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
-            <Navbar expand="lg" className='header-area bg-light' style={{ position: 'sticky', zIndex: '1001', borderBottom: '2px solid #143962' }}>
+            <Navbar expand="lg" style={{ position: 'sticky', zIndex: '1001', backgroundColor: '#090e1e' }}>
                 <Container>
                     <Navbar><Link href={'/'} ><img src="/images/logo.png" style={{ width: '100px' }} alt="" /></Link></Navbar>
                     <Navbar.Toggle aria-controls="navbarScroll" />
                     <Navbar.Collapse id="navbarScroll">
                         <Form className="d-flex m-auto">
                             <div className="input-group">
-                                <input type="search" className='form-control border border-dark' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
+                                <input type="search" className='form-control border border-secondary bg-secondary' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
                                     style={{ width: '300px' }} />
                                 <Button variant="outline-dark"><i className="bi bi-search"></i></Button>
                             </div>
                         </Form>
                         <Nav
-                            className="ms-auto my-2 my-lg-0 d-flex justify-content-center align-items-center"
+                            className="ms-auto my-2 my-lg-0 d-flex justify-content-center align-items-center nav-home"
                             style={{ maxHeight: '100px' }}
                             navbarScroll
                         >
-                            <Nav>
-                                <a href="/categories/products" className='head-hv-nav text-decoration-none '><i className="bi bi-tools me-2"></i>Sản phẩm</a>
-                            </Nav>
-                            <Nav>
-                                <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
-                            </Nav>
+                            <Link href="/categories/products" className='head-hv-nav text-decoration-none'><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
+                            <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
                             <div className="dropdown">
                                 <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
                                     <i className="bi bi-person-fill me-2"></i>{userData ? userData?.fullname : 'Tài khoản'}
@@ -203,12 +167,12 @@ const Header = () => {
                                         }
                                         if (item.role.name === "ROLE_OWNER") {
                                             return (
-                                                <Link key={index} href='/owner' className={`dropdown-item text-decoration-none text-dark`}>Chủ sân</Link>
+                                                <a key={index} href='/owner' className={`dropdown-item text-decoration-none text-dark`}>Chủ sân</a>
                                             );
                                         }
                                         if (item.role.name === "ROLE_ADMIN") {
                                             return (
-                                                <Link key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</Link>
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</a>
                                             );
                                         }
                                         return null;
@@ -218,7 +182,7 @@ const Header = () => {
                                 </ul>
                             </div>
                             <Nav className='position-relative'>
-                                <a href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</a>
+                                <Link href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</Link>
                                 <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
                                     0
                                     <span className="visually-hidden">unread messages</span>

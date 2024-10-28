@@ -15,4 +15,7 @@ public interface ProductDetailSizeDAO extends JpaRepository<ProductDetailSize, I
 	  
 //	  @Query("SELECT o.product from ProductDetail o where  o.productDetailId = ?1")	  
 //		Product findProduct_Id_By_Product_Detail_Id(@Param("productDetailId") Integer productDetailId);
+	  //Mỵ
+	  ProductDetailSize  findByProductDetailSizeId(Integer productDetailSizeId);
+	  //My
 }

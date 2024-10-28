@@ -9,7 +9,6 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -69,7 +68,8 @@ public class SportField implements Serializable{
     private List<FavoriteField> favoriteFields;
  
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
-    @JsonIgnore
+    //@JsonManagedReference //tanthanh
+    @JsonBackReference //phihung (27/10)
     private List<FieldReview> fieldReviews;
 }
 
