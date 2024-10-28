@@ -77,7 +77,6 @@ public class BookingRestController {
 	public List<BookingDetail> findBySportFieldDetailAndNextWeek(@PathVariable("sportDetailId") Integer sportDetailId,
 			@PathVariable("startDay") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDay,
 			@PathVariable("endDay") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDay) {
-		System.out.println(startDay);
 
 		return bookingDetailService.findBySportFieldDetailAndNextWeek(sportDetailId, startDay, endDay);
 	}
