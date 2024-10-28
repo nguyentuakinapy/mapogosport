@@ -22,4 +22,6 @@ public interface UserService {
 	UserSubscription saveUserSubcription(Map<String, Object> data);
 	
 	UserSubscription findUserSubscriptionByUser(String username);
+	
+	UserSubscription updateUserSubscription(Map<String, Object> data);
 }

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { Button, Col, FloatingLabel, Form, Nav, Row } from "react-bootstrap";
-import useSWR from "swr";
+import { toast } from "react-toastify";
+import useSWR, { mutate } from "swr";
 
 export default function Owner({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState<string>('all');
@@ -68,6 +69,30 @@ export default function Owner({ children }: { children: ReactNode }) {
     useEffect(() => {
         setUserSubscription(userSub);
     }, [userSub])
+
+    const handleUpdateSubscription = (ap: AccountPackage) => {
+        fetch(`http://localhost:8080/rest/user/subscription/${userSubscription?.userSubscriptionId}`, {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userSubscriptionId: userSubscription?.userSubscriptionId,
+                accountPackageId: ap.accountPackageId
+            }),
+        }).then(async (res) => {
+            if (!res.ok) {
+                const errorText = await res.text();
+                toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
+                return
+            }
+            mutate(`http://localhost:8080/rest/user/subscription/${userData?.username}`);
+            toast.success('Cập nhật thành công!');
+        }).catch((error) => {
+            toast.error(`Đã xảy ra lỗi: ${error.message}`);
+        });
+    }
 
     const renderContent = () => {
         switch (activeTab) {
@@ -168,10 +193,13 @@ export default function Owner({ children }: { children: ReactNode }) {
                 );
             case 'withdraw':
                 return (
-                    <Row className="my-3" style={{ fontSize: '15px' }}>
+                    <Row className="my-3" style={{ fontSize: '15px', height: '100%', display: 'flex' }}>
                         {accountPackages && accountPackages.map(ap => {
+                            const isOwned = ap.accountPackageId === 1 || ap.accountPackageId ===
+                                userSubscription?.accountPackage?.accountPackageId ||
+                                userSubscription?.accountPackage?.accountPackageId === 3;
                             return (
-                                <Col xs={4} key={ap.accountPackageId}>
+                                <Col xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div className="card packageUpdate">
                                         <b className="ms-3 mt-3 fs-5">{ap.packageName}</b>
                                         <div className="body-package my-3">
@@ -183,16 +211,14 @@ export default function Owner({ children }: { children: ReactNode }) {
                                             ))}
                                         </div>
                                         <b className="text-danger ms-3">{ap.price == 0 ? 'Miễn phí' : formatPrice(ap.price)}</b>
-                                        {(ap.accountPackageId === userSubscription?.accountPackage?.accountPackageId ||
-                                            userSubscription?.accountPackage?.accountPackageId === 1 ||
-                                            userSubscription?.accountPackage?.accountPackageId === 2) && (
-                                                <Button className='btn-sub' disabled={true}>Đã sở hữu</Button>
-                                            )}
+                                        <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={isOwned}>
+                                            {isOwned ? "Đã sở hữu" : "Nâng cấp ngay"}
+                                        </Button>
                                     </div>
                                 </Col>
                             )
                         })}
-                    </Row>
+                    </Row >
                 );
             default:
                 return (
