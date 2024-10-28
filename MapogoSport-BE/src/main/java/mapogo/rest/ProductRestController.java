@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +39,7 @@ import org.springframework.util.StringUtils;
 import mapogo.entity.CategoryProduct;
 import mapogo.entity.Product;
 import mapogo.service.CategoryProductService;
+import mapogo.service.ProductDetailService;
 import mapogo.service.ProductService;
 import mapogo.utils.RemoveSpaceUtils;
 
@@ -52,12 +55,22 @@ public class ProductRestController {
 	private Cloudinary cloudinary;
 	@Autowired
 	ObjectMapper objectMapper;
-	private static final String IMAGE_DIRECTORY = "src/main/resources/static/images/product-images/";
+//	private static final String IMAGE_DIRECTORY = "src/main/resources/static/images/product-images/";
+	
+	@Autowired
+	ProductDetailService productDetailService;
 
 	@GetMapping()
 	public List<Product> findAll() {
 		return productService.findAll();
 	}
+	
+
+    @GetMapping("/page")
+    public Page<Product> getProducts(@RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = "10") int size) {
+        return productService.getProducts(page, size);
+    }
 
 	@GetMapping("/{id}")
 	public Optional<Product> findById(@PathVariable Integer id) { // Thêm @PathVariable
@@ -73,9 +86,10 @@ public class ProductRestController {
 	}
 
 	@PostMapping
-	public Product createProduct(@RequestPart("product") String productJson,
+	public ResponseEntity<Integer> createProduct(@RequestPart("product") String productJson,
 			@RequestPart("fileimage") MultipartFile image) {
 		try {
+			System.err.println("productJson "+ productJson);
 			// Chuyển đổi chuỗi JSON thành đối tượng Product
 			Product product = objectMapper.readValue(productJson, Product.class);
 
@@ -107,9 +121,29 @@ public class ProductRestController {
 				// Lưu URL của ảnh vào đối tượng Product
 				product.setImage(imageUrl); // Lưu URL vào cơ sở dữ liệu
 			}
+			System.err.println("Sản phẩm: " + product);
+			System.err.println("ID: " + product.getProductId()); // null
+			System.err.println("Tên sản phẩm: " + product.getName());
+			System.err.println(
+					"Danh mục: " + product.getCategoryProduct() != null ? product.getCategoryProduct().getName()
+							: "Loại hàng: null");
+			System.err.println("Mô tả: " + product.getDescription());
+			System.err.println("Trạng thái: " + product.getStatus()); // chưa có
 
+			System.err.println("Ngày tạo: " + product.getCreateDate());
+			System.err.println("Thương hiệu: " + product.getBrand());
+			System.err.println("Xuất xứ: " + product.getCountry());
+			System.err.println("Hình ảnh: " + product.getImage());
+			System.err.println("Tồn kho: " + product.getStock());
+			System.err.println("Giá tiền: " + product.getPrice());
+
+//			Product createdProduct = productService.create(product);
+//			return createdProduct;
 			Product createdProduct = productService.create(product);
-			return createdProduct;
+			createdProduct.getProductId();
+			System.err.println("Id vừa tạo "+createdProduct.getProductId());
+	        // Trả về ResponseEntity chứa sản phẩm đã tạo
+	        return ResponseEntity.ok(createdProduct.getProductId());
 
 		} catch (IOException e) {
 			System.err.println("Lỗi khi lưu ảnh sản phẩm: " + e.getMessage());

@@ -6,6 +6,7 @@ import Header from "./app.header";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ReactQueryProvider from "@/app/utils/UseQueryProviders/ReactQueryProvider";
 
 
 
@@ -84,6 +85,7 @@ export default function AdminLayout({
     }, []);
     return (
         <>
+         <ReactQueryProvider>
             <Nav isAniActive={isAniActive} toggleAni={toggleAni} isActive={isActive} setIsActive={setIsActive} />
             <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} />
             <main className={`main-right ${isAniActive ? 'mainRight' : ''}`}>
@@ -92,6 +94,7 @@ export default function AdminLayout({
                 </div>
             </main>
             <ToastContainer></ToastContainer>
+         </ReactQueryProvider>
         </>
     )
 }

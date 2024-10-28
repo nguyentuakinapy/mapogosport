@@ -6,4 +6,5 @@ interface ProductDetail {
     image: string;
     galleries: Gallery[];
     product: Product;
+    productDetailSizes: ProductDetailSize[]
   }

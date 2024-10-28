@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.ProductDetailDAO;
+import mapogo.entity.Product;
 import mapogo.entity.ProductDetail;
 import mapogo.entity.ProductDetailSize;
 import mapogo.service.ProductDetailService;
@@ -47,5 +48,41 @@ public class ProductDetailServiceImpl implements ProductDetailService{
 	public List<Object[]> findByImageDetailAndGalleryByIdProductDetail(Integer productDetailId) {
 		return detailDAO.findByImageDetailAndGalleryByIdProductDetail(productDetailId);
 	}
+
+	@Override
+	public ProductDetail create(ProductDetail productDetail) {
+		// TODO Auto-generated method stub
+		return detailDAO.save(productDetail);
+	}
+
+	@Override
+	public ProductDetail update(ProductDetail productDetail) {
+		  Optional<ProductDetail> existingProductDetail = detailDAO.findById(productDetail.getProductDetailId());
+	        if (existingProductDetail.isPresent()) {
+	            return detailDAO.save(productDetail);  // Save will update if the product already exists
+	        }
+	        throw new RuntimeException("Product not found with id: " + productDetail.getProductDetailId());
+	    }
+	
+
+	@Override
+	public void delete(Integer id) {
+		// TODO Auto-generated method stub
+		detailDAO.deleteById(id);
+	}
+
+	@Override
+	public Optional<ProductDetail> findByIdProduct(Integer id) {
+		 List<ProductDetail> details = detailDAO.findByIdProduct(id);
+		    return details.isEmpty() ? Optional.empty() : Optional.of(details.get(0));
+	}
+
+//	@Override
+//	public ProductDetail findProduct_Id_By_Product_Detail_Id(Integer productDetail_Id) {
+//		
+//		return detailDAO.findProduct_Id_By_Product_Detail_Id(productDetail_Id);
+//	}
+	
+	
 	
 }
