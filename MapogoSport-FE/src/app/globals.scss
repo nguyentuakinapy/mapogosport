@@ -92,6 +92,7 @@
     .sportField-info-detail {
         padding: 15px;
         border-radius: 8px;
+        height: 100%;
 
         .title-detail-sportField {
             font-size: 18px;
@@ -126,6 +127,7 @@
             border-radius: 8px;
             background: #F3F3F3;
             padding: 10px 15px;
+            min-height: 36%;
 
             .title {
                 font-size: 16px;
@@ -137,6 +139,7 @@
 .section-form-sportField {
     padding: 15px;
     border-radius: 8px;
+    height: 100%;
 
     .title-detail-sportField {
         font-size: 18px;
@@ -188,8 +191,7 @@
         display: flex;
 
         select {
-            width: 15%;
-            padding: 6px;
+            width: 20%;
             border: 1px solid #142239;
         }
 
@@ -201,13 +203,27 @@
             border: 1px solid #142239;
             background: #142239;
             color: white;
-            padding: 6px 20px;
+            padding: 6px 10px;
+            width: 330px;
             cursor: pointer;
         }
 
         .btn-frame {
             border: 1px solid #142239;
             border-radius: 8px;
+            width: 120px;
+            &:hover {
+                background: #142239;
+                color: white;
+            }
+        }
+        .active {
+            background: #142239;
+            color: white;
+            &:hover {
+                background: white;
+                color: black;
+            }
         }
     }
 

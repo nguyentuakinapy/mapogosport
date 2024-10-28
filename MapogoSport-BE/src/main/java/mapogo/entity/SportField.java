@@ -69,7 +69,8 @@ public class SportField implements Serializable{
     private List<FavoriteField> favoriteFields;
  
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
-    @JsonManagedReference //tanthanh
+    //@JsonManagedReference //tanthanh
+    @JsonBackReference //phihung (27/10)
     private List<FieldReview> fieldReviews;
 }
 
