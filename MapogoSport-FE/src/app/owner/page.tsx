@@ -195,9 +195,8 @@ export default function Owner({ children }: { children: ReactNode }) {
                 return (
                     <Row className="my-3" style={{ fontSize: '15px', height: '100%', display: 'flex' }}>
                         {accountPackages && accountPackages.map(ap => {
-                            const isOwned = ap.accountPackageId === 1 || ap.accountPackageId ===
-                                userSubscription?.accountPackage?.accountPackageId ||
-                                userSubscription?.accountPackage?.accountPackageId === 3;
+                            const isOwned = ap.accountPackageId ===
+                                userSubscription?.accountPackage?.accountPackageId;
                             return (
                                 <Col xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div className="card packageUpdate">
@@ -211,9 +210,18 @@ export default function Owner({ children }: { children: ReactNode }) {
                                             ))}
                                         </div>
                                         <b className="text-danger ms-3">{ap.price == 0 ? 'Miễn phí' : formatPrice(ap.price)}</b>
-                                        <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={isOwned}>
+                                        {/* <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={isOwned}>
                                             {isOwned ? "Đã sở hữu" : "Nâng cấp ngay"}
-                                        </Button>
+                                        </Button> */}
+                                        {userSubscription && ap.accountPackageId <= userSubscription?.accountPackage?.accountPackageId ? (
+                                            <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={true}>
+                                                Đã sở hữu
+                                            </Button>
+                                        ) : (
+                                            <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={isOwned}>
+                                                Nâng cấp ngay
+                                            </Button>
+                                        )}
                                     </div>
                                 </Col>
                             )
