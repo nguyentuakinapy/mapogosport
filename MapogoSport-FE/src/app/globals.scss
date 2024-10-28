@@ -5,6 +5,10 @@
     height: auto;
     border-radius: 0;
     border: 1px solid black;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 
     .body-package {
         padding: 10px;
@@ -36,27 +40,33 @@
         font-size: 24px;
         color: #dc3545;
     }
+
     div {
         .address {
             font-size: 15px;
         }
+
         .star-comment {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
+
             .star {
                 font-size: 16px;
                 display: flex;
                 align-items: center;
+
                 i {
                     font-size: 16px;
                     margin: 0 7px;
                     color: #F7D03F;
                 }
             }
+
             .btn-option-icon {
                 padding-left: 20px;
                 position: relative;
+
                 &::before {
                     content: '';
                     position: absolute;
@@ -66,6 +76,7 @@
                     height: 20px;
                     background: #142239;
                 }
+
                 i {
                     display: inline-block;
                     font-size: 16px;
@@ -77,13 +88,16 @@
             }
         }
     }
+
     .sportField-info-detail {
         padding: 15px;
         border-radius: 8px;
+
         .title-detail-sportField {
             font-size: 18px;
             position: relative;
             padding-left: 15px;
+
             &::before {
                 width: 4px;
                 background-color: #dc3545;
@@ -95,33 +109,40 @@
                 left: 0;
             }
         }
+
         .info {
             .item {
                 display: flex;
                 justify-content: space-between;
                 margin-bottom: 1rem;
             }
+
             select {
                 border: 1px solid black;
             }
         }
+
         .extends {
             border-radius: 8px;
             background: #F3F3F3;
             padding: 10px 15px;
+
             .title {
                 font-size: 16px;
             }
         }
     }
 }
+
 .section-form-sportField {
     padding: 15px;
     border-radius: 8px;
+
     .title-detail-sportField {
         font-size: 18px;
         position: relative;
         padding-left: 15px;
+
         &::before {
             width: 4px;
             background-color: #dc3545;
@@ -133,9 +154,13 @@
             left: 0;
         }
     }
-    input, select, textarea {
+
+    input,
+    select,
+    textarea {
         border: 1px solid black;
     }
+
     .btn-sportField {
         width: 100%;
         border-radius: 8px;
@@ -144,25 +169,30 @@
         color: white;
         padding: 10px;
         font-size: 15px;
+
         &:hover {
             background: white;
             color: black;
         }
     }
 }
+
 .book-calendar {
     border-radius: 8px;
     padding: 1rem 2rem;
     height: 100%;
+
     .header-book {
         align-items: center;
         justify-content: space-between;
         display: flex;
+
         select {
             width: 15%;
             padding: 6px;
             border: 1px solid #142239;
         }
+
         .header-date {
             align-items: center;
             justify-content: space-between;
@@ -174,31 +204,38 @@
             padding: 6px 20px;
             cursor: pointer;
         }
+
         .btn-frame {
             border: 1px solid #142239;
             border-radius: 8px;
         }
     }
+
     .book-calendar-content {
         .table-price {
             width: 100%;
             overflow-x: auto;
+
             &::-webkit-scrollbar-thumb {
                 background-color: #142239;
             }
+
             &::-webkit-scrollbar-thumb:hover {
                 background: #555;
             }
+
             .table {
                 min-width: 1150px;
                 border-collapse: separate;
                 border-spacing: 5px;
+
                 tbody {
                     tr {
                         td {
                             align-content: center;
                             min-width: 130px;
                             font-size: 14px;
+
                             &:first-child {
                                 min-width: 90px;
                                 position: sticky;
@@ -210,31 +247,40 @@
                                 color: white;
                                 border-radius: 8px;
                             }
+
                             .frame-info-secondary {
                                 background: #f3f3f3;
                                 border: 1px solid #f3f3f3;
                                 cursor: not-allowed;
-                                .time-label, .status-label {
+
+                                .time-label,
+                                .status-label {
                                     color: #8b8b8b;
                                 }
+
                                 .status-label {
                                     font-weight: 700;
                                 }
                             }
+
                             .frame-info-available {
                                 background: #DBE6FE;
                                 border: 1px solid #93B4FD;
                                 border-radius: 8px;
                                 cursor: pointer;
+
                                 .time-label {
                                     font-weight: 700;
                                 }
                             }
+
                             .frame-info-danger {
                                 background: #f7959f;
                                 border: 1px solid #dc3545;
                                 cursor: not-allowed;
-                                .time-label, .status-label {
+
+                                .time-label,
+                                .status-label {
                                     color: white;
                                 }
                             }
@@ -245,4 +291,5 @@
         }
     }
 }
+
 /*===================================================SportField Detail CSS End===================================================*/

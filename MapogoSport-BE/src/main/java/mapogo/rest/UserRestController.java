@@ -62,9 +62,9 @@ public class UserRestController {
 	}
 
 	@PostMapping("/user/sendMail")
-	public String sendMail(@RequestBody String username) {
+	public String sendMail(@RequestBody String email) {
 		String otp = RandomUtils.generateOTP();
-		emailService.sendEmail(username, "MapogoSport", "Bạn đã yêu cầu gửi mã xác nhận mới! Mã của bạn là: " + otp);
+		emailService.sendEmail(email, "MapogoSport", "Bạn đã yêu cầu gửi mã xác nhận mới! Mã của bạn là: " + otp);
 		return otp;
 	}
 
@@ -93,17 +93,14 @@ public class UserRestController {
 		return userService.saveUserSubcription(requestBody);
 	}
 	
+	@PutMapping("/user/subscription/{userSubscriptionId}")
+	public void updateUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId, 
+			@RequestBody Map<String, Object> requestBody) {
+		userService.updateUserSubscription(requestBody);
+	}
+	
 	@GetMapping("/user/subscription/{id}")
 	public UserSubscription findUserSubscriptionByUser(@PathVariable("id") String username) {
 		return userService.findUserSubscriptionByUser(username);
 	}
-
-	@Autowired
-	ProductDAO productDAO;
-
-	@GetMapping("/product")
-	public List<Product> findAll() {
-		return productDAO.findAll();
-	}
-	// ??? sao nó nằm ở đây?
 }
