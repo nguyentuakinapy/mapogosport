@@ -1,5 +1,6 @@
 package mapogo.service.impl;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -82,6 +83,19 @@ public class BookingServiceImpl implements BookingService {
 		booking.setVoucher(v);
 		booking.setNote((String) b.get("note"));
 		return bookingDAO.save(booking);
+	}
+
+	@Override
+	public Double findTotalAmountByOwnerAndStatus(Integer ownerId) {
+		return bookingDAO.findTotalAmountByOwnerAndStatus(ownerId);
+	}
+
+	@Override
+	public Double findRevenueByDate(Integer ownerId, Integer flag, String startDate, String endDate) {
+		// TODO Auto-generated method stub
+		Date sqlStartDate = Date.valueOf(startDate);
+		Date sqlEndDate = Date.valueOf(endDate);
+		return bookingDAO.findRevenueByDate(ownerId, flag, sqlStartDate, sqlEndDate);
 	}
 
 }
