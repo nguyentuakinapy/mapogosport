@@ -1,9 +1,8 @@
 package mapogo.entity;
 
-import java.util.List;
+import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
@@ -26,7 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "Phonenumberuser")
-public class PhoneNumberUser {
+public class PhoneNumberUser implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PhoneNumberUserId")
@@ -34,7 +33,6 @@ public class PhoneNumberUser {
     
     @ManyToOne
     @JoinColumn(name = "PhoneNumberId")
-    @JsonBackReference
     private PhoneNumber phoneNumber;
     
     @ManyToOne
@@ -43,6 +41,5 @@ public class PhoneNumberUser {
 	private User user;
     
     @Column(name= "Active")
-    @JsonManagedReference
     private Boolean active;
 }

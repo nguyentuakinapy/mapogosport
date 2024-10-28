@@ -8,15 +8,7 @@ interface User {
     birthday: Date | null;
     email: string;
     avatar: string | null;
-    authorities: [
-        {
-            authorityId: number;
-            role: {
-                roleId: number;
-                name: string;
-            }
-        }
-    ];
+    authorities: Authorities[];
     addressUsers: [
         {
             addressUserId: number;
@@ -26,8 +18,17 @@ interface User {
                 district: string;
                 ward: string;
             },
-            phoneNumber: string;
             addressDetail: string;
+        }
+    ];
+    phoneNumberUsers: [
+        {
+            phoneNumberUserId: number;
+            phoneNumber: {
+                phoneNumberId: number;
+                phoneNumber: string;
+            },
+            active: boolean;
         }
     ]
 }
