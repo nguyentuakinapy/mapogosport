@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,7 +35,7 @@ public class FieldReview implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "SportFieldId", nullable = false)
-    @JsonBackReference
+    @JsonManagedReference //phihung (27/10)
     private SportField sportField;
 
     @ManyToOne

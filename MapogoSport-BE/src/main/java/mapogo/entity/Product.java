@@ -71,7 +71,7 @@ public class Product implements Serializable {
 	private List<ProductDetail> productDetails;
 
 	@OneToMany(mappedBy = "product")
-	@JsonIgnore
+	@JsonBackReference //phihung (27/10)
 	private List<ProductReview> productReviews;
 
 }

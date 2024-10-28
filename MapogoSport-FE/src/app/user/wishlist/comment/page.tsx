@@ -84,54 +84,55 @@ const CommentPage = () => {
                 </Row>
             </div>
             {reviews && reviews.length > 0 ? (
-                reviews.map((review) => {
-                    let key = '';
-                    if (selectedOption === '1') {
-                        const fieldReview = review as FieldReview;
-                        key = `field-${fieldReview.fieldReviewId}`;
-                        if (fieldReview.fieldReviewId === undefined) {
-                            return null;
-                        }
-                        return (
-                            <div className="box-comment-container mb-2" key={key}>
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <Link href={"#"} className="box-comment" style={{ fontSize: '15px' }}>
-                                        <b>{fieldReview.user.fullname}</b> đã đánh giá sân <b>{fieldReview.sportField?.name}</b>.
-                                        <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
-                                            <div>{fieldReview.comment}</div>
-                                            <span>{new Date(fieldReview.datedAt).toLocaleDateString('en-GB')}</span>
+                reviews.sort((a: any, b: any) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime())
+                    .map((review) => {
+                        let key = '';
+                        if (selectedOption === '1') {
+                            const fieldReview = review as FieldReview;
+                            key = `field-${fieldReview.fieldReviewId}`;
+                            if (fieldReview.fieldReviewId === undefined) {
+                                return null;
+                            }
+                            return (
+                                <div className="box-comment-container mb-2" key={key}>
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <Link href={"#"} className="box-comment" style={{ fontSize: '15px' }}>
+                                            <b>{fieldReview.user.fullname}</b> đã đánh giá sân <b>{fieldReview.sportField?.name}</b>.
+                                            <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
+                                                <div>{fieldReview.comment}</div>
+                                                <span>{new Date(fieldReview.datedAt).toLocaleDateString('en-GB')}</span>
+                                            </div>
+                                        </Link>
+                                        <div className="d-flex align-items-center me-2">
+                                            <i className="bi bi-trash3-fill fs-5"></i>
                                         </div>
-                                    </Link>
-                                    <div className="d-flex align-items-center me-2">
-                                        <i className="bi bi-trash3-fill fs-5"></i>
                                     </div>
                                 </div>
-                            </div>
-                        );
-                    } else {
-                        const productReview = review as ProductReview;
-                        key = `product-${productReview.productReviewId}`;
-                        if (productReview.productReviewId === undefined) {
-                            return null;
-                        }
-                        return (
-                            <div className="box-comment-container mb-2" key={key}>
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <Link href={"#"} className="box-comment" style={{ fontSize: '15px' }}>
-                                        <b>{productReview.user.fullname}</b> đã đánh giá sản phẩm <b>{productReview.product?.name}</b>.
-                                        <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
-                                            <div>{productReview.comment}</div>
-                                            <span>{new Date(productReview.datedAt).toLocaleDateString('en-GB')}</span>
+                            );
+                        } else {
+                            const productReview = review as ProductReview;
+                            key = `product-${productReview.productReviewId}`;
+                            if (productReview.productReviewId === undefined) {
+                                return null;
+                            }
+                            return (
+                                <div className="box-comment-container mb-2" key={key}>
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <Link href={"#"} className="box-comment" style={{ fontSize: '15px' }}>
+                                            <b>{productReview.user.fullname}</b> đã đánh giá sản phẩm <b>{productReview.product?.name}</b>.
+                                            <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
+                                                <div>{productReview.comment}</div>
+                                                <span>{new Date(productReview.datedAt).toLocaleDateString('en-GB')}</span>
+                                            </div>
+                                        </Link>
+                                        <div className="d-flex align-items-center me-2">
+                                            <i className="bi bi-trash3-fill fs-5"></i>
                                         </div>
-                                    </Link>
-                                    <div className="d-flex align-items-center me-2">
-                                        <i className="bi bi-trash3-fill fs-5"></i>
                                     </div>
                                 </div>
-                            </div>
-                        );
-                    }
-                })
+                            );
+                        }
+                    })
             ) : (
                 <div>Chưa có bình luận nào!</div>
             )}
