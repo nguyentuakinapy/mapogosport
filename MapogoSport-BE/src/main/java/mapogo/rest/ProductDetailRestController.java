@@ -33,6 +33,7 @@ import mapogo.service.GalleryService;
 import mapogo.service.OrderDetailService;
 import mapogo.service.ProductDetailService;
 import mapogo.service.ProductService;
+import mapogo.utils.CloudinaryUtils;
 
 @CrossOrigin("*")
 @RequestMapping("/rest")
@@ -56,6 +57,8 @@ public class ProductDetailRestController {
 	OrderDetailService orderDetailService;
 	@Autowired
 	ProductDetailDAO productDetailDAO;
+	@Autowired
+	CloudinaryUtils cloudinaryUtils;
 
 	@GetMapping("/product-detail")
 	public List<ProductDetail> findAll() {
@@ -115,10 +118,12 @@ public class ProductDetailRestController {
 			// Xử lý lưu hình ảnh chính (fileimage)
 			if (!file.isEmpty()) {
 				// Upload ảnh lên Cloudinary
-				Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(),
-						ObjectUtils.emptyMap());
+//				Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(),
+//						ObjectUtils.emptyMap());
 				// Lấy URL của ảnh từ kết quả upload
-				String imageUrl = (String) uploadResult.get("secure_url");
+//				String imageUrl = (String) uploadResult.get("secure_url");
+				
+				String imageUrl = cloudinaryUtils.uploadImage(file);
 				System.err.println("Uploaded image URL: " + imageUrl);
 
 				// Cập nhật đường dẫn hình ảnh vào productDetail
@@ -139,9 +144,10 @@ public class ProductDetailRestController {
 				for (MultipartFile galleryFile : galleryFiles) {
 					if (!galleryFile.isEmpty()) {
 						// Upload từng ảnh trong gallery lên Cloudinary
-						Map<String, Object> galleryUploadResult = cloudinary.uploader().upload(galleryFile.getBytes(),
-								ObjectUtils.emptyMap());
-						String galleryImageUrl = (String) galleryUploadResult.get("secure_url");
+					//	Map<String, Object> galleryUploadResult = cloudinary.uploader().upload(galleryFile.getBytes(),
+						//		ObjectUtils.emptyMap());
+						//String galleryImageUrl = (String) galleryUploadResult.get("secure_url");
+						String galleryImageUrl = cloudinaryUtils.uploadImage(file);
 						System.err.println("Uploaded gallery image URL: " + galleryImageUrl);
 
 						// Tạo đối tượng Gallery và gán thông tin
@@ -190,7 +196,10 @@ public class ProductDetailRestController {
 	        if (oldImagePath != null && !oldImagePath.isEmpty()) {
 	            String publicId = oldImagePath.substring(oldImagePath.lastIndexOf("/") + 1, oldImagePath.lastIndexOf("."));
 	            try {
-	                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+//	                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+//	            	Xóa ảnh từ cloundary
+	            	cloudinaryUtils.deleteImage(publicId);
+	            	
 	                System.err.println("Đã xóa ảnh của ProductDetail: " + oldImagePath);
 	            } catch (IOException e) {
 	                System.err.println("Không thể xóa ảnh trên Cloudinary: " + e.getMessage());
@@ -203,8 +212,9 @@ public class ProductDetailRestController {
 	            if (galleryImagePath != null && !galleryImagePath.isEmpty()) {
 	                String galleryPublicId = galleryImagePath.substring(galleryImagePath.lastIndexOf("/") + 1, galleryImagePath.lastIndexOf("."));
 	                try {
-	                    cloudinary.uploader().destroy(galleryPublicId, ObjectUtils.emptyMap());
-	                    System.err.println("Đã xóa ảnh trong Gallery: " + galleryImagePath);
+//	                    cloudinary.uploader().destroy(galleryPublicId, ObjectUtils.emptyMap());
+	                    cloudinaryUtils.deleteImage(galleryPublicId);
+	                	System.err.println("Đã xóa ảnh trong Gallery: " + galleryImagePath);
 	                } catch (IOException e) {
 	                    System.err.println("Không thể xóa ảnh trong Gallery trên Cloudinary: " + e.getMessage());
 	                }
