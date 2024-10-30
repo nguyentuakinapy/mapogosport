@@ -259,7 +259,10 @@ public class ProductDetailRestController {
 	        ProductDetail updatedProductDetail = objectMapper.readValue(productDetailJson, ProductDetail.class);
 	        System.err.println("Đối tượng ProductDetail sau khi parse từ JSON: " + updatedProductDetail);
 
+	        
 	        ProductDetail existingProductDetail = existingProductDetailOptional.get();
+        	System.err.println("existingProductDetail "+existingProductDetail.getColor());
+
 	        	
 	        if (updatedProductDetail.getColor() != null && !updatedProductDetail.getColor().isEmpty()) {
 	            // Cập nhật màu sắc nếu `updatedProductDetail.getColor()` không rỗng
