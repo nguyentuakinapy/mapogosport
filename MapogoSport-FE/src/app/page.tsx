@@ -13,6 +13,7 @@ import ForgotPassword from "@/components/account/modal/forgotPassword.modal";
 import ChangePasswordNew from "@/components/account/modal/change-password-new.modal";
 import Popup from "@/components/User/modal/popup-voucher.modal";
 import useSWR from "swr";
+import { height } from "@fortawesome/free-brands-svg-icons/fa42Group";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
@@ -138,35 +139,50 @@ export default function Home() {
 
   return (
     <HomeLayout>
-      <div style={{
-        minHeight: '500px',
-        backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(/images/bannerSport.png)',
-        backgroundSize: '100% 100%',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div
-          style={{
-            width: '300px',
-            padding: '10px',
-            fontSize: '16px',
-            borderRadius: '5px',
-            border: 'none',
-            outline: 'none',
-            position: 'absolute',
-            top: '50%',
-            transform: 'translateY(-50%)'
-          }}
-        >
-          <input type="text" />
-          <button></button>
+      <div className="search-sport">
+        <div className="body-search-sport " >
+          <div className="m-auto text-center">
+            <h1 className="text-white fw-bold">HỆ THỐNG HỖ TRỢ TÌM KIẾM SÂN BÃI NHANH</h1>
+            <hr className="border border-info border-4 opacity-75 m-auto my-4" style={{ maxWidth: '10%' }} />
+            <b className="text-white fs-11 text-center">Dữ liệu được MapogoSport cập nhật thường xuyên giúp cho người dùng tìm được sân một cách nhanh nhất</b>
+          </div>
+          <div className="d-flex justify-content-center mt-4">
+            <div className="input-group" style={{ width: '70%', backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: '8px', padding: '10px' }}>
+              <select className="form-control" style={{ border: 'none', height: '50px' }}>
+                <option selected>Lọc theo loại sân</option>
+                <option value="1">Sân cỏ nhân tạo</option>
+                <option value="2">Sân cỏ tự nhiên</option>
+              </select>
+              <input type="text" className="form-control" placeholder="Nhập tên sân hoặc địa chỉ" style={{ border: 'none', height: '50px' }} />
+              <input type="text" className="form-control" placeholder="Nhập khu vực" style={{ border: 'none', height: '50px' }} />
+              <div className="input-group-append">
+                <button className="btn btn-warning" type="button" style={{ height: '50px', borderRadius: '4px', fontWeight: 'bold' }}>
+                  Tìm kiếm <i className="bi bi-search fw-bold"></i>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
+      <Container className="mt-3">
+        <Row>
+          <Col className="text-center">
+            <img className="p-4" src="/images/timsan.png" alt="" />
+            <h6 className="fw-bold">Tìm kiếm vị trí sân</h6>
+            <p style={{ fontSize: '12px' }}>Dữ liệu sân đấu dồi dào, liên tục cập nhật, giúp bạn dễ dàng tìm kiếm theo khu vực mong muốn</p>
+          </Col>
+          <Col className="text-center position-relative custom-border">
+            <img className="p-3" src="/images/datsan.png" alt="" />
+            <h6 className="fw-bold mt-1">Đặt lịch online</h6>
+            <p style={{ fontSize: '12px' }}>Không cần đến trực tiếp, không cần gọi điện đặt lịch, bạn hoàn toàn có thể đặt sân ở bất kì đâu có internet</p>
+          </Col>
+          <Col className="text-center">
+            <img className="p-4" src="/images/timsan.png" alt="" />
+            <h6 className="fw-bold">Đa dạng sản phẩm</h6>
+            <p style={{ fontSize: '12px' }}>Tìm kiếm, mua sắn sản phẩm, dụng cụ liên quan đến thể thao, giao hàng toàn quốc đến khu vực bạn mong muốn</p>
+          </Col>
+        </Row>
+      </Container>
       <Container className="pt-3">
         <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">
           <div className="carousel-inner">

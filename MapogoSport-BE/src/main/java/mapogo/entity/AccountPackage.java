@@ -33,7 +33,13 @@ public class AccountPackage implements Serializable {
     private double price;
 
     @Column(name = "DurationDays", nullable = false)
-    private int durationDays;
+    private Integer durationDays;
+    
+    @Column(name = "LimitBookings")
+    private Integer limitBookings;
+    
+    @Column(name = "LimitSportfields")
+    private Integer limitSportFields;
 
     @OneToMany(mappedBy = "accountPackage", cascade = CascadeType.ALL)
     @JsonManagedReference
