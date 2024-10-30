@@ -20,4 +20,9 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 		return paymentMethodDAO.findAll();
 	}
 
+	@Override
+	public PaymentMethod findByName(String name) {
+		return paymentMethodDAO.findByName(name);
+	}
+
 }
