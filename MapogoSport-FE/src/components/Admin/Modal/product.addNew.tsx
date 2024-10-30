@@ -545,11 +545,15 @@ const ProductAddNew = ({
               console.log("variables======== add data", data);
               if (data) {
                 // Lấy ID từ backend trả về thành công
-                  ProductWasCreated = data.data;
+                if(selectedProductDetail){
+                   ProductWasCreated = data.data;
                   console.log("new Id: ", ProductWasCreated);
                   toast.success("Thêm sản phẩm thành công");
                   handleAddNewProductDetail(ProductWasCreated);
-                  handleAddNewSize;
+                  // handleAddNewSize;
+                  handleClose()
+                }
+                 
               
               }
 
@@ -1419,43 +1423,55 @@ const ProductAddNew = ({
                 </Row>
 
                 {/* Bảng Gallery */}
-                <Form.Group controlId="formGallery">
-                  <Form.Label>Gallery:</Form.Label>
+                <Form.Group controlId="formGallery" className="mb-4">
+                  <Form.Label className="fs-6">Thư viện ảnh:</Form.Label>
 
-                  {/* Input chọn ảnh */}
+                  {/* Custom File Input */}
                   <Form.Control
                     type="file"
                     multiple
                     accept="image/*"
                     onChange={handleImageChangeProductGallery}
+                    className="d-none" // Hide default file input
+                    id="galleryInput"
                   />
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className="mx-2"
+                    onClick={() => document.getElementById("galleryInput").click()}
+                  >
+                    Thêm ảnh <i className="bi bi-plus-circle mx-1"></i>
+                  </Button>
 
-                  {/* Hiển thị danh sách ảnh được chọn */}
-                  <div className="mt-3 d-flex flex-wrap">
+                  {/* Display Selected Images */}
+                  <div className="mt-3 d-flex flex-wrap gap-2">
                     {selectedGalleryFiles.length > 0 ? (
                       selectedGalleryFiles.map((file, index) => (
-                        <div key={index} className="mb-2 me-2">
+                        <div key={index} className="position-relative">
                           <img
-                            src={URL.createObjectURL(file)} // Hiển thị ảnh được chọn
+                            src={URL.createObjectURL(file)}
                             alt={`gallery-${index}`}
-                            className="border"
+                            className="border img-thumbnail"
                             style={{
                               objectFit: "cover",
                               height: "70px",
                               width: "70px",
                               borderRadius: "5px",
-                              border: "1px solid #ddd", // Viền cho ảnh
+                              border: "1px solid #ddd",
                             }}
                           />
                         </div>
                       ))
-                    ) : (
-                      <p>Chưa có ảnh trong gallery.</p>
-                    )}
+                    ) :galleries.length === 0 ? (
+                      <p className=" text-danger">Chưa có ảnh trong gallery.</p>
+                    ): null}
                   </div>
                 </Form.Group>
 
+
                 {/* Bảng gallery demo*/}
+                {galleries.length > 0 && (
                 <Form.Group controlId="formGallery">
                   <div className="mb-3">
                     <label className="form-label fw-bold">
@@ -1515,7 +1531,7 @@ const ProductAddNew = ({
                     </div>
                   </div>
                 </Form.Group>
-
+                )}
                 {/* Bảng Kích cỡ */}
                 {/* {productDetailWasCreated || */}
                  { (selectedProductDetail.productDetailId && (
@@ -1612,9 +1628,15 @@ const ProductAddNew = ({
                           )}
                           <tr>
                             <td colSpan="5">
-                              Thêm kích cỡ
-                              <i className="btn btn-secondary rounded bi bi-plus-circle mx-1"
-                              onClick={handleAddNewSize}></i>
+                              <Button 
+                              size="sm"
+                              className="mx-2"
+                               variant="outline-primary"
+                              onClick={handleAddNewSize}>
+                              Thêm kích cỡ  <i className=" bi bi-plus-circle mx-1"
+                              ></i>
+                              </Button>
+                            
                             </td>
                           </tr>
                         </tbody>

@@ -45,10 +45,17 @@ const ModalProductAddNewSize = ({
   const queryClient = useQueryClient();
   const [sizes, setSizes] = useState<Size[]>([]); // Save list of sizes from API
 
-  // Update sizes state when data is fetched
+  // Cập nhật danh sách kích cỡ khi có dữ liệu từ API
   useEffect(() => {
     if (sizeData) {
       setSizes(sizeData);
+      if (!formValues.sizeId && sizeData.length > 0) {
+        // Thiết lập giá trị mặc định là kích cỡ đầu tiên nếu chưa có chọn lựa
+        setFormValues((prev) => ({
+          ...prev,
+          sizeId: sizeData[0].sizeId,
+        }));
+      }
     }
   }, [sizeData]);
 
