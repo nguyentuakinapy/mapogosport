@@ -13,6 +13,10 @@ import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
 import mapogo.service.OrderDetailService;
 import mapogo.service.OrderService;
+import mapogo.service.impl.OrderServiceImpl;
+
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @CrossOrigin("*")
 @RequestMapping("/rest")
@@ -32,4 +36,16 @@ public class OrderRestController {
 	public List<OrderDetail> getOrderDetails(@PathVariable("orderId") Integer orderId) {
 		return orderDetailService.findByOrder_OrderId(orderId);
 	}
+	
+	@GetMapping("/admin/orderToDay")
+	public List<Order> getOrderToDay() {
+		return orderService.getOrdersToday();
+	}
+	
+	@GetMapping("/admin/category-product-totals-today")
+	public List<Object[]> getCategoryProductTotalsToDay() {
+		return orderService.getCategoryProductTotalsToDay();
+	}
+	
+	
 }
