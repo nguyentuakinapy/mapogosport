@@ -19,4 +19,9 @@ public class OrderServiceImpl implements OrderService{
 		return orderDAO.findByUser_Username(username);
 	}
 
+	@Override
+	public Order createOrder(Order order) {
+		return orderDAO.save(order);
+	}
+
 }
