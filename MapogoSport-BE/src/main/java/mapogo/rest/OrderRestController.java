@@ -16,6 +16,10 @@ import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
 import mapogo.service.OrderDetailService;
 import mapogo.service.OrderService;
+import mapogo.service.impl.OrderServiceImpl;
+
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @CrossOrigin("*")
 @RequestMapping("/rest")
@@ -36,6 +40,18 @@ public class OrderRestController {
 		return orderDetailService.findByOrder_OrderId(orderId);
 	}
 	
+	@GetMapping("/admin/orderToDay")
+	public List<Order> getOrderToDay() {
+		return orderService.getOrdersToday();
+	}
+	
+	@GetMapping("/admin/category-product-totals-today")
+	public List<Object[]> getCategoryProductTotalsToDay() {
+		return orderService.getCategoryProductTotalsToDay();
+	}
+	
+	
+
 	//của Mỵ từ đây
 	@PostMapping("/create_order")
     public ResponseEntity<Order> createOrder(@RequestBody Order order) {
