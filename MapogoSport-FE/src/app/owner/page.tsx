@@ -48,6 +48,39 @@ export default function Owner({ children }: { children: ReactNode }) {
 
     }, [dataUser]);
 
+    useEffect(() => {
+        getOwner();
+    }, [])
+
+    const [owner, setOwner] = useState<Owner>();
+
+    const getOwner = async () => {
+        const user = sessionStorage.getItem('user');
+
+        if (user) {
+            const parsedUserData = JSON.parse(user) as User;
+            const responseOwner = await fetch(`http://localhost:8080/rest/owner/${parsedUserData.username}`);
+            if (!responseOwner.ok) {
+                throw new Error('Error fetching data');
+            }
+            const dataOwner = await responseOwner.json() as Owner;
+            setOwner(dataOwner);
+        }
+    }
+
+    const [dataSport, setDataSport] = useState<SportField[]>([])
+
+    const { data: dataS, error: errorS, isLoading: isLoadingS } = useSWR(owner && `http://localhost:8080/rest/sport_field_by_owner/${owner.ownerId}`, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
+
+    useEffect(() => {
+        setDataSport(dataS);
+    }, [dataS])
+
+
     const { data: ap, error: erAp, isLoading: isLoadingAp } = useSWR(
         `http://localhost:8080/rest/accountpackage`, fetcher, {
         revalidateIfStale: false,
@@ -245,7 +278,7 @@ export default function Owner({ children }: { children: ReactNode }) {
                         <p>Chào mừng bạn đến với hệ thống quản lý dành cho chủ sân của MapogoSport</p>
                         <div className="stats">
                             <span>0 Bài Viết</span>
-                            <span>1/1 Sân</span>
+                            <span>{dataSport && dataSport.length}/{userSubscription?.accountPackage.limitSportFields}</span>
                             <span>0 Được thích</span>
                             <span>
                                 {userSubscription && userSubscription.accountPackage ? userSubscription.accountPackage.packageName : 'Không có gói nào'}

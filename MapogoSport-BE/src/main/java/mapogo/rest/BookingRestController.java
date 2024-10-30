@@ -103,7 +103,13 @@ public class BookingRestController {
 									@PathVariable("endDate") String endDate) {
 		
 		return bookingService.findRevenueByDate(ownerId, flag, startDate, endDate);
-		
+	}
+	
+	@GetMapping("/booking/detail/findbystarttime/sportfielddetail/{startTime}/{sportFieldDetailId}/{date}")
+	public BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(@PathVariable("startTime") String startTime, 
+			@PathVariable("sportFieldDetailId") Integer sportFieldDetailId,
+			@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+		return bookingDetailService.findBookingDetailByStartTimeDateAndSportDetailId(startTime, sportFieldDetailId, date);
 	}
 
 

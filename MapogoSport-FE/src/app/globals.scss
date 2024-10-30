@@ -212,14 +212,17 @@
             border: 1px solid #142239;
             border-radius: 8px;
             width: 120px;
+
             &:hover {
                 background: #142239;
                 color: white;
             }
         }
+
         .active {
             background: #142239;
             color: white;
+
             &:hover {
                 background: white;
                 color: black;
@@ -309,3 +312,46 @@
 }
 
 /*===================================================SportField Detail CSS End===================================================*/
+
+// SEARCH SPORT
+.search-sport {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(/images/soccer-ball-goal.png);
+    background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .body-search-sport {
+        width: 1600px;
+        transform: translateY(-10%);
+        margin-top: 135px;
+        margin-bottom: 138px;
+    }
+}
+
+.custom-border {
+    position: relative;
+    text-align: center;
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        width: 5px; // Độ dày của viền
+        height: 50%; // Độ dài viền tùy chỉnh, bạn có thể điều chỉnh
+        background-color: #6c757d; // Màu viền
+    }
+
+    &::before {
+        left: 0;
+        top: 25%; // Canh giữa
+    }
+
+    &::after {
+        right: 0;
+        top: 25%; // Canh giữa
+    }
+}

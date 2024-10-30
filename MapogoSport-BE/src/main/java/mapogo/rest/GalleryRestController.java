@@ -20,6 +20,7 @@ import com.cloudinary.utils.ObjectUtils;
 import mapogo.dao.GalleryDAO;
 import mapogo.entity.Gallery;
 import mapogo.service.GalleryService;
+import mapogo.utils.CloudinaryUtils;
 
 @CrossOrigin("*")
 @RestController
@@ -31,6 +32,8 @@ public class GalleryRestController {
 	GalleryDAO galleryDAO;
 	@Autowired
 	private Cloudinary cloudinary;
+	@Autowired
+	CloudinaryUtils cloudinaryUtils; 
 
 	@GetMapping
 	public List<Gallery> findAll() {
@@ -56,12 +59,12 @@ public class GalleryRestController {
 				// Xóa ảnh nếu tồn tại
 				if (oldImagePath != null && !oldImagePath.isEmpty()) {
 					// Lấy ID ảnh cũ từ URL
-					String publicId = oldImagePath.substring(oldImagePath.lastIndexOf("/") + 1,
-							oldImagePath.lastIndexOf("."));
+					String publicId = oldImagePath.substring(oldImagePath.lastIndexOf("/") + 1,oldImagePath.lastIndexOf("."));
 					System.err.println("publicId of image: " + publicId);
 					try {
 						// Xóa ảnh cũ trên Cloudinary
-						cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+//						cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+						cloudinaryUtils.deleteImage(publicId);
 						System.err.println("Đã xóa ảnh cũ: " + oldImagePath);
 					} catch (IOException e) {
 						System.err.println(

@@ -37,7 +37,7 @@ const ModalProductAddNewSize = ({
   };
 
   // Use react-query to fetch sizes
-  const { data: sizeData, isLoading } = useQuery({
+  const { data: sizeData, isLoading, refetch } = useQuery({
     queryFn: getDataSize,
     queryKey: ["getDataSize"],
   });
@@ -145,24 +145,6 @@ const ModalProductAddNewSize = ({
       };
 
 
-  // // Add or update size
-  // const mutation = useMutation({
-  //   mutationFn: (productDetailSize: ProductDetailSize) =>
-  //     createProductDetailSize(
-  //       selectedProductDetail!.productDetailId,
-  //       productDetailSize
-  //     ),
-
-  //   onSuccess: () => {
-  //     toast.success("Kích cỡ đã được lưu thành công!");
-  //     queryClient.invalidateQueries(["getDataSize"]); // Tải lại dữ liệu sau khi thêm/cập nhật thành công
-  //     handleCloseModal(); // Close the modal after saving
-  //   },
-  //   onError: (error) => {
-  //     console.error("Error occurred while saving size: ", error);
-  //     toast.error("Có lỗi xảy ra khi lưu kích cỡ!");
-  //   },
-  // });
   const mutation = useMutation({
     mutationFn: (productDetailSize: ProductDetailSize) => {
       return modalTypeProductDetail === "edit"
@@ -202,14 +184,6 @@ const ModalProductAddNewSize = ({
       price: Number(price),
       quantity: Number(quantity),
     };
-
-    // console.log({
-    //     productDetailId: selectedProductDetail?.productDetailId ?? ProductDetailWasCreated,
-    //     sizeId: sizeId,
-    //     price: price,
-    //     quantity: quantity,
-    //   });
-      
 
     // Log the sizeData to see what is being sent
     console.log("sizeData: ", sizeData);

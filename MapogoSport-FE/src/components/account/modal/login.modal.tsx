@@ -82,7 +82,7 @@ export default function Login(props: LoginProps) {
                     toast.error("Thông tin đăng nhập không đúng!");
                 }
             } catch (error: any) {
-                toast.error("Thông tin đăng nhập không đúng!!! " + error);
+                toast.error("Thông tin đăng nhập không đúng! ");
             }
         }
 

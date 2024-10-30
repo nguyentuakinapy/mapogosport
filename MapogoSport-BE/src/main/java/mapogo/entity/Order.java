@@ -35,6 +35,7 @@ public class Order implements Serializable {
 	@Column(name = "OrderId")
 	private Integer orderId;
 
+	@JsonManagedReference
 	@ManyToOne
 	@JoinColumn(name = "Username", nullable = false)
 	private User user;
