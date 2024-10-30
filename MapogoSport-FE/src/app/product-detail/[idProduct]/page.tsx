@@ -11,6 +11,7 @@ import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from "react-toastify";
 import { formatPrice } from '@/components/Utils/Format'
+import useSWR, { mutate } from 'swr';
 const StarRating = ({ setRating }) => {
     const [rating, localSetRating] = useState(0); // Trạng thái cho rating hiện tại
     const [hover, setHover] = useState(0); // Trạng thái cho sao đang được hover
@@ -189,7 +190,7 @@ const ProductDetail = () => {
                         height={100}
                         className="rounded-circle" // Hình tròn
                     />
-                    <span className='fs-4'>Vợt cầu lông siêu xịn</span>
+                    <span className='fs-4'>Hãy gửi đánh giá của bạn về chúng tôi</span>
 
                     <div className='mt-3 ms-3'>
                         <span className='fs-5'>Đánh giá chung</span>
@@ -240,7 +241,6 @@ const ProductDetail = () => {
     }, [idProduct]);
 
 
-
     // Select Size by color to product detail
     useEffect(() => {
         if (selectedProductDetailId) {
@@ -265,8 +265,9 @@ const ProductDetail = () => {
     // select price by size and productDetailId
 
     useEffect(() => {
+        console.log("idSize", idSize)
         if (selectedProductDetailId && idSize) {
-            console.log("idSize: ", idSize)
+            // console.log("idSize: ", idSize)
             const fetchData = async () => {
                 try {
                     const response = await fetch(`http://localhost:8080/rest/product-detail/price-by-size/${selectedProductDetailId}/${idSize}`)
@@ -305,18 +306,53 @@ const ProductDetail = () => {
         setSelectedColor(colorItem[0]); // Đặt màu đã chọn
         setSelectedProductDetailId(colorItem[1]); // Đặt ID chi tiết sản phẩm
     };
-
-    //add to cart
-    const handleAddToCart = () => {
+    // Hàm fetcher để lấy dữ liệu từ API
+    const fetcher = (url) => fetch(url).then((res) => {
+        if (!res.ok) {
+            throw new Error('Lỗi khi lấy dữ liệu');
+        }
+        return res.json();
+    });
+    const { data: cartCount, error } = useSWR(user ? `http://localhost:8080/rest/cart/count/${user.username}` : null, fetcher);
+    const handleAddToCart = async () => {
         if (user && user.username) {
-            console.log(">> user: ", user.username);
-            console.log(">> productDetailSize: ", selectedProductDetailSizeId);
-            console.log(">> quantity: ", quantity);
+            const dataAddCart = {
+                username: user.username,
+                productDetailSizeId: selectedProductDetailSizeId,
+                date: new Date(),
+                totalAmount: 150.00,
+                quantity: quantity
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/rest/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataAddCart)
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    throw new Error(`Có lỗi xảy ra khi thêm giỏ hàng: ${errorMessage}`);
+                }
+
+                toast.success("Thêm sản phẩm vào giỏ hàng thành công!");
+
+                // Cập nhật lại số lượng giỏ hàng
+                mutate(`http://localhost:8080/rest/cart/count/${user.username}`); // Tái tải dữ liệu
+
+            } catch (error) {
+                console.error("Lỗi khi gửi yêu cầu:", error);
+                alert("Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.");
+            }
 
         } else {
             console.log("Người dùng chưa đăng nhập");
         }
     };
+
 
     return (
         <>
@@ -402,6 +438,7 @@ const ProductDetail = () => {
                                                 onClick={() => {
                                                     setSelectedSize(item.size.sizeName);
                                                     setSelectedProductDetailSizeId(item.productDetailSizeId);
+                                                    setIdSize(item.size.sizeId);
                                                 }}>
                                                 {item.size.sizeName}
                                             </Button>
@@ -410,13 +447,9 @@ const ProductDetail = () => {
                                 })}
 
                             </div>
-
-
                             <h5 className='mb-3'>
-                                Giá sản phẩm: {selectedSize ? price : findByIdProduct.price}
+                                Giá sản phẩm: {findByIdProduct.price || price}
                             </h5>
-
-
 
                             <div className="d-flex align-items-center mb-4">
                                 <span>Số lượng</span>

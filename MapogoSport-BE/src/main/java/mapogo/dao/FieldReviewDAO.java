@@ -8,4 +8,7 @@ import mapogo.entity.FieldReview;
 
 public interface FieldReviewDAO extends JpaRepository<FieldReview, Integer>{
 	List<FieldReview> findByUser_Username(String username);
+	List<FieldReview> findBySportField_SportFieldId(Integer id);
+
+
 }

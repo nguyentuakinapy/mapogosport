@@ -2,20 +2,63 @@
 import BookingChart from '@/components/Owner/Statistic/BookingChart';
 import CustomerChartPage from '@/components/Owner/Statistic/CustomerChartPage';
 import RevenueChart from '@/components/Owner/Statistic/RevenuaChart';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, InputGroup, Nav, Table } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileExport } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-
-
 export default function Home() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [revenue, setRevenue] = useState<number | null>(null);
+  const [revenueByDate, setRevenueByDate] = useState<number | null>(null);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/rest/booking/successful/revenue/2`);
+        const data = await response.json();
+        setRevenue(data);
+        console.log(data);
+      } catch (error) {
+        console.log("Error fetch revenue", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Fetch revenue by date when startDate or endDate changes
+  useEffect(() => {
+    if (startDate) {
+        const fetchData = async () => {
+            try {
+                // Determine flag value based on endDate presence
+                const flag = endDate ? 2 : 1; // flag is 1 if no endDate, otherwise 2
+                
+                const response = await fetch(`http://localhost:8080/rest/booking/success/revenue/byDate/2/${flag}/${startDate.toISOString().split('T')[0]}${endDate ? '/' + endDate.toISOString().split('T')[0] : ''}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const text = await response.text(); // Get raw response text
+                console.log('Raw Response:', text); // Log the raw response
+                const data = JSON.parse(text); // Attempt to parse as JSON
+                setRevenueByDate(data);
+                console.log('Revenue By Date:', data);
+            } catch (error) {
+                console.error('Error fetching revenue by date:', error);
+            }
+        };
+        fetchData();
+    }
+}, [startDate, endDate]);
+
+
+  console.log('sate', startDate);
   const renderContent = () => {
     switch (activeTab) {
       case 'all':
@@ -26,15 +69,13 @@ export default function Home() {
                 <div className="row mt-0">
                   <div className="col-6 card-title">
                     <h4 style={{ fontSize: '20px' }}> <i className="bi bi-box"></i> Doanh thu</h4>
-
                   </div>
                 </div>
                 <div className="row">
                   <div className="col-3">
-                    <span className="price-amount">100.000</span>
-                    <span className="price-currency">VNĐ</span>
+                    <span className="price-amount">{revenue}</span>
+                    <span className="price-currency">{revenueByDate}</span>
                   </div>
-
                   <div className="col-7 text-center">
                     <InputGroup className="search-date">
                       <DatePicker

@@ -31,3 +31,25 @@ interface User {
         }
     ]
 }
+
+interface Authorities {
+    authorityId: number;
+    role: {
+        roleId: number;
+        name: string;
+    }
+}
+
+interface UserSubscription {
+    userSubscriptionId: number
+    accountPackage: AccountPackage
+    user: User
+    startDay: string
+    endDay: string
+    status: string
+    subscriptionPayments: SubscriptionPayments[]
+}
+
+interface SubscriptionPayments {
+
+}

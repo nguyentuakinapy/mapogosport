@@ -34,7 +34,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "Productdetailsize")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "productDetailSizeId")
 public class ProductDetailSize implements Serializable {
 
 	@Id
@@ -44,7 +43,7 @@ public class ProductDetailSize implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductDetailId", nullable = false)
-	@JsonBackReference
+	@JsonManagedReference // tanthanh
 	private ProductDetail productDetail;
 
 	@ManyToOne

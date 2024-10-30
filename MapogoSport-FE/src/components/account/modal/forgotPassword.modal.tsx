@@ -151,10 +151,10 @@ export default function ForgotPassword(props: ForgotPasswordProps) {
         }
     }
 
-    useEffect(() => {
-        console.log(codeOtp);
+    // useEffect(() => {
+    //     console.log(codeOtp);
 
-    }, [codeOtp])
+    // }, [codeOtp])
     // const checkEmail = async () => {
     //     if (emailFetch) {
 

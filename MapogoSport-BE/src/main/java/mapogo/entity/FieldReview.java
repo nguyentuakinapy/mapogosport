@@ -3,7 +3,9 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,11 +35,11 @@ public class FieldReview implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "SportFieldId", nullable = false)
+    @JsonManagedReference //phihung (27/10)
     private SportField sportField;
 
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
-    @JsonIgnore //phihung đã ở đây, có thể mở ra khi cần, hiện tại đóng để giảm dữ liệu từ get
     private User user;
 
     @Column(name = "Rating", nullable = false)

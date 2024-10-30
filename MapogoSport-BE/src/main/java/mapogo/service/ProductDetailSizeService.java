@@ -12,5 +12,5 @@ public interface ProductDetailSizeService {
 	void deleteById(Integer id);
 	
 	List<ProductDetailSize> findProductDetailSize_By_ProductDetailId(Integer id);
-
+	
 }

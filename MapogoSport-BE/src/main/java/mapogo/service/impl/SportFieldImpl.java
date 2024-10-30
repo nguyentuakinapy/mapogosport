@@ -32,4 +32,9 @@ public class SportFieldImpl implements SportFieldService{
 		return sportFieldDao.findSportFieldByOwner(id);
 	}
 
+	@Override
+	public SportField create(SportField sportField) {
+		return sportFieldDao.save(sportField);
+	}
+
 }

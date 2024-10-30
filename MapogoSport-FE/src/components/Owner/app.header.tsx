@@ -64,8 +64,7 @@ export default function Header({ isAniActive, toggleAni, weather, userData }: He
 
 
     return (
-        <header className={`${isAniActive ? 'aniHead' : ''} 
-        `}>
+        <header className={`${isAniActive ? 'aniHead' : ''}`}>
             <div className="d-flex m-0 justify-content-between align-items-center m-auto">
                 <div className="d-flex justify-content-center align-items-center">
                     <i className={`bi ${isAniActive ? 'bi-list' : 'bi-filter-left'} mx-3`} onClick={() => {
@@ -93,7 +92,7 @@ export default function Header({ isAniActive, toggleAni, weather, userData }: He
                     Thời tiết {translate(weather == null ? '' : weather?.weather[0].description)}
                 </div>
                 <div className="d-flex justify-content-center align-items-center">
-                    <em id="clock"><i className="bi bi-calendar2-range-fill me-1"></i>{currentDate} <i className="bi bi-alarm-fill ms-2"></i> {currentTime}</em>
+                    <span id="clock"><i className="bi bi-calendar2-range-fill me-1"></i>{currentDate} <i className="bi bi-alarm-fill ms-2"></i> {currentTime}</span>
                 </div>
                 <div className=" d-flex justify-content-center align-items-center">
                     <nav className="navbar navbar-expand-lg p-0">
