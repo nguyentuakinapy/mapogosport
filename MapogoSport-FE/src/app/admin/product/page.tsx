@@ -11,12 +11,11 @@ import {
   Tooltip,
   Nav,
 } from "react-bootstrap";
-import "../product/adminStyleProduct.scss"
+import "../product/adminStyleProduct.scss";
 import { useState, useEffect } from "react";
 import ProductAddNew from "@/components/Admin/Modal/product.addNew";
 import axios from "axios";
 import { toast } from "react-toastify";
-// import useSWR from "swr";
 import { useQuery } from "@tanstack/react-query";
 
 const AdminProduct = () => {
@@ -42,9 +41,7 @@ const AdminProduct = () => {
     const apiCategoriesProducts =
       "http://localhost:8080/rest/category-products";
     const [productsRes, categoriesRes] = await Promise.all([
-      axios.get(
-        apiProducts
-      ),
+      axios.get(apiProducts),
       axios.get(apiCategoriesProducts),
     ]);
     return {
@@ -52,33 +49,6 @@ const AdminProduct = () => {
       categoriesRes,
     };
   };
-  // const [totalPages, setTotalPages] = useState<number>(0);
-  // const [currentPage, setCurrentPage] = useState<number>(0);
-
-
-  // const getDatas = async (page: number = 0, size: number = 5) => {
-//     const apiProducts = `http://localhost:8080/rest/products/page?page=${page}&size=${size}`;
-//     const apiCategoriesProducts = "http://localhost:8080/rest/category-products";
-
-//     const [productsRes, categoriesRes] = await Promise.all([
-//         axios.get(apiProducts),
-//         axios.get(apiCategoriesProducts),
-//     ]);
-
-//     return {
-//         products: productsRes.data.content, // This is where the product data is in the response
-//         totalPages: productsRes.data.totalPages, // Total pages for pagination
-//         categoriesRes,
-//     };
-// };
-
-// const handlePageChange = async (newPage: number) => {
-//   const { products, totalPages, categoriesRes } = await getDatas(newPage, 10);
-//   setProducts(products);
-//   setTotalPages(totalPages); // Keep track of the total number of pages
-// };
-
-// Render your pagination controls based on totalPages
 
   const getDatas_DEMO = async () => {
     const url_getProduct = "http://localhost:8080/rest/products";
@@ -88,30 +58,30 @@ const AdminProduct = () => {
   };
 
   useEffect(() => {
-      const fetchData = async () => {
-          try {
-              const apiProducts = 'http://localhost:8080/rest/products';
+    const fetchData = async () => {
+      try {
+        const apiProducts = "http://localhost:8080/rest/products";
 
-              const apiCategoriesProducts  = 'http://localhost:8080/rest/category-products';
+        const apiCategoriesProducts =
+          "http://localhost:8080/rest/category-products";
 
-               // Gọi cả hai API cùng lúc
-          const [productsRes, categoriesRes] = await Promise.all([
-              axios.get(apiProducts),
-              axios.get(apiCategoriesProducts),
-          ]);
+        // Gọi cả hai API cùng lúc
+        const [productsRes, categoriesRes] = await Promise.all([
+          axios.get(apiProducts),
+          axios.get(apiCategoriesProducts),
+        ]);
 
-      // console.log('Products:', productsRes.data); // Ghi lại sản phẩm
-      // console.log('Category Products:', categoriesRes.data); // Ghi lại danh mục sản phẩm
+        // console.log('Products:', productsRes.data); // Ghi lại sản phẩm
+        // console.log('Category Products:', categoriesRes.data); // Ghi lại danh mục sản phẩm
 
-               // Lưu dữ liệu vào state
-          setProducts(productsRes.data);      // Dữ liệu từ API products
-          setCategoryProducts(categoriesRes.data);  // Dữ liệu từ API category_products
-
-          } catch (error) {
-              console.error('Error fetching data:', error);
-          }
-      };
-      fetchData();
+        // Lưu dữ liệu vào state
+        setProducts(productsRes.data); // Dữ liệu từ API products
+        setCategoryProducts(categoriesRes.data); // Dữ liệu từ API category_products
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
   }, []);
 
   // const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -137,18 +107,6 @@ const AdminProduct = () => {
     queryKey: ["getDatas_DEMO"], //Array according to Documentation
   });
 
-
-  // useEffect(() => {
-  //   if (data) {
-  //     console.log("data ", data.products);
-      
-  //     console.log("danh sách sản phẩm phân trang");
-      
-  //     setProducts(data.productsRes?.data || []);
-  //     setCategoryProducts(data.categoriesRes?.data || []);
-  //   }
-  // }, [data]);
-
   useEffect(() => {
     if (!isNeedScroll) return;
     if (products.length > 0) {
@@ -168,26 +126,13 @@ const AdminProduct = () => {
     }
   }, [products]);
 
-//   useEffect(() => {
-//     const fetchData = async () => {
-//         const data = await getDatas(currentPage); // Gọi hàm với currentPage
-//         setProducts(data.products);
-//         setTotalPages(data.totalPages); // Cập nhật tổng số trang
-//     };
-
-//     fetchData();
-// }, [currentPage]);
-
-
-// load lại data
-useEffect(() => {
-  if (data) {
-    setProducts(data.productsRes?.data || []);
-    setCategoryProducts(data.categoriesRes?.data || []);
-  }
-}, [data]);
-
-
+  // load lại data
+  useEffect(() => {
+    if (data) {
+      setProducts(data.productsRes?.data || []);
+      setCategoryProducts(data.categoriesRes?.data || []);
+    }
+  }, [data]);
 
   // Hàm thêm sản phẩm mới vào danh sách
   const handleAddProduct = (newProduct: Product) => {
@@ -248,42 +193,79 @@ useEffect(() => {
     }
   };
 
-//   const renderPagination = () => {
-//     const pages = Array.from({ length: totalPages }, (_, index) => index);
-//     return (
-//       <div className="d-flex justify-content-center my-3">
-//           <div className="pagination">
-//               <button
-//                   onClick={() => setCurrentPage(currentPage - 1)}
-//                   disabled={currentPage === 0} // Disable if on the first page
-//                   className="btn btn-danger mx-1"
-//               >
-//                   Previous
-//               </button>
-//               {pages.map((page) => (
-//                   <button
-//                       key={page}
-//                       onClick={() => setCurrentPage(page)}
-//                       className={`btn btn-outline-danger mx-1 ${currentPage === page ? "active" : ""}`}
-//                   >
-//                       {page + 1} {/* Add 1 to display page number starting from 1 */}
-//                   </button>
-//               ))}
-//               <button
-//                   onClick={() => setCurrentPage(currentPage + 1)}
-//                   disabled={currentPage >= totalPages - 1} // Disable if on the last page
-//                   className="btn btn-danger mx-1"
-//               >
-//                   Next
-//               </button>
-//           </div>
-//       </div>
-//   );
-  
-// };
+  // Phần phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 2; // số item trên mỗi trang
+
+  // Tính toán dữ liệu cho trang hiện tại
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = products.slice(startIndex, startIndex + itemsPerPage);
+
+  // Tổng số trang
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+
+  // Xử lý khi bấm vào trang mới
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+  // Xử lý khi bấm nút "Lùi"
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Xử lý khi bấm nút "Tới"
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+
+  const handleLastPage = () => {
+    setCurrentPage(totalPages);
+  };
+  const handleFirstPage = () => {
+    setCurrentPage(1);
+  };
+
+  //   const renderPagination = () => {
+  //     const pages = Array.from({ length: totalPages }, (_, index) => index);
+  //     return (
+  //       <div className="d-flex justify-content-center my-3">
+  //           <div className="pagination">
+  //               <button
+  //                   onClick={() => setCurrentPage(currentPage - 1)}
+  //                   disabled={currentPage === 0} // Disable if on the first page
+  //                   className="btn btn-danger mx-1"
+  //               >
+  //                   Previous
+  //               </button>
+  //               {pages.map((page) => (
+  //                   <button
+  //                       key={page}
+  //                       onClick={() => setCurrentPage(page)}
+  //                       className={`btn btn-outline-danger mx-1 ${currentPage === page ? "active" : ""}`}
+  //                   >
+  //                       {page + 1} {/* Add 1 to display page number starting from 1 */}
+  //                   </button>
+  //               ))}
+  //               <button
+  //                   onClick={() => setCurrentPage(currentPage + 1)}
+  //                   disabled={currentPage >= totalPages - 1} // Disable if on the last page
+  //                   className="btn btn-danger mx-1"
+  //               >
+  //                   Next
+  //               </button>
+  //           </div>
+  //       </div>
+  //   );
+
+  // };
 
   const renderContent = () => {
-        // const pages = Array.from({ length: totalPages }, (_, index) => index);
+    // const pages = Array.from({ length: totalPages }, (_, index) => index);
     return (
       <div className="box-table-border mb-4">
         <Table striped className="mb-0">
@@ -303,9 +285,9 @@ useEffect(() => {
             </tr>
           </thead>
           <tbody>
-            {products &&
-              products.length > 0 &&
-              products.map((product, index) => (
+            {currentItems &&
+              currentItems.length > 0 &&
+              currentItems.map((product, index) => (
                 <tr key={product.productId} id={product.productId.toString()}>
                   {/* <td className="text-center align-middle">
                     <FormCheck
@@ -400,7 +382,6 @@ useEffect(() => {
               ))}
           </tbody>
         </Table>
-        
       </div>
     );
   };
@@ -447,37 +428,54 @@ useEffect(() => {
           </Nav.Link>
         </Nav.Item>
       </Nav>
-      
+
       <div className="mt-3">
-        {/* <div className="text-end py-0">
-          <Button
-            variant="success"
-            className="mb-4"
-            onClick={handleCreateClick}
-          >
-            <i className="bi bi-plus-square-fill">
-              <span className="mx-1">Tạo mới</span>
-            </i>
-          </Button>
-          <Button
-            variant="danger"
-            className="mb-4 mx-2"
-            disabled={selectedProducts.length === 0}
-            onClick={() => {
-              setProducts(
-                products.filter(
-                  (product) => !selectedProducts.includes(product.productId)
-                )
-              );
-              setSelectedProducts([]);
-              setSelectAllProduct(false);
-            }}
-          >
-            <i className="bi bi-trash-fill"></i> Xóa đã chọn
-          </Button>
-        </div> */}
         {renderContent()}
-        {/* {renderPagination()} */}
+
+        <div className="pagination ">
+          <div className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+            <div
+              className="page-link"
+              aria-label="First"
+              onClick={() => handlePageChange(1)}
+              title="Go to first page"
+            >
+              <span aria-hidden="true">&laquo;</span>
+            </div>
+          </div>
+          {/* Nút "Lùi" */}
+          <button 
+          className="btn btn-primary mx-1 active"
+          onClick={handlePrevPage} disabled={currentPage === 1}>
+            {/* Lùi */}	&lt;
+          </button>
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              // className="btn btn-primary mx-1 active"
+              className={`btn mx-1 ${currentPage === index + 1 ? "btn-primary active" : "btn-secondary"}`}
+              key={index + 1}
+              onClick={() => handlePageChange(index + 1)}
+              disabled={currentPage === index + 1}>
+              {index + 1}
+              
+            </button>
+          ))}
+          {/* Nút "Tới" */}
+          <button
+          className="btn btn-primary mx-1 active"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}>
+            {/* Tới */}	&gt;
+          </button>
+           {/* Nút "Tới trang cuối" */}
+           <button
+          className="btn btn-primary mx-1"
+          onClick={handleLastPage}
+          disabled={currentPage === totalPages}
+        >
+          &raquo;
+        </button>
+        </div>
       </div>
 
       <ProductAddNew

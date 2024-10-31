@@ -61,6 +61,7 @@ public class ProductDetailSizeRestController {
 
             // Chuyển đổi dữ liệu JSON thành đối tượng ProductDetailSizeDTO
             ProductDetailSizeDTO productDetailSizeDTO = objectMapper.readValue(productDetailSizeJson, ProductDetailSizeDTO.class);
+            
             System.err.println("Converted to ProductDetailSizeDTO: " + productDetailSizeDTO.toString());
 
             // Log productDetailId
@@ -78,13 +79,7 @@ public class ProductDetailSizeRestController {
             System.err.println("productDetailSize getProductDetail().getColor(): "+productDetailSize.getProductDetail().getColor());
             System.err.println("productDetailSize getProductDetail().getProductDetailId(): "+productDetailSize.getProductDetail().getProductDetailId());
             
-            // Khởi tạo và thiết lập Size
-//            Size size = new Size();
-//            size.setSizeId(productDetailId);
-////            size.setSizeId(1); // demo
-//            System.err.println("productDetailSizeDTO.getSizeId() "+productDetailSizeDTO.getSizeId());
-//            productDetailSize.setSize(size);
-//            System.err.println("Set size with SizeId: " + productDetailSize.getSize().getSizeId());
+        
             // Khởi tạo và thiết lập Size từ DTO
             
             Size size = new Size();

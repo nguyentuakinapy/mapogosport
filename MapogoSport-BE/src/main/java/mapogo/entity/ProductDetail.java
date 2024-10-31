@@ -37,9 +37,9 @@ public class ProductDetail implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductId", nullable = false)
-//   @JsonManagedReference
+	@JsonManagedReference
 //	@JsonBackReference // QA Sửa 24/10
-	@JsonIgnore // QA (30/10)
+//	@JsonIgnore // QA (30/10)
 	private Product product;
 
 	@Column(name = "Color", nullable = false)
