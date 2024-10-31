@@ -365,7 +365,7 @@ const SportDetail = () => {
 
     const setStatusOnWeek = async () => {
         const updatedBookingsOnWeek = { ...bookingsOnWeek };
-        const currentHour = new Date().getHours();
+        const currentDateTime = new Date();
         if (dayYears) {
             const response = await fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${sportFieldDetailId}/${dayYears &&
                 dayYears[0]}/${dayYears && dayYears[dayYears.length - 1]}`);
@@ -406,16 +406,19 @@ const SportDetail = () => {
                             const sportDataTemporary = { ...sportData };
                             Object.entries(sportDataTemporary).forEach(([sport, statuses], j) => {
                                 if (sport === item.sportFieldDetail.name) {
-                                    const timeHour = parseInt(time.split('h')[0], 10);
-                                    if (timeHour < currentHour && dayIndex === 0) {
+                                    const [hour, minute] = time.split('h').map(Number);
+                                    const timeDate = new Date(dayYear);
+                                    timeDate.setHours(hour, minute);
+                                    if (timeDate < currentDateTime && dayIndex === 0) {
                                         sportDataTemporary[sport][dayIndex] = "Quá hạn";
                                     } else if (item.sportFieldDetail.status === "Hoạt động") {
                                         const timeIndex = newData.indexOf(time);
-                                        if (timeIndex >= 0) {
-                                            sportDataTemporary[sport][dayIndex] = "Đã đặt";
-                                        } else if (!sportDataTemporary[sport][dayIndex] || sportDataTemporary[sport][dayIndex] === "Còn trống") {
-                                            sportDataTemporary[sport][dayIndex] = "Còn trống";
-                                        }
+                                        sportDataTemporary[sport][dayIndex] = timeIndex >= 0 ? "Đã đặt" : "Còn trống";
+                                        // if (timeIndex >= 0) {
+                                        //     sportDataTemporary[sport][dayIndex] = "Đã đặt";
+                                        // } else if (!sportDataTemporary[sport][dayIndex] || sportDataTemporary[sport][dayIndex] === "Còn trống") {
+                                        //     sportDataTemporary[sport][dayIndex] = "Còn trống";
+                                        // }
                                     } else {
                                         sportDataTemporary[sport][dayIndex] = "Tạm đóng";
                                     }
@@ -429,15 +432,17 @@ const SportDetail = () => {
                 if (!hasBookingForDay) {
                     Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
                         const sportDataTemporary = { ...sportData };
-                        const timeHour = parseInt(time.split('h')[0], 10);
+                        const [hour, minute] = time.split('h').map(Number);
+                        const timeDate = new Date(dayYear);
+                        timeDate.setHours(hour, minute);
                         Object.entries(sportDataTemporary).forEach(([sport, statuses], j) => {
                             const sportStatus = sportField?.sportFielDetails.find(detail => detail.name === sport);
                             if (sportStatus) {
-                                if (timeHour < currentHour && dayIndex === 0) {
-                                    sportDataTemporary[sport][dayIndex] = "Quá hạn";
-                                } else {
-                                    sportDataTemporary[sport][dayIndex] = sportStatus.status === "Hoạt động" ? "Còn trống" : "Tạm đóng";
-                                }
+                                sportDataTemporary[sport][dayIndex] = timeDate < currentDateTime && dayIndex === 0
+                                    ? "Quá hạn"
+                                    : sportStatus.status === "Hoạt động"
+                                        ? "Còn trống"
+                                        : "Tạm đóng";
                             }
                         });
 

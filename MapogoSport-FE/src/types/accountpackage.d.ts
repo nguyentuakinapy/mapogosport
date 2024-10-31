@@ -3,6 +3,8 @@ interface AccountPackage {
     packageName: string
     price: number
     durationDays: number
+    limitSportFields: number
+    limitBookings: number
     accountPackageBenefits: AccountPackageBenefit[]
 }
 

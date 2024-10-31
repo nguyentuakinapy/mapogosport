@@ -15,8 +15,7 @@ const CheckoutPage = () => {
   // Dữ liệu giỏ hàng
   const [data, setData] = useState([]);
   const [cartIds, setCartIds] = useState([]);
-  const userSession = sessionStorage.getItem('user');
-  const user = userSession ? JSON.parse(userSession) : null;
+  const [user, setUser] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
 
   // const products = localStorage.getItem('productIds');
@@ -26,7 +25,6 @@ const CheckoutPage = () => {
       setCartIds(JSON.parse(storedCartIds));
     }
   }, []);
-  console.log("Checkout cartIds: ", cartIds);
 
 
   useEffect(() => {
@@ -41,10 +39,8 @@ const CheckoutPage = () => {
         } catch (err) {
           console.log('Lỗi:', err);
         }
-
       }
     }
-
     fetchData();
   }, [cartIds]);
 
@@ -55,6 +51,94 @@ const CheckoutPage = () => {
       console.log("Tổng giá trị của giỏ hàng:", total);
     }
   }, [data]);
+
+  const [addressUsers, setAddressUsers] = useState([]);
+  useEffect(() => {
+    const userSession = sessionStorage.getItem('user');
+    const user = userSession ? JSON.parse(userSession) : null;
+    setUser(user); // Cập nhật user từ sessionStorage
+    if (user) {
+      axios.get(`http://localhost:8080/rest/user/address/${user.username}`)
+        .then(response => {
+          setAddressUsers(response.data)
+          console.log(response.data);
+
+        })
+        .catch(error => console.error('Error:', error));
+    }
+  }, []);
+
+  const [addressSelected, setAddressSelected] = useState([]);
+
+  const [urlPayment, setUrlPayment] = useState();
+  const [order, setOrder] = useState<Order>();
+
+  const [orderStatus, setOrderStatus] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('');
+
+  const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedMethod = e.target.value;
+    if (selectedMethod === 'COD') {
+      setOrderStatus('Chờ xác nhận');
+    } else if (selectedMethod === 'VNPay') {
+      setOrderStatus('Chưa thanh toán');
+    }
+    axios.get(`http://localhost:8080/rest/getPaymentMethod/${selectedMethod}`)
+      .then(response => {
+        setPaymentMethod(response.data)
+      })
+      .catch(error => console.error('Error:', error));
+  };
+
+  const handleCreateOrder = async () => {
+    if (!user || !addressSelected || !paymentMethod || !totalPrice) {
+      throw new Error('Thông tin đơn hàng không đầy đủ');
+    }
+
+    const orderData = {
+      username: user, // Nếu user có trường userId
+      address: {
+        detail: addressSelected?.addressDetail,
+        province: addressSelected?.address?.province,
+        district: addressSelected?.address?.district,
+        ward: addressSelected?.address?.ward,
+      },
+      phoneNumber: addressSelected?.phoneNumber,
+      date: new Date(),
+      status: orderStatus,
+      amount: totalPrice,
+      paymentMethodId: paymentMethod.paymentMethodId,
+      voucherId: null,
+      note: null,
+      shipFee: 30000.0
+
+    };
+
+    try {
+      const response = await axios.post('http://localhost:8080/rest/create_order', orderData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data; // Trả về thông tin đơn hàng
+    } catch (error) {
+      console.error('Error creating order:', error.response?.data || error.message);
+      throw new Error('Không thể tạo đơn hàng'); // Ném lại lỗi để xử lý sau
+    }
+
+  };
+  const handlePayment = async () => {
+    try {
+      const order = await handleCreateOrder();
+      const paymentResponse = await axios.get(`http://localhost:8080/api/payment/create_payment`, order);
+      const paymentUrl = paymentResponse.data.url;
+
+      // Chuyển hướng đến URL thanh toán
+      window.location.href = paymentUrl;
+    } catch (error) {
+      console.error('Error during payment:', error);
+    }
+  };
 
   return (
     <HomeLayout>
@@ -68,15 +152,27 @@ const CheckoutPage = () => {
             <form className="mt-4">
               {/* Email */}
               <div className="form-floating mb-1">
-                <select className="form-select" id="city">
-                  <option selected>Chọn thành phố...</option>
-                  <option>Hồ Chí Minh</option>
-                  <option>Hà Nội</option>
-                  <option>Đà Nẵng</option>
-                  <option>Địa chỉ khác...</option>
-                  {/* Add more options as needed */}
+                <select
+                  className="form-select"
+                  id="city"
+                  value={addressSelected ? JSON.stringify(addressSelected) : ''}
+                  onChange={(e) => {
+                    const selectedValue = e.target.value;
+                    setAddressSelected(selectedValue ? JSON.parse(selectedValue) : null);
+                  }}
+                >
+                  <option value="">Chọn địa chỉ</option>
+                  {addressUsers.map(addressUser => (
+                    <option
+                      key={addressUser.addressUserId}
+                      value={JSON.stringify(addressUser)}
+                    >
+                      {addressUser.phoneNumber}, {addressUser.addressDetail}, {addressUser.address.ward}, {addressUser.address.district}, {addressUser.address.province}
+                    </option>
+                  ))}
                 </select>
-                <label htmlFor="city" style={{ color: "gray" }}>Số địa chỉ</label>
+
+                <label htmlFor="city" style={{ color: "gray" }}>Địa chỉ</label>
               </div>
 
               {/* Họ và tên */}
@@ -86,6 +182,7 @@ const CheckoutPage = () => {
                   className="form-control"
                   id="name"
                   placeholder="Họ và tên"
+                  value={user?.fullname ?? ''}
                 />
                 <label htmlFor="name" style={{ color: "gray" }}>Họ và tên</label>
               </div>
@@ -104,6 +201,7 @@ const CheckoutPage = () => {
                       className="form-control"
                       id="phone"
                       placeholder="Số điện thoại"
+                      value={addressSelected?.phoneNumber ?? ''}
                     />
                     <label htmlFor="phone" style={{ color: "gray" }}>Số điện thoại</label>
                   </div>
@@ -112,31 +210,34 @@ const CheckoutPage = () => {
 
 
               <div className="form-floating mb-1">
-                <select className="form-select" id="city">
-                  <option selected>...</option>
-                  <option>Hồ Chí Minh</option>
-                  <option>Hà Nội</option>
-                  <option>Đà Nẵng</option>
-                  <option>Địa chỉ khác...</option>
-                  {/* Add more options as needed */}
-                </select>
+                <input
+                  type="Text"
+                  className="form-control"
+                  id="phone"
+                  placeholder="Số điện thoại"
+                  value={addressSelected?.address?.province ?? ''}
+                />
                 <label htmlFor="city" style={{ color: "gray" }}>Tỉnh thành</label>
               </div>
 
               <div className="form-floating mb-1">
-                <select className="form-select" id="city">
-                  <option selected>...</option>
-                  <option>1</option>
-                  {/* Add more options as needed */}
-                </select>
+                <input
+                  type="Text"
+                  className="form-control"
+                  id="phone"
+                  placeholder="Số điện thoại"
+                  value={addressSelected?.address?.district ?? ''}
+                />
                 <label htmlFor="city" style={{ color: "gray" }}>Quận</label>
               </div>
               <div className="form-floating mb-1">
-                <select className="form-select" id="city">
-                  <option selected>...</option>
-                  <option>1</option>
-                  {/* Add more options as needed */}
-                </select>
+                <input
+                  type="Text"
+                  className="form-control"
+                  id="phone"
+                  placeholder="Số điện thoại"
+                  value={addressSelected?.address?.ward ?? ''}
+                />
                 <label htmlFor="city" style={{ color: "gray" }}>Phường</label>
               </div>
               {/* Địa chỉ cụ thể */}
@@ -146,6 +247,7 @@ const CheckoutPage = () => {
                   className="form-control"
                   id="specificAddress"
                   placeholder="Số nhà"
+                  value={addressSelected?.addressDetail ?? ''}
                 />
                 <label htmlFor="specificAddress" style={{ color: "gray" }}>Địa chỉ cụ thể</label>
               </div>
@@ -171,6 +273,8 @@ const CheckoutPage = () => {
                     name="paymentMethod"
                     id="cod"
                     aria-expanded={open}
+                    value={"COD"}
+                    onChange={handlePaymentMethodChange}
                   />
                   <label className="form-check-label" htmlFor="cod">
                     Thanh toán khi nhận hàng (COD)
@@ -192,35 +296,38 @@ const CheckoutPage = () => {
                     className="form-check-input"
                     type="radio"
                     name="paymentMethod"
-                    id="cod"
+                    id="vnpay"
                     aria-expanded={open}
+                    value="VNPay"
+                    onChange={handlePaymentMethodChange}
                   />
                   <label className="form-check-label" htmlFor="cod">
-                    Chuyển khoản
+                    Thanh toán qua ví điện tử VNPay
                   </label>
                 </div>
                 <i className="bi bi-cash" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}></i>
               </div>
               {/* Collapse for bank transfer details */}
-              <Collapse in={open}>
+              {/* <Collapse in={open}>
                 <div id="bank-transfer-collapse" className="card-footer">
                   <h6>Thông tin chuyển khoản</h6>
 
-                  {/* Hiển thị các hình ảnh của các hình thức thanh toán */}
-                  <div className="d-flex align-items-center mb-3">
-                    <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" alt="Visa" className="me-2" style={{ width: "50px" }} />
-                    <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" alt="MasterCard" className="me-2" style={{ width: "50px" }} />
-                    <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" className="me-2" style={{ width: "50px" }} />
-                  </div>
+                  Hiển thị các hình ảnh của các hình thức thanh toán 
+              <div className="d-flex align-items-center mb-3">
+                <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" alt="Visa" className="me-2" style={{ width: "50px" }} />
+                <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" alt="MasterCard" className="me-2" style={{ width: "50px" }} />
+                <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" className="me-2" style={{ width: "50px" }} />
+              </div>
 
-                  {/* Thông tin chi tiết chuyển khoản */}
-                  <p>
-                    <strong>Ngân hàng:</strong> ABC Bank <br />
-                    <strong>Số tài khoản:</strong> 123456789 <br />
-                    <strong>Tên tài khoản:</strong> Nguyen Van A
-                  </p>
-                </div>
-              </Collapse>
+              {/* Thông tin chi tiết chuyển khoản 
+              <p>
+                <strong>Ngân hàng:</strong> ABC Bank <br />
+                <strong>Số tài khoản:</strong> 123456789 <br />
+                <strong>Tên tài khoản:</strong> Nguyen Van A
+              </p>
+            </div>
+          </Collapse> 
+          */}
 
             </div>
           </div>
@@ -232,7 +339,7 @@ const CheckoutPage = () => {
             <div className="order-summary">
               {/* Order Items */}
               {data && data.map((cart, index: number) => (
-                <div style={{ maxHeight: '130px', overflowY: 'auto' }}>
+                <div key={index} style={{ maxHeight: '130px', overflowY: 'auto' }}>
                   <div className="order-item d-flex align-items-center my-3">
                     <div className="product-image me-3 position-relative">
                       <img
@@ -295,14 +402,14 @@ const CheckoutPage = () => {
                   </span>
                 </a>
 
-                <Button href='' className="btn btn-success px-3">Thanh toán</Button>
+                <Button onClick={handlePayment} className="btn btn-success px-3">Thanh toán</Button>
               </div>
             </div>
           </div>
 
         </div>
-      </div>
-    </HomeLayout>
+      </div >
+    </HomeLayout >
   );
 };
 

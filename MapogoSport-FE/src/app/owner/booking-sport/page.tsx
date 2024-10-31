@@ -229,7 +229,7 @@ export default function BookingSport() {
     });
 
     const initialEndWeek = new Date();
-    initialEndWeek.setDate(initialEndWeek.getDate() + 7);
+    initialEndWeek.setDate(initialEndWeek.getDate() + 6);
     const [endWeek, setEndWeek] = useState<string>(initialEndWeek.toISOString().split('T')[0]);
 
     const setOnDayAndOnWeek = (direction: 'forward' | 'backward') => {
@@ -566,11 +566,12 @@ export default function BookingSport() {
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
     const [startTime, setStartTime] = useState("");
     const [dayStartBooking, setDayStartBooking] = useState("");
+    const [startTimeKey, setStartTimeKey] = useState<boolean>(true);
 
     const handleGetDataBookingOnDay = (event: React.MouseEvent<HTMLTableCellElement>) => {
         const sportDetail = event.currentTarget.getAttribute("sport-detail");
         const startTime = event.currentTarget.getAttribute("time-data");
-        const dayStartBooking = new Date(onDay); 
+        const dayStartBooking = new Date(onDay);
 
         const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
 
@@ -578,6 +579,7 @@ export default function BookingSport() {
             setSportDetail(selectedSportDetail);
             setStartTime(startTime);
             setDayStartBooking(dayStartBooking.toLocaleDateString('en-CA'));
+            setStartTimeKey(!startTimeKey);
             setShowBookingModal(true);
         }
         // toast.success(sportDetail + " - " + timeStart + " - " + dayStartBooking);
@@ -594,10 +596,12 @@ export default function BookingSport() {
             setSportDetail(selectedSportDetail);
             setStartTime(startTime);
             setDayStartBooking(dayStartBooking);
+            setStartTimeKey(!startTimeKey);
             setShowBookingModal(true);
             // toast.success(sportDetail + " - " + timeStart + " - " + dayStartBooking);
         }
     };
+
 
     const getBadgeClass = (status: string) => {
         switch (status) {
@@ -699,8 +703,8 @@ export default function BookingSport() {
             <BookingModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
                 sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
                 sport={dataSport && dataSport[selectSport]} owner={owner}
-                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus}
-            ></BookingModal>
+                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey}>
+            </BookingModal >
         </>
     );
 }

@@ -77,4 +77,12 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		return bookingDetailDAO.findBySportFieldDetailAndDay(sportDetailId, date);
 	}
 
+	@Override
+	public BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId,
+			LocalDate date) {
+		return bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date);
+	}
+
+	
+
 }

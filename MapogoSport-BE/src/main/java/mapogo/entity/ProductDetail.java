@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -36,8 +37,8 @@ public class ProductDetail implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductId", nullable = false)
+
 	@JsonManagedReference// của tanthanh k có sữa nha
-//	@JsonBackReference // QA Sửa 24/10
 	private Product product;
 
 	@Column(name = "Color", nullable = false)

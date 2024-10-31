@@ -71,4 +71,10 @@ public class OrderServiceImpl implements OrderService {
 		return orderDAO.findCategoryProductTotalsLast7DaysWithStatus(startDate, statuses);
 	}
 
+    
+	public Order createOrder(Order order) {
+		return orderDAO.save(order);
+
+	}
+
 }

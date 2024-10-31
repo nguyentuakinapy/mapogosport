@@ -41,7 +41,9 @@ public class ProductDetailSize implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductDetailId", nullable = false)
-	@JsonManagedReference // tanthanh
+	//@JsonManagedReference // tanthanh
+//	@JsonBackReference // QA - 30-10
+	@JsonIgnore // QA - 30-10
 	private ProductDetail productDetail;
 
 	@ManyToOne
