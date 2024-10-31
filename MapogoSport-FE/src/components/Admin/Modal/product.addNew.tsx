@@ -1423,7 +1423,7 @@ const ProductAddNew = ({
                 </Row>
 
                 {/* Bảng Gallery */}
-                <Form.Group controlId="formGallery" className="mb-4">
+                <Form.Group className="mb-4">
                   <Form.Label className="fs-6">Thư viện ảnh:</Form.Label>
 
                   {/* Custom File Input */}
@@ -1475,8 +1475,16 @@ const ProductAddNew = ({
                 <Form.Group controlId="formGallery">
                   <div className="mb-3">
                     <label className="form-label fw-bold">
-                      Gallery của sản phẩm:
+                      Thư viện ảnh của sản phẩm: 
                     </label>
+                    <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className="mx-2"
+                    onClick={() => document.getElementById("galleryInput").click()}
+                  >
+                    Thêm ảnh <i className="bi bi-plus-circle mx-1"></i>
+                  </Button>
                     <div className="d-flex flex-wrap align-items-center">
                       {galleries.length > 0 ? (
                         galleries.map((gallery) => (

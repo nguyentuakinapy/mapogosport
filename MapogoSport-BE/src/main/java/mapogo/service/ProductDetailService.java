@@ -1,6 +1,7 @@
 package mapogo.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import mapogo.entity.Product;
 import mapogo.entity.ProductDetail;
 import mapogo.entity.ProductDetailSize;
+import mapogo.entity.UserSubscription;
 
 public interface ProductDetailService {
 	List<ProductDetail> findAll();
@@ -29,4 +31,7 @@ public interface ProductDetailService {
 	void delete(Integer id);
 	
 //	ProductDetail findProduct_Id_By_Product_Detail_Id( Integer productDetail_Id);
+	
+	ProductDetail updateProductDetailWithMap(Map<String, Object> data);
+
 }
