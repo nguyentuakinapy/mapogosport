@@ -3,11 +3,16 @@ package mapogo.service.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.ProductDetailDAO;
+import mapogo.dto.GalleryDTO;
+import mapogo.dto.ProductDTO;
+import mapogo.dto.ProductDetailDTO;
+import mapogo.dto.ProductDetailSizeDTO;
 import mapogo.entity.AccountPackage;
 import mapogo.entity.Product;
 import mapogo.entity.ProductDetail;
@@ -87,11 +92,60 @@ public class ProductDetailServiceImpl implements ProductDetailService{
 		return null;
 	}
 
-//	@Override
-//	public ProductDetail findProduct_Id_By_Product_Detail_Id(Integer productDetail_Id) {
-//		
-//		return detailDAO.findProduct_Id_By_Product_Detail_Id(productDetail_Id);
-//	}
+    @Override
+    public List<ProductDetailDTO> findAllProductDetailDTO() {
+        List<ProductDetail> productDetails = detailDAO.findAll();
+        return productDetails.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public ProductDetailDTO convertToDTO(ProductDetail productDetail) {
+        List<ProductDetailSizeDTO> productDetailSizeDTOs = productDetail.getProductDetailSizes().stream()
+            .map(size -> new ProductDetailSizeDTO(size.getProductDetailSizeId(), size.getSize(), size.getPrice(), size.getQuantity()))
+            .collect(Collectors.toList());
+
+        ProductDTO productDTO = new ProductDTO(
+            productDetail.getProduct().getProductId(),
+            productDetail.getProduct().getName(),
+            productDetail.getProduct().getDescription(),
+            productDetail.getProduct().getBrand(),
+            productDetail.getProduct().getCountry(),
+            productDetail.getProduct().getPrice(),
+            productDetail.getProduct().getImage()
+        );
+
+        List<GalleryDTO> galleryDTOs = productDetail.getGalleries().stream()
+            .map(gallery -> new GalleryDTO(gallery.getGalleryId(), gallery.getName()))
+            .collect(Collectors.toList());
+
+        return new ProductDetailDTO(
+            productDetail.getProductDetailId(),
+            productDetail.getColor(),
+            productDetail.getImage(),
+            productDetailSizeDTOs,
+            productDTO,
+            galleryDTOs
+        );
+    }
+    
+    @Override
+    public ProductDetailDTO findByIdProductDetailDTO(Integer id) {
+        Optional<ProductDetail> productDetailOpt = detailDAO.findById(id);
+        return productDetailOpt.map(this::convertToDTO).orElse(null);
+    }
+    
+    @Override
+    public Optional<ProductDetailDTO> findByIdDto(Integer id) {
+        return detailDAO.findById(id).map(this::convertToDTO);
+    }
+
+    @Override
+    public List<ProductDetailDTO> findByIdProductDto(Integer id) {
+        List<ProductDetail> productDetails = detailDAO.findByIdProduct(id);
+        return productDetails.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+    
+
 	
 	
 	

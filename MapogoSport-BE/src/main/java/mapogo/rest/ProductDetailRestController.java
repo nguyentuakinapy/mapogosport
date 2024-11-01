@@ -66,12 +66,14 @@ public class ProductDetailRestController {
 	public List<ProductDetail> findAll() {
 		return productDetailService.findAll();
 	}
-
+	
+    
 	@GetMapping("/product-detail/{id}")
 	public List<ProductDetail> findById(@PathVariable Integer id) {
-
+		
 		return productDetailService.findById(id);
 	}
+	
 
 	@GetMapping("/product-detail/color/{idProduct}")
 	public List<Object[]> selectColorByProductId(@PathVariable Integer idProduct) {
