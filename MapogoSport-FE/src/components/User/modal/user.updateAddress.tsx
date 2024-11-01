@@ -24,7 +24,6 @@ const ModalAddAddress = (props: UserProps) => {
     const [selectedProvince, setSelectedProvince] = useState<string>('');
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [selectedWard, setSelectedWard] = useState<string>('');
-    const [phone, setPhone] = useState<string>('');
     const [addressDetail, setAddressDetail] = useState<string>('');
 
     useEffect(() => {
@@ -32,7 +31,6 @@ const ModalAddAddress = (props: UserProps) => {
             setSelectedProvince(addressUser.address.province);
             setSelectedDistrict(addressUser.address.district);
             setSelectedWard(addressUser.address.ward);
-            setPhone(addressUser.phoneNumber);
             setAddressDetail(addressUser.addressDetail);
 
             const selectedProvinceData = data?.find((province: any) => province.Name === addressUser.address.province);
@@ -66,14 +64,11 @@ const ModalAddAddress = (props: UserProps) => {
     };
 
     const handleClose = () => {
-        setSelectedProvince('');
-        setSelectedDistrict('');
-        setSelectedWard('');
         setShowUpdateAddress(false);
     };
 
     const handleUpdate = () => {
-        if (!selectedProvince || !selectedDistrict || !selectedWard || !phone || !addressDetail) {
+        if (!selectedProvince || !selectedDistrict || !selectedWard || !addressDetail) {
             toast.error("Hãy điền đầy đủ thông tin!");
             return;
         }
@@ -92,7 +87,6 @@ const ModalAddAddress = (props: UserProps) => {
                         district: selectedDistrict,
                         ward: selectedWard
                     },
-                    phoneNumber: phone,
                     addressDetail: addressDetail
                 }),
             }).then(async (res) => {
@@ -174,21 +168,13 @@ const ModalAddAddress = (props: UserProps) => {
 
                             <Form.Group className="mb-3">
                                 <Form.Floating>
-                                    <Form.Control size="sm" type="text" placeholder="Số điện thoại"
-                                        value={phone} onChange={(e) => setPhone(e.target.value)} />
-                                    <Form.Label htmlFor="phone">Số điện thoại <b className="text-danger">*</b></Form.Label>
+                                    <Form.Control size="sm" type="text" placeholder="Địa chỉ chi tiết"
+                                        value={addressDetail} onChange={(e) => setAddressDetail(e.target.value)} />
+                                    <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
                                 </Form.Floating>
                             </Form.Group>
                         </Col>
                     </Row>
-
-                    <Form.Group>
-                        <Form.Floating>
-                            <Form.Control size="sm" type="text" placeholder="Địa chỉ chi tiết"
-                                value={addressDetail} onChange={(e) => setAddressDetail(e.target.value)} />
-                            <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
-                        </Form.Floating>
-                    </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer>

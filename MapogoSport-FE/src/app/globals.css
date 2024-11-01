@@ -2,6 +2,7 @@ body {
   background: #F6F6F6 !important
 }
 
+
 .thumbnail-container {
   text-align: center;
   /* Căn giữa hình ảnh thu nhỏ */
@@ -16,10 +17,6 @@ body {
   /* Thêm viền cho hình ảnh */
   border-radius: 4px;
   /* Làm tròn các góc */
-}
-
-.container1 {
-  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .1), 0 2px 6px 2px rgba(60, 64, 67, .15);
 }
 
 /* sport detail========================================*/
@@ -55,57 +52,6 @@ body {
   color: white;
   max-width: 275px;
   border-radius: 10px;
-}
-
-.info-header {
-  display: flex;
-  align-items: center;
-  font-size: 1.5rem;
-  /* Adjust as needed */
-  font-weight: bold;
-  color: #1b2b46;
-  /* Dark blue color as shown in the image */
-}
-
-.info-line {
-  width: 5px;
-  height: 30px;
-  background-color: #FFD36E;
-  /* Yellow vertical line color */
-  margin-right: 10px;
-}
-
-.info-text {
-  font-size: 1.25rem;
-  /* Adjust the text size to match the design */
-}
-
-.extends {
-  flex-wrap: wrap;
-  border-radius: 8px;
-  background: #F3F3F3;
-  padding: 10px 15px;
-}
-
-.list-extends {
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-}
-
-.item-extends {
-
-  flex: 0 0 50%;
-  display: flex;
-  align-items: center;
-  margin-top: 10px;
-  /* Adds vertical space between rows */
-}
-
-
-.title {
-  font-size: 16px;
-  font-weight: 700;
 }
 
 .mb-3 {
@@ -360,8 +306,9 @@ body {
 .head-hv-nav {
   letter-spacing: 0.5px;
   margin: 0px 10px;
-  font-weight: bold !important;
-  color: black !important;
+  font-weight: 600 !important;
+  color: rgb(255, 255, 255) !important;
+  font-size: 16px;
 }
 
 .head-hv-nav:hover {
@@ -501,4 +448,182 @@ body {
 /* Tùy chỉnh khi hover vào thanh kéo */
 ::-webkit-scrollbar-thumb:hover {
   background-color: #555;
+}
+
+
+
+/* PAGINATION */
+
+.page-item .page-link {
+  color: #000;
+  font-weight: 500;
+  border: none;
+  background-color: #f3f3f3;
+}
+
+.page-item.active .page-link {
+  background-color: #ff4500;
+  border-radius: 5px;
+  color: white;
+  border: none;
+}
+
+.page-link:hover {
+  text-decoration: none;
+  color: #ff4500;
+  /* Hover color */
+}
+
+.page-item.disabled .page-link {
+  color: #d3d3d3;
+  /* Disabled arrow color */
+}
+
+
+
+/* XEM THÊM */
+
+.see-more-link {
+  color: #FF4500;
+  /* Bright orange color */
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 16px;
+  position: relative;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.see-more-link:hover {
+  color: #FF6347;
+  /* Slightly darker on hover */
+}
+
+.see-more-link:hover::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #FF6347;
+  /* Same color as hover */
+}
+
+.see-more-link::after {
+  content: '\203A';
+  /* Unicode for the right arrow */
+  font-size: 16px;
+  position: relative;
+  left: 5px;
+  transition: all 0.3s ease;
+}
+
+.see-more-link:hover::after {
+  left: 10px;
+}
+
+/* POP UP SALE */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.popup {
+  background-color: #2e3b4e;
+  /* Màu nền */
+  color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 350px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+
+  background-image: url('https://static.vecteezy.com/system/resources/previews/006/921/981/original/british-lion-animal-silhouette-illustration-free-vector.jpg');
+  background-repeat: repeat;
+  /* Lặp lại hình ảnh */
+  background-size: 50px 50px;
+  /* Kích thước biểu tượng */
+  background-position: center;
+  /* Đặt vị trí của biểu tượng */
+
+  /* Đặt thứ tự giữa màu và ảnh */
+  background-blend-mode: multiply;
+  /* Hoặc thử 'overlay', 'screen', v.v. */
+}
+
+
+.popup h2 {
+  font-size: 32px;
+  font-weight: bold;
+  color: #f462a3;
+  margin-bottom: 15px;
+}
+
+.popup p {
+  margin: 10px 0;
+  font-size: 20px;
+}
+
+.popup .close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.claim-btn {
+  background-color: #f462a3;
+  border: none;
+  color: white;
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+}
+
+.claim-btn:hover {
+  background-color: #f13e8a;
+}
+
+.countdown {
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: 20px;
+  color: #ffffff;
+}
+
+.expiry {
+  background-color: #ffffff;
+  color: #2e3b4e;
+  border-radius: 20px;
+  padding: 10px 20px;
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.percent {
+  background-color: #ffffff;
+  color: #f462a3;
+  padding: 5px;
+  font-size: 29px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  border: dotted;
 }

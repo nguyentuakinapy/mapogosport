@@ -11,4 +11,6 @@ public interface GalleryService {
 	Gallery create(Gallery gallery);
 	Gallery update(Gallery gallery);
 	void deleteById(Integer id);
+	
+	List<Gallery> findGalleryByProductDetailId(Integer id);
 }

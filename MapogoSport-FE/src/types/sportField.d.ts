@@ -12,13 +12,7 @@ interface SportField {
     quantity: number;
     status: string;
     image: string;
-    owner: {
-        ownerId: number;
-        user: User;
-        bankAccount: string;
-        momoAccount: string;
-        vnpayAccount: string;
-    }
+    owner: Owner;
     decription: string;
     sportFielDetails: SportFieldDetail[];
 }
@@ -32,4 +26,5 @@ interface SportFieldDetail {
     status: string;
     percentDeposit: number;
     peakHour: string;
+    availableTimes: string[];
 }

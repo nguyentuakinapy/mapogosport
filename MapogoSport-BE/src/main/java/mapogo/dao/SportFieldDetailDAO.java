@@ -21,4 +21,6 @@ public interface SportFieldDetailDAO extends JpaRepository<SportFieldDetail, Int
 	
 	SportFieldDetail findBySportFielDetailId(Integer sportFielDetailId);
 	//đến đây
+	
+	
 }

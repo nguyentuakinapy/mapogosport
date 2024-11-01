@@ -11,7 +11,7 @@ public interface SportFieldService {
 	SportField findBySportFieldId(Integer Id);
 	
 	//Mỵ sửa lỗi chính tả
-	List<SportField> findSportFieldByOwner(Integer id);
+	List<SportField> findSportFieldByOwner(Integer id);// hht lấy
 	
 	//Của Mỵ 
 	SportField create(SportFieldDTO sportFieldDTO);

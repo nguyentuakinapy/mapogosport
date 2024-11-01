@@ -23,7 +23,6 @@ const ModalAddAddress = (props: UserProps) => {
     const [selectedProvince, setSelectedProvince] = useState<string>('');
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [selectedWard, setSelectedWard] = useState<string>('');
-    const [phone, setPhone] = useState<string>('');
     const [addressDetail, setAddressDetail] = useState<string>('');
 
     const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -57,7 +56,7 @@ const ModalAddAddress = (props: UserProps) => {
     };
 
     const handleSave = () => {
-        if (!selectedProvince || !selectedDistrict || !selectedWard || !phone || !addressDetail) {
+        if (!selectedProvince || !selectedDistrict || !selectedWard || !addressDetail) {
             toast.error("Hãy điền đầy đủ thông tin!");
             return;
         }
@@ -76,7 +75,6 @@ const ModalAddAddress = (props: UserProps) => {
                         district: selectedDistrict,
                         ward: selectedWard
                     },
-                    phoneNumber: phone,
                     addressDetail: addressDetail
                 }]),
             }).then(res => res.json()).then(res => {
@@ -156,21 +154,13 @@ const ModalAddAddress = (props: UserProps) => {
 
                             <Form.Group className="mb-3">
                                 <Form.Floating>
-                                    <Form.Control size="sm" type="text" placeholder="Số điện thoại"
-                                        onChange={(e) => setPhone(e.target.value)} />
-                                    <Form.Label htmlFor="phone">Số điện thoại <b className="text-danger">*</b></Form.Label>
+                                    <Form.Control size="sm" type="text" placeholder="Địa chỉ chi tiết"
+                                        onChange={(e) => setAddressDetail(e.target.value)} />
+                                    <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
                                 </Form.Floating>
                             </Form.Group>
                         </Col>
                     </Row>
-
-                    <Form.Group>
-                        <Form.Floating>
-                            <Form.Control size="sm" type="text" placeholder="Địa chỉ chi tiết"
-                                onChange={(e) => setAddressDetail(e.target.value)} />
-                            <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
-                        </Form.Floating>
-                    </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer>

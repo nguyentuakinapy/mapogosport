@@ -3,11 +3,9 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 
 import jakarta.persistence.CascadeType;
 
@@ -43,12 +41,15 @@ public class ProductDetailSize implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductDetailId", nullable = false)
-	@JsonManagedReference // tanthanh
+//	@JsonManagedReference // tanthanh
+//	@JsonBackReference // QA - 30-10
+	@JsonIgnore // QA - 30-10
 	private ProductDetail productDetail;
 
 	@ManyToOne
 	@JoinColumn(name = "SizeId", nullable = false)
-	@JsonManagedReference
+//	@JsonManagedReference
+//	@JsonBackReference // QA sửa 23/10
 	private Size size;
 
 	@Column(name = "Price", nullable = false)

@@ -21,9 +21,8 @@ export default function Nav({ isAniActive, isActive, setIsActive }: NavProps) {
                             <li><Link className={`link ${isActive == 2 ? 'active' : ''}`} href="/owner/sport-manager" onClick={() => setIsActive(2)}><i className="bi bi-box-seam me-2"></i>QUẢN LÝ SÂN</Link></li>
                             <li><Link className={`link ${isActive == 3 ? 'active' : ''}`} href="/owner/booking-sport" onClick={() => setIsActive(3)}><i className="bi bi-people me-2"></i>LỊCH ĐẶT SÂN</Link></li>
                             <li><Link className={`link ${isActive == 4 ? 'active' : ''}`} href="/owner/booking-sport" onClick={() => setIsActive(4)}><i className="bi bi-receipt me-2"></i>HÓA ĐƠN</Link></li>
-                            <li><Link className={`link ${isActive == 5 ? 'active' : ''}`} href="/owner/booking-sport" onClick={() => setIsActive(5)}><i className="bi bi-bar-chart me-2"></i>THỐNG KÊ</Link></li>
-                            <li><Link className={`link ${isActive == 6 ? 'active' : ''}`} href="/owner/authority" onClick={() => setIsActive(6)}><i className="bi bi-bar-chart me-2"></i>PHÂN QUYỀN</Link></li>
-                            <li><Link className={`link ${isActive == 7 ? 'active' : ''}`} href="/owner/booking-sport" onClick={() => setIsActive(7)}><i className="bi bi-bar-chart me-2"></i>ĐĂNG XUẤT</Link></li>
+                            <li><Link className={`link ${isActive == 5 ? 'active' : ''}`} href="/owner/statistic" onClick={() => setIsActive(5)}><i className="bi bi-bar-chart me-2"></i>THỐNG KÊ</Link></li>
+                            <li><Link className={`link ${isActive == 7 ? 'active' : ''}`} href="/owner/booking-sport" onClick={() => setIsActive(7)}><i className="bi bi-box-arrow-left me-2"></i>ĐĂNG XUẤT</Link></li>
                         </ul>
                     </nav>
                 </div>

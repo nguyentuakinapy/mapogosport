@@ -16,9 +16,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.dao.ProductDAO;
+import mapogo.entity.Owner;
 import mapogo.entity.Product;
 import mapogo.entity.User;
+import mapogo.entity.UserSubscription;
 import mapogo.service.EmailService;
+import mapogo.service.OwnerService;
 import mapogo.service.UserService;
 import mapogo.utils.RandomUtils;
 
@@ -47,10 +50,9 @@ public class UserRestController {
 		System.out.println(email);
 		return userService.findByEmail(email);
 	}
-	
+
 	@PostMapping("/user")
 	public User saveStudents(@RequestBody User u) {
-		System.out.println(u.getFullname());
 		return userService.createUser(u);
 	}
 
@@ -60,24 +62,45 @@ public class UserRestController {
 	}
 
 	@PostMapping("/user/sendMail")
-	public String sendMail(@RequestBody String username) {
+	public String sendMail(@RequestBody String email) {
 		String otp = RandomUtils.generateOTP();
-		emailService.sendEmail(username, "MapogoSport", "Bạn đã yêu cầu gửi mã xác nhận mới! Mã của bạn là: " + otp);
+		emailService.sendEmail(email, "MapogoSport", "Bạn đã yêu cầu gửi mã xác nhận mới! Mã của bạn là: " + otp);
 		return otp;
 	}
-	
+
 	@PostMapping("/user/changePassword/sendMail")
 	public void passMail(@RequestBody Map<String, String> requestBody) {
-		 String email = requestBody.get("email");
-		 emailService.sendEmail(email, "MapogoSport", "Bạn đã thay đổi mật khẩu tài khoản. Nếu đó không phải là bạn, vui lòng liên hệ với chúng tôi ngay.");
+		String email = requestBody.get("email");
+		emailService.sendEmail(email, "MapogoSport",
+				"Bạn đã thay đổi mật khẩu tài khoản. Nếu đó không phải là bạn, vui lòng liên hệ với chúng tôi ngay.");
 	}
 
 	@Autowired
-	ProductDAO productDAO;
+	OwnerService ownerService;
 
-	@GetMapping("/product")
-	public List<Product> findAll() {
-		return productDAO.findAll();
+	@GetMapping("/owner/{id}")
+	public Owner findByUser(@PathVariable("id") String username) {
+		return ownerService.findByUsername(username);
 	}
-	// ??? sao nó nằm ở đây?
+	
+	@PostMapping("/owner")
+	public Owner saveOwner(@RequestBody Map<String, Object> requestBody) {
+		return ownerService.save(requestBody);
+	}
+
+	@PostMapping("/user/subscription")
+	public UserSubscription saveUserSubscription(@RequestBody Map<String, Object> requestBody) {
+		return userService.saveUserSubcription(requestBody);
+	}
+	
+	@PutMapping("/user/subscription/{userSubscriptionId}")
+	public void updateUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId, 
+			@RequestBody Map<String, Object> requestBody) {
+		userService.updateUserSubscription(requestBody);
+	}
+	
+	@GetMapping("/user/subscription/{id}")
+	public UserSubscription findUserSubscriptionByUser(@PathVariable("id") String username) {
+		return userService.findUserSubscriptionByUser(username);
+	}
 }

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,10 +33,16 @@ public class AccountPackage implements Serializable {
     private double price;
 
     @Column(name = "DurationDays", nullable = false)
-    private int durationDays;
+    private Integer durationDays;
+    
+    @Column(name = "LimitBookings")
+    private Integer limitBookings;
+    
+    @Column(name = "LimitSportfields")
+    private Integer limitSportFields;
 
     @OneToMany(mappedBy = "accountPackage", cascade = CascadeType.ALL)
-    @JsonIgnore // Ngăn vòng lặp tuần tự hóa
+    @JsonManagedReference
     private List<AccountPackageBenefit> accountPackageBenefits;
 
     @OneToMany(mappedBy = "accountPackage", cascade = CascadeType.ALL)

@@ -363,7 +363,7 @@ const ProductDetail = () => {
                             {imageGallery.length > 0 ? (
                                 <>
                                     <img
-                                        src={`/images/images_product/${imageGallery[0][0].image}`}
+                                        src={`${imageGallery[0][0].image}`}
                                         className='w-75'
                                         alt="Main product"
                                         id="main-product-image"
@@ -378,7 +378,7 @@ const ProductDetail = () => {
                                         {imageGallery[0][0].galleries.map((galleryItem, index) => (
                                             <img
                                                 key={index}
-                                                src={`/images/${galleryItem.name}`}
+                                                src={`${galleryItem.name}`}
                                                 className='me-2'
                                                 alt={`Gallery image ${index + 1}`}
                                                 style={{ width: '100px', cursor: 'pointer' }}

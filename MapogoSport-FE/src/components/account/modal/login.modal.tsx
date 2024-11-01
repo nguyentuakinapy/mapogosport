@@ -68,6 +68,7 @@ export default function Login(props: LoginProps) {
                     }
                     handleClose();
                     sessionStorage.setItem('user', JSON.stringify(dataUser));
+                    toast.success("Đăng nhập thành công!");
                     // if (dataUser.authorities[0].role.name == "ROLE_ADMIN") {
                     //     window.location.href = "/admin";
                     // } else if (dataUser.authorities[0].role.name == "ROLE_STAFF") {
@@ -81,7 +82,7 @@ export default function Login(props: LoginProps) {
                     toast.error("Thông tin đăng nhập không đúng!");
                 }
             } catch (error: any) {
-                toast.error("Thông tin đăng nhập không đúng!!! " + error);
+                toast.error("Thông tin đăng nhập không đúng! ");
             }
         }
 

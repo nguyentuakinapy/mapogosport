@@ -7,9 +7,6 @@ import "./globals.scss";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 const inter = Inter({ subsets: ['latin'] })
-import ChangeEmailModel from '@/components/account/modal/changeEmail.modal';
-import ChangePassword from '@/components/account/modal/changePassword.modal';
-import ForgotPassword from '@/components/account/modal/forgotPassword.modal';
 import ChatMessenger from '@/components/app.chatMessenger';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -34,8 +31,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         {children}
-        <ChangeEmailModel></ChangeEmailModel>
-        <ChangePassword></ChangePassword>
         <ChatMessenger></ChatMessenger>
         <ToastContainer
           position="top-right"

@@ -11,10 +11,16 @@ import { toast } from "react-toastify";
 import RegisterModal from "@/components/account/modal/register.modal";
 import ForgotPassword from "@/components/account/modal/forgotPassword.modal";
 import ChangePasswordNew from "@/components/account/modal/change-password-new.modal";
+import Popup from "@/components/User/modal/popup-voucher.modal";
+import useSWR from "swr";
+import { height } from "@fortawesome/free-brands-svg-icons/fa42Group";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
   const [sportFields, setSportFields] = useState<SportField[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
+  const [userData, setUserData] = useState<User>();
 
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
@@ -58,6 +64,21 @@ export default function Home() {
     fetchData();
   }, []);
 
+  // Fetch base product
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/rest/products');
+        const data = await response.json();
+        console.log(data);
+        setProducts(data);
+      } catch (error) {
+        console.log("Lỗi khi gọi API: ", error);
+      }
+    };
+    fetchData();
+  }, []);
+
   const createOwnerSubmit = () => {
     const user = sessionStorage.getItem('user');
     if (user) {
@@ -69,12 +90,103 @@ export default function Home() {
 
   }
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/rest/voucher/active`);
+        const data = await response.json();
+        setVouchers(data)
+        console.log("voucher", data)
+      } catch (error) {
+        console.log("lỗi voucher", error)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const [username, setUsername] = useState<string>("");
+  useEffect(() => {
+    const user = sessionStorage.getItem('user');
+    if (user) {
+      const parsedUserData = JSON.parse(user) as User;
+      setUsername(parsedUserData.username);
+      // console.log(parsedUserData); // Kiểm tra dữ liệu
+    }
+  })
+
+  const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+  const { data, error, isLoading } = useSWR(
+    username == "" ? null : `http://localhost:8080/rest/user/${username}`, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
+
+  useEffect(() => {
+    if (data) {
+      setUserData(data);
+    }
+  }, [data])
+
+  const [hasOwnerRole, setHasOwnerRole] = useState(false);
+
+  useEffect(() => {
+    const authorities = userData?.authorities || [];
+    const ownerRoleExists = authorities.some(item => item.role.name === "ROLE_OWNER");
+    setHasOwnerRole(ownerRoleExists);
+  }, [userData]);
+
   return (
     <HomeLayout>
+      <div className="search-sport">
+        <div className="body-search-sport " >
+          <div className="m-auto text-center">
+            <h1 className="text-white fw-bold">HỆ THỐNG HỖ TRỢ TÌM KIẾM SÂN BÃI NHANH</h1>
+            <hr className="border border-info border-4 opacity-75 m-auto my-4" style={{ maxWidth: '10%' }} />
+            <b className="text-white fs-11 text-center">Dữ liệu được MapogoSport cập nhật thường xuyên giúp cho người dùng tìm được sân một cách nhanh nhất</b>
+          </div>
+          <div className="d-flex justify-content-center mt-4">
+            <div className="input-group" style={{ width: '70%', backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: '8px', padding: '10px' }}>
+              <select className="form-control" style={{ border: 'none', height: '50px' }}>
+                <option selected>Lọc theo loại sân</option>
+                <option value="1">Sân cỏ nhân tạo</option>
+                <option value="2">Sân cỏ tự nhiên</option>
+              </select>
+              <input type="text" className="form-control" placeholder="Nhập tên sân hoặc địa chỉ" style={{ border: 'none', height: '50px' }} />
+              <input type="text" className="form-control" placeholder="Nhập khu vực" style={{ border: 'none', height: '50px' }} />
+              <div className="input-group-append">
+                <button className="btn btn-warning" type="button" style={{ height: '50px', borderRadius: '4px', fontWeight: 'bold' }}>
+                  Tìm kiếm <i className="bi bi-search fw-bold"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <Container className="mt-3">
+        <Row>
+          <Col className="text-center">
+            <img className="p-4" src="/images/timsan.png" alt="" />
+            <h6 className="fw-bold">Tìm kiếm vị trí sân</h6>
+            <p style={{ fontSize: '12px' }}>Dữ liệu sân đấu dồi dào, liên tục cập nhật, giúp bạn dễ dàng tìm kiếm theo khu vực mong muốn</p>
+          </Col>
+          <Col className="text-center position-relative custom-border">
+            <img className="p-3" src="/images/datsan.png" alt="" />
+            <h6 className="fw-bold mt-1">Đặt lịch online</h6>
+            <p style={{ fontSize: '12px' }}>Không cần đến trực tiếp, không cần gọi điện đặt lịch, bạn hoàn toàn có thể đặt sân ở bất kì đâu có internet</p>
+          </Col>
+          <Col className="text-center">
+            <img className="p-4" src="/images/timsan.png" alt="" />
+            <h6 className="fw-bold">Đa dạng sản phẩm</h6>
+            <p style={{ fontSize: '12px' }}>Tìm kiếm, mua sắn sản phẩm, dụng cụ liên quan đến thể thao, giao hàng toàn quốc đến khu vực bạn mong muốn</p>
+          </Col>
+        </Row>
+      </Container>
       <Container className="pt-3">
         <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">
           <div className="carousel-inner">
-            <div className="carousel-item active" data-bs-interval="2000">
+            <div className="carousel-item" data-bs-interval="2000">
               <img src="/images/bannerSport.png" className="d-block w-100" alt="..." />
               <Link href={'/categories/sport_field'} style={{
                 position: 'absolute',
@@ -89,26 +201,34 @@ export default function Home() {
                 ĐẶT SÂN NGAY
               </Link>
             </div>
-            {/* <div className="carousel-item" data-bs-interval="2000">
-              <img src="https://img.thegioithethao.vn/media/banner/thi-cong-cai-tao.png" className="d-block w-100" alt="..." />
-            </div> */}
-            <div className="carousel-item" data-bs-interval="2000">
+            <div className="carousel-item active" data-bs-interval="2000">
               <img src="/images/registerowner.png" className="w-100" alt="" />
-              <button style={{
-                position: 'absolute',
-                top: '40%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                borderRadius: '50px',
-              }} className="btn btn-danger" onClick={() => createOwnerSubmit()}>
-                ĐĂNG KÝ NGAY
-              </button>
+              {hasOwnerRole ? (
+                <a style={{
+                  position: 'absolute',
+                  top: '40%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  borderRadius: '50px',
+                }} className="btn btn-danger" href="/owner">
+                  QUẢN LÝ NGAY
+                </a>
+              ) : (
+                <button style={{
+                  position: 'absolute',
+                  top: '40%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  borderRadius: '50px',
+                }} className="btn btn-danger" onClick={() => createOwnerSubmit()}>
+                  ĐĂNG KÝ NGAY
+                </button>
+              )}
             </div>
-            {/* <div className="carousel-item">
-            <img src="..." className="d-block w-100" alt="..." />
-          </div> */}
           </div>
           <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleInterval" data-bs-slide="prev">
             <span className="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -217,7 +337,12 @@ export default function Home() {
         {/* Sân thể thao mới */}
 
         <div>
-          <h3 className="fw-bold mt-5">SÂN THỂ THAO MỚI</h3>
+          <div className="row a-more">
+            <h3 className="fw-bold col-10">SÂN THỂ THAO MỚI</h3>
+            <div className="col-2 text-end">
+              <a href="/categories/sport_field" className="see-more-link">Xem Thêm</a>
+            </div>
+          </div>
           <div style={{ fontSize: '15px' }}>
             <Row className="my-3">
               {sportFields.slice(0, 8).map((field: SportField) => (
@@ -258,89 +383,36 @@ export default function Home() {
         </div>
         {/* Sản phẩm mới */}
         <div>
-          <h3 className="fw-bold mt-5">SẢN PHẨM MỚI</h3>
+          <div className="row a-more">
+            <h3 className="fw-bold col-10">SẢN PHẨM MỚI</h3>
+            <div className="col-2 text-end">
+              <a href="/categories/products" className="see-more-link">Xem Thêm</a>
+            </div>
+          </div>
           <div style={{ fontSize: '15px' }}>
             <Row className="my-3">
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
+              {products.slice(0, 8).map((product: Product) => (
+                <Col xs={3} key={product.productId}>
+                  <div className="user-border">
+                    <div className="mb-3">
+                      <Link href={"#"}>
+                        <Image src={"/images/ck3.jpg"} alt={product.name} />
+                      </Link>
                     </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
+                    <div className="content">
+                      <div className="mb-1 title">
+                        <Link href={"#"}><b>{product.name}</b></Link>
+                      </div>
+                      <div className="d-flex align-items-center justify-content-between">
+                        <div> <b>{formatPrice(product.price)}</b></div>
+                        <div className="star-item text-warning">
+                          {renderStars(rating)}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Col>
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Col>
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Col>
-              <Col xs={3}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Col>
+                </Col>
+              ))}
             </Row>
           </div>
         </div>
@@ -362,8 +434,17 @@ export default function Home() {
             </div>
           </div>
         </div>
+        {/* VOUCHER */}
+
+        <div className="App">
+          <h1>Discount Popup Demo</h1>
+          {vouchers.map((voucher) => (
+            <Popup key={voucher.voucherId} voucher={voucher} />
+          ))}
+        </div>
       </Container>
-      <CreateOwnerModal showCreateOwnerModal={showCreateOwnerModal} setShowCreateOwnerModal={setShowCreateOwnerModal}></CreateOwnerModal>
+      <CreateOwnerModal showCreateOwnerModal={showCreateOwnerModal}
+        setShowCreateOwnerModal={setShowCreateOwnerModal} userData={userData} />
       <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}
         showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
         showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}></LoginModal>
