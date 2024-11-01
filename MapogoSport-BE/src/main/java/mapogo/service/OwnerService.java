@@ -5,5 +5,6 @@ import mapogo.entity.User;
 
 public interface OwnerService {
 	Owner findOwnerByUsername(User useranme);
-	
+	//Mỵ
+	Owner findByUsername(String username);
 }

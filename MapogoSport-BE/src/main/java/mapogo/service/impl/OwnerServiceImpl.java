@@ -18,4 +18,9 @@ public class OwnerServiceImpl implements OwnerService{
 		return dao.findByUser(useranme);
 	}
 
+	@Override
+	public Owner findByUsername(String username) {
+		return dao.findByUsername(username);
+	}
+
 }

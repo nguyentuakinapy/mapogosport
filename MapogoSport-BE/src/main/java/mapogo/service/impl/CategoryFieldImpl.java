@@ -20,4 +20,9 @@ public class CategoryFieldImpl implements CategoryFieldService{
 		return categoryFieldDao.findAll();
 	}
 
+	@Override
+	public CategoryField findById(int cate) {
+		return categoryFieldDao.findById(cate).get();
+	}
+
 }

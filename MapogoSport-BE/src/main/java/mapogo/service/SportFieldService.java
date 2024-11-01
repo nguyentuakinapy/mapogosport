@@ -2,6 +2,7 @@ package mapogo.service;
 
 import java.util.List;
 
+import mapogo.dto.SportFieldDTO;
 import mapogo.entity.SportField;
 
 public interface SportFieldService {
@@ -13,6 +14,6 @@ public interface SportFieldService {
 	List<SportField> findSportFieldByOwner(Integer id);
 	
 	//Của Mỵ 
-	SportField create(SportField sportField);
+	SportField create(SportFieldDTO sportFieldDTO);
 	//
 }
