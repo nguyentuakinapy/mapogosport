@@ -116,7 +116,7 @@ public class User implements Serializable {
 	private List<PhoneNumberUser> phoneNumberUsers;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonManagedReference
+	@JsonIgnore
 	private List<Wallet> wallets;
 }
 
