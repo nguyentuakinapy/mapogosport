@@ -39,7 +39,7 @@ public class CategoryFieldRestController {
 	}
 	
 	@GetMapping("/category_field/{id}")
-	Optional<CategoryField> findCategoryFieldById(@PathVariable Integer id) {
+	public CategoryField findCategoryFieldById(@PathVariable int id) {
 		return categoryFieldService.findById(id);
 	}
 	
