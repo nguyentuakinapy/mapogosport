@@ -83,10 +83,14 @@ public class OrderServiceImpl implements OrderService {
 		return orderDAO.findOrdersBetweenDates(date,startDate, endDate);
 	}
 
-	@Override
-	public List<Object[]> getCategoryProductTotalsToDay() {
-		return orderDAO.findCategoryProductTotalsTodayWithStatus(statuses);
-	}
+// 	@Override
+// 	public List<Object[]> getCategoryProductTotalsToDay() {
+// 		return orderDAO.findCategoryProductTotalsToDay();
+// 	}
+	
+// 	@Override
+// 		return orderDAO.findCategoryProductTotalsTodayWithStatus(statuses);
+// 	}
 
 	@Override
 	public List<Order> getOrdersYesterday() {
@@ -108,7 +112,6 @@ public class OrderServiceImpl implements OrderService {
 		return orderDAO.findCategoryProductTotalsLast7DaysWithStatus(startDate, statuses);
 	}
 
-    
 	public Order createOrder(Order order) {
 		return orderDAO.save(order);
 

@@ -1,5 +1,4 @@
-import { formatPrice } from "@/components/Utils/Format";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
@@ -12,20 +11,17 @@ interface OwnerProps {
     dayStartBooking: string;
     sport?: SportField | null;
     owner?: Owner;
-    checkDataStatus: boolean
+    checkDataStatus: boolean;
     setCheckDataStatus: (v: boolean) => void;
+    startTimeKey: boolean;
+    note: string | null;
 }
 
-const CheckoutModal = (props: OwnerProps) => {
-    const { showBookingModal, setShowBookingModal, sportDetail, startTime, dayStartBooking, sport, owner, checkDataStatus, setCheckDataStatus } = props;
-
-    const [selectTime, setSelectTime] = useState<string>("Chọn thời gian");
-    const [isOffline, setIsOffline] = useState(false);
-
-    const [booking, setBooking] = useState<Booking>();
-
+const BookingModal = (props: OwnerProps) => {
+    const { showBookingModal, setShowBookingModal, sportDetail, startTime,
+        dayStartBooking, sport, owner, checkDataStatus, setCheckDataStatus, startTimeKey, note } = props;
+    const [selectTime, setSelectTime] = useState<string>('Chọn thời gian');
     const [dataPaymentMethod, setDataPaymentMethod] = useState<PaymentMethod[]>();
-
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -37,11 +33,11 @@ const CheckoutModal = (props: OwnerProps) => {
     });
 
     // BOOKING
-    const [username, setUsername] = useState<string>();
+    const [userData, setUserData] = useState<User>();
     const [totalAmount, setTotalAmount] = useState<number>();
     const [statusBooking, setStatusBooking] = useState<string>("Đã thanh toán");
     const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
-    const [note, setNote] = useState<string>("");
+    const [localNote, setLocalNote] = useState<string>("");
 
     // BOOKING DETAIL
     const [endTime, setEndTime] = useState<string>();
@@ -54,87 +50,210 @@ const CheckoutModal = (props: OwnerProps) => {
     const [referenceCode, setReferenceCode] = useState<string>("0");
 
     useEffect(() => {
+        const user = sessionStorage.getItem('user');
+        if (user) {
+            const parsedUserData = JSON.parse(user) as User;
+            setUserData(parsedUserData);
+        }
+    }, []);
+
+    useEffect(() => {
         setDataPaymentMethod(data);
     }, [data])
 
+    const [operatingTime, setOperatingTime] = useState<number>(0);
+    const [operatingTimeFetchData, setOperatingTimeFetchData] = useState<number>(0);
+    const [dataTime, setDataTime] = useState<String[]>();
+
     useEffect(() => {
-        if (selectTime == '1h') {
-            if (startTime.includes("h30")) {
-                const getTime = startTime.match(/\d+/);
-                if (getTime) {
-                    setEndTime(String(Number(getTime[0]) + 1) + "h30");
-                }
-            } else {
-                const getTime = startTime.match(/\d+/);
-                if (getTime) {
-                    setEndTime(String(Number(getTime[0]) + 1) + "h00");
-                }
+        checkTimeBooking();
+    }, [operatingTime]);
+
+    const checkTimeBooking = async () => {
+        if (!startTime || !dayStartBooking) return;
+
+        const newData = [startTime];
+        for (let i = 0; i < operatingTime * 2; i++) {
+            const getTime = newData[i].match(/\d+/);
+            if (getTime) {
+                const hour = Number(getTime[0]);
+                newData.push(newData[i].includes("h30") ? `${hour + 1}h00` : `${hour}h30`);
             }
-            setPrice(sportDetail && sportDetail?.price);
-            setTotalAmount(sportDetail && sportDetail?.price);
-            setDate(dayStartBooking);
-        } else if (selectTime == '1h30') {
-            if (startTime.includes("h30")) {
-                const getTime = startTime.match(/\d+/);
-                if (getTime) {
-                    setEndTime(String(Number(getTime[0]) + 2) + "h00");
-                }
-            } else {
-                const getTime = startTime.match(/\d+/);
-                if (getTime) {
-                    setEndTime(String(Number(getTime[0]) + 1) + "h30");
-                }
-            }
-            setPrice(sportDetail && sportDetail.price + (sportDetail.price / 2));
-            setTotalAmount(sportDetail && sportDetail.price + (sportDetail.price / 2));
-            setDate(dayStartBooking);
-        } else if (selectTime == '2h') {
-            if (startTime.includes("h30")) {
-                const getTime = startTime.match(/\d+/);
-                if (getTime) {
-                    setEndTime(String(Number(getTime[0]) + 2) + "h30");
-                }
-            } else {
-                const getTime = startTime.match(/\d+/);
-                if (getTime) {
-                    setEndTime(String(Number(getTime[0]) + 2) + "h00");
-                }
-            }
-            setPrice(sportDetail && sportDetail.price + sportDetail.price);
-            setTotalAmount(sportDetail && sportDetail.price + sportDetail.price);
-            setDate(dayStartBooking);
-        } else {
-            setPrice(0);
-            setEndTime("0");
         }
-    }, [selectTime])
+
+        let count = 0;
+        for (const time of newData) {
+            if (count >= 6) {
+                setOperatingTimeFetchData(6);
+                break;
+            }
+
+            try {
+                const response = await fetch(
+                    `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
+                );
+
+                if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+                const text = await response.text();
+
+                if (text) {
+                    const dataBooking = JSON.parse(text);
+                    if (dataBooking && Object.keys(dataBooking).length > 0) {
+                        setOperatingTimeFetchData(count);
+                        break;
+                    }
+                } else {
+                    setOperatingTimeFetchData(count);
+                }
+            } catch (error) {
+                console.error("API or JSON parsing error:", error);
+            }
+            count++;
+        }
+    };
+
+    useEffect(() => {
+        getTime();
+    }, [startTimeKey]);
+
+    const getTime = () => {
+        if (startTime && typeof startTime === 'string' && sport?.closing && typeof sport?.closing === 'string') {
+            const [openHour, openMinute] = startTime.split("h").map(Number);
+            const [closeHour, closeMinute] = sport.closing.split("h").map(Number);
+            if (openHour !== undefined && openMinute !== undefined && closeHour !== undefined && closeMinute !== undefined) {
+                const totalOpenMinutes = openHour * 60 + openMinute;
+                const totalCloseMinutes = closeHour * 60 + closeMinute;
+                const operatingTimeInHours = (totalCloseMinutes - totalOpenMinutes) / 60;
+                setOperatingTime(operatingTimeInHours);
+            }
+        }
+    };
+
+    useEffect(() => {
+        createDataTime();
+    }, [operatingTimeFetchData])
+
+    useEffect(() => {
+        if (note) {
+            setLocalNote(note);
+        }
+    }, [note]);
+
+
+    const createDataTime = () => {
+        const newData: string[] = [];
+        const timeIntervals = [];
+        for (let hours = 0; hours <= 24; hours++) {
+            for (let minutes = 0; minutes <= 30; minutes += 30) {
+                if (hours === 0 && minutes === 0) continue; // Bỏ qua 0 giờ 0 phút
+                let label: string;
+                if (hours === 0 && minutes > 0) {
+                    label = `${minutes} phút`;
+                } else if (minutes === 0) {
+                    label = `${hours} giờ`;
+                } else {
+                    label = `${hours} giờ ${minutes} phút`;
+                }
+                timeIntervals.push({ label, value: hours + minutes / 60 });
+            }
+        }
+        for (let index = 0; index < operatingTimeFetchData; index++) {
+            newData.push(timeIntervals[index].label);
+        }
+        setDataTime(newData);
+    }
+
+    useEffect(() => {
+        getPriceByTimeBooking();
+    }, [selectTime]);
+
+    const getPriceByTimeBooking = () => {
+        if (selectTime == 'Chọn thời gian') {
+            setPrice(0);
+            setEndTime("");
+            return;
+        }
+        if (selectTime && startTime) {
+            const getTime = startTime.match(/(\d+)h(\d+)/);
+            const hours = getTime ? Number(getTime[1]) : 0;
+            const minutes = getTime ? Number(getTime[2]) : 0;
+            let endHour = hours;
+            let endMinute = minutes;
+            const selectedTime = dataTime && dataTime.find(item => item === selectTime);
+            if (selectedTime) {
+                const timeParts = selectedTime.split(' ');
+                let hoursToAdd = 0;
+                let minutesToAdd = 0;
+                for (let i = 0; i < timeParts.length; i++) {
+                    if (timeParts[i].includes('giờ')) {
+                        hoursToAdd += Number(timeParts[i - 1]); // Cộng dồn số giờ
+                    }
+                    if (timeParts[i].includes('phút')) {
+                        minutesToAdd += Number(timeParts[i - 1]); // Cộng dồn số phút
+                    }
+                }
+                endHour += hoursToAdd;
+                endMinute += minutesToAdd;
+                if (endMinute >= 60) {
+                    endHour += Math.floor(endMinute / 60);
+                    endMinute = endMinute % 60;
+                }
+                setEndTime(`${endHour}h${endMinute > 0 ? endMinute : '00'}`);
+
+                const selectedPrice = sportDetail?.price || 0; // giá cơ bản cho mỗi giờ
+                let totalAmount = 0;
+
+                let totalTimeInHours: number = 0;
+                if (startTime.includes("h30")) {
+                    totalTimeInHours = Math.abs(endHour - hours) + (endMinute / 60) - 0.5; // Thời gian từ giờ bắt đầu đến giờ kết thúc
+                    if (totalTimeInHours == 0.5) {
+                        totalAmount = selectedPrice / 2;
+                    } else if (String(totalTimeInHours).includes(".5")) {
+                        totalAmount = (selectedPrice * Math.abs(endHour - hours)) - selectedPrice / 2;
+                    } else {
+                        totalAmount = selectedPrice * totalTimeInHours;
+                    }
+                } else {
+                    totalTimeInHours = (Math.abs(endHour - hours) + (endMinute / 60)); // Thời gian từ giờ bắt đầu đến giờ kết thúc
+                    if (totalTimeInHours == 0.5) {
+                        totalAmount = selectedPrice / 2;
+                    } else if (String(totalTimeInHours).includes(".5")) {
+                        if (String(totalTimeInHours).includes("1")) {
+                            totalAmount = (selectedPrice * Math.abs(endHour - hours)) + selectedPrice / 2;
+                        } else {
+                            totalAmount = (selectedPrice * Math.abs(endHour - hours)) + selectedPrice / 2;
+                        }
+                    } else {
+                        totalAmount = selectedPrice * totalTimeInHours;
+                    }
+                }
+                setPrice(totalAmount);
+                setTotalAmount(totalAmount);
+                setDate(dayStartBooking);
+            }
+        }
+    }
 
     const handleClose = () => {
         setShowBookingModal(false);
+        setOperatingTime(0);
+        setOperatingTimeFetchData(0);
+        setSelectTime("Chọn thời gian");
     }
 
-    const handleSave = async () => {
+    const handleSave = async (username: any) => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
         if (!paymentMethod) {
             toast.error("Phương thức thanh toán không hợp lệ!");
             return;
         }
-        if (isOffline) {
-            const responseUser = await fetch(`http://localhost:8080/rest/user/sportoffline`);
-            if (!responseUser.ok) {
-                throw new Error('Error fetching data');
-            }
-            const dataUser = await responseUser.json() as User;
-            createBooking(paymentMethod, dataUser);
-        } else {
-            const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
-            if (!responseUser.ok) {
-                toast.error('Error fetching data');
-                return;
-            }
-            const dataUser = await responseUser.json() as User;
-            createBooking(paymentMethod, dataUser);
+        const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
+        if (!responseUser.ok) {
+            toast.error('Error fetching data');
+            return;
         }
+        const dataUser = await responseUser.json() as User;
+        createBooking(paymentMethod, dataUser);
         setCheckDataStatus(!checkDataStatus);
         handleClose();
     }
@@ -155,7 +274,7 @@ const CheckoutModal = (props: OwnerProps) => {
                 'Content-Type': 'application/json' // Không cần charset=UTF-8
             },
             body: JSON.stringify({
-                username: dataUser.username,
+                username: userData?.username,
                 totalAmount,
                 paymentMethodId: paymentMethod.paymentMethodId,
                 ownerId: owner.ownerId,
@@ -184,85 +303,86 @@ const CheckoutModal = (props: OwnerProps) => {
         });
         const resBookingDetail = await responseBookingDetail.json() as BookingDetail;
 
-        toast.success("Đặt sân thành công!" + resBooking.bookingId + " - " + resBookingDetail.bookingDetailId);
+        toast.success("Đặt sân thành công!");
     }
 
     return (
         <>
-            <Modal show={showBookingModal} onHide={() => handleClose()} size="lg" aria-labelledby="contained-modal-title-vcenter"
-                centered backdrop="static" keyboard={false}>
+            <Modal show={showBookingModal} onHide={() => handleClose()} size="xl" aria-labelledby="contained-modal-title-vcenter"
+                centered backdrop="static" keyboard={false} style={{ fontSize: '15px' }}>
                 <Modal.Header>
-                    <Modal.Title className="text-uppercase text-danger fw-bold m-auto">đặt Sân</Modal.Title>
+                    <Modal.Title className="text-uppercase text-danger m-auto">đặt Sân</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Row>
                         <Col>
-                            <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
-                            <ul>
-                                <li><span className="fw-bold">Giá đặt sân / 1h:</span> {formatPrice(sportDetail && sportDetail.price)}.</li>
-                                <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {formatPrice(sportDetail && sportDetail.peakHourPrices)}.</li>
-                                <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>
-                                <li><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}.</li>
-                                <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
-                                <li><span className="fw-bold">Địa chỉ:</span> {sport && sport.address}.</li>
+                            <div className="text-uppercase text-danger fw-bold text-center">Thông tin - {sportDetail && sportDetail.name}</div>
+                            <ul style={{ listStyle: 'none' }}>
+                                <li className="pb-1"><span className="fw-bold">Giá sân:</span> {sportDetail?.price.toLocaleString()}/giờ</li>
+                                <li className="pb-1"><span className="fw-bold">Giá sân giờ vàng:</span> {sportDetail?.peakHourPrices.toLocaleString()}/giờ</li>
+                                <li className="pb-1"><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}</li>
+                                <li className="pb-1"><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}</li>
+                                <li className="pb-1"><span className="fw-bold">Trạng thái:</span> {sport && sport.status}</li>
+                                <li><span className="fw-bold">Địa chỉ:</span> {sport && sport.address}</li>
                             </ul>
                         </Col>
                         <Col>
-                            <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
+                            <div className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</div>
                             <InputGroup className="mb-2">
-                                <Form.Control disabled={isOffline}
-                                    type="text"
-                                    placeholder="Vui lòng nhập tên đăng nhập!"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                />
-                                <InputGroup.Text aria-label="Checkbox for following text input bg-white">
-                                    <Form.Check
-                                        type="checkbox"
-                                        label="Offline"
-                                        checked={isOffline}
-                                        onChange={(e) => setIsOffline(e.target.checked)}
+                                <FloatingLabel controlId="floatingUsername" label="Họ và tên" className="flex-grow-1">
+                                    <Form.Control
+                                        type="text"
+                                        value={userData?.fullname}
+                                        readOnly
                                     />
-                                </InputGroup.Text>
+                                </FloatingLabel>
                             </InputGroup>
-                            <select value={selectTime} onChange={(e) => setSelectTime(e.target.value)}
-                                className="form-select mb-2" aria-label="Default select example">
-                                <option value="Chọn thời gian">Chọn thời gian</option>
-                                <option value="1h">1h00</option>
-                                <option value="1h30">1h30p</option>
-                                <option value="2h">2h00</option>
-                            </select>
-                            <select value={paymentMethodId}
-                                onChange={(e) => setPaymentMethodId(Number(e.target.value))}
-                                className="form-select" aria-label="Default select example">
-                                <option value={"0"}
-                                >Phương thức thanh toán *</option>
-                                {dataPaymentMethod && (
-                                    dataPaymentMethod.map((item) => (
-                                        <option key={item.paymentMethodId} value={item.paymentMethodId}>{item.name}</option>
-                                    ))
-                                )}
-                            </select>
+
+                            <FloatingLabel controlId="floatingSelectTime" label="Chọn thời gian" className="mb-2">
+                                <Form.Select
+                                    value={selectTime}
+                                    onChange={(e) => setSelectTime(e.target.value)}
+                                    aria-label="Default select example"
+                                >
+                                    <option value="Chọn thời gian">Chọn thời gian</option>
+                                    {dataTime && dataTime.map((time, index) => (
+                                        <option key={index} value={String(time)}>{time}</option>
+                                    ))}
+                                </Form.Select>
+                            </FloatingLabel>
+
+                            <FloatingLabel controlId="floatingPaymentMethod" label={<span>Phương thức thanh toán <span className="text-danger">*</span></span>}>
+                                <Form.Select
+                                    value={paymentMethodId}
+                                    onChange={(e) => setPaymentMethodId(Number(e.target.value))}
+                                >
+                                    {dataPaymentMethod && dataPaymentMethod.map((item) => (
+                                        <option key={item.paymentMethodId} value={item.paymentMethodId}>
+                                            {item.name}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                            </FloatingLabel>
+
                         </Col>
                     </Row>
-                    <h6 className="text-uppercase text-danger fw-bold text-center my-2">Thông tin đặt sân</h6>
+                    <div className="text-uppercase text-danger fw-bold text-center my-3">Thông tin đặt sân</div>
                     <Row>
                         <Col className="px-5 text-center">
                             <span><b> Ngày đặt: </b>{dayStartBooking}. </span><br />
-                            <span><b> Giờ bắt đầu: </b>{startTime}. </span><br />
-                            <span><b> Giờ kết thúc: </b>{endTime}.</span>
+                            <span><b> Thời gian đá: </b>{startTime} - {endTime ? endTime : '???'}</span><br />
                         </Col>
                         <Col className="px-5 text-center">
-                            <span><b>Đơn giá: </b> <em className="text-danger">{formatPrice(sportDetail?.price)}</em>. </span><br />
-                            <span><b>Tổng tiền: </b><em className="text-danger">{formatPrice(price)}</em>. </span><br />
+                            <div><b>Đơn giá: </b> <span className="text-danger">{sportDetail?.price.toLocaleString()} đ</span></div>
+                            <div><b>Tổng tiền: </b><span className="text-danger">{price ? price.toLocaleString() : '0'} đ</span></div>
                         </Col>
                     </Row>
                     <Form.Group className="mt-3 px-4">
                         <Form.Control as="textarea" rows={3}
                             type="text"
                             placeholder="Ghi chú!"
-                            value={note}
-                            onChange={(e) => setNote(e.target.value)}
+                            value={localNote} // Use the renamed local state
+                            onChange={(e) => setLocalNote(e.target.value)}
                         />
                     </Form.Group>
                 </Modal.Body>
@@ -270,11 +390,11 @@ const CheckoutModal = (props: OwnerProps) => {
                     <Button variant="secondary" onClick={() => handleClose()}>
                         Hủy
                     </Button>
-                    <Button style={{ backgroundColor: "#142239" }} onClick={() => handleSave()}>Xác nhận</Button>
+                    <Button style={{ backgroundColor: "#142239" }} onClick={() => handleSave(userData?.username)}>Xác nhận</Button>
                 </Modal.Footer>
             </Modal >
         </>
     )
 }
 
-export default CheckoutModal;
+export default BookingModal;

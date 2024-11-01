@@ -98,7 +98,7 @@ const WishListSportField = () => {
                         </Col>
                     ))
                 ) : (
-                    <UserLayout><div>Không có sân đã yêu thích!</div></UserLayout>
+                    <div>Không có sân đã yêu thích!</div>
                 )}
                 {/* ))} */}
             </Row>

@@ -134,8 +134,7 @@ const ProductDetail = () => {
             }
             const ratingData = {
                 user: {
-                    username: user.username,
-                    fullname: user.fullname
+                    username: user.username
                 },
                 product: {
                     productId: idProduct

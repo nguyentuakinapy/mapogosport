@@ -140,12 +140,10 @@
     padding: 15px;
     border-radius: 8px;
     height: 100%;
-
     .title-detail-sportField {
         font-size: 18px;
         position: relative;
         padding-left: 15px;
-
         &::before {
             width: 4px;
             background-color: #dc3545;
@@ -157,10 +155,11 @@
             left: 0;
         }
     }
+    .react-datepicker-wrapper {
+        display: block !important;
+    }
 
-    input,
-    select,
-    textarea {
+    input, select, textarea {
         border: 1px solid black;
     }
 
@@ -176,6 +175,7 @@
         &:hover {
             background: white;
             color: black;
+            border: 1px solid #142239;
         }
     }
 }

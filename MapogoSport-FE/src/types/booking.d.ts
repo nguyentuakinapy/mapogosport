@@ -64,3 +64,13 @@ interface BookingDetail {
     price: number;
     date: string;
 }
+
+interface AvailableBooking {
+    time: string;
+    sportType: string;
+    status: string;
+    date: string;
+    price: number;
+    peakHourPrices: number;
+    percentDeposit: number;
+}

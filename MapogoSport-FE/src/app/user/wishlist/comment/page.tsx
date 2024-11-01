@@ -119,7 +119,7 @@ const CommentPage = () => {
                                 <div className="box-comment-container mb-2" key={key}>
                                     <div className="d-flex justify-content-between align-items-center">
                                         <Link href={"#"} className="box-comment" style={{ fontSize: '15px' }}>
-                                            <b>{productReview.user.fullname}</b> đã đánh giá sản phẩm <b>{productReview.product?.name}</b>.
+                                            <b>{productReview.fullname}</b> đã đánh giá sản phẩm <b>{productReview.productName}</b>.
                                             <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
                                                 <div>{productReview.comment}</div>
                                                 <span>{new Date(productReview.datedAt).toLocaleDateString('en-GB')}</span>
