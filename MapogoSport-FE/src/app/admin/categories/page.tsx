@@ -19,7 +19,7 @@ const AdminProduct = () => {
     const [activeTab, setActiveTab] = useState<string>('categoriesProduct');
 
     // Pagination
-    const itemsPerPage = 8;
+    const itemsPerPage = 5;
     const [currentPage, setCurrentPage] = useState(1);
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -221,17 +221,6 @@ const AdminProduct = () => {
                         <Table striped className="mb-0">
                             <thead>
                                 <tr>
-                                    {/* <th>
-                                        <FormCheck
-                                            type="checkbox"
-                                            checked={selectAllProduct}
-                                            onChange={() => {
-                                                const newSelectedProducts = selectAllProduct ? [] : categoryProducts.map(cat => cat.categoryProductId);
-                                                setSelectedProducts(newSelectedProducts);
-                                                setSelectAllProduct(!selectAllProduct);
-                                            }}
-                                        />
-                                    </th> */}
                                     <th>STT</th>
                                     <th>Hình ảnh</th>
                                     <th>ID</th>
@@ -242,19 +231,6 @@ const AdminProduct = () => {
                             <tbody>
                                 {currentItemsCategoryProduct.map((category, index) => (
                                     <tr id={`category-${category.categoryProductId}`} key={category.categoryProductId}>
-                                        {/* <td className="text-center align-middle">
-                                            <FormCheck
-                                                type="checkbox"
-                                                checked={selectedProducts.includes(category.categoryProductId)}
-                                                onChange={() => {
-                                                    if (selectedProducts.includes(category.categoryProductId)) {
-                                                        setSelectedProducts(selectedProducts.filter(id => id !== category.categoryProductId));
-                                                    } else {
-                                                        setSelectedProducts([...selectedProducts, category.categoryProductId]);
-                                                    }
-                                                }}
-                                            />
-                                        </td> */}
                                         <td className="text-center align-middle">{index + 1}</td>
                                         <td className="text-center align-middle">
                                             <Link href="#">
@@ -262,7 +238,6 @@ const AdminProduct = () => {
                                                     src={`http://localhost:8080/images/product-images/${category.image}`}
                                                     style={{ width: '150px', height: 'auto' }}
                                                     className="mx-2"
-                                                // alt={category.image}
                                                 />
                                             </Link>
                                         </td>
@@ -293,76 +268,75 @@ const AdminProduct = () => {
                             </tbody>
                             <>
                                 {totalPagesCategoryProduct > 1 && (
-                                    <nav aria-label="Page navigation example">
-                                        <ul className="pagination justify-content-center">
-                                            {/* Nút về trang đầu tiên */}
-                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                <a
-                                                    className="page-link"
-                                                    href="#"
-                                                    aria-label="First"
-                                                    onClick={() => handlePageChangeCategoryProduct(1)}
-                                                    title="Go to first page"
-                                                >
-                                                    <span aria-hidden="true">&laquo;</span>
-                                                </a>
-                                            </li>
+                                    <div className="d-flex justify-content-center mt-3">
+                                        <nav aria-label="Page navigation example">
+                                            <ul className="pagination">
+                                                {/* First page button */}
+                                                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                    <a
+                                                        className="page-link"
+                                                        href="#"
+                                                        aria-label="First"
+                                                        onClick={() => handlePageChangeCategoryProduct(1)}
+                                                        title="Go to first page"
+                                                    >
+                                                        <span aria-hidden="true">&laquo;</span>
+                                                    </a>
+                                                </li>
 
-                                            {/* Hiển thị 5 trang tùy theo currentPage */}
-                                            {Array.from({ length: totalPagesCategoryProduct }, (_, index) => {
-                                                let startPage = 1;
-                                                let endPage = 5;
+                                                {/* Display page numbers */}
+                                                {Array.from({ length: totalPagesCategoryProduct }, (_, index) => {
+                                                    let startPage = 1;
+                                                    let endPage = 5;
 
-                                                // Nếu tổng số trang lớn hơn 5
-                                                if (totalPagesCategoryProduct > 5) {
-                                                    // Điều chỉnh để luôn hiển thị 5 trang
-                                                    if (currentPage > 3) {
-                                                        startPage = currentPage - 2;
-                                                        endPage = currentPage + 2;
-                                                        if (endPage > totalPagesCategoryProduct) {
-                                                            endPage = totalPagesCategoryProduct;
-                                                            startPage = totalPagesCategoryProduct - 4; // Đảm bảo vẫn hiển thị đủ 5 trang
+                                                    if (totalPagesCategoryProduct > 5) {
+                                                        if (currentPage > 3) {
+                                                            startPage = currentPage - 2;
+                                                            endPage = currentPage + 2;
+                                                            if (endPage > totalPagesCategoryProduct) {
+                                                                endPage = totalPagesCategoryProduct;
+                                                                startPage = totalPagesCategoryProduct - 4;
+                                                            }
                                                         }
+                                                    } else {
+                                                        endPage = totalPagesCategoryProduct;
                                                     }
-                                                } else {
-                                                    // Nếu tổng số trang ít hơn hoặc bằng 5, hiển thị tất cả
-                                                    endPage = totalPagesCategoryProduct;
-                                                }
 
-                                                // Hiển thị các trang từ startPage đến endPage
-                                                if (index + 1 >= startPage && index + 1 <= endPage) {
-                                                    return (
-                                                        <li
-                                                            key={index + 1}
-                                                            className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
-                                                            title={`Go to page ${index + 1}`}
-                                                        >
-                                                            <a
-                                                                className="page-link"
-                                                                href="#"
-                                                                onClick={() => handlePageChangeCategoryProduct(index + 1)}
+                                                    if (index + 1 >= startPage && index + 1 <= endPage) {
+                                                        return (
+                                                            <li
+                                                                key={index + 1}
+                                                                className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
+                                                                title={`Go to page ${index + 1}`}
                                                             >
-                                                                {index + 1}
-                                                            </a>
-                                                        </li>
-                                                    );
-                                                }
+                                                                <a
+                                                                    className="page-link"
+                                                                    href="#"
+                                                                    onClick={() => handlePageChangeCategoryProduct(index + 1)}
+                                                                >
+                                                                    {index + 1}
+                                                                </a>
+                                                            </li>
+                                                        );
+                                                    }
 
-                                                return null;
-                                            })}
-                                            <li className={`page-item ${currentPage === totalPagesCategoryProduct ? 'disabled' : ''}`}>
-                                                <a
-                                                    className="page-link"
-                                                    href="#"
-                                                    aria-label="Last"
-                                                    onClick={() => handlePageChangeCategoryProduct(totalPagesCategoryProduct)}
-                                                    title="Go to last page"
-                                                >
-                                                    <span aria-hidden="true">&raquo;</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </nav>
+                                                    return null;
+                                                })}
+                                                {/* Last page button */}
+                                                <li className={`page-item ${currentPage === totalPagesCategoryProduct ? 'disabled' : ''}`}>
+                                                    <a
+                                                        className="page-link"
+                                                        href="#"
+                                                        aria-label="Last"
+                                                        onClick={() => handlePageChangeCategoryProduct(totalPagesCategoryProduct)}
+                                                        title="Go to last page"
+                                                    >
+                                                        <span aria-hidden="true">&raquo;</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
                                 )}
                             </>
                         </Table>
@@ -375,6 +349,7 @@ const AdminProduct = () => {
                         />
                     </div>
                 );
+
             case 'categoriesField':
                 return (
                     <div className="box-table-border mb-4 text-center">
@@ -453,80 +428,75 @@ const AdminProduct = () => {
                             </tbody>
 
                         </Table>
-                        
-                            {totalPagesCategoryField > 1 && (
-                                <nav aria-label="Page navigation example" style={{ textAlign: 'center' }}>
-                                    <ul className="pagination justify-content-center">
-                                        {/* Nút về trang đầu tiên */}
-                                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                            <a
-                                                className="page-link"
-                                                href="#"
-                                                aria-label="First"
-                                                onClick={() => handlePageChangeCategoryField(1)}
-                                                title="Go to first page"
-                                            >
-                                                <span aria-hidden="true">&laquo;</span>
-                                            </a>
-                                        </li>
 
-                                        {/* Hiển thị 5 trang tùy theo currentPage */}
-                                        {Array.from({ length: totalPagesCategoryField }, (_, index) => {
-                                            let startPage = 1;
-                                            let endPage = 5;
+                        {totalPagesCategoryField > 1 && (
+                            <nav aria-label="Page navigation example">
+                                <ul className="pagination justify-content-center">
+                                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                        <a
+                                            className="page-link"
+                                            href="#"
+                                            aria-label="First"
+                                            onClick={() => handlePageChangeCategoryField(1)}
+                                            title="Go to first page"
+                                        >
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
 
-                                            // Nếu tổng số trang lớn hơn 5
-                                            if (totalPagesCategoryField > 5) {
-                                                // Điều chỉnh để luôn hiển thị 5 trang
-                                                if (currentPage > 3) {
-                                                    startPage = currentPage - 2;
-                                                    endPage = currentPage + 2;
-                                                    if (endPage > totalPagesCategoryField) {
-                                                        endPage = totalPagesCategoryField;
-                                                        startPage = totalPagesCategoryField - 4; // Đảm bảo vẫn hiển thị đủ 5 trang
-                                                    }
+                                    {Array.from({ length: totalPagesCategoryField }, (_, index) => {
+                                        let startPage = 1;
+                                        let endPage = 5;
+
+                                        if (totalPagesCategoryField > 5) {
+                                            if (currentPage > 3) {
+                                                startPage = currentPage - 2;
+                                                endPage = currentPage + 2;
+                                                if (endPage > totalPagesCategoryField) {
+                                                    endPage = totalPagesCategoryField;
+                                                    startPage = totalPagesCategoryField - 4;
                                                 }
-                                            } else {
-                                                // Nếu tổng số trang ít hơn hoặc bằng 5, hiển thị tất cả
-                                                endPage = totalPagesCategoryField;
                                             }
+                                        } else {
+                                            endPage = totalPagesCategoryField;
+                                        }
 
-                                            // Hiển thị các trang từ startPage đến endPage
-                                            if (index + 1 >= startPage && index + 1 <= endPage) {
-                                                return (
-                                                    <li
-                                                        key={index + 1}
-                                                        className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
-                                                        title={`Go to page ${index + 1}`}
+                                        if (index + 1 >= startPage && index + 1 <= endPage) {
+                                            return (
+                                                <li
+                                                    key={index + 1}
+                                                    className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
+                                                    title={`Go to page ${index + 1}`}
+                                                >
+                                                    <a
+                                                        className="page-link"
+                                                        href="#"
+                                                        onClick={() => handlePageChangeCategoryField(index + 1)}
                                                     >
-                                                        <a
-                                                            className="page-link"
-                                                            href="#"
-                                                            onClick={() => handlePageChangeCategoryField(index + 1)}
-                                                        >
-                                                            {index + 1}
-                                                        </a>
-                                                    </li>
-                                                );
-                                            }
+                                                        {index + 1}
+                                                    </a>
+                                                </li>
+                                            );
+                                        }
 
-                                            return null;
-                                        })}
-                                        <li className={`page-item ${currentPage === totalPagesCategoryField ? 'disabled' : ''}`}>
-                                            <a
-                                                className="page-link"
-                                                href="#"
-                                                aria-label="Last"
-                                                onClick={() => handlePageChangeCategoryField(totalPagesCategoryField)}
-                                                title="Go to last page"
-                                            >
-                                                <span aria-hidden="true">&raquo;</span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            )}
-                        
+                                        return null;
+                                    })}
+                                    <li className={`page-item ${currentPage === totalPagesCategoryField ? 'disabled' : ''}`}>
+                                        <a
+                                            className="page-link"
+                                            href="#"
+                                            aria-label="Last"
+                                            onClick={() => handlePageChangeCategoryField(totalPagesCategoryField)}
+                                            title="Go to last page"
+                                        >
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        )}
+
+
                         <CategoryFieldAddNew
                             showAddCategory={showModal}
                             setShowAddCategory={handleCloseModalField}

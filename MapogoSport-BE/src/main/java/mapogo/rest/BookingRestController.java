@@ -91,19 +91,33 @@ public class BookingRestController {
 		return bookingDetailService.createBookingDetail(bd);
 	}
 	
-	@GetMapping("/booking/successful/revenue/{ownerId}")
-	public Double findTotalAmountByOwnerAndStatus(@PathVariable("ownerId") Integer ownerId) {
-	    return bookingService.findTotalAmountByOwnerAndStatus(ownerId);
+	@GetMapping("/booking/successful/revenue/{status}/{ownerId}")
+	public List<Booking> findBookingAmountByOwnerAndStatus(@PathVariable("ownerId") Integer ownerId, @PathVariable("status") String status) {
+	    return bookingService.findBookingAmountByOwnerAndStatus(ownerId, status);
 	}
 	
-	@GetMapping("/booking/success/revenue/byDate/{ownerId}/{flag}/{startDate}/{endDate}")
-	public Double findRevenueByDate(@PathVariable("ownerId") Integer ownerId,
-									@PathVariable("flag") Integer flag,
-									@PathVariable("startDate") String startDate,
-									@PathVariable("endDate") String endDate) {
-		
-		return bookingService.findRevenueByDate(ownerId, flag, startDate, endDate);
-		
+//	@GetMapping("/booking/success/revenue/byDate/{ownerId}/{flag}/{startDate}/{endDate}")
+//	public Double findRevenueByDate(@PathVariable("ownerId") Integer ownerId,
+//									@PathVariable("flag") Integer flag,
+//									@PathVariable("startDate") String startDate,
+//									@PathVariable("endDate") String endDate) {
+//		
+//		return bookingService.findRevenueByDate(ownerId, flag, startDate, endDate);
+//		
+//	}
+	
+	@GetMapping("/bookingdetail/booking/bysportField/byowner/{sportFieldIds}/{ownerId}")
+	public List<BookingDetail> findBookingDetailBySportFieldAndOwner(
+	    @PathVariable("sportFieldIds") List<Integer> sportFieldIds, 
+	    @PathVariable("ownerId") Integer ownerId) {
+	    
+	    return bookingService.findBookingDetailBySportFieldAndOwner(sportFieldIds, ownerId);
+	}
+
+	@GetMapping("/bookingdetail/booking/bysportFieldDetail/{sportFieldIds}")
+	public List<Object[]> findRevenueBySportFieldDetailIds(
+	    @PathVariable("sportFieldIds") List<Integer> sportFieldIds) {
+	    return bookingService.findRevenueBySportFieldDetailIds(sportFieldIds);
 	}
 
 
