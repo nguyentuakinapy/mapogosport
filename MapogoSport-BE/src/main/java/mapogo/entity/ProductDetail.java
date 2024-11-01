@@ -37,8 +37,7 @@ public class ProductDetail implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductId", nullable = false)
-
-	@JsonManagedReference// của tanthanh k có sữa nha
+	@JsonManagedReference// của tanthanh k có sữa nha>>>>>>> main
 	private Product product;
 
 	@Column(name = "Color", nullable = false)
