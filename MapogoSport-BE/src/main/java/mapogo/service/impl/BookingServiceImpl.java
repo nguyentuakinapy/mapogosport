@@ -13,6 +13,7 @@ import mapogo.dao.PaymentMethodDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.VoucherDAO;
 import mapogo.entity.Booking;
+import mapogo.entity.BookingDetail;
 import mapogo.entity.Owner;
 import mapogo.entity.PaymentMethod;
 import mapogo.entity.User;
@@ -85,17 +86,34 @@ public class BookingServiceImpl implements BookingService {
 		return bookingDAO.save(booking);
 	}
 
-	@Override
-	public Double findTotalAmountByOwnerAndStatus(Integer ownerId) {
-		return bookingDAO.findTotalAmountByOwnerAndStatus(ownerId);
-	}
+//	@Override
+//	public Double findRevenueByDate(Integer ownerId, Integer flag, String startDate, String endDate) {
+//		// TODO Auto-generated method stub
+//		Date sqlStartDate = Date.valueOf(startDate);
+//		Date sqlEndDate = Date.valueOf(endDate);
+//		return bookingDAO.findRevenueByDate(ownerId, flag, sqlStartDate, sqlEndDate);
+//	}
+
+
 
 	@Override
-	public Double findRevenueByDate(Integer ownerId, Integer flag, String startDate, String endDate) {
+	public List<Booking> findBookingAmountByOwnerAndStatus(Integer ownerId, String status) {
 		// TODO Auto-generated method stub
-		Date sqlStartDate = Date.valueOf(startDate);
-		Date sqlEndDate = Date.valueOf(endDate);
-		return bookingDAO.findRevenueByDate(ownerId, flag, sqlStartDate, sqlEndDate);
+		return bookingDAO.findBookingByOwnerAndStatus(ownerId, status);
 	}
+
+@Override
+public List<BookingDetail> findBookingDetailBySportFieldAndOwner(List<Integer> sportFielDetailIds, Integer ownerId) {
+	// TODO Auto-generated method stub
+	return bookingDAO.findBookingDetailBySportFieldIdsAndOwner(sportFielDetailIds, ownerId);
+}
+
+@Override
+public List<Object[]> findRevenueBySportFieldDetailIds(List<Integer> sportFieldDetailIds) {
+	// TODO Auto-generated method stub
+	return bookingDAO.findRevenueBySportFieldDetailIds(sportFieldDetailIds);
+}
+
+
 
 }
