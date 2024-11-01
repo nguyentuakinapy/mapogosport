@@ -9,7 +9,7 @@ interface Product {
     brand: string;
     country: string;
     price: number;
-    image:  File | string;
+    image: File | string;
     stock: double;
 }
 

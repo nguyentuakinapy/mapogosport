@@ -1,5 +1,3 @@
-
-
 interface ProductDetailSize {
   productDetailSizeId: number;
   productDetail: ProductDetail;

@@ -43,6 +43,7 @@ export default function RootLayout({
           draggable
           pauseOnHover={false}
           theme="dark"
+          style={{ marginTop: '75px' }}
         />
       </body>
     </html>

@@ -45,7 +45,9 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public List<Object[]> getCategoryProductTotalsToDay() {
 		return orderDAO.findCategoryProductTotalsToDay();
-    
+	}
+	
+	@Override
 	public Order createOrder(Order order) {
 		return orderDAO.save(order);
 	}

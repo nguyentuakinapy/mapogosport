@@ -1,10 +1,8 @@
-
-
 interface ProductDetail {
-    productDetailId: number;
-    color: string;
-    image: string;
-    galleries: Gallery[];
-    product: Product;
-    productDetailSizes: ProductDetailSize[]
-  }
+  productDetailId: number;
+  color: string;
+  image: string;
+  galleries: Gallery[];
+  product: Product;
+  productDetailSizes: ProductDetailSize[]
+}

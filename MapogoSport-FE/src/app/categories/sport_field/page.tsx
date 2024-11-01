@@ -195,7 +195,7 @@ function Categories() {
                                                                 {renderStars(rating)}
                                                             </div>
                                                         </div>
-                                                        <Link href={`/sport-detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
+                                                        <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
                                                     </div>
                                                 </div>
                                             </Col>

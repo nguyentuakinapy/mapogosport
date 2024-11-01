@@ -1,5 +1,5 @@
 interface Review {
-   
+
     productReviewId: number,
     user: {
         username: string,
@@ -23,7 +23,7 @@ interface Review {
         addressUsers: []
     },
     rating: number,
-    comment:string,
+    comment: string,
     datedAt: string
 }
 
