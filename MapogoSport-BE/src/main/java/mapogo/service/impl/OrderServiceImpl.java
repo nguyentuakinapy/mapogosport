@@ -28,7 +28,7 @@ public class OrderServiceImpl implements OrderService {
 	public List<Order> findByUser_Username(String username) {
 		return orderDAO.findByUser_Username(username);
 	}
-//Myj
+	
 	@Autowired
 	UserService userService;
 	@Autowired
@@ -60,8 +60,9 @@ public class OrderServiceImpl implements OrderService {
 
 	@Override
 	public Order update(Order order) {
-   
-  Â
+		return orderDAO.save(order);
+	}
+	
 	public List<Order> getOrdersToday() {
 		return orderDAO.findOrdersToday();
 	}

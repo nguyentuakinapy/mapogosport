@@ -685,7 +685,7 @@ export default function BookingSport() {
                     {selectDate == 0 ?
                         <div className="header-date">
                             <i className="bi bi-arrow-left" onClick={() => setOnDayAndOnWeek('backward')}></i>
-                            <span className="mx-3">{formatDate(onDay)}</span>
+                            <span className="mx-3">{onDay}</span>
                             <i className="bi bi-arrow-right" onClick={() => setOnDayAndOnWeek('forward')}></i>
                         </div>
                         :
