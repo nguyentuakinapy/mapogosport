@@ -59,16 +59,9 @@ public class SportFieldManagerRestController {
 	}
 	
 	@PostMapping("/sportfield/create")
-	public ResponseEntity<SportField> createSportField(@RequestBody SportFieldDTO sportField) {
-		System.out.println(sportField.getAddress());
-		System.out.println(sportField.getClosing());
-		System.out.println(sportField.getDecription());
-		System.out.println(sportField.getImage());
-		System.out.println(sportField.getName());
-		System.out.println(sportField.getOpening());
-		System.out.println(sportField.getStatus());
-		SportField sportField1 = new SportField();
-        return ResponseEntity.ok(sportField1);
+	public ResponseEntity<SportField> createSportField(@RequestBody SportFieldDTO sportFieldDTO) {
+		SportField sportField= sportService.create(sportFieldDTO);
+        return ResponseEntity.ok(sportField);
     }
 	
 	

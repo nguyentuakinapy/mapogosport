@@ -4,7 +4,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
+import mapogo.dto.OrderDTO;
 import mapogo.dto.PaymentDTO;
+import mapogo.entity.Order;
+import mapogo.service.OrderService;
 import mapogo.utils.Config;
 
 import java.io.UnsupportedEncodingException;
@@ -21,9 +24,11 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -31,13 +36,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RestController
 @RequestMapping("/api/payment")
 public class PaymentController {
-
-	@GetMapping("/create_payment")
-	public ResponseEntity<?> createPayment(HttpServletRequest req) throws UnsupportedEncodingException {
-
+	@Autowired
+	OrderService orderService;
+	
+	@PostMapping("/create_payment")
+	public ResponseEntity<?> createPayment(HttpServletRequest req, @RequestParam("orderId") Integer orderId) throws UnsupportedEncodingException {
+		System.out.println("orderId: "+orderId);
+		Order order = orderService.findByOrderId(orderId);
+		
         String orderType = "other";
 //        String bankCode = req.getParameter("bankCode");
-		long amount = 100000*100;
+		long amount = (long) (order.getAmount()*100);
         String vnp_TxnRef = Config.getRandomNumber(8);
         String vnp_IpAddr = Config.getIpAddress(req);
 
@@ -99,6 +108,8 @@ public class PaymentController {
         
         PaymentDTO paymentDTO = new PaymentDTO();
         //thành công 
+        order.setStatus("Đã thanh toán");
+        orderService.update(order);
         paymentDTO.setStatus("ok");
         paymentDTO.setMessage("successfully");
         paymentDTO.setURL(paymentUrl);

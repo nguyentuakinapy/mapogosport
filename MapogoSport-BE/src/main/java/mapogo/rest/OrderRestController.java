@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import mapogo.dto.OrderDTO;
 import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
 import mapogo.service.OrderDetailService;
@@ -90,8 +91,8 @@ public class OrderRestController {
 
 	//của Mỵ từ đây
 	@PostMapping("/create_order")
-    public ResponseEntity<Order> createOrder(@RequestBody Order order) {
-        Order createdOrder = orderService.createOrder(order);
+    public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
+        Order createdOrder = orderService.createOrder(orderDTO);
         return ResponseEntity.ok(createdOrder);
     }
 	

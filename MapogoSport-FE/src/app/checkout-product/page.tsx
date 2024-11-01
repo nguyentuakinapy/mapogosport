@@ -71,7 +71,7 @@ const CheckoutPage = () => {
   const [addressSelected, setAddressSelected] = useState([]);
 
   const [urlPayment, setUrlPayment] = useState();
-  const [order, setOrder] = useState<Order>();
+  const [order, setOrder] = useState();
 
   const [orderStatus, setOrderStatus] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -83,11 +83,7 @@ const CheckoutPage = () => {
     } else if (selectedMethod === 'VNPay') {
       setOrderStatus('Chưa thanh toán');
     }
-    axios.get(`http://localhost:8080/rest/getPaymentMethod/${selectedMethod}`)
-      .then(response => {
-        setPaymentMethod(response.data)
-      })
-      .catch(error => console.error('Error:', error));
+    setPaymentMethod(selectedMethod);
   };
 
   const handleCreateOrder = async () => {
@@ -96,22 +92,16 @@ const CheckoutPage = () => {
     }
 
     const orderData = {
-      username: user, // Nếu user có trường userId
-      address: {
-        detail: addressSelected?.addressDetail,
-        province: addressSelected?.address?.province,
-        district: addressSelected?.address?.district,
-        ward: addressSelected?.address?.ward,
-      },
-      phoneNumber: addressSelected?.phoneNumber,
-      date: new Date(),
+      username: user.username, // Giả sử bạn có thuộc tính username trong user
+      address: `${addressSelected?.addressDetail}, ${addressSelected?.address?.ward}, ${addressSelected?.address?.district}, ${addressSelected?.address?.province}`, // Chuỗi địa chỉ đầy đủ
+      phoneNumber: addressSelected.phoneNumber,
+      date: new Date().toISOString(), // Chuyển đổi sang ISO string
       status: orderStatus,
       amount: totalPrice,
-      paymentMethodId: paymentMethod.paymentMethodId,
-      voucherId: null,
-      note: null,
-      shipFee: 30000.0
-
+      paymentMethod: paymentMethod,
+      voucherId: 1, // Hoặc ID voucher hợp lệ
+      note: "", // Hoặc ghi chú hợp lệ
+      shipFee: 30000.0 // Hoặc giá trị phí vận chuyển
     };
 
     try {
@@ -120,6 +110,9 @@ const CheckoutPage = () => {
           'Content-Type': 'application/json'
         }
       });
+      console.log("Dữ liệu trả về từ API:", response.data);
+
+      setOrder(response.data);
       return response.data; // Trả về thông tin đơn hàng
     } catch (error) {
       console.error('Error creating order:', error.response?.data || error.message);
@@ -127,17 +120,31 @@ const CheckoutPage = () => {
     }
 
   };
-  const handlePayment = async () => {
-    try {
-      const order = await handleCreateOrder();
-      const paymentResponse = await axios.get(`http://localhost:8080/api/payment/create_payment`, order);
-      const paymentUrl = paymentResponse.data.url;
+  const handlePaymentWithOrder = async () => {
 
-      // Chuyển hướng đến URL thanh toán
-      window.location.href = paymentUrl;
-    } catch (error) {
-      console.error('Error during payment:', error);
+    if (paymentMethod === "COD") {
+      window.location.href = `/checkout-product/order`;
+
+
+    } else {
+      try {
+        const order = await handleCreateOrder();
+        console.log("order truyền:", order);
+        const paymentResponse = await axios.post(
+          `http://localhost:8080/api/payment/create_payment`,
+          null,
+          {
+            params: { orderId: order.orderId }, // truyền orderId qua params
+          }
+        );
+        const paymentUrl = paymentResponse.data.url;
+        // chuyển hướng đến URL thanh toán
+        window.location.href = paymentUrl;
+      } catch (error) {
+        console.error('Error during payment:', error);
+      }
     }
+
   };
 
   return (
@@ -402,7 +409,7 @@ const CheckoutPage = () => {
                   </span>
                 </a>
 
-                <Button onClick={handlePayment} className="btn btn-success px-3">Thanh toán</Button>
+                <Button onClick={handlePaymentWithOrder} className="btn btn-success px-3">Thanh toán</Button>
               </div>
             </div>
           </div>

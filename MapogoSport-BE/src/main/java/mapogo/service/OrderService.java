@@ -4,10 +4,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import mapogo.dto.OrderDTO;
 import mapogo.entity.Order;
 
 public interface OrderService {
 	List<Order> findByUser_Username(String username);
+	//của Mỵ từ đây
+	Order createOrder(OrderDTO order);
+	Order findByOrderId(int orderId);
+	Order update(Order order);
+
+	//đến đây
 
 	List<Order> getOrdersYesterday();
 
@@ -23,8 +30,6 @@ public interface OrderService {
 
 	List<Object[]> getCategoryProductTotalsOneMonth();
 
-	Order createOrder(Order order);
 
 	List<Order> getOrdersLast7Days();
-
 }

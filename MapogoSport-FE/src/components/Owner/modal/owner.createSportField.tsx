@@ -17,9 +17,10 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     const [selectedFieldType, setSelectedFieldType] = useState("");
     const [address, setAddress] = useState("");
     const [description, setDescription] = useState("");
-    const [status, setStatus] = useState("Hoạt động");
+    const [status, setStatus] = useState("");
     const [image, setImage] = useState("/images/logo.png");
-
+    const userSession = sessionStorage.getItem('user');
+    const user = userSession ? JSON.parse(userSession) : null;
     // State cho danh sách loại sân
     const [fieldTypes, setFieldTypes] = useState([]);
 
@@ -39,7 +40,18 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     // Đóng modal
     const handleClose = () => {
         setShowSportFieldModal(false);
+        setFieldName("");
+        setOpenTime("");
+        setCloseTime("");
+        setSelectedFieldType("");
+        setAddress("");
+        setDescription("");
+        setStatus("");
+        setImage("/images/logo.png");
+        window.location.reload();
+
     }
+
 
     const fieldNameRef = useRef<HTMLInputElement>(null);
     const openTimeRef = useRef<HTMLInputElement>(null);
@@ -83,13 +95,17 @@ const ModalCreateSportField = (props: SportFieldProps) => {
 
         const sportFieldData = {
             name: fieldName,
-            openTime: openTime,
-            closeTime: closeTime,
-            fieldType: selectedFieldType,
+            opening: `${openTime}h`,
+            closing: `${closeTime}h`,
+            categoriesField: selectedFieldType,
             address: address,
-            description: description,
+            decription: description,
+            status: status,
+            owner: user.username,
             image: image
         };
+
+        console.log(sportFieldData);
 
         // Gọi API để lưu thông tin sân
         axios.post("http://localhost:8080/rest/sportfield/create", sportFieldData, {
@@ -136,7 +152,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                 <Col className="col-6">
                                     <FloatingLabel controlId="floatingOpenTime" label="Giờ mở cửa" className="mb-3">
                                         <Form.Control
-                                            type="text"
+                                            type="number"
                                             placeholder="Giờ mở cửa"
                                             value={openTime}
                                             onChange={(e) => setOpenTime(e.target.value)}
@@ -146,7 +162,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                 <Col className="col-6">
                                     <FloatingLabel controlId="floatingCloseTime" label="Giờ đóng cửa" className="mb-3">
                                         <Form.Control
-                                            type="text"
+                                            type="number"
                                             placeholder="Giờ đóng cửa"
                                             value={closeTime}
                                             onChange={(e) => setCloseTime(e.target.value)}
@@ -160,11 +176,12 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                         <Form.Select
                                             aria-label="Loại sân"
                                             value={selectedFieldType}
-                                            onChange={(e) => setSelectedFieldType(e.target.value)}
+                                            onChange={(e) => setSelectedFieldType(e.target.value)} // Đảm bảo lưu ID
                                         >
+                                            <option value="">Chọn loại sân</option>
                                             {fieldTypes.length > 0 ? (
-                                                fieldTypes.map((type: any) => (
-                                                    <option key={type.id} value={type.id}>
+                                                fieldTypes.map((type) => (
+                                                    <option key={type.categoriesFieldId} value={type.categoriesFieldId}>
                                                         {type.name}
                                                     </option>
                                                 ))
@@ -181,6 +198,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                             value={status}
                                             onChange={(e) => setStatus(e.target.value)}
                                         >
+                                            <option value="">Chọn trạng thái</option>
                                             <option value="Hoạt động">Hoạt động</option>
                                             <option value="Tạm đóng">Tạm đóng</option>
                                             <option value="Sửa chữa">Sửa chữa</option>

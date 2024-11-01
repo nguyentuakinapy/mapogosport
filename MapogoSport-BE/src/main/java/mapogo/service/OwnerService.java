@@ -7,6 +7,7 @@ import mapogo.entity.User;
 
 public interface OwnerService {
 	Owner findOwnerByUsername(User useranme);
+
 	
 	Owner findByUsername(String useranme);
 	
