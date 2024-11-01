@@ -100,6 +100,8 @@ const BookingModal = (props: OwnerProps) => {
                         setOperatingTimeFetchData(count);
                         break;
                     }
+                } else {
+                    setOperatingTimeFetchData(count);
                 }
             } catch (error) {
                 console.error("API or JSON parsing error:", error);
@@ -274,7 +276,7 @@ const BookingModal = (props: OwnerProps) => {
         } else {
             const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
             if (!responseUser.ok) {
-                toast.error('Error fetching data');
+                toast.error('Tên người dùng không tồn tại!');
                 return;
             }
             const dataUser = await responseUser.json() as User;
