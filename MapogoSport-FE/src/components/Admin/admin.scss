@@ -11,7 +11,7 @@
     transition: transform 0.2s, box-shadow 0.2s;
 
     &:hover {
-        cursor: pointer;
+      cursor: pointer;
       transform: translateY(-5px);
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 
@@ -40,7 +40,7 @@
 
     // Hiệu ứng khi hover
     &:hover {
-        border: 1px solid #000;
+      border: 1px solid #000;
       background-color: #dc3545; // Màu đỏ đậm
       opacity: 1;
     }
@@ -90,5 +90,77 @@
     }
   }
 }
+
+// css avatar logo
+// SCSS Avatar Logo
+.image-container {
+  position: relative;
+  width: 100px; // Chiều rộng cố định cho hình ảnh
+  height: 100px; // Chiều cao cố định
+  border: #5c5556;
+  overflow: hidden; // Ẩn phần hình ảnh ra ngoài vùng chứa
+
+  img {
+    width: 100%; // Đảm bảo hình ảnh chiếm toàn bộ chiều rộng
+    height: 100%; // Đảm bảo hình ảnh chiếm toàn bộ chiều cao
+    object-fit: cover; // Đảm bảo hình ảnh không bị méo
+    background-color: #ffffff;
+  }
+}
+
+.file-input {
+  display: none; // Ẩn input file
+}
+
+.upload-icon {
+  position: absolute;
+  bottom: 5px; // Đặt ở dưới cùng của hình ảnh
+  right: 5px; // Đặt bên phải
+  background-color: rgb(168, 163, 163); // Nền cho biểu tượng
+  border-radius: 50%; // Hình tròn
+  width: 30px; // Đặt chiều rộng cố định
+  height: 30px; // Đặt chiều cao cố định
+  display: flex; // Sử dụng flex để căn giữa nội dung
+  align-items: center; // Căn giữa theo chiều dọc
+  justify-content: center; // Căn giữa theo chiều ngang
+  cursor: pointer; // Con trỏ khi di chuột vào biểu tượng
+  box-shadow: 2px 4px 4px rgba(0, 0, 0, 0.2);
+
+  i {
+    font-size: 20px; // Kích thước biểu tượng
+    color: white; // Màu biểu tượng
+  }
+}
+
+.preview-image {
+  // margin-top: 10px;
+  width: 100px; // Chiều rộng cố định cho hình ảnh xem trước
+  height: 100px; // Chiều cao cố định cho hình ảnh xem trước
+
+  .preview-img {
+    width: 100%; // Đảm bảo hình ảnh xem trước chiếm toàn bộ chiều rộng
+    height: 100%; // Đảm bảo hình ảnh xem trước chiếm toàn bộ chiều cao
+    object-fit: cover; // Đảm bảo hình ảnh không bị méo
+    border-radius: 5px;
+  }
+}
+
+// bỏ hover select 
+select {
+  -webkit-appearance: none; /* Tắt kiểu mặc định của trình duyệt */
+  -moz-appearance: none; /* Tắt kiểu mặc định của trình duyệt */
+  appearance: none; /* Tắt kiểu mặc định của trình duyệt */
+  border: none; /* Bỏ viền nếu cần */
+}
+
+select option {
+  color: inherit; /* Giữ màu mặc định cho text */
+  background-color: inherit; /* Giữ màu nền */
+}
+
+select:hover, select:focus {
+  outline: none; /* Bỏ outline khi hover hoặc focus */
+}
+
 
 /*======================================================Modal Product CSS End======================================================*/

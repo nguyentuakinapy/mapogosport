@@ -9,8 +9,8 @@ interface IProps {
   isShowAddColor: boolean;
   setIsShowAddColor: any;
   productDetailId?: ProductDetail;
-  setNewColor: any
-    newColor:any
+  setNewColor: any;
+  newColor: any;
 }
 
 const ModalProductAddNewColor = ({
@@ -20,9 +20,23 @@ const ModalProductAddNewColor = ({
   newColor,
   setIsShowAddColor,
 }: IProps) => {
-  
   // console.log("new color ", newColor);
-  
+
+  const optionColor = [
+    { label: "Xanh", value: "Xanh", style: "green" },
+    { label: "Đỏ", value: "Đỏ", style: "red" },
+    { label: "Vàng", value: "Vàng", style: "yellow" },
+    { label: "Cam", value: "Cam", style: "orange" },
+    { label: "Tím", value: "Tím", style: "purple" },
+    { label: "Hồng", value: "Hồng", style: "pink" },
+    { label: "Đen", value: "Đen", style: "black" },
+    { label: "Trắng", value: "Trắng", style: "white" },
+    { label: "Xanh dương", value: "Xanh dương", style: "blue" },
+    { label: "Nâu", value: "Nâu", style: "brown" },
+    { label: "Xám", value: "Xám", style: "gray" },
+];
+
+
   // const [color, setColor] = useState(newColor);
   const [color, setColor] = useState(newColor || "#3cd64c"); // Giá trị mặc định khi newColor rỗng
 
@@ -31,7 +45,7 @@ const ModalProductAddNewColor = ({
 
   const onColorChange = (updatedColor: any) => {
     // alert()
- 
+
     setColor(updatedColor);
     setNewColor(updatedColor);
   };
@@ -49,65 +63,21 @@ const ModalProductAddNewColor = ({
     string | null
   >(null); // Dùng để lưu đường dẫn ảnh xem trước
 
-
   const handleCloseModalAddColor = () => {
     setIsShowAddColor(false); // Đóng modal
     setNewColor(""); // Reset input màu sắc
     setPreviewNewColorImage(null);
     // setNewColorImage(null); // Reset hình ảnh
   };
-  const handleAddColor =()=>{
-      // Cập nhật selectedProductDetail.color với color mới
-  if (newColor) {
-    // selectedProductDetail.color = newColor; // Cập nhật màu sắc hiện tại
-    // setColor(newColor); // Cập nhật màu sắc hiện tại
-  }
+  const handleAddColor = () => {
+    // Cập nhật selectedProductDetail.color với color mới
+    if (newColor) {
+      // selectedProductDetail.color = newColor; // Cập nhật màu sắc hiện tại
+      // setColor(newColor); // Cập nhật màu sắc hiện tại
+    }
     setIsShowAddColor(false); // Đóng modal
     setPreviewNewColorImage(null);
-
-  }
-
-  // const handleAddColor = async () => {
-  //   try {
-  //     // Tạo đối tượng productDetail chứa các thuộc tính cần thiết
-  //     const productDetail = {
-  //       color: newColor,
-  //     };
-
-  //     // Tạo FormData để chứa productDetail (JSON) và ảnh
-  //     const formData = new FormData();
-  //     formData.append("productDetail", JSON.stringify(productDetail)); // Chuyển productDetail thành JSON
-  //     formData.append("fileimage", newColorImage); // Thêm ảnh mới vào FormData
-
-  //     // Log thông tin để kiểm tra
-  //     console.log("Tên màu:", newColor);
-  //     if (newColorImage instanceof File) {
-  //       console.log("Tên ảnh:", newColorImage.name); // Log tên file của ảnh
-  //     } else {
-  //       console.error(
-  //         "newColorImage không phải là một đối tượng File:",
-  //         newColorImage
-  //       );
-  //     }
-
-  //     // Gửi yêu cầu thêm màu sắc mới
-  //     await axios.post(
-  //       `http://localhost:8080/rest/product-detail/${currentProduct.productId}`, // Thay đổi URL theo API của bạn
-  //       formData,
-  //       {
-  //         headers: { "Content-Type": "multipart/form-data" },
-  //       }
-  //     );
-
-  //     // Thông báo thành công và đóng modal
-  //     toast.success("Thêm màu sắc thành công");
-  //     handleCloseModalAddColor(); // Đóng modal và reset dữ liệu
-  //   } catch (error: any) {
-  //     // Thông báo lỗi
-  //     toast.error(`Lỗi khi thêm màu sắc: ${error.message}`);
-  //     console.error("Lỗi khi thêm màu sắc:", error);
-  //   }
-  // };
+  };
 
   return (
     <div>
@@ -184,6 +154,18 @@ const ModalProductAddNewColor = ({
               </Col>
             </Row>
           </Form>
+          <div>
+            {optionColor.map((option) => (
+              <div
+                className="btn mx-1 mt-2"
+                key={option.value}
+                value={option.value}
+                style={{ backgroundColor: `${option.style}` }}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
         </Modal.Body>
       </Modal>
     </div>
