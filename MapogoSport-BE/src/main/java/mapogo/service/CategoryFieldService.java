@@ -8,8 +8,8 @@ import mapogo.entity.CategoryField;
 
 public interface CategoryFieldService {
 	List<CategoryField> findAll();
-	
-	Optional<CategoryField> findById(Integer id);
+  
+	CategoryField findById(int cate);
 	
 	CategoryField createCategoryField(CategoryField categoryField);
 	

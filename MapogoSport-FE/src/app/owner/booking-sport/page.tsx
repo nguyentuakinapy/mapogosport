@@ -16,6 +16,7 @@ type BookingsTypeOnWeek = {
         [sport: string]: string[];
     };
 };
+
 export default function BookingSport() {
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
 
@@ -186,10 +187,9 @@ export default function BookingSport() {
 
     const setDayOnWeek = () => {
         const today = new Date(startWeek);
-
         const days = [];
         const dayYears = [];
-        const weekdays = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        const weekdays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
         // console.log(`Start Week: ${today.toISOString().split('T')[0]}`);
 
@@ -266,7 +266,7 @@ export default function BookingSport() {
         } else {
             setDayOnWeek();
         }
-    }, [onDay, startWeek, endWeek, selectDate, checkDataBooking, selectSport, selectDate]);
+    }, [onDay, startWeek, endWeek, selectDate, checkDataBooking, selectSport]);
 
     useEffect(() => {
         setStatusOnWeek();
@@ -287,7 +287,7 @@ export default function BookingSport() {
     }, [checkDataStatus]);
 
     const setStatusOnDay = async () => {
-
+        const currentDateTime = new Date();
         const sportDetails = dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails;
         const numFields = sportDetails ? sportDetails.length : 0;
 
@@ -303,7 +303,17 @@ export default function BookingSport() {
             const dataBooking = await response.json() as BookingDetail[];
             if (dataBooking.length === 0) {
                 Object.entries(bookingsOnDay).forEach(([time, statuses]) => {
-                    if (sportDetails && sportDetails[index].status == "Hoạt động") {
+
+                    const [hour, minute] = time.split('h').map(Number);
+                    const timeDate = new Date(onDay);
+                    timeDate.setHours(hour, minute);
+                    if (timeDate < currentDateTime) {
+                        if (sportDetails && sportDetails[index].status == "Hoạt động") {
+                            statuses[index] = "Quá hạn";
+                        } else {
+                            statuses[index] = "Tạm đóng";
+                        }
+                    } else if (sportDetails && sportDetails[index].status == "Hoạt động") {
                         statuses[index] = "Còn trống";
                     } else {
                         statuses[index] = "Tạm đóng";
@@ -342,9 +352,13 @@ export default function BookingSport() {
                     if (sportDetails && sportDetails[index].sportFielDetailId == item.sportFieldDetail.sportFielDetailId) {
                         if (sportDetails[index].status == "Hoạt động") {
                             let timeIndex = newData.indexOf(time)
-
+                            const [hour, minute] = time.split('h').map(Number);
+                            const timeDate = new Date(onDay);
+                            timeDate.setHours(hour, minute);
                             if (timeIndex >= 0) {
                                 statuses[index] = "Đã đặt";
+                            } else if (timeDate < currentDateTime) {
+                                statuses[index] = "Quá hạn";
                             } else {
                                 if (statuses[index] == "Đã đặt") {
                                     statuses[index] = "Đã đặt";
@@ -380,6 +394,7 @@ export default function BookingSport() {
     };
 
     const setStatusOnWeek = async () => {
+        const currentDateTime = new Date();
         const sportDetails = dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails;
         const numFields = sportDetails ? sportDetails.length : 0;
 
@@ -398,14 +413,11 @@ export default function BookingSport() {
             }
 
             const dataBooking = await response.json() as BookingDetail[];
-            // console.log('dataBooking ', dataBooking);
-            // console.log(`${dayYears && dayYears[0]} '-' ${dayYears && dayYears[dayYears.length - 1]}`);
 
             for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
                 const dayYear = dayYears && dayYears[dayIndex];
+
                 let hasBookingForDay = false;
-                `       `
-                // Lọc các booking trùng ngày
                 const bookingsForDay = dataBooking.filter(item => item.date === dayYear);
 
                 if (bookingsForDay.length > 0) {
@@ -434,15 +446,24 @@ export default function BookingSport() {
                         }
 
                         Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                            const sportDataTemporary = { ...sportData }; // Tạo bản sao
+                            const sportDataTemporary = { ...sportData };
                             Object.entries(sportDataTemporary).forEach(([sport, statuses], j) => {
-                                if (sport === item.sportFieldDetail.name) {
+                                if (dayYear && sport === item.sportFieldDetail.name) {
+                                    if (!sportDataTemporary[sport][dayIndex] ||
+                                        sportDataTemporary[sport][dayIndex] === "Chưa đặt") {
+                                        sportDataTemporary[sport][dayIndex] = "Còn trống";
+                                    }
+
+                                    const timeIndex = newData.indexOf(time);
+                                    const [hour, minute] = time.split('h').map(Number);
+                                    const timeDate = new Date(dayYear);
+                                    timeDate.setHours(hour, minute);
+
                                     if (item.sportFieldDetail.status === "Hoạt động") {
-                                        const timeIndex = newData.indexOf(time);
                                         if (timeIndex >= 0) {
                                             sportDataTemporary[sport][dayIndex] = "Đã đặt";
-                                        } else if (!sportDataTemporary[sport][dayIndex] || sportDataTemporary[sport][dayIndex] === "Còn trống") {
-                                            sportDataTemporary[sport][dayIndex] = "Còn trống";
+                                        } else if (sportDataTemporary[sport][dayIndex] === "Còn trống") {
+                                            sportDataTemporary[sport][dayIndex] = (timeDate < currentDateTime) ? "Chưa đặt" : "Còn trống";
                                         }
                                     } else {
                                         sportDataTemporary[sport][dayIndex] = "Tạm đóng";
@@ -454,11 +475,16 @@ export default function BookingSport() {
                     });
                 }
 
-                if (!hasBookingForDay) {
+                if (!hasBookingForDay && dayYears) {
                     Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
                         const sportDataTemporary = { ...sportData };
                         Object.entries(sportDataTemporary).forEach(([sport, statuses], j) => {
-                            if (sportDetails && sport === sportDetails[index].name) {
+                            const [hour, minute] = time.split('h').map(Number);
+                            const timeDate = new Date(dayYears[dayIndex]);
+                            timeDate.setHours(hour, minute);
+                            if (sportDetails && timeDate < currentDateTime && sportDetails[index].status === "Hoạt động") {
+                                sportDataTemporary[sport][dayIndex] = "Chưa đặt";
+                            } else if (sportDetails && sport === sportDetails[index].name) {
                                 sportDataTemporary[sport][dayIndex] = sportDetails[index].status === "Hoạt động" ? "Còn trống" : "Tạm đóng";
                             }
                         });
@@ -467,6 +493,8 @@ export default function BookingSport() {
                 }
             }
         }
+        console.log(updatedBookingsOnWeek);
+
         setBookingsOnWeek(updatedBookingsOnWeek);
     };
 
@@ -504,57 +532,62 @@ export default function BookingSport() {
 
     const renderTableRowsByWeek = () => {
         return (
-            <Table bordered>
+            <Table >
                 <thead className="tb-head">
                     <tr>
-                        <th>Thời gian</th>
-                        <th>Sân</th>
+                        <th rowSpan={2}>Giờ </th>
                         {days?.map((day, index) => (
-                            <th key={index}>{day}</th> // Thêm key cho mỗi phần tử
+                            <th colSpan={dataSport[selectSport]?.sportFielDetails?.length || 1} key={index}>{day}</th>
+                        ))}
+                    </tr>
+                    <tr>
+                        {days?.map(() => (
+                            dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails &&
+                            dataSport[selectSport].sportFielDetails.map(item => (
+                                <th key={item.sportFielDetailId}>{item.name}</th>
+                            ))
                         ))}
                     </tr>
                 </thead>
                 <tbody>
-                    {Object.entries(bookingsOnWeek).map(([time, sportData], indexBk) => {
+                    {Object.entries(bookingsOnWeek).map(([time, sportData], i) => {
                         if (dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails) {
                             const sportFielDetails = dataSport[selectSport].sportFielDetails;
-                            const rowSpan = sportFielDetails.length;
 
-                            return sportFielDetails.map((item, index) => (
-                                <tr key={`${time}-${item.sportFielDetailId}`} style={{ border: '1px solid #a1a1a1' }}>
-                                    {index === 0 && (
-                                        <td className="title fw-bold" style={{ textAlign: 'center' }} rowSpan={rowSpan}>
-                                            {time}
-                                        </td>
-                                    )}
-                                    <td style={{ backgroundColor: '#eed6fa' }}>{item.name}</td>
-                                    {Object.entries(sportData).map(([sport, status], i) => (
-                                        status.map((statusItem, j) => {
-                                            if (sport === item.name) {
-                                                return (
-                                                    <td key={`${sport}-${j}`}
-                                                        sport-detail={item.sportFielDetailId}
-                                                        time-data={time}
-                                                        day-data={dayYears && dayYears[j]}
-                                                        onClick={
-                                                            dayYears && dayYears[j] &&
-                                                                new Date().setHours(0, 0, 0, 0) <=
-                                                                new Date(dayYears[j]).setHours(0, 0, 0, 0) && statusItem === 'Còn trống'
-                                                                ? handleGetDataBookingOnWeek
-                                                                : undefined
-                                                        }
-                                                        className={`w-10 ${getBadgeClass(statusItem)}`}>
-                                                        <div className={`badge ${getBadgeClass(statusItem)}`}>
-                                                            <span className="status-label"
-                                                            >{statusItem}</span>
-                                                        </div>
-                                                    </td>
-                                                );
-                                            }
+                            return (
+                                <tr key={time} style={{ border: '1px solid #a1a1a1' }}>
+                                    <td className="title fw-bold" style={{ textAlign: 'center' }}>{time}</td>
+                                    {days?.map((_, dayIndex) => (
+                                        sportFielDetails.map((item, i) => {
+                                            const statusItem = sportData[item.name]?.[dayIndex] || "Còn trống";
+                                            const isAvailable =
+                                                dayYears &&
+                                                dayYears[dayIndex] &&
+                                                new Date().setHours(0, 0, 0, 0) <= new Date(dayYears[dayIndex]).setHours(0, 0, 0, 0) &&
+                                                statusItem === "Còn trống";
+                                            return (
+                                                <td
+                                                    key={`${time}-${item.sportFielDetailId}-${dayIndex}`}
+                                                    sport-detail={dataSport &&
+                                                        dataSport[selectSport] &&
+                                                        dataSport[selectSport].sportFielDetails &&
+                                                        dataSport[selectSport].sportFielDetails[i] ?
+                                                        dataSport[selectSport].sportFielDetails[i].sportFielDetailId : 'N/A'}
+                                                    time-data={time}
+                                                    day-data={dayYears && dayYears[dayIndex]}
+                                                    onClick={isAvailable ? handleGetDataBookingOnWeek : undefined}
+                                                    className={`w-10 ${getBadgeClass(statusItem)}`}
+                                                    style={{ textAlign: 'center' }}
+                                                >
+                                                    <div className={`badge ${getBadgeClass(statusItem)}`}>
+                                                        <span className="status-label">{statusItem}</span><br />
+                                                    </div>
+                                                </td>
+                                            );
                                         })
                                     ))}
                                 </tr>
-                            ));
+                            );
                         }
                         return null;
                     })}
@@ -590,6 +623,9 @@ export default function BookingSport() {
         const startTime = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
 
+        // console.log(sportDetail);
+        // toast.success(startTime);
+        // toast.success(dayStartBooking);
         const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
 
         if (sportDetail && startTime && dayStartBooking) {
@@ -611,6 +647,10 @@ export default function BookingSport() {
                 return "frame-info-available";
             case "Tạm đóng":
                 return "frame-info-danger";
+            case "Quá hạn":
+                return "frame-overdue-secondary";
+            case "Chưa đặt":
+                return "frame-overdue-secondary";
             default:
                 return "";
         }

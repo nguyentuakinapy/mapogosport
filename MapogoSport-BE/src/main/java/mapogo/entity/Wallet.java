@@ -1,13 +1,13 @@
 package mapogo.entity;
 
-import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,29 +28,23 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Productdetails")
-public class ProductDetail implements Serializable {
+@Table(name = "Wallets")
+public class Wallet {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ProductDetailId")
-	private Integer productDetailId;
-
+	@Column(name = "WalletId")
+	Integer walletId;
+	
 	@ManyToOne
-	@JoinColumn(name = "ProductId", nullable = false)
-	@JsonManagedReference// của tanthanh k có sữa nha>>>>>>> main
-	private Product product;
-
-	@Column(name = "Color", nullable = false)
-	private String color;
-
-	@Column(name = "Image", nullable = false)
-	private String image;
-
-	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-	@JsonManagedReference
-	private List<Gallery> galleries;
-
-	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-	@JsonBackReference // tanthanh
-	private List<ProductDetailSize> productDetailSizes;
+	@JoinColumn(name="Username")
+	@JsonBackReference
+	User user;
+	
+	@Column(name="Balance")
+	BigDecimal balance;
+	
+	@OneToMany(mappedBy = "wallet")
+	@JsonManagedReference 
+	List<Transaction> transactions;
 }

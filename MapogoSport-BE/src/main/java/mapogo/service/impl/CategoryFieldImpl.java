@@ -22,9 +22,8 @@ public class CategoryFieldImpl implements CategoryFieldService{
 	}
 
 	@Override
-	public Optional<CategoryField> findById(Integer id) {
-		// TODO Auto-generated method stub
-		return categoryFieldDao.findById(id);
+	public CategoryField findById(int cate) {
+		return categoryFieldDao.findById(cate).get();
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import mapogo.entity.Booking;
+import mapogo.entity.BookingDetail;
 
 public interface BookingService {
 	
@@ -15,7 +16,11 @@ public interface BookingService {
 	
 	Booking createBooking(Map<String, Object> booking);
 	
-	Double findTotalAmountByOwnerAndStatus(Integer ownerId);
+	List<Booking> findBookingAmountByOwnerAndStatus(Integer ownerId, String status);
 	
-	Double findRevenueByDate(Integer ownerId, Integer flag, String startDate, String endDate);
+//	Double findRevenueByDate(Integer ownerId, Integer flag, String startDate, String endDate);
+	
+	List<BookingDetail> findBookingDetailBySportFieldAndOwner(List<Integer> sportFielDetailIds, Integer ownerId);
+
+	List<Object[]> findRevenueBySportFieldDetailIds(List<Integer> sportFieldDetailIds);
 }

@@ -156,7 +156,7 @@
 }
 
 .div-tb {
-    max-height: 440px;
+    height: calc(100vh - 200px);
     overflow-y: auto;
     overflow-x: auto;
     border: 1px solid #142239;
@@ -272,6 +272,21 @@
 
 .frame-info-secondary {
     background: #f3f3f3 !important;
+    cursor: not-allowed !important;
+
+    .status-label {
+        cursor: not-allowed !important;
+        color: #8b8b8b !important;
+    }
+
+    .status-label {
+        font-weight: 700 !important;
+    }
+}
+
+
+.frame-overdue-secondary {
+    background: #f9e1e1 !important;
     cursor: not-allowed !important;
 
     .status-label {

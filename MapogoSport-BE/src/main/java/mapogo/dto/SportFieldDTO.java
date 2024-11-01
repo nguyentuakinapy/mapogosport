@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import mapogo.entity.Owner;
 
 @Getter
 @Setter
@@ -19,4 +20,6 @@ public class SportFieldDTO {
     private int categoriesField;
     private String image;
     private  String decription;
+    private  String owner;
+
 }
