@@ -204,8 +204,8 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                     <div className="form-floating mb-3">
                                         <select className="form-select">
                                             {userData && userData.addressUsers.length > 0 &&
-                                                userData.addressUsers.map((adU, index) => (
-                                                    <option selected={index === 0} key={adU.address.addressId} value={adU.address.addressId}>{adU.phoneNumber}.</option>
+                                                userData.phoneNumberUsers.map((pNu, index) => (
+                                                    <option selected={index === 0} key={pNu.phoneNumberUserId} value={pNu.phoneNumber.phoneNumber}>{pNu.phoneNumber.phoneNumber}.</option>
                                                 ))
                                             }
                                         </select>
