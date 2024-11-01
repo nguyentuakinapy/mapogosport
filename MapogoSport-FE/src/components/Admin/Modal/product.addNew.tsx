@@ -54,6 +54,21 @@ const ProductAddNew = ({
     { label: "Còn hàng", value: "Còn hàng" },
     { label: "Hết hàng", value: "Hết hàng" },
   ];
+
+  const optionColor = [
+    { label: "Xanh", value: "Xanh", style: "green" },
+    { label: "Đỏ", value: "Đỏ", style: "red" },
+    { label: "Vàng", value: "Vàng", style: "yellow" },
+    { label: "Cam", value: "Cam", style: "orange" },
+    { label: "Tím", value: "Tím", style: "purple" },
+    { label: "Hồng", value: "Hồng", style: "pink" },
+    { label: "Đen", value: "Đen", style: "black" },
+    { label: "Trắng", value: "Trắng", style: "white" },
+    { label: "Xanh biển", value: "Xanh bi?n", style: "blue" },
+    { label: "Nâu", value: "Nâu", style: "brown" },
+    { label: "Xám", value: "Xám", style: "gray" },
+  ];
+
   // >>>>>>>>>>>>>>>
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -316,6 +331,15 @@ const ProductAddNew = ({
     console.log("selected value: ", value);
   };
 
+  const handleSelectColor = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = event.target;
+    setNewColor(value);
+
+    setSelectedProductDetail((prevValues) => ({ ...prevValues, color: value }));
+
+    console.log("selected  color value: ", value);
+  };
+
   const handleCategorySelect = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -412,7 +436,7 @@ const ProductAddNew = ({
       // Hiển thị thông báo lỗi cho từng trường còn thiếu
       missingFields.forEach((field) => {
         // console.error(`Vui lòng nhập trường: ${field}`);
-        toast.error(`Vui lòng nhập trường: ${field}`);
+        toast.warning(`Vui lòng nhập trường: ${field}`);
       });
       return false; // Trả về false nếu có trường còn thiếu
     }
@@ -423,38 +447,36 @@ const ProductAddNew = ({
   const validateForm = () => {
     let isValid = true;
 
-
-    if(!previewImage ){
+    if (!previewImage) {
       isValid = false;
       toast.error("Vui lòng chọn hình đại diện của sản phẩm.");
     }
-    if(!previewImageProductColor ){
+    if (!previewImageProductColor) {
       isValid = false;
       toast.error("Vui lòng chọn hình đại diện của màu sản phẩm.");
     }
-  
+
     // Kiểm tra màu sắc
     // if (!selectedProductDetail.color) {
     if (!newColor) {
       isValid = false;
       toast.error("Vui lòng chọn màu sắc.");
     }
-  
+
     // Kiểm tra hình ảnh
     if (!selectedProductDetail.image && !previewImageProductColor) {
       isValid = false;
       toast.error("Vui lòng chọn hình ảnh cho sản phẩm.");
     }
-  
+
     // Kiểm tra gallery
     if (selectedGalleryFiles.length === 0) {
       isValid = false;
-        toast.error("Vui lòng chọn ít nhất một hình ảnh trong gallery.");
+      toast.error("Vui lòng chọn ít nhất một hình ảnh trong gallery.");
     }
-  
+
     return isValid;
   };
-  
 
   const handleSave = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -545,16 +567,14 @@ const ProductAddNew = ({
               console.log("variables======== add data", data);
               if (data) {
                 // Lấy ID từ backend trả về thành công
-                if(selectedProductDetail){
-                   ProductWasCreated = data.data;
+                if (selectedProductDetail) {
+                  ProductWasCreated = data.data;
                   console.log("new Id: ", ProductWasCreated);
                   toast.success("Thêm sản phẩm thành công");
                   handleAddNewProductDetail(ProductWasCreated);
                   // handleAddNewSize;
-                  handleClose()
+                  handleClose();
                 }
-                 
-              
               }
 
               onFetch();
@@ -595,7 +615,7 @@ const ProductAddNew = ({
             onSuccess(data, variables) {
               console.log("variables======== success cập nhât", variables);
               // Kiểm tra nếu selectedProductDetail đã được chọn
-
+              toast.success("Cập nhật sản phẩm thành công");
               if (!productDetails || productDetails.length === 0) {
                 console.log(
                   "Chưa có ProductDetail trong db, sẽ thêm mới productDetails"
@@ -615,9 +635,15 @@ const ProductAddNew = ({
                 );
                 onFetch();
               } else {
-                console.log(
-                  "Không có selectedProductDetail, bỏ qua cập nhật chi tiết sản phẩm"
-                );
+                if (newColor != "") {
+                  console.log("new color có sự chỉnh sửa");
+                  handleAddNewProductDetail(currentProduct?.productId);
+                } else {
+                  console.log("new color khong có sự chỉnh sửa");
+                  console.log(
+                    "Không có selectedProductDetail, bỏ qua cập nhật chi tiết sản phẩm là sao"
+                  );
+                }
               }
 
               onFetch();
@@ -757,6 +783,14 @@ const ProductAddNew = ({
         }
       }
 
+      if (newColor === "") {
+        if (selectedProductDetail.color === "") {
+          setNewColor("Xám");
+        } else {
+          setNewColor(selectedProductDetail.color);
+        }
+      }
+
       const productDetailData = {
         color: newColor,
         image: imageUrl,
@@ -813,7 +847,11 @@ const ProductAddNew = ({
 
       // Gán lại giá trị cho `newColor` nếu chưa có
       if (newColor === "") {
-        setNewColor(selectedProductDetail.color);
+        if (selectedProductDetail.color === "") {
+          setNewColor("Xám");
+        } else {
+          setNewColor(selectedProductDetail.color);
+        }
       }
       console.log("newColor lúc sau ", newColor);
       console.log("newColor ", imageUrl);
@@ -912,9 +950,9 @@ const ProductAddNew = ({
             {modalType === "add" ? "Thêm sản phẩm" : "Chỉnh sửa sản phẩm"}
           </Modal.Title>
         </Modal.Header>
-        <h5 className="text-danger text-center">
+        {/* <h5 className="text-danger text-center">
           productId: {currentProduct?.productId}- {currentProduct?.name}
-        </h5>
+        </h5> */}
         <Modal.Body>
           <Nav variant="tabs" activeKey={activeTab} className="mb-3">
             <Nav.Item>
@@ -1179,43 +1217,55 @@ const ProductAddNew = ({
                     {currentProduct?.productId &&
                     productDetails &&
                     productDetails.length > 0 ? ( // Kiểm tra nếu có sản phẩm và danh sách màu không rỗng
-                      productDetails.map((detailDemo) => (
-                        <div
-                          key={detailDemo.productDetailId}
-                          className="d-inline-block me-2 position-relative color-wrapper"
-                          onClick={() => {
-                            setActiveTab("add-details");
-                            handleSelectedColor(detailDemo);
-                          }} // Sự kiện chọn màu
-                        >
-                          {/* <span>{detailDemo.productDetailId}</span> */}
-                          <OverlayTrigger
-                            overlay={<Tooltip>{detailDemo.color}</Tooltip>}
+                      productDetails.map((detailDemo) => {
+                        // Tìm màu tương ứng từ optionColor
+                        const colorOption = optionColor.find(
+                          (color) => color.value === detailDemo.color
+                        );
+                        const backgroundColor = colorOption
+                          ? colorOption.style
+                          : detailDemo.color; // Dùng màu từ optionColor hoặc trực tiếp từ detailDemo.color nếu không có trong optionColor
+
+                        return (
+                          <div
+                            key={detailDemo.productDetailId}
+                            className="d-inline-block me-2 position-relative color-wrapper"
+                            onClick={() => {
+                              setActiveTab("add-details");
+                              handleSelectedColor(detailDemo);
+                            }} // Sự kiện chọn màu
                           >
-                            <div
-                              className="color-circle d-flex align-items-center justify-content-center"
-                              style={{
-                                backgroundColor: detailDemo.color,
-                              }}
-                            ></div>
-                          </OverlayTrigger>
-                          {/* Nút xóa màu */}
-                          <OverlayTrigger overlay={<Tooltip>{`Xóa`}</Tooltip>}>
-                            <Button
-                              variant="danger"
-                              className="btn-sm position-absolute button-delete-color"
-                              onClick={(event) => {
-                                event.stopPropagation(); // Ngăn sự kiện chọn màu chạy
-                                handleDeleteProductDetail(
-                                  detailDemo.productDetailId
-                                );
-                              }}
+                            <OverlayTrigger
+                              overlay={<Tooltip>{detailDemo.color}</Tooltip>}
                             >
-                              <i className="bi bi-x"></i>
-                            </Button>
-                          </OverlayTrigger>
-                        </div>
-                      ))
+                              <div
+                                className="color-circle d-flex align-items-center justify-content-center"
+                                style={{
+                                  backgroundColor: backgroundColor, // Áp dụng màu nền
+                                }}
+                              ></div>
+                            </OverlayTrigger>
+
+                            {/* Nút xóa màu */}
+                            <OverlayTrigger
+                              overlay={<Tooltip>{`Xóa`}</Tooltip>}
+                            >
+                              <Button
+                                variant="danger"
+                                className="btn-sm position-absolute button-delete-color"
+                                onClick={(event) => {
+                                  event.stopPropagation(); // Ngăn sự kiện chọn màu chạy
+                                  handleDeleteProductDetail(
+                                    detailDemo.productDetailId
+                                  );
+                                }}
+                              >
+                                <i className="bi bi-x"></i>
+                              </Button>
+                            </OverlayTrigger>
+                          </div>
+                        );
+                      })
                     ) : (
                       <span className="text-danger">Thêm màu.</span>
                     )}
@@ -1240,7 +1290,7 @@ const ProductAddNew = ({
                       : ""
                   }
                 />
-                <h5 className="text-danger text-center">
+                {/* <h5 className="text-danger text-center">
                   Id Detail Sản phẩm:{" "}
                   {selectedProductDetail?.productDetailId || "Chưa có"} -{" "}
                   {currentProduct?.name || "chưa có"} -{" "}
@@ -1249,11 +1299,14 @@ const ProductAddNew = ({
                   >
                     màu: {selectedProductDetail.color || "chưa có"}
                   </span>
-                </h5>
+                </h5> */}
                 <Row>
                   <Col>
-                    {/* Màu sản phẩm hiện có */}
-                    <Form.Group className="mb-1">
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <Form.Group className="mb-3">
                       <Form.Floating>
                         <Form.Control
                           as="select"
@@ -1263,168 +1316,71 @@ const ProductAddNew = ({
                               ? selectedProductDetail.color
                               : ""
                           }
-                          onChange={(e) =>
-                            handleSelectedColorCombobox(e.target.value)
-                          }
+                          onChange={handleSelectColor}
                         >
-                          {currentProduct?.productId &&
-                            productDetails &&
-                            productDetails.length > 0 &&
-                            productDetails.map((detailDemo) => (
-                              <option
-                                key={detailDemo.productDetailId}
-                                value={detailDemo.color}
-                              >
-                                {detailDemo.color}
-                              </option>
-                            ))}
+                          {optionColor.map((option) => (
+                            <option key={option.value} value={option.value} style={{color: `${option.style}`}}>                                             
+                                {option.label}
+                            </option>
+                          ))}
                         </Form.Control>
-                        <Form.Label htmlFor="color">
-                          Màu hiện có theo sản phẩm:{" "}
-                          <b className="text-danger">*</b>
+                        <Form.Label htmlFor="status">
+                          Màu sắc <b className="text-danger">*</b>
                         </Form.Label>
                       </Form.Floating>
                     </Form.Group>
                   </Col>
-                </Row>
-                <Row>
-                  <Col>
-                    <Form.Group className="mt-3 me-2">
-                      <InputGroup>
-                        <Form.Floating>
-                          <Form.Control
-                            type="text"
-                            value={selectedProductDetail.color}
-                            readOnly={true}
-                            // onChange={(e) => setNewColor(e.target.value)
-                            className="form-control-sm " // Kích thước nhỏ cho input
-                          />
-                          <Form.Label>Màu sắc hiện tại:</Form.Label>
-                        </Form.Floating>
-                        {selectedProductDetail.color ? (
-                          <Button
-                            className="btn btn-primary btn-sm" // Kích thước nhỏ cho button
-                            // onClick={handleOpenModalAddColor}
-                            onClick={() =>
-                              handleOpenModalAddColor(
-                                selectedProductDetail?.color
-                              )
-                            }
-                          >
-                            Sửa màu nè
-                          </Button>
-                        ) : (
-                          <>
-                            <Button
-                              className="btn btn-primary btn-sm" // Kích thước nhỏ cho button
-                              // onClick={handleOpenModalAddColor}
-                              onClick={() =>
-                                handleOpenModalAddColor(
-                                  selectedProductDetail?.color
-                                )
-                              }
-                            >
-                              Thêm màu
-                            </Button>
-                            {/* <div>
-                          <p className="text-danger mt-2">Vui lòng chọn màu</p>
-                          </div> */}
-                          </>
-                        )}
-                      </InputGroup>
-                      {selectedProductDetail.color ? (
-                        <span
-                          className="rounded-circle d-inline-block mt-2"
-                          style={{
-                            backgroundColor: selectedProductDetail.color,
-                            width: "50px",
-                            height: "50px",
-                            border: "1px solid #000", // Viền cho vòng tròn
-                          }}
-                        />
-                      ) : (
-                        <p className="text-danger mt-2">Vui lòng chọn màu</p>
-                      )}
-                    </Form.Group>
-                  </Col>
-                  {newColor && (
-                    <Col className="d-flex">
-                      <Col className="">
-                        <Form.Group className="mt-3 me-2">
-                          <InputGroup>
-                            <Form.Floating>
-                              <Form.Control
-                                type="text"
-                                placeholder="Nhập màu sắc"
-                                value={newColor}
-                                onChange={(e) => setNewColor(e.target.value)}
-                                className="form-control-sm " // Kích thước nhỏ cho input
-                              />
-                              <Form.Label>Màu sắc nè:</Form.Label>
-                            </Form.Floating>
-                          </InputGroup>
-                          {/* Hiển thị màu hoặc thông báo lỗi nếu màu không hợp lệ */}
-                          {newColor ? (
-                            <span
-                              className="rounded-circle d-inline-block mt-2"
-                              style={{
-                                backgroundColor: newColor,
-                                width: "50px",
-                                height: "50px",
-                                border: "1px solid #000", // Viền cho vòng tròn
-                              }}
-                            />
-                          ) : (
-                            <p className="text-danger mt-2">
-                              Vui lòng chọn màu nè
-                            </p>
-                          )}
-                        </Form.Group>
-                      </Col>
-                    </Col>
-                  )}
 
                   <Col>
-                    <Form.Group controlId="formImage">
+                    <Form.Group controlId="formImage d-flex">
                       <Form.Label>Hình ảnh:</Form.Label>
-                      <img
-                        src={selectedProductDetail?.image || ""}
-                        alt={selectedProductDetail?.color || "chưa có hình"}
-                        className="img-thumbnail"
-                        style={{ width: "100px", height: "auto" }}
-                      />
-                      <Form.Control
-                        className="my-1"
-                        type="file"
-                        name="image"
-                        onChange={handleImageChangeProductColor}
-                        accept="image/png, image/jpeg, image/jpg"
-                      />
-                      {previewImageProductColor && (
-                        <div
-                          className="preview-image"
-                          style={{ marginTop: "10px", display: "flex" }}
-                        >
-                          <Image
-                            src={previewImageProductColor}
-                            alt="Preview"
-                            fluid
-                            style={{
-                              objectFit: "cover",
-                              maxHeight: "70px",
-                              maxWidth: "100px",
-                              borderRadius: "5px",
-                            }}
+
+                      {/* Hình ảnh hiển thị */}
+                      <div className="d-flex align-items-center">
+                        <div className="image-container">
+                          <img
+                            src={selectedProductDetail?.image || ""}
+                            alt={selectedProductDetail?.color || "chưa có hình"}
+                            className="img-thumbnail"
                           />
+
+                          {/* Input để chọn ảnh, được ẩn đi */}
+                          <Form.Control
+                            id="file"
+                            className="file-input"
+                            type="file"
+                            name="image"
+                            onChange={handleImageChangeProductColor}
+                            accept="image/png, image/jpeg, image/jpg"
+                          />
+
+                          {/* Nút tải ảnh */}
+                          <label htmlFor="file" className="upload-icon">
+                            <i className="bi bi-camera-fill"></i>
+                          </label>
                         </div>
-                      )}
+
+                        {previewImageProductColor && (
+                          <div
+                            className="preview-image"
+                            style={{ marginLeft: "10px" }}
+                          >
+                            <Image
+                              src={previewImageProductColor}
+                              alt="Preview"
+                              fluid
+                              className="preview-img"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </Form.Group>
                   </Col>
                 </Row>
 
                 {/* Bảng Gallery */}
                 <Form.Group className="mb-4">
-                  <Form.Label className="fs-6">Thư viện ảnh:</Form.Label>
+                  <Form.Label className="fs-6">Chọn thêm ảnh:</Form.Label>
 
                   {/* Custom File Input */}
                   <Form.Control
@@ -1439,9 +1395,11 @@ const ProductAddNew = ({
                     variant="outline-primary"
                     size="sm"
                     className="mx-2"
-                    onClick={() => document.getElementById("galleryInput").click()}
+                    onClick={() =>
+                      document.getElementById("galleryInput").click()
+                    }
                   >
-                    Thêm ảnh <i className="bi bi-plus-circle mx-1"></i>
+                    <i className="bi bi-plus-circle mx-1"></i>
                   </Button>
 
                   {/* Display Selected Images */}
@@ -1463,194 +1421,184 @@ const ProductAddNew = ({
                           />
                         </div>
                       ))
-                    ) :galleries.length === 0 ? (
+                    ) : galleries.length === 0 ? (
                       <p className=" text-danger">Chưa có ảnh trong gallery.</p>
-                    ): null}
+                    ) : null}
                   </div>
                 </Form.Group>
-
 
                 {/* Bảng gallery demo*/}
                 {galleries.length > 0 && (
-                <Form.Group controlId="formGallery">
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">
-                      Thư viện ảnh của sản phẩm: 
-                    </label>
-                    <Button
-                    variant="outline-primary"
-                    size="sm"
-                    className="mx-2"
-                    onClick={() => document.getElementById("galleryInput").click()}
-                  >
-                    Thêm ảnh <i className="bi bi-plus-circle mx-1"></i>
-                  </Button>
-                    <div className="d-flex flex-wrap align-items-center">
-                      {galleries.length > 0 ? (
-                        galleries.map((gallery) => (
-                          <div
-                            key={gallery.galleryId}
-                            className="position-relative me-3 mb-3"
-                          >
-                            <Image
-                              src={gallery.name} // Đường dẫn ảnh từ gallery.name
-                              alt={`Gallery ${gallery.galleryId}`}
-                              width={70} // Chiều rộng ảnh, có thể tùy chỉnh
-                              height={70} // Chiều cao ảnh, có thể tùy chỉnh
-                              className="border"
-                              style={{
-                                objectFit: "cover",
-                                borderRadius: "8px",
-                                border: "1px solid #ddd",
-                                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                              }}
-                            />
-                            <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
-                              <Button
-                                variant="danger"
-                                className="btn-sm position-absolute"
+                  <Form.Group controlId="formGallery">
+                    <div className="mb-3">
+                      <label className="form-label fw-bold">
+                        Thư viện ảnh của sản phẩm:
+                      </label>
+
+                      <div className="d-flex flex-wrap align-items-center">
+                        {galleries.length > 0 ? (
+                          galleries.map((gallery) => (
+                            <div
+                              key={gallery.galleryId}
+                              className="position-relative me-3 mb-3"
+                            >
+                              <Image
+                                src={gallery.name} // Đường dẫn ảnh từ gallery.name
+                                alt={`Gallery ${gallery.galleryId}`}
+                                width={70} // Chiều rộng ảnh, có thể tùy chỉnh
+                                height={70} // Chiều cao ảnh, có thể tùy chỉnh
+                                className="border"
                                 style={{
-                                  top: "-8px",
-                                  right: "-8px",
-                                  width: "24px",
-                                  height: "24px",
-                                  borderRadius: "50%",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  padding: "0",
-                                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                  objectFit: "cover",
+                                  borderRadius: "8px",
+                                  border: "1px solid #ddd",
+                                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                                 }}
-                                onClick={(event) => {
-                                  event.stopPropagation(); // Ngăn sự kiện chọn màu chạy
-                                  handleDeleteProductDetailGallery(
-                                    gallery.galleryId
-                                  );
-                                }}
-                              >
-                                <i className="bi bi-x fs-6"></i>
-                              </Button>
-                            </OverlayTrigger>
-                          </div>
-                        ))
-                      ) : (
-                        <span className="text-muted">Chưa có gallery</span>
-                      )}
+                              />
+                              <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
+                                <Button
+                                  variant="danger"
+                                  className="btn-sm position-absolute"
+                                  style={{
+                                    top: "-8px",
+                                    right: "-8px",
+                                    width: "24px",
+                                    height: "24px",
+                                    borderRadius: "50%",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    padding: "0",
+                                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                  }}
+                                  onClick={(event) => {
+                                    event.stopPropagation(); // Ngăn sự kiện chọn màu chạy
+                                    handleDeleteProductDetailGallery(
+                                      gallery.galleryId
+                                    );
+                                  }}
+                                >
+                                  <i className="bi bi-x fs-6"></i>
+                                </Button>
+                              </OverlayTrigger>
+                            </div>
+                          ))
+                        ) : (
+                          <span className="text-muted">Chưa có gallery</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </Form.Group>
+                  </Form.Group>
                 )}
                 {/* Bảng Kích cỡ */}
                 {/* {productDetailWasCreated || */}
-                 { (selectedProductDetail.productDetailId && (
-                    <Form.Group controlId="formSize">
-                      {/* Khối chứa nút thêm kích cỡ */}
-                      <div className="d-flex justify-content-between align-items-center">
-                        <Form.Label>Kích cỡ:</Form.Label>
-                        <div></div> {/* Chỗ trống để căn chỉnh */}
-                        {/* <Button
+                {selectedProductDetail.productDetailId && (
+                  <Form.Group controlId="formSize">
+                    {/* Khối chứa nút thêm kích cỡ */}
+                    <div className="d-flex justify-content-between align-items-center">
+                      <Form.Label>Kích cỡ:</Form.Label>
+                      <div></div> {/* Chỗ trống để căn chỉnh */}
+                      {/* <Button
                           className="mb-2 btn-success"
                           onClick={handleAddNewSize}
                         >
                           Thêm kích cỡ
                         </Button> */}
-                      </div>
-                      <span>
-                        ProductDetail Id from backend {productDetailWasCreated}
-                      </span>
-                      {isShowAddNewSize && (
-                        <ModalProductAddNewSize
-                          setIsShowAddNewSize={setIsShowAddNewSize}
-                          isShowAddNewSize={isShowAddNewSize}
-                          ProductDetailWasCreated={productDetailWasCreated}
-                          // onAddNewSize={handleAddNewSize}
-                          currentProductDetailSize={currentProductDetailSize}
-                          modalTypeProductDetail={modalTypeProductDetail}
-                          selectedProductDetail={selectedProductDetail}
-                        />
-                      )}
-                      <Table striped bordered hover>
-                        <thead>
-                          <tr>
-                            <th>ID</th>
-                            <th>Tên Kích cỡ</th>
-                            <th>Giá</th>
-                            <th>Số lượng</th>
-                            <th>Hành động</th>
-                            {/* <th>{selectedProductDetail.productDetailSizes}</th> */}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {selectedProductDetail?.productDetailSizes?.length >
-                          0 ? (
-                            selectedProductDetail.productDetailSizes.map(
-                              (sizeDetail) => (
-                                <tr key={sizeDetail.productDetailSizeId}>
-                                  <td>{sizeDetail.productDetailSizeId}</td>
-                                  {/* <td>{sizeDetail.size.sizeName}</td> */}
-                                  <td>
-                                    {sizeDetail.size?.sizeName ||
-                                      "Không có kích cỡ"}
-                                  </td>
-                                  <td>{sizeDetail.price}</td>
-                                  <td>{sizeDetail.quantity}</td>
-                                  <td className="text-center align-middle">
-                                    <OverlayTrigger
-                                      overlay={<Tooltip>Sửa</Tooltip>}
+                    </div>
+                    <span>
+                      ProductDetail Id from backend {productDetailWasCreated}
+                    </span>
+                    {isShowAddNewSize && (
+                      <ModalProductAddNewSize
+                        setIsShowAddNewSize={setIsShowAddNewSize}
+                        isShowAddNewSize={isShowAddNewSize}
+                        ProductDetailWasCreated={productDetailWasCreated}
+                        // onAddNewSize={handleAddNewSize}
+                        currentProductDetailSize={currentProductDetailSize}
+                        modalTypeProductDetail={modalTypeProductDetail}
+                        selectedProductDetail={selectedProductDetail}
+                      />
+                    )}
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Tên Kích cỡ</th>
+                          <th>Giá</th>
+                          <th>Số lượng</th>
+                          <th>Hành động</th>
+                          {/* <th>{selectedProductDetail.productDetailSizes}</th> */}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedProductDetail?.productDetailSizes?.length >
+                        0 ? (
+                          selectedProductDetail.productDetailSizes.map(
+                            (sizeDetail) => (
+                              <tr key={sizeDetail.productDetailSizeId}>
+                                <td>{sizeDetail.productDetailSizeId}</td>
+                                {/* <td>{sizeDetail.size.sizeName}</td> */}
+                                <td>
+                                  {sizeDetail.size?.sizeName ||
+                                    "Không có kích cỡ"}
+                                </td>
+                                <td>{sizeDetail.price}</td>
+                                <td>{sizeDetail.quantity}</td>
+                                <td className="text-center align-middle">
+                                  <OverlayTrigger
+                                    overlay={<Tooltip>Sửa</Tooltip>}
+                                  >
+                                    <Button
+                                      variant="warning"
+                                      className="m-1"
+                                      onClick={() =>
+                                        handleEditClickProductSize(sizeDetail)
+                                      }
                                     >
-                                      <Button
-                                        variant="warning"
-                                        className="m-1"
-                                        onClick={() =>
-                                          handleEditClickProductSize(sizeDetail)
-                                        }
-                                      >
-                                        <i className="bi bi-pencil-fill"></i>
-                                      </Button>
-                                    </OverlayTrigger>
-                                    <OverlayTrigger
-                                      overlay={<Tooltip>Xóa</Tooltip>}
+                                      <i className="bi bi-pencil-fill"></i>
+                                    </Button>
+                                  </OverlayTrigger>
+                                  <OverlayTrigger
+                                    overlay={<Tooltip>Xóa</Tooltip>}
+                                  >
+                                    <Button
+                                      variant="danger"
+                                      className="m-1"
+                                      onClick={() =>
+                                        deleteProductDetailSize(
+                                          sizeDetail.productDetailSizeId
+                                        )
+                                      }
                                     >
-                                      <Button
-                                        variant="danger"
-                                        className="m-1"
-                                        onClick={() =>
-                                          deleteProductDetailSize(
-                                            sizeDetail.productDetailSizeId
-                                          )
-                                        }
-                                      >
-                                        <i className="bi bi-trash3-fill"></i>
-                                      </Button>
-                                    </OverlayTrigger>
-                                  </td>
-                                </tr>
-                                
-                                
-                              )
+                                      <i className="bi bi-trash3-fill"></i>
+                                    </Button>
+                                  </OverlayTrigger>
+                                </td>
+                              </tr>
                             )
-                          ) : (
-                            <tr>
-                              <td colSpan="5"></td>
-                            </tr>
-                          )}
+                          )
+                        ) : (
                           <tr>
-                            <td colSpan="5">
-                              <Button 
+                            <td colSpan="5"></td>
+                          </tr>
+                        )}
+                        <tr>
+                          <td colSpan="5">
+                            <Button
                               size="sm"
                               className="mx-2"
-                               variant="outline-primary"
-                              onClick={handleAddNewSize}>
-                              Thêm kích cỡ  <i className=" bi bi-plus-circle mx-1"
-                              ></i>
-                              </Button>
-                            
-                            </td>
-                          </tr>
-                        </tbody>
-                      </Table>
-                    </Form.Group>
-                  ))}
+                              variant="outline-primary"
+                              onClick={handleAddNewSize}
+                            >
+                              Thêm kích cỡ{" "}
+                              <i className=" bi bi-plus-circle mx-1"></i>
+                            </Button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                  </Form.Group>
+                )}
               </Form>
             )}
 
