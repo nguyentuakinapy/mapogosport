@@ -5,5 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import mapogo.entity.PaymentMethod;
 
 public interface PaymentMethodDAO extends JpaRepository<PaymentMethod, Integer>{
-
+	//của Mỵ từ đây
+		PaymentMethod findByName(String name);
+	//đến đây
 }

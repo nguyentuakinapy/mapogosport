@@ -1,15 +1,18 @@
 package mapogo.service.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.ProductDetailDAO;
+import mapogo.entity.AccountPackage;
 import mapogo.entity.Product;
 import mapogo.entity.ProductDetail;
 import mapogo.entity.ProductDetailSize;
+import mapogo.entity.UserSubscription;
 import mapogo.service.ProductDetailService;
 
 @Service
@@ -55,14 +58,16 @@ public class ProductDetailServiceImpl implements ProductDetailService{
 		return detailDAO.save(productDetail);
 	}
 
+
+	
 	@Override
 	public ProductDetail update(ProductDetail productDetail) {
-		  Optional<ProductDetail> existingProductDetail = detailDAO.findById(productDetail.getProductDetailId());
-	        if (existingProductDetail.isPresent()) {
-	            return detailDAO.save(productDetail);  // Save will update if the product already exists
-	        }
-	        throw new RuntimeException("Product not found with id: " + productDetail.getProductDetailId());
-	    }
+		Optional<ProductDetail> existingProductDetail = detailDAO.findById(productDetail.getProductDetailId());
+		if (existingProductDetail.isPresent()) {
+			return detailDAO.save(productDetail);  // Save will update if the product already exists
+		}
+		throw new RuntimeException("Product not found with id: " + productDetail.getProductDetailId());
+	}
 	
 
 	@Override
@@ -75,6 +80,11 @@ public class ProductDetailServiceImpl implements ProductDetailService{
 	public Optional<ProductDetail> findByIdProduct(Integer id) {
 		 List<ProductDetail> details = detailDAO.findByIdProduct(id);
 		    return details.isEmpty() ? Optional.empty() : Optional.of(details.get(0));
+	}
+
+	@Override
+	public ProductDetail updateProductDetailWithMap(Map<String, Object> data) {
+		return null;
 	}
 
 //	@Override

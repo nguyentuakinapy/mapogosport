@@ -37,7 +37,7 @@ const ModalProductAddNewSize = ({
   };
 
   // Use react-query to fetch sizes
-  const { data: sizeData, isLoading } = useQuery({
+  const { data: sizeData, isLoading, refetch } = useQuery({
     queryFn: getDataSize,
     queryKey: ["getDataSize"],
   });
@@ -45,10 +45,17 @@ const ModalProductAddNewSize = ({
   const queryClient = useQueryClient();
   const [sizes, setSizes] = useState<Size[]>([]); // Save list of sizes from API
 
-  // Update sizes state when data is fetched
+  // Cập nhật danh sách kích cỡ khi có dữ liệu từ API
   useEffect(() => {
     if (sizeData) {
       setSizes(sizeData);
+      if (!formValues.sizeId && sizeData.length > 0) {
+        // Thiết lập giá trị mặc định là kích cỡ đầu tiên nếu chưa có chọn lựa
+        setFormValues((prev) => ({
+          ...prev,
+          sizeId: sizeData[0].sizeId,
+        }));
+      }
     }
   }, [sizeData]);
 
@@ -145,24 +152,6 @@ const ModalProductAddNewSize = ({
       };
 
 
-  // // Add or update size
-  // const mutation = useMutation({
-  //   mutationFn: (productDetailSize: ProductDetailSize) =>
-  //     createProductDetailSize(
-  //       selectedProductDetail!.productDetailId,
-  //       productDetailSize
-  //     ),
-
-  //   onSuccess: () => {
-  //     toast.success("Kích cỡ đã được lưu thành công!");
-  //     queryClient.invalidateQueries(["getDataSize"]); // Tải lại dữ liệu sau khi thêm/cập nhật thành công
-  //     handleCloseModal(); // Close the modal after saving
-  //   },
-  //   onError: (error) => {
-  //     console.error("Error occurred while saving size: ", error);
-  //     toast.error("Có lỗi xảy ra khi lưu kích cỡ!");
-  //   },
-  // });
   const mutation = useMutation({
     mutationFn: (productDetailSize: ProductDetailSize) => {
       return modalTypeProductDetail === "edit"
@@ -202,14 +191,6 @@ const ModalProductAddNewSize = ({
       price: Number(price),
       quantity: Number(quantity),
     };
-
-    // console.log({
-    //     productDetailId: selectedProductDetail?.productDetailId ?? ProductDetailWasCreated,
-    //     sizeId: sizeId,
-    //     price: price,
-    //     quantity: quantity,
-    //   });
-      
 
     // Log the sizeData to see what is being sent
     console.log("sizeData: ", sizeData);

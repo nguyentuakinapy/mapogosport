@@ -130,16 +130,18 @@ const Header = () => {
 
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
-            <Navbar expand="lg" style={{ position: 'sticky', zIndex: '1001', backgroundColor: '#090e1e' }}>
+            <Navbar expand="lg" style={{
+                position: 'sticky', zIndex: '1001', backgroundColor: '#090e1e', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)'
+            }}>
                 <Container>
-                    <Navbar><Link href={'/'} ><img src="/images/logo.png" style={{ width: '100px' }} alt="" /></Link></Navbar>
+                    <Navbar><Link href={'/'} ><img src="/images/logo-black.png" style={{ width: '80px' }} alt="" /></Link></Navbar>
                     <Navbar.Toggle aria-controls="navbarScroll" />
                     <Navbar.Collapse id="navbarScroll">
                         <Form className="d-flex m-auto">
                             <div className="input-group">
-                                <input type="search" className='form-control border border-secondary bg-secondary' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
+                                <input type="search" className='form-control border border-white ' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
                                     style={{ width: '300px' }} />
-                                <Button variant="outline-dark"><i className="bi bi-search"></i></Button>
+                                <Button variant="outline-light"><i className="bi bi-search"></i></Button>
                             </div>
                         </Form>
                         <Nav

@@ -96,15 +96,6 @@ public class BookingRestController {
 	    return bookingService.findBookingAmountByOwnerAndStatus(ownerId, status);
 	}
 	
-//	@GetMapping("/booking/success/revenue/byDate/{ownerId}/{flag}/{startDate}/{endDate}")
-//	public Double findRevenueByDate(@PathVariable("ownerId") Integer ownerId,
-//									@PathVariable("flag") Integer flag,
-//									@PathVariable("startDate") String startDate,
-//									@PathVariable("endDate") String endDate) {
-//		
-//		return bookingService.findRevenueByDate(ownerId, flag, startDate, endDate);
-//		
-//	}
 	
 	@GetMapping("/bookingdetail/booking/bysportField/byowner/{sportFieldIds}/{ownerId}")
 	public List<BookingDetail> findBookingDetailBySportFieldAndOwner(
@@ -118,7 +109,20 @@ public class BookingRestController {
 	public List<Object[]> findRevenueBySportFieldDetailIds(
 	    @PathVariable("sportFieldIds") List<Integer> sportFieldIds) {
 	    return bookingService.findRevenueBySportFieldDetailIds(sportFieldIds);
+    
+	@GetMapping("/booking/success/revenue/byDate/{ownerId}/{flag}/{startDate}/{endDate}")
+	public Double findRevenueByDate(@PathVariable("ownerId") Integer ownerId,
+									@PathVariable("flag") Integer flag,
+									@PathVariable("startDate") String startDate,
+									@PathVariable("endDate") String endDate) {
+		
+		return bookingService.findRevenueByDate(ownerId, flag, startDate, endDate);
 	}
-
-
+	
+	@GetMapping("/booking/detail/findbystarttime/sportfielddetail/{startTime}/{sportFieldDetailId}/{date}")
+	public BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(@PathVariable("startTime") String startTime, 
+			@PathVariable("sportFieldDetailId") Integer sportFieldDetailId,
+			@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+		return bookingDetailService.findBookingDetailByStartTimeDateAndSportDetailId(startTime, sportFieldDetailId, date);
+	}
 }
