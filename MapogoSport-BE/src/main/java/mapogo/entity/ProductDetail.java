@@ -52,5 +52,6 @@ public class ProductDetail implements Serializable {
 
 	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
 	@JsonBackReference // tanthanh
+//	@JsonManagedReference
 	private List<ProductDetailSize> productDetailSizes;
 }

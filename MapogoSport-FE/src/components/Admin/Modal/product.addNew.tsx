@@ -83,6 +83,11 @@ const ProductAddNew = ({
   // const [showDetailModal, setShowDetailModal] = useState(false);    // quản lý modal -- hiện chưa dùng
   const [selectedProductDetail, setSelectedProductDetail] =
     useState<ProductDetail>([]); // lấy sản phẩm chi tiết chi tiết theo ID product
+
+  const [selectedProductDetailSize, setSelectedProductDetailSize] = useState<
+    ProductDetailSize[]
+  >([]); // lấy sản phẩm chi tiết chi tiết theo ID product
+
   // Fetch ProductDetail dựa vào productId
 
   // Chỉ fetch dữ liệu khi currentProduct?.productId có giá trị
@@ -254,7 +259,7 @@ const ProductAddNew = ({
       brand: "",
       country: "",
       image: "",
-      stock: 1,
+      stock: 0,
     });
     setNewColor("");
     setPreviewImageProductColor(null);
@@ -274,20 +279,7 @@ const ProductAddNew = ({
       });
     } else {
       // trường hợp này là thêm mới nên set form thành rỗng
-      setFormValues({
-        name: "",
-        categoryProduct: {
-          categoryProductId: 1,
-          name: "",
-        },
-        description: "",
-        price: 0,
-        status: option[0].value,
-        brand: "",
-        country: "",
-        image: "",
-        stock: 1,
-      });
+      setFormValueNull()
     }
   }, [modalType, currentProduct, categoryProducts]);
 
@@ -373,6 +365,15 @@ const ProductAddNew = ({
     setFormValueNull(); // onFetch();
     setActiveTab("edit"); // set sang atb edit
   };
+  // const handleOpenTabAddProductDetail =(tab: string) =>{
+  //   setNewColor("");
+  //   setPreviewImageProductColor(null);
+  //   setSelectedGalleryFiles([]);
+  //   setGalleries([]);
+  //   setSelectedProductDetailSize([])
+  //   setCurrentProductDetailSize([])
+  //   setActiveTab(tab)
+  // }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (modalType === "add") {
@@ -433,6 +434,9 @@ const ProductAddNew = ({
     const missingFields = requiredFields.filter((field) => !formValues[field]);
 
     if (missingFields.length > 0) {
+      if (!previewImage)
+        toast.warning("Vui lòng chọn hình đại diện của sản phẩm.");
+
       // Hiển thị thông báo lỗi cho từng trường còn thiếu
       missingFields.forEach((field) => {
         // console.error(`Vui lòng nhập trường: ${field}`);
@@ -447,16 +451,11 @@ const ProductAddNew = ({
   const validateForm = () => {
     let isValid = true;
 
-    if (!previewImage) {
-      isValid = false;
-      toast.error("Vui lòng chọn hình đại diện của sản phẩm.");
-    }
     if (!previewImageProductColor) {
       isValid = false;
       toast.error("Vui lòng chọn hình đại diện của màu sản phẩm.");
     }
 
-    // Kiểm tra màu sắc
     // if (!selectedProductDetail.color) {
     if (!newColor) {
       isValid = false;
@@ -544,7 +543,6 @@ const ProductAddNew = ({
       // Gửi dữ liệu lên backend
       if (modalType === "add") {
         if (!validateForm()) {
-          toast.error("Vui lòng kiểm tra lại dữ liệu.");
           return; // Ngừng xử lý nếu form không hợp lệ
         }
         // const response = await axios.post(
@@ -604,49 +602,126 @@ const ProductAddNew = ({
           currentProduct.productId
         );
         console.log("currentProduct========", currentProduct);
+        let b = false;
 
+        if (!productDetails || productDetails.length === 0) {
+          // Kiểm tra nếu productDetails trống
+
+          if (
+            newColor !== "" &&
+            selectedGalleryFiles.length > 0 &&
+            previewImageProductColor !== null
+          ) {
+            b = true; // Nếu có newColor, cho phép thêm mới ProductDetail
+          }
+        } else {
+          b = true;
+        }
+
+        // Sửa so sánh b = false thành b === false
+        if (b === false) {
+          toast.warning("Nhập ProductDetail đi, đang trống đấy");
+          return; // Ngừng xử lý nếu không có thông tin ProductDetail
+        }
+
+        // await mutation.mutateAsync(
+        //   { formData: formData, id: currentProduct.productId },
+        //   {
+        //     onError(error, variables) {
+        //       console.log("variables========", variables);
+        //       toast.error("Loi");
+        //     },
+        //     onSuccess(data, variables) {
+        //       console.log("variables======== success cập nhât", variables);
+        //       // Kiểm tra nếu selectedProductDetail đã được chọn
+        //       toast.success("Cập nhật sản phẩm thành công");
+        //       if (!productDetails || productDetails.length === 0 ) {
+        //         console.log(
+        //           "Chưa có ProductDetail trong db, sẽ thêm mới productDetails"
+        //         );
+        //         handleAddNewProductDetail(currentProduct?.productId);
+        //         onFetch();
+        //       } else if (selectedProductDetail?.productDetailId) {
+        //         console.log(
+        //           "có selectedProductDetail được chọn nên sẽ cập nhật"
+        //         );
+        //         console.log(
+        //           "selectedProductDetail ID:",
+        //           selectedProductDetail.productDetailId
+        //         );
+        //         handleUpdateProductDetail(
+        //           selectedProductDetail.productDetailId
+        //         );
+        //         onFetch();
+        //       } else {
+        //         if (newColor != "") {
+        //           console.log("new color có sự chỉnh sửa");
+        //           handleAddNewProductDetail(currentProduct?.productId);
+        //         } else {
+        //           console.log("new color khong có sự chỉnh sửa");
+        //           console.log(
+        //             "Không có selectedProductDetail, bỏ qua cập nhật chi tiết sản phẩm là sao"
+        //           );
+        //         }
+        //       }
+
+        //       onFetch();
+        //     },
+        //   }
+        // );
         await mutation.mutateAsync(
           { formData: formData, id: currentProduct.productId },
           {
             onError(error, variables) {
-              console.log("variables========", variables);
-              toast.error("Loi");
+              console.log("Error updating product:", error);
+              toast.error("Lỗi khi cập nhật sản phẩm");
             },
             onSuccess(data, variables) {
-              console.log("variables======== success cập nhât", variables);
-              // Kiểm tra nếu selectedProductDetail đã được chọn
-              toast.success("Cập nhật sản phẩm thành công");
+              console.log("Cập nhật sản phẩm thành công", variables);
+
+              // Kiểm tra nếu `ProductDetail` trống và yêu cầu nhập thông tin ProductDetail
               if (!productDetails || productDetails.length === 0) {
+                if (
+                  newColor !== "" ||
+                  selectedGalleryFiles.length > 0 ||
+                  previewImageProductColor !== null
+                ) {
+                  // Thêm ProductDetail mới nếu có thay đổi màu sắc
+
+                  handleAddNewProductDetail(currentProduct?.productId);
+                } else {
+                  toast.info(
+                    "Vui lòng điền thông tin ProductDetail trước khi cập nhật Product."
+                  );
+                  toast.error(
+                    "Không thể cập nhật sản phẩm vì thiếu ProductDetail."
+                  );
+                }
+                return; // Ngừng xử lý cập nhật Product
+              }
+
+              // Nếu `ProductDetail` đã có đầy đủ, thực hiện cập nhật `ProductDetail` hoặc thêm mới nếu cần
+              if (selectedProductDetail?.productDetailId) {
                 console.log(
-                  "Chưa có ProductDetail trong db, sẽ thêm mới productDetails"
-                );
-                handleAddNewProductDetail(currentProduct?.productId);
-                onFetch();
-              } else if (selectedProductDetail?.productDetailId) {
-                console.log(
-                  "có selectedProductDetail được chọn nên sẽ cập nhật"
-                );
-                console.log(
-                  "selectedProductDetail ID:",
-                  selectedProductDetail.productDetailId
+                  "Cập nhật chi tiết sản phẩm với selectedProductDetail"
                 );
                 handleUpdateProductDetail(
                   selectedProductDetail.productDetailId
                 );
                 onFetch();
-              } else {
-                if (newColor != "") {
-                  console.log("new color có sự chỉnh sửa");
-                  handleAddNewProductDetail(currentProduct?.productId);
-                } else {
-                  console.log("new color khong có sự chỉnh sửa");
-                  console.log(
-                    "Không có selectedProductDetail, bỏ qua cập nhật chi tiết sản phẩm là sao"
-                  );
-                }
+              } else if (newColor !== "") {
+                console.log("Thêm ProductDetail mới do có thay đổi màu sắc");
+                handleAddNewProductDetail(currentProduct?.productId);
+                onFetch();
               }
 
-              onFetch();
+              // Đóng modal và cập nhật lại danh sách nếu tất cả thông tin đã hoàn tất
+              if (productDetails.length > 0) {
+                toast.success(
+                  "Sản phẩm và chi tiết sản phẩm đã được cập nhật thành công"
+                );
+                onFetch(); // Làm mới dữ liệu sau khi cập nhật
+              }
             },
           }
         );
@@ -655,6 +730,7 @@ const ProductAddNew = ({
       toast.error(`Lỗi khi lưu sản phẩm: ${error}`);
       console.error("Lỗi khi lưu sản phẩm:", error);
     }
+    onFetch();
     handleClose();
   };
 
@@ -662,11 +738,18 @@ const ProductAddNew = ({
   const { data: productDetailSizes, error: errorProductDetailSizes } = useSWR<
     ProductDetailSize[]
   >(
-    openProductDetailId
-      ? `${BASE_URL}/rest/product-detail-size/${openProductDetailId}`
+    selectedProductDetail.productDetailId
+      ? `${BASE_URL}/rest/product-detail-size/${selectedProductDetail.productDetailId}`
       : null,
     fetcher
   );
+
+  // Đồng bộ dữ liệu với selectedProductDetailSize
+  useEffect(() => {
+    if (productDetailSizes) {
+      setSelectedProductDetailSize(productDetailSizes);
+    }
+  }, [productDetailSizes]);
 
   // // Xử lý lỗi và trạng thái loading
   if (errorProductDetails)
@@ -762,6 +845,10 @@ const ProductAddNew = ({
   };
 
   const handleAddNewProductDetail = async (currentProductID: number) => {
+    if (!validateForm()) {
+      toast.error("Vui lòng kiểm tra lại dữ liệu.");
+      return; // Ngừng xử lý nếu form không hợp lệ
+    }
     try {
       console.log("currentProduct Id: ", currentProductID);
 
@@ -1009,7 +1096,7 @@ const ProductAddNew = ({
                             type="number"
                             placeholder="Số lượng"
                             name="stock"
-                            value={formValues.stock}
+                            value={formValues.stock || ""}
                             onChange={handleInputChangeNumber}
                           />
                           <Form.Label htmlFor="stock">
@@ -1024,7 +1111,7 @@ const ProductAddNew = ({
                             type="number"
                             placeholder="Giá"
                             name="price"
-                            value={formValues.price}
+                            value={formValues.price || ""}
                             onChange={handleInputChangeNumber}
                           />
                           <Form.Label htmlFor="stock">
@@ -1196,6 +1283,7 @@ const ProductAddNew = ({
                           variant="outline-primary"
                           className="d-flex align-items-center justify-content-center"
                           onClick={() => {
+                            // handleOpenTabAddProductDetail("add-details");
                             handleOpenTabColor("add-details");
                           }}
                           style={{
@@ -1301,8 +1389,7 @@ const ProductAddNew = ({
                   </span>
                 </h5> */}
                 <Row>
-                  <Col>
-                  </Col>
+                  <Col></Col>
                 </Row>
                 <Row>
                   <Col>
@@ -1319,8 +1406,12 @@ const ProductAddNew = ({
                           onChange={handleSelectColor}
                         >
                           {optionColor.map((option) => (
-                            <option key={option.value} value={option.value} style={{color: `${option.style}`}}>                                             
-                                {option.label}
+                            <option
+                              key={option.value}
+                              value={option.value}
+                              style={{ color: `${option.style}` }}
+                            >
+                              {option.label}
                             </option>
                           ))}
                         </Form.Control>
@@ -1527,59 +1618,54 @@ const ProductAddNew = ({
                           <th>Giá</th>
                           <th>Số lượng</th>
                           <th>Hành động</th>
-                          {/* <th>{selectedProductDetail.productDetailSizes}</th> */}
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedProductDetail?.productDetailSizes?.length >
-                        0 ? (
-                          selectedProductDetail.productDetailSizes.map(
-                            (sizeDetail) => (
-                              <tr key={sizeDetail.productDetailSizeId}>
-                                <td>{sizeDetail.productDetailSizeId}</td>
-                                {/* <td>{sizeDetail.size.sizeName}</td> */}
-                                <td>
-                                  {sizeDetail.size?.sizeName ||
-                                    "Không có kích cỡ"}
-                                </td>
-                                <td>{sizeDetail.price}</td>
-                                <td>{sizeDetail.quantity}</td>
-                                <td className="text-center align-middle">
-                                  <OverlayTrigger
-                                    overlay={<Tooltip>Sửa</Tooltip>}
+                        {selectedProductDetailSize.length > 0 ? (
+                          selectedProductDetailSize.map((sizeDetail) => (
+                            <tr key={sizeDetail.productDetailSizeId}>
+                              <td>{sizeDetail.productDetailSizeId}</td>
+                              <td>
+                                {sizeDetail.size?.sizeName ||
+                                  "Không có kích cỡ"}
+                              </td>
+                              <td>{sizeDetail.price}</td>
+                              <td>{sizeDetail.quantity}</td>
+                              <td className="text-center align-middle">
+                                <OverlayTrigger
+                                  overlay={<Tooltip>Sửa</Tooltip>}
+                                >
+                                  <Button
+                                    variant="warning"
+                                    className="m-1"
+                                    onClick={() =>
+                                      handleEditClickProductSize(sizeDetail)
+                                    }
                                   >
-                                    <Button
-                                      variant="warning"
-                                      className="m-1"
-                                      onClick={() =>
-                                        handleEditClickProductSize(sizeDetail)
-                                      }
-                                    >
-                                      <i className="bi bi-pencil-fill"></i>
-                                    </Button>
-                                  </OverlayTrigger>
-                                  <OverlayTrigger
-                                    overlay={<Tooltip>Xóa</Tooltip>}
+                                    <i className="bi bi-pencil-fill"></i>
+                                  </Button>
+                                </OverlayTrigger>
+                                <OverlayTrigger
+                                  overlay={<Tooltip>Xóa</Tooltip>}
+                                >
+                                  <Button
+                                    variant="danger"
+                                    className="m-1"
+                                    onClick={() =>
+                                      deleteProductDetailSize(
+                                        sizeDetail.productDetailSizeId
+                                      )
+                                    }
                                   >
-                                    <Button
-                                      variant="danger"
-                                      className="m-1"
-                                      onClick={() =>
-                                        deleteProductDetailSize(
-                                          sizeDetail.productDetailSizeId
-                                        )
-                                      }
-                                    >
-                                      <i className="bi bi-trash3-fill"></i>
-                                    </Button>
-                                  </OverlayTrigger>
-                                </td>
-                              </tr>
-                            )
-                          )
+                                    <i className="bi bi-trash3-fill"></i>
+                                  </Button>
+                                </OverlayTrigger>
+                              </td>
+                            </tr>
+                          ))
                         ) : (
                           <tr>
-                            <td colSpan="5"></td>
+                            <td colSpan="5">Chưa lấy được kích cỡ</td>
                           </tr>
                         )}
                         <tr>
@@ -1591,7 +1677,7 @@ const ProductAddNew = ({
                               onClick={handleAddNewSize}
                             >
                               Thêm kích cỡ{" "}
-                              <i className=" bi bi-plus-circle mx-1"></i>
+                              <i className="bi bi-plus-circle mx-1"></i>
                             </Button>
                           </td>
                         </tr>

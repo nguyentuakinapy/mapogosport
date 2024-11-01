@@ -145,22 +145,45 @@
   }
 }
 
-// bỏ hover select 
-select {
-  -webkit-appearance: none; /* Tắt kiểu mặc định của trình duyệt */
-  -moz-appearance: none; /* Tắt kiểu mặc định của trình duyệt */
-  appearance: none; /* Tắt kiểu mặc định của trình duyệt */
-  border: none; /* Bỏ viền nếu cần */
-}
 
-select option {
-  color: inherit; /* Giữ màu mặc định cho text */
-  background-color: inherit; /* Giữ màu nền */
-}
+  .avatar-upload {
+      display: inline-block;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+  
+      .avatar-edit {
+          position: absolute;
+          bottom: -1px;
+          width: 100%;
+          text-align: center;
+          z-index: 9;
+  
+          input+label {
+              margin-bottom: 0;
+              background-color: #000;
+              cursor: pointer;
+              transition: all .2s ease-in-out;
+              width: 100%;
+              color: #fff;
+              text-decoration: none;
+          }
+  
+          input {
+              display: none;
+          }
+      }
+  
+      .avatar-preview {
+          div {
+              width: 6rem;
+              height: 6rem;
+              margin: 0 auto;
+              background-size: cover;
+              background-repeat: no-repeat;
+          }
+      }
 
-select:hover, select:focus {
-  outline: none; /* Bỏ outline khi hover hoặc focus */
 }
-
 
 /*======================================================Modal Product CSS End======================================================*/
