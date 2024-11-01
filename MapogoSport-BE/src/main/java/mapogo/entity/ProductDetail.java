@@ -37,9 +37,7 @@ public class ProductDetail implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductId", nullable = false)
-	@JsonManagedReference
-//	@JsonBackReference // QA Sửa 24/10
-//	@JsonIgnore // QA (30/10)
+	@JsonManagedReference// của tanthanh k có sữa nha>>>>>>> main
 	private Product product;
 
 	@Column(name = "Color", nullable = false)
@@ -47,13 +45,12 @@ public class ProductDetail implements Serializable {
 
 	@Column(name = "Image", nullable = false)
 	private String image;
-	
+
 	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private List<Gallery> galleries;
 
 	@OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-//	@JsonBackReference // tanthanh 
-//	@JsonIgnore // QA - 30/10
+	@JsonBackReference // tanthanh
 	private List<ProductDetailSize> productDetailSizes;
 }
