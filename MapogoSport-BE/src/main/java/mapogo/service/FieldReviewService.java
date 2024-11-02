@@ -7,6 +7,7 @@ import mapogo.entity.FieldReview;
 
 public interface FieldReviewService {
 	List<FieldReview> findByUser_Username(String username);
+	void deleteReviewByUser(Integer fieldReviewId);
 	List<FieldReview> findBySportField_SportFieldId(Integer id);
 	
 //	FieldReview createReview ( FieldReview review);

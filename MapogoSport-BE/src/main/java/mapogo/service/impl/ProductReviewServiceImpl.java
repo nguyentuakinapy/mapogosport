@@ -31,4 +31,9 @@ public class ProductReviewServiceImpl implements ProductReviewService{
 		return proReviewDao.findByUser_Username(username);
 	}
 
+	@Override
+	public void deleteReviewByUser(Integer productReviewId) {
+		proReviewDao.deleteById(productReviewId);
+	}
+
 }
