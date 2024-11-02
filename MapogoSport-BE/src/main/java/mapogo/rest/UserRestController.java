@@ -103,4 +103,9 @@ public class UserRestController {
 	public UserSubscription findUserSubscriptionByUser(@PathVariable("id") String username) {
 		return userService.findUserSubscriptionByUser(username);
 	}
+	
+	@GetMapping("/user/getbysportdetailid/{id}")
+	public User findTestr(@PathVariable("id") Integer id) {
+		return userService.findUserByBookingDetailId(id);
+	}
 }

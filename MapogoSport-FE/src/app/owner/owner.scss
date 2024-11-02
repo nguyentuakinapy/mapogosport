@@ -156,7 +156,7 @@
 }
 
 .div-tb {
-    height: calc(100vh - 200px);
+    height: calc(100vh - 261px);
     overflow-y: auto;
     overflow-x: auto;
     border: 1px solid #142239;
@@ -188,7 +188,7 @@
         .tb-head {
             font-weight: bold;
             position: sticky;
-            top: -1px;
+            top: 0;
             z-index: 10;
             white-space: nowrap;
 
@@ -199,11 +199,13 @@
                 color: white;
                 font-weight: normal;
             }
+
         }
 
         tbody {
 
             tr {
+
                 .title {
                     overflow: hidden;
                     white-space: nowrap;
@@ -272,29 +274,28 @@
 
 .frame-info-secondary {
     background: #f3f3f3 !important;
-    cursor: not-allowed !important;
+    cursor: pointer;
+    outline: 1px solid slategrey;
 
     .status-label {
-        cursor: not-allowed !important;
         color: #8b8b8b !important;
-    }
-
-    .status-label {
         font-weight: 700 !important;
     }
-}
 
+    &:hover {
+        background-color: #86fff3 !important;
+        transition: background-color 0.3s;
+    }
+}
 
 .frame-overdue-secondary {
     background: #f9e1e1 !important;
     cursor: not-allowed !important;
+    outline: 2px solid transparent;
 
     .status-label {
         cursor: not-allowed !important;
         color: #8b8b8b !important;
-    }
-
-    .status-label {
         font-weight: 700 !important;
     }
 }
@@ -307,14 +308,22 @@
         color: #353535 !important;
         font-weight: 700 !important;
     }
+
+    &:hover {
+        background-color: #fff7d4 !important;
+        transition: background-color 0.3s;
+    }
 }
+
 
 .frame-info-danger {
     background: #f7959f !important;
     cursor: not-allowed !important;
+    outline: 2px solid transparent;
 
     .status-label {
         cursor: not-allowed !important;
         color: white !important;
+        font-weight: 700 !important;
     }
 }

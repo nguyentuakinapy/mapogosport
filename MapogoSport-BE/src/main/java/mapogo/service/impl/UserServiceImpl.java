@@ -87,4 +87,9 @@ public class UserServiceImpl implements UserService {
 		uS.setAccountPackage(ap);
 		return userSubscriptionDAO.save(uS);
 	}
+
+	@Override
+	public User findUserByBookingDetailId(Integer bookingDetailId) {
+		return userDAO.findUserByBookingDetailId(bookingDetailId);
+	}
 }

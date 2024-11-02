@@ -14,9 +14,11 @@ import mapogo.dao.BookingDAO;
 import mapogo.dao.BookingDetailDAO;
 import mapogo.dao.SportFieldDAO;
 import mapogo.dao.SportFieldDetailDAO;
+import mapogo.dao.UserDAO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
 import mapogo.entity.SportFieldDetail;
+import mapogo.entity.User;
 import mapogo.service.BookingDetailService;
 
 @Service
@@ -30,6 +32,9 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	
 	@Autowired
 	SportFieldDetailDAO sportFieldDAO;
+	
+	@Autowired
+	UserDAO userDAO;
 
 //	@Override
 //	public List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId) {
@@ -37,11 +42,12 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 //	}
 
 	public List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportFieldDetailId, LocalDate today, LocalDate endDate) {
-
-//		LocalDate today = LocalDate.now();
-//		LocalDate endDate = today.plusDays(7);
-
-		return bookingDetailDAO.findBySportFieldDetailAndDateBetween(sportFieldDetailId, today, endDate);
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findBySportFieldDetailAndDateBetween(sportFieldDetailId, today, endDate);
+		bookingDetails.forEach(bd -> {
+			User u = userDAO.findUserByBookingDetailId(bd.getBookingDetailId());
+			bd.setFullName(u.getFullname());
+		});
+		return bookingDetails;
 	}
 
 	@Override
@@ -74,7 +80,12 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Override
 	public List<BookingDetail> findBySportFieldDetailAndDay(Integer sportDetailId, LocalDate date) {
-		return bookingDetailDAO.findBySportFieldDetailAndDay(sportDetailId, date);
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findBySportFieldDetailAndDay(sportDetailId, date);
+		bookingDetails.forEach(bd -> {
+			User u = userDAO.findUserByBookingDetailId(bd.getBookingDetailId());
+			bd.setFullName(u.getFullname());
+		});
+		return bookingDetails;
 	}
 
 	@Override
