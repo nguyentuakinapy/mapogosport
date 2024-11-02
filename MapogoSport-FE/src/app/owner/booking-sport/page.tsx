@@ -22,7 +22,6 @@ type BookingsTypeOnWeek = {
     };
 };
 export default function BookingSport() {
-
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
     const [showViewOrEditBookingModal, setShowViewOrEditBookingModal] = useState<boolean>(false);
 
@@ -1010,12 +1009,26 @@ export default function BookingSport() {
         setBookingsOnWeek({});
     }
 
+    const [isFullScreen, setIsFullScreen] = useState(false);
+
+    const toggleFullScreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            setIsFullScreen(true);
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                setIsFullScreen(false);
+            }
+        }
+    };
+
     if (isLoading) return <h2>Data is comming</h2>
 
     return (
         <>
             <div className="d-flex align-items-center justify-content-between">
-                <i className="bi bi-fullscreen fs-5"></i>
+                <i onClick={toggleFullScreen} className="bi bi-fullscreen fs-5"></i>
                 <h3 className="text-danger fw-bold" style={{ fontSize: '20px' }}> LỊCH ĐẶT SÂN</h3>
                 <i className="bi bi-question-circle fs-5"></i>
             </div>
