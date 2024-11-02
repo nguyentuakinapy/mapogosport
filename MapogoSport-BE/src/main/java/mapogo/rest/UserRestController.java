@@ -74,6 +74,13 @@ public class UserRestController {
 		emailService.sendEmail(email, "MapogoSport",
 				"Bạn đã thay đổi mật khẩu tài khoản. Nếu đó không phải là bạn, vui lòng liên hệ với chúng tôi ngay.");
 	}
+	
+	@PostMapping("/user/updateEmail/sendMail")
+	public void sendUpdateMail(@RequestBody Map<String, String> requestBody) {
+		String email = requestBody.get("email");
+		emailService.sendEmail(email, "MapogoSport",
+				"Bạn đã thay đổi email tài khoản. Nếu đó không phải là bạn, vui lòng liên hệ với chúng tôi ngay.");
+	}
 
 	@Autowired
 	OwnerService ownerService;
