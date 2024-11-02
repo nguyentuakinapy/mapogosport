@@ -23,4 +23,5 @@ public interface BookingService {
 	List<BookingDetail> findBookingDetailBySportFieldAndOwner(List<Integer> sportFielDetailIds, Integer ownerId);
 
 	List<Object[]> findRevenueBySportFieldDetailIds(List<Integer> sportFieldDetailIds);
+	
 }
