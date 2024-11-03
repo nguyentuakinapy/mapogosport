@@ -12,6 +12,24 @@ const formatDate = (dateString) => {
     second: "2-digit",
   });
 };
+const formatDateNotime = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleString("vi-VN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+};
+
+
+const formatDateForApi = (date: Date | null) => {
+  if (!date) return ''; // Đảm bảo rằng nếu date là null thì trả về chuỗi rỗng
+
+  // Chuyển đổi thành ISO string và loại bỏ phần '.000Z'
+  return date.toISOString().replace('.000Z', '');
+};
+
+
 
 const formatPrice = (price) => {
   // Kiểm tra nếu price không hợp lệ hoặc không phải là số
@@ -31,5 +49,5 @@ const hashPassword = (password: string): string => {
   return hash;
 };
 
-export { formatDate, formatPrice, hashPassword };
+export { formatDate, formatPrice, hashPassword, formatDateForApi, formatDateNotime };
 

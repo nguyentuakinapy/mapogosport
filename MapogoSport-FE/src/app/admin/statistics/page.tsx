@@ -3,12 +3,14 @@ import { Container } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 // import Form from 'react-bootstrap/Form';
 import { Dropdown, Button } from 'react-bootstrap';
+import Pagination from 'react-bootstrap/Pagination';
 import DatePicker from 'react-datepicker';
 import Table from 'react-bootstrap/Table';
 import 'react-datepicker/dist/react-datepicker.css'; // Ensure to import the styles
-
+import MyVerticallyCenteredModal from '@/components/ModalOrder/MoDal'
+import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
-import { formatPrice, formatDate } from '@/components/Utils/Format';
+import { formatPrice, formatDate, formatDateForApi, formatDateNotime } from '@/components/Utils/Format';
 
 const Admin = () => {
 
@@ -17,101 +19,117 @@ const Admin = () => {
     // Tạo state để lưu trữ mục được chọn
     const [selectedOption, setSelectedOption] = useState('Danh Sách Hóa Đơn');
     const [selectedOptionDay, setSelectedOptionDay] = useState('Hôm Nay');
+    const [showSubOptions, setShowSubOptions] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedOrderId, setSelectedOrderId] = useState(null); // Để lưu trữ orderId của đơn hàng được chọn
 
     // Hàm xử lý khi người dùng chọn một mục
     const handleSelect = (eventKey) => {
         setSelectedOption(eventKey);
     };
+
     const handleSelectDay = (eventKey) => {
-        setSelectedOptionDay(eventKey);
+        if (eventKey === "Tùy Chọn") {
+            setShowSubOptions((prev) => !prev); // Toggle hiển thị menu con
+        } else {
+            setSelectedOptionDay(eventKey);
+            setShowSubOptions(false); // Ẩn menu con nếu chọn mục khác
+            setShowDropdown(false); // Ẩn Dropdown chính khi chọn một mục
+        }
     };
-    const handleDateChange = (date: Date | null) => {
-        setSelectedDate(date);  // Update state with selected date
+    const handleToggle = (isOpen: boolean) => {
+        setShowDropdown(isOpen);
     };
-    const handleDateChange1 = (date: Date | null) => {
-        setSelectedDate1(date);  // Update state with selected date
-    };
-    const [dataColumnnCharOther, setDataColumnnChartOther] = useState([]);
+
+
+
+    const [dataListOther, setDataListOther] = useState([]);
+    const [dataColumnnChartOther, setDataColumnnChartOther] = useState([]);
     const handleFindDate = async () => {
-
-        console.log(" date: ", formatDate(selectedDate) || formatDate(selectedDate1));
-        console.log("start date: ", formatDate(selectedDate));
-        console.log("end date: ", formatDate(selectedDate1));
-
         try {
+            if (selectedOptionDay === "Một Ngày") {
+                const date = formatDateForApi(selectedDate);
+                console.log(date);
 
-            const date = formatDate(selectedDate) || formatDate(selectedDate1); // Ngày cụ thể
-            const startDay = formatDate(selectedDate); // Ngày bắt đầu
-            const endDay = formatDate(selectedDate1); // Ngày kết thúc
-
-            const resp = await axios.get(`http://localhost:8080/admin/order-between?date=${date}&startDay=${startDay}&endDay=${endDay}`);
-            setDataColumnnChartOther(resp.data);
-        } catch (err) {
-            console.error("Error fetching orders:", err);
+                const response = await axios.get(`http://localhost:8080/rest/admin/order-between?date=${date}`);
+                const response1 = await axios.get(`http://localhost:8080/rest/admin/category-product-total-between?date=${date}`)
+                setDataListOther(response.data);
+                setDataColumnnChartOther(response1.data);
+            } else if (selectedOptionDay === "Nhiều Ngày") {
+                const startDay = formatDateForApi(selectedDate);
+                const endDay = formatDateForApi(selectedDate1);
+                console.log("end day: ", endDay);
+                const response = await axios.get(`http://localhost:8080/rest/admin/order-between?startDay=${startDay}&endDay=${endDay}`);
+                const response1 = await axios.get(`http://localhost:8080/rest/admin/category-product-total-between?startDay=${startDay}&endDay=${endDay}`)
+                setDataListOther(response.data);
+                setDataColumnnChartOther(response1.data);
+            }
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+            // Optional: Show error message to the user
         }
     };
 
 
+
+
+
     const ColumnChart = () => {
+        const [dataColumnnToday, setDataColumnnChartToday] = useState([]);
+        const [dataColumnnYesterday, setDataColumnnChartYesterday] = useState([]);
         const [dataColumnnChart7Day, setDataColumnnChart7Day] = useState([]);
         const [dataColumnnChartOneMonth, setDataColumnnChartOneMonth] = useState([]);
+        const [loading, setLoading] = useState(true); // Set loading to true initially
 
-        // Fetch data for the last 7 days
+
         useEffect(() => {
-            const fetchDataColumnnChart7Day = async () => {
+            const fetchData = async () => {
                 try {
-                    const resp = await axios.get('http://localhost:8080/rest/admin/category-product-totals-7day');
-                    setDataColumnnChart7Day(resp.data);
-                    console.log(">>> dataChart111: ", resp.data);
+                    setLoading(true); // Set loading to true when starting fetch
+                    const [todayResp, yesterdayResp, weekResp, monthResp] = await Promise.all([
+                        axios.get('http://localhost:8080/rest/admin/category-product-totals-today'),
+                        axios.get('http://localhost:8080/rest/admin/category-product-totals-yesterday'),
+                        axios.get('http://localhost:8080/rest/admin/category-product-totals-7day'),
+                        axios.get('http://localhost:8080/rest/admin/category-product-totals-one-month'),
+                    ]);
+
+                    setDataColumnnChartToday(todayResp.data);
+                    setDataColumnnChartYesterday(yesterdayResp.data);
+                    setDataColumnnChart7Day(weekResp.data);
+                    setDataColumnnChartOneMonth(monthResp.data);
                 } catch (error) {
-                    console.error("Error fetching data for 7-day chart", error);
+                    console.error("Error fetching chart data", error);
+                } finally {
+                    setLoading(false); // Stop loading when data fetch is done
                 }
             };
 
-            fetchDataColumnnChart7Day();
+            fetchData();
         }, []);
-
-        // Fetch data for the last month
-        useEffect(() => {
-            const fetchDataColumnnChartMonth = async () => {
-                try {
-                    const resp = await axios.get('http://localhost:8080/rest/admin/category-product-totals-one-month'); // Corrected endpoint
-                    setDataColumnnChartOneMonth(resp.data);
-                    console.log(">>> dataChart 1 month: ", resp.data);
-                } catch (error) {
-                    console.error("Error fetching data for 1-month chart", error);
-                }
-            };
-
-            fetchDataColumnnChartMonth();
-        }, []);
-
-
 
         const chartOptions = [
             {
                 option: 'Hôm Nay',
                 title: 'Biểu đồ hoạt động hôm nay',
-                data: [
-                    ['Task', 'Hours per To Day'],
-                    ['Work', 8],
-                    ['Eat', 2],
-                    ['Commute', 2],
-                    ['Watch TV', 3],
-                    ['Sleep', 9],
-                ]
+                data: dataColumnnToday.length > 0
+                    ? [['Category', { role: 'style' }, 'Total'],
+                    ...dataColumnnToday.map(item => [
+                        item[1] || 'Chưa có tên',
+                        'color: #76A7FA',
+                        parseFloat(item[3]) || 0])]
+                    : [['Category', { role: 'style' }, 'Total'], ['Loading', 'color: #76A7FA', 0]]
             },
             {
                 option: 'Hôm Qua',
-                title: 'Biểu đồ hoạt động hôm nay',
-                data: [
-                    ['Task', 'Hours per To Day'],
-                    ['Work', 8],
-                    ['Eat', 2],
-                    ['Commute', 2],
-                    ['Watch TV', 3],
-                    ['Sleep', 9],
-                ]
+                title: 'Biểu đồ hoạt động hôm qua',
+                data: dataColumnnYesterday.length > 0
+                    ? [['Category', { role: 'style' }, 'Total'],
+                    ...dataColumnnYesterday.map(item => [
+                        item[1] || 'Chưa có tên',
+                        'color: #76A7FA',
+                        parseFloat(item[3]) || 0])]
+                    : [['Category', { role: 'style' }, 'Total'], ['Loading', 'color: #76A7FA', 0]]
             },
             {
                 option: 'Một Tuần',
@@ -122,10 +140,7 @@ const Admin = () => {
                         item[1] || 'Chưa có tên',
                         'color: #76A7FA',
                         parseFloat(item[3]) || 0])]
-                    : [ // No data case
-                        ['Category', { role: 'style' }, 'Total'],
-                        ['Loading', 'Loading', 'color: #76A7FA', 0]
-                    ]
+                    : [['Category', { role: 'style' }, 'Total'], ['Loading', 'color: #76A7FA', 0]]
             },
             {
                 option: 'Một Tháng',
@@ -136,22 +151,35 @@ const Admin = () => {
                         item[1] || 'Chưa có tên',
                         'color: #76A7FA',
                         parseFloat(item[3]) || 0])]
+                    : [['Category', { role: 'style' }, 'Total'], ['Loading', 'color: #76A7FA', 0]]
+            },
+            {
+                option: 'Một Ngày',
+                title: 'Biểu đồ hoạt động Một ngày',
+                data: dataColumnnChartOther.length > 0
+                    ? [['Category', { role: 'style' }, 'Total'],
+                    ...dataColumnnChartOther.map(item => [
+                        item[1] || 'Chưa có tên',
+                        'color: #76A7FA',
+                        parseFloat(item[3]) || 0])]
                     : [ // No data case
                         ['Category', { role: 'style' }, 'Total'],
                         ['Loading', 'Loading', 'color: #76A7FA', 0]
                     ]
             },
             {
-                option: 'Tùy Chọn',
-                title: 'Biểu đồ hoạt động hôm nay',
-                data: [
-                    ['Task', 'Hours per To Day'],
-                    ['Work', 8],
-                    ['Eat', 2],
-                    ['Commute', 2],
-                    ['Watch TV', 3],
-                    ['Sleep', 9],
-                ]
+                option: 'Nhiều Ngày',
+                title: 'Biểu đồ hoạt động Nhiều ngày',
+                data: dataColumnnChartOther.length > 0
+                    ? [['Category', { role: 'style' }, 'Total'],
+                    ...dataColumnnChartOther.map(item => [
+                        item[1] || 'Chưa có tên',
+                        'color: #76A7FA',
+                        parseFloat(item[3]) || 0])]
+                    : [ // No data case
+                        ['Category', { role: 'style' }, 'Total'],
+                        ['Loading', 'Loading', 'color: #76A7FA', 0]
+                    ]
             },
         ];
 
@@ -179,8 +207,8 @@ const Admin = () => {
                     title: chartOptions.find(option => option.option === selectedOptionDay)?.title || 'Biểu đồ',
                     width: 1000,
                     height: 500,
-                    hAxis: { title: 'Loại Sản Phẩm' },  // Tiêu đề trục hoành
-                    vAxis: { title: 'Tiền (VND)' },      // Tiêu đề trục tung
+                    hAxis: { title: 'Loại Sản Phẩm' },
+                    vAxis: { title: 'Tiền (VND)' },
                 };
 
                 const chart = new window.google.visualization.ColumnChart(document.getElementById('columnChart'));
@@ -188,11 +216,17 @@ const Admin = () => {
             };
 
             loadGoogleCharts();
-        }, [selectedOptionDay, dataColumnnChart7Day, dataColumnnChartOneMonth]); // Add dataColumnnChartOneMonth to the dependency array
+        }, [selectedOptionDay, dataColumnnToday, dataColumnnYesterday, dataColumnnChart7Day, dataColumnnChartOneMonth, dataColumnnChartOther]);
 
         return (
             <div>
-                <div id="columnChart" className='justify-content-center'></div>
+                {loading ? (
+                    <>
+                        <Spinner animation="border" variant="info" /> Đang tải.....
+                    </>
+                ) : (
+                    <div id="columnChart" className='justify-content-center'></div>
+                )}
             </div>
         );
     };
@@ -340,79 +374,160 @@ const Admin = () => {
         fetchDataOrderOneMonth();
 
     }, [])
+    // Effect to reset selectedDate when switching to "Nhiều Ngày"
+    useEffect(() => {
+        if (selectedOptionDay === "Nhiều Ngày") {
+            setSelectedDate(null); // Reset selectedDate when switching to "Nhiều Ngày"
+            setSelectedDate1(null); // Optionally reset selectedDate1 as well
+        }
+    }, [selectedOptionDay]); // Dependency array to run when selectedOptionDay changes
 
 
 
     const LisOrder = () => {
-        const renderTable = (title, data) => {
+        const renderTable = (title: string, data: []) => {
             // Tính tổng tiền
             const totalAmount = data.reduce((sum, order) => sum + order.amount, 0);
+            const [currentPage, setCurrentPage] = useState(1);
+            const itemsPerPage = 10;
+
+            // Sắp xếp dữ liệu từ ngày mới nhất đến cũ nhất
+            const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Tính toán dữ liệu cho trang hiện tại
+            const indexOfLastItem = currentPage * itemsPerPage;
+            const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+            const currentData = sortedData.slice(indexOfFirstItem, indexOfLastItem);
+            // Tính số trang
+            const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+
+            // Hàm chuyển trang
+            const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+            const renderPaginationItems = () => {
+                const items = [];
+                for (let page = 1; page <= totalPages; page++) {
+                    items.push(
+                        <Pagination.Item
+                            key={page}
+                            active={page === currentPage}
+                            onClick={() => paginate(page)}
+                        >
+                            {page}
+                        </Pagination.Item>
+                    );
+                }
+                return items;
+            };
 
             return (
                 <div>
                     <h5>{title}</h5>
-                    {data.length > 0 ? (
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Tên Khách Hàng</th>
-                                    <th>Số Điện Thoại</th>
-                                    <th>Ngày mua</th>
-                                    <th>Trạng thái</th>
-                                    <th>Tiền</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {data.map((order, index) => (
-                                    <tr key={order.orderId}>
-                                        <td>{index + 1}</td>
-                                        <td>{order.user.fullname || 'Chưa có tên'}</td>
-                                        <td>{order.phoneNumber || 'Chưa có số điện thoại'}</td>
-                                        <td>{formatDate(order.date)}</td>
-                                        <td>{order.status}</td>
-                                        <td>{formatPrice(order.amount)}</td>
+                    {currentData.length > 0 ? (
+                        <>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Tên Khách Hàng</th>
+                                        <th>Số Điện Thoại</th>
+                                        <th>Ngày mua</th>
+                                        <th>Trạng thái</th>
+                                        <th>Tiền</th>
+                                        <th>Chi tiết</th>
                                     </tr>
-                                ))}
-                                {/* Hiển thị tổng tiền */}
-                                <tr>
-                                    <td colSpan="4" style={{ textAlign: 'right', fontWeight: 'bold', color: 'red' }}>Tổng Tiền:</td>
-                                    <td style={{ fontWeight: 'bold', color: 'red' }}>{formatPrice(totalAmount)}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {currentData.map((order, index) => (
+                                        <tr key={order.orderId}>
+                                            <td>{indexOfFirstItem + index + 1}</td>
+                                            <td>{order.user.fullname || 'Chưa có tên'}</td>
+                                            <td>{order.phoneNumber || 'Chưa có số điện thoại'}</td>
+                                            <td>{formatDate(order.date)}</td>
+                                            <td>{order.status}</td>
+                                            <td>{formatPrice(order.amount)}</td>
+                                            <td>
+                                                <i style={{ cursor: 'pointer' }}
+                                                    className="bi bi-three-dots"
+                                                    onClick={() => {
+                                                        setSelectedOrderId(order.orderId); // Lưu orderId
+                                                        setShowModal(true); // Hiển thị modal
+                                                    }}
+                                                ></i>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    <tr>
+                                        <td colSpan={5} style={{ textAlign: 'right', fontWeight: 'bold', color: 'red' }}>Tổng Tiền:</td>
+                                        <td colSpan={2} style={{ fontWeight: 'bold', color: 'red' }}>{formatPrice(totalAmount)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            {/* Hiển thị Modal bên ngoài tbody */}
+                            <MyVerticallyCenteredModal
+                                showModal={showModal}
+                                setShowModal={setShowModal}
+                                orderId={selectedOrderId}
+                                onHide={() => setShowModal(false)} // Đóng modal
+                            />
+
+                            {/* Nút phân trang */}
+                            <Pagination style={{ justifyContent: 'center' }}>
+                                <Pagination.First onClick={() => paginate(1)} disabled={currentPage === 1} />
+                                <Pagination.Prev onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1} />
+                                {renderPaginationItems()}
+                                <Pagination.Next onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages} />
+                                <Pagination.Last onClick={() => paginate(totalPages)} disabled={currentPage === totalPages} />
+                            </Pagination>
+                        </>
                     ) : (
                         <p>Không có đơn hàng nào.</p>
                     )}
                 </div>
             );
+
         };
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        // Tính ngày cách đây 1 tuần (7 ngày)
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(today.getDate() - 7);
+
+        // Tính ngày cách đây 1 tháng
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(today.getMonth() - 1);
 
         const orderOptions = [
             {
                 option: 'Hôm Nay',
-                title: 'Danh sách đơn hàng hôm nay',
+                title: `Danh sách đơn hàng hôm nay ${formatDateNotime(today)}`,
                 data: dataOrderToDay, // Dữ liệu cho hôm nay
             },
             {
                 option: 'Hôm Qua',
-                title: 'Danh sách hóa đơn hôm qua',
+                title: `Danh sách hóa đơn hôm qua ngày ${formatDateNotime(yesterday)}`,
                 data: dataOrderYesterday
             },
             {
                 option: 'Một Tuần',
-                title: 'Danh sách đơn hàng một tuần',
+                title: `Danh sách đơn hàng một tuần từ ngày ${formatDateNotime(today)} đến ${formatDateNotime(oneWeekAgo)}`,
                 data: dataOrder7day, // Thay thế bằng dữ liệu thực tế cho một tuần
             },
             {
                 option: 'Một Tháng',
-                title: 'Danh sách đơn hàng một tháng',
+                title: `Danh sách đơn hàng một tháng từ ngày ${formatDateNotime(today)} đến ${formatDateNotime(oneWeekAgo)}`,
                 data: dataOrderOneMonth, // Thay thế bằng dữ liệu thực tế cho một tháng
             },
             {
-                option: 'Tùy Chọn',
-                title: 'Danh sách đơn hàng tùy chọn',
-                data: dataColumnnCharOther, // Thay thế bằng dữ liệu thực tế cho tùy chọn
+                option: 'Một Ngày',
+                title: `Danh sách đơn hàng ngày ${selectedDate === null ? '...' : formatDateNotime(selectedDate)}`,
+                data: dataListOther, // Thay thế bằng dữ liệu thực tế cho tùy chọn
+            },
+            {
+                option: 'Nhiều Ngày',
+                title: `Danh sách đơn hàng từ ${selectedDate === null || selectedDate1 === null ? '...' : formatDateNotime(selectedDate)} đến ${selectedDate1 === null ? '...' : formatDateNotime(selectedDate1)}`,
+                data: dataListOther, // Thay thế bằng dữ liệu thực tế cho tùy chọn
             },
 
         ];
@@ -426,70 +541,133 @@ const Admin = () => {
         );
     };
 
+
     return (
         <>
             <Container>
                 <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12 mt-3">
                     <div className="white-box">
                         <div className="d-flex">
-                            {selectedOptionDay === "Tùy Chọn" ? (
+                            {/* Your Dropdown component here */}
+                            {selectedOptionDay === "Một Ngày" && (
                                 <>
                                     <DatePicker
                                         selected={selectedDate}
-                                        onChange={handleDateChange}  // Corrected event handler
+                                        onChange={date => setSelectedDate(date)}
                                         dateFormat="dd/MM/yyyy"
                                         className="form-control mb-3"
-                                        placeholderText="Từ ngày" // "From date" in English
-                                        popperPlacement="bottom-end"
-                                        showPopperArrow={false}
+                                        placeholderText="Chọn ngày"
+                                    />
+                                    <Button onClick={handleFindDate} variant="outline-info" style={{ width: "100px", height: '39px' }}>
+                                        <i className="bi bi-search"></i>
+                                    </Button>
+                                </>
+                            )}
+
+                            {selectedOptionDay === "Nhiều Ngày" && (
+                                <>
+                                    <DatePicker
+                                        selected={selectedDate}
+                                        onChange={date => setSelectedDate(date)} // Set the start date
+                                        dateFormat="dd/MM/yyyy"
+                                        className="form-control mb-3"
+                                        placeholderText="Từ ngày"
                                     />
                                     <DatePicker
                                         selected={selectedDate1}
-                                        onChange={handleDateChange1}
+                                        onChange={date => setSelectedDate1(date)} // Set the end date
                                         dateFormat="dd/MM/yyyy"
                                         className="form-control ms-1"
-                                        placeholderText="Đến ngày" // "To date" in English
-                                        popperPlacement="bottom-end"
-                                        showPopperArrow={false}
+                                        placeholderText="Đến ngày"
                                     />
-                                    <Button
-                                        onClick={handleFindDate}  // Corrected event handler
-                                        variant="outline-info"
-                                        className='ms-3'
-                                        style={{ width: "100px", height: '39px' }}>
-                                        <i className="bi bi-search"></i> {/* Search icon */}
+                                    <Button onClick={handleFindDate} variant="outline-info" style={{ width: "100px", height: '39px' }}>
+                                        <i className="bi bi-search"></i>
                                     </Button>
                                 </>
+                            )}
 
-                            ) : <div></div>}
 
 
-                            <div className="select-option mb-3 ms-auto me-2">
-                                <Dropdown onSelect={handleSelect}>
+
+                            <div className="select-option mb-3 ms-auto me-1">
+                                <Dropdown>
                                     <Dropdown.Toggle variant="info" id="dropdown-basic">
-                                        {selectedOption}
+                                        Danh Sách Hóa Đơn
                                     </Dropdown.Toggle>
                                     <Dropdown.Menu>
                                         <Dropdown.Item eventKey={"Danh Sách Hóa Đơn"}>Danh Sách Hóa Đơn</Dropdown.Item>
-                                        <Dropdown.Item eventKey={"Tài Khoảng Mới"}>Tài Khoảng mới</Dropdown.Item>
+                                        <Dropdown.Item eventKey={"Tài Khoản Mới"}>Tài Khoản Mới</Dropdown.Item>
                                         <Dropdown.Item eventKey={"Tồn Kho"}>Tồn Kho</Dropdown.Item>
-
                                     </Dropdown.Menu>
                                 </Dropdown>
                             </div>
-                            <div className="select-option mb-3 me-2">
-                                <Dropdown onSelect={handleSelectDay}>
-                                    <Dropdown.Toggle variant="info" id="dropdown-basic">
+
+                            <div style={{ position: 'relative', display: 'inline-block' }} className='me-1'>
+                                <Dropdown
+                                    show={showDropdown}
+                                    onToggle={(isOpen) => {
+                                        // Chỉ đổi trạng thái khi cần thiết
+                                        handleToggle(isOpen);
+                                    }}
+                                    onSelect={(eventKey) => handleSelectDay(eventKey)}
+                                >
+                                    <Dropdown.Toggle
+                                        variant="info"
+                                        id="dropdown-basic"
+                                        onMouseDown={(e) => e.preventDefault()} // Ngăn sự kiện ảnh hưởng đến toggle
+                                    >
                                         {selectedOptionDay}
                                     </Dropdown.Toggle>
                                     <Dropdown.Menu>
-                                        <Dropdown.Item eventKey={"Hôm Nay"}>Hôm Nay</Dropdown.Item>
-                                        <Dropdown.Item eventKey={"Hôm Qua"}>Hôm Qua</Dropdown.Item>
-                                        <Dropdown.Item eventKey={"Một Tuần"}>Một Tuần</Dropdown.Item>
-                                        <Dropdown.Item eventKey={"Một Tháng"}>Một Tháng</Dropdown.Item>
-                                        <Dropdown.Item eventKey={"Tùy Chọn"}>Tùy Chọn</Dropdown.Item>
+                                        <Dropdown.Item eventKey="Hôm Nay">Hôm Nay</Dropdown.Item>
+                                        <Dropdown.Item eventKey="Hôm Qua">Hôm Qua</Dropdown.Item>
+                                        <Dropdown.Item eventKey="Một Tuần">Một Tuần</Dropdown.Item>
+                                        <Dropdown.Item eventKey="Một Tháng">Một Tháng</Dropdown.Item>
+                                        <Dropdown.Item
+                                            as="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowSubOptions(!showSubOptions);
+                                            }}
+                                        >
+                                            Tùy Chọn
+                                        </Dropdown.Item>
                                     </Dropdown.Menu>
                                 </Dropdown>
+
+
+
+
+                                {/* Hiển thị sub-options bên phải của Dropdown */}
+                                {showSubOptions && (
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: '156px',
+                                            left: '100%',
+                                            marginLeft: '50px',
+                                            backgroundColor: 'white',
+                                            border: '1px solid #ccc',
+                                            borderRadius: '4px',
+                                            padding: '5px',
+                                            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                                            zIndex: 1000,
+                                        }}
+                                    >
+                                        <Dropdown.Item
+                                            eventKey="Một Ngày"
+                                            onClick={() => { handleSelectDay("Một Ngày"); }}
+                                        >
+                                            Một Ngày
+                                        </Dropdown.Item>
+                                        <Dropdown.Item
+                                            eventKey="Nhiều Ngày"
+                                            onClick={() => { handleSelectDay("Nhiều Ngày"); }}
+                                        >
+                                            Nhiều Ngày
+                                        </Dropdown.Item>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="select-option">
