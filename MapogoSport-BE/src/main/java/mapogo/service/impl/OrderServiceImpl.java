@@ -118,4 +118,10 @@ public class OrderServiceImpl implements OrderService {
 
 	}
 
+	@Override
+	public List<Object[]> getCategoryProductTotalsToDay() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

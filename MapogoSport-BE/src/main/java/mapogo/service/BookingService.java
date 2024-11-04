@@ -18,9 +18,26 @@ public interface BookingService {
 	
 	List<Booking> findBookingAmountByOwnerAndStatus(Integer ownerId, String status);
 	
-//	Double findRevenueByDate(Integer ownerId, Integer flag, String startDate, String endDate);
-	
 	List<BookingDetail> findBookingDetailBySportFieldAndOwner(List<Integer> sportFielDetailIds, Integer ownerId);
 
 	List<Object[]> findRevenueBySportFieldDetailIds(List<Integer> sportFieldDetailIds);
+	
+	List<BookingDetail> findBookingDetailBySportFieldId(Integer sportFieldDetailIds);
+	
+	//Revenue by Date
+	
+	List<Booking> findRevenueByDate(String status,Integer ownerId, String startDate, String endDate);
+	
+	List<BookingDetail> findBookingDetailByDate(List<Integer> sportFielDetailIds, Integer ownerId, String startDate, String endDate);
+	
+	List<Object[]> findRevenueBySportFieldDetailIdsByDate(List<Integer> sportFieldDetailIds, String startDate, String endDate);
+	
+	//Chart Customer
+	
+	Integer totalCustomer(Integer ownerId);
+	
+	Map<Integer, Integer> findCustomerCountsByMonth(Integer year, Integer ownerId);
+	
+	List<Object[]> findBookingByOwnerIdUsername(Integer ownerId);
+	
 }
