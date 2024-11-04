@@ -5,11 +5,13 @@ import '../globals.css'
 import Header from "./app.header";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+
 export default function OwnerLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+
     const [weather, setWeather] = useState<WeatherData | null>(null);
 
     const apiKey = '767451e95917fe713995435a49beb32a'; // Đặt API key ngoài để dễ quản lý
@@ -55,7 +57,7 @@ export default function OwnerLayout({
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude, accuracy } = position.coords;
-                        console.log(`Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`);
+                        // console.log(`Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`);
                         fetchWeather(latitude, longitude);
                     },
                     (err) => {
@@ -99,10 +101,12 @@ export default function OwnerLayout({
             }
         }
     }, []);
+
     return (
         <>
             <Nav isAniActive={isAniActive} toggleAni={toggleAni} isActive={isActive} setIsActive={setIsActive} />
             <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} userData={userData} />
+
             <main className={`main-right ${isAniActive ? 'mainRight' : ''} pb-1 `}>
                 <div className="main-body">
                     {children}

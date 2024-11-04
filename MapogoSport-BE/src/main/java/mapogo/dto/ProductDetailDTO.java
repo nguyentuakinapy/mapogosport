@@ -15,8 +15,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProductDetailDTO {
-	 private Integer productDetailId;
+	 		private Integer productDetailId;
 	    private String color;
 	    private String image;
 	    private List<ProductDetailSizeDTO> productDetailSizes;
+	    
+	    private ProductDTO product; // Thêm ProductDTO
+	    private List<GalleryDTO> galleries; // Thêm GalleryDTO
 }

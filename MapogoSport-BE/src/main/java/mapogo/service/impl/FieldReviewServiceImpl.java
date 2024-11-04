@@ -48,5 +48,10 @@ public class FieldReviewServiceImpl implements FieldReviewService{
 		
 	}
 
+	@Override
+	public void deleteReviewByUser(Integer fieldReviewId) {
+		fieldReviewDAO.deleteById(fieldReviewId);
+	}
+
 
 }
