@@ -44,21 +44,12 @@ const Sidebar = () => {
             const parsedUserData = JSON.parse(user) as User;
             setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`)
         }
-    }, [])
-    const { data, error, isLoading } = useSWR(
-        usernameFetchApi, fetcher, {
+    }, []);
+    const { data } = useSWR(usernameFetchApi, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false
-    }
-    );
-    // const { data, error, isLoading } = useSWR(
-    //     "http://localhost:8080/rest/user/hungnpps30910", fetcher, {
-    //     revalidateIfStale: false,
-    //     revalidateOnFocus: false,
-    //     revalidateOnReconnect: false
-    // }
-    // );
+    });
 
     const [name, setName] = useState('');
     const [avatar, setAvatar] = useState();

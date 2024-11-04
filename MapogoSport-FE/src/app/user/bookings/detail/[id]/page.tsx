@@ -24,7 +24,6 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
 
     useEffect(() => {
         if (data) {
-            console.log('Fetched Data:', data);
             setBooking(data);
             const address = data.sportFieldInfo?.address;
             if (address) {

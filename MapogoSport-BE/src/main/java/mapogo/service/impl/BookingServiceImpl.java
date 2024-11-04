@@ -1,6 +1,5 @@
 package mapogo.service.impl;
 
-import java.sql.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -94,26 +93,23 @@ public class BookingServiceImpl implements BookingService {
 //		return bookingDAO.findRevenueByDate(ownerId, flag, sqlStartDate, sqlEndDate);
 //	}
 
-
-
 	@Override
 	public List<Booking> findBookingAmountByOwnerAndStatus(Integer ownerId, String status) {
 		// TODO Auto-generated method stub
 		return bookingDAO.findBookingByOwnerAndStatus(ownerId, status);
 	}
 
-@Override
-public List<BookingDetail> findBookingDetailBySportFieldAndOwner(List<Integer> sportFielDetailIds, Integer ownerId) {
-	// TODO Auto-generated method stub
-	return bookingDAO.findBookingDetailBySportFieldIdsAndOwner(sportFielDetailIds, ownerId);
-}
+	@Override
+	public List<BookingDetail> findBookingDetailBySportFieldAndOwner(List<Integer> sportFielDetailIds,
+			Integer ownerId) {
+		// TODO Auto-generated method stub
+		return bookingDAO.findBookingDetailBySportFieldIdsAndOwner(sportFielDetailIds, ownerId);
+	}
 
-@Override
-public List<Object[]> findRevenueBySportFieldDetailIds(List<Integer> sportFieldDetailIds) {
-	// TODO Auto-generated method stub
-	return bookingDAO.findRevenueBySportFieldDetailIds(sportFieldDetailIds);
-}
-
-
+	@Override
+	public List<Object[]> findRevenueBySportFieldDetailIds(List<Integer> sportFieldDetailIds) {
+		// TODO Auto-generated method stub
+		return bookingDAO.findRevenueBySportFieldDetailIds(sportFieldDetailIds);
+	}
 
 }

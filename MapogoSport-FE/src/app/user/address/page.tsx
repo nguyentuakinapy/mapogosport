@@ -31,11 +31,11 @@ export default function Address() {
         revalidateOnReconnect: false,
     });
 
-    const [addressUsers, setAddressUsers] = useState<any[]>([]); // Lưu toàn bộ địa chỉ của người dùng
+    const [addressUsers, setAddressUsers] = useState<any[]>([]);
 
     useEffect(() => {
         if (data && data.addressUsers) {
-            setAddressUsers(data.addressUsers); // Lưu tất cả địa chỉ
+            setAddressUsers(data.addressUsers);
         }
     }, [data]);
 
@@ -44,8 +44,8 @@ export default function Address() {
     const [selectedAddressUser, setSelectedAddressUser] = useState<any>(null);
 
     const handleEdit = (addressUser: any) => {
-        setSelectedAddressUser(addressUser); // Lưu thông tin địa chỉ được chọn
-        setShowUpdateAddress(true); // Hiển thị modal cập nhật
+        setSelectedAddressUser(addressUser);
+        setShowUpdateAddress(true);
     };
 
     const handleDelete = (addressUserId: number) => {
@@ -58,15 +58,12 @@ export default function Address() {
                 }
             }).then(async (res) => {
                 if (!res.ok) {
-                    const errorText = await res.text();
-                    toast.error(`Xóa địa chỉ không thành công! Chi tiết lỗi: ${errorText}`);
+                    toast.error(`Xóa địa chỉ không thành công! Vui lòng thử lại sau!`);
                     return
                 }
                 mutate(usernameFetchApi);
                 toast.success('Xóa địa chỉ thành công!');
-            }).catch((error) => {
-                toast.error(`Đã xảy ra lỗi: ${error.message}`);
-            });
+            })
         }
     }
 
@@ -84,13 +81,10 @@ export default function Address() {
                 ) : (
                     addressUsers.length > 0 ? (
                         addressUsers.map(addressUser => (
-                            <div key={addressUser.addressUserId} className='item-address d-flex justify-content-between align-items-center'>
+                            <div key={addressUser.addressUserId} className='item-address'>
                                 <div className="item-left">
-                                    <div><b>Số điện thoại: </b>{addressUser.phoneNumber}</div>
-                                    <div>
-                                        <b>Địa chỉ: </b>
-                                        {`${removePrefix(addressUser.addressDetail)}, ${removePrefix(addressUser.address.ward)}, ${removePrefix(addressUser.address.district)}, ${removePrefix(addressUser.address.province)}`}
-                                    </div>
+                                    <b>Địa chỉ: </b>
+                                    {`${removePrefix(addressUser.addressDetail)}, ${removePrefix(addressUser.address.ward)}, ${removePrefix(addressUser.address.district)}, ${removePrefix(addressUser.address.province)}`}
                                 </div>
                                 <div className="item-right">
                                     <div className="d-flex">
@@ -105,7 +99,7 @@ export default function Address() {
                             </div>
                         ))
                     ) : (
-                        <div>Không có địa chỉ nào</div>
+                        <div className='item-address'>Không có địa chỉ nào</div>
                     )
                 )}
             </div>

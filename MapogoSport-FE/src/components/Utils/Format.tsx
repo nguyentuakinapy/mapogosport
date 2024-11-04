@@ -44,10 +44,20 @@ const formatPrice = (price) => {
   });
 };
 
+const formatDateVN = (date: string) => {
+  return new Intl.DateTimeFormat('vi-VN', {
+    // weekday: 'long', // Hiển thị tên ngày trong tuần
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).format(new Date(date));
+};
+
 const hashPassword = (password: string): string => {
   const hash = createHash('sha256').update(password + 'YOUR_FIXED_SALT').digest('hex');
   return hash;
 };
 
-export { formatDate, formatPrice, hashPassword, formatDateForApi, formatDateNotime };
+export { formatDate, formatPrice, hashPassword, formatDateForApi, formatDateNotime, formatDateVN };
+
 
