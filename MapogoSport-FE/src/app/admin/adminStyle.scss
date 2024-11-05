@@ -158,14 +158,107 @@ body {
             &:hover,
             &.active {
                 background-color: #142239;
-                /* Màu xanh đậm */
                 color: white;
             }
         }
     }
 }
-
+.dropdown {
+    .dropdown-toggle {
+        width: 110px !important;
+        font-size: 11px !important;
+        text-align: center;
+        font-weight: 700;
+    }
+    .dropdown-menu {
+        font-size: 13px;
+        background: #142239;
+        transform: translate3d(-7.8px, 32px, 0px) !important;
+        .dropdown-item {
+            color: white;
+            &:hover {
+                color: black;
+            }
+        }
+    }
+}
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    .page-item.active {
+        .page-link {
+            background: #142239 !important;
+        }
+    }
+}
+.form-control {
+    border: 1px solid !important;
+}
 /*======================================================Order CSS End======================================================*/
+/*======================================================Order Detail CSS Start======================================================*/
+.detail-order {
+    tr {
+        td {
+            text-align: center;
+            vertical-align: middle;
+        }
+    }
+
+    .total-money {
+        td {
+            background-color: #142239;
+            color: white;
+        }
+    }
+}
+.btn-layout {
+    display: flex !important;
+    justify-content: flex-end !important;
+    .btn-buyAgain {
+        background-color: #142239;
+        font-size: 15px;
+        border: 1px solid #142239;
+        &:hover {
+            color: black;
+            background-color: white;
+        }
+    }
+    .btn-cancel {
+        background-color: #dc3545;
+        font-size: 15px;
+        border: 1px solid #dc3545;
+        &:hover {
+            color: black;
+            background-color: white;
+        }
+    }
+}
+.item-address {
+    background: #f8f8f8;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px dashed black;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    .btn-address {
+        cursor: pointer;
+        font-size: 1.1rem !important;
+        &:hover {
+            text-shadow: 0 0 10px #142239;
+        }
+    }
+}
+/*======================================================Order Detail CSS End======================================================*/
 /*======================================================Subcription CSS Start======================================================*/
 .packageUpdate {
     width: 100%;

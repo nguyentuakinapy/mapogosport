@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -35,7 +36,7 @@ public class Order implements Serializable {
 	@Column(name = "OrderId")
 	private Integer orderId;
 
-	@JsonManagedReference
+//	@JsonManagedReference
 	@ManyToOne
 	@JoinColumn(name = "Username", nullable = false)
 	private User user;
@@ -57,6 +58,7 @@ public class Order implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "PaymentMethodId", nullable = false)
+	@JsonBackReference
 	private PaymentMethod paymentMethod;
 
 	@ManyToOne

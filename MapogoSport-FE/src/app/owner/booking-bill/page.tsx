@@ -1,7 +1,7 @@
 'use client'
 import Link from "next/link";
 import { Form, Button, Table, Nav, Pagination, Dropdown } from "react-bootstrap";
-import '../adminStyle.scss';
+import '../owner.scss'
 import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import jsPDF from 'jspdf';
@@ -11,9 +11,9 @@ import { toast } from "react-toastify";
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
-const AdminOrder = () => {
+const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
-    const [orderData, setOrderData] = useState<OrderMap[]>([]);
+    const [bookingData, setBookingData] = useState<BookingFindAll[]>([]);
     const [activeTab, setActiveTab] = useState<string>('all');
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -21,13 +21,11 @@ const AdminOrder = () => {
 
     const orderStatuses = [
         'Chờ thanh toán',
-        'Đang xử lí',
-        'Đang vận chuyển',
-        'Đã hủy',
-        'Đã hoàn thành'
+        'Đã thanh toán',
+        'Đã hủy'
     ];
 
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/admin/order/findAll`, fetcher, {
+    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/owner/booking/findAll`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -35,7 +33,7 @@ const AdminOrder = () => {
 
     useEffect(() => {
         if (data) {
-            setOrderData(data);
+            setBookingData(data);
         }
     }, [data]);
 
@@ -49,41 +47,35 @@ const AdminOrder = () => {
 
     const getStatusVariant = (status: string) => {
         switch (status) {
-            case 'Chờ thanh toán': return 'warning';
-            case 'Đang xử lí': return 'info';
-            case 'Đang vận chuyển': return 'primary';
+            case 'Đã thanh toán': return 'success';
+            case 'Chờ thanh toán': return 'info';
             case 'Đã hủy': return 'danger';
-            case 'Đã hoàn thành': return 'success';
             default: return 'secondary';
         }
     };
 
-    const handleViewDetail = (order: OrderMap) => {
-        sessionStorage.setItem('selectedOrder', JSON.stringify(order));
-    };
-
-    const handleStatusChange = (orderId: number, newStatus: string) => {
-        fetch(`http://localhost:8080/rest/admin/order/update`, {
+    const handleStatusChange = (bookingId: number, newStatus: string) => {
+        fetch(`http://localhost:8080/rest/owner/booking/update`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ orderId, status: newStatus }),
+            body: JSON.stringify({ bookingId, status: newStatus }),
         }).then(async (res) => {
             if (!res.ok) {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return;
             }
-            mutate(`http://localhost:8080/rest/admin/order/findAll`);
+            mutate(`http://localhost:8080/rest/owner/booking/findAll`);
             toast.success('Cập nhật thành công!');
         });
     };
 
-    const renderStatusDropdown = (order: OrderMap) => {
+    const renderStatusDropdown = (booking: BookingFindAll) => {
         return (
-            <Dropdown onSelect={(newStatus) => handleStatusChange(order.orderId, newStatus || order.status)}>
-                <Dropdown.Toggle variant={getStatusVariant(order.status)}>{order.status}</Dropdown.Toggle>
+            <Dropdown onSelect={(newStatus) => handleStatusChange(booking.bookingId, newStatus || booking.status)}>
+                <Dropdown.Toggle variant={getStatusVariant(booking.status)}>{booking.status}</Dropdown.Toggle>
                 <Dropdown.Menu>
                     {orderStatuses.map((status) => (
                         <Dropdown.Item key={status} eventKey={status}>
@@ -95,7 +87,7 @@ const AdminOrder = () => {
         );
     };
 
-    const renderTable = (filteredOrders: OrderMap[]) => {
+    const renderTable = (filteredBookings: BookingFindAll[]) => {
         return (
             <div className="box-table-border mb-4">
                 <Table striped className="mb-0">
@@ -103,30 +95,31 @@ const AdminOrder = () => {
                         <tr>
                             <th style={{ width: '120px' }}>Mã hóa đơn</th>
                             <th style={{ width: '250px' }}>Họ và tên</th>
-                            <th>Ngày mua</th>
+                            <th>Ngày đặt</th>
                             <th>Tổng tiền</th>
-                            <th style={{ width: '300px' }}>Địa chỉ</th>
+                            <th>Số điện thoại</th>
                             <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredOrders.length > 0 ?
-                            filteredOrders.map((order) => (
-                                <tr key={order.orderId}>
-                                    <td className="text-start title">
-                                        <Link href={`/admin/order/${order.orderId}`} onClick={() => handleViewDetail(order)}>{`#${order.orderId}`}</Link>
-                                    </td>
-                                    <td>{order.fullname}</td>
-                                    <td>{new Date(order.date).toLocaleDateString('en-GB')}</td>
-                                    <td>{`${order.amount.toLocaleString()} ₫`}</td>
-                                    <td className="title-brand">{order.address}</td>
-                                    <td>{renderStatusDropdown(order)}</td>
-                                    <td>
-                                        <Link href={`/admin/order/${order.orderId}`} onClick={() => handleViewDetail(order)}>Xem</Link>
-                                    </td>
-                                </tr>
-                            )) :
+                        {filteredBookings.length > 0 ?
+                            filteredBookings.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                                .map((booking) => (
+                                    <tr key={booking.bookingId}>
+                                        <td className="text-start title">
+                                            <Link href={`/owner/booking-bill/${booking.bookingId}`}>{`#${booking.bookingId}`}</Link>
+                                        </td>
+                                        <td>{booking.userFullname}</td>
+                                        <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
+                                        <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
+                                        <td>{booking.userPhone || 'Chưa cập nhật số điện thoại'}</td>
+                                        <td>{renderStatusDropdown(booking)}</td>
+                                        <td>
+                                            <Link href={`/owner/booking-bill/${booking.bookingId}`}>Xem</Link>
+                                        </td>
+                                    </tr>
+                                )) :
                             <tr>
                                 <td colSpan={7} className="text-center">Không có dữ liệu về trạng thái này!</td>
                             </tr>}
@@ -137,34 +130,28 @@ const AdminOrder = () => {
     };
 
     const renderContent = () => {
-        let filteredOrders = orderData;
+        let filteredBookings = bookingData;
         switch (activeTab) {
             case 'unpaid':
-                filteredOrders = filteredOrders.filter(order => order.status === 'Chờ thanh toán');
-                break;
-            case 'processing':
-                filteredOrders = filteredOrders.filter(order => order.status === 'Đang xử lí');
-                break;
-            case 'shipping':
-                filteredOrders = filteredOrders.filter(order => order.status === 'Đang vận chuyển');
+                filteredBookings = filteredBookings.filter(booking => booking.status === 'Chờ thanh toán');
                 break;
             case 'cancel':
-                filteredOrders = filteredOrders.filter(order => order.status === 'Đã hủy');
+                filteredBookings = filteredBookings.filter(booking => booking.status === 'Đã hủy');
                 break;
             case 'complete':
-                filteredOrders = filteredOrders.filter(order => order.status === 'Đã hoàn thành');
+                filteredBookings = filteredBookings.filter(booking => booking.status === 'Đã thanh toán');
                 break;
             default:
                 break;
         }
 
-        filteredOrders = filteredOrders.filter(order =>
-            order.fullname.toLowerCase().includes(searchTerm)
+        filteredBookings = filteredBookings.filter(booking =>
+            booking.userFullname.toLowerCase().includes(searchTerm)
         );
 
         const indexOfLastItem = currentPage * itemsPerPage;
         const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-        const currentItems = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
+        const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
         return renderTable(currentItems);
     };
 
@@ -175,22 +162,20 @@ const AdminOrder = () => {
     };
 
     const handleNextPage = () => {
-        const totalPages = Math.ceil(orderData.length / itemsPerPage);
+        const totalPages = Math.ceil(bookingData.length / itemsPerPage);
         if (currentPage < totalPages) {
             setCurrentPage(currentPage + 1);
         }
     };
 
     const renderPagination = () => {
-        const filteredOrders = orderData.filter(order =>
-            order.fullname.toLowerCase().includes(searchTerm)
-        ).filter(order => {
+        const filteredOrders = bookingData.filter(booking =>
+            booking.userFullname.toLowerCase().includes(searchTerm)
+        ).filter(booking => {
             switch (activeTab) {
-                case 'unpaid': return order.status === 'Chờ thanh toán';
-                case 'processing': return order.status === 'Đang xử lí';
-                case 'shipping': return order.status === 'Đang vận chuyển';
-                case 'cancel': return order.status === 'Đã hủy';
-                case 'complete': return order.status === 'Đã hoàn thành';
+                case 'unpaid': return booking.status === 'Chờ thanh toán';
+                case 'cancel': return booking.status === 'Đã hủy';
+                case 'complete': return booking.status === 'Đã thanh toán';
                 default: return true;
             }
         });
@@ -227,30 +212,28 @@ const AdminOrder = () => {
 
             doc.text("Danh Sách Hóa Đơn", 14, 16);
 
-            const tableColumn = ["Mã HD", "Họ và tên", "Ngày mua", "Tổng tiền", "Địa chỉ", "Trạng thái"];
+            const tableColumn = ["Mã HD", "Họ và tên", "Ngày đặt", "Tổng tiền", "Số điện thoại", "Trạng thái"];
             const tableRows: string[][] = [];
 
-            const filteredOrders = orderData.filter(order =>
-                order.fullname.toLowerCase().includes(searchTerm)
-            ).filter(order => {
+            const filteredBookings = bookingData.filter(booking =>
+                booking.userFullname.toLowerCase().includes(searchTerm)
+            ).filter(booking => {
                 switch (activeTab) {
-                    case 'unpaid': return order.status === 'Chờ thanh toán';
-                    case 'processing': return order.status === 'Đang xử lí';
-                    case 'shipping': return order.status === 'Đang vận chuyển';
-                    case 'cancel': return order.status === 'Đã hủy';
-                    case 'complete': return order.status === 'Đã hoàn thành';
+                    case 'unpaid': return booking.status === 'Chờ thanh toán';
+                    case 'cancel': return booking.status === 'Đã hủy';
+                    case 'complete': return booking.status === 'Đã thanh toán';
                     default: return true;
                 }
             });
 
-            filteredOrders.forEach(order => {
+            filteredBookings.forEach(booking => {
                 const orderData = [
-                    `#${order.orderId}`,
-                    order.fullname,
-                    new Date(order.date).toLocaleDateString('en-GB'),
-                    `${order.amount.toLocaleString()} ₫`,
-                    order.address,
-                    order.status
+                    `#${booking.bookingId}`,
+                    booking.userFullname,
+                    new Date(booking.date).toLocaleDateString('en-GB'),
+                    `${booking.totalAmount.toLocaleString()} ₫`,
+                    booking.userPhone || 'Chưa cập nhật số điện thoại',
+                    booking.status
                 ];
                 tableRows.push(orderData);
             });
@@ -286,7 +269,7 @@ const AdminOrder = () => {
             const formattedMonth = month < 10 ? `0${month}` : month;
             const formattedDay = day < 10 ? `0${day}` : day;
 
-            doc.save(`HoaDonDatHang-Mapogo(${formattedDay}/${formattedMonth}).pdf`);
+            doc.save(`HoaDonDatSan-Mapogo(${formattedDay}/${formattedMonth}).pdf`);
             toast.success("Đã xuất file PDF thành công!");
         } catch (error) {
             toast.error("Đã xảy ra lỗi trong quá trình xuất file! Vui lòng thử lại sau!");
@@ -299,15 +282,13 @@ const AdminOrder = () => {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Hóa Đơn');
 
-            const filteredOrders = orderData.filter(order =>
-                order.fullname.toLowerCase().includes(searchTerm)
-            ).filter(order => {
+            const filteredBookings = bookingData.filter(booking =>
+                booking.userFullname.toLowerCase().includes(searchTerm)
+            ).filter(booking => {
                 switch (activeTab) {
-                    case 'unpaid': return order.status === 'Chờ thanh toán';
-                    case 'processing': return order.status === 'Đang xử lí';
-                    case 'shipping': return order.status === 'Đang vận chuyển';
-                    case 'cancel': return order.status === 'Đã hủy';
-                    case 'complete': return order.status === 'Đã hoàn thành';
+                    case 'unpaid': return booking.status === 'Chờ thanh toán';
+                    case 'cancel': return booking.status === 'Đã hủy';
+                    case 'complete': return booking.status === 'Đã thanh toán';
                     default: return true;
                 }
             });
@@ -315,20 +296,20 @@ const AdminOrder = () => {
             worksheet.columns = [
                 { header: 'Mã hóa đơn', key: 'orderId', width: 15 },
                 { header: 'Họ và tên', key: 'fullname', width: 25 },
-                { header: 'Ngày mua', key: 'date', width: 15 },
+                { header: 'Ngày đặt', key: 'date', width: 15 },
                 { header: 'Tổng tiền', key: 'amount', width: 15, style: { numFmt: '#,##0 ₫' } },
-                { header: 'Địa chỉ', key: 'address', width: 60 },
+                { header: 'Số điện thoại', key: 'userPhone', width: 60 },
                 { header: 'Trạng thái', key: 'status', width: 15 },
             ];
 
-            filteredOrders.forEach(order => {
+            filteredBookings.forEach(booking => {
                 worksheet.addRow({
-                    orderId: `#${order.orderId}`,
-                    fullname: order.fullname,
-                    date: new Date(order.date).toLocaleDateString('en-GB'),
-                    amount: order.amount,
-                    address: order.address,
-                    status: order.status
+                    orderId: `#${booking.bookingId}`,
+                    fullname: booking.userFullname,
+                    date: new Date(booking.date).toLocaleDateString('en-GB'),
+                    amount: booking.totalAmount,
+                    userPhone: booking.userPhone || 'Chưa cập nhật số điện thoại',
+                    status: booking.status
                 });
             });
 
@@ -349,7 +330,7 @@ const AdminOrder = () => {
             const formattedDay = day < 10 ? `0${day}` : day;
 
             const buffer = await workbook.xlsx.writeBuffer();
-            saveAs(new Blob([buffer]), `HoaDonDatHang-Mapogo(${formattedDay}/${formattedMonth}).xlsx`);
+            saveAs(new Blob([buffer]), `HoaDonDatSan-Mapogo(${formattedDay}/${formattedMonth}).xlsx`);
             toast.success('Đã xuất file Excel thành công!');
         } catch (error) {
             toast.error('Xuất file Excel không thành công! Vui lòng thử lại sau!');
@@ -380,16 +361,10 @@ const AdminOrder = () => {
                     <Nav.Link eventKey="unpaid" className="tab-link">Chờ thanh toán</Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                    <Nav.Link eventKey="processing" className="tab-link">Đang xử lý</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="shipping" className="tab-link">Đang vận chuyển</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
                     <Nav.Link eventKey="cancel" className="tab-link">Đã hủy</Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                    <Nav.Link eventKey="complete" className="tab-link">Đã hoàn thành</Nav.Link>
+                    <Nav.Link eventKey="complete" className="tab-link">Đã thanh toán</Nav.Link>
                 </Nav.Item>
             </Nav>
             {renderContent()}
@@ -398,4 +373,4 @@ const AdminOrder = () => {
     );
 };
 
-export default AdminOrder;
+export default OwnerBookingBill;

@@ -7,7 +7,7 @@
     border: 1px dashed black;
     font-size: 14px;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
 
     &:last-child {
@@ -86,8 +86,8 @@
                         font-weight: 700;
                     }
 
-                    .bg-badge-user {
-                        background: #142239 !important;
+                    .badge {
+                        width: 110px !important;
                     }
                 }
 
@@ -96,12 +96,23 @@
                     white-space: nowrap;
                     text-overflow: ellipsis;
                     max-width: 220px;
+                    min-width: 220px;
                 }
             }
         }
     }
 }
-
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    .page-item.active {
+        .page-link {
+            background: #142239 !important;
+        }
+    }
+}
 /*======================================================Order & Booking CSS End======================================================*/
 /*======================================================Detail Order CSS Start======================================================*/
 .detail-order {
