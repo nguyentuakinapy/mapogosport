@@ -94,7 +94,8 @@ const CheckoutPage = () => {
     const orderData = {
       username: user.username, // Giả sử bạn có thuộc tính username trong user
       address: `${addressSelected?.addressDetail}, ${addressSelected?.address?.ward}, ${addressSelected?.address?.district}, ${addressSelected?.address?.province}`, // Chuỗi địa chỉ đầy đủ
-      phoneNumber: addressSelected.phoneNumber,
+      // phoneNumber: addressSelected.phoneNumber,
+      phoneNumber: "0123455555",
       date: new Date().toISOString(), // Chuyển đổi sang ISO string
       status: orderStatus,
       amount: totalPrice,
