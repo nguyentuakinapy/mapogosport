@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import mapogo.dto.OrderDTO;
 import mapogo.entity.Order;
@@ -68,7 +69,10 @@ public class OrderRestController {
 	public List<Object[]> getCategoryProductTotalsToDay() {
 		return orderService.getCategoryProductTotalsToDay();
 	}
-
+	@GetMapping("/admin/category-product-totals-yesterday")
+	public List<Object[]> getCategoryProductTotalsYesterday() {
+		return orderService.getCategoryProductTotalsToDay();
+	}
 
 	@GetMapping("/admin/category-product-totals-7day")
 	public List<Object[]> getCategoryProductTotals7Day() {
@@ -95,10 +99,36 @@ public class OrderRestController {
 	        @RequestParam(value = "date", required = false) LocalDateTime date,
 	        @RequestParam(value = "startDay", required = false) LocalDateTime startDay,
 	        @RequestParam(value = "endDay", required = false) LocalDateTime endDay) {
-	    return orderService.getOrdersBetweenDates(date, startDay, endDay);
+	    
+	    // Log the received parameters for debugging
+	    System.out.println("Received date: " + date);
+	    System.out.println("Received startDay: " + startDay);
+	    System.out.println("Received endDay: " + endDay);
+
+	    if (date != null) {
+	        return orderService.getOrdersForSingleDate(date);
+	    } else if (startDay != null && endDay != null) {
+	        return orderService.getOrdersBetweenDates(startDay, endDay);
+	    } else {
+	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date parameters");
+	    }
 	}
+	
 
-
+	@GetMapping("/admin/category-product-total-between")
+	public List<Object> getCategoryProductTotalBetween(
+	    @RequestParam(value = "date", required = false) LocalDateTime date,
+	    @RequestParam(value = "startDay", required = false) LocalDateTime startDay,
+	    @RequestParam(value = "endDay", required = false) LocalDateTime endDay
+	) {
+	    if (date != null) {
+	        return orderService.findCategoryProductTotalsByDateAndStatus(date);
+	    } else if (startDay != null && endDay != null) {
+	        return orderService.findCategoryProductTotalsByBetweenDateAndStatus(startDay, endDay);
+	    } else {
+	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date parameters");
+	    }
+	}
 
 	
 

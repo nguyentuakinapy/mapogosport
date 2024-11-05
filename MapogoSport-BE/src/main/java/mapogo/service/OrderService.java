@@ -14,11 +14,16 @@ public interface OrderService {
 	Order updateStatusOrder(Map<String, Object> orderData);
 	
 	//của Mỵ từ đây
+	List<Order> findByUser_Username(String username);
+
+	// của Mỵ từ đây
 	Order createOrder(OrderDTO order);
+
 	Order findByOrderId(int orderId);
+
 	Order update(Order order);
 
-	//đến đây
+	// đến đây
 
 	List<Order> getOrdersYesterday();
 
@@ -26,7 +31,10 @@ public interface OrderService {
 
 	List<Order> getOrdersLastMonth();
 
-	List<Order> getOrdersBetweenDates(LocalDateTime date, LocalDateTime startDate, LocalDateTime endDate);
+//	List<Order> getOrdersBetweenDates(LocalDateTime date, LocalDateTime startDate, LocalDateTime endDate);
+	List<Order> getOrdersBetweenDates(LocalDateTime startDate, LocalDateTime endDate);
+
+	List<Order> getOrdersForSingleDate(LocalDateTime date);
 
 	List<Object[]> getCategoryProductTotalsToDay();
 
@@ -34,6 +42,10 @@ public interface OrderService {
 
 	List<Object[]> getCategoryProductTotalsOneMonth();
 
-
 	List<Order> getOrdersLast7Days();
+
+	List<Object[]> getCategoryProductTotalsYesterday();
+
+	List<Object> findCategoryProductTotalsByDateAndStatus(LocalDateTime date);
+	List<Object> findCategoryProductTotalsByBetweenDateAndStatus(LocalDateTime startDate, LocalDateTime endDate);
 }

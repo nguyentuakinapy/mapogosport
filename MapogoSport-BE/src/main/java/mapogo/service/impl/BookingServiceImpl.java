@@ -2,6 +2,7 @@ package mapogo.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,14 +154,6 @@ public class BookingServiceImpl implements BookingService {
 		booking.setNote((String) b.get("note"));
 		return bookingDAO.save(booking);
 	}
-//
-//	@Override
-//	public Double findRevenueByDate(Integer ownerId, Integer flag, String startDate, String endDate) {
-//		// TODO Auto-generated method stub
-//		Date sqlStartDate = Date.valueOf(startDate);
-//		Date sqlEndDate = Date.valueOf(endDate);
-//		return bookingDAO.findRevenueByDate(ownerId, flag, sqlStartDate, sqlEndDate);
-//	}
 
 	@Override
 	public List<Booking> findBookingAmountByOwnerAndStatus(Integer ownerId, String status) {
@@ -179,6 +172,68 @@ public class BookingServiceImpl implements BookingService {
 	public List<Object[]> findRevenueBySportFieldDetailIds(List<Integer> sportFieldDetailIds) {
 		// TODO Auto-generated method stub
 		return bookingDAO.findRevenueBySportFieldDetailIds(sportFieldDetailIds);
+	}
+
+	@Override
+	public List<BookingDetail> findBookingDetailBySportFieldId(Integer sportFieldDetailIds) {
+		// TODO Auto-generated method stub
+		return bookingDAO.findBookingDetailBySportFieldId(sportFieldDetailIds);
+	}
+
+	@Override
+	public List<Booking> findRevenueByDate(String status, Integer ownerId, String startDate, String endDate) {
+		Date sqlStartDate = Date.valueOf(startDate);
+		Date sqlEndDate = Date.valueOf(endDate);
+		System.out.println(sqlStartDate);
+		return bookingDAO.findRevenueByDate(status, ownerId, sqlStartDate, sqlEndDate);
+	}
+
+	@Override
+	public List<BookingDetail> findBookingDetailByDate(List<Integer> sportFielDetailIds, Integer ownerId,
+			String startDate, String endDate) {
+		Date sqlStartDate = Date.valueOf(startDate);
+		Date sqlEndDate = Date.valueOf(endDate);
+		return bookingDAO.findBookingDetailByDate(sportFielDetailIds, ownerId, sqlStartDate, sqlEndDate);
+	}
+
+	@Override
+	public List<Object[]> findRevenueBySportFieldDetailIdsByDate(List<Integer> sportFieldDetailIds, String startDate,
+			String endDate) {
+		Date sqlStartDate = Date.valueOf(startDate);
+		Date sqlEndDate = Date.valueOf(endDate);
+		return bookingDAO.findRevenueBySportFieldDetailIdsByDate(sportFieldDetailIds, sqlStartDate, sqlEndDate);
+	}
+
+	@Override
+	public Integer totalCustomer(Integer ownerId) {
+		// TODO Auto-generated method stub
+		return bookingDAO.totalCustomer(ownerId);
+	}
+
+	@Override
+	public Map<Integer, Integer> findCustomerCountsByMonth(Integer year, Integer ownerId) {
+		List<Object[]> results = bookingDAO.findCustomerCountsByMonth(year, ownerId);
+		
+		//Khởi tạo Map với 12 tháng
+		Map<Integer,Integer> customerCountsByMonth = new HashMap<>();
+		for(int i = 1; i<=12; i++) {
+			customerCountsByMonth.put(i, 0);
+		}
+			
+		//Cập nhật Map với dữ liệu 
+		for(Object[] result : results) {
+			Integer month = (Integer) result[0];
+			Long count = (Long) result[1];
+			customerCountsByMonth.put(month, count.intValue());
+		}
+		return customerCountsByMonth;
+	}
+
+	@Override
+	public List<Object[]> findBookingByOwnerIdUsername(Integer ownerId) {
+		// TODO Auto-generated method stub
+		return bookingDAO.findBookingByOwnerIdUsername(ownerId);
+
 	}
 
 }
