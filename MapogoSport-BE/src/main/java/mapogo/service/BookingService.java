@@ -40,4 +40,5 @@ public interface BookingService {
 	
 	List<Object[]> findBookingByOwnerIdUsername(Integer ownerId);
 	
+
 }

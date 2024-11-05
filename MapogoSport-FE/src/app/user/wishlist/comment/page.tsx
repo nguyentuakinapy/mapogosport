@@ -6,7 +6,8 @@ import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../types/user.scss';
 import Link from "next/link";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
+import { toast } from "react-toastify";
 const CommentPage = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [fieldFetchAPI, setFieldFetchAPI] = useState<string>('');
@@ -41,6 +42,52 @@ const CommentPage = () => {
     const handleFilter = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedOption(event.target.value);
     };
+
+    const handleDeleteFieldReview = (fieldReviewId: number) => {
+        if (window.confirm('Bạn có chắc muốn xóa bình luận này?')) {
+            const user = sessionStorage.getItem('user');
+            if (user) {
+                const parsedUserData = JSON.parse(user) as User;
+                fetch(`http://localhost:8080/rest/user/fieldReview/${fieldReviewId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json',
+                    }
+                }).then(async (res) => {
+                    if (!res.ok) {
+                        toast.error(`Xóa bình luận không thành công! Vui lòng thử lại sau!`);
+                        return
+                    }
+                    mutate(`http://localhost:8080/rest/user/fieldReview/${parsedUserData.username}`);
+                    toast.success('Xóa bình luận thành công!');
+                })
+            }
+        }
+    }
+
+    const handleDeleteProductReview = (productReviewId: number) => {
+        if (window.confirm('Bạn có chắc muốn xóa bình luận này?')) {
+            const user = sessionStorage.getItem('user');
+            if (user) {
+                const parsedUserData = JSON.parse(user) as User;
+                fetch(`http://localhost:8080/rest/user/productReview/${productReviewId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json',
+                    }
+                }).then(async (res) => {
+                    if (!res.ok) {
+                        toast.error(`Xóa bình luận không thành công! Vui lòng thử lại sau!`);
+                        return
+                    }
+                    mutate(`http://localhost:8080/rest/user/productReview/${parsedUserData.username}`);
+                    toast.success('Xóa bình luận thành công!');
+                })
+            }
+        }
+    }
 
     if (isLoading) return <UserLayout><div>Đang tải...</div></UserLayout>;
     if (error) return <UserLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></UserLayout>;
@@ -96,14 +143,15 @@ const CommentPage = () => {
                             return (
                                 <div className="box-comment-container mb-2" key={key}>
                                     <div className="d-flex justify-content-between align-items-center">
-                                        <Link href={"#"} className="box-comment" style={{ fontSize: '15px' }}>
+                                        <Link href={`/categories/sport_field/detail/${fieldReview.sportField.sportFieldId}`}
+                                            className="box-comment" style={{ fontSize: '15px' }}>
                                             <b>{fieldReview.user.fullname}</b> đã đánh giá sân <b>{fieldReview.sportField?.name}</b>.
                                             <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
                                                 <div>{fieldReview.comment}</div>
                                                 <span>{new Date(fieldReview.datedAt).toLocaleDateString('en-GB')}</span>
                                             </div>
                                         </Link>
-                                        <div className="d-flex align-items-center me-2">
+                                        <div className="btn-cmt" onClick={() => handleDeleteFieldReview(fieldReview.fieldReviewId)}>
                                             <i className="bi bi-trash3-fill fs-5"></i>
                                         </div>
                                     </div>
@@ -118,14 +166,15 @@ const CommentPage = () => {
                             return (
                                 <div className="box-comment-container mb-2" key={key}>
                                     <div className="d-flex justify-content-between align-items-center">
-                                        <Link href={"#"} className="box-comment" style={{ fontSize: '15px' }}>
-                                            <b>{productReview.fullname}</b> đã đánh giá sản phẩm <b>{productReview.productName}</b>.
+                                        <Link href={`/product-detail/${productReview.product.productId}`}
+                                            className="box-comment" style={{ fontSize: '15px' }}>
+                                            <b>{productReview.fullname}</b> đã đánh giá sản phẩm <b>{productReview.product.name}</b>.
                                             <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
                                                 <div>{productReview.comment}</div>
                                                 <span>{new Date(productReview.datedAt).toLocaleDateString('en-GB')}</span>
                                             </div>
                                         </Link>
-                                        <div className="d-flex align-items-center me-2">
+                                        <div className="btn-cmt" onClick={() => handleDeleteProductReview(productReview.productReviewId)}>
                                             <i className="bi bi-trash3-fill fs-5"></i>
                                         </div>
                                     </div>

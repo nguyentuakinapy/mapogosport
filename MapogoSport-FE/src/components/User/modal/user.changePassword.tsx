@@ -65,14 +65,13 @@ const ModalChangePassword = (props: UserProps) => {
                 }),
             }).then(async (res) => {
                 if (!res.ok) {
-                    const errorText = await res.text();
-                    toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
+                    toast.error(`Cập nhật mật khẩu không thành công! Vui lòng thử lại sau!`);
                     return
                 }
                 handleClose();
                 mutate(`http://localhost:8080/rest/user/${parsedUserData.username}`);
-                toast.success('Cập nhật thành công!');
-                const response = await fetch('http://localhost:8080/rest/user/changePassword/sendMail', {
+                toast.success('Cập nhật mật khẩu thành công!');
+                fetch('http://localhost:8080/rest/user/changePassword/sendMail', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',
@@ -82,13 +81,7 @@ const ModalChangePassword = (props: UserProps) => {
                         email: userData?.email
                     })
                 });
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    toast.error(`Gửi email không thành công! Chi tiết lỗi: ${errorText}`);
-                }
-            }).catch((error) => {
-                toast.error(`Đã xảy ra lỗi: ${error.message}`);
-            });
+            })
         }
     };
 

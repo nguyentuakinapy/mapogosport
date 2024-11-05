@@ -12,6 +12,24 @@ const formatDate = (dateString) => {
     second: "2-digit",
   });
 };
+const formatDateNotime = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleString("vi-VN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+};
+
+
+const formatDateForApi = (date: Date | null) => {
+  if (!date) return ''; // Đảm bảo rằng nếu date là null thì trả về chuỗi rỗng
+
+  // Chuyển đổi thành ISO string và loại bỏ phần '.000Z'
+  return date.toISOString().replace('.000Z', '');
+};
+
+
 
 const formatPrice = (price) => {
   // Kiểm tra nếu price không hợp lệ hoặc không phải là số
@@ -26,10 +44,20 @@ const formatPrice = (price) => {
   });
 };
 
+const formatDateVN = (date: string) => {
+  return new Intl.DateTimeFormat('vi-VN', {
+    // weekday: 'long', // Hiển thị tên ngày trong tuần
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).format(new Date(date));
+};
+
 const hashPassword = (password: string): string => {
   const hash = createHash('sha256').update(password + 'YOUR_FIXED_SALT').digest('hex');
   return hash;
 };
 
-export { formatDate, formatPrice, hashPassword };
+export { formatDate, formatPrice, hashPassword, formatDateForApi, formatDateNotime, formatDateVN };
+
 

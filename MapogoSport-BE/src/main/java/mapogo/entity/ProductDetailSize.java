@@ -3,6 +3,7 @@ package mapogo.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -41,9 +42,9 @@ public class ProductDetailSize implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "ProductDetailId", nullable = false)
-//	@JsonManagedReference // tanthanh
+	@JsonManagedReference // tanthanh
 //	@JsonBackReference // QA - 30-10
-	@JsonIgnore // QA - 30-10
+//	@JsonIgnore // QA - 30-10
 	private ProductDetail productDetail;
 
 	@ManyToOne

@@ -10,6 +10,7 @@ import mapogo.entity.ProductDetail;
 
 public interface ProductDAO extends JpaRepository<Product, Integer>{
 	
-	
+	  @Query("SELECT p FROM Product p ORDER BY p.productId DESC")
+	    List<Product> findAllProductsFromBottom();
 	
 }

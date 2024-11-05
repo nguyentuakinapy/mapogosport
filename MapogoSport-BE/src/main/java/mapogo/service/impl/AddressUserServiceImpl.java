@@ -32,7 +32,7 @@ public class AddressUserServiceImpl implements AddressUserService{
 
 	@Override
 	public List<AddressUser> addAddressByUsername(String username, List<AddressUser> newAddress) {
-		User user = userDAO.findById(username).get(); // Lấy người dùng
+		User user = userDAO.findById(username).get();
 		List<AddressUser> savedAddressUsers = new ArrayList<>();
 		for (AddressUser addressUser : newAddress) {
 	        addressUser.setUser(user);
@@ -45,7 +45,7 @@ public class AddressUserServiceImpl implements AddressUserService{
 	        );
 	        if (existedAddress != null) { // Nếu địa chỉ đã tồn tại thì sử dụng dữ liệu cũ
 				addressUser.setAddress(existedAddress);
-			} else { // Nếu không thì lưu mới
+			} else {
 				address = addressDAO.save(address); // Lưu địa chỉ mới
 	            addressUser.setAddress(address);
 			}
@@ -64,9 +64,7 @@ public class AddressUserServiceImpl implements AddressUserService{
 	public AddressUser updateAddressUser(Integer addressUserId, AddressUser updateAddress) {
 	    Optional<AddressUser> currentAddresses = addressUserDAO.findById(addressUserId);
 	    AddressUser currentAddress = currentAddresses.get();
-
-	    // Lấy địa chỉ từ updateAddress
-	    Address newAddress = updateAddress.getAddress();
+	    Address newAddress = updateAddress.getAddress(); // Lấy địa chỉ từ updateAddress
 	    // Kiểm tra xem địa chỉ mới đã tồn tại trong cơ sở dữ liệu hay chưa
 	    Address existedAddress = addressDAO.findExistedAddress(
 	        newAddress.getWard(), 
@@ -75,13 +73,11 @@ public class AddressUserServiceImpl implements AddressUserService{
 	    );
 	    if (existedAddress != null) {// Nếu địa chỉ đã tồn tại, sử dụng địa chỉ đã có
 	        currentAddress.setAddress(existedAddress);
-	    } else {// Nếu không tồn tại, lưu địa chỉ mới
+	    } else {
 	        Address savedAddress = addressDAO.save(newAddress);
 	        currentAddress.setAddress(savedAddress);
 	    }
-
 	    currentAddress.setAddressDetail(updateAddress.getAddressDetail());
-
 	    return addressUserDAO.save(currentAddress);
 	}
 }

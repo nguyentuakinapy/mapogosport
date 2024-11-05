@@ -65,6 +65,26 @@ interface BookingDetail {
     date: string;
 }
 
+
+interface BookingDetailFullName {
+    bookingDetailId: number;
+    startTime: string;
+    endTime: string;
+    sportFieldDetail: {
+        sportFielDetailId: number;
+        name: string;
+        price: number;
+        peakHourPrices: number;
+        size: string;
+        status: string;
+        percentDeposit: number;
+        peakHour: string;
+    };
+    price: number;
+    date: string;
+    fullName: string
+}
+
 interface AvailableBooking {
     time: string;
     sportType: string;

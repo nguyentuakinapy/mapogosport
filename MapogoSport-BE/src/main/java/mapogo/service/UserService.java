@@ -24,4 +24,6 @@ public interface UserService {
 	UserSubscription findUserSubscriptionByUser(String username);
 	
 	UserSubscription updateUserSubscription(Map<String, Object> data);
+	
+	User findUserByBookingDetailId(Integer bookingDetailId);
 }

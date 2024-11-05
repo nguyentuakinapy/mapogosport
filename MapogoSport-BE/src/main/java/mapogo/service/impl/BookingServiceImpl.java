@@ -2,6 +2,7 @@ package mapogo.service.impl;
 
 import java.sql.Date;
 import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
@@ -165,6 +166,7 @@ public class BookingServiceImpl implements BookingService {
 	public List<Object[]> findBookingByOwnerIdUsername(Integer ownerId) {
 		// TODO Auto-generated method stub
 		return bookingDAO.findBookingByOwnerIdUsername(ownerId);
+
 	}
 
 }

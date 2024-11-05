@@ -258,7 +258,7 @@ const ModalProductAddNewSize = ({
                     type="number"
                     name="price"
                     placeholder="Nhập giá"
-                    value={formValues.price}
+                    value={formValues.price || ""}
                     onChange={handleInputChange}
                   />
                 </Form.Group>
@@ -272,7 +272,7 @@ const ModalProductAddNewSize = ({
                     type="number"
                     name="quantity"
                     placeholder="Nhập số lượng"
-                    value={formValues.quantity}
+                    value={formValues.quantity || ""}
                     onChange={handleInputChange}
                   />
                 </Form.Group>
