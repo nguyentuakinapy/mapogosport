@@ -11,12 +11,10 @@ interface UserProps {
 
 const ModalUpdatePhone = (props: UserProps) => {
     const { showUpdatePhone, setShowUpdatePhone, userData } = props;
-
     const [otpValue, setOtpValue] = useState<string>("");
     const [timeLeft, setTimeLeft] = useState(5);
     const [checkButton, setCheckButton] = useState<boolean>(false);
     const [newPhone, setNewPhone] = useState<string>("");
-    const [selectedPhoneIndex, setSelectedPhoneIndex] = useState<number | null>(null);
     const [page, setPage] = useState<boolean>(true);
 
     const coolDownTime = async () => {
@@ -48,10 +46,6 @@ const ModalUpdatePhone = (props: UserProps) => {
         }
     }
 
-    const handleSelect = (index: number) => {
-        setSelectedPhoneIndex(index === selectedPhoneIndex ? null : index);
-    };
-
     const handleClose = () => {
         setShowUpdatePhone(false);
         setNewPhone('');
@@ -74,12 +68,12 @@ const ModalUpdatePhone = (props: UserProps) => {
             }]),
         }).then(async (res) => {
             if (!res.ok) {
-                const errorText = await res.text();
                 toast.error(`Thêm số điện thoại thành không thành công! Vui lòng thử lại sau!`);
                 return
             }
             mutate(`http://localhost:8080/rest/user/${userData?.username}`);
             toast.success('Thêm số điện thoại thành công!');
+            setPage(true);
         })
     }
 
@@ -114,7 +108,6 @@ const ModalUpdatePhone = (props: UserProps) => {
             }),
         }).then(async (res) => {
             if (!res.ok) {
-                const errorText = await res.text();
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return
             }
@@ -165,7 +158,6 @@ const ModalUpdatePhone = (props: UserProps) => {
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={() => handleClose()}>Hủy</Button>
-                        <Button style={{ backgroundColor: "#142239" }} onClick={() => handleSave()}>Xác nhận</Button>
                     </Modal.Footer>
                 </>
                 :
@@ -187,7 +179,8 @@ const ModalUpdatePhone = (props: UserProps) => {
                         </InputGroup>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button style={{ backgroundColor: "#142239" }} onClick={() => setPage(true)}>Quay lại</Button>
+                        <Button variant="secondary" onClick={() => setPage(true)}>Quay lại</Button>
+                        <Button style={{ backgroundColor: "#142239" }} onClick={() => handleSave()}>Xác nhận</Button>
                     </Modal.Footer>
                 </>
             }

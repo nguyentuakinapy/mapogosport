@@ -5,12 +5,15 @@ import java.util.Map;
 
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
+import mapogo.entity.Order;
 
 public interface BookingService {
 	
 	List<Booking> findAll();
 	
-	List<Booking> findByUser_Username(String username);
+	List<Map<String, Object>> findBookingByUsername(String username);
+	List<Map<String, Object>> findAllBooking();
+	Order updateStatusBooking(Map<String, Object> bookingData);
 	
 	List<Booking> findById(Integer id);
 	

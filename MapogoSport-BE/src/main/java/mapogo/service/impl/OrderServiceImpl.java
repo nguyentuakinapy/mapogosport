@@ -2,8 +2,13 @@ package mapogo.service.impl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +16,9 @@ import org.springframework.stereotype.Service;
 import mapogo.dao.OrderDAO;
 import mapogo.dto.OrderDTO;
 import mapogo.entity.Order;
+import mapogo.entity.OrderDetail;
 import mapogo.entity.PaymentMethod;
+import mapogo.entity.PhoneNumberUser;
 import mapogo.entity.User;
 import mapogo.service.OrderService;
 import mapogo.service.PaymentMethodService;
@@ -25,9 +32,42 @@ public class OrderServiceImpl implements OrderService {
 	List<String> statuses = Arrays.asList("Đã Giao hàng", "Đã Thanh Toán");
 
 	@Override
-	public List<Order> findByUser_Username(String username) {
+	public List<Order> findOrderByUsername(String username) {
 		return orderDAO.findByUser_Username(username);
 	}
+	
+	@Override
+	public List<Map<String, Object>> findAllOrder() {
+		List<Order> orders = orderDAO.findAll();
+		List<Map<String, Object>> resultList = new ArrayList<>();
+		
+		for (Order order: orders) {
+			Map<String, Object> orderData = new HashMap<>();
+			orderData.put("orderId", order.getOrderId());
+			orderData.put("fullname", order.getUser().getFullname());
+			orderData.put("date", order.getDate());
+			orderData.put("amount", order.getAmount());
+			orderData.put("address", order.getAddress());
+			orderData.put("status", order.getStatus());
+			orderData.put("phoneNumber", order.getPhoneNumber());
+	        resultList.add(orderData);
+		}
+		return resultList;
+	}
+	
+	@Override
+	public Order updateStatusOrder(Map<String, Object> orderData) {
+		Integer orderId = (Integer) orderData.get("orderId");
+		String newStatus = (String) orderData.get("status");
+		
+		Optional<Order> optionalOrder = orderDAO.findById(orderId);
+		if (optionalOrder.isPresent()) {
+		    Order order = optionalOrder.get();
+		    order.setStatus(newStatus);
+		    orderDAO.save(order);
+		}
+		return null;
+    }
 
 	@Autowired
 	UserService userService;
@@ -120,6 +160,7 @@ public class OrderServiceImpl implements OrderService {
 		return orderDAO.save(order);
 
 	}
+
 
 	@Override
 	public List<Object[]> getCategoryProductTotalsToDay() {
