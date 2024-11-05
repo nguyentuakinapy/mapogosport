@@ -3,12 +3,16 @@ package mapogo.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import mapogo.dto.OrderDTO;
 import mapogo.entity.Order;
 
 public interface OrderService {
-	List<Order> findByUser_Username(String username);
+	List<Order> findOrderByUsername(String username);
+	List<Map<String, Object>> findAllOrder();
+	Order updateStatusOrder(Map<String, Object> orderData);
+	
 	//của Mỵ từ đây
 	Order createOrder(OrderDTO order);
 	Order findByOrderId(int orderId);

@@ -15,7 +15,7 @@ public class OrderDetailServiceImpl implements OrderDetailService{
 	OrderDetailDAO orderDetailDAO;
 	
 	@Override
-	public List<OrderDetail> findByOrder_OrderId(Integer orderId) {
+	public List<OrderDetail> findOrderDetailByOrderId(Integer orderId) {
 		return orderDetailDAO.findByOrder_OrderId(orderId);
 	}
 

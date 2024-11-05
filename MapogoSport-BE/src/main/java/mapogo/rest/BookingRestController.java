@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,10 +39,20 @@ public class BookingRestController {
 	public List<Booking> findAll() {
 		return bookingService.findAll();
 	}
+	
+	@GetMapping("/owner/booking/findAll")
+	public List<Map<String, Object>> ownerFindAll() {
+		return bookingService.findAllBooking();
+	}
+	
+	@PutMapping("/owner/booking/update")
+	public void updateBookingStatus(@RequestBody Map<String, Object> bookingData) {
+		bookingService.updateStatusBooking(bookingData);
+	}
 
 	@GetMapping("/user/booking/{username}")
-	public List<Booking> getByUser(@PathVariable("username") String username) {
-		return bookingService.findByUser_Username(username);
+	public List<Map<String, Object>> getByUser(@PathVariable("username") String username) {
+		return bookingService.findBookingByUsername(username);
 	}
 
 	@GetMapping("/user/booking/detail/{bookingId}")

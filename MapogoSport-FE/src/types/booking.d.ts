@@ -94,3 +94,20 @@ interface AvailableBooking {
     peakHourPrices: number;
     percentDeposit: number;
 }
+
+interface BookingByUserMap {
+    bookingId: number;
+    sportFieldName: string;
+    totalAmount: number;
+    status: string;
+    date: Date;
+}
+
+interface BookingFindAll {
+    bookingId: number;
+    userFullname: string;
+    userPhone: string;
+    totalAmount: number;
+    status: string;
+    date: Date;
+}
