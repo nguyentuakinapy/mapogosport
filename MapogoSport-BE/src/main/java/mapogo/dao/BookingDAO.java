@@ -53,10 +53,6 @@ public interface BookingDAO extends JpaRepository<Booking, Integer> {
 	
 	Booking findByBookingDetails_BookingDetailId(Integer bookingDetailId);
 	
-	@Query("SELECT o " +
-		       "FROM Booking o " +
-		       "WHERE o.owner.ownerId = :ownerId AND TRIM(o.status) = :status")
-		List<Booking> findBookingByOwnerAndStatus(@Param("ownerId") Integer ownerId, @Param("status") String status);
   
 	@Query("SELECT o.sportFieldDetail.name, SUM(o.price) AS revenueField, Min(o.date) as StarDate, Max(o.date) as EndDate, o.sportFieldDetail.sportFielDetailId "
 			+ "FROM BookingDetail o " 
