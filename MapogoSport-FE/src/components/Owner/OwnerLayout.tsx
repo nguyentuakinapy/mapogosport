@@ -4,7 +4,12 @@ import Nav from "./app.nav";
 import '../globals.css'
 import Header from "./app.header";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { UserProvider } from "@/app/context/UserContext";
+import { vi } from "date-fns/locale/vi";
+import { registerLocale, setDefaultLocale } from "react-datepicker";
 
+registerLocale('vi', vi);
+setDefaultLocale('vi');
 
 export default function OwnerLayout({
     children,
@@ -103,7 +108,7 @@ export default function OwnerLayout({
     }, []);
 
     return (
-        <>
+        <UserProvider>
             <Nav isAniActive={isAniActive} toggleAni={toggleAni} isActive={isActive} setIsActive={setIsActive} />
             <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} userData={userData} />
 
@@ -112,6 +117,6 @@ export default function OwnerLayout({
                     {children}
                 </div>
             </main>
-        </>
+        </UserProvider>
     )
 }

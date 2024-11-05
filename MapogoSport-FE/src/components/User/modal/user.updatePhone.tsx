@@ -158,6 +158,8 @@ const ModalUpdatePhone = (props: UserProps) => {
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={() => handleClose()}>Hủy</Button>
+                        <Button style={{ backgroundColor: "#142239" }} onClick={handleClose}>Xác nhận</Button>
+
                     </Modal.Footer>
                 </>
                 :
@@ -179,7 +181,7 @@ const ModalUpdatePhone = (props: UserProps) => {
                         </InputGroup>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={() => setPage(true)}>Quay lại</Button>
+                        <Button style={{ backgroundColor: "#142239" }} onClick={() => setPage(true)}>Quay lại</Button>
                         <Button style={{ backgroundColor: "#142239" }} onClick={() => handleSave()}>Xác nhận</Button>
                     </Modal.Footer>
                 </>

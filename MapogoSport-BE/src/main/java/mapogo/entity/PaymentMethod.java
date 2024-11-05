@@ -43,7 +43,7 @@ public class PaymentMethod implements Serializable{
 
 
     @OneToMany(mappedBy = "paymentMethod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference("paymentmethod-booking-reference") // Đặt tên duy nhất
+    @JsonIgnore // Đặt tên duy nhất
     private List<Booking> bookings;
 
     @OneToMany(mappedBy = "paymentMethod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

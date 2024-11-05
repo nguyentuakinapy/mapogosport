@@ -51,6 +51,13 @@ public interface BookingDAO extends JpaRepository<Booking, Integer> {
 					                            @Param("endDate") Date endDate
 												);
 	
+	Booking findByBookingDetails_BookingDetailId(Integer bookingDetailId);
+	
+	@Query("SELECT o " +
+		       "FROM Booking o " +
+		       "WHERE o.owner.ownerId = :ownerId AND TRIM(o.status) = :status")
+		List<Booking> findBookingByOwnerAndStatus(@Param("ownerId") Integer ownerId, @Param("status") String status);
+  
 	@Query("SELECT o.sportFieldDetail.name, SUM(o.price) AS revenueField, Min(o.date) as StarDate, Max(o.date) as EndDate, o.sportFieldDetail.sportFielDetailId "
 			+ "FROM BookingDetail o " 
 			+ "WHERE o.sportFieldDetail.sportFielDetailId IN :sportFieldDetailIds "
@@ -66,6 +73,7 @@ public interface BookingDAO extends JpaRepository<Booking, Integer> {
 		       + "from Booking b "
 		       + "where b.owner.ownerId = :ownerId")
 		Integer totalCustomer(@Param("ownerId") Integer ownerId);
+
 
 	@Query("SELECT FUNCTION('MONTH', b.date) AS month, COUNT(DISTINCT b.user.username) AS customerCount "
 		       + "FROM Booking b "

@@ -7,7 +7,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ReactQueryProvider from "@/app/utils/UseQueryProviders/ReactQueryProvider";
+import { vi } from "date-fns/locale/vi";
+import { registerLocale, setDefaultLocale } from "react-datepicker";
 
+registerLocale('vi', vi);
+setDefaultLocale('vi');
 
 
 export default function AdminLayout({
@@ -85,16 +89,16 @@ export default function AdminLayout({
     }, []);
     return (
         <>
-         <ReactQueryProvider>
-            <Nav isAniActive={isAniActive} toggleAni={toggleAni} isActive={isActive} setIsActive={setIsActive} />
-            <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} />
-            <main className={`main-right ${isAniActive ? 'mainRight' : ''}`}>
-                <div className="main-body">
-                    {children}
-                </div>
-            </main>
-            <ToastContainer></ToastContainer>
-         </ReactQueryProvider>
+            <ReactQueryProvider>
+                <Nav isAniActive={isAniActive} toggleAni={toggleAni} isActive={isActive} setIsActive={setIsActive} />
+                <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} />
+                <main className={`main-right ${isAniActive ? 'mainRight' : ''}`}>
+                    <div className="main-body">
+                        {children}
+                    </div>
+                </main>
+                <ToastContainer></ToastContainer>
+            </ReactQueryProvider>
         </>
     )
 }

@@ -56,6 +56,9 @@ public class BookingDetail implements Serializable{
     @JsonBackReference
     private Booking booking;
     
+    @Column(name="SubscriptionKey")
+    private String subcriptionKey =  null;
+    
     @Transient
     private String fullName;
     

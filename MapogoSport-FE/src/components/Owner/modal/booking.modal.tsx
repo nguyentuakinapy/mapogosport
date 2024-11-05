@@ -1,8 +1,11 @@
 import { formatPrice } from "@/components/Utils/Format";
 import { use, useEffect, useState } from "react";
-import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup } from "react-bootstrap";
+import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, Nav } from "react-bootstrap";
+import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
+import 'react-datepicker/dist/react-datepicker.css';
+
 
 interface OwnerProps {
     showBookingModal: boolean;
@@ -23,6 +26,7 @@ const BookingModal = (props: OwnerProps) => {
 
     const [selectTime, setSelectTime] = useState<string>('Chọn thời gian');
     const [isOffline, setIsOffline] = useState(false);
+    const [activeTab, setActiveTab] = useState<string>('all');
 
     const [booking, setBooking] = useState<Booking>();
 
@@ -334,95 +338,373 @@ const BookingModal = (props: OwnerProps) => {
         toast.success("Đặt sân thành công!");
     }
 
-    return (
-        <>
-            <Modal show={showBookingModal} onHide={() => handleClose()} size="lg" aria-labelledby="contained-modal-title-vcenter"
-                centered backdrop="static" keyboard={false}>
-                <Modal.Header>
-                    <Modal.Title className="text-uppercase text-danger fw-bold m-auto">đặt Sân</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Row>
-                        <Col>
-                            <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
-                            <ul>
-                                <li><span className="fw-bold">Giá đặt sân / 1h:</span> {formatPrice(sportDetail && sportDetail.price)}.</li>
-                                <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {formatPrice(sportDetail && sportDetail.peakHourPrices)}.</li>
-                                <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>
-                                <li><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}.</li>
-                                <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
-                                <li><span className="fw-bold">Địa chỉ:</span> {sport && sport.address}.</li>
-                            </ul>
-                        </Col>
-                        <Col>
-                            <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
-                            <InputGroup className="mb-2">
-                                <FloatingLabel controlId="floatingUsername" label="Vui lòng nhập tên đăng nhập!" className="flex-grow-1">
+    type DateDetail = {
+        date: string;
+    }
+
+    type DateType = {
+        [index: string]: {
+            [week: number]: DateDetail[];
+        };
+    };
+
+    useEffect(() => {
+        setStartDate(new Date(dayStartBooking));
+    }, [dayStartBooking])
+
+    const [startDate, setStartDate] = useState<Date | null>(null);
+    const [weekDays, setWeekDays] = useState<DateType>({});
+    const [endDate, setEndDate] = useState<Date | null>(null);
+
+    const renderWeekDay = () => {
+        const days: DateType = {};
+        const weekdays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+        let differenceInDays = 0;
+
+        if (startDate && endDate) {
+            const differenceInTime = endDate.getTime() - startDate.getTime();
+            differenceInDays = Math.round(differenceInTime / (1000 * 3600 * 24));
+            // toast.success(`Khoảng cách: ${differenceInDays} ngày`);
+        }
+
+        if (differenceInDays >= 0 && startDate && endDate) {
+            for (let i = 0; i <= differenceInDays; i++) {
+                const nextDay = new Date(startDate);
+                nextDay.setDate(startDate.getDate() + i);
+
+                const day = nextDay.getDate().toString().padStart(2, '0');
+                const month = (nextDay.getMonth() + 1).toString().padStart(2, '0');
+                const weekday = weekdays[nextDay.getDay()];
+
+                if (!days[weekday]) {
+                    days[weekday] = {};
+                }
+
+                if (!days[weekday][i]) {
+                    days[weekday][i] = [];
+                }
+
+                days[weekday][i].push({ date: `${nextDay.getFullYear()}-${month}-${day}` });
+            }
+        }
+
+        console.log(days);
+        setWeekDays(days); // Cập nhật state với các ngày trong tuần
+    };
+
+    useEffect(() => {
+        toast.success(startDate + '-' + endDate)
+        renderWeekDay();
+    }, [startDate, endDate])
+
+    const [selectedWeek, setSelectedWeek] = useState<string[]>([]);
+
+    const getWeekDate = async (weekDate: string) => {
+        let count = 0;
+        const dateWeek = weekDays[weekDate];
+        console.log(weekDays[weekDate]);
+
+        if (!selectedWeek.includes(weekDate)) {
+            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
+                if (count >= 6) {
+                    setOperatingTimeFetchData(6);
+                    break;
+                }
+
+                for (const booking of bookings) { // Duyệt qua từng ngày trong bookings
+                    try {
+                        const response = await fetch(
+                            `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${startTime}/${sportDetail?.sportFielDetailId}/${booking.date}`
+                        );
+
+                        if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+                        const text = await response.text();
+                        toast.success(text)
+                        if (text) {
+                            const dataBooking = JSON.parse(text);
+                            if (dataBooking && Object.keys(dataBooking).length > 0) {
+                                console.log(dataBooking);
+
+                                setOperatingTimeFetchData(count);
+                                break;
+                            }
+                        } else {
+                            setOperatingTimeFetchData(count);
+                        }
+                    } catch (error) {
+                        console.error("API or JSON parsing error:", error);
+                    }
+                    count++;
+                }
+            }
+            setSelectedWeek(prevSelectedWeek => [...prevSelectedWeek, weekDate]);
+        } else {
+            setSelectedWeek(prevSelectedWeek => prevSelectedWeek.filter(date => date !== weekDate));
+        }
+    }
+
+    function isTimeWithinRange(startTime: string, endTime: string, checkTime: string): boolean {
+        const [startHours, startMinutes] = startTime.split('h').map(Number);
+        const [endHours, endMinutes] = endTime.split('h').map(Number);
+        const [checkHours, checkMinutes] = checkTime.split('h').map(Number);
+
+        // Tạo đối tượng Date cho từng thời gian
+        const startDate = new Date(0, 0, 0, startHours, startMinutes);
+        const endDate = new Date(0, 0, 0, endHours, endMinutes);
+        const checkDate = new Date(0, 0, 0, checkHours, checkMinutes);
+
+        // Kiểm tra thời gian nằm trong khoảng
+        return checkDate >= startDate && checkDate <= endDate;
+    }
+
+    useEffect(() => {
+        const checkTime = "10h";
+        const result = isTimeWithinRange('9h30', '11h30', checkTime);
+        console.log(result);
+    }, [selectedWeek])
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'all':
+                return (
+                    <>
+                        <Row>
+                            <Col>
+                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
+                                <ul>
+                                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {formatPrice(sportDetail && sportDetail.price)}.</li>
+                                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {formatPrice(sportDetail && sportDetail.peakHourPrices)}.</li>
+                                    <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>
+                                    <li><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}.</li>
+                                    <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
+                                    <li><span className="fw-bold">Địa chỉ:</span> {sport && sport.address}.</li>
+                                </ul>
+                            </Col>
+                            <Col>
+                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
+
+                                <InputGroup className="mb-2">
+                                    <FloatingLabel controlId="floatingUsername" label="Vui lòng nhập tên đăng nhập!" className="flex-grow-1">
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Vui lòng nhập tên đăng nhập!"
+                                            disabled={isOffline}
+                                            value={username}
+                                            onChange={(e) => setUsername(e.target.value)}
+                                        />
+                                    </FloatingLabel>
+
+                                    <InputGroup.Text aria-label="Checkbox for following text input bg-white">
+                                        <Form.Check
+                                            type="checkbox"
+                                            label="Offline"
+                                            checked={isOffline}
+                                            onChange={(e) => setIsOffline(e.target.checked)}
+                                        />
+                                    </InputGroup.Text>
+                                </InputGroup>
+
+                                <FloatingLabel controlId="floatingSelectTime" label="Chọn thời gian" className="mb-2">
+                                    <Form.Select
+                                        value={selectTime}
+                                        onChange={(e) => setSelectTime(e.target.value)}
+                                        aria-label="Default select example"
+                                    >
+                                        <option value="Chọn thời gian">Chọn thời gian</option>
+                                        {dataTime && dataTime.map((time, index) => (
+                                            <option key={index} value={String(time)}>{time}</option>
+                                        ))}
+                                    </Form.Select>
+                                </FloatingLabel>
+
+                                <FloatingLabel controlId="floatingPaymentMethod" label="Phương thức thanh toán *">
+                                    <Form.Select
+                                        value={paymentMethodId}
+                                        onChange={(e) => setPaymentMethodId(Number(e.target.value))}
+                                        aria-label="Default select example"
+                                    >
+                                        <option value="0">Phương thức thanh toán *</option>
+                                        {dataPaymentMethod && dataPaymentMethod.map((item) => (
+                                            <option key={item.paymentMethodId} value={item.paymentMethodId}>{item.name}</option>
+                                        ))}
+                                    </Form.Select>
+                                </FloatingLabel>
+                            </Col>
+                        </Row>
+                        <h6 className="text-uppercase text-danger fw-bold text-center my-2">Thông tin đặt sân</h6>
+                        <Row>
+                            <Col className="px-5 text-center">
+                                <span><b> Ngày đặt: </b>{dayStartBooking}. </span><br />
+                                <span><b> Thời gian đá: </b>{startTime} - {endTime ? endTime : '???'}</span><br />
+                            </Col>
+                            <Col className="px-5 text-center">
+                                <span><b>Đơn giá: </b> <em className="text-danger">{sportDetail?.price.toLocaleString("vi-VN", { style: "currency", currency: "VND", })}</em>. </span><br />
+                                <span><b>Tổng tiền: </b><em className="text-danger">{price ? price.toLocaleString("vi-VN", { style: "currency", currency: "VND", }) : '???'}</em>. </span><br />
+                            </Col>
+                        </Row>
+                        <Form.Group className="mt-3 px-4">
+                            <Form.Control as="textarea" rows={3}
+                                type="text"
+                                placeholder="Ghi chú!"
+                                value={note}
+                                onChange={(e) => setNote(e.target.value)}
+                            />
+                        </Form.Group>
+                    </>
+                );
+            case 'deposit':
+                return (
+                    <>
+                        <Row>
+                            <Col>
+                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
+                                <ul>
+                                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {formatPrice(sportDetail && sportDetail.price)}.</li>
+                                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {formatPrice(sportDetail && sportDetail.peakHourPrices)}.</li>
+                                    <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>
+                                    <li><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}.</li>
+                                    <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
+                                    <li><span className="fw-bold">Địa chỉ:</span> {sport && sport.address}.</li>
+                                </ul>
+                            </Col>
+                            <Col>
+                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
+                                <InputGroup className="mb-2">
+                                    {isOffline ? (
+                                        <FloatingLabel controlId="floatingUsername" label="Họ và tên!" className="flex-grow-1">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Vui lòng nhập tên đăng nhập!"
+                                                value={username}
+                                                onChange={(e) => setUsername(e.target.value)}
+                                            />
+                                        </FloatingLabel>
+                                    ) : (
+                                        <FloatingLabel controlId="floatingFullName" label="Vui lòng nhập tên đăng nhập!" className="flex-grow-1">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Vui lòng nhập tên đăng nhập!"
+                                            />
+                                        </FloatingLabel>
+                                    )}
+                                    <InputGroup.Text aria-label="Checkbox for following text input bg-white">
+                                        <Form.Check
+                                            type="checkbox"
+                                            label="Offline"
+                                            checked={isOffline}
+                                            onChange={(e) => setIsOffline(e.target.checked)}
+                                        />
+                                    </InputGroup.Text>
+                                </InputGroup>
+
+                                <FloatingLabel controlId="floatingPhoneNumber" label="Số điện thoại!" className="flex-grow-1 mb-2">
                                     <Form.Control
                                         type="text"
                                         placeholder="Vui lòng nhập tên đăng nhập!"
-                                        disabled={isOffline}
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
                                     />
                                 </FloatingLabel>
 
-                                <InputGroup.Text aria-label="Checkbox for following text input bg-white">
-                                    <Form.Check
-                                        type="checkbox"
-                                        label="Offline"
-                                        checked={isOffline}
-                                        onChange={(e) => setIsOffline(e.target.checked)}
-                                    />
-                                </InputGroup.Text>
+                                <FloatingLabel controlId="floatingPaymentMethod" label="Phương thức thanh toán *">
+                                    <Form.Select
+                                        value={paymentMethodId}
+                                        onChange={(e) => setPaymentMethodId(Number(e.target.value))}
+                                        aria-label="Default select example"
+                                    >
+                                        <option value="0">Phương thức thanh toán *</option>
+                                        {dataPaymentMethod && dataPaymentMethod.map((item) => (
+                                            <option key={item.paymentMethodId} value={item.paymentMethodId}>{item.name}</option>
+                                        ))}
+                                    </Form.Select>
+                                </FloatingLabel>
+                            </Col>
+                        </Row>
+                        <h6 className="text-uppercase text-danger fw-bold text-center mt-3">Thời gian</h6>
+                        <div className="d-flex">
+                            <InputGroup className="search-date mb-2">
+                                <DatePicker
+                                    selected={startDate || undefined}
+                                    onChange={(date) => setStartDate(date)}
+                                    selectsStart
+                                    startDate={startDate || undefined}
+                                    endDate={endDate || undefined}
+                                    minDate={new Date()}
+                                    placeholderText="Từ ngày"
+                                    className="form-control start"
+                                />
+                                <InputGroup.Text><i className="bi bi-three-dots"></i></InputGroup.Text>
+                                <DatePicker
+                                    selected={endDate || undefined}
+                                    onChange={(date) => setEndDate(date)}
+                                    selectsEnd
+                                    startDate={startDate || undefined}
+                                    endDate={endDate || undefined}
+                                    minDate={startDate || undefined}
+                                    maxDate={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 30)) : undefined}
+                                    placeholderText="Đến ngày"
+                                    className="form-control end"
+                                />
                             </InputGroup>
-
-                            <FloatingLabel controlId="floatingSelectTime" label="Chọn thời gian" className="mb-2">
-                                <Form.Select
-                                    value={selectTime}
-                                    onChange={(e) => setSelectTime(e.target.value)}
-                                    aria-label="Default select example"
-                                >
+                            <InputGroup className="search-date mb-2">
+                                <Form.Control
+                                    value={startTime}
+                                    onChange={(e) => undefined}
+                                    placeholder="Thời gian bắt đầu"
+                                    aria-label="Username"
+                                    aria-describedby="basic-addon1"
+                                />
+                                <Form.Select value={selectTime}
+                                    onChange={(e) => setSelectTime(e.target.value)} aria-label="Default select example">
                                     <option value="Chọn thời gian">Chọn thời gian</option>
                                     {dataTime && dataTime.map((time, index) => (
                                         <option key={index} value={String(time)}>{time}</option>
                                     ))}
                                 </Form.Select>
-                            </FloatingLabel>
+                            </InputGroup>
+                        </div>
+                        <Row className="text-center mx-4">
+                            {weekDays && Object.entries(weekDays).map(([weekday, weeks]) => (
+                                <Col onClick={() => getWeekDate(weekday)} key={weekday}
+                                    className={`col-day border p-2 bg-dark text-white ${selectedWeek.includes(weekday) ? 'active' : ''}`}>
+                                    <b>{weekday}</b>
+                                </Col>
+                            ))}
+                        </Row>
 
-                            <FloatingLabel controlId="floatingPaymentMethod" label="Phương thức thanh toán *">
-                                <Form.Select
-                                    value={paymentMethodId}
-                                    onChange={(e) => setPaymentMethodId(Number(e.target.value))}
-                                    aria-label="Default select example"
-                                >
-                                    <option value="0">Phương thức thanh toán *</option>
-                                    {dataPaymentMethod && dataPaymentMethod.map((item) => (
-                                        <option key={item.paymentMethodId} value={item.paymentMethodId}>{item.name}</option>
-                                    ))}
-                                </Form.Select>
-                            </FloatingLabel>
-                        </Col>
-                    </Row>
-                    <h6 className="text-uppercase text-danger fw-bold text-center my-2">Thông tin đặt sân</h6>
-                    <Row>
-                        <Col className="px-5 text-center">
-                            <span><b> Ngày đặt: </b>{dayStartBooking}. </span><br />
-                            <span><b> Thời gian đá: </b>{startTime} - {endTime ? endTime : '???'}</span><br />
-                        </Col>
-                        <Col className="px-5 text-center">
-                            <span><b>Đơn giá: </b> <em className="text-danger">{sportDetail?.price.toLocaleString("vi-VN", { style: "currency", currency: "VND", })}</em>. </span><br />
-                            <span><b>Tổng tiền: </b><em className="text-danger">{price ? price.toLocaleString("vi-VN", { style: "currency", currency: "VND", }) : '???'}</em>. </span><br />
-                        </Col>
-                    </Row>
-                    <Form.Group className="mt-3 px-4">
-                        <Form.Control as="textarea" rows={3}
-                            type="text"
-                            placeholder="Ghi chú!"
-                            value={note}
-                            onChange={(e) => setNote(e.target.value)}
-                        />
-                    </Form.Group>
+                        <Form.Group className="mt-3 px-4">
+                            <Form.Control as="textarea" rows={3}
+                                type="text"
+                                placeholder="Ghi chú!"
+                                value={note}
+                                onChange={(e) => setNote(e.target.value)}
+                            />
+                        </Form.Group>
+                        {price ? price : ''}
+                    </>
+                );
+            default:
+                return (
+                    <div className="font-14">
+                        Loading...
+                    </div>
+                );
+        }
+    };
+
+    return (
+        <>
+            <Modal show={showBookingModal} onHide={() => handleClose()} size="xl" aria-labelledby="contained-modal-title-vcenter"
+                centered backdrop="static" keyboard={false}>
+                <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)}
+                    className="custom-tabs mb-3 mx-2">
+                    <Nav.Item>
+                        <Nav.Link eventKey="all" className="tab-link">ĐẶT SÂN THEO NGÀY</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link eventKey="deposit" className="tab-link">ĐẶT SÂN THEO KỲ</Nav.Link>
+                    </Nav.Item>
+                </Nav>
+                <Modal.Body className="pt-0">
+                    {renderContent()}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => handleClose()}>

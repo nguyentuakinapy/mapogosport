@@ -1,3 +1,4 @@
+import { useData } from "@/app/context/UserContext";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -33,7 +34,7 @@ const BookingModal = (props: OwnerProps) => {
     });
 
     // BOOKING
-    const [userData, setUserData] = useState<User>();
+    // const [userData, setUserData] = useState<User>();
     const [totalAmount, setTotalAmount] = useState<number>();
     const [statusBooking, setStatusBooking] = useState<string>("Đã thanh toán");
     const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
@@ -49,13 +50,16 @@ const BookingModal = (props: OwnerProps) => {
     const [statusPayment, setStatusPayment] = useState<string>("0");
     const [referenceCode, setReferenceCode] = useState<string>("0");
 
-    useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUserData(parsedUserData);
-        }
-    }, []);
+    // useEffect(() => {
+    //     const user = sessionStorage.getItem('user');
+    //     if (user) {
+    //         const parsedUserData = JSON.parse(user) as User;
+    //         setUserData(parsedUserData);
+    //     }
+    // }, []);
+
+    const userData = useData();
+
 
     useEffect(() => {
         setDataPaymentMethod(data);

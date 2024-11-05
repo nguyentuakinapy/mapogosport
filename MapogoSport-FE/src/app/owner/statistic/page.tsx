@@ -26,7 +26,8 @@ export default function Home() {
   const [owner, setOwner] = useState<Owner>();
   const [selectedFieldId, setSelectedFieldId] = useState<number | null>(null);
   const [selectSportFieldDetail, setSelectSportFieldDetail] = useState<any>([]);
-  const [sportFieldDetailIds, setSportFieldDetailIds] = useState<number[]>([]);
+  const [sportFieldDetailIds, setSportFieldDetailIds] = useState<number[]>([]); 
+  const [revenueBySportFieldDetail, setRevenueBySportFieldDetail] = useState<any>([])
   const [chartData, setChartData] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [idSportFieldDetailTable, setIdSportFieldDetailTable] = useState<number | null>(null);
@@ -78,6 +79,7 @@ export default function Home() {
   }, []);
 
   console.log(owner?.ownerId);
+
 
   // Fetch success booking revenue 
   useEffect(() => {
@@ -177,6 +179,7 @@ export default function Home() {
           const idsString = sportFieldDetailIds.join(',');
           const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportFieldDetail/${idsString}`);
           const data = await response.json();
+          setRevenueBySportFieldDetail(data)
           const formattedData = [
             ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
             ...data.map((item: any) => [item[0], item[1], item[2], item[3], item[4]])
@@ -190,6 +193,7 @@ export default function Home() {
       fetchData()
     }
   }, [sportFieldDetailIds])
+
   // Calculate total price from booking details
   const totalBookingPrice = bookingdetailBySportField.reduce((total, bookingDetail) => {
     return total + bookingDetail.price;

@@ -4,8 +4,10 @@ import ViewEditBookingModal from "@/components/Owner/modal/view-edit-booking.mod
 import { formatDateVN } from "@/components/Utils/Format";
 import { useEffect, useRef, useState } from "react";
 import { Col, Row, Table } from "react-bootstrap";
+import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
 import useSWR from "swr";
+
 
 type BookingsTypeOnDay = {
     [time: string]: BookingDetails[];
@@ -106,7 +108,6 @@ export default function BookingSport() {
     //         ]
     //     }
     // };
-
 
 
     const [owner, setOwner] = useState<Owner>();
@@ -902,7 +903,7 @@ export default function BookingSport() {
             const currentMinutes = now.getMinutes();
 
             if ((currentMinutes === 0 || currentMinutes === 30) && !hasExecuted) {
-                console.log("Thực hiện cập nhật trạng thái tại phút:", currentMinutes);
+                // console.log("Thực hiện cập nhật trạng thái tại phút:", currentMinutes);
                 if (selectDate === 0) {
                     setStatusOnDay();
                 } else {
@@ -924,6 +925,8 @@ export default function BookingSport() {
     const [dayStartBooking, setDayStartBooking] = useState("");
     const [startTimeKey, setStartTimeKey] = useState<boolean>(true);
     const [bookingDetailData, setBookingDetailData] = useState<BookingDetail>();
+    const [userData, setUserData] = useState<User>();
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
 
     const handleGetDataBookingOnDay = (event: React.MouseEvent<HTMLTableCellElement>) => {
         const sportDetail = event.currentTarget.getAttribute("sport-detail");
@@ -969,15 +972,31 @@ export default function BookingSport() {
 
         const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
 
-        const response = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${startTime}/${selectedSportDetail?.sportFielDetailId}/${dayStartBooking}`);
-        if (!response.ok) {
-            throw new Error(`Error fetching data: ${response.statusText}`);
+        const responseBookingDetail = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${startTime}/${selectedSportDetail?.sportFielDetailId}/${dayStartBooking}`);
+        if (!responseBookingDetail.ok) {
+            throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
         }
 
-        const bkDData = await response.json() as BookingDetail;
+        const bkDData = await responseBookingDetail.json() as BookingDetail;
+
+        const responsePaymentMethod = await fetch(`http://localhost:8080/rest/paymentMethod/by/bookingdetailid/${bkDData.bookingDetailId}`);
+        if (!responsePaymentMethod.ok) {
+            throw new Error(`Error fetching data: ${responsePaymentMethod.statusText}`);
+        }
+
+        const resPaymentMethod = await responsePaymentMethod.json() as PaymentMethod;
+
+        const responseUser = await fetch(`http://localhost:8080/rest/user/getbysportdetailid/${bkDData.bookingDetailId}`);
+        if (!responseUser.ok) {
+            throw new Error(`Error fetching data: ${responseUser.statusText}`);
+        }
+
+        const userData = await responseUser.json() as User;
 
         if (sportDetail && startTime && dayStartBooking && bkDData) {
             setBookingDetailData(bkDData);
+            setUserData(userData);
+            setPaymentMethod(resPaymentMethod);
             setSportDetail(selectedSportDetail);
             setStartTime(startTime);
             setDayStartBooking(dayStartBooking);
@@ -1020,8 +1039,17 @@ export default function BookingSport() {
                 document.exitFullscreen();
                 setIsFullScreen(false);
             }
-        }
-    };
+
+        };
+    }
+
+    const [startDate, setStartDate] = useState(null);
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleButtonClick = () => {
+        setIsOpen(!isOpen);
+    };;
+
 
     if (isLoading) return <h2>Data is comming</h2>
 
@@ -1048,38 +1076,90 @@ export default function BookingSport() {
 
                 <Col md={4} className="text-center">
                     {selectDate == 0 ?
-                        <div className="header-date">
+                        <div className="header-date date-picker-container">
                             <i className="bi bi-arrow-left" onClick={() => setOnDayAndOnWeek('backward')}></i>
-                            <span className="mx-3">{formatDateVN(onDay)}</span>
+                            <span onClick={handleButtonClick} className="mx-3">{formatDateVN(onDay)}</span>
+                            {isOpen && (
+                                <div className="date-picker-dropdown">
+                                    <DatePicker
+                                        selected={startDate}
+                                        onChange={(date) => {
+                                            setStartDate(date);
+                                            setIsOpen(false);
+                                        }}
+                                        inline
+                                    />
+                                </div>
+                            )}
                             <i className="bi bi-arrow-right" onClick={() => setOnDayAndOnWeek('forward')}></i>
                         </div>
                         :
-                        <div className="header-date">
+                        <div className="header-date date-picker-container">
                             <i className="bi bi-arrow-left" onClick={() => setOnDayAndOnWeek('backward')}></i>
-                            <span className="mx-3">Từ {formatDateVN(startWeek)} đến {formatDateVN(endWeek)}</span>
+                            <span onClick={handleButtonClick} className="mx-3">Từ {formatDateVN(startWeek)} đến {formatDateVN(endWeek)}</span>
+                            {isOpen && (
+                                <div className="date-picker-dropdown">
+                                    <DatePicker
+                                        selected={startDate}
+                                        onChange={(date) => {
+                                            setStartDate(date);
+                                            setIsOpen(false);
+                                        }}
+                                        inline
+                                    />
+                                </div>
+                            )}
                             <i className="bi bi-arrow-right" onClick={() => setOnDayAndOnWeek('forward')}></i>
                         </div>
                     }
                 </Col>
 
                 <Col md={4}>
-                    <select
-                        value={selectSport}
-                        onChange={(e) => {
-                            setSelectSport(Number(e.target.value));
-                            clearData();
-                        }}
-                        className="form-select" style={{ border: '1px solid' }}
-                        aria-label="Default select example"
-                    >
-                        {dataSport &&
-                            dataSport.length > 0 &&
-                            dataSport.map((item, index) => (
-                                <option key={item.sportFieldId} value={index}>
-                                    {item.name}
-                                </option>
-                            ))}
-                    </select>
+                    <div className="d-flex">
+                        <select
+                            value={selectSport}
+                            onChange={(e) => {
+                                setSelectSport(Number(e.target.value));
+                                clearData();
+                            }}
+                            className="form-select" style={{ border: '1px solid' }}
+                            aria-label="Default select example"
+                        >
+                            {dataSport &&
+                                dataSport.length > 0 &&
+                                dataSport.map((item, index) => (
+                                    <option key={item.sportFieldId} value={index}>
+                                        {item.name}
+                                    </option>
+                                ))}
+                        </select>
+                        <button className="fw-bold btn btn-dark ms-2"><i className="bi bi-search"></i></button>
+                    </div>
+                    {/* <Row className="g-0 toggle-row">
+                        <Col md={10}>
+                            <select
+                                value={selectSport}
+                                onChange={(e) => {
+                                    setSelectSport(Number(e.target.value));
+                                    clearData();
+                                }}
+                                className="form-select" style={{ border: '1px solid' }}
+                                aria-label="Default select example"
+                            >
+                                {dataSport &&
+                                    dataSport.length > 0 &&
+                                    dataSport.map((item, index) => (
+                                        <option key={item.sportFieldId} value={index}>
+                                            {item.name}
+                                        </option>
+                                    ))}
+                            </select>
+                        </Col>
+                        <Col md={1}>
+                            <button className="fw-bold btn btn-dark" style={{ width: '100%' }}><i className="bi bi-search"></i></button>
+                        </Col>
+                    </Row> */}
+
                 </Col>
             </Row>
             {selectDate == 0 ?
@@ -1110,12 +1190,10 @@ export default function BookingSport() {
                 sport={dataSport && dataSport[selectSport]} owner={owner}
                 checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey}>
             </BookingModal >
-            <ViewEditBookingModal showViewOrEditBookingModal={showViewOrEditBookingModal}
-                setShowViewOrEditBookingModal={setShowViewOrEditBookingModal}
-                sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
-                sport={dataSport && dataSport[selectSport]} owner={owner}
+            <ViewEditBookingModal showViewOrEditBookingModal={showViewOrEditBookingModal} paymentMethod={paymentMethod}
+                setShowViewOrEditBookingModal={setShowViewOrEditBookingModal} owner={owner}
                 checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey}
-                bookingDetailData={bookingDetailData}>
+                bookingDetailData={bookingDetailData} userData={userData}>
             </ViewEditBookingModal >
         </>
     );

@@ -30,4 +30,9 @@ public class PaymentMethodRestController {
 		return paymentMethodService.findByName(name);
 	}
 	//đến đây
+	
+	@GetMapping("/paymentMethod/by/bookingdetailid/{id}")
+	public PaymentMethod findPaymentMethodByBookingDetailId(@PathVariable("id") Integer bookingDetailId){
+		return paymentMethodService.findPaymentMethodByBookingDetailId(bookingDetailId);
+	}
 }
