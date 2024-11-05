@@ -1,7 +1,7 @@
 'use client';
 import { Container } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
-// import Form from 'react-bootstrap/Form';
+import Form from 'react-bootstrap/Form';
 import { Dropdown, Button } from 'react-bootstrap';
 import Pagination from 'react-bootstrap/Pagination';
 import DatePicker from 'react-datepicker';
@@ -19,30 +19,20 @@ const Admin = () => {
     // Tạo state để lưu trữ mục được chọn
     const [selectedOption, setSelectedOption] = useState('Danh Sách Hóa Đơn');
     const [selectedOptionDay, setSelectedOptionDay] = useState('Hôm Nay');
-    const [showSubOptions, setShowSubOptions] = useState(false);
-    const [showDropdown, setShowDropdown] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [selectedOrderId, setSelectedOrderId] = useState(null); // Để lưu trữ orderId của đơn hàng được chọn
-
     // Hàm xử lý khi người dùng chọn một mục
     const handleSelect = (eventKey) => {
         setSelectedOption(eventKey);
     };
-
-    const handleSelectDay = (eventKey) => {
-        if (eventKey === "Tùy Chọn") {
-            setShowSubOptions((prev) => !prev); // Toggle hiển thị menu con
-        } else {
-            setSelectedOptionDay(eventKey);
-            setShowSubOptions(false); // Ẩn menu con nếu chọn mục khác
-            setShowDropdown(false); // Ẩn Dropdown chính khi chọn một mục
-        }
-    };
-    const handleToggle = (isOpen: boolean) => {
-        setShowDropdown(isOpen);
+    const handleSelectChange = (e) => {
+        setSelectedOption(e.target.value);
     };
 
-
+    const handleSelectDay = (e) => {
+        const value = e.target.value;
+        setSelectedOptionDay(value);
+    };
 
     const [dataListOther, setDataListOther] = useState([]);
     const [dataColumnnChartOther, setDataColumnnChartOther] = useState([]);
@@ -586,9 +576,6 @@ const Admin = () => {
                                 </>
                             )}
 
-
-
-
                             <div className="select-option mb-3 ms-auto me-1">
                                 <Dropdown>
                                     <Dropdown.Toggle variant="info" id="dropdown-basic">
@@ -603,71 +590,18 @@ const Admin = () => {
                             </div>
 
                             <div style={{ position: 'relative', display: 'inline-block' }} className='me-1'>
-                                <Dropdown
-                                    show={showDropdown}
-                                    onToggle={(isOpen) => {
-                                        // Chỉ đổi trạng thái khi cần thiết
-                                        handleToggle(isOpen);
-                                    }}
-                                    onSelect={(eventKey) => handleSelectDay(eventKey)}
+                                <Form.Select
+                                    aria-label="Chọn Ngày"
+                                    value={selectedOptionDay}
+                                    onChange={handleSelectDay}
                                 >
-                                    <Dropdown.Toggle
-                                        variant="info"
-                                        id="dropdown-basic"
-                                        onMouseDown={(e) => e.preventDefault()} // Ngăn sự kiện ảnh hưởng đến toggle
-                                    >
-                                        {selectedOptionDay}
-                                    </Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item eventKey="Hôm Nay">Hôm Nay</Dropdown.Item>
-                                        <Dropdown.Item eventKey="Hôm Qua">Hôm Qua</Dropdown.Item>
-                                        <Dropdown.Item eventKey="Một Tuần">Một Tuần</Dropdown.Item>
-                                        <Dropdown.Item eventKey="Một Tháng">Một Tháng</Dropdown.Item>
-                                        <Dropdown.Item
-                                            as="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setShowSubOptions(!showSubOptions);
-                                            }}
-                                        >
-                                            Tùy Chọn
-                                        </Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
-
-
-
-
-                                {/* Hiển thị sub-options bên phải của Dropdown */}
-                                {showSubOptions && (
-                                    <div
-                                        style={{
-                                            position: 'absolute',
-                                            top: '156px',
-                                            left: '100%',
-                                            marginLeft: '50px',
-                                            backgroundColor: 'white',
-                                            border: '1px solid #ccc',
-                                            borderRadius: '4px',
-                                            padding: '5px',
-                                            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-                                            zIndex: 1000,
-                                        }}
-                                    >
-                                        <Dropdown.Item
-                                            eventKey="Một Ngày"
-                                            onClick={() => { handleSelectDay("Một Ngày"); }}
-                                        >
-                                            Một Ngày
-                                        </Dropdown.Item>
-                                        <Dropdown.Item
-                                            eventKey="Nhiều Ngày"
-                                            onClick={() => { handleSelectDay("Nhiều Ngày"); }}
-                                        >
-                                            Nhiều Ngày
-                                        </Dropdown.Item>
-                                    </div>
-                                )}
+                                    <option value="Hôm Nay">Hôm Nay</option>
+                                    <option value="Hôm Qua">Hôm Qua</option>
+                                    <option value="Một Tuần">Một Tuần</option>
+                                    <option value="Một Tháng">Một Tháng</option>
+                                    <option value="Một Ngày"> Một Ngày</option>
+                                    <option value="Nhiều Ngày"> Nhiều Ngày</option>
+                                </Form.Select>
                             </div>
 
                             <div className="select-option">

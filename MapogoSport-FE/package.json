@@ -55,7 +55,8 @@
     "react-router-dom": "6.27.0",
     "react-toastify": "10.0.5",
     "sass": "1.79.3",
-    "swr": "2.2.5"
+    "swr": "2.2.5",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/google.visualization": "0.0.74",
