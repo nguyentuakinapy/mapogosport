@@ -19,6 +19,8 @@ type BookingsTypeOnWeek = {
 const SportDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+
+
     const [sportField, setSportField] = useState<SportField | null>(null);
     const [selectedSize, setSelectedSize] = useState<string>('');
     const [priceBySizeSp, setPriceBySizeSp] = useState<{ price: number, peakHourPrices: number }>({ price: 0, peakHourPrices: 0 });

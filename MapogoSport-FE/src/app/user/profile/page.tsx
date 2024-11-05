@@ -14,6 +14,7 @@ export default function Profile() {
             setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`);
         }
     }, []);
+
     return (
         <UserLayout>
             <div className='mb-3 text-danger' style={{ fontSize: '20px' }}>

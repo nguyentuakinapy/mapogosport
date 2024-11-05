@@ -46,13 +46,18 @@ const CartBadge = ({ username }: { username: string }) => {
     );
 };
 
-const Header = () => {
+interface HeaderProps {
+    setRefreshKey: (v: number) => void;
+    refreshKey: number
+}
+
+const Header = (props: HeaderProps) => {
     const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
     const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
     const [showChangePasswordNew, setShowChangePasswordNew] = useState<boolean>(false);
     const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
-
+    const { setRefreshKey, refreshKey } = props;
 
     const [userData, setUserData] = useState<User | null>(null);
 
@@ -206,7 +211,7 @@ const Header = () => {
                     ))}
                 </Container>
             </Navbar> */}
-            <LoginModal
+            <LoginModal setRefreshKey={setRefreshKey} refreshKey={refreshKey}
                 showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}
                 showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
                 showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}>

@@ -5,6 +5,7 @@ import useLocalStorage from "../useLocalStorage";
 import SidebarItem from "./SideBarItem";
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
+import { useData } from '@/app/context/UserContext';
 
 const menuGroups = [
     {
@@ -37,22 +38,25 @@ const Sidebar = () => {
     const pathname = usePathname();
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
-    const [usernameFetchApi, setUsernameFetchApi] = useState<string>("");
-    useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`)
-        }
-    }, []);
-    const { data } = useSWR(usernameFetchApi, fetcher, {
-        revalidateIfStale: false,
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false
-    });
+
+    // const [usernameFetchApi, setUsernameFetchApi] = useState<string>("");
+    // useEffect(() => {
+    //     const user = sessionStorage.getItem('user');
+    //     if (user) {
+    //         const parsedUserData = JSON.parse(user) as User;
+    //         setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`)
+    //     }
+    // }, []);
+    // const { data } = useSWR(usernameFetchApi, fetcher, {
+    //     revalidateIfStale: false,
+    //     revalidateOnFocus: false,
+    //     revalidateOnReconnect: false
+    // });
+
+    const userData = useData();
 
     const [name, setName] = useState('');
-    const [avatar, setAvatar] = useState();
+    const [avatar, setAvatar] = useState<string>();
 
     useEffect(() => {
         const activeItem = menuGroups.flatMap(group => group.menuItems)
@@ -63,11 +67,11 @@ const Sidebar = () => {
         }
     }, [pathname, setPageName]);
     useEffect(() => {
-        if (data) {
-            setName(data.fullname || '');
-            setAvatar(data.avatar ? data.avatar : 'avatar-init.gif');
+        if (userData) {
+            setName(userData.fullname || '');
+            setAvatar(userData.avatar ? userData.avatar : 'avatar-init.gif');
         }
-    }, [data]);
+    }, [userData]);
 
     return (
         <div className="menu-user">
@@ -79,7 +83,7 @@ const Sidebar = () => {
                         <label htmlFor="imageUpload" className="btn btn-link"> Sửa </label>
                     </div>
                     <div className="avatar-preview">
-                        <div style={data ? { backgroundImage: `url("/images/${avatar}")` } : { backgroundImage: `url("/images/avatar-init.gif")` }}></div>
+                        <div style={userData ? { backgroundImage: `url("/images/${avatar}")` } : { backgroundImage: `url("/images/avatar-init.gif")` }}></div>
                     </div>
                 </div>
                 <div className="text-dark fw-bold mb-3">{name}</div>

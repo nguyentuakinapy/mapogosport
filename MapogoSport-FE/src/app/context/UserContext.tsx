@@ -4,14 +4,14 @@ import useSWR from 'swr';
 interface UserProviderProps {
     children: ReactNode;
 }
+interface UserProviderProps {
+    children: ReactNode;
+    refreshKey: number;
+}
 
 const UserContext = createContext<User | null>(null);
 
-interface UserProviderProps {
-    children: ReactNode;
-}
-
-export function UserProvider({ children }: UserProviderProps) {
+export function UserProvider({ children, refreshKey }: UserProviderProps) {
     const [userData, setUserData] = useState<User | null>(null);
     const [username, setUsername] = useState<string>("");
 
@@ -21,11 +21,11 @@ export function UserProvider({ children }: UserProviderProps) {
             const parsedUserData = JSON.parse(user) as User;
             setUsername(parsedUserData.username);
         }
-    }, []);
+    }, [refreshKey]);
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-    const { data, error, isLoading } = useSWR(
+    const { data, error } = useSWR(
         username === "" ? null : `http://localhost:8080/rest/user/${username}`,
         fetcher,
         {
@@ -35,22 +35,30 @@ export function UserProvider({ children }: UserProviderProps) {
         }
     );
 
-    useEffect(() => {
-        if (error) {
-            console.error("Error fetching data:", error);
-        }
-        if (data) {
-            console.log("Data fetched:", data);
-            setUserData(data);
-        }
-    }, [data, error]);
+    // useEffect(() => {
+    //     if (error) {
+    //         console.error("Error fetching data:", error);
+    //     }
+    //     if (data) {
+    //         console.log("Data fetched:", data);
+    //         setUserData(data);
+    //     }
+    // }, [data, error]);
 
-    console.log("Username:", username);
-    console.log("UserData in context:", userData);
+    // console.log("Username:", username);
+    // console.log("UserData in context:", userData);
 
-    return <UserContext.Provider value={userData}>{children}</UserContext.Provider>;
+    return (
+        <UserContext.Provider value={userData}>
+            {children}
+        </UserContext.Provider>
+    );
 }
 
 export function useData() {
-    return useContext(UserContext);
+    const userData = useContext(UserContext);
+    // if (userData === null) {
+    //     // console.warn("User data is null.");
+    // }
+    return userData;
 }

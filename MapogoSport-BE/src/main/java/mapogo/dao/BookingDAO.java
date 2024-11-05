@@ -15,6 +15,8 @@ public interface BookingDAO extends JpaRepository<Booking, Integer>{
 	
 	List<Booking> findByBookingId(Integer bookingId);
 	
+	Booking findByBookingDetails_BookingDetailId(Integer bookingDetailId);
+	
 	@Query("SELECT o " +
 		       "FROM Booking o " +
 		       "WHERE o.owner.ownerId = :ownerId AND TRIM(o.status) = :status")

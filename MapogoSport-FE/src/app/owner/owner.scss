@@ -327,3 +327,58 @@
         font-weight: 700 !important;
     }
 }
+
+.search-date {
+    flex-wrap: nowrap;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+
+    .start {
+        border-radius: 5px 0 0 5px;
+        border-width: 1px 0px 1px 1px !important;
+        border-style: solid;
+        border-color: black;
+    }
+
+    .input-group-text {
+        border-width: 1px 0;
+        border-style: solid;
+        border-color: black;
+        background: #e9ecef;
+    }
+
+    .end {
+        border-radius: 0 5px 5px 0;
+        border-width: 1px 1px 1px 0px !important;
+        border-style: solid;
+        border-color: black;
+    }
+}
+
+.date-picker-container {
+    position: relative;
+
+    .date-picker-dropdown {
+        height: 100%;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        background-color: #142239;
+        border-radius: 4px;
+    }
+}
+
+
+.col-day {
+    cursor: pointer; 
+    &.active {
+        background-color: orangered !important; // Màu nền khi active
+    }
+
+    &:hover {
+        background-color: slategray !important; // Tối màu khi hover
+    }
+}

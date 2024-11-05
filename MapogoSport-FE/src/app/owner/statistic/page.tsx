@@ -22,7 +22,7 @@ export default function Home() {
   const [selectedFieldId, setSelectedFieldId] = useState<number | null>(null);
   const [selectSportFieldDetail, setSelectSportFieldDetail] = useState<any>([]);
   const [sportFieldDetailIds, setSportFieldDetailIds] = useState<number[]>([]);
-  const [revenueBySportFieldDetail,setRevenueBySportFieldDetail] = useState<any>([])
+  const [revenueBySportFieldDetail, setRevenueBySportFieldDetail] = useState<any>([])
 
   // Định nghĩa hàm getOwner
   const getOwner = async () => {
@@ -44,6 +44,7 @@ export default function Home() {
   }, []);
 
   console.log(owner?.ownerId);
+
 
   // Fetch success booking revenue 
   useEffect(() => {
@@ -105,7 +106,7 @@ export default function Home() {
           const ids = data.sportFielDetails.map((detail: any) => detail.sportFielDetailId);
           setSportFieldDetailIds(ids); // Lưu các ID vào sportFieldDetailIds
           console.log("sportFieldDetailIds:", ids);
-  
+
         } catch (error) {
           console.log("error fetch bookingdetail", error);
         }
@@ -114,45 +115,45 @@ export default function Home() {
     }
   }, [selectedFieldId]);
 
-  console.log("hiiiiiiiiiiiiiiii",sportFieldDetailIds)
+  console.log("hiiiiiiiiiiiiiiii", sportFieldDetailIds)
 
   //Fetch bookingdetail by sportField and ownerId
   useEffect(() => {
-    if(owner?.ownerId&&sportFieldDetailIds.length > 0){
-    const fetchData = async () => {
-      try {
-        const idsString = sportFieldDetailIds.join(',');
-        const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportField/byowner/${idsString}/${owner?.ownerId}`);
-        const data = await response.json();
-        setBookingdetailBySportField(data)
-        console.log("bookingDetail", data)
-      } catch (error) {
-        console.log("error fetch bookingdetail", error) 
+    if (owner?.ownerId && sportFieldDetailIds.length > 0) {
+      const fetchData = async () => {
+        try {
+          const idsString = sportFieldDetailIds.join(',');
+          const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportField/byowner/${idsString}/${owner?.ownerId}`);
+          const data = await response.json();
+          setBookingdetailBySportField(data)
+          console.log("bookingDetail", data)
+        } catch (error) {
+          console.log("error fetch bookingdetail", error)
+        }
       }
+      fetchData()
     }
-    fetchData()
-  }
-  }, [owner?.ownerId,sportFieldDetailIds])
+  }, [owner?.ownerId, sportFieldDetailIds])
 
   //Fetch data revenueField by sportFieldDetail
 
   useEffect(() => {
-    if(sportFieldDetailIds.length > 0){
-    const fetchData = async () => {
-      try {
-        const idsString = sportFieldDetailIds.join(',');
-        const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportFieldDetail/${idsString}`);
-        const data = await response.json();
-        setRevenueBySportFieldDetail(data)
-        console.log("revenuedata oooooooooooooooooooo", data)
-      } catch (error) {
-        console.log("error fetch ", error) 
+    if (sportFieldDetailIds.length > 0) {
+      const fetchData = async () => {
+        try {
+          const idsString = sportFieldDetailIds.join(',');
+          const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportFieldDetail/${idsString}`);
+          const data = await response.json();
+          setRevenueBySportFieldDetail(data)
+          console.log("revenuedata oooooooooooooooooooo", data)
+        } catch (error) {
+          console.log("error fetch ", error)
+        }
       }
+      fetchData()
     }
-    fetchData()
-  }
   }, [sportFieldDetailIds])
- 
+
 
   // Calculate total price from booking details
   const totalBookingPrice = bookingdetailBySportField.reduce((total, bookingDetail) => {
@@ -187,7 +188,7 @@ export default function Home() {
                         setSelectedFieldId(Number(e.target.value));
                         console.log('Selected Sport Field ID:', selectedFieldId);
                       }}
-                      value={selectedFieldId || ''} 
+                      value={selectedFieldId || ''}
                     >
                       {sportFieldByOwner.map((field, index) => (
                         <option key={`${field.categoriesField}-${index}`} value={field.sportFieldId}>
