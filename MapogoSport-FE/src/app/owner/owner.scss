@@ -373,13 +373,15 @@
 
 
 .col-day {
-    cursor: pointer; 
+    background-color: #142239;
+    cursor: pointer;
+
     &.active {
-        background-color: orangered !important; // Màu nền khi active
+        background-color: rgb(255, 89, 0) !important; // Màu nền khi active
     }
 
     &:hover {
-        background-color: slategray !important; // Tối màu khi hover
+        background-color: slategray; // Tối màu khi hover
     }
 }
 
@@ -405,6 +407,7 @@
         }
     }
 }
+
 .box-table-border {
     border: 1px solid #142239;
     border-radius: 8px 8px 0 0;
@@ -470,6 +473,7 @@
         }
     }
 }
+
 .custom-tabs {
     .nav-item {
         flex: 1;
@@ -507,6 +511,7 @@
         }
     }
 }
+
 .dropdown {
     .dropdown-toggle {
         width: 110px !important;
@@ -514,30 +519,37 @@
         text-align: center;
         font-weight: 700;
     }
+
     .dropdown-menu {
         font-size: 13px;
         background: #142239;
         transform: translate3d(-7.8px, 32px, 0px) !important;
+
         .dropdown-item {
             color: white;
+
             &:hover {
                 color: black;
             }
         }
     }
 }
+
 .pagination {
     display: flex;
     align-items: center;
     justify-content: center;
     margin-top: 1rem;
+
     .page-item.active {
         .page-link {
             background: #142239 !important;
         }
     }
 }
+
 .form-control {
     border: 1px solid !important;
 }
+
 /*======================================================Booking Bill CSS End======================================================*/

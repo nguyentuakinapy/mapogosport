@@ -14,13 +14,13 @@ import ChangePasswordNew from "@/components/account/modal/change-password-new.mo
 import Popup from "@/components/User/modal/popup-voucher.modal";
 import useSWR from "swr";
 import { height } from "@fortawesome/free-brands-svg-icons/fa42Group";
+import { useData } from "./context/UserContext";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
   const [sportFields, setSportFields] = useState<SportField[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
-  const [userData, setUserData] = useState<User>();
 
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
@@ -80,7 +80,7 @@ export default function Home() {
   }, []);
 
   const createOwnerSubmit = () => {
-    const user = sessionStorage.getItem('user');
+    const user = localStorage.getItem('username');
     if (user) {
       setShowCreateOwnerModal(true);
     } else {
@@ -104,30 +104,7 @@ export default function Home() {
     fetchData()
   }, [])
 
-  const [username, setUsername] = useState<string>("");
-  useEffect(() => {
-    const user = sessionStorage.getItem('user');
-    if (user) {
-      const parsedUserData = JSON.parse(user) as User;
-      setUsername(parsedUserData.username);
-      // console.log(parsedUserData); // Kiểm tra dữ liệu
-    }
-  })
-
-  const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-  const { data, error, isLoading } = useSWR(
-    username == "" ? null : `http://localhost:8080/rest/user/${username}`, fetcher, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-  });
-
-  useEffect(() => {
-    if (data) {
-      setUserData(data);
-    }
-  }, [data])
+  const userData = useData();
 
   const [hasOwnerRole, setHasOwnerRole] = useState(false);
 
@@ -148,8 +125,8 @@ export default function Home() {
           </div>
           <div className="d-flex justify-content-center mt-4">
             <div className="input-group" style={{ width: '70%', backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: '8px', padding: '10px' }}>
-              <select className="form-control" style={{ border: 'none', height: '50px' }}>
-                <option selected>Lọc theo loại sân</option>
+              <select defaultValue={0} className="form-control" style={{ border: 'none', height: '50px' }}>
+                <option value={'0'}>Lọc theo loại sân</option>
                 <option value="1">Sân cỏ nhân tạo</option>
                 <option value="2">Sân cỏ tự nhiên</option>
               </select>

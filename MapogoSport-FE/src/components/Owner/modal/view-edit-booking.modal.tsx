@@ -1,6 +1,7 @@
 import { formatPrice } from "@/components/Utils/Format";
 import { use, useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { safeMultipleDatesFormat } from "react-datepicker/dist/date_utils";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
 
@@ -33,6 +34,7 @@ const BookingModal = (props: OwnerProps) => {
     }, [bookingDetailData])
 
     const handleClose = () => {
+        setEditBooking(true);
         setShowViewOrEditBookingModal(false);
     }
 
@@ -48,9 +50,28 @@ const BookingModal = (props: OwnerProps) => {
                     <Row>
                         <Col>
                             <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name}
-                                <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
-                                    <i className="bi bi-pencil-square ms-2 text-dark" onClick={() => setEditBooking(!editBooking)} style={{ cursor: 'pointer' }} />
-                                </OverlayTrigger>
+                                {bookingDetailData &&
+                                    new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                        new Date().getHours() <= parseInt(bookingDetailData.endTime.split('h')[0]) ? (
+                                            <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
+                                                <i
+                                                    className="bi bi-pencil-square ms-2 text-dark"
+                                                    onClick={() => setEditBooking(!editBooking)}
+                                                    style={{ cursor: 'pointer' }}
+                                                />
+                                            </OverlayTrigger>
+                                        ) : (
+                                            new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                                <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
+                                                    <i
+                                                        className="bi bi-pencil-square ms-2 text-dark"
+                                                        onClick={() => setEditBooking(!editBooking)}
+                                                        style={{ cursor: 'pointer' }}
+                                                    />
+                                                </OverlayTrigger>
+                                            )
+                                        )
+                                    )}
                             </h6>
                             <FloatingLabel controlId="floatingDate" label="Ngày đặt!" className="flex-grow-1 mb-2">
                                 <Form.Control
@@ -148,11 +169,23 @@ const BookingModal = (props: OwnerProps) => {
                             </FloatingLabel> */}
                             </Col>
                         )}
-                        {!editBooking ? (
-                            <button className="btn btn-danger m-auto" style={{ width: '97%' }}>Cập nhật</button>
-                        ) :
-                            <button className="btn btn-danger m-auto" style={{ width: '97%' }}>Hủy đặt sân</button>
-                        }
+                        {bookingDetailData &&
+                            new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                new Date().getHours() <= parseInt(bookingDetailData.endTime.split('h')[0]) ? (
+                                    !editBooking ? (
+                                        <button className="btn btn-danger m-auto" style={{ width: '97%' }}>Cập nhật</button>
+                                    ) :
+                                        <button className="btn btn-danger m-auto" style={{ width: '97%' }}>Hủy đặt sân</button>
+
+                                ) : (
+                                    new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                        !editBooking ? (
+                                            <button className="btn btn-danger m-auto" style={{ width: '97%' }}>Cập nhật</button>
+                                        ) :
+                                            <button className="btn btn-danger m-auto" style={{ width: '97%' }}>Hủy đặt sân</button>
+                                    )
+                                )
+                            )}
                     </Row>
 
                 </Modal.Body>

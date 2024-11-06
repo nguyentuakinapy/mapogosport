@@ -63,6 +63,7 @@ interface BookingDetail {
     };
     price: number;
     date: string;
+    subcriptionKey: string;
 }
 
 

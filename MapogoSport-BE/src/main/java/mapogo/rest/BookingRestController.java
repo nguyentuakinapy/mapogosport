@@ -99,7 +99,6 @@ public class BookingRestController {
 
 	@PostMapping("/booking/detail")
 	public BookingDetail saveBookingDetail(@RequestBody Map<String, Object> bd) {
-		System.out.println(bd);
 		return bookingDetailService.createBookingDetail(bd);
 	}
 
