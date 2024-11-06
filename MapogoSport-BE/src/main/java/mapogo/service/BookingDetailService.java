@@ -17,4 +17,6 @@ public interface BookingDetailService {
 	BookingDetail createBookingDetail(Map<String, Object> bd);
 	
 	BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId, LocalDate date);
+	
+	void cancelBookingDetail(Integer bookingDetailId);
 }
