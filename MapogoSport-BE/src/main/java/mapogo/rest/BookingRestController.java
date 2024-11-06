@@ -40,9 +40,9 @@ public class BookingRestController {
 		return bookingService.findAll();
 	}
 	
-	@GetMapping("/owner/booking/findAll")
-	public List<Map<String, Object>> ownerFindAll() {
-		return bookingService.findAllBooking();
+	@GetMapping("/owner/booking/findAll/{ownerId}")
+	public List<Map<String, Object>> ownerFindAll(@PathVariable("ownerId") Integer ownerId) {
+		return bookingService.findAllBookingByOwnerId(ownerId);
 	}
 	
 	@PutMapping("/owner/booking/update")

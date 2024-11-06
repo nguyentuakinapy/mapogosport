@@ -12,7 +12,7 @@ public interface BookingService {
 	List<Booking> findAll();
 	
 	List<Map<String, Object>> findBookingByUsername(String username);
-	List<Map<String, Object>> findAllBooking();
+	List<Map<String, Object>> findAllBookingByOwnerId(Integer ownerId);
 	Order updateStatusBooking(Map<String, Object> bookingData);
 	
 	List<Booking> findById(Integer id);

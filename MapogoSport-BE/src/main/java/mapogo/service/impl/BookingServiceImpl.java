@@ -52,8 +52,8 @@ public class BookingServiceImpl implements BookingService {
 	}
 	
 	@Override
-	public List<Map<String, Object>> findAllBooking() {
-		List<Booking> bookings = bookingDAO.findAll();
+	public List<Map<String, Object>> findAllBookingByOwnerId(Integer ownerId) {
+		List<Booking> bookings = bookingDAO.findByOwner_OwnerId(ownerId);
 		List<Map<String, Object>> resultList = new ArrayList<>();
 		
 		for (Booking booking: bookings) {
