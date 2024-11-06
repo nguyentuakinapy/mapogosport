@@ -33,7 +33,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "src/app/api/create-momo-payment/route.ts"  ],
   "exclude": [
     "node_modules"
   ]

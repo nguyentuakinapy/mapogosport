@@ -30,7 +30,7 @@ public class GallerySportFieldRestController {
 	@Autowired
     private GallerySportFieldService gallerySportFieldService;
 
-    @DeleteMapping("/gallerySportField/delete/{gallerySportFieldId}")
+    @DeleteMapping("/gallerySportFieldK/delete/{gallerySportFieldId}")
     public ResponseEntity<String> deleteGallery(@PathVariable int gallerySportFieldId) {
         boolean isDeleted = gallerySportFieldService.deleteGalleryById(gallerySportFieldId);
         if (isDeleted) {

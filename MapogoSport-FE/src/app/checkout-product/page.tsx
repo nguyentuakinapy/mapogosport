@@ -130,7 +130,6 @@ const CheckoutPage = () => {
     } else {
       try {
         const order = await handleCreateOrder();
-        console.log("order truyền:", order);
         const paymentResponse = await axios.post(
           `http://localhost:8080/api/payment/create_payment`,
           null,
