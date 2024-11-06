@@ -12,6 +12,8 @@ import mapogo.entity.BookingDetail;
 
 public interface BookingDAO extends JpaRepository<Booking, Integer> {
 	List<Booking> findByUser_Username(String username);
+	
+	List<Booking> findByOwner_OwnerId(Integer ownerId);;
 
 	List<Booking> findByBookingId(Integer bookingId);
 
