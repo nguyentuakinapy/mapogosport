@@ -69,6 +69,12 @@ public class Booking implements Serializable{
 	@JsonManagedReference("booking-bookingdetail")
 	private List<BookingDetail> bookingDetails;
 	
+	@Column(name="FullName")
+	private String fullName = null;
+	
+	@Column(name="PhoneNumber")
+	private String phoneNumber = null;
+	
 	@Transient
     private Map<String, Object> sportFieldInfo;
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,10 +50,20 @@ public class ProductReivewRestController {
 	        reviewMap.put("rating", review.getRating());
 	        reviewMap.put("comment", review.getComment());
 	        reviewMap.put("datedAt", review.getDatedAt());
-	        reviewMap.put("productName", review.getProduct().getName());
+	        
+	        Map<String, Object> productMap = new HashMap<>();
+	        productMap.put("productName", review.getProduct().getName());
+	        productMap.put("productId", review.getProduct().getProductId());
+	        
+	        reviewMap.put("product", productMap);
 	        result.add(reviewMap);
 	    }
 	    return result;
+	}
+	
+	@DeleteMapping("/user/productReview/{productReviewId}")
+	public void deleteByUser(@PathVariable("productReviewId") Integer productReviewId) {
+		proReviewService.deleteReviewByUser(productReviewId);
 	}
 	
 }

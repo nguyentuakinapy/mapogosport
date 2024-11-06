@@ -1,4 +1,3 @@
-
 package mapogo.entity;
 
 import java.io.Serializable;
@@ -41,4 +40,3 @@ public class GallerySportField implements Serializable{
     private SportField sportField;
 
 }
-

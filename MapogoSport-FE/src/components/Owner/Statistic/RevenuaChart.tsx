@@ -6,9 +6,11 @@ export const options = {
   is3D: true,
 };
 
-const data = null;
+interface RevenueChartProps {
+  data: any[];
+}
 
-export default function RevenueChart() {
+export default function RevenueChart({ data }: RevenueChartProps) {
   return (
     <Chart
       chartType="PieChart"

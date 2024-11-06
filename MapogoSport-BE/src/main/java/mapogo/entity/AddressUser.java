@@ -36,4 +36,6 @@ public class AddressUser implements Serializable {
 	@Column(name = "AddressDetail", nullable = false)
 	private String addressDetail;
 
+	@Column(name = "Active")
+	private Boolean active;
 }

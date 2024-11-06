@@ -4,26 +4,25 @@ import Nav from "./app.nav";
 import '../globals.css'
 import Header from "./app.header";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { UserProvider } from "@/app/context/UserContext";
+import { vi } from "date-fns/locale/vi";
+import { registerLocale, setDefaultLocale } from "react-datepicker";
+
+registerLocale('vi', vi);
+setDefaultLocale('vi');
 
 export default function OwnerLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+
     const [weather, setWeather] = useState<WeatherData | null>(null);
 
     const apiKey = '767451e95917fe713995435a49beb32a'; // Đặt API key ngoài để dễ quản lý
 
-    const [userData, setUserData] = useState<User | null>(null);
 
     useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUserData(parsedUserData);
-            // console.log(parsedUserData); // Kiểm tra dữ liệu
-        }
-
         const fetchWeather = async (lat: number, lon: number) => {
             try {
                 const response = await fetch(
@@ -55,7 +54,7 @@ export default function OwnerLayout({
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude, accuracy } = position.coords;
-                        console.log(`Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`);
+                        // console.log(`Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`);
                         fetchWeather(latitude, longitude);
                     },
                     (err) => {
@@ -99,15 +98,20 @@ export default function OwnerLayout({
             }
         }
     }, []);
+
+    const [refreshKey, setRefreshKey] = useState<number>(0);
+
+
     return (
-        <>
+        <UserProvider refreshKey={refreshKey}>
             <Nav isAniActive={isAniActive} toggleAni={toggleAni} isActive={isActive} setIsActive={setIsActive} />
-            <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} userData={userData} />
+            <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} />
+
             <main className={`main-right ${isAniActive ? 'mainRight' : ''} pb-1 `}>
                 <div className="main-body">
                     {children}
                 </div>
             </main>
-        </>
+        </UserProvider>
     )
 }

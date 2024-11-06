@@ -3,9 +3,12 @@ package mapogo.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.jpa.repository.Query;
 
+import mapogo.dto.ProductDetailDTO;
+import mapogo.dto.ProductDetailSizeDTO;
 import mapogo.entity.Product;
 import mapogo.entity.ProductDetail;
 import mapogo.entity.ProductDetailSize;
@@ -33,5 +36,23 @@ public interface ProductDetailService {
 //	ProductDetail findProduct_Id_By_Product_Detail_Id( Integer productDetail_Id);
 	
 	ProductDetail updateProductDetailWithMap(Map<String, Object> data);
+	
+	
+	  // Phương thức lấy danh sách ProductDetailDTO
+    List<ProductDetailDTO> findAllProductDetailDTO();
+
+    // Phương thức chuyển đổi ProductDetail sang ProductDetailDTO
+    ProductDetailDTO convertToDTO(ProductDetail productDetail);
+    
+	  // Phương thức lấy danh sách theo ID productdetail ProductDetailDTO
+    ProductDetailDTO findByIdProductDetailDTO(Integer id);
+    
+    Optional<ProductDetailDTO> findByIdDto(Integer id); // Sửa kiểu trả về thành Optional<ProductDetailDTO>
+
+    List<ProductDetailDTO> findByIdProductDto(Integer id); // Trả về ProductDetailDTO
+
+
+	  
+	
 
 }

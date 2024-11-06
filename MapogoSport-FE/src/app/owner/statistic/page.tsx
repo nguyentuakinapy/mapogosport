@@ -1,6 +1,6 @@
 'use client'
 import BookingChart from '@/components/Owner/Statistic/BookingChart';
-import CustomerChartPage from '@/components/Owner/Statistic/CustomerChartPage';
+// import CustomerChartPage from '@/components/Owner/Statistic/CustomerChartPage';
 import RevenueChart from '@/components/Owner/Statistic/RevenuaChart';
 import { useEffect, useState } from 'react';
 import { Button, InputGroup, Nav, Table } from 'react-bootstrap';
@@ -9,22 +9,57 @@ import { faFileExport } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { formatPrice } from "@/components/Utils/Format"
+import ModalTableDetail from '@/components/Owner/modal/tableDetailStatictis.modal';
+import CustomerLineChart from '@/components/Owner/Statistic/CustomerLineChart';
+import { userAgent } from 'next/server';
+import ModalTableDetailCustomer from '@/components/Owner/modal/tableDetailCustomer.modal';
+
+
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [bookingSuccess, setBookingSuccess] = useState<Booking[]>([]);
-  const [revenueByDate, setRevenueByDate] = useState<number | null>(null);
   const [sportFieldByOwner, setSportFieldByOwner] = useState<SportField[]>([]);
   const [bookingdetailBySportField, setBookingdetailBySportField] = useState<BookingDetail[]>([])
   const [owner, setOwner] = useState<Owner>();
   const [selectedFieldId, setSelectedFieldId] = useState<number | null>(null);
   const [selectSportFieldDetail, setSelectSportFieldDetail] = useState<any>([]);
-  const [sportFieldDetailIds, setSportFieldDetailIds] = useState<number[]>([]);
-  const [revenueBySportFieldDetail,setRevenueBySportFieldDetail] = useState<any>([])
+  const [sportFieldDetailIds, setSportFieldDetailIds] = useState<number[]>([]); 
+  const [revenueBySportFieldDetail, setRevenueBySportFieldDetail] = useState<any>([])
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [idSportFieldDetailTable, setIdSportFieldDetailTable] = useState<number | null>(null);
+  const [bookingDetailBySpFDetail, setBookingDetailBySpFDetail] = useState<BookingDetail[]>([]);
+  // by Date
+  const [bookingSuccessByDate, setBookingSuccessByDate] = useState<Booking[]>([]);
+  const [bookingdetailBySportFieldByDate, setBookingdetailBySportFieldByDate] = useState<BookingDetail[]>([])
+  //chart customer
+  const [totalCustomer, setTotalCustomer] = useState<number | null>(null);
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [customerData, setCustomerData] = useState<any[]>([]);
+  const [rankCustomer, setRankCustomer] = useState<any[]>([])
+  const [selectedUsername, setSelectedUsername] = useState<string | null>(null)
+  const [showModalRank, setShowModalRank] = useState(false);
+  const [bookingByUsernameModal, setBookingByUsernameModal] = useState<Booking[]>([])
+  // Pagination
+  const itemsPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-  // Định nghĩa hàm getOwner
+  const currentItems = rankCustomer.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(rankCustomer.length / itemsPerPage);
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+
+  const years = Array.from(new Array(10), (val, index) => currentYear - index);
+
+  // Definition getOwner function
   const getOwner = async () => {
     const user = sessionStorage.getItem('user');
 
@@ -40,10 +75,11 @@ export default function Home() {
   };
 
   useEffect(() => {
-    getOwner(); // Gọi hàm getOwner trong useEffect
+    getOwner(); // Call  getOwner function in useEffect
   }, []);
 
   console.log(owner?.ownerId);
+
 
   // Fetch success booking revenue 
   useEffect(() => {
@@ -101,11 +137,11 @@ export default function Home() {
           const data = await response.json();
           setSelectSportFieldDetail(data);
           console.log("sportFieldDetail", data);
-          // Lấy mảng các sportFielDetailId và lưu vào state sportFieldDetailIds
+          // Get array sportFielDetailId and save in state sportFieldDetailIds
           const ids = data.sportFielDetails.map((detail: any) => detail.sportFielDetailId);
-          setSportFieldDetailIds(ids); // Lưu các ID vào sportFieldDetailIds
+          setSportFieldDetailIds(ids); // Save ID in sportFieldDetailIds
           console.log("sportFieldDetailIds:", ids);
-  
+
         } catch (error) {
           console.log("error fetch bookingdetail", error);
         }
@@ -114,45 +150,49 @@ export default function Home() {
     }
   }, [selectedFieldId]);
 
-  console.log("hiiiiiiiiiiiiiiii",sportFieldDetailIds)
+  console.log("hiiiiiiiiiiiiiiii", sportFieldDetailIds)
 
   //Fetch bookingdetail by sportField and ownerId
   useEffect(() => {
-    if(owner?.ownerId&&sportFieldDetailIds.length > 0){
-    const fetchData = async () => {
-      try {
-        const idsString = sportFieldDetailIds.join(',');
-        const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportField/byowner/${idsString}/${owner?.ownerId}`);
-        const data = await response.json();
-        setBookingdetailBySportField(data)
-        console.log("bookingDetail", data)
-      } catch (error) {
-        console.log("error fetch bookingdetail", error) 
+    if (owner?.ownerId && sportFieldDetailIds.length > 0) {
+      const fetchData = async () => {
+        try {
+          const idsString = sportFieldDetailIds.join(',');
+          const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportField/byowner/${idsString}/${owner?.ownerId}`);
+          const data = await response.json();
+          setBookingdetailBySportField(data)
+          console.log("bookingDetail", data)
+        } catch (error) {
+          console.log("error fetch bookingdetail", error)
+        }
       }
+      fetchData()
     }
-    fetchData()
-  }
-  }, [owner?.ownerId,sportFieldDetailIds])
+  }, [owner?.ownerId, sportFieldDetailIds])
 
   //Fetch data revenueField by sportFieldDetail
 
   useEffect(() => {
-    if(sportFieldDetailIds.length > 0){
-    const fetchData = async () => {
-      try {
-        const idsString = sportFieldDetailIds.join(',');
-        const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportFieldDetail/${idsString}`);
-        const data = await response.json();
-        setRevenueBySportFieldDetail(data)
-        console.log("revenuedata oooooooooooooooooooo", data)
-      } catch (error) {
-        console.log("error fetch ", error) 
+    if (sportFieldDetailIds.length > 0) {
+      const fetchData = async () => {
+        try {
+          const idsString = sportFieldDetailIds.join(',');
+          const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportFieldDetail/${idsString}`);
+          const data = await response.json();
+          setRevenueBySportFieldDetail(data)
+          const formattedData = [
+            ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
+            ...data.map((item: any) => [item[0], item[1], item[2], item[3], item[4]])
+          ];
+          setChartData(formattedData);
+          console.log("revenuedata oooooooooooooooooooo", data)
+        } catch (error) {
+          console.log("error fetch ", error)
+        }
       }
+      fetchData()
     }
-    fetchData()
-  }
   }, [sportFieldDetailIds])
- 
 
   // Calculate total price from booking details
   const totalBookingPrice = bookingdetailBySportField.reduce((total, bookingDetail) => {
@@ -164,15 +204,253 @@ export default function Home() {
     return totalAmount + booking.totalAmount
   }, 0)
 
+
+
+  // Revenue by Date
+
+
+  //fetch booking success by Date
+  useEffect(() => {
+    if (owner?.ownerId) {
+      const fetchData = async () => {
+        try {
+          // Set endDate to startDate if only startDate is provided
+          const effectiveEndDate = endDate || startDate;
+
+          const formatDate = (date: Date | null) => {
+            if (!date) return '';
+            const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            return utcDate.toISOString().split('T')[0];
+          };
+
+          const response = await fetch(
+            `http://localhost:8080/rest/booking/success/revenue/byDate/Đã thanh toán/${owner?.ownerId}/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`
+          );
+
+          if (!response.ok) {
+            throw new Error('Error fetching data');
+          }
+
+          const data = await response.json();
+          setBookingSuccessByDate(data);
+          console.log("Booking Success Data By Date:", data);
+        } catch (error) {
+          console.log("Error fetching revenue", error);
+        }
+      };
+      fetchData();
+    }
+  }, [owner, startDate, endDate]);
+
+
+  //Calculate total totalAmount from booking
+  const totalAmountBookingByDate = bookingSuccessByDate.reduce((totalAmount, booking) => {
+    return totalAmount + booking.totalAmount
+  }, 0)
+
+  console.log(totalAmountBookingByDate)
+
+  //Fetch bookingdetail by sportField and ownerId by Date
+  useEffect(() => {
+    if (owner?.ownerId && sportFieldDetailIds.length > 0) {
+      const fetchData = async () => {
+        try {
+          // Ensure endDate is set to startDate if only startDate is provided
+          const effectiveEndDate = endDate || startDate;
+
+          // Helper function to format date to UTC and only include YYYY-MM-DD
+          const formatDate = (date: Date | null) => {
+            if (!date) return '';
+            const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            return utcDate.toISOString().split('T')[0];
+          };
+
+          // Create a comma-separated string of IDs for the API request
+          const idsString = sportFieldDetailIds.join(',');
+
+          // Fetch data from the API
+          const response = await fetch(
+            `http://localhost:8080/rest/bookingDetail/byOwner/bySportField/byDate/${idsString}/${owner?.ownerId}/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`
+          );
+
+          if (!response.ok) {
+            throw new Error('Error fetching booking details');
+          }
+
+          const data = await response.json();
+          setBookingdetailBySportFieldByDate(data);
+          console.log("Booking Detail by Date:", data);
+        } catch (error) {
+          console.error("Error fetching booking details:", error);
+        }
+      };
+
+      fetchData();
+    }
+  }, [owner?.ownerId, sportFieldDetailIds, startDate, endDate]);
+
+
+  // Calculate total price from booking details
+  const totalBookingDetailPriceByDate = bookingdetailBySportFieldByDate.reduce((total, bookingDetail) => {
+    return total + bookingDetail.price;
+  }, 0);
+
+  //Fetch data revenueField by sportFieldDetail by Date
+
+  useEffect(() => {
+    if (sportFieldDetailIds.length > 0) {
+      const fetchData = async () => {
+        try {
+          //set startDate for endDate when endDate is isEmty
+          const effectiveEndDate = endDate || startDate;
+          // Helper function to format date to UTC and only include YYYY-MM-DD
+          const formatDate = (date: Date | null) => {
+            if (!date) return '';
+            const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            return utcDate.toISOString().split('T')[0];
+          };
+          const idsString = sportFieldDetailIds.join(',');
+          const response = await fetch(`http://localhost:8080/rest/bookingDetail/bySportField/byDate/${idsString}/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`);
+          const data = await response.json();
+          const formattedData = [
+            ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
+            ...data.map((item: any) => [item[0], item[1], item[2], item[3], item[4]])
+          ];
+          setChartData(formattedData);
+          console.log("revenuedata oooooooooooooooooooo", data)
+        } catch (error) {
+          console.log("error fetch ", error)
+        }
+      }
+      fetchData()
+    }
+  }, [sportFieldDetailIds, startDate, endDate])
+
+  // Function handel detail table
+
+  const handleOpenModal = (id: number) => {
+    setIdSportFieldDetailTable(id); // Update state immediately
+    setShowModal(true);
+    console.log('chartData:', chartData);
+    console.log('totalBookingPrice:', totalBookingPrice);
+    console.log("idSportFieldDetailTable", id);
+
+    // Fetch modal data based on the provided id
+    const fetchModalData = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/rest/bookingdetail/bysportFieldDetail/${id}`);
+        const data = await response.json();
+        setBookingDetailBySpFDetail(data); // Store modal-specific data
+        console.log("Booking Detail by SportFieldDetail for Modal", data);
+      } catch (error) {
+        console.log("Error fetching modal booking details", error);
+      }
+    };
+
+    fetchModalData();
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setBookingDetailBySpFDetail([]);
+  }
+
   console.log("id spf", selectedFieldId)
 
 
   console.log('sate', startDate);
+
+  //char Customer
+
+  //Fetch totalCustomer by OwnerId from Booking
+  useEffect(() => {
+    if (owner?.ownerId) {
+      const fetchData = async () => {
+        try {
+          const response = await fetch(`http://localhost:8080/rest/booking/byOwnerId/totalCustomer/${owner?.ownerId}`)
+          const data = await response.json();
+          setTotalCustomer(data);
+          console.log("Tổng khách hàng", data)
+        } catch (error) {
+          console.log("Lỗi khi lấy data totalCustomer", error)
+        }
+      }
+      fetchData()
+    }
+  }, [owner?.ownerId])
+
+  // handle year
+  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedYear(parseInt(event.target.value));
+  };
+
+  // Fetch customer by month
+
+  useEffect(() => {
+    if (owner?.ownerId && selectedYear) {
+      const fetchData = async () => {
+        try {
+          const response = await fetch(`http://localhost:8080/rest/booking/customerByMonth/byOwnerId/${selectedYear}/${owner.ownerId}`)
+          const data = await response.json();
+          const formattedData = [
+            ['Month', 'Customers'], // Header for the chart
+            ...Object.entries(data).map(([month, count]) => [parseInt(month), count])
+          ];
+          setCustomerData(formattedData)
+          console.log("cusssssssssssssssssssssssssss", formattedData)
+        } catch (error) {
+          console.log("Lỗi fetch data của customer by month", error)
+        }
+      }
+      fetchData()
+    }
+  }, [owner?.ownerId, selectedYear])
+
+  //Fetch rank customer
+  useEffect(() => {
+    if (owner?.ownerId) {
+      const fetchData = async () => {
+        try {
+          const response = await fetch(`http://localhost:8080/rest/booking/customer/byOwner/byUsername/${owner?.ownerId}`)
+          const data = await response.json()
+          setRankCustomer(data)
+        } catch (error) {
+          console.log("Error fetch data rank customer", error)
+        }
+      }
+      fetchData()
+    }
+  }, [owner?.ownerId])
+
+  const handleOpenModalRank = (username: string) => {
+    setSelectedUsername(username); // Update state immediately
+    console.log("username",username)
+    setShowModalRank(true);
+    // Fetch modal data based on the provided username
+    const fetchModalData = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/rest/user/booking/${username}`);
+        const data = await response.json();
+        setBookingByUsernameModal(data); // Store modal-specific data
+        console.log("Booking Detail Customer", data);
+      } catch (error) {
+        console.log("Error fetching modal booking details", error);
+      }
+    };
+    fetchModalData();
+  };
+
+  const handleCloseModalRank = () => {
+    setShowModalRank(false);
+    setBookingByUsernameModal([]);
+  }
+
   const renderContent = () => {
     switch (activeTab) {
       case 'all':
         return (
           <>
+            <ModalTableDetail showModal={showModal} onClose={handleCloseModal} data={bookingDetailBySpFDetail} />
             <div className="card">
               <div className="card-body">
                 <div className="row mt-0">
@@ -187,7 +465,7 @@ export default function Home() {
                         setSelectedFieldId(Number(e.target.value));
                         console.log('Selected Sport Field ID:', selectedFieldId);
                       }}
-                      value={selectedFieldId || ''} 
+                      value={selectedFieldId || ''}
                     >
                       {sportFieldByOwner.map((field, index) => (
                         <option key={`${field.categoriesField}-${index}`} value={field.sportFieldId}>
@@ -204,8 +482,12 @@ export default function Home() {
                 </div>
                 <div className="row">
                   <div className="col-3">
-                    <span className="price-amount">{formatPrice(totalAmountBooking)} /</span>
-                    <span className="price-currency">{formatPrice(totalBookingPrice)}</span>
+                    <span className="price-amount">{formatPrice(
+                      startDate || endDate ? totalAmountBookingByDate ?? 0 : totalAmountBooking
+                    )} /</span>
+                    <span className="price-amount">{formatPrice(
+                      startDate || endDate ? totalBookingDetailPriceByDate ?? 0 : totalBookingPrice
+                    )} </span>
                   </div>
                   <div className="col-7 text-center">
                     <InputGroup className="search-date">
@@ -239,36 +521,55 @@ export default function Home() {
 
               </div>
             </div>
-            <RevenueChart />
+            <RevenueChart data={chartData} />
             <div>
               <Table striped bordered hover>
                 <thead>
                   <tr>
                     <th>#</th>
                     <th>Thời gian</th>
-                    <th>Loại sân</th>
+                    <th>Tên sân</th>
                     <th>Tổng doanh thu</th>
                     <th>Doanh thu</th>
                     <th>Tỉ lệ</th>
+                    <th>Chi tiết</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                    <td>@mdo</td>
-                    <td>@mdo</td>
-                  </tr>
-                  <tr>
-                    <td>1</td>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                    <td>@mdo</td>
-                    <td>@mdo</td>
-                  </tr>
+                  {chartData.slice(1).map((field, index) => {
+                    const isDateSelected = startDate || endDate;
+                    const displayDate = startDate || endDate
+                      ? `${startDate ? new Date(startDate).toLocaleDateString('en-GB') : ''} / ${endDate ? new Date(endDate).toLocaleDateString('en-GB') : ''}`
+                      : `${new Date(field[2]).toLocaleDateString('en-GB')} / ${new Date(field[3]).toLocaleDateString('en-GB')}`;
+                    const displayTotalBookingPrice = isDateSelected ? totalBookingDetailPriceByDate : totalBookingPrice;
+                    const displayFieldRevenue = isDateSelected ? field[1] : field[1];
+                    return (
+
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>
+                          {displayDate}
+                        </td>
+                        <td>{field[0]}</td>
+                        <td>{formatPrice(displayTotalBookingPrice)}</td>
+                        <td>{formatPrice(displayFieldRevenue)}</td>
+                        <td>{(displayFieldRevenue / displayTotalBookingPrice * 100).toFixed(1)}%</td>
+                        <td>
+                          <button
+                            style={{ cursor: 'pointer' }}
+                            className="bg-success border-0"
+                            onClick={
+                              () => {
+                                handleOpenModal(field[4])
+                              }
+                            }
+                          >
+                            <i className="bi bi-eye-fill text-light"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </Table>
             </div>
@@ -276,11 +577,187 @@ export default function Home() {
         );
       case 'deposit':
         return (
-          <BookingChart />
+          <>
+            <BookingChart />
+          </>
+
         );
       case 'withdraw':
         return (
-          <CustomerChartPage />
+          <>
+            <ModalTableDetailCustomer showModal={showModalRank} onClose={handleCloseModalRank} data={bookingByUsernameModal} />
+            <div className="card mb-3">
+              <div className="card-body">
+                <div className="row mt-0">
+                  <div className="col-10 card-title d-flex">
+                    <h4 style={{ fontSize: '20px', marginTop: '5px' }}> <i className="bi bi-box"></i> Khách hàng </h4>
+                  </div>
+                  <div className="col-2 ">
+                    <Button variant="outline-dark" className='float-end' style={{ fontSize: '15px', cursor: 'pointer' }}>Export  <FontAwesomeIcon icon={faFileExport} /></Button>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-3">
+                    <span className="price-amount">Tổng có {totalCustomer} khách hàng</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Statictis Customer */}
+            <div className='row'>
+              <div className="row mt-0">
+                <div className="col-10 card-title d-flex">
+                  <h4>Thống kê khách hàng</h4>
+                </div>
+                <div className="col-2 card-title text-end " style={{ fontSize: '20px' }}>
+                  <select id="yearSelect" value={selectedYear} onChange={handleYearChange}>
+                    {years.map((year) => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <CustomerLineChart data={customerData} />
+
+            <div>
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Tháng</th>
+                    <th>Số lượng khách</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {customerData.slice(1).map((field, index) => {
+                    return (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>
+                          {field[0]}
+                        </td>
+                        <td>{field[1]}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+            </div>
+
+            <div>
+              <h4 className='bg-dark text-light p-3'>Bảng xếp hạng khách hàng</h4>
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Họ và tên khách hàng</th>
+                    <th>Lượt đặt</th>
+                    <th>Chi tiết</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.map((field, index) => {
+                    return (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>
+                          {field[2]}
+                        </td>
+                        <td>{field[0]}</td>
+                        <td><button
+                          style={{ cursor: 'pointer' }}
+                          className="bg-success border-0"
+                          onClick={
+                            () => {
+                              handleOpenModalRank(field[1])
+                            }
+                          }
+                        >
+                          <i className="bi bi-eye-fill text-light"></i>
+                        </button></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+              <>
+                {totalPages > 1 && (
+                  <nav aria-label="Page navigation example">
+                    <ul className="pagination justify-content-center">
+                      {/* Nút về trang đầu tiên */}
+                      <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                        <a
+                          className="page-link"
+                          href="#"
+                          aria-label="First"
+                          onClick={() => handlePageChange(1)}
+                          title="Go to first page"
+                        >
+                          <span aria-hidden="true">&laquo;</span>
+                        </a>
+                      </li>
+
+                      {/* Hiển thị 5 trang tùy theo currentPage */}
+                      {Array.from({ length: totalPages }, (_, index) => {
+                        let startPage = 1;
+                        let endPage = 5;
+
+                        // Nếu tổng số trang lớn hơn 5
+                        if (totalPages > 5) {
+                          // Điều chỉnh để luôn hiển thị 5 trang
+                          if (currentPage > 3) {
+                            startPage = currentPage - 2;
+                            endPage = currentPage + 2;
+                            if (endPage > totalPages) {
+                              endPage = totalPages;
+                              startPage = totalPages - 4; // Đảm bảo vẫn hiển thị đủ 5 trang
+                            }
+                          }
+                        } else {
+                          // Nếu tổng số trang ít hơn hoặc bằng 5, hiển thị tất cả
+                          endPage = totalPages;
+                        }
+
+                        // Hiển thị các trang từ startPage đến endPage
+                        if (index + 1 >= startPage && index + 1 <= endPage) {
+                          return (
+                            <li
+                              key={index + 1}
+                              className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
+                              title={`Go to page ${index + 1}`}
+                            >
+                              <a
+                                className="page-link"
+                                href="#"
+                                onClick={() => handlePageChange(index + 1)}
+                              >
+                                {index + 1}
+                              </a>
+                            </li>
+                          );
+                        }
+
+                        return null;
+                      })}
+                      <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                        <a
+                          className="page-link"
+                          href="#"
+                          aria-label="Last"
+                          onClick={() => handlePageChange(totalPages)}
+                          title="Go to last page"
+                        >
+                          <span aria-hidden="true">&raquo;</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                )}
+              </>
+            </div>
+          </>
         );
       default:
         return (

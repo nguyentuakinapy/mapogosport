@@ -12,6 +12,8 @@ interface LoginProps {
     setShowRegisterModal: (v: boolean) => void;
     showForgotPassword: boolean;
     setShowForgotPassword: (v: boolean) => void;
+    refreshKey: number;
+    setRefreshKey: (v: number) => void;
 }
 
 export default function Login(props: LoginProps) {
@@ -19,6 +21,7 @@ export default function Login(props: LoginProps) {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [checkRememberMe, setCheckRememberMe] = useState<boolean>(false);
+    const { setRefreshKey, refreshKey } = props;
     // Data auto fet khi update data
     // const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -57,7 +60,7 @@ export default function Login(props: LoginProps) {
                 if (!responseUser.ok) {
                     throw new Error('Error fetching data');
                 }
-                const dataUser = await responseUser.json();
+                const dataUser = await responseUser.json() as User;
                 // console.log(hashPassword(password));
                 if (dataUser.password == hashPassword(password)) {
                     if (checkRememberMe) {
@@ -67,7 +70,12 @@ export default function Login(props: LoginProps) {
                         Cookies.remove('user');
                     }
                     handleClose();
-                    sessionStorage.setItem('user', JSON.stringify(dataUser));
+
+                    const usernameLocal = dataUser.username.replace(/['"]+/g, '');
+                    localStorage.setItem('username', usernameLocal);
+                    // localStorage.setItem('username', dataUser.username);
+                    // sessionStorage.setItem('user', JSON.stringify(dataUser));
+                    setRefreshKey(refreshKey + 1);
                     toast.success("Đăng nhập thành công!");
                     // if (dataUser.authorities[0].role.name == "ROLE_ADMIN") {
                     //     window.location.href = "/admin";

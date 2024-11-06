@@ -1,16 +1,16 @@
 'use client'
 import { formatPrice } from "@/components/Utils/Format";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { Button, Col, FloatingLabel, Form, Nav, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
+import { useData } from "../context/UserContext";
+
 
 export default function Owner({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState<string>('all');
 
-    const [userData, setUserData] = useState<User | null>(null);
     const [accountPackages, setAccountPackages] = useState<AccountPackage[]>();
     const [userSubscription, setUserSubscription] = useState<UserSubscription>();
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
@@ -22,31 +22,19 @@ export default function Owner({ children }: { children: ReactNode }) {
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-    useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`);
-        }
-    }, []);
+    const userData = useData();
 
-    const { data: dataUser, error: errorUser, isLoading: isLoadingUser } = useSWR(usernameFetchApi, fetcher, {
-        revalidateIfStale: false,
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-    });
 
     useEffect(() => {
-        if (dataUser) {
-            setFullName(dataUser.fullname);
-            setEmail(dataUser.email);
-            setBirthday(dataUser.birthday ? new Date(dataUser.birthday) : null);
-            setGender(dataUser.gender);
-            setUserData(dataUser);
+        if (userData) {
+            setFullName(userData.fullname);
+            setEmail(userData.email);
+            setBirthday(userData.birthday ? new Date(userData.birthday) : null);
+            setGender(userData.gender);
         }
-        console.log(dataUser);
+        console.log(userData);
 
-    }, [dataUser]);
+    }, [userData]);
 
     useEffect(() => {
         getOwner();
