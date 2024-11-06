@@ -1227,7 +1227,7 @@ export default function BookingSport() {
                 checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey}>
             </BookingModal >
             <ViewEditBookingModal showViewOrEditBookingModal={showViewOrEditBookingModal} paymentMethod={paymentMethod}
-                setShowViewOrEditBookingModal={setShowViewOrEditBookingModal} owner={owner}
+                setShowViewOrEditBookingModal={setShowViewOrEditBookingModal} owner={owner} sport={dataSport && dataSport[selectSport]}
                 checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey}
                 bookingDetailData={bookingDetailData} userData={userData}>
             </ViewEditBookingModal >

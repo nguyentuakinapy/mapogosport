@@ -50,6 +50,9 @@ public class BookingDetail implements Serializable{
     
     @Column(name = "date")
     private LocalDate date;
+
+    @Column(name = "Status")
+    private Boolean status = true;
     
     @ManyToOne
     @JoinColumn(name = "BookingId", nullable = false)

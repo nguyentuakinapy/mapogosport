@@ -97,6 +97,27 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		return bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date);
 	}
 
+	@Override
+	public void cancelBookingDetail(Integer bookingDetailId) {
+		BookingDetail bd = bookingDetailDAO.findById(bookingDetailId).get();
+		bd.setStatus(false);
+		bookingDetailDAO.save(bd);
+		Booking booking = bookingDAO.findById(bd.getBooking().getBookingId()).get();
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(booking.getBookingId());
+		int index = 0;
+		for (BookingDetail b : bookingDetails) {
+		    if (!b.getStatus()) {
+		        index++;
+		    }
+		}
+		if (index == bookingDetails.size()) {
+			booking.setStatus("Đã hủy");
+			bookingDAO.save(booking);
+		}
+	}
+	
+	
+
 	
 
 }
