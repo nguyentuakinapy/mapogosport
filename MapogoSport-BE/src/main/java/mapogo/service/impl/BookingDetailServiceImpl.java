@@ -52,6 +52,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Override
 	public BookingDetail createBookingDetail(Map<String, Object> bd) {
+		System.err.println(bd);
+
 		BookingDetail bookingDetail = new BookingDetail();
 		
 		SportFieldDetail spd = sportFieldDAO.findById((Integer) bd.get("sportFieldDetailId")).get();
@@ -74,8 +76,9 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bookingDetail.setPrice(price);
 		bookingDetail.setDate(LocalDate.parse((String) bd.get("date")));	
 		bookingDetail.setBooking(b);
-
+		bookingDetail.setSubcriptionKey((String) bd.get("subscriptionKey"));
 		return bookingDetailDAO.save(bookingDetail);
+//		return null;
 	}
 
 	@Override

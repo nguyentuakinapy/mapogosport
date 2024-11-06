@@ -21,16 +21,8 @@ export default function OwnerLayout({
 
     const apiKey = '767451e95917fe713995435a49beb32a'; // Đặt API key ngoài để dễ quản lý
 
-    const [userData, setUserData] = useState<User | null>(null);
 
     useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUserData(parsedUserData);
-            // console.log(parsedUserData); // Kiểm tra dữ liệu
-        }
-
         const fetchWeather = async (lat: number, lon: number) => {
             try {
                 const response = await fetch(
@@ -107,10 +99,13 @@ export default function OwnerLayout({
         }
     }, []);
 
+    const [refreshKey, setRefreshKey] = useState<number>(0);
+
+
     return (
-        <UserProvider>
+        <UserProvider refreshKey={refreshKey}>
             <Nav isAniActive={isAniActive} toggleAni={toggleAni} isActive={isActive} setIsActive={setIsActive} />
-            <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} userData={userData} />
+            <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} />
 
             <main className={`main-right ${isAniActive ? 'mainRight' : ''} pb-1 `}>
                 <div className="main-body">

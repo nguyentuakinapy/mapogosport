@@ -125,6 +125,8 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	public Booking createBooking(Map<String, Object> b) {
+		System.err.println(b);
+
 		Booking booking = new Booking();
 
 		User u = userDAO.findById((String) b.get("username")).get();
@@ -153,7 +155,10 @@ public class BookingServiceImpl implements BookingService {
 		booking.setStatus((String) b.get("status"));
 		booking.setVoucher(v);
 		booking.setNote((String) b.get("note"));
+		booking.setFullName((String) b.get("fullName"));
+		booking.setPhoneNumber((String) b.get("phoneNumber"));
 		return bookingDAO.save(booking);
+//		return null;
 	}
 
 	@Override

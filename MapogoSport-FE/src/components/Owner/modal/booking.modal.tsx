@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
 import 'react-datepicker/dist/react-datepicker.css';
+import { time } from "console";
 
 
 interface OwnerProps {
@@ -25,6 +26,7 @@ const BookingModal = (props: OwnerProps) => {
         dayStartBooking, sport, owner, checkDataStatus, setCheckDataStatus, startTimeKey } = props;
 
     const [selectTime, setSelectTime] = useState<string>('Chọn thời gian');
+    const [selectTimeOnStage, setSelectTimeOnStage] = useState<string>('Chọn thời gian');
     const [isOffline, setIsOffline] = useState(false);
     const [activeTab, setActiveTab] = useState<string>('all');
 
@@ -48,10 +50,13 @@ const BookingModal = (props: OwnerProps) => {
     const [statusBooking, setStatusBooking] = useState<string>("Đã thanh toán");
     const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
     const [note, setNote] = useState<string>("");
+    const [fullName, setFullName] = useState<string>("");
+    const [phoneNumber, setPhoneNumber] = useState<string>("");
 
     // BOOKING DETAIL
     const [endTime, setEndTime] = useState<string>();
     const [price, setPrice] = useState<number>();
+    const [prices, setPriceS] = useState<number[]>([]);
     const [date, setDate] = useState<string>();
 
     // BOOKING PAYMENT
@@ -63,9 +68,11 @@ const BookingModal = (props: OwnerProps) => {
         setDataPaymentMethod(data);
     }, [data])
 
+
     const [operatingTime, setOperatingTime] = useState<number>(0);
     const [operatingTimeFetchData, setOperatingTimeFetchData] = useState<number>(0);
     const [dataTime, setDataTime] = useState<String[]>();
+    const [dataTimeTemporary, setDataTimeTemporary] = useState<String[]>();
 
     useEffect(() => {
         checkTimeBooking();
@@ -171,19 +178,24 @@ const BookingModal = (props: OwnerProps) => {
             newData.push(timeIntervals[index].label);
         }
         setDataTime(newData);
+        setDataTimeTemporary(newData);
     }
 
     useEffect(() => {
-        getPriceByTimeBooking();
+        getPriceByTimeBooking(selectTime);
     }, [selectTime]);
 
-    const getPriceByTimeBooking = () => {
-        if (selectTime == 'Chọn thời gian') {
+    useEffect(() => {
+        getPriceByTimeBooking(selectTimeOnStage);
+    }, [selectTimeOnStage]);
+
+    const getPriceByTimeBooking = (slTime: string) => {
+        if (slTime == 'Chọn thời gian') {
             setPrice(0);
             setEndTime("");
             return;
         }
-        if (selectTime && startTime) {
+        if (slTime) {
             const getTime = startTime.match(/(\d+)h(\d+)/);
             const hours = getTime ? Number(getTime[1]) : 0;
             const minutes = getTime ? Number(getTime[2]) : 0;
@@ -191,7 +203,7 @@ const BookingModal = (props: OwnerProps) => {
             let endHour = hours;
             let endMinute = minutes;
 
-            const selectedTime = dataTime && dataTime.find(item => item === selectTime);
+            const selectedTime = dataTime && dataTime.find(item => item === slTime);
             if (selectedTime) {
                 const timeParts = selectedTime.split(' ');
 
@@ -249,20 +261,12 @@ const BookingModal = (props: OwnerProps) => {
                 setPrice(totalAmount);
                 setTotalAmount(totalAmount);
                 setDate(dayStartBooking);
+                console.log(totalAmount);
             }
         }
     }
 
 
-    const handleClose = () => {
-        setShowBookingModal(false);
-        setUsername("");
-        setOperatingTime(0);
-        setOperatingTimeFetchData(0);
-        // setPrice(0);
-        // setEndTime("");
-        setSelectTime("Chọn thời gian");
-    }
 
     const handleSave = async () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
@@ -290,71 +294,31 @@ const BookingModal = (props: OwnerProps) => {
         handleClose();
     }
 
-    const createBooking = async (paymentMethod: PaymentMethod, dataUser: User) => {
-        if (!owner) {
-            toast.error("Thông tin chủ sở hữu không hợp lệ!");
-            return;
-        }
-        if (!sportDetail) {
-            toast.error("Thông tin sân không hợp lệ!");
-            return;
-        }
-        const responseBooking = await fetch('http://localhost:8080/rest/booking', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json' // Không cần charset=UTF-8
-            },
-            body: JSON.stringify({
-                username: dataUser.username,
-                totalAmount,
-                paymentMethodId: paymentMethod.paymentMethodId,
-                ownerId: owner.ownerId,
-                status: statusBooking,
-                voucher: null,
-                note
-            })
-        })
 
-        const resBooking = await responseBooking.json() as Booking;
-
-        const responseBookingDetail = await fetch('http://localhost:8080/rest/booking/detail', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                startTime,
-                endTime,
-                sportFieldDetailId: sportDetail.sportFielDetailId,
-                price,
-                date: dayStartBooking,
-                booking: resBooking.bookingId
-            })
-        });
-        const resBookingDetail = await responseBookingDetail.json() as BookingDetail;
-
-        toast.success("Đặt sân thành công!");
-    }
 
     type DateDetail = {
         date: string;
     }
 
     type DateType = {
-        [index: string]: {
-            [week: number]: DateDetail[];
+        [week: string]: {
+            [index: number]: DateDetail[];
         };
     };
 
+    type WeekBookingDetail = {
+        [week: string]: BookingDetail[];
+    }
+
     useEffect(() => {
         setStartDate(new Date(dayStartBooking));
-    }, [dayStartBooking])
+        setEndDate(new Date(new Date(dayStartBooking).setDate(new Date(dayStartBooking).getDate() + 14)))
+    }, [dayStartBooking, activeTab])
 
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [weekDays, setWeekDays] = useState<DateType>({});
     const [endDate, setEndDate] = useState<Date | null>(null);
+    const [dataTimeOnStage, setDataTimeOnStage] = useState<string[]>([]);
 
     const renderWeekDay = () => {
         const days: DateType = {};
@@ -393,57 +357,129 @@ const BookingModal = (props: OwnerProps) => {
     };
 
     useEffect(() => {
-        toast.success(startDate + '-' + endDate)
-        renderWeekDay();
-    }, [startDate, endDate])
+        setSportFieldDuplicate({});
+        setWeekDays({});
+        setSelectedWeek([]);
+        createTimeByTimeOnStage();
+        if (startDate && endDate && selectTimeOnStage != 'Chọn thời gian') {
+            renderWeekDay();
+        }
+    }, [startDate, endDate, selectTimeOnStage])
+
+    const createTimeByTimeOnStage = () => {
+        const getTime = startTime.match(/(\d+)h(\d+)/);
+        const startHours = getTime ? Number(getTime[1]) : 0;
+        const startMinutes = getTime ? Number(getTime[2]) : 0;
+
+        const timeParts = selectTimeOnStage.split(' ');
+        const getHour = timeParts[0] == '30' ? 0 : Number(timeParts[0]);
+        const getMinute = Number(timeParts[2]) | 0;
+        const numberOfSlots = (getHour * 60 + getMinute);
+        toast.success(numberOfSlots == 0 ? 1 : numberOfSlots);
+
+        const timeSlots = [];
+
+        let currentHours = startHours;
+        let currentMinutes = startMinutes;
+        if (selectTimeOnStage == '30 phút') {
+            timeSlots.push(startTime);
+            if (startTime.includes('h30')) {
+                timeSlots.push(startHours + 1 + 'h00')
+            } else {
+                timeSlots.push(startHours + 'h30')
+            }
+        } else {
+            for (let i = 0; i <= Math.ceil(numberOfSlots) / 30; i++) {
+                timeSlots.push(`${currentHours}h${currentMinutes === 0 ? '00' : currentMinutes}`);
+                currentMinutes += 30;
+
+                if (currentMinutes >= 60) {
+                    currentHours += Math.floor(currentMinutes / 60);
+                    currentMinutes = currentMinutes % 60;
+                }
+            }
+        }
+        setEndTime(timeSlots[timeSlots.length - 1]);
+        setDataTime(['30 phút', '1 giờ', '1 giờ 30 phút', '2 giờ', '2 giờ 30 phút', '3 giờ']);
+        timeSlots.pop();
+        setDataTimeOnStage(timeSlots);
+    };
 
     const [selectedWeek, setSelectedWeek] = useState<string[]>([]);
+    const [sportFieldDuplicate, setSportFieldDuplicate] = useState<WeekBookingDetail>({});
+
+    useEffect(() => {
+        let index = 0;
+        for (const week of selectedWeek) {
+            const dateWeek = weekDays[week];
+            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
+                bookings.map(b => {
+                    console.log('b', b.date);
+                    index = index + 1;
+                })
+            }
+        }
+        if (price) {
+            setTotalAmount(price * index);
+        }
+    }, [selectedWeek])
 
     const getWeekDate = async (weekDate: string) => {
-        let count = 0;
         const dateWeek = weekDays[weekDate];
-        console.log(weekDays[weekDate]);
-
         if (!selectedWeek.includes(weekDate)) {
             for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
-                if (count >= 6) {
-                    setOperatingTimeFetchData(6);
-                    break;
-                }
+                for (const booking of bookings) {
 
-                for (const booking of bookings) { // Duyệt qua từng ngày trong bookings
                     try {
                         const response = await fetch(
-                            `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${startTime}/${sportDetail?.sportFielDetailId}/${booking.date}`
+                            `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${booking.date}`
                         );
 
                         if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
                         const text = await response.text();
-                        toast.success(text)
-                        if (text) {
-                            const dataBooking = JSON.parse(text);
-                            if (dataBooking && Object.keys(dataBooking).length > 0) {
-                                console.log(dataBooking);
+                        // console.log(text);
 
-                                setOperatingTimeFetchData(count);
-                                break;
+                        if (text) {
+                            const dataBooking = JSON.parse(text) as BookingDetail[];
+                            if (dataBooking && Object.keys(dataBooking).length > 0) {
+                                for (const item of dataBooking) {
+                                    for (const time of dataTimeOnStage) {
+                                        const result = isTimeWithinRange(item.startTime, item.endTime, time);
+                                        toast.warning(result);
+                                        if (result) {
+                                            setSportFieldDuplicate(prevState => ({
+                                                ...prevState,
+                                                [weekDate]: prevState[weekDate]
+                                                    ? prevState[weekDate].some(existingItem => existingItem === item)
+                                                        ? prevState[weekDate]
+                                                        : [...prevState[weekDate], item]
+                                                    : [item],
+                                            }));
+                                        }
+                                    }
+                                }
                             }
-                        } else {
-                            setOperatingTimeFetchData(count);
                         }
                     } catch (error) {
                         console.error("API or JSON parsing error:", error);
                     }
-                    count++;
                 }
             }
             setSelectedWeek(prevSelectedWeek => [...prevSelectedWeek, weekDate]);
         } else {
             setSelectedWeek(prevSelectedWeek => prevSelectedWeek.filter(date => date !== weekDate));
+            setSportFieldDuplicate(prevSportFieldDuplicate => {
+                const newState = { ...prevSportFieldDuplicate };
+                if (prevSportFieldDuplicate[weekDate]) {
+                    delete newState[weekDate];
+                    return newState;
+                }
+                return prevSportFieldDuplicate;
+            })
         }
     }
 
-    function isTimeWithinRange(startTime: string, endTime: string, checkTime: string): boolean {
+    const isTimeWithinRange = (startTime: string, endTime: string, checkTime: string): boolean => {
         const [startHours, startMinutes] = startTime.split('h').map(Number);
         const [endHours, endMinutes] = endTime.split('h').map(Number);
         const [checkHours, checkMinutes] = checkTime.split('h').map(Number);
@@ -457,11 +493,220 @@ const BookingModal = (props: OwnerProps) => {
         return checkDate >= startDate && checkDate <= endDate;
     }
 
+    const handleSaveByPeriod = async () => {
+        const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
+        if (!paymentMethod) {
+            toast.error("Phương thức thanh toán không hợp lệ!");
+            return;
+        }
+
+        if (isOffline) {
+            const responseUser = await fetch(`http://localhost:8080/rest/user/sportoffline`);
+            if (!responseUser.ok) {
+                throw new Error('Error fetching data');
+            }
+            const dataUser = await responseUser.json() as User;
+            createBookingByPeriod(paymentMethod, dataUser);
+        } else {
+            const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
+            if (!responseUser.ok) {
+                toast.error('Tên người dùng không tồn tại!');
+                return;
+            }
+            const dataUser = await responseUser.json() as User;
+            createBookingByPeriod(paymentMethod, dataUser);
+        }
+
+        setCheckDataStatus(!checkDataStatus);
+        handleClose();
+    }
+
+    const createBooking = async (paymentMethod: PaymentMethod, dataUser: User) => {
+        if (!owner) {
+            toast.error("Thông tin chủ sở hữu không hợp lệ!");
+            return;
+        }
+        if (!sportDetail) {
+            toast.error("Thông tin sân không hợp lệ!");
+            return;
+        }
+        const responseBooking = await fetch('http://localhost:8080/rest/booking', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json' // Không cần charset=UTF-8
+            },
+            body: JSON.stringify({
+                username: dataUser.username,
+                fullName: fullName,
+                phoneNumber: phoneNumber,
+                totalAmount,
+                paymentMethodId: paymentMethod.paymentMethodId,
+                ownerId: owner.ownerId,
+                status: statusBooking,
+                voucher: null,
+                note
+            })
+        })
+
+        const resBooking = await responseBooking.json() as Booking;
+
+        const responseBookingDetail = await fetch('http://localhost:8080/rest/booking/detail', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                startTime,
+                endTime,
+                sportFieldDetailId: sportDetail.sportFielDetailId,
+                price,
+                date: dayStartBooking,
+                booking: resBooking.bookingId,
+                subscriptionKey: activeTab !== 'all' ? 'createKey' : null
+            })
+        });
+        const resBookingDetail = await responseBookingDetail.json() as BookingDetail;
+
+        toast.success("Đặt sân thành công!");
+    }
+
+    const createBookingByPeriod = async (paymentMethod: PaymentMethod, dataUser: User) => {
+        if (!owner) {
+            toast.error("Thông tin chủ sở hữu không hợp lệ!");
+            return;
+        }
+        if (!sportDetail) {
+            toast.error("Thông tin sân không hợp lệ!");
+            return;
+        }
+
+        const responseBooking = await fetch('http://localhost:8080/rest/booking', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json' // Không cần charset=UTF-8
+            },
+            body: JSON.stringify({
+                username: dataUser.username,
+                fullName: fullName,
+                phoneNumber: phoneNumber,
+                totalAmount,
+                paymentMethodId: paymentMethod.paymentMethodId,
+                ownerId: owner.ownerId,
+                status: statusBooking,
+                voucher: null,
+                note
+            })
+        })
+
+        const resBooking = await responseBooking.json() as Booking;
+
+        for (const week of selectedWeek) {
+            const dateWeek = weekDays[week];
+            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
+                bookings.map(async b => {
+                    const responseBookingDetail = await fetch('http://localhost:8080/rest/booking/detail', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            startTime,
+                            endTime,
+                            sportFieldDetailId: sportDetail.sportFielDetailId,
+                            price,
+                            date: b.date,
+                            booking: resBooking.bookingId,
+                            subscriptionKey: activeTab !== 'all' ? `keybooking${resBooking.bookingId}` : ""
+                        })
+                    });
+                    const resBookingDetail = await responseBookingDetail.json() as BookingDetail;
+                })
+            }
+        }
+
+
+
+        toast.success("Đặt sân thành công!");
+    }
+
+    const handleClose = () => {
+        setShowBookingModal(false);
+        setUsername("");
+        setOperatingTime(0);
+        setOperatingTimeFetchData(0);
+        setTotalAmount(0);
+        setPrice(0);
+        // setStartDate(null);
+        // setEndDate(null);
+        setWeekDays({});
+        setSelectedWeek([]);
+        setActiveTab("all");
+        setSportFieldDuplicate({});
+        setSelectTime("Chọn thời gian");
+        setIsOffline(false);
+        setFullName("");
+        setPhoneNumber("");
+        setSelectTimeOnStage("Chọn thời gian")
+    }
+
     useEffect(() => {
-        const checkTime = "10h";
-        const result = isTimeWithinRange('9h30', '11h30', checkTime);
-        console.log(result);
-    }, [selectedWeek])
+        setFullName("");
+        setPhoneNumber("");
+        setSelectTimeOnStage("Chọn thời gian");
+        setSelectTime("Chọn thời gian");
+        setIsOffline(false);
+    }, [activeTab])
+
+    const renderInputBooking = () => {
+        return (
+            <>
+                <InputGroup className="mb-2">
+                    {isOffline ? (
+                        <FloatingLabel controlId="floatingUsername" label="Họ và tên!" className="flex-grow-1">
+                            <Form.Control
+                                type="text"
+                                placeholder="Vui lòng nhập tên đăng nhập!"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                            />
+                        </FloatingLabel>
+                    ) : (
+                        <FloatingLabel controlId="floatingFullName" label="Vui lòng nhập tên đăng nhập!" className="flex-grow-1">
+                            <Form.Control
+                                type="text"
+                                placeholder="Vui lòng nhập tên đăng nhập!"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                            />
+                        </FloatingLabel>
+                    )}
+                    <InputGroup.Text aria-label="Checkbox for following text input bg-white">
+                        <Form.Check
+                            type="checkbox"
+                            label="Offline"
+                            checked={isOffline}
+                            onChange={(e) => setIsOffline(e.target.checked)}
+                        />
+                    </InputGroup.Text>
+                </InputGroup>
+
+                {isOffline && (
+                    <FloatingLabel controlId="floatingPhoneNumber" label="Số điện thoại!" className="flex-grow-1 mb-2">
+                        <Form.Control
+                            type="text"
+                            placeholder="Vui lòng nhập tên đăng nhập!"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                        />
+                    </FloatingLabel>
+                )}
+            </>
+        )
+    }
 
     const renderContent = () => {
         switch (activeTab) {
@@ -482,28 +727,7 @@ const BookingModal = (props: OwnerProps) => {
                             </Col>
                             <Col>
                                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
-
-                                <InputGroup className="mb-2">
-                                    <FloatingLabel controlId="floatingUsername" label="Vui lòng nhập tên đăng nhập!" className="flex-grow-1">
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Vui lòng nhập tên đăng nhập!"
-                                            disabled={isOffline}
-                                            value={username}
-                                            onChange={(e) => setUsername(e.target.value)}
-                                        />
-                                    </FloatingLabel>
-
-                                    <InputGroup.Text aria-label="Checkbox for following text input bg-white">
-                                        <Form.Check
-                                            type="checkbox"
-                                            label="Offline"
-                                            checked={isOffline}
-                                            onChange={(e) => setIsOffline(e.target.checked)}
-                                        />
-                                    </InputGroup.Text>
-                                </InputGroup>
-
+                                {renderInputBooking()}
                                 <FloatingLabel controlId="floatingSelectTime" label="Chọn thời gian" className="mb-2">
                                     <Form.Select
                                         value={selectTime}
@@ -511,7 +735,7 @@ const BookingModal = (props: OwnerProps) => {
                                         aria-label="Default select example"
                                     >
                                         <option value="Chọn thời gian">Chọn thời gian</option>
-                                        {dataTime && dataTime.map((time, index) => (
+                                        {dataTimeTemporary && dataTimeTemporary.map((time, index) => (
                                             <option key={index} value={String(time)}>{time}</option>
                                         ))}
                                     </Form.Select>
@@ -569,41 +793,7 @@ const BookingModal = (props: OwnerProps) => {
                             </Col>
                             <Col>
                                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
-                                <InputGroup className="mb-2">
-                                    {isOffline ? (
-                                        <FloatingLabel controlId="floatingUsername" label="Họ và tên!" className="flex-grow-1">
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Vui lòng nhập tên đăng nhập!"
-                                                value={username}
-                                                onChange={(e) => setUsername(e.target.value)}
-                                            />
-                                        </FloatingLabel>
-                                    ) : (
-                                        <FloatingLabel controlId="floatingFullName" label="Vui lòng nhập tên đăng nhập!" className="flex-grow-1">
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Vui lòng nhập tên đăng nhập!"
-                                            />
-                                        </FloatingLabel>
-                                    )}
-                                    <InputGroup.Text aria-label="Checkbox for following text input bg-white">
-                                        <Form.Check
-                                            type="checkbox"
-                                            label="Offline"
-                                            checked={isOffline}
-                                            onChange={(e) => setIsOffline(e.target.checked)}
-                                        />
-                                    </InputGroup.Text>
-                                </InputGroup>
-
-                                <FloatingLabel controlId="floatingPhoneNumber" label="Số điện thoại!" className="flex-grow-1 mb-2">
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Vui lòng nhập tên đăng nhập!"
-                                    />
-                                </FloatingLabel>
-
+                                {renderInputBooking()}
                                 <FloatingLabel controlId="floatingPaymentMethod" label="Phương thức thanh toán *">
                                     <Form.Select
                                         value={paymentMethodId}
@@ -627,7 +817,7 @@ const BookingModal = (props: OwnerProps) => {
                                     selectsStart
                                     startDate={startDate || undefined}
                                     endDate={endDate || undefined}
-                                    minDate={new Date()}
+                                    minDate={new Date(dayStartBooking)}
                                     placeholderText="Từ ngày"
                                     className="form-control start"
                                 />
@@ -638,7 +828,7 @@ const BookingModal = (props: OwnerProps) => {
                                     selectsEnd
                                     startDate={startDate || undefined}
                                     endDate={endDate || undefined}
-                                    minDate={startDate || undefined}
+                                    minDate={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 14)) : undefined}
                                     maxDate={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 30)) : undefined}
                                     placeholderText="Đến ngày"
                                     className="form-control end"
@@ -652,25 +842,44 @@ const BookingModal = (props: OwnerProps) => {
                                     aria-label="Username"
                                     aria-describedby="basic-addon1"
                                 />
-                                <Form.Select value={selectTime}
-                                    onChange={(e) => setSelectTime(e.target.value)} aria-label="Default select example">
+                                <Form.Select value={selectTimeOnStage} className="me-3"
+                                    onChange={(e) => setSelectTimeOnStage(e.target.value)} aria-label="Default select example">
                                     <option value="Chọn thời gian">Chọn thời gian</option>
-                                    {dataTime && dataTime.map((time, index) => (
+                                    <option value="30 phút">30 phút</option>
+                                    <option value="1 giờ">1 giờ</option>
+                                    <option value="1 giờ 30 phút">1 giờ 30 phút</option>
+                                    <option value="2 giờ">2 giờ</option>
+                                    <option value="2 giờ 30 phút">2 giờ 30 phút</option>
+                                    <option value="3 giờ">3 giờ</option>
+                                    {/* {dataTime && dataTime.map((time, index) => (
                                         <option key={index} value={String(time)}>{time}</option>
-                                    ))}
+                                    ))} */}
                                 </Form.Select>
                             </InputGroup>
                         </div>
                         <Row className="text-center mx-4">
                             {weekDays && Object.entries(weekDays).map(([weekday, weeks]) => (
                                 <Col onClick={() => getWeekDate(weekday)} key={weekday}
-                                    className={`col-day border p-2 bg-dark text-white ${selectedWeek.includes(weekday) ? 'active' : ''}`}>
+                                    className={`col-day border p-2 text-white ${selectedWeek.includes(weekday) ? 'active' : ''}`}>
                                     <b>{weekday}</b>
                                 </Col>
                             ))}
                         </Row>
-
-                        <Form.Group className="mt-3 px-4">
+                        {Object.entries(sportFieldDuplicate).map(([week, bookings]) => (
+                            <div key={week} className="bg-dark p-2 text-center mx-4 mt-2 text-light">
+                                <b className="text-uppercase">Đã có sân đặt vào {week}</b><br />
+                                {bookings.map((booking, index) => (
+                                    <div key={booking.bookingDetailId}>
+                                        Ngày: {booking.date}  Giờ: {booking.startTime} - {booking.endTime}  {/* Có thể hiển thị thêm thông tin khác ở đây */}
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                        <div className="d-flex justify-content-around mt-2">
+                            <span><b>Đơn giá: </b> <em className="text-danger">{sportDetail?.price.toLocaleString("vi-VN", { style: "currency", currency: "VND", })}</em>. </span>
+                            <span><b>Tổng tiền: </b><em className="text-danger">{totalAmount ? totalAmount.toLocaleString("vi-VN", { style: "currency", currency: "VND", }) : '???'}</em>. </span>
+                        </div>
+                        <Form.Group className="mt-2 px-4">
                             <Form.Control as="textarea" rows={3}
                                 type="text"
                                 placeholder="Ghi chú!"
@@ -678,7 +887,6 @@ const BookingModal = (props: OwnerProps) => {
                                 onChange={(e) => setNote(e.target.value)}
                             />
                         </Form.Group>
-                        {price ? price : ''}
                     </>
                 );
             default:
@@ -710,7 +918,14 @@ const BookingModal = (props: OwnerProps) => {
                     <Button variant="secondary" onClick={() => handleClose()}>
                         Hủy
                     </Button>
-                    <Button style={{ backgroundColor: "#142239" }} onClick={() => handleSave()}>Xác nhận</Button>
+                    {activeTab === 'all' ?
+                        <Button style={{ backgroundColor: "#142239" }}
+                            onClick={() => handleSave()}>Xác nhận</Button>
+                        :
+                        <Button style={{ backgroundColor: "#142239" }}
+                            disabled={Object.keys(sportFieldDuplicate).length === 0 && selectedWeek.length !== 0 ? false : true}
+                            onClick={() => handleSaveByPeriod()}>Xác nhận</Button>
+                    }
                 </Modal.Footer>
             </Modal >
         </>
