@@ -106,6 +106,7 @@ const Header = (props: HeaderProps) => {
 
     const logOut = () => {
         localStorage.removeItem('username');
+        sessionStorage.removeItem('user');
         window.location.href = "/";
     }
 

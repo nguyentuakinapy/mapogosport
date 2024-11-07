@@ -56,7 +56,6 @@ const BookingModal = (props: OwnerProps) => {
     // BOOKING DETAIL
     const [endTime, setEndTime] = useState<string>();
     const [price, setPrice] = useState<number>();
-    const [prices, setPriceS] = useState<number[]>([]);
     const [date, setDate] = useState<string>();
 
     // BOOKING PAYMENT
@@ -293,7 +292,6 @@ const BookingModal = (props: OwnerProps) => {
         setCheckDataStatus(!checkDataStatus);
         handleClose();
     }
-
 
 
     type DateDetail = {
@@ -860,6 +858,8 @@ const BookingModal = (props: OwnerProps) => {
                         <Row className="text-center mx-4">
                             {weekDays && Object.entries(weekDays).map(([weekday, weeks]) => (
                                 <Col onClick={() => getWeekDate(weekday)} key={weekday}
+                                    // style={{ backgroundColor: Object.entries(sportFieldDuplicate). ? 
+                                    // '#ff1f8c' : undefined }}
                                     className={`col-day border p-2 text-white ${selectedWeek.includes(weekday) ? 'active' : ''}`}>
                                     <b>{weekday}</b>
                                 </Col>

@@ -83,6 +83,12 @@ public class BookingRestController {
 			@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 		return bookingDetailService.findBySportFieldDetailAndDay(sportDetailId, date);
 	}
+	
+	@GetMapping("/user/booking/detail/getbyday/subscriptionkey/{subscriptionkey}")
+	public List<BookingDetail> findBookingDetailBySubscriptionKey(
+			@PathVariable("subscriptionkey") String subscriptionKey) {
+		return bookingDetailService.findBookingDetailBySubscriptionKey(subscriptionKey);
+	}
 
 	@GetMapping("/user/booking/detail/getnextweek/{sportDetailId}/{startDay}/{endDay}")
 	public List<BookingDetail> findBySportFieldDetailAndNextWeek(@PathVariable("sportDetailId") Integer sportDetailId,
@@ -180,6 +186,12 @@ public class BookingRestController {
 	@PutMapping("/booking/update/status/{bookingDetailId}")
 	public void cancelBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId) {
 		 bookingDetailService.cancelBookingDetail(bookingDetailId);
+	}
+	
+	@PutMapping("/booking/update/booking/detail/{bookingDetailId}")
+	public void updateBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId,
+			@RequestBody Map<String, Object> data) {
+		 bookingDetailService.updateBookingDetail(data);
 	}
 	
 	

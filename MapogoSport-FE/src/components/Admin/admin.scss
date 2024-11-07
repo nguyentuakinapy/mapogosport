@@ -145,45 +145,21 @@
   }
 }
 
-
-  .avatar-upload {
-      display: inline-block;
-      border-radius: 50%;
-      position: relative;
-      overflow: hidden;
-  
-      .avatar-edit {
-          position: absolute;
-          bottom: -1px;
-          width: 100%;
-          text-align: center;
-          z-index: 9;
-  
-          input+label {
-              margin-bottom: 0;
-              background-color: #000;
-              cursor: pointer;
-              transition: all .2s ease-in-out;
-              width: 100%;
-              color: #fff;
-              text-decoration: none;
-          }
-  
-          input {
-              display: none;
-          }
-      }
-  
-      .avatar-preview {
-          div {
-              width: 6rem;
-              height: 6rem;
-              margin: 0 auto;
-              background-size: cover;
-              background-repeat: no-repeat;
-          }
-      }
-
+tbody tr:hover {
+  background-color: #f1f1f1; /* Thay đổi màu nền khi hover */
 }
+.form-group {
+  margin-bottom: 20px; /* Tăng khoảng cách giữa các nhóm form */
+}
+
+input.is-invalid, select.is-invalid, textarea.is-invalid {
+  // border-color: #dc3545;
+  // background-color: #f8d7da;
+}
+
+
+
+
+
 
 /*======================================================Modal Product CSS End======================================================*/

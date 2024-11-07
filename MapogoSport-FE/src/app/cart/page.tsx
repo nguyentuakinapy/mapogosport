@@ -176,6 +176,7 @@ const Cart = () => {
         // Đảm bảo người dùng tồn tại trước khi gọi API
         if (user && user.username) {
           const response = await axios.get(`http://localhost:8080/rest/cart/${user.username}`);
+
           setDataCart(response.data); // Lưu dữ liệu giỏ hàng vào state
           console.log(">>> check data Cart: ", response.data);
           // Trích xuất số lượng từ dữ liệu giỏ hàng

@@ -42,6 +42,7 @@ export function UserProvider({ children, refreshKey }: UserProviderProps) {
         if (data) {
             console.log("Data fetched:", data);
             setUserData(data);
+            sessionStorage.setItem('user', JSON.stringify(data))
         }
     }, [data, error]);
 

@@ -26,6 +26,7 @@ type BookingsTypeOnWeek = {
 export default function BookingSport() {
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
     const [showViewOrEditBookingModal, setShowViewOrEditBookingModal] = useState<boolean>(false);
+    const [checkDataStatus, setCheckDataStatus] = useState<boolean>(true);
 
     const [bookingsOnDay, setBookingsOnDay] = useState<BookingsTypeOnDay>({
         // "6h00": ["Đã đặt", "Tạm đóng", "Còn trống"],
@@ -357,19 +358,40 @@ export default function BookingSport() {
         }
     }, [dayYears]);
 
-    const [checkDataStatus, setCheckDataStatus] = useState<boolean>(true);
+
+    const [isFirstRender, setIsFirstRender] = useState(true);
 
     useEffect(() => {
+        if (isFirstRender) {
+            setIsFirstRender(false);
+            return;
+        }
+
         const timeoutId = setTimeout(() => {
             if (selectDate === 0) {
-                setStatusOnDay();
+                const updatedBookingsOnDay = { ...bookingsOnDay };
+                Object.entries(updatedBookingsOnDay).forEach(([time, statuses]) => {
+                    updatedBookingsOnDay[time] = [];
+                });
+                setBookingsOnDay(updatedBookingsOnDay);
+                setDayOnWeek();
             } else {
-                setStatusOnWeek();
+                const updatedBookingsOnWeek = { ...bookingsOnWeek };
+                Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
+                    const sportDataTemporary = { ...sportData };
+                    Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
+                        sportDataTemporary[sport] = [];
+                    });
+                    updatedBookingsOnWeek[time] = sportDataTemporary;
+                });
+                setBookingsOnWeek(updatedBookingsOnWeek);
+                setDayOnWeek();
             }
         }, 500);
 
         return () => clearTimeout(timeoutId);
     }, [checkDataStatus]);
+
 
     const setStatusOnDay = async () => {
         console.log("Dữ liệu đã được load vào mốc giờ - 1:", new Date().toLocaleTimeString());
@@ -921,6 +943,7 @@ export default function BookingSport() {
     const [dayStartBooking, setDayStartBooking] = useState("");
     const [startTimeKey, setStartTimeKey] = useState<boolean>(true);
     const [bookingDetailData, setBookingDetailData] = useState<BookingDetail>();
+    const [bookingBySubscriptionKey, setDataBookingBySubscriptionKey] = useState<BookingDetail[]>();
     const [userData, setUserData] = useState<User>();
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
 
@@ -1037,6 +1060,18 @@ export default function BookingSport() {
             setStartTime(startTime);
             setDayStartBooking(dayStartBooking);
             setStartTimeKey(!startTimeKey);
+
+            const responseBookingSubscriptionKey = await fetch(
+                `http://localhost:8080/rest/user/booking/detail/getbyday/subscriptionkey/${bkDData.subcriptionKey}`
+            );
+
+            if (!responseBookingSubscriptionKey.ok) {
+                throw new Error(`Error fetching data: ${responseBookingSubscriptionKey.statusText}`);
+            }
+
+            const dataBookingBySubscriptionKey = await responseBookingSubscriptionKey.json() as BookingDetail[];
+
+            setDataBookingBySubscriptionKey(dataBookingBySubscriptionKey);
             setShowViewOrEditBookingModal(true);
         }
     };
@@ -1226,7 +1261,8 @@ export default function BookingSport() {
                 sport={dataSport && dataSport[selectSport]} owner={owner}
                 checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey}>
             </BookingModal >
-            <ViewEditBookingModal showViewOrEditBookingModal={showViewOrEditBookingModal} paymentMethod={paymentMethod}
+            <ViewEditBookingModal bookingBySubscriptionKey={bookingBySubscriptionKey && bookingBySubscriptionKey}
+                showViewOrEditBookingModal={showViewOrEditBookingModal} paymentMethod={paymentMethod}
                 setShowViewOrEditBookingModal={setShowViewOrEditBookingModal} owner={owner} sport={dataSport && dataSport[selectSport]}
                 checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey}
                 bookingDetailData={bookingDetailData} userData={userData}>
