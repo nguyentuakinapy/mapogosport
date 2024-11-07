@@ -36,13 +36,13 @@ public class OrderServiceImpl implements OrderService {
 	public List<Map<String, Object>> findOrderByUsername(String username) {
 		List<Order> orders = orderDAO.findByUser_Username(username);
 		List<Map<String, Object>> resultList = new ArrayList<>();
-		
-		for (Order order: orders) {
+
+		for (Order order : orders) {
 			Map<String, Object> orderData = new HashMap<>();
 			orderData.put("orderId", order.getOrderId());
-			for (OrderDetail orderDetail: order.getOrderDetails()) {
-				orderData.put("productName", orderDetail.getProductDetailSize()
-						.getProductDetail().getProduct().getName());
+			for (OrderDetail orderDetail : order.getOrderDetails()) {
+				orderData.put("productName",
+						orderDetail.getProductDetailSize().getProductDetail().getProduct().getName());
 			}
 			orderData.put("date", order.getDate());
 			orderData.put("status", order.getStatus());
@@ -51,16 +51,16 @@ public class OrderServiceImpl implements OrderService {
 			orderData.put("phoneNumber", order.getPhoneNumber());
 			resultList.add(orderData);
 		}
-		
+
 		return resultList;
 	}
-	
+
 	@Override
 	public List<Map<String, Object>> findAllOrder() {
 		List<Order> orders = orderDAO.findAll();
 		List<Map<String, Object>> resultList = new ArrayList<>();
-		
-		for (Order order: orders) {
+
+		for (Order order : orders) {
 			Map<String, Object> orderData = new HashMap<>();
 			orderData.put("orderId", order.getOrderId());
 			orderData.put("fullname", order.getUser().getFullname());
@@ -69,24 +69,24 @@ public class OrderServiceImpl implements OrderService {
 			orderData.put("address", order.getAddress());
 			orderData.put("status", order.getStatus());
 			orderData.put("phoneNumber", order.getPhoneNumber());
-	        resultList.add(orderData);
+			resultList.add(orderData);
 		}
 		return resultList;
 	}
-	
+
 	@Override
 	public Order updateStatusOrder(Map<String, Object> orderData) {
 		Integer orderId = (Integer) orderData.get("orderId");
 		String newStatus = (String) orderData.get("status");
-		
+
 		Optional<Order> optionalOrder = orderDAO.findById(orderId);
 		if (optionalOrder.isPresent()) {
-		    Order order = optionalOrder.get();
-		    order.setStatus(newStatus);
-		    orderDAO.save(order);
+			Order order = optionalOrder.get();
+			order.setStatus(newStatus);
+			orderDAO.save(order);
 		}
 		return null;
-    }
+	}
 
 	@Autowired
 	UserService userService;
@@ -146,14 +146,14 @@ public class OrderServiceImpl implements OrderService {
 	public List<Object[]> getCategoryProductTotalsToDay() {
 		return orderDAO.findCategoryProductTotalsTodayWithStatus(statuses);
 	}
+
 	@Override
 	public List<Object[]> getCategoryProductTotalsYesterday() {
-	    LocalDateTime startDate = LocalDate.now().minusDays(1).atStartOfDay(); // Bắt đầu từ 00:00 của ngày hôm qua
-	    LocalDateTime endDate = startDate.plusHours(23).plusMinutes(59).plusSeconds(59); // Kết thúc tại 23:59:59 của ngày hôm qua
-	    return orderDAO.findCategoryProductTotalsYesterdayWithStatus(startDate, endDate, statuses);
+		LocalDateTime startDate = LocalDate.now().minusDays(1).atStartOfDay(); // Bắt đầu từ 00:00 của ngày hôm qua
+		LocalDateTime endDate = startDate.plusHours(23).plusMinutes(59).plusSeconds(59); // Kết thúc tại 23:59:59 của
+																							// ngày hôm qua
+		return orderDAO.findCategoryProductTotalsYesterdayWithStatus(startDate, endDate, statuses);
 	}
-
-
 
 	@Override
 	public List<Order> getOrdersYesterday() {
@@ -183,38 +183,34 @@ public class OrderServiceImpl implements OrderService {
 	public List<Order> getOrdersBetweenDates(LocalDateTime startDay, LocalDateTime endDay) {
 		LocalDateTime adjustedEndDay = endDay.withHour(23).withMinute(59).withSecond(59);
 
-	    System.out.println("Start Day: " + startDay);
-	    System.out.println("Adjusted End Day: " + adjustedEndDay);
-	    return orderDAO.getOrdersBetweenDates(startDay, adjustedEndDay,statuses);
+		System.out.println("Start Day: " + startDay);
+		System.out.println("Adjusted End Day: " + adjustedEndDay);
+		return orderDAO.getOrdersBetweenDates(startDay, adjustedEndDay, statuses);
 	}
-
-    @Override
-    public List<Order> getOrdersForSingleDate(LocalDateTime date) {
-        // Adjusting start and end of day for the given date
-        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
-        LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
-        // Fetching orders for the entire day
-        return orderDAO.getOrdersForSingleDate(startOfDay, endOfDay,statuses);
-    }
-
-    @Override
-    public List<Object> findCategoryProductTotalsByDateAndStatus(LocalDateTime date) {
-        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
-        LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
-        return orderDAO.findCategoryProductTotalsByDateAndStatus(startOfDay, endOfDay, statuses);
-    }
-
-    @Override
-    public List<Object> findCategoryProductTotalsByBetweenDateAndStatus(LocalDateTime startDate, LocalDateTime endDate) {
-        LocalDateTime adjustedEndDay = endDate.withHour(23).withMinute(59).withSecond(59);
-        return orderDAO.findCategoryProductTotalsByBetweenAndStatus(startDate, adjustedEndDay, statuses);
-    }
 
 	@Override
-	public List<Order> findByUser_Username(String username) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Order> getOrdersForSingleDate(LocalDateTime date) {
+		// Adjusting start and end of day for the given date
+		LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+		LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
+		// Fetching orders for the entire day
+		return orderDAO.getOrdersForSingleDate(startOfDay, endOfDay, statuses);
 	}
+
+	@Override
+	public List<Object> findCategoryProductTotalsByDateAndStatus(LocalDateTime date) {
+		LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+		LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
+		return orderDAO.findCategoryProductTotalsByDateAndStatus(startOfDay, endOfDay, statuses);
+	}
+
+	@Override
+	public List<Object> findCategoryProductTotalsByBetweenDateAndStatus(LocalDateTime startDate,
+			LocalDateTime endDate) {
+		LocalDateTime adjustedEndDay = endDate.withHour(23).withMinute(59).withSecond(59);
+		return orderDAO.findCategoryProductTotalsByBetweenAndStatus(startDate, adjustedEndDay, statuses);
+	}
+
 
 
 }
