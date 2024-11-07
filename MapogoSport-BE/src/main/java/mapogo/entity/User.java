@@ -118,5 +118,15 @@ public class User implements Serializable {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<Wallet> wallets;
+	
+	// QA 3/11
+	@OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Message> sentMessages;
+
+	@OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Message> receivedMessages;
+
 }
 

@@ -16,6 +16,7 @@ interface IProps {
   modalTypeProductDetail: "add" | "edit";
   currentProductDetailSize: ProductDetailSize | null;
   selectedProductDetail: ProductDetail | null;
+  onFetchProductDetailSize: any
 }
 
 const ModalProductAddNewSize = ({
@@ -24,7 +25,8 @@ const ModalProductAddNewSize = ({
   modalTypeProductDetail,
   currentProductDetailSize,
   selectedProductDetail,
-  ProductDetailWasCreated
+  ProductDetailWasCreated,
+  onFetchProductDetailSize,
 }: IProps) => {
 
   console.log("ProductDetailWasCreated ",ProductDetailWasCreated);
@@ -94,6 +96,11 @@ const ModalProductAddNewSize = ({
     const { name, value } = e.target;
     const numericValue = Number(value);
 
+    if (value === "" || value === "Chọn kích cỡ --") {
+      toast.warning("Vui lòng chọn kích cỡ"); // Hiển thị thông báo khi không chọn màu
+    } else {
+      console.log("Selected size value: ", value);
+    }
     // Check if the value is a number and not negative
     if (!isNaN(numericValue) && numericValue >= 0) {
       setFormValues((prevValues) => ({
@@ -160,6 +167,7 @@ const ModalProductAddNewSize = ({
     },
     onSuccess: () => {
       toast.success("Kích cỡ đã được lưu thành công!");
+      onFetchProductDetailSize(); // Gọi mutate để refetch dữ liệu
       queryClient.invalidateQueries(["getDataSize"]); // Tải lại dữ liệu sau khi cập nhật
       handleCloseModal(); // Đóng modal sau khi lưu
     },
@@ -183,11 +191,6 @@ const ModalProductAddNewSize = ({
       productDetail: selectedProductDetail !== null ? { productDetailId: selectedProductDetail.productDetailId } : ProductDetailWasCreated,
 
       size: {sizeId: sizeId} || 0, 
-    //   },
-    //   size: sizes.find((size) => size.sizeId === sizeId) || {
-    //     sizeId: 0,
-    //     sizeName: "",
-    //   },
       price: Number(price),
       quantity: Number(quantity),
     };
@@ -228,10 +231,10 @@ const ModalProductAddNewSize = ({
         <Modal.Body>
           <Form>
             <Row>
-              <span>
+              {/* <span>
                 Id productDetail: {selectedProductDetail?.productDetailId} <br />
                 Id productDetail ProductDetailWasCreated: ${ProductDetailWasCreated}
-              </span>
+              </span> */}
               <Col>
                 <Form.Group className="mt-3">
                   <Form.Label>Kích cỡ</Form.Label>
@@ -240,8 +243,8 @@ const ModalProductAddNewSize = ({
                     value={formValues.sizeId}
                     onChange={handleInputChange}
                   >
-                    <option value="" disabled>
-                      Chọn kích cỡ
+                    <option>
+                      Chọn kích cỡ --
                     </option>
                     {sizes.map((size: Size) => (
                       <option key={size.sizeId} value={size.sizeId}>
