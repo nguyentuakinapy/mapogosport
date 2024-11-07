@@ -210,10 +210,5 @@ public List<Order> getOrdersBetweenDates(LocalDateTime startDay, LocalDateTime e
         return orderDAO.findCategoryProductTotalsByBetweenAndStatus(startDate, adjustedEndDay, statuses);
     }
 
-	@Override
-	public List<Order> findByUser_Username(String username) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }
