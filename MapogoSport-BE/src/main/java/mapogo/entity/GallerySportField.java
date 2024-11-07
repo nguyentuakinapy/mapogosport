@@ -2,6 +2,8 @@ package mapogo.entity;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,15 +25,18 @@ import lombok.Setter;
 @AllArgsConstructor
 @Table(name = "Gallerysportfield")
 public class GallerySportField implements Serializable{
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "GallerySportFieldId")
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Gallery_Sport_Field_Id")
     private Integer gallerySportFieldId;
-	
-	@ManyToOne
+
+    @Column(name = "Image", nullable = false)
+    private String image;
+
+    @ManyToOne
     @JoinColumn(name = "SportFieldId", nullable = false)
+    @JsonBackReference
     private SportField sportField;
-	
-	@Column(name = "Image", nullable = false)
-	private String Image;
+
 }

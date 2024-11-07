@@ -161,7 +161,6 @@ public class OrderServiceImpl implements OrderService {
 
 	}
 
-
 	public List<Order> getOrdersBetweenDates(LocalDateTime startDay, LocalDateTime endDay) {
 		LocalDateTime adjustedEndDay = endDay.withHour(23).withMinute(59).withSecond(59);
 
@@ -197,8 +196,5 @@ public class OrderServiceImpl implements OrderService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	
-
 
 }

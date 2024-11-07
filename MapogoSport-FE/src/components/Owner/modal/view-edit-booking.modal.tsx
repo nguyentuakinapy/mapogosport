@@ -15,23 +15,140 @@ interface OwnerProps {
     bookingDetailData?: BookingDetail;
     userData?: User;
     paymentMethod?: PaymentMethod
+    sport?: SportField;
+
 }
 
 const BookingModal = (props: OwnerProps) => {
-    const { showViewOrEditBookingModal, setShowViewOrEditBookingModal, paymentMethod
+    const { showViewOrEditBookingModal, setShowViewOrEditBookingModal, paymentMethod, sport
         , owner, checkDataStatus, setCheckDataStatus, startTimeKey, bookingDetailData, userData } = props;
 
     const [editBooking, setEditBooking] = useState<boolean>(true);
     const [dateBooking, setDateBooking] = useState<string>();
+    const [idSportDetail, setIdSportDetail] = useState<number>();
     const [startTimeBooking, setStartTimeBooking] = useState<string>();
     const [endTimeBooking, setEndTimeBooking] = useState<string>();
     const today = new Date().toISOString().split("T")[0];
+
 
     useEffect(() => {
         setDateBooking(bookingDetailData?.date);
         setStartTimeBooking(bookingDetailData?.startTime);
         setEndTimeBooking(bookingDetailData?.endTime);
+        setIdSportDetail(bookingDetailData?.sportFieldDetail.sportFielDetailId);
     }, [bookingDetailData])
+
+    const handleCancelBookingDetail = () => {
+
+        fetch(`http://localhost:8080/rest/booking/update/status/${bookingDetailData?.bookingDetailId}`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Hủy sân không thành công!`);
+                return
+            }
+            setCheckDataStatus(!checkDataStatus);
+            handleClose();
+            toast.success('Hủy sân thành công!');
+        })
+    }
+
+    const changeTime = (option: boolean, checkTime: boolean, time?: string) => {
+        const timeStart = time && time.match(/(\d+)h(\d+)/);
+        const startHours = timeStart ? Number(timeStart[1]) : 0;
+        const startMinutes = timeStart ? Number(timeStart[2]) : 0;
+
+        const today = new Date();
+        const hourToday = today.getHours();
+        const minuteToday = today.getMinutes() >= 30 ? 30 : 0;
+
+        const timeOpen = sport && sport.opening.match(/(\d+)h(\d+)/);
+        const hourOpen = timeOpen ? Number(timeOpen[1]) : 0;
+        const minuteOpen = timeOpen ? Number(timeOpen[2]) : 0;
+
+        const timeClose = sport && sport.closing.match(/(\d+)h(\d+)/);
+        const hourClose = timeClose ? Number(timeClose[1]) : 0;
+        const minuteClose = timeClose ? Number(timeClose[2]) : 0;
+
+        const checkDay = dateBooking && new Date().setHours(0, 0, 0, 0) === new Date(dateBooking).setHours(0, 0, 0, 0);
+
+        const timeBookingStart = startTimeBooking && startTimeBooking.match(/(\d+)h(\d+)/);
+        const timeBookingEnd = endTimeBooking && endTimeBooking.match(/(\d+)h(\d+)/);
+
+        if (option && time) {
+            if (checkTime) {
+                if (hourClose == startHours && minuteClose == startMinutes) {
+                    toast.success("Vượt quá thời gian đóng cửa!")
+                } else if (timeBookingStart && timeBookingEnd &&
+                    (Number(timeBookingStart[1]) * 60 + Number(timeBookingStart[2]))
+                    == (Number(timeBookingEnd[1]) * 60 + Number(timeBookingEnd[2]) - 30)) {
+                    toast.success("Thời gian đặt cách nhau tối thiểu 30 phút!")
+                } else {
+                    setStartTimeBooking(increaseTime(time))
+                }
+            } else {
+                if (hourClose == startHours && minuteClose == startMinutes) {
+                    toast.success("Vượt quá thời gian đóng cửa!")
+                } else {
+                    setEndTimeBooking(increaseTime(time))
+                }
+            }
+        } else if (time) {
+            if (checkTime) {
+                if (checkDay && startHours === hourToday && minuteToday === startMinutes) {
+                    toast.success("Vượt quá thời gian cần đặt hiện tại!")
+                } else if (hourOpen == startHours && minuteOpen == startMinutes) {
+                    toast.success("Vượt quá thời gian mở cửa!")
+                } else {
+                    setStartTimeBooking(reduceTime(time))
+                }
+            } else {
+                if (timeBookingStart && timeBookingEnd &&
+                    (Number(timeBookingStart[1]) * 60 + Number(timeBookingStart[2]) + 30)
+                    == (Number(timeBookingEnd[1]) * 60 + Number(timeBookingEnd[2]))) {
+                    toast.success("Thời gian đặt cách nhau tối thiểu 30 phút!")
+                } else {
+                    setEndTimeBooking(reduceTime(time))
+                }
+            }
+        }
+
+    };
+
+    const reduceTime = (timeBooking: string): string => {
+        const getTime = timeBooking.match(/(\d+)h(\d+)/);
+        let hours = getTime ? Number(getTime[1]) : 0;
+        let minutes = getTime ? Number(getTime[2]) : 0;
+
+        // Decrement by 30 minutes
+        if (minutes === 0) {
+            minutes = 30;
+            hours = hours > 0 ? hours - 1 : 23; // Wrap to previous hour or day
+        } else {
+            minutes = 0;
+        }
+        return `${hours}h${minutes === 0 ? '00' : '30'}`;
+    };
+
+    const increaseTime = (timeBooking: string): string => {
+        const getTime = timeBooking.match(/(\d+)h(\d+)/);
+        let hours = getTime ? Number(getTime[1]) : 0;
+        let minutes = getTime ? Number(getTime[2]) : 0;
+
+        // Increment by 30 minutes
+        if (minutes === 0) {
+            minutes = 30;
+        } else {
+            minutes = 0;
+            hours = hours < 23 ? hours + 1 : 0; // Wrap to next hour or day
+        }
+        return `${hours}h${minutes === 0 ? '00' : '30'}`;
+    };
+
 
     const handleClose = () => {
         setEditBooking(true);
@@ -52,7 +169,7 @@ const BookingModal = (props: OwnerProps) => {
                             <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name}
                                 {bookingDetailData &&
                                     new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                        new Date().getHours() <= parseInt(bookingDetailData.endTime.split('h')[0]) ? (
+                                        new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
                                             <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                                                 <i
                                                     className="bi bi-pencil-square ms-2 text-dark"
@@ -73,6 +190,19 @@ const BookingModal = (props: OwnerProps) => {
                                         )
                                     )}
                             </h6>
+                            <FloatingLabel controlId="floatingSelectTime" label="Chọn thời gian" className="mb-2">
+                                <Form.Select
+                                    value={idSportDetail}
+                                    disabled={editBooking}
+
+                                    onChange={(e) => setIdSportDetail(Number(e.target.value))}
+                                    aria-label="Default select example"
+                                >
+                                    {sport && sport.sportFielDetails.map((item, index) => (
+                                        <option key={index} value={item.sportFielDetailId}>{item.name}</option>
+                                    ))}
+                                </Form.Select>
+                            </FloatingLabel>
                             <FloatingLabel controlId="floatingDate" label="Ngày đặt!" className="flex-grow-1 mb-2">
                                 <Form.Control
                                     type="date"
@@ -92,8 +222,17 @@ const BookingModal = (props: OwnerProps) => {
                                         disabled={editBooking}
                                     />
                                 </FloatingLabel>
-
-                                <FloatingLabel controlId="floatingDate" label="Giờ kết thúc!" className="flex-grow-1 mb-2">
+                                {!editBooking && (
+                                    <>
+                                        <Button disabled={editBooking} onClick={() => changeTime(false, true, startTimeBooking)} variant="outline-secondary mb-2" id="button-addon1">
+                                            <i className="bi bi-chevron-up"></i>
+                                        </Button>
+                                        <Button disabled={editBooking} onClick={() => changeTime(true, true, startTimeBooking)} variant="outline-secondary mb-2" id="button-addon1">
+                                            <i className="bi bi-chevron-down"></i>
+                                        </Button>
+                                    </>
+                                )}
+                                <FloatingLabel controlId="floatingDate" label="Giờ kết thúc!" className="ms-2 flex-grow-1 mb-2">
                                     <Form.Control
                                         type="text"
                                         placeholder="Giờ kết thúc!"
@@ -101,7 +240,16 @@ const BookingModal = (props: OwnerProps) => {
                                         disabled={editBooking}
                                     />
                                 </FloatingLabel>
-
+                                {!editBooking && (
+                                    <>
+                                        <Button disabled={editBooking} onClick={() => changeTime(false, false, endTimeBooking)} variant="outline-secondary mb-2" id="button-addon1">
+                                            <i className="bi bi-chevron-up"></i>
+                                        </Button>
+                                        <Button disabled={editBooking} onClick={() => changeTime(true, false, endTimeBooking)} variant="outline-secondary mb-2" id="button-addon1">
+                                            <i className="bi bi-chevron-down"></i>
+                                        </Button>
+                                    </>
+                                )}
                             </InputGroup>
                             <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
                                 <Form.Control
@@ -171,18 +319,18 @@ const BookingModal = (props: OwnerProps) => {
                         )}
                         {bookingDetailData &&
                             new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                new Date().getHours() <= parseInt(bookingDetailData.endTime.split('h')[0]) ? (
+                                new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
                                     !editBooking ? (
                                         <button className="btn btn-danger m-auto" style={{ width: '97%' }}>Cập nhật</button>
                                     ) :
-                                        <button className="btn btn-danger m-auto" style={{ width: '97%' }}>Hủy đặt sân</button>
+                                        <button className="btn btn-danger m-auto" onClick={() => handleCancelBookingDetail()} style={{ width: '97%' }}>Hủy đặt sân</button>
 
                                 ) : (
                                     new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
                                         !editBooking ? (
                                             <button className="btn btn-danger m-auto" style={{ width: '97%' }}>Cập nhật</button>
                                         ) :
-                                            <button className="btn btn-danger m-auto" style={{ width: '97%' }}>Hủy đặt sân</button>
+                                            <button className="btn btn-danger m-auto" onClick={() => handleCancelBookingDetail()} style={{ width: '97%' }}>Hủy đặt sân</button>
                                     )
                                 )
                             )}
