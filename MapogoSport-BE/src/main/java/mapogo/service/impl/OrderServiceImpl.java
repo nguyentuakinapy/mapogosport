@@ -211,10 +211,6 @@ public class OrderServiceImpl implements OrderService {
 		return orderDAO.findCategoryProductTotalsByBetweenAndStatus(startDate, adjustedEndDay, statuses);
 	}
 
-//	@Override
-//	public List<Order> findByUser_Username(String username) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
+
 
 }

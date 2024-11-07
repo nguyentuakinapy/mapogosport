@@ -627,3 +627,128 @@ body {
   font-weight: bold;
   border: dotted;
 }
+
+/* PAGE VOUCHER */
+.voucher-container {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.voucher-banner {
+  margin-bottom: 20px;
+}
+
+.voucher-details {
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.voucher-title {
+  color: #343a40;
+}
+
+.discount-info {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #dc3545;
+}
+
+.card-voucher {
+  background-color: #f8f9fa;
+  /* Light background */
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.voucher-item {
+  background: linear-gradient(135deg, #eceff1, #f6f9fc);
+  /* Soft gradient background */
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+
+
+}
+
+.voucher-item:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.voucher-info {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.voucher-discount {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #e53935;
+}
+
+.brand-name {
+  display: block;
+  padding: 10px 0;
+}
+
+.discount {
+  display: block;
+  padding: 10px 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.p-3 {
+  padding: 1rem;
+}
+
+.circle {
+
+  width: 100px;
+  /* Adjust the size as needed */
+  height: 100px;
+  border: 2px solid #333;
+  /* Border color */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.brand-name {
+  font-size: 1rem;
+  /* Adjust font size as needed */
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
+
+.get {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 5px;
+}
+
+.expiry {
+  font-size: 15px;
+  color: #959595;
+}
+
+.step {
+  position: absolute;
+
+}
