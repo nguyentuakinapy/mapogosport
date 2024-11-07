@@ -1,5 +1,6 @@
 'use client';
 import BookingModal from "@/components/Owner/modal/booking.modal";
+import SearchBookingModal from "@/components/Owner/modal/search-booking.modal";
 import ViewEditBookingModal from "@/components/Owner/modal/view-edit-booking.modal";
 import { formatDateVN } from "@/components/Utils/Format";
 import { useEffect, useRef, useState } from "react";
@@ -25,6 +26,7 @@ type BookingsTypeOnWeek = {
 };
 export default function BookingSport() {
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
+    const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
     const [showViewOrEditBookingModal, setShowViewOrEditBookingModal] = useState<boolean>(false);
     const [checkDataStatus, setCheckDataStatus] = useState<boolean>(true);
 
@@ -550,8 +552,6 @@ export default function BookingSport() {
                 const bookingsForDay = dataBooking.filter(item => item.date === dayYear);
 
                 if (bookingsForDay.length > 0) {
-                    hasBookingForDay = true;
-
                     bookingsForDay.forEach(item => {
                         const newData: string[] = [];
 
@@ -576,12 +576,12 @@ export default function BookingSport() {
                         }
 
                         Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                            const sportDataTemporary = { ...sportData };
-                            Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
+                            Object.entries(sportData).forEach(([sport, statuses]) => {
+
                                 if (dayYear && sport === item.sportFieldDetail.name) {
 
-                                    if (!sportDataTemporary[sport][dayIndex]) {
-                                        sportDataTemporary[sport][dayIndex] = { status: "Còn trống", bookingId: 0, fullName: "" };
+                                    if (!sportData[sport][dayIndex]) {
+                                        sportData[sport][dayIndex] = { status: "Còn trống", bookingId: 0, fullName: "" };
                                     }
 
                                     const timeIndex = newData.indexOf(time);
@@ -591,20 +591,20 @@ export default function BookingSport() {
 
                                     if (item.sportFieldDetail.status === "Hoạt động") {
                                         if (timeIndex >= 0) {
-                                            sportDataTemporary[sport][dayIndex] = {
+                                            sportData[sport][dayIndex] = {
                                                 status: "Đã đặt",
                                                 bookingId: item.bookingDetailId,
                                                 fullName: item.fullName
                                             };
-                                        } else if (sportDataTemporary[sport][dayIndex].status === "Còn trống") {
-                                            sportDataTemporary[sport][dayIndex] = {
+                                        } else if (sportData[sport][dayIndex].status === "Còn trống") {
+                                            sportData[sport][dayIndex] = {
                                                 status: (timeDate < currentDateTime) ? "Chưa đặt" : "Còn trống",
                                                 bookingId: 0,
                                                 fullName: ""
                                             };
                                         }
                                     } else {
-                                        sportDataTemporary[sport][dayIndex] = {
+                                        sportData[sport][dayIndex] = {
                                             status: "Tạm đóng",
                                             bookingId: 0,
                                             fullName: ""
@@ -612,39 +612,36 @@ export default function BookingSport() {
                                     }
                                 }
                             });
-                            updatedBookingsOnWeek[time] = sportDataTemporary;
+                            updatedBookingsOnWeek[time] = sportData;
                         });
                     });
-                }
-
-                if (!hasBookingForDay && dayYears) {
+                } else {
                     Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                        const sportDataTemporary = { ...sportData };
-                        Object.entries(sportDataTemporary).forEach(([sport]) => {
+                        Object.entries(sportData).forEach(([sport]) => {
                             const [hour, minute] = time.split('h').map(Number);
-                            const timeDate = new Date(dayYears[dayIndex]);
+                            const timeDate = dayYears && new Date(dayYears[dayIndex]) || new Date();
                             timeDate.setHours(hour, minute);
-                            if (sportDetails && timeDate < currentDateTime && sportDetails[index].status === "Hoạt động") {
-                                sportDataTemporary[sport][dayIndex] = {
-                                    status: "Chưa đặt",
-                                    bookingId: 0,
-                                    fullName: ""
-                                };
-                            } else if (sportDetails && sport === sportDetails[index].name) {
-                                sportDataTemporary[sport][dayIndex] = {
-                                    status: sportDetails[index].status === "Hoạt động" ? "Còn trống" : "Tạm đóng",
-                                    bookingId: 0,
-                                    fullName: ""
-                                };
+                            if (sportDetails && sport === sportDetails[index].name) {
+                                if (sportDetails && timeDate < currentDateTime && sportDetails[index].status === "Hoạt động") {
+                                    sportData[sport][dayIndex] = {
+                                        status: "Chưa đặt",
+                                        bookingId: 0,
+                                        fullName: ""
+                                    };
+                                } else {
+                                    sportData[sport][dayIndex] = {
+                                        status: sportDetails[index].status === "Hoạt động" ? "Còn trống" : "Tạm đóng",
+                                        bookingId: 0,
+                                        fullName: ""
+                                    };
+                                }
                             }
                         });
-                        updatedBookingsOnWeek[time] = sportDataTemporary;
+                        updatedBookingsOnWeek[time] = sportData;
                     });
                 }
             }
         }
-        console.log(updatedBookingsOnWeek);
-
         setBookingsOnWeek(updatedBookingsOnWeek);
     };
 
@@ -1204,7 +1201,7 @@ export default function BookingSport() {
                                     </option>
                                 ))}
                         </select>
-                        <button className="fw-bold btn btn-dark ms-2"><i className="bi bi-search"></i></button>
+                        <button onClick={() => setSearchShowBookingModal(true)} className="fw-bold btn btn-dark ms-2"><i className="bi bi-search"></i></button>
                     </div>
                     {/* <Row className="g-0 toggle-row">
                         <Col md={10}>
@@ -1267,6 +1264,10 @@ export default function BookingSport() {
                 checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey}
                 bookingDetailData={bookingDetailData} userData={userData}>
             </ViewEditBookingModal >
+            <SearchBookingModal showSearchBookingModal={showSearchBookingModal} setSearchShowBookingModal={setSearchShowBookingModal}
+                dataTimeSport={dataTimeSport.filter(time => time !== "undefinedh00" && time !== null)}>
+
+            </SearchBookingModal>
         </>
     );
 }

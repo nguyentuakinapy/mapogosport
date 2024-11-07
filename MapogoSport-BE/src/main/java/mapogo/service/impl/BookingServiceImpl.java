@@ -140,7 +140,7 @@ public class BookingServiceImpl implements BookingService {
 		PaymentMethod p = paymentMethodDAO.findById((Integer) b.get("paymentMethodId")).get();
 		Owner o = ownerDAO.findById((Integer) b.get("ownerId")).get();
 		Voucher v = null;
-		if (((String) b.get("voucher")) != null) {
+		if (b.get("voucher") != null) {
 			v = voucherDAO.findById(Integer.parseInt((String) b.get("voucher"))).get();
 		}
 

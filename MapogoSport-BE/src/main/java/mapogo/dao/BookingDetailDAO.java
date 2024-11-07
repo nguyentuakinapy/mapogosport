@@ -34,4 +34,7 @@ public interface BookingDetailDAO extends JpaRepository<BookingDetail, Integer> 
 	@Query("SELECT b FROM BookingDetail b WHERE b.status = true AND b.subcriptionKey = :subcriptionKey")
 	List<BookingDetail> findBookingDetailBySubscriptionKey(
 			@Param("subcriptionKey") String subcriptionKey);
+	
+	@Query("SELECT b FROM BookingDetail b WHERE b.subcriptionKey = :subcriptionKey")
+	List<BookingDetail> findBySubscriptionKey(@Param("subcriptionKey") String subscriptionKey);
 }
