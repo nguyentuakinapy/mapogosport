@@ -117,7 +117,7 @@ const Cart = () => {
 
   //
   const handleDeleCartItem = async (index: number) => {
-    if (!user) {
+    if (!username) {
       console.log("Người dùng chưa đăng nhập.");
       return; // Không thực hiện nếu người dùng chưa đăng nhập
     }
@@ -152,7 +152,7 @@ const Cart = () => {
       }
 
       // Cập nhật lại số lượng giỏ hàng
-      mutate(`http://localhost:8080/rest/cart/count/${user.username}`); // Tái tải dữ liệu
+      mutate(`http://localhost:8080/rest/cart/count/${username}`); // Tái tải dữ liệu
       toast.success("Xóa thành công !");
 
     } catch (err) {
@@ -166,16 +166,15 @@ const Cart = () => {
 
   // Dữ liệu giỏ hàng
   const [dataCart, setDataCart] = useState([]);
-  const userSession = sessionStorage.getItem('user');
-  const user = userSession ? JSON.parse(userSession) : null;
+  const username = localStorage.getItem('username');
 
   useEffect(() => {
     // Hàm lấy dữ liệu giỏ hàng
     const fetchDataCart = async () => {
       try {
         // Đảm bảo người dùng tồn tại trước khi gọi API
-        if (user && user.username) {
-          const response = await axios.get(`http://localhost:8080/rest/cart/${user.username}`);
+        if (username) {
+          const response = await axios.get(`http://localhost:8080/rest/cart/${username}`);
           setDataCart(response.data); // Lưu dữ liệu giỏ hàng vào state
           console.log(">>> check data Cart: ", response.data);
           // Trích xuất số lượng từ dữ liệu giỏ hàng
@@ -201,8 +200,8 @@ const Cart = () => {
       <h1 className="text-center pt-4 mb-">Giỏ hàng</h1>
       <div className="container" >
         <div className="d-flex">
-          <Col className={`col-md-8 p-3 mb-5 rounded ${user ? 'shadow bg-body' : ' '}`}>
-            {user && (
+          <Col className={`col-md-8 p-3 mb-5 rounded ${username ? 'shadow bg-body' : ' '}`}>
+            {username && (
               <>
                 <div className="table-responsive">
                   <table className="table table-hover">

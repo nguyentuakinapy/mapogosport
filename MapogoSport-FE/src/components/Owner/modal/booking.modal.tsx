@@ -858,6 +858,8 @@ const BookingModal = (props: OwnerProps) => {
                         <Row className="text-center mx-4">
                             {weekDays && Object.entries(weekDays).map(([weekday, weeks]) => (
                                 <Col onClick={() => getWeekDate(weekday)} key={weekday}
+                                    // style={{ backgroundColor: Object.entries(sportFieldDuplicate). ? 
+                                    // '#ff1f8c' : undefined }}
                                     className={`col-day border p-2 text-white ${selectedWeek.includes(weekday) ? 'active' : ''}`}>
                                     <b>{weekday}</b>
                                 </Col>
