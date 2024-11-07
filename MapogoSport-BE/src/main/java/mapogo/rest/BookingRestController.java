@@ -188,6 +188,12 @@ public class BookingRestController {
 		 bookingDetailService.cancelBookingDetail(bookingDetailId);
 	}
 	
+	@PutMapping("/booking/update/status/by/subcriptionKey/{bookingDetailId}/{subscriptionKey}")
+	public void cancelBookingDetailBySubscription(@PathVariable("bookingDetailId") Integer bookingDetailId,
+			@PathVariable("subscriptionKey") String subscriptionKey) {
+		 bookingDetailService.cancelBookingDetailBySubscription(bookingDetailId, subscriptionKey);
+	}
+	
 	@PutMapping("/booking/update/booking/detail/{bookingDetailId}")
 	public void updateBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId,
 			@RequestBody Map<String, Object> data) {

@@ -22,6 +22,8 @@ public interface BookingDetailService {
 			LocalDate date);
 
 	void cancelBookingDetail(Integer bookingDetailId);
+	
+	void cancelBookingDetailBySubscription(Integer bookingDetailId, String subscriptionKey);
 
 	void updateBookingDetail(Map<String, Object> data);
 }

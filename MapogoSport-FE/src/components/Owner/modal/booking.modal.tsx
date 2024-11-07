@@ -8,7 +8,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { time } from "console";
 
 
-interface OwnerProps {
+interface BookingProps {
     showBookingModal: boolean;
     setShowBookingModal: (v: boolean) => void;
     sportDetail?: SportFieldDetail;
@@ -21,7 +21,7 @@ interface OwnerProps {
     startTimeKey: boolean
 }
 
-const BookingModal = (props: OwnerProps) => {
+const BookingModal = (props: BookingProps) => {
     const { showBookingModal, setShowBookingModal, sportDetail, startTime,
         dayStartBooking, sport, owner, checkDataStatus, setCheckDataStatus, startTimeKey } = props;
 
@@ -269,9 +269,28 @@ const BookingModal = (props: OwnerProps) => {
 
     const handleSave = async () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
-        if (!paymentMethod) {
-            toast.error("Phương thức thanh toán không hợp lệ!");
-            return;
+        if (isOffline) {
+            if (!fullName) {
+                toast.error("Vui lòng nhập họ và tên!");
+                return;
+            } else if (!phoneNumber) {
+                toast.error("Vui lòng nhập số điện thoại!");
+                return;
+            } else if (selectTime === "Chọn thời gian") {
+                toast.error("Vui lòng chọn thời gian!");
+                return;
+            } else if (!paymentMethod) {
+                toast.error("Phương thức thanh toán không hợp lệ!");
+                return;
+            }
+        } else {
+            if (!username) {
+                toast.error("Vui lòng nhập tên đăng nhập!");
+                return;
+            } else if (!paymentMethod) {
+                toast.error("Phương thức thanh toán không hợp lệ!");
+                return;
+            }
         }
         if (isOffline) {
             const responseUser = await fetch(`http://localhost:8080/rest/user/sportoffline`);
@@ -493,9 +512,26 @@ const BookingModal = (props: OwnerProps) => {
 
     const handleSaveByPeriod = async () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
-        if (!paymentMethod) {
-            toast.error("Phương thức thanh toán không hợp lệ!");
-            return;
+
+        if (isOffline) {
+            if (!fullName) {
+                toast.error("Vui lòng nhập họ và tên!");
+                return;
+            } else if (!phoneNumber) {
+                toast.error("Vui lòng nhập số điện thoại!");
+                return;
+            } else if (!paymentMethod) {
+                toast.error("Phương thức thanh toán không hợp lệ!");
+                return;
+            }
+        } else {
+            if (!username) {
+                toast.error("Vui lòng nhập tên đăng nhập!");
+                return;
+            } else if (!paymentMethod) {
+                toast.error("Phương thức thanh toán không hợp lệ!");
+                return;
+            }
         }
 
         if (isOffline) {
@@ -589,7 +625,7 @@ const BookingModal = (props: OwnerProps) => {
             body: JSON.stringify({
                 username: dataUser.username,
                 fullName: isOffline ? fullName : dataUser.fullname,
-                phoneNumber: isOffline ? phoneNumber : dataUser.phoneNumberUsers.find(item => item.active),
+                phoneNumber: isOffline ? phoneNumber : dataUser.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
                 totalAmount,
                 paymentMethodId: paymentMethod.paymentMethodId,
                 ownerId: owner.ownerId,
@@ -625,9 +661,6 @@ const BookingModal = (props: OwnerProps) => {
                 })
             }
         }
-
-
-
         toast.success("Đặt sân thành công!");
     }
 
@@ -652,11 +685,20 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     useEffect(() => {
-        setFullName("");
-        setPhoneNumber("");
-        setSelectTimeOnStage("Chọn thời gian");
+        setUsername("");
+        setOperatingTime(0);
+        setOperatingTimeFetchData(0);
+        setTotalAmount(0);
+        setPrice(0);
+        // setStartDate(null);
+        // setEndDate(null);
+        setWeekDays({});
+        setSelectedWeek([]);
+        setSportFieldDuplicate({});
         setSelectTime("Chọn thời gian");
         setIsOffline(false);
+        setFullName("");
+        setPhoneNumber("");
     }, [activeTab])
 
     const renderInputBooking = () => {
@@ -818,6 +860,7 @@ const BookingModal = (props: OwnerProps) => {
                                     minDate={new Date(dayStartBooking)}
                                     placeholderText="Từ ngày"
                                     className="form-control start"
+                                    dateFormat="dd/MM/yyyy"
                                 />
                                 <InputGroup.Text><i className="bi bi-three-dots"></i></InputGroup.Text>
                                 <DatePicker
@@ -830,6 +873,7 @@ const BookingModal = (props: OwnerProps) => {
                                     maxDate={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 30)) : undefined}
                                     placeholderText="Đến ngày"
                                     className="form-control end"
+                                    dateFormat="dd/MM/yyyy"
                                 />
                             </InputGroup>
                             <InputGroup className="search-date mb-2">
@@ -924,7 +968,7 @@ const BookingModal = (props: OwnerProps) => {
                         :
                         <Button style={{ backgroundColor: "#142239" }}
                             disabled={Object.keys(sportFieldDuplicate).length === 0 && selectedWeek.length !== 0 ? false : true}
-                            onClick={() => handleSaveByPeriod()}>Xác nhận</Button>
+                            onClick={() => handleSaveByPeriod()}>Xác nhận 1</Button>
                     }
                 </Modal.Footer>
             </Modal >

@@ -26,13 +26,13 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Autowired
 	BookingDetailDAO bookingDetailDAO;
-	
+
 	@Autowired
 	BookingDAO bookingDAO;
-	
+
 	@Autowired
 	SportFieldDetailDAO sportFieldDAO;
-	
+
 	@Autowired
 	UserDAO userDAO;
 
@@ -41,8 +41,10 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 //		return bookingDetailDAO.findBySportFieldDetailAndToday(sportDetailId);
 //	}
 
-	public List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportFieldDetailId, LocalDate today, LocalDate endDate) {
-		List<BookingDetail> bookingDetails = bookingDetailDAO.findBySportFieldDetailAndDateBetween(sportFieldDetailId, today, endDate);
+	public List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportFieldDetailId, LocalDate today,
+			LocalDate endDate) {
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findBySportFieldDetailAndDateBetween(sportFieldDetailId,
+				today, endDate);
 		bookingDetails.forEach(bd -> {
 			User u = userDAO.findUserByBookingDetailId(bd.getBookingDetailId());
 			bd.setFullName(u.getFullname());
@@ -55,10 +57,10 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		System.err.println(bd);
 
 		BookingDetail bookingDetail = new BookingDetail();
-		
+
 		SportFieldDetail spd = sportFieldDAO.findById((Integer) bd.get("sportFieldDetailId")).get();
 		Booking b = bookingDAO.findById((Integer) bd.get("booking")).get();
-		
+
 		Object priceObj = bd.get("price");
 		Double price;
 
@@ -69,12 +71,12 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		} else {
 			throw new IllegalArgumentException("totalAmount must be a String or Number");
 		}
-		
+
 		bookingDetail.setStartTime((String) bd.get("startTime"));
 		bookingDetail.setEndTime((String) bd.get("endTime"));
 		bookingDetail.setSportFieldDetail(spd);
 		bookingDetail.setPrice(price);
-		bookingDetail.setDate(LocalDate.parse((String) bd.get("date")));	
+		bookingDetail.setDate(LocalDate.parse((String) bd.get("date")));
 		bookingDetail.setBooking(b);
 		bookingDetail.setSubcriptionKey((String) bd.get("subscriptionKey"));
 		return bookingDetailDAO.save(bookingDetail);
@@ -106,9 +108,9 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(booking.getBookingId());
 		int index = 0;
 		for (BookingDetail b : bookingDetails) {
-		    if (!b.getStatus()) {
-		        index++;
-		    }
+			if (!b.getStatus()) {
+				index++;
+			}
 		}
 		if (index == bookingDetails.size()) {
 			booking.setStatus("Đã hủy");
@@ -120,7 +122,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	public void updateBookingDetail(Map<String, Object> data) {
 		BookingDetail bd = bookingDetailDAO.findById((Integer) data.get("bookingDetailId")).get();
 		SportFieldDetail spd = sportFieldDAO.findById((Integer) data.get("idSportDetail")).get();
-		
+
 		Object priceObj = data.get("price");
 		Double price;
 
@@ -131,7 +133,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		} else {
 			throw new IllegalArgumentException("totalAmount must be a String or Number");
 		}
-		
+
 		bd.setSportFieldDetail(spd);
 		bd.setDate(LocalDate.parse((String) data.get("dateBooking")));
 		bd.setStartTime((String) data.get("startTimeBooking"));
@@ -145,9 +147,20 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	public List<BookingDetail> findBookingDetailBySubscriptionKey(String subscriptionKey) {
 		return bookingDetailDAO.findBookingDetailBySubscriptionKey(subscriptionKey);
 	}
-	
-	
 
-	
+	@Override
+	public void cancelBookingDetailBySubscription(Integer bookingDetailId, String subscriptionKey) {
+		List<BookingDetail> bookingDetailsSub = bookingDetailDAO.findBySubscriptionKey(subscriptionKey);
+		BookingDetail bookingDetail = bookingDetailDAO.findById(bookingDetailId).get();
 
+		Booking booking = bookingDAO.findById(bookingDetail.getBooking().getBookingId()).get();
+
+		bookingDetailsSub.forEach(bd -> {
+			bd.setStatus(false);
+			bookingDetailDAO.save(bd);
+		});
+
+		booking.setStatus("Đã hủy");
+		bookingDAO.save(booking);
+	}
 }
