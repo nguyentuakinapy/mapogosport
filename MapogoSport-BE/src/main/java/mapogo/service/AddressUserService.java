@@ -9,4 +9,5 @@ public interface AddressUserService {
 	void deleteAddressByUser(Integer addressUserId);
 	List<AddressUser> addAddressByUsername(String username, List<AddressUser> newAddress);
 	AddressUser updateAddressUser(Integer addressUserId, AddressUser updateAddress);
+	AddressUser updateStatusAddressUser(Integer addressUserId, AddressUser updateAdress);
 }

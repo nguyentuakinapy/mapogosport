@@ -10,7 +10,6 @@ import useSWR from "swr";
 
 const Bookings = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
-    const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
     const [bookingUser, setBookingUser] = useState<BookingByUserMap[]>([]);
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
@@ -20,15 +19,9 @@ const Bookings = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
 
-    useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUsernameFetchApi(`http://localhost:8080/rest/user/booking/${parsedUserData.username}`);
-        }
-    }, []);
+    const username = localStorage.getItem('username');
 
-    const { data, error, isLoading } = useSWR(usernameFetchApi ? usernameFetchApi : null, fetcher, {
+    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/booking/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -36,8 +29,9 @@ const Bookings = () => {
 
     useEffect(() => {
         if (data) {
-            setBookingUser(data);
-            setFilteredBookings(data);
+            const sortedData = data.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            setBookingUser(sortedData);
+            setFilteredBookings(sortedData);
         }
     }, [data]);
 
@@ -90,11 +84,11 @@ const Bookings = () => {
         if (endDate) {
             filtered = filtered.filter(booking => new Date(booking.date) <= endDate);
         };
-        if (statusFilter) {
+        if (statusFilter && statusFilter !== "") {
             filtered = filtered.filter(booking => booking.status === statusFilter);
         };
         if (nameFilter) {
-            filtered = filtered.filter(booking => booking.sportFieldName == nameFilter);
+            filtered = filtered.filter(booking => booking.sportFieldName.toLowerCase().includes(nameFilter.toLowerCase()));
         };
 
         setFilteredBookings(filtered);
@@ -142,7 +136,7 @@ const Bookings = () => {
                     </Col>
                     <Col xs={12} md={4}>
                         <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                            <option>-- Trạng thái --</option>
+                            <option value="">-- Trạng thái --</option>
                             <option value="Đã thanh toán">Đã thanh toán</option>
                             <option value="Đã hủy">Đã hủy</option>
                             <option value="Chờ thanh toán">Chờ thanh toán</option>
@@ -162,40 +156,41 @@ const Bookings = () => {
                 <Table striped className="mb-0">
                     <thead>
                         <tr>
-                            <th>Mã đặt sân</th>
-                            <th>Tên sân</th>
-                            <th>Ngày</th>
-                            <th>Tình trạng</th>
-                            <th>Thao tác</th>
+                            <th style={{ width: '120px' }}>Mã đặt sân</th>
+                            <th style={{ width: '240px' }}>Tên sân</th>
+                            <th style={{ width: '100px' }}>Ngày đặt</th>
+                            <th style={{ width: '240px' }}>Tổng tiền</th>
+                            <th style={{ width: '120px' }}>Tình trạng</th>
+                            <th style={{ width: '100px' }}>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         {currentItems.length > 0 ? (
-                            currentItems.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                                .map((booking) => (
-                                    <tr key={booking.bookingId}>
-                                        <td className="ps-3 text-start">
-                                            <Link href={`/user/bookings/detail/${booking.bookingId}`}>
-                                                #{booking.bookingId}
-                                            </Link>
-                                        </td>
-                                        <td className="title text-start">{booking.sportFieldName}</td>
-                                        <td>{new Date(booking.date).toLocaleDateString()}</td>
-                                        <td>
-                                            <Badge bg={getStatusVariant(booking.status)}>
-                                                {booking.status}
-                                            </Badge>
-                                        </td>
-                                        <td>
-                                            <Link href={`/user/bookings/detail/${booking.bookingId}`}>
-                                                Xem
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
+                            currentItems.map((booking) => (
+                                <tr key={booking.bookingId}>
+                                    <td className="ps-3 text-start">
+                                        <Link href={`/user/bookings/detail/${booking.bookingId}`}>
+                                            #{booking.bookingId}
+                                        </Link>
+                                    </td>
+                                    <td className="title text-start">{booking.sportFieldName}</td>
+                                    <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
+                                    <td>{booking.totalAmount.toLocaleString()} đ</td>
+                                    <td>
+                                        <Badge bg={getStatusVariant(booking.status)}>
+                                            {booking.status}
+                                        </Badge>
+                                    </td>
+                                    <td>
+                                        <Link href={`/user/bookings/detail/${booking.bookingId}`}>
+                                            Xem
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))
                         ) : (
                             <tr>
-                                <td colSpan={5} className="text-center">Không có đơn hàng nào.</td>
+                                <td colSpan={6} className="text-center">Không có đơn hàng nào.</td>
                             </tr>
                         )}
                     </tbody>

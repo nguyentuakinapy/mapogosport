@@ -16,7 +16,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
     });
 
     const [orderDetail, setOrderDetail] = useState<OrderDetail[]>([]);
-    const [order, setOrder] = useState<Order | null>(null);
+    const [order, setOrder] = useState<OrderMap | null>(null);
 
     useEffect(() => {
         if (data) {
@@ -27,7 +27,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
     useEffect(() => {
         const selectedOrder = sessionStorage.getItem('selectedOrder');
         if (selectedOrder) {
-            const parsedOrder = JSON.parse(selectedOrder) as Order;
+            const parsedOrder = JSON.parse(selectedOrder) as OrderMap;
             setOrder(parsedOrder);
         }
     }, []);
@@ -81,13 +81,13 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
             </div>
             <b className='text-danger' style={{ fontSize: '20px' }}>Địa chỉ nhận hàng</b>
             <div className='p-3' style={{ fontSize: '15px' }}>
-                <Row className='item-address'>
+                <Row className='item-order'>
                     <Col xs={12} md={5}>
-                        <p><i className="bi bi-person-vcard"></i> <b>Họ và tên: </b>{order?.user.fullname}</p>
+                        <p><i className="bi bi-person-vcard"></i> <b>Họ và tên: </b>{order?.fullname}</p>
                         <p><i className="bi bi-telephone-fill"></i> <b>Số điện thoại:</b> {order?.phoneNumber}</p>
                     </Col>
                     <Col xs={12} md={7}>
-                        <p><i className="bi bi-geo-alt-fill"></i> <b>Địa chỉ: </b>{order?.address}</p>
+                        <p><i className="bi bi-geo-alt-fill"></i> <b>Địa chỉ: </b>{order?.address || "Chưa cập nhật địa chỉ"}</p>
                     </Col>
                 </Row>
             </div>

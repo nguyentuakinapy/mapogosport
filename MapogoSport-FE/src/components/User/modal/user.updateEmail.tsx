@@ -28,10 +28,9 @@ const ModalUpdateEmail = (props: UserProps) => {
             toast.warning("Vui lòng nhập đầy đủ thông tin!")
             return;
         }
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            fetch(`http://localhost:8080/rest/user/${parsedUserData.username}`, {
+        const username = localStorage.getItem('username');
+        if (username) {
+            fetch(`http://localhost:8080/rest/user/${username}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -47,7 +46,7 @@ const ModalUpdateEmail = (props: UserProps) => {
                     return
                 }
                 handleClose();
-                mutate(`http://localhost:8080/rest/user/${parsedUserData.username}`);
+                mutate(`http://localhost:8080/rest/user/${username}`);
                 toast.success('Cập nhật địa chỉ email thành công!');
                 fetch('http://localhost:8080/rest/user/updateEmail/sendMail', {
                     method: 'POST',

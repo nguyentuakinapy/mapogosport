@@ -1,16 +1,17 @@
 'use client'
 import ProfileContent from "@/components/User/modal/user.profile";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
-import { Col, FloatingLabel, Form, Nav, Row } from "react-bootstrap";
+import { Nav } from "react-bootstrap";
+import { useData } from "../context/UserContext";
 
 export default function Owner({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState<string>('all');
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
-
     const searchParams = useSearchParams();
     const check = searchParams.get('check');
+    const userData = useData();
+
     useEffect(() => {
         if (check === 'withdraw') {
             setActiveTab('withdraw');
@@ -18,10 +19,9 @@ export default function Owner({ children }: { children: ReactNode }) {
     }, [check]);
 
     useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`);
+        const username = localStorage.getItem('username');
+        if (username) {
+            setUsernameFetchApi(`http://localhost:8080/rest/user/${username}`);
         }
     }, []);
 
@@ -52,7 +52,7 @@ export default function Owner({ children }: { children: ReactNode }) {
             <>
                 <div className="profile-header">
                     <div className="profile-info">
-                        <h2>Nguyễn Tú Akina</h2>
+                        <h2>{userData?.fullname}</h2>
                         <p>Thằng nào có tiền thì nạp vào DONATE cho tao</p>
                         <div className="stats">
                             <span>0 Bài Viết</span>

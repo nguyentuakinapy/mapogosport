@@ -49,11 +49,10 @@ const ModalChangePassword = (props: UserProps) => {
             toast.error("Mật khẩu mới và xác nhận mật khẩu không khớp!");
             return;
         }
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
+        const username = localStorage.getItem('username');
+        if (username) {
             const hashNewPass = hashPassword(newPassword);
-            fetch(`http://localhost:8080/rest/user/${parsedUserData.username}`, {
+            fetch(`http://localhost:8080/rest/user/${username}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -69,7 +68,7 @@ const ModalChangePassword = (props: UserProps) => {
                     return
                 }
                 handleClose();
-                mutate(`http://localhost:8080/rest/user/${parsedUserData.username}`);
+                mutate(`http://localhost:8080/rest/user/${username}`);
                 toast.success('Cập nhật mật khẩu thành công!');
                 fetch('http://localhost:8080/rest/user/changePassword/sendMail', {
                     method: 'POST',

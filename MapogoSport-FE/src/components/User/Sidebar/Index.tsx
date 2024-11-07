@@ -21,11 +21,18 @@ const menuGroups = [
                 ],
             },
             {
-                label: "Yêu thích và voucher",
+                label: "Bình luận và yêu thích",
                 route: "#",
                 children: [
                     { label: "Sân yêu thích", route: "/user/wishlist/sportfield" },
-                    { label: "Bình luận và đánh giá", route: "/user/wishlist/comment" },
+                    { label: "Bình luận và đánh giá", route: "/user/wishlist/comment" }
+                ],
+            },
+            {
+                label: "Ví và voucher",
+                route: "#",
+                children: [
+                    { label: "Ví", route: "/user/wallet" },
                     { label: "Phiếu giảm giá", route: "/user/coupon" }
                 ],
             }
@@ -36,22 +43,6 @@ const menuGroups = [
 const Sidebar = () => {
     const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
     const pathname = usePathname();
-
-    const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-    // const [usernameFetchApi, setUsernameFetchApi] = useState<string>("");
-    // useEffect(() => {
-    //     const user = sessionStorage.getItem('user');
-    //     if (user) {
-    //         const parsedUserData = JSON.parse(user) as User;
-    //         setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`)
-    //     }
-    // }, []);
-    // const { data } = useSWR(usernameFetchApi, fetcher, {
-    //     revalidateIfStale: false,
-    //     revalidateOnFocus: false,
-    //     revalidateOnReconnect: false
-    // });
 
     const userData = useData();
 
@@ -66,6 +57,7 @@ const Sidebar = () => {
             setPageName(activeItem.label.toLowerCase());
         }
     }, [pathname, setPageName]);
+
     useEffect(() => {
         if (userData) {
             setName(userData.fullname || '');
@@ -74,7 +66,7 @@ const Sidebar = () => {
     }, [userData]);
 
     return (
-        <div className="menu-user">
+        <div className="menu-user" style={{ height: '100%' }}>
             <div className="text-center">
                 <div className="avatar-upload">
                     <div className="avatar-edit">

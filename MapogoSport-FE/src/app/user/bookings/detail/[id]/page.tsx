@@ -120,6 +120,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                         <Table className="my-3">
                             <thead>
                                 <tr>
+                                    <th className="text-secondary">Ngày đá</th>
                                     <th className="text-secondary">Sân</th>
                                     <th className="text-secondary">Thời gian</th>
                                     <th className="text-secondary">Giá</th>
@@ -128,6 +129,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                             <tbody>
                                 {booking && booking.bookingDetails.map((detail) => (
                                     <tr key={detail.bookingDetailId}>
+                                        <td>{new Date(detail.date).toLocaleDateString('en-GB')}</td>
                                         <td>{detail.sportFieldDetail.name}</td>
                                         <td>{detail.startTime} - {detail.endTime}</td>
                                         <td>{detail.price.toLocaleString()} ₫</td>
@@ -149,7 +151,8 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                     <tbody>
                                         <tr>
                                             <td className="title">{booking.owner?.user?.fullname}</td>
-                                            <td>{booking.owner?.user?.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber}</td>
+                                            <td>{booking.owner?.user?.phoneNumberUsers
+                                                .find(item => item.active)?.phoneNumber.phoneNumber || "Chưa cập nhật số điện thoại"}</td>
                                         </tr>
                                     </tbody>
                                 </Table>

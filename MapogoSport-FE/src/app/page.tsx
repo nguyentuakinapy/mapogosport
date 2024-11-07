@@ -12,8 +12,6 @@ import RegisterModal from "@/components/account/modal/register.modal";
 import ForgotPassword from "@/components/account/modal/forgotPassword.modal";
 import ChangePasswordNew from "@/components/account/modal/change-password-new.modal";
 import Popup from "@/components/User/modal/popup-voucher.modal";
-import useSWR from "swr";
-import { height } from "@fortawesome/free-brands-svg-icons/fa42Group";
 import { useData } from "./context/UserContext";
 
 export default function Home() {
@@ -125,13 +123,13 @@ export default function Home() {
           </div>
           <div className="d-flex justify-content-center mt-4">
             <div className="input-group" style={{ width: '70%', backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: '8px', padding: '10px' }}>
-              <select defaultValue={0} className="form-control" style={{ border: 'none', height: '50px' }}>
+              <select defaultValue={0} className="form-control" style={{ borderWidth: '0 1px 0 0', borderStyle: 'solid', borderColor: 'black' }}>
                 <option value={'0'}>Lọc theo loại sân</option>
                 <option value="1">Sân cỏ nhân tạo</option>
                 <option value="2">Sân cỏ tự nhiên</option>
               </select>
-              <input type="text" className="form-control" placeholder="Nhập tên sân hoặc địa chỉ" style={{ border: 'none', height: '50px' }} />
-              <input type="text" className="form-control" placeholder="Nhập khu vực" style={{ border: 'none', height: '50px' }} />
+              <input type="text" className="form-control" placeholder="Nhập tên sân hoặc địa chỉ" style={{ borderWidth: '0 1px 0 1px', borderStyle: 'solid', borderColor: 'black' }} />
+              <input type="text" className="form-control" placeholder="Nhập khu vực" style={{ borderWidth: '0 0 0 1px', borderStyle: 'solid', borderColor: 'black' }} />
               <div className="input-group-append">
                 <button className="btn btn-warning" type="button" style={{ height: '50px', borderRadius: '4px', fontWeight: 'bold' }}>
                   Tìm kiếm <i className="bi bi-search fw-bold"></i>

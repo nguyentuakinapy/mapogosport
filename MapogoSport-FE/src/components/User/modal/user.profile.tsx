@@ -20,11 +20,13 @@ interface ProfileContentProps {
 const ProfileContent: React.FC<ProfileContentProps> = React.memo(({ usernameFetchApi }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [userData, setUserData] = useState<User | null>(null);
-
     const [fullName, setFullName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [birthday, setBirthday] = useState<Date | null>(null);
     const [gender, setGender] = useState<number | null>(null);
+    const [showUpdateEmail, setShowUpdateEmail] = useState<boolean>(false);
+    const [showChangePassword, setShowChangePassword] = useState<boolean>(false);
+    const [showUpdatePhone, setShowUpdatePhone] = useState<boolean>(false);
 
     const { data, error, isLoading } = useSWR(usernameFetchApi, fetcher, {
         revalidateIfStale: false,
@@ -80,10 +82,6 @@ const ProfileContent: React.FC<ProfileContentProps> = React.memo(({ usernameFetc
     useEffect(() => {
         updateUserData();
     }, [fullName, email, birthday, gender]);
-
-    const [showUpdateEmail, setShowUpdateEmail] = useState<boolean>(false);
-    const [showChangePassword, setShowChangePassword] = useState<boolean>(false);
-    const [showUpdatePhone, setShowUpdatePhone] = useState<boolean>(false);
 
     if (isLoading) return <div>Đang tải...</div>;
     if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;

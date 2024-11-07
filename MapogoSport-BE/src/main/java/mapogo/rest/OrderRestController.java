@@ -36,7 +36,7 @@ public class OrderRestController {
 	OrderDetailService orderDetailService;
 
 	@GetMapping("/user/order/{username}")
-	public List<Order> getUserAll(@PathVariable("username") String username) {
+	public List<Map<String, Object>> getUserAll(@PathVariable("username") String username) {
 		return orderService.findOrderByUsername(username);
 	}
 	
