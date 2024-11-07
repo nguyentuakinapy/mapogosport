@@ -195,7 +195,7 @@ const AdminProduct = () => {
 
   // Phần phân trang
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 2; // số item trên mỗi trang
+  const itemsPerPage = 3; // số item trên mỗi trang
 
   // Tính toán dữ liệu cho trang hiện tại
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -230,54 +230,21 @@ const AdminProduct = () => {
     setCurrentPage(1);
   };
 
-  //   const renderPagination = () => {
-  //     const pages = Array.from({ length: totalPages }, (_, index) => index);
-  //     return (
-  //       <div className="d-flex justify-content-center my-3">
-  //           <div className="pagination">
-  //               <button
-  //                   onClick={() => setCurrentPage(currentPage - 1)}
-  //                   disabled={currentPage === 0} // Disable if on the first page
-  //                   className="btn btn-danger mx-1"
-  //               >
-  //                   Previous
-  //               </button>
-  //               {pages.map((page) => (
-  //                   <button
-  //                       key={page}
-  //                       onClick={() => setCurrentPage(page)}
-  //                       className={`btn btn-outline-danger mx-1 ${currentPage === page ? "active" : ""}`}
-  //                   >
-  //                       {page + 1} {/* Add 1 to display page number starting from 1 */}
-  //                   </button>
-  //               ))}
-  //               <button
-  //                   onClick={() => setCurrentPage(currentPage + 1)}
-  //                   disabled={currentPage >= totalPages - 1} // Disable if on the last page
-  //                   className="btn btn-danger mx-1"
-  //               >
-  //                   Next
-  //               </button>
-  //           </div>
-  //       </div>
-  //   );
-
-  // };
+  const formatCurrency = (value) => {
+    if (value === null || value === undefined) return '';
+    return value.toLocaleString('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    });
+  };
+  
 
   const renderContent = () => {
-    // const pages = Array.from({ length: totalPages }, (_, index) => index);
     return (
       <div className="box-table-border mb-4">
         <Table striped className="mb-0">
           <thead>
             <tr>
-              {/* <th>
-                <FormCheck
-                  type="checkbox"
-                  checked={selectAllProduct}
-                  onChange={handleSelectAllProduct}
-                />
-              </th> */}
               <th>STT</th>
               <th>Hình ảnh</th>
               <th>Thông tin sản phẩm</th>
@@ -289,13 +256,6 @@ const AdminProduct = () => {
               currentItems.length > 0 &&
               currentItems.map((product, index) => (
                 <tr key={product.productId} id={product.productId.toString()}>
-                  {/* <td className="text-center align-middle">
-                    <FormCheck
-                      type="checkbox"
-                      checked={selectedProducts.includes(product.productId)}
-                      onChange={() => handleSelectProduct(product.productId)}
-                    />
-                  </td> */}
                   <td className="text-center align-middle">{index + 1}</td>
                   <td className="text-center align-middle">
                     <Link href="#">
@@ -307,12 +267,6 @@ const AdminProduct = () => {
                         className="mx-2"
                         alt={`product.image`}
                       />
-                      {/* <Image 
-                                     src={`${BASE_URL}/images/product-images/${product.image}`} 
-                                     style={{ width: '150px', height: 'auto' }} 
-                                    className="mx-2" 
-                                    alt={product.image} 
-                                /> */}
                     </Link>
                   </td>
                   <td className="text-start align-middle">
@@ -333,7 +287,9 @@ const AdminProduct = () => {
                       </strong>
                     </div>
                     <div>
-                      <span>Giá:</span> <strong>{product.price}</strong>
+                      {/* <span>Giá:</span> <strong>{product.price}</strong> */}
+                      <span>Giá:</span> <strong>{formatCurrency(product.price)}</strong>
+
                     </div>
                     <div>
                       <span>Hãng:</span> <strong>{product.brand}</strong>

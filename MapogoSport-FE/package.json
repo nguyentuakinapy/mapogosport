@@ -55,6 +55,7 @@
     "react-router-dom": "^6.27.0",
     "react-toastify": "10.0.5",
     "sass": "1.79.3",
+    "socket.io-client": "^4.8.1",
     "swr": "2.2.5"
   },
   "devDependencies": {
