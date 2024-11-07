@@ -52,27 +52,35 @@ public class BookingServiceImpl implements BookingService {
 	}
 	
 	@Override
-	public List<Map<String, Object>> findAllBookingByOwnerId(Integer ownerId) {
-		List<Booking> bookings = bookingDAO.findByOwner_OwnerId(ownerId);
+	public List<Map<String, Object>> findAllBookingByOwner(String ownerUsername) {
+		List<Booking> bookings = bookingDAO.findByOwner_User_Username(ownerUsername);
 		List<Map<String, Object>> resultList = new ArrayList<>();
 		
 		for (Booking booking: bookings) {
 			Map<String, Object> bookingMap = new HashMap<>();
 			bookingMap.put("bookingId", booking.getBookingId());
-			bookingMap.put("userFullname", booking.getUser().getFullname());
+			bookingMap.put("bookingUserFullname", booking.getFullName());
 			bookingMap.put("date", booking.getDate());
 			bookingMap.put("totalAmount", booking.getTotalAmount());
 			bookingMap.put("status", booking.getStatus());
+			bookingMap.put("bookingUserPhone", booking.getPhoneNumber());
 			
-			User user = booking.getUser();
-			for (PhoneNumberUser phoneNumberUser : user.getPhoneNumberUsers()) {
-                if (phoneNumberUser.getActive() != null && phoneNumberUser.getActive()) {
-                    PhoneNumber phoneNumber = phoneNumberUser.getPhoneNumber();
-                    if (phoneNumber != null) {
-                        bookingMap.put("userPhone", phoneNumber.getPhoneNumber());
-                    }
-                }
-            }
+			for (BookingDetail bookingDetail : booking.getBookingDetails()) {
+	            if (bookingDetail.getSportFieldDetail() != null) {
+	                SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
+	                if (sportField != null) {
+	                    bookingMap.put("sportFieldName", sportField.getName());
+	                }
+	            }
+	        }
+			
+			Map<String, Object> userMap = new HashMap<>();
+			if (booking.getUser() != null) {
+				userMap.put("username", booking.getUser().getUsername());
+				userMap.put("fullname", booking.getUser().getFullname());
+			}
+			
+			bookingMap.put("user", userMap);
 	        resultList.add(bookingMap);
 		}
 		return resultList;
@@ -89,7 +97,6 @@ public class BookingServiceImpl implements BookingService {
 			bookingMap.put("date", booking.getDate());
 			bookingMap.put("totalAmount", booking.getTotalAmount());
 			bookingMap.put("status", booking.getStatus());
-			
 			for (BookingDetail bookingDetail : booking.getBookingDetails()) {
 	            if (bookingDetail.getSportFieldDetail() != null) {
 	                SportField sportField = bookingDetail.getSportFieldDetail().getSportField();

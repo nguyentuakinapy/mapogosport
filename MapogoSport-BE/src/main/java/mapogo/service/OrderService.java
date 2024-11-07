@@ -9,12 +9,12 @@ import mapogo.dto.OrderDTO;
 import mapogo.entity.Order;
 
 public interface OrderService {
-	List<Order> findOrderByUsername(String username);
+	List<Map<String, Object>> findOrderByUsername(String username);
 	List<Map<String, Object>> findAllOrder();
 	Order updateStatusOrder(Map<String, Object> orderData);
 	
 	//của Mỵ từ đây
-	List<Order> findByUser_Username(String username);
+//	List<Order> findByUser_Username(String username);
 
 	// của Mỵ từ đây
 	Order createOrder(OrderDTO order);

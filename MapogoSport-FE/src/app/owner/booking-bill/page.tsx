@@ -10,6 +10,7 @@ import { RobotoBase64 } from '../../../../public/font/Roboto-Regular';
 import { toast } from "react-toastify";
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { debounce } from "lodash";
 
 const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -17,7 +18,7 @@ const OwnerBookingBill = () => {
     const [activeTab, setActiveTab] = useState<string>('all');
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [itemsPerPage] = useState(8);
 
     const orderStatuses = [
         'Chờ thanh toán',
@@ -25,7 +26,9 @@ const OwnerBookingBill = () => {
         'Đã hủy'
     ];
 
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/owner/booking/findAll`, fetcher, {
+    const username = localStorage.getItem('username');
+
+    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/owner/booking/findAll/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -33,7 +36,8 @@ const OwnerBookingBill = () => {
 
     useEffect(() => {
         if (data) {
-            setBookingData(data);
+            const sortedData = data.sort((a: BookingFindAll, b: BookingFindAll) => b.bookingId - a.bookingId);
+            setBookingData(sortedData);
         }
     }, [data]);
 
@@ -41,9 +45,9 @@ const OwnerBookingBill = () => {
         setCurrentPage(1);
     }, [activeTab, searchTerm]);
 
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSearch = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value.toLowerCase());
-    };
+    }, 300);
 
     const getStatusVariant = (status: string) => {
         switch (status) {
@@ -67,7 +71,7 @@ const OwnerBookingBill = () => {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return;
             }
-            mutate(`http://localhost:8080/rest/owner/booking/findAll`);
+            mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
             toast.success('Cập nhật thành công!');
         });
     };
@@ -75,7 +79,7 @@ const OwnerBookingBill = () => {
     const renderStatusDropdown = (booking: BookingFindAll) => {
         return (
             <Dropdown onSelect={(newStatus) => handleStatusChange(booking.bookingId, newStatus || booking.status)}>
-                <Dropdown.Toggle variant={getStatusVariant(booking.status)}>{booking.status}</Dropdown.Toggle>
+                <Dropdown.Toggle disabled={booking.status == "Đã hủy"} variant={getStatusVariant(booking.status)}>{booking.status}</Dropdown.Toggle>
                 <Dropdown.Menu>
                     {orderStatuses.map((status) => (
                         <Dropdown.Item key={status} eventKey={status}>
@@ -93,33 +97,35 @@ const OwnerBookingBill = () => {
                 <Table striped className="mb-0">
                     <thead>
                         <tr>
-                            <th style={{ width: '120px' }}>Mã hóa đơn</th>
-                            <th style={{ width: '250px' }}>Họ và tên</th>
+                            <th style={{ width: '110px' }}>Mã hóa đơn</th>
+                            <th style={{ width: '220px' }}>Tên sân</th>
+                            <th style={{ width: '200px' }}>Họ và tên</th>
                             <th>Ngày đặt</th>
                             <th>Tổng tiền</th>
-                            <th>Số điện thoại</th>
+                            <th style={{ width: '200px' }}>Số điện thoại</th>
                             <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredBookings.length > 0 ?
-                            filteredBookings.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                                .map((booking) => (
-                                    <tr key={booking.bookingId}>
-                                        <td className="text-start title">
-                                            <Link href={`/owner/booking-bill/${booking.bookingId}`}>{`#${booking.bookingId}`}</Link>
-                                        </td>
-                                        <td>{booking.userFullname}</td>
-                                        <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
-                                        <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
-                                        <td>{booking.userPhone || 'Chưa cập nhật số điện thoại'}</td>
-                                        <td>{renderStatusDropdown(booking)}</td>
-                                        <td>
-                                            <Link href={`/owner/booking-bill/${booking.bookingId}`}>Xem</Link>
-                                        </td>
-                                    </tr>
-                                )) :
+                            filteredBookings.map((booking) => (
+                                <tr key={booking.bookingId}>
+                                    <td className="text-start title">
+                                        <Link href={`/owner/booking-bill/${booking.bookingId}`}>{`#${booking.bookingId}`}</Link>
+                                    </td>
+                                    <td className="text-start">{booking.sportFieldName}</td>
+                                    <td className="title">{booking.user.username == 'sportoffline' ?
+                                        (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname}</td>
+                                    <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
+                                    <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
+                                    <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
+                                    <td>{renderStatusDropdown(booking)}</td>
+                                    <td>
+                                        <Link href={`/owner/booking-bill/${booking.bookingId}`}>Xem</Link>
+                                    </td>
+                                </tr>
+                            )) :
                             <tr>
                                 <td colSpan={7} className="text-center">Không có dữ liệu về trạng thái này!</td>
                             </tr>}
@@ -129,26 +135,22 @@ const OwnerBookingBill = () => {
         );
     };
 
-    const renderContent = () => {
-        let filteredBookings = bookingData;
-        switch (activeTab) {
-            case 'unpaid':
-                filteredBookings = filteredBookings.filter(booking => booking.status === 'Chờ thanh toán');
-                break;
-            case 'cancel':
-                filteredBookings = filteredBookings.filter(booking => booking.status === 'Đã hủy');
-                break;
-            case 'complete':
-                filteredBookings = filteredBookings.filter(booking => booking.status === 'Đã thanh toán');
-                break;
-            default:
-                break;
-        }
-
-        filteredBookings = filteredBookings.filter(booking =>
-            booking.userFullname.toLowerCase().includes(searchTerm)
+    const filteredBookings = bookingData.filter(booking => {
+        const fullName = booking.user.username === 'sportoffline' ? (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname;
+        return (
+            (fullName && fullName.toLowerCase().includes(searchTerm)) ||
+            booking.sportFieldName.toLowerCase().includes(searchTerm)
         );
+    }).filter(booking => {
+        switch (activeTab) {
+            case 'unpaid': return booking.status === 'Chờ thanh toán';
+            case 'cancel': return booking.status === 'Đã hủy';
+            case 'complete': return booking.status === 'Đã thanh toán';
+            default: return true;
+        }
+    });
 
+    const renderContent = () => {
         const indexOfLastItem = currentPage * itemsPerPage;
         const indexOfFirstItem = indexOfLastItem - itemsPerPage;
         const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
@@ -169,23 +171,9 @@ const OwnerBookingBill = () => {
     };
 
     const renderPagination = () => {
-        const filteredOrders = bookingData.filter(booking =>
-            booking.userFullname.toLowerCase().includes(searchTerm)
-        ).filter(booking => {
-            switch (activeTab) {
-                case 'unpaid': return booking.status === 'Chờ thanh toán';
-                case 'cancel': return booking.status === 'Đã hủy';
-                case 'complete': return booking.status === 'Đã thanh toán';
-                default: return true;
-            }
-        });
-
-        if (filteredOrders.length === 0) {
-            return null;
-        }
-
-        const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+        const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
         const pages = [];
+        if (totalPages <= 1) return null;
 
         for (let i = 1; i <= totalPages; i++) {
             pages.push(
@@ -215,24 +203,14 @@ const OwnerBookingBill = () => {
             const tableColumn = ["Mã HD", "Họ và tên", "Ngày đặt", "Tổng tiền", "Số điện thoại", "Trạng thái"];
             const tableRows: string[][] = [];
 
-            const filteredBookings = bookingData.filter(booking =>
-                booking.userFullname.toLowerCase().includes(searchTerm)
-            ).filter(booking => {
-                switch (activeTab) {
-                    case 'unpaid': return booking.status === 'Chờ thanh toán';
-                    case 'cancel': return booking.status === 'Đã hủy';
-                    case 'complete': return booking.status === 'Đã thanh toán';
-                    default: return true;
-                }
-            });
-
             filteredBookings.forEach(booking => {
                 const orderData = [
                     `#${booking.bookingId}`,
-                    booking.userFullname,
+                    booking.user.username == 'sportoffline' ?
+                        (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname,
                     new Date(booking.date).toLocaleDateString('en-GB'),
                     `${booking.totalAmount.toLocaleString()} ₫`,
-                    booking.userPhone || 'Chưa cập nhật số điện thoại',
+                    booking.bookingUserPhone || 'Chưa cập nhật số điện thoại',
                     booking.status
                 ];
                 tableRows.push(orderData);
@@ -282,17 +260,6 @@ const OwnerBookingBill = () => {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Hóa Đơn');
 
-            const filteredBookings = bookingData.filter(booking =>
-                booking.userFullname.toLowerCase().includes(searchTerm)
-            ).filter(booking => {
-                switch (activeTab) {
-                    case 'unpaid': return booking.status === 'Chờ thanh toán';
-                    case 'cancel': return booking.status === 'Đã hủy';
-                    case 'complete': return booking.status === 'Đã thanh toán';
-                    default: return true;
-                }
-            });
-
             worksheet.columns = [
                 { header: 'Mã hóa đơn', key: 'orderId', width: 15 },
                 { header: 'Họ và tên', key: 'fullname', width: 25 },
@@ -305,10 +272,11 @@ const OwnerBookingBill = () => {
             filteredBookings.forEach(booking => {
                 worksheet.addRow({
                     orderId: `#${booking.bookingId}`,
-                    fullname: booking.userFullname,
+                    fullname: booking.user.username == 'sportoffline' ?
+                        (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname,
                     date: new Date(booking.date).toLocaleDateString('en-GB'),
                     amount: booking.totalAmount,
-                    userPhone: booking.userPhone || 'Chưa cập nhật số điện thoại',
+                    userPhone: booking.bookingUserPhone || 'Chưa cập nhật số điện thoại',
                     status: booking.status
                 });
             });
@@ -346,7 +314,7 @@ const OwnerBookingBill = () => {
             <div className="box-ultil">
                 <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Hóa Đơn</b>
                 <div>
-                    <Form.Control type="text" placeholder="Tìm theo tên người dùng..." onChange={handleSearch} />
+                    <Form.Control type="text" placeholder="Tìm theo tên..." onChange={handleSearch} />
                 </div>
                 <div>
                     <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={exportPDF}>Xuất File PDF</Button>

@@ -10,24 +10,18 @@ import useSWR, { mutate } from "swr";
 
 const Orders = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
-    const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
-    const [orderUsers, setOrderUsers] = useState<Order[]>([]);
-    const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+    const [orderUsers, setOrderUsers] = useState<OrderMap[]>([]);
+    const [filteredOrders, setFilteredOrders] = useState<OrderMap[]>([]);
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [statusFilter, setStatusFilter] = useState<string>("");
+    const [nameFilter, setNameFilter] = useState<string>("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [itemsPerPage] = useState(8);
 
-    useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUsernameFetchApi(`http://localhost:8080/rest/user/order/${parsedUserData.username}`);
-        }
-    }, []);
+    const username = localStorage.getItem("username");
 
-    const { data, error, isLoading } = useSWR(usernameFetchApi ? usernameFetchApi : null, fetcher, {
+    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/order/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -35,8 +29,9 @@ const Orders = () => {
 
     useEffect(() => {
         if (data) {
-            setOrderUsers(data);
-            setFilteredOrders(data);
+            const sortedData = data.sort((a: OrderMap, b: OrderMap) => b.orderId - a.orderId);
+            setOrderUsers(sortedData);
+            setFilteredOrders(sortedData);
         }
     }, [data]);
 
@@ -51,7 +46,7 @@ const Orders = () => {
         }
     };
 
-    const handleViewDetail = (order: Order) => {
+    const handleViewDetail = (order: OrderMap) => {
         sessionStorage.setItem('selectedOrder', JSON.stringify(order));
     };
 
@@ -59,13 +54,16 @@ const Orders = () => {
         let filtered = orderUsers;
         if (startDate) {
             filtered = filtered.filter(order => new Date(order.date) >= startDate);
-        };
+        }
         if (endDate) {
             filtered = filtered.filter(order => new Date(order.date) <= endDate);
-        };
-        if (statusFilter) {
+        }
+        if (statusFilter && statusFilter !== "") {
             filtered = filtered.filter(order => order.status === statusFilter);
-        };
+        }
+        if (nameFilter) {
+            filtered = filtered.filter(order => order.productName.toLowerCase().includes(nameFilter.toLowerCase()));
+        }
 
         setFilteredOrders(filtered);
         setCurrentPage(1);
@@ -78,6 +76,7 @@ const Orders = () => {
         setStartDate(null);
         setEndDate(null);
         setStatusFilter("");
+        setNameFilter("");
     };
 
 
@@ -124,22 +123,25 @@ const Orders = () => {
         <UserLayout>
             <b className='text-danger' style={{ fontSize: '20px' }}>Quản lý đơn hàng</b>
             <div className="my-3">
-                <div className="d-flex justify-content-between align-items-center">
-                    <div className="d-flex" style={{ width: '30%' }}>
+                <Row className="d-flex justify-content-between align-items-center">
+                    <Col xs={12} md={4}>
+                        <Form.Control value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="input-search-user" type="text" placeholder="Tìm theo tên sản phẩm" />
+                    </Col>
+                    <Col xs={12} md={4}>
                         <InputGroup className="search-date">
-                            <DatePicker selected={startDate || null} onChange={(date) => setStartDate(date)}
+                            <DatePicker selected={startDate || undefined} onChange={(date) => setStartDate(date)}
                                 selectsStart startDate={startDate || undefined} endDate={endDate || undefined}
                                 placeholderText="Từ ngày" className="form-control start" dateFormat="dd/MM/yyyy"
                             />
                             <InputGroup.Text><i className="bi bi-three-dots"></i></InputGroup.Text>
-                            <DatePicker selected={endDate || null} onChange={(date) => setEndDate(date)}
+                            <DatePicker selected={endDate || undefined} onChange={(date) => setEndDate(date)}
                                 selectsEnd startDate={startDate || undefined} endDate={endDate || undefined}
                                 minDate={startDate || undefined} placeholderText="Đến ngày" className="form-control end"
                                 dateFormat="dd/MM/yyyy"
                             />
                         </InputGroup>
-                    </div>
-                    <div className="d-flex" style={{ width: '30%' }}>
+                    </Col>
+                    <Col xs={12} md={4}>
                         <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                             <option value="">-- Trạng thái --</option>
                             <option value="Chờ thanh toán">Chờ thanh toán</option>
@@ -148,22 +150,23 @@ const Orders = () => {
                             <option value="Đã hủy">Đã hủy</option>
                             <option value="Đã hoàn thành">Đã hoàn thành</option>
                         </Form.Select>
-                    </div>
-                    <div className="d-flex justify-content-between" style={{ width: '30%' }}>
-                        <Button variant="danger" style={{ width: '48%' }} onClick={handleFilter}>
+                    </Col>
+                    <Col xs={12} md={12} className="mt-2">
+                        <Button variant="danger" style={{ width: '87%', marginRight: '9.4px' }} onClick={handleFilter}>
                             <i className="bi bi-search"></i> Tìm kiếm
                         </Button>
-                        <Button variant="secondary" style={{ width: '48%' }} onClick={handleRefresh}>
+                        <Button variant="secondary" style={{ width: '12%' }} onClick={handleRefresh}>
                             <i className="bi bi-arrow-clockwise"></i> Làm mới
                         </Button>
-                    </div>
-                </div>
+                    </Col>
+                </Row>
             </div>
             <div className="box-table-border mb-4">
                 <Table striped className="mb-0">
                     <thead>
                         <tr>
-                            <th style={{ width: '150px' }}>Mã đơn hàng</th>
+                            <th style={{ width: '140px' }}>Mã đơn hàng</th>
+                            <th style={{ width: '300px' }}>Tên sản phẩm</th>
                             <th>Ngày</th>
                             <th>Tình trạng</th>
                             <th>Tổng</th>
@@ -172,27 +175,27 @@ const Orders = () => {
                     </thead>
                     <tbody>
                         {currentItems.length > 0 ? (
-                            currentItems.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                                .map((order) => (
-                                    <tr key={order.orderId}>
-                                        <td className="ps-3 text-start">
-                                            <Link href={`/user/orders/detail/${order.orderId}`} onClick={() => handleViewDetail(order)}>#{order.orderId}</Link>
-                                        </td>
-                                        <td>{new Date(order.date).toLocaleDateString()}</td>
-                                        <td>
-                                            <Badge bg={getStatusVariant(order.status)}>{order.status}</Badge>
-                                        </td>
-                                        <td>{order.amount.toLocaleString()} ₫</td>
-                                        <td>
-                                            <Link href={`/user/orders/detail/${order.orderId}`} onClick={() => handleViewDetail(order)}>
-                                                Xem
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
+                            currentItems.map((order) => (
+                                <tr key={order.orderId}>
+                                    <td className="ps-3 text-start">
+                                        <Link href={`/user/orders/detail/${order.orderId}`} onClick={() => handleViewDetail(order)}>#{order.orderId}</Link>
+                                    </td>
+                                    <td className="title text-start">{order.productName}</td>
+                                    <td>{new Date(order.date).toLocaleDateString('en-GB')}</td>
+                                    <td>
+                                        <Badge bg={getStatusVariant(order.status)}>{order.status}</Badge>
+                                    </td>
+                                    <td>{order.amount.toLocaleString()} ₫</td>
+                                    <td>
+                                        <Link href={`/user/orders/detail/${order.orderId}`} onClick={() => handleViewDetail(order)}>
+                                            Xem
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))
                         ) : (
                             <tr>
-                                <td colSpan={5} className="text-center">Không có đơn hàng nào.</td>
+                                <td colSpan={6} className="text-center">Không có đơn hàng nào.</td>
                             </tr>
                         )}
                     </tbody>

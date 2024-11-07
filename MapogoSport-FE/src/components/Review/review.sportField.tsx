@@ -47,9 +47,8 @@ const ModalReviewSportField = (props: ReviewProps) => {
     const [comment, setComment] = useState(''); // Trạng thái cho bình luận
 
     const handleRatingSubmit = () => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
+        const username = localStorage.getItem('username');
+        if (username) {
             fetch('http://localhost:8080/rest/fieldReview/save', {
                 method: 'POST',
                 headers: {
@@ -57,7 +56,7 @@ const ModalReviewSportField = (props: ReviewProps) => {
                 },
                 body: JSON.stringify({
                     sportFieldId: fieldId,
-                    username: parsedUserData.username,
+                    username: username,
                     rating: rating,
                     comment: comment,
                     datedAt: new Date()

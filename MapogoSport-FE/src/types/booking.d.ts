@@ -106,9 +106,14 @@ interface BookingByUserMap {
 
 interface BookingFindAll {
     bookingId: number;
-    userFullname: string;
-    userPhone: string;
+    sportFieldName: string;
+    bookingUserFullname: string;
+    bookingUserPhone: string;
     totalAmount: number;
     status: string;
     date: Date;
+    user: {
+        username: string;
+        fullname: string;
+    }
 }

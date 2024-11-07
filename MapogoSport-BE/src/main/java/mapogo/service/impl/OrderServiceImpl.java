@@ -19,6 +19,7 @@ import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
 import mapogo.entity.PaymentMethod;
 import mapogo.entity.PhoneNumberUser;
+import mapogo.entity.ProductDetailSize;
 import mapogo.entity.User;
 import mapogo.service.OrderService;
 import mapogo.service.PaymentMethodService;
@@ -32,8 +33,26 @@ public class OrderServiceImpl implements OrderService {
 	List<String> statuses = Arrays.asList("Đã Giao hàng", "Đã Thanh Toán");
 
 	@Override
-	public List<Order> findOrderByUsername(String username) {
-		return orderDAO.findByUser_Username(username);
+	public List<Map<String, Object>> findOrderByUsername(String username) {
+		List<Order> orders = orderDAO.findByUser_Username(username);
+		List<Map<String, Object>> resultList = new ArrayList<>();
+		
+		for (Order order: orders) {
+			Map<String, Object> orderData = new HashMap<>();
+			orderData.put("orderId", order.getOrderId());
+			for (OrderDetail orderDetail: order.getOrderDetails()) {
+				orderData.put("productName", orderDetail.getProductDetailSize()
+						.getProductDetail().getProduct().getName());
+			}
+			orderData.put("date", order.getDate());
+			orderData.put("status", order.getStatus());
+			orderData.put("amount", order.getAmount());
+			orderData.put("fullname", order.getUser().getFullname());
+			orderData.put("phoneNumber", order.getPhoneNumber());
+			resultList.add(orderData);
+		}
+		
+		return resultList;
 	}
 	
 	@Override
@@ -161,13 +180,6 @@ public class OrderServiceImpl implements OrderService {
 
 	}
 
-
-	@Override
-	public List<Object[]> getCategoryProductTotalsToDay() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public List<Order> getOrdersBetweenDates(LocalDateTime startDay, LocalDateTime endDay) {
 		LocalDateTime adjustedEndDay = endDay.withHour(23).withMinute(59).withSecond(59);
 
@@ -197,6 +209,4 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime adjustedEndDay = endDate.withHour(23).withMinute(59).withSecond(59);
         return orderDAO.findCategoryProductTotalsByBetweenAndStatus(startDate, adjustedEndDay, statuses);
     }
-
-
 }
