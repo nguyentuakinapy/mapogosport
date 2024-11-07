@@ -43,6 +43,7 @@ public class PhoneNumberUserServiceImpl implements PhoneNumberUserService{
 		}
 		
 		phoneNumberUserDAO.deleteByPhoneNumberUserId(phoneNumberUserId);
+		phoneNumberDAO.deleteById(phoneNumberUser.getPhoneNumber().getPhoneNumberId());
 	}
 	
 	@Transactional
@@ -68,11 +69,6 @@ public class PhoneNumberUserServiceImpl implements PhoneNumberUserService{
 	@Override
 	public PhoneNumberUser updatePhoneNumberUser(Integer phoneNumberUserId, PhoneNumberUser updatePhoneNumber) {
 		PhoneNumberUser phoneNumberUser = phoneNumberUserDAO.findById(phoneNumberUserId).get();
-		
-		if (updatePhoneNumber.getPhoneNumber() != null && updatePhoneNumber.getPhoneNumber().getPhoneNumber() != null) {
-	        phoneNumberUser.getPhoneNumber().setPhoneNumber(updatePhoneNumber.getPhoneNumber().getPhoneNumber());
-	        phoneNumberDAO.save(phoneNumberUser.getPhoneNumber()); // Save updated phone number
-	    }
 		if (updatePhoneNumber.getActive() != null) {
 	        boolean isCurrentlyActive = phoneNumberUser.getActive();
 

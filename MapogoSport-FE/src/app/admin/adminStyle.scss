@@ -47,7 +47,7 @@ body {
     .btn-sd-admin {
         background-color: #142239 !important;
         border: 1px solid #142239 !important;
-        padding: 0.25rem;
+        padding: 6px;
         width: 190px;
         font-size: 15px;
 
@@ -242,9 +242,6 @@ body {
     margin-bottom: 10px;
     border: 1px dashed black;
     font-size: 14px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 
     &:last-child {
         margin-bottom: 0;

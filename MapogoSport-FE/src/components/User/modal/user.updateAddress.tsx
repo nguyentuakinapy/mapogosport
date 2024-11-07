@@ -72,9 +72,8 @@ const ModalAddAddress = (props: UserProps) => {
             toast.error("Hãy điền đầy đủ thông tin!");
             return;
         }
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
+        const username = localStorage.getItem('username');
+        if (username) {
             fetch(`http://localhost:8080/rest/user/address/${addressUser.addressUserId}`, {
                 method: 'PUT',
                 headers: {
@@ -95,7 +94,7 @@ const ModalAddAddress = (props: UserProps) => {
                     return
                 }
                 handleClose();
-                mutate(`http://localhost:8080/rest/user/${parsedUserData.username}`);
+                mutate(`http://localhost:8080/rest/user/${username}`);
                 toast.success('Cập nhật thành công!');
             })
         }

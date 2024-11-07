@@ -74,6 +74,8 @@ const ModalUpdatePhone = (props: UserProps) => {
             mutate(`http://localhost:8080/rest/user/${userData?.username}`);
             toast.success('Thêm số điện thoại thành công!');
             setPage(true);
+            setNewPhone('');
+            setOtpValue('');
         })
     }
 
@@ -157,9 +159,7 @@ const ModalUpdatePhone = (props: UserProps) => {
                             )}
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={() => handleClose()}>Hủy</Button>
-                        <Button style={{ backgroundColor: "#142239" }} onClick={handleClose}>Xác nhận</Button>
-
+                        <Button style={{ backgroundColor: "#142239" }} onClick={() => handleClose()}>Hủy</Button>
                     </Modal.Footer>
                 </>
                 :
@@ -181,7 +181,7 @@ const ModalUpdatePhone = (props: UserProps) => {
                         </InputGroup>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button style={{ backgroundColor: "#142239" }} onClick={() => setPage(true)}>Quay lại</Button>
+                        <Button variant="secondary" onClick={() => setPage(true)}>Quay lại</Button>
                         <Button style={{ backgroundColor: "#142239" }} onClick={() => handleSave()}>Xác nhận</Button>
                     </Modal.Footer>
                 </>

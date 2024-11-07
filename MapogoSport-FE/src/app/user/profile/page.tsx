@@ -8,10 +8,9 @@ export default function Profile() {
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
 
     useEffect(() => {
-        const user = localStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`);
+        const username = localStorage.getItem('username');
+        if (username) {
+            setUsernameFetchApi(`http://localhost:8080/rest/user/${username}`);
         }
     }, []);
 
