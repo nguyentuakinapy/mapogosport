@@ -180,7 +180,7 @@ public class OrderServiceImpl implements OrderService {
 
 	}
 
-	public List<Order> getOrdersBetweenDates(LocalDateTime startDay, LocalDateTime endDay) {
+public List<Order> getOrdersBetweenDates(LocalDateTime startDay, LocalDateTime endDay) {
 		LocalDateTime adjustedEndDay = endDay.withHour(23).withMinute(59).withSecond(59);
 
 	    System.out.println("Start Day: " + startDay);
@@ -209,5 +209,11 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime adjustedEndDay = endDate.withHour(23).withMinute(59).withSecond(59);
         return orderDAO.findCategoryProductTotalsByBetweenAndStatus(startDate, adjustedEndDay, statuses);
     }
+
+	@Override
+	public List<Order> findByUser_Username(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
