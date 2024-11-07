@@ -22,4 +22,9 @@ public class VoucherRestController {
 	public List<Voucher> selectVoucherActive(){
 		return voucherService.selectVoucherActive();
 	}
+	
+	@RequestMapping("/voucher/findAll")
+	public List<Voucher> findAll(){
+		return voucherService.finAll();
+	}
 }

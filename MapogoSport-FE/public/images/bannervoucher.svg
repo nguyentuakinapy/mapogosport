@@ -1,0 +1,96 @@
+<svg viewBox="0 0 1200 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" style="stop-color:#1a1a1a"/>
+      <stop offset="50%" style="stop-color:#2a2a2a"/>
+      <stop offset="100%" style="stop-color:#1a1a1a"/>
+    </linearGradient>
+    
+    <pattern id="pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background layers -->
+  <rect width="1200" height="300" fill="url(#bg-gradient)"/>
+  <rect width="1200" height="300" fill="url(#pattern)"/>
+  
+  <!-- Decorative lines -->
+  <path d="M0 150 Q 600 50, 1200 150" stroke="white" stroke-width="0.5" fill="none" opacity="0.1"/>
+  <path d="M0 160 Q 600 60, 1200 160" stroke="white" stroke-width="0.5" fill="none" opacity="0.1"/>
+
+  <!-- Main Title -->
+  <g transform="translate(600, 70)">
+    <text x="0" y="0" font-family="Arial Black, sans-serif" font-size="42" fill="white" text-anchor="middle" 
+          style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));">
+      SCAN QR CODE &amp; ĐĂNG NHẬP
+    </text>
+  </g>
+
+  <!-- Subtitle -->
+  <g transform="translate(600, 110)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="24" fill="#cccccc" text-anchor="middle"
+          letter-spacing="2">
+      NHẬN NGAY COMBO VOUCHER
+    </text>
+  </g>
+
+  <!-- Voucher Boxes -->
+  <g transform="translate(90, 150)">
+    <!-- Box 1 - Freeship -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="320" height="110" rx="20" fill="white" 
+            style="filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.2));"/>
+      <circle cx="45" cy="55" r="25" fill="#00c2a8"/>
+      <!-- Delivery truck icon -->
+      <path d="M30 55 h15 M33 50 h12 v8 h-12 v-8 M45 58 h8 l4-4 v-4 h-4 M49 58 a2 2 0 1 1 0-0.1 M38 58 a2 2 0 1 1 0-0.1" 
+            stroke="white" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Increased spacing between title and value -->
+      <text x="180" y="48" font-family="Arial Black, sans-serif" font-size="22" fill="#333" text-anchor="middle">
+        FREESHIP MAX
+      </text>
+      <text x="180" y="85" font-family="Arial, sans-serif" font-size="20" fill="#666" text-anchor="middle">
+        ĐẾN 50K
+      </text>
+    </g>
+
+    <!-- Box 2 - Voucher -->
+    <g transform="translate(340, 0)">
+      <rect x="0" y="0" width="320" height="110" rx="20" fill="white"
+            style="filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.2));"/>
+      <circle cx="45" cy="55" r="25" fill="#4c6ef5"/>
+      <!-- Voucher tag icon -->
+      <path d="M35 45 l20 0 l5 10 l-5 10 l-20 0 l-5 -10 l5 -10 M40 50 v10" 
+            stroke="white" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Increased spacing between title and value -->
+      <text x="180" y="48" font-family="Arial Black, sans-serif" font-size="22" fill="#333" text-anchor="middle">
+        VOUCHER GIẢM GIÁ
+      </text>
+      <text x="180" y="85" font-family="Arial, sans-serif" font-size="20" fill="#666" text-anchor="middle">
+        ĐẾN 100K
+      </text>
+    </g>
+
+    <!-- Box 3 - Flash Sale -->
+    <g transform="translate(680, 0)">
+      <rect x="0" y="0" width="320" height="110" rx="20" fill="white"
+            style="filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.2));"/>
+      <circle cx="45" cy="55" r="25" fill="#f03e3e"/>
+      <!-- Lightning bolt icon -->
+      <path d="M45 42 L37 55 L47 55 L40 68 L50 55 L40 55 L48 42" 
+            fill="white" stroke="white" stroke-width="1"/>
+      <!-- Increased spacing between title and value -->
+      <text x="180" y="48" font-family="Arial Black, sans-serif" font-size="22" fill="#333" text-anchor="middle">
+        FLASH SALE
+      </text>
+      <text x="180" y="85" font-family="Arial, sans-serif" font-size="20" fill="#666" text-anchor="middle">
+        12H &amp; 20H HÀNG NGÀY
+      </text>
+    </g>
+  </g>
+
+  <!-- Decorative elements -->
+  <circle cx="50" cy="50" r="80" fill="white" opacity="0.02"/>
+  <circle cx="1150" cy="250" r="100" fill="white" opacity="0.02"/>
+</svg>
