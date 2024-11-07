@@ -29,4 +29,10 @@ public class VoucherServiceImpl implements VoucherService{
 		return dao.selectVoucherActive();
 	}
 
+	@Override
+	public List<Voucher> finAll() {
+		// TODO Auto-generated method stub
+		return dao.findAll();
+	}
+
 }
