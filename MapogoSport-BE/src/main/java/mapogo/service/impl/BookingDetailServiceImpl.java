@@ -52,6 +52,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Override
 	public BookingDetail createBookingDetail(Map<String, Object> bd) {
+		System.err.println(bd);
+
 		BookingDetail bookingDetail = new BookingDetail();
 		
 		SportFieldDetail spd = sportFieldDAO.findById((Integer) bd.get("sportFieldDetailId")).get();
@@ -74,8 +76,9 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bookingDetail.setPrice(price);
 		bookingDetail.setDate(LocalDate.parse((String) bd.get("date")));	
 		bookingDetail.setBooking(b);
-
+		bookingDetail.setSubcriptionKey((String) bd.get("subscriptionKey"));
 		return bookingDetailDAO.save(bookingDetail);
+//		return null;
 	}
 
 	@Override
@@ -93,6 +96,57 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			LocalDate date) {
 		return bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date);
 	}
+
+	@Override
+	public void cancelBookingDetail(Integer bookingDetailId) {
+		BookingDetail bd = bookingDetailDAO.findById(bookingDetailId).get();
+		bd.setStatus(false);
+		bookingDetailDAO.save(bd);
+		Booking booking = bookingDAO.findById(bd.getBooking().getBookingId()).get();
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(booking.getBookingId());
+		int index = 0;
+		for (BookingDetail b : bookingDetails) {
+		    if (!b.getStatus()) {
+		        index++;
+		    }
+		}
+		if (index == bookingDetails.size()) {
+			booking.setStatus("Đã hủy");
+			bookingDAO.save(booking);
+		}
+	}
+
+	@Override
+	public void updateBookingDetail(Map<String, Object> data) {
+		BookingDetail bd = bookingDetailDAO.findById((Integer) data.get("bookingDetailId")).get();
+		SportFieldDetail spd = sportFieldDAO.findById((Integer) data.get("idSportDetail")).get();
+		
+		Object priceObj = data.get("price");
+		Double price;
+
+		if (priceObj instanceof String) {
+			price = Double.valueOf((String) priceObj);
+		} else if (priceObj instanceof Number) {
+			price = ((Number) priceObj).doubleValue();
+		} else {
+			throw new IllegalArgumentException("totalAmount must be a String or Number");
+		}
+		
+		bd.setSportFieldDetail(spd);
+		bd.setDate(LocalDate.parse((String) data.get("dateBooking")));
+		bd.setStartTime((String) data.get("startTimeBooking"));
+		bd.setEndTime((String) data.get("endTimeBooking"));
+		bd.setPrice(price);
+//		System.err.println(data);
+		bookingDetailDAO.save(bd);
+	}
+
+	@Override
+	public List<BookingDetail> findBookingDetailBySubscriptionKey(String subscriptionKey) {
+		return bookingDetailDAO.findBookingDetailBySubscriptionKey(subscriptionKey);
+	}
+	
+	
 
 	
 

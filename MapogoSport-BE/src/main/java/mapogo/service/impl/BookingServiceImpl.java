@@ -52,27 +52,35 @@ public class BookingServiceImpl implements BookingService {
 	}
 	
 	@Override
-	public List<Map<String, Object>> findAllBooking() {
-		List<Booking> bookings = bookingDAO.findAll();
+	public List<Map<String, Object>> findAllBookingByOwner(String ownerUsername) {
+		List<Booking> bookings = bookingDAO.findByOwner_User_Username(ownerUsername);
 		List<Map<String, Object>> resultList = new ArrayList<>();
 		
 		for (Booking booking: bookings) {
 			Map<String, Object> bookingMap = new HashMap<>();
 			bookingMap.put("bookingId", booking.getBookingId());
-			bookingMap.put("userFullname", booking.getUser().getFullname());
+			bookingMap.put("bookingUserFullname", booking.getFullName());
 			bookingMap.put("date", booking.getDate());
 			bookingMap.put("totalAmount", booking.getTotalAmount());
 			bookingMap.put("status", booking.getStatus());
+			bookingMap.put("bookingUserPhone", booking.getPhoneNumber());
 			
-			User user = booking.getUser();
-			for (PhoneNumberUser phoneNumberUser : user.getPhoneNumberUsers()) {
-                if (phoneNumberUser.getActive() != null && phoneNumberUser.getActive()) {
-                    PhoneNumber phoneNumber = phoneNumberUser.getPhoneNumber();
-                    if (phoneNumber != null) {
-                        bookingMap.put("userPhone", phoneNumber.getPhoneNumber());
-                    }
-                }
-            }
+			for (BookingDetail bookingDetail : booking.getBookingDetails()) {
+	            if (bookingDetail.getSportFieldDetail() != null) {
+	                SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
+	                if (sportField != null) {
+	                    bookingMap.put("sportFieldName", sportField.getName());
+	                }
+	            }
+	        }
+			
+			Map<String, Object> userMap = new HashMap<>();
+			if (booking.getUser() != null) {
+				userMap.put("username", booking.getUser().getUsername());
+				userMap.put("fullname", booking.getUser().getFullname());
+			}
+			
+			bookingMap.put("user", userMap);
 	        resultList.add(bookingMap);
 		}
 		return resultList;
@@ -89,7 +97,6 @@ public class BookingServiceImpl implements BookingService {
 			bookingMap.put("date", booking.getDate());
 			bookingMap.put("totalAmount", booking.getTotalAmount());
 			bookingMap.put("status", booking.getStatus());
-			
 			for (BookingDetail bookingDetail : booking.getBookingDetails()) {
 	            if (bookingDetail.getSportFieldDetail() != null) {
 	                SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
@@ -125,6 +132,8 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	public Booking createBooking(Map<String, Object> b) {
+		System.err.println(b);
+
 		Booking booking = new Booking();
 
 		User u = userDAO.findById((String) b.get("username")).get();
@@ -153,7 +162,10 @@ public class BookingServiceImpl implements BookingService {
 		booking.setStatus((String) b.get("status"));
 		booking.setVoucher(v);
 		booking.setNote((String) b.get("note"));
+		booking.setFullName((String) b.get("fullName"));
+		booking.setPhoneNumber((String) b.get("phoneNumber"));
 		return bookingDAO.save(booking);
+//		return null;
 	}
 
 	@Override

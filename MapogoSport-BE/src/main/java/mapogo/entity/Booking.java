@@ -50,7 +50,7 @@ public class Booking implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "OwnerId", nullable = false)
-    @JsonBackReference
+    @JsonManagedReference
     private Owner owner;
     
     @ManyToOne

@@ -60,7 +60,7 @@ export default function Login(props: LoginProps) {
                 if (!responseUser.ok) {
                     throw new Error('Error fetching data');
                 }
-                const dataUser = await responseUser.json();
+                const dataUser = await responseUser.json() as User;
                 // console.log(hashPassword(password));
                 if (dataUser.password == hashPassword(password)) {
                     if (checkRememberMe) {
@@ -70,7 +70,11 @@ export default function Login(props: LoginProps) {
                         Cookies.remove('user');
                     }
                     handleClose();
-                    sessionStorage.setItem('user', JSON.stringify(dataUser));
+
+                    const usernameLocal = dataUser.username.replace(/['"]+/g, '');
+                    localStorage.setItem('username', usernameLocal);
+                    // localStorage.setItem('username', dataUser.username);
+                    // sessionStorage.setItem('user', JSON.stringify(dataUser));
                     setRefreshKey(refreshKey + 1);
                     toast.success("Đăng nhập thành công!");
                     // if (dataUser.authorities[0].role.name == "ROLE_ADMIN") {

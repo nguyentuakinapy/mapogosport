@@ -1,58 +1,26 @@
 'use client'
 import { formatPrice } from "@/components/Utils/Format";
-import Link from "next/link";
 import { ReactNode, useEffect, useState } from "react";
-import { Button, Col, FloatingLabel, Form, Nav, Row } from "react-bootstrap";
+import { Button, Col, Form, Nav, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
+import { useData } from "../context/UserContext";
+import ProfileContent from "@/components/User/modal/user.profile";
 
 
 export default function Owner({ children }: { children: ReactNode }) {
-    const [activeTab, setActiveTab] = useState<string>('all');
-
-    const [userData, setUserData] = useState<User | null>(null);
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const [activeTab, setActiveTab] = useState<string>('profile');
     const [accountPackages, setAccountPackages] = useState<AccountPackage[]>();
     const [userSubscription, setUserSubscription] = useState<UserSubscription>();
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
-
-    const [fullName, setFullName] = useState<string>('');
-    const [email, setEmail] = useState<string>('');
-    const [birthday, setBirthday] = useState<Date | null>(null);
-    const [gender, setGender] = useState<number | null>(null);
-
-    const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-    useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${parsedUserData.username}`);
-        }
-    }, []);
-
-    const { data: dataUser, error: errorUser, isLoading: isLoadingUser } = useSWR(usernameFetchApi, fetcher, {
-        revalidateIfStale: false,
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-    });
-
-    useEffect(() => {
-        if (dataUser) {
-            setFullName(dataUser.fullname);
-            setEmail(dataUser.email);
-            setBirthday(dataUser.birthday ? new Date(dataUser.birthday) : null);
-            setGender(dataUser.gender);
-            setUserData(dataUser);
-        }
-        console.log(dataUser);
-
-    }, [dataUser]);
+    const userData = useData();
+    const [owner, setOwner] = useState<Owner>();
+    const [dataSport, setDataSport] = useState<SportField[]>([]);
 
     useEffect(() => {
         getOwner();
     }, [])
-
-    const [owner, setOwner] = useState<Owner>();
 
     const getOwner = async () => {
         const user = sessionStorage.getItem('user');
@@ -67,8 +35,6 @@ export default function Owner({ children }: { children: ReactNode }) {
             setOwner(dataOwner);
         }
     }
-
-    const [dataSport, setDataSport] = useState<SportField[]>([])
 
     const { data: dataS, error: errorS, isLoading: isLoadingS } = useSWR(owner && `http://localhost:8080/rest/sport_field_by_owner/${owner.ownerId}`, fetcher, {
         revalidateIfStale: false,
@@ -127,104 +93,59 @@ export default function Owner({ children }: { children: ReactNode }) {
         });
     }
 
+    useEffect(() => {
+        const username = localStorage.getItem('username');
+        if (username) {
+            setUsernameFetchApi(`http://localhost:8080/rest/user/${username}`);
+        }
+    }, []);
+
     const renderContent = () => {
         switch (activeTab) {
-            case 'all':
+            case 'profile':
                 return (
-                    <div className="font-14">
-                        <div style={{ fontSize: '14px' }}>
-                            <Form>
-                                <Form.Group className="mb-3">
-                                    <Form.Floating className="mb-3">
-                                        <Form.Control size="sm" type="text" placeholder="Họ và tên"
-                                            value={fullName} onChange={(e) => setFullName(e.target.value)}
-                                        />
-                                        <Form.Label>Họ và tên <b className='text-danger'>*</b></Form.Label>
-                                    </Form.Floating>
-                                </Form.Group>
-
-                                <Row>
-                                    <Col xs={6}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Floating className="mb-3">
-                                                <Form.Control size="sm" type="date" placeholder="Ngày sinh"
-                                                />
-                                                <Form.Label>Ngày sinh</Form.Label>
-                                            </Form.Floating>
-                                        </Form.Group>
-
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Email:</Form.Label>
-                                            <div>{userData?.email}<Link href="#" >(<i className="bi bi-pencil-square"></i> Cập nhật)</Link></div>
-                                        </Form.Group>
-                                    </Col>
-
-                                    <Col xs={6}>
-                                        <Form.Group className="mb-3">
-                                            <FloatingLabel label="Giới tính">
-                                                <Form.Select aria-label="Floating label select example"
-                                                    value={gender != null ? gender.toString() : ''}
-                                                    onChange={(e) => setGender(e.target.value === '0' ? 0 : e.target.value === '1' ? 1 : e.target.value === '2' ? 2 : null)}>
-                                                    <option>-- Nhấn để chọn --</option>
-                                                    <option value="0">Nam</option>
-                                                    <option value="1">Nữ</option>
-                                                    <option value="2">Khác</option>
-                                                </Form.Select>
-                                            </FloatingLabel>
-                                        </Form.Group>
-
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Sổ địa chỉ</Form.Label>
-                                            <div>
-                                                Chưa có thông tin
-                                                <Link href="#" >(<i className="bi bi-pencil-square"></i> Cập nhật)</Link>
-                                            </div>
-
-                                        </Form.Group>
-                                    </Col>
-
-                                    <Col xs={6}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Floating className="mb-3">
-                                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
-                                                />
-                                                <Form.Label>Bank Account</Form.Label>
-                                            </Form.Floating>
-                                        </Form.Group>
-
-                                    </Col>
-                                    <Col xs={12}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Floating className="mb-3">
-                                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
-                                                />
-                                                <Form.Label>Momo Account</Form.Label>
-                                            </Form.Floating>
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <Form.Floating className="mb-3">
-                                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
-                                                />
-                                                <Form.Label>VNPay Account</Form.Label>
-                                            </Form.Floating>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-
-                                <Link href={"#"} className='btn btn-profile' type="submit" >
-                                    <i className="bi bi-floppy2"></i> Lưu
-                                </Link>
-                            </Form>
-                        </div>
+                    <div>
+                        {usernameFetchApi && <ProfileContent usernameFetchApi={usernameFetchApi} />}
                     </div>
                 );
-            case 'deposit':
+            case 'post':
                 return (
                     <div className="font-14">
                         chưa biết có gì bên trong
                     </div>
                 );
-            case 'withdraw':
+            case 'bank':
+                return (
+                    <div className="font-14">
+                        <Form.Group className="mb-3">
+                            <Form.Floating className="mb-3">
+                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
+                                />
+                                <Form.Label>Bank Account</Form.Label>
+                            </Form.Floating>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Floating className="mb-3">
+                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
+                                />
+                                <Form.Label>Momo Account</Form.Label>
+                            </Form.Floating>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Floating className="mb-3">
+                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
+                                />
+                                <Form.Label>VNPay Account</Form.Label>
+                            </Form.Floating>
+                        </Form.Group>
+                        <div className="d-flex justify-content-end">
+                            <Button className='btn btn-profile'>
+                                <i className="bi bi-floppy2"></i> Lưu
+                            </Button>
+                        </div>
+                    </div>
+                )
+            case 'package':
                 return (
                     <Row className="my-3" style={{ fontSize: '15px', height: '100%', display: 'flex' }}>
                         {accountPackages && accountPackages.map(ap => {
@@ -289,13 +210,16 @@ export default function Owner({ children }: { children: ReactNode }) {
                 <div className="font-14">
                     <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
                         <Nav.Item>
-                            <Nav.Link eventKey="all" className="tab-link">Thông tin cá nhân</Nav.Link>
+                            <Nav.Link eventKey="profile" className="tab-link">Thông tin cá nhân</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link eventKey="deposit" className="tab-link">Bài viết</Nav.Link>
+                            <Nav.Link eventKey="post" className="tab-link">Bài viết</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link eventKey="withdraw" className="tab-link">Gói nâng cấp</Nav.Link>
+                            <Nav.Link eventKey="bank" className="tab-link">Tài khoản ngân hàng</Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey="package" className="tab-link">Gói nâng cấp</Nav.Link>
                         </Nav.Item>
                     </Nav>
                     <div className="mt-3">

@@ -47,6 +47,14 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [dataReview, setDataReview] = useState<Review[]>([]);
 
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setStatusOnWeek();
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [checkDataStatus]);
+
     const { data: reviewData } = useSWR(`http://localhost:8080/rest/fieldReview/${params.id}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,

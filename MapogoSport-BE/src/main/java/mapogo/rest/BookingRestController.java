@@ -40,9 +40,9 @@ public class BookingRestController {
 		return bookingService.findAll();
 	}
 	
-	@GetMapping("/owner/booking/findAll")
-	public List<Map<String, Object>> ownerFindAll() {
-		return bookingService.findAllBooking();
+	@GetMapping("/owner/booking/findAll/{ownerUsername}")
+	public List<Map<String, Object>> ownerFindAll(@PathVariable("ownerUsername") String ownerUsername) {
+		return bookingService.findAllBookingByOwner(ownerUsername);
 	}
 	
 	@PutMapping("/owner/booking/update")
@@ -83,6 +83,12 @@ public class BookingRestController {
 			@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 		return bookingDetailService.findBySportFieldDetailAndDay(sportDetailId, date);
 	}
+	
+	@GetMapping("/user/booking/detail/getbyday/subscriptionkey/{subscriptionkey}")
+	public List<BookingDetail> findBookingDetailBySubscriptionKey(
+			@PathVariable("subscriptionkey") String subscriptionKey) {
+		return bookingDetailService.findBookingDetailBySubscriptionKey(subscriptionKey);
+	}
 
 	@GetMapping("/user/booking/detail/getnextweek/{sportDetailId}/{startDay}/{endDay}")
 	public List<BookingDetail> findBySportFieldDetailAndNextWeek(@PathVariable("sportDetailId") Integer sportDetailId,
@@ -99,7 +105,6 @@ public class BookingRestController {
 
 	@PostMapping("/booking/detail")
 	public BookingDetail saveBookingDetail(@RequestBody Map<String, Object> bd) {
-		System.out.println(bd);
 		return bookingDetailService.createBookingDetail(bd);
 	}
 
@@ -178,6 +183,16 @@ public class BookingRestController {
 		return bookingService.findBookingByOwnerIdUsername(ownerId);		
 	}
 
-
+	@PutMapping("/booking/update/status/{bookingDetailId}")
+	public void cancelBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId) {
+		 bookingDetailService.cancelBookingDetail(bookingDetailId);
+	}
+	
+	@PutMapping("/booking/update/booking/detail/{bookingDetailId}")
+	public void updateBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId,
+			@RequestBody Map<String, Object> data) {
+		 bookingDetailService.updateBookingDetail(data);
+	}
+	
 	
 }

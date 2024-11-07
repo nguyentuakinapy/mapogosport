@@ -17,7 +17,7 @@ const AdminOrder = () => {
     const [activeTab, setActiveTab] = useState<string>('all');
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [itemsPerPage] = useState(8);
 
     const orderStatuses = [
         'Chờ thanh toán',
@@ -35,7 +35,8 @@ const AdminOrder = () => {
 
     useEffect(() => {
         if (data) {
-            setOrderData(data);
+            const sortedData = data.sort((a: OrderMap, b: OrderMap) => b.orderId - a.orderId);
+            setOrderData(sortedData);
         }
     }, [data]);
 
@@ -83,7 +84,7 @@ const AdminOrder = () => {
     const renderStatusDropdown = (order: OrderMap) => {
         return (
             <Dropdown onSelect={(newStatus) => handleStatusChange(order.orderId, newStatus || order.status)}>
-                <Dropdown.Toggle variant={getStatusVariant(order.status)}>{order.status}</Dropdown.Toggle>
+                <Dropdown.Toggle disabled={order.status == 'Đã hủy'} variant={getStatusVariant(order.status)}>{order.status}</Dropdown.Toggle>
                 <Dropdown.Menu>
                     {orderStatuses.map((status) => (
                         <Dropdown.Item key={status} eventKey={status}>
@@ -114,10 +115,10 @@ const AdminOrder = () => {
                         {filteredOrders.length > 0 ?
                             filteredOrders.map((order) => (
                                 <tr key={order.orderId}>
-                                    <td className="text-start title">
+                                    <td className="text-start">
                                         <Link href={`/admin/order/${order.orderId}`} onClick={() => handleViewDetail(order)}>{`#${order.orderId}`}</Link>
                                     </td>
-                                    <td>{order.fullname}</td>
+                                    <td className="text-start title">{order.fullname}</td>
                                     <td>{new Date(order.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${order.amount.toLocaleString()} ₫`}</td>
                                     <td className="title-brand">{order.address}</td>
@@ -136,32 +137,18 @@ const AdminOrder = () => {
         );
     };
 
-    const renderContent = () => {
-        let filteredOrders = orderData;
+    const filteredOrders = orderData.filter(order => order.fullname.toLowerCase().includes(searchTerm)).filter(order => {
         switch (activeTab) {
-            case 'unpaid':
-                filteredOrders = filteredOrders.filter(order => order.status === 'Chờ thanh toán');
-                break;
-            case 'processing':
-                filteredOrders = filteredOrders.filter(order => order.status === 'Đang xử lí');
-                break;
-            case 'shipping':
-                filteredOrders = filteredOrders.filter(order => order.status === 'Đang vận chuyển');
-                break;
-            case 'cancel':
-                filteredOrders = filteredOrders.filter(order => order.status === 'Đã hủy');
-                break;
-            case 'complete':
-                filteredOrders = filteredOrders.filter(order => order.status === 'Đã hoàn thành');
-                break;
-            default:
-                break;
+            case 'unpaid': return order.status === "Chờ thanh toán";
+            case 'processing': return order.status === "Đang xử lí";
+            case 'shipping': return order.status === "Đang vận chuyển";
+            case 'cancel': return order.status === "Đã hủy";
+            case 'complete': return order.status === "Đã hoàn thành";
+            default: return true;
         }
+    });
 
-        filteredOrders = filteredOrders.filter(order =>
-            order.fullname.toLowerCase().includes(searchTerm)
-        );
-
+    const renderContent = () => {
         const indexOfLastItem = currentPage * itemsPerPage;
         const indexOfFirstItem = indexOfLastItem - itemsPerPage;
         const currentItems = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
@@ -182,25 +169,10 @@ const AdminOrder = () => {
     };
 
     const renderPagination = () => {
-        const filteredOrders = orderData.filter(order =>
-            order.fullname.toLowerCase().includes(searchTerm)
-        ).filter(order => {
-            switch (activeTab) {
-                case 'unpaid': return order.status === 'Chờ thanh toán';
-                case 'processing': return order.status === 'Đang xử lí';
-                case 'shipping': return order.status === 'Đang vận chuyển';
-                case 'cancel': return order.status === 'Đã hủy';
-                case 'complete': return order.status === 'Đã hoàn thành';
-                default: return true;
-            }
-        });
-
-        if (filteredOrders.length === 0) {
-            return null;
-        }
-
         const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
         const pages = [];
+
+        if (totalPages <= 1) return null;
 
         for (let i = 1; i <= totalPages; i++) {
             pages.push(
@@ -229,19 +201,6 @@ const AdminOrder = () => {
 
             const tableColumn = ["Mã HD", "Họ và tên", "Ngày mua", "Tổng tiền", "Địa chỉ", "Trạng thái"];
             const tableRows: string[][] = [];
-
-            const filteredOrders = orderData.filter(order =>
-                order.fullname.toLowerCase().includes(searchTerm)
-            ).filter(order => {
-                switch (activeTab) {
-                    case 'unpaid': return order.status === 'Chờ thanh toán';
-                    case 'processing': return order.status === 'Đang xử lí';
-                    case 'shipping': return order.status === 'Đang vận chuyển';
-                    case 'cancel': return order.status === 'Đã hủy';
-                    case 'complete': return order.status === 'Đã hoàn thành';
-                    default: return true;
-                }
-            });
 
             filteredOrders.forEach(order => {
                 const orderData = [
@@ -298,19 +257,6 @@ const AdminOrder = () => {
         try {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Hóa Đơn');
-
-            const filteredOrders = orderData.filter(order =>
-                order.fullname.toLowerCase().includes(searchTerm)
-            ).filter(order => {
-                switch (activeTab) {
-                    case 'unpaid': return order.status === 'Chờ thanh toán';
-                    case 'processing': return order.status === 'Đang xử lí';
-                    case 'shipping': return order.status === 'Đang vận chuyển';
-                    case 'cancel': return order.status === 'Đã hủy';
-                    case 'complete': return order.status === 'Đã hoàn thành';
-                    default: return true;
-                }
-            });
 
             worksheet.columns = [
                 { header: 'Mã hóa đơn', key: 'orderId', width: 15 },

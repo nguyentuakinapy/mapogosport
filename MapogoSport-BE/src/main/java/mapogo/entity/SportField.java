@@ -64,6 +64,10 @@ public class SportField implements Serializable{
     @JsonManagedReference
     private List<SportFieldDetail> sportFielDetails;
 
+    @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<GallerySportField> gallerySportFields;
+    
     @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL) // corrected from "sportsField"
     @JsonIgnore
     private List<FavoriteField> favoriteFields;
@@ -73,7 +77,5 @@ public class SportField implements Serializable{
     @JsonBackReference //phihung (27/10)
     private List<FieldReview> fieldReviews;
     
-    @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
-    private List<GallerySportField> gallerySportFields;
 }
 

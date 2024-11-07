@@ -4,31 +4,32 @@ import ModalCreateSportField from '@/components/Owner/modal/owner.createSportFie
 import axios from 'axios';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Button, Table } from 'react-bootstrap';
+import useSWR, { mutate } from 'swr';
+import { Button, OverlayTrigger, Table, Tooltip } from 'react-bootstrap';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 
 const SportFieldList = () => {
     const [showSportFieldModal, setShowSportFieldModal] = useState<boolean>(false)
-    const [sportFields, setSportFields] = useState([]);
-    const [user, setUser] = useState(null);
+    // const [sportFields, setSportFields] = useState([]);
+    const userSession = sessionStorage.getItem('user');
+    const user = userSession ? JSON.parse(userSession) : null;
+    const [selectedSportField, setSelectedSportField] = useState(null); // State to hold the selected sport field data
 
-    useEffect(() => {
-        const userSession = sessionStorage.getItem('user');
-        const user = userSession ? JSON.parse(userSession) : null;
-        setUser(user); // Cập nhật user từ sessionStorage
+    const fetcher = (url) => axios.get(url).then(res => res.data);
 
-        if (user) {
-            // Gọi API từ Spring Boot
-            axios.get(`http://localhost:8080/rest/sportfields/lists/${user.username}`)
-                .then(response => {
-                    setSportFields(response.data); // Cập nhật state với dữ liệu từ API
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    }, []);
+    const { data: sportFields, error } = useSWR(
+        user ? `http://localhost:8080/rest/sportfields/lists/${user.username}` : null,
+        fetcher
+    );
 
+    if (error) return <div>Error: {error.message}</div>;
+    if (!sportFields) return <div>Loading...</div>;
 
+    const handleEditSportField = (sportField) => {
+        setSelectedSportField(sportField); // Set the selected sport field data
+        setShowSportFieldModal(true); // Show the modal
+    };
     return (
         <>
             <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>QUẢN LÝ SÂN</h3>
@@ -52,7 +53,7 @@ const SportFieldList = () => {
                             <div className='d-flex justify-content-between'>
                                 <div>
                                     <b className='mx-3'>{index + 1}</b>
-                                    <img src={`http://localhost:8080/images/images_sportfield/${sf.image}`}
+                                    <img src={`${sf.image}`}
                                         className='me-3' style={{ width: '300px' }} alt="cc" />
                                 </div>
                                 <div className='me-auto mt-3'>
@@ -64,8 +65,14 @@ const SportFieldList = () => {
                                 </div>
                                 <div className='me-3 d-flex align-items-center'>
                                     <div className='btn-group'>
-                                        <Link href={`/owner/sport-manager/view-list-sports/${sf.sportFieldId}`} className='btn btn-secondary btn-hv'><i className="bi bi-eye"></i></Link>
-                                        <Link href={`/owner/sport-manager/edit-sport/${sf.sportFieldId}`} className='btn btn-warning btn-hv'><i className="bi bi-pencil-square"></i></Link>
+                                        <OverlayTrigger overlay={<Tooltip>Xem danh sách sân</Tooltip>}>
+                                            <Link href={`/owner/sport-manager/view-list-sports/${sf.sportFieldId}`} className='btn btn-secondary btn-hv'><i className="bi bi-eye"></i></Link>
+                                        </OverlayTrigger>
+                                        <OverlayTrigger overlay={<Tooltip>Chỉnh sửa</Tooltip>}>
+                                            <Button style={{ width: "100%" }} variant='' className='btn btn-warning btn-hv' onClick={() => handleEditSportField(sf)}>
+                                                <i className="bi bi-pencil-square"></i>
+                                            </Button>
+                                        </OverlayTrigger>
                                     </div>
                                 </div>
                             </div>
@@ -76,10 +83,18 @@ const SportFieldList = () => {
 
             ))}
 
-            <Button style={{ width: "100%" }} variant='danger' className='' onClick={() => setShowSportFieldModal(true)}>
+            <Button style={{ width: "100%" }} variant='danger' onClick={() => handleEditSportField(null)}>
                 <i className="bi bi-plus-circle"></i> Thêm khu vực
             </Button>
-            <ModalCreateSportField showSportFieldModal={showSportFieldModal} setShowSportFieldModal={setShowSportFieldModal} />
+
+
+            {/* <ModalCreateSportField showSportFieldModal={showSportFieldModal} setShowSportFieldModal={setShowSportFieldModal} /> */}
+            <ModalCreateSportField
+                showSportFieldModal={showSportFieldModal}
+                setShowSportFieldModal={setShowSportFieldModal}
+                selectedSportField={selectedSportField}
+                setSelectedSportField={setSelectedSportField}
+            />
 
         </>
     );

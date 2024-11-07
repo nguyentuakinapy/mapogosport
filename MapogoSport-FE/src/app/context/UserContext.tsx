@@ -16,10 +16,10 @@ export function UserProvider({ children, refreshKey }: UserProviderProps) {
     const [username, setUsername] = useState<string>("");
 
     useEffect(() => {
-        const user = sessionStorage.getItem('user');
+        const user = localStorage.getItem('username');
+
         if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUsername(parsedUserData.username);
+            setUsername(user);
         }
     }, [refreshKey]);
 
@@ -35,15 +35,15 @@ export function UserProvider({ children, refreshKey }: UserProviderProps) {
         }
     );
 
-    // useEffect(() => {
-    //     if (error) {
-    //         console.error("Error fetching data:", error);
-    //     }
-    //     if (data) {
-    //         console.log("Data fetched:", data);
-    //         setUserData(data);
-    //     }
-    // }, [data, error]);
+    useEffect(() => {
+        if (error) {
+            // console.error("Error fetching data:", error);
+        }
+        if (data) {
+            console.log("Data fetched:", data);
+            setUserData(data);
+        }
+    }, [data, error]);
 
     // console.log("Username:", username);
     // console.log("UserData in context:", userData);

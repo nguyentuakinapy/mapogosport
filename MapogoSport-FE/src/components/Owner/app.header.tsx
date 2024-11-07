@@ -1,3 +1,4 @@
+import { useData } from '@/app/context/UserContext';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { NavDropdown } from 'react-bootstrap';
@@ -5,7 +6,6 @@ interface HeaderProps {
     isAniActive: boolean;
     toggleAni: () => void;
     weather: WeatherData | null;
-    userData: User | null;
 }
 
 const translations: { [key: string]: string } = {
@@ -27,9 +27,11 @@ const translations: { [key: string]: string } = {
     "overcast clouds": 'âm u'
 };
 
-export default function Header({ isAniActive, toggleAni, weather, userData }: HeaderProps) {
+export default function Header({ isAniActive, toggleAni, weather }: HeaderProps) {
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
+    const userData = useData();
+
 
     const translate = (word: string): string => {
         return translations[word.toLowerCase()] || word;

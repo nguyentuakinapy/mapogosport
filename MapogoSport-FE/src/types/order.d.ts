@@ -57,4 +57,5 @@ interface OrderMap {
     address: string;
     status: string;
     phoneNumber: string;
+    productName: string;
 }

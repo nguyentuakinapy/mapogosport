@@ -2,7 +2,7 @@
 import { Container } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import Form from 'react-bootstrap/Form';
-import { Dropdown, Button } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import Pagination from 'react-bootstrap/Pagination';
 import DatePicker from 'react-datepicker';
 import Table from 'react-bootstrap/Table';
@@ -10,6 +10,10 @@ import 'react-datepicker/dist/react-datepicker.css'; // Ensure to import the sty
 import MyVerticallyCenteredModal from '@/components/ModalOrder/MoDal'
 import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
+import { toast } from "react-toastify";
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+
 import { formatPrice, formatDate, formatDateForApi, formatDateNotime } from '@/components/Utils/Format';
 
 const Admin = () => {
@@ -21,12 +25,21 @@ const Admin = () => {
     const [selectedOptionDay, setSelectedOptionDay] = useState('Hôm Nay');
     const [showModal, setShowModal] = useState(false);
     const [selectedOrderId, setSelectedOrderId] = useState(null); // Để lưu trữ orderId của đơn hàng được chọn
+    const [dataColumnnToday, setDataColumnnChartToday] = useState([]);
+    const [dataColumnnYesterday, setDataColumnnChartYesterday] = useState([]);
+    const [dataColumnnChart7Day, setDataColumnnChart7Day] = useState([]);
+    const [dataColumnnChartOneMonth, setDataColumnnChartOneMonth] = useState([]);
+    const [dataListOther, setDataListOther] = useState([]);
+    const [dataColumnnChartOther, setDataColumnnChartOther] = useState([]);
+    const [dataOrderToDay, setDataOrderToDay] = useState([]);
+    const [dataOrderYesterday, setDataOrderYesterday] = useState([]);
+    const [dataOrderOneMonth, setDataOrderOneMonth] = useState([]);
+    const [dataOrder7day, setDataOrder7day] = useState([]);
     // Hàm xử lý khi người dùng chọn một mục
-    const handleSelect = (eventKey) => {
-        setSelectedOption(eventKey);
-    };
+
     const handleSelectChange = (e) => {
-        setSelectedOption(e.target.value);
+        const value = e.target.value;
+        setSelectedOption(value);
     };
 
     const handleSelectDay = (e) => {
@@ -34,8 +47,7 @@ const Admin = () => {
         setSelectedOptionDay(value);
     };
 
-    const [dataListOther, setDataListOther] = useState([]);
-    const [dataColumnnChartOther, setDataColumnnChartOther] = useState([]);
+
     const handleFindDate = async () => {
         try {
             if (selectedOptionDay === "Một Ngày") {
@@ -46,6 +58,8 @@ const Admin = () => {
                 const response1 = await axios.get(`http://localhost:8080/rest/admin/category-product-total-between?date=${date}`)
                 setDataListOther(response.data);
                 setDataColumnnChartOther(response1.data);
+                // console.log(">>>date ", date);
+
             } else if (selectedOptionDay === "Nhiều Ngày") {
                 const startDay = formatDateForApi(selectedDate);
                 const endDay = formatDateForApi(selectedDate1);
@@ -61,22 +75,11 @@ const Admin = () => {
         }
     };
 
-
-
-
-
     const ColumnChart = () => {
-        const [dataColumnnToday, setDataColumnnChartToday] = useState([]);
-        const [dataColumnnYesterday, setDataColumnnChartYesterday] = useState([]);
-        const [dataColumnnChart7Day, setDataColumnnChart7Day] = useState([]);
-        const [dataColumnnChartOneMonth, setDataColumnnChartOneMonth] = useState([]);
-        const [loading, setLoading] = useState(true); // Set loading to true initially
-
-
         useEffect(() => {
             const fetchData = async () => {
                 try {
-                    setLoading(true); // Set loading to true when starting fetch
+
                     const [todayResp, yesterdayResp, weekResp, monthResp] = await Promise.all([
                         axios.get('http://localhost:8080/rest/admin/category-product-totals-today'),
                         axios.get('http://localhost:8080/rest/admin/category-product-totals-yesterday'),
@@ -90,12 +93,12 @@ const Admin = () => {
                     setDataColumnnChartOneMonth(monthResp.data);
                 } catch (error) {
                     console.error("Error fetching chart data", error);
-                } finally {
-                    setLoading(false); // Stop loading when data fetch is done
                 }
             };
 
-            fetchData();
+            if (!dataColumnnToday.length && !dataColumnnYesterday.length && !dataColumnnChart7Day.length && !dataColumnnChartOneMonth.length) {
+                fetchData();
+            }
         }, []);
 
         const chartOptions = [
@@ -209,19 +212,9 @@ const Admin = () => {
         }, [selectedOptionDay, dataColumnnToday, dataColumnnYesterday, dataColumnnChart7Day, dataColumnnChartOneMonth, dataColumnnChartOther]);
 
         return (
-            <div>
-                {loading ? (
-                    <>
-                        <Spinner animation="border" variant="info" /> Đang tải.....
-                    </>
-                ) : (
-                    <div id="columnChart" className='justify-content-center'></div>
-                )}
-            </div>
+            <div id="columnChart" className='justify-content-center'></div>
         );
     };
-
-
 
     const PieChart = () => {
         useEffect(() => {
@@ -302,7 +295,7 @@ const Admin = () => {
     };
 
 
-    const [dataOrderToDay, setDataOrderToDay] = useState([]);
+
     useEffect(() => {
         const fetchDataOrderToDay = async () => {
             try {
@@ -317,7 +310,7 @@ const Admin = () => {
         fetchDataOrderToDay();
     }, []);
 
-    const [dataOrderYesterday, setDataOrderYesterday] = useState([]);
+
     useEffect(() => {
         const fetchDataOrderYesterday = async () => {
             try {
@@ -333,7 +326,7 @@ const Admin = () => {
 
     }, [])
 
-    const [dataOrder7day, setDataOrder7day] = useState([]);
+
     useEffect(() => {
         const fetchDataOrder7day = async () => {
             try {
@@ -349,7 +342,7 @@ const Admin = () => {
 
     }, [])
 
-    const [dataOrderOneMonth, setDataOrderOneMonth] = useState([]);
+
     useEffect(() => {
         const fetchDataOrderOneMonth = async () => {
             try {
@@ -524,11 +517,136 @@ const Admin = () => {
 
         return (
             <>
-                {orderOptions.map(({ option, title, data }) =>
-                    selectedOptionDay === option ? renderTable(title, data) : null
-                )}
+                {orderOptions.map(({ option, title, data }) => (
+                    selectedOptionDay === option ? (
+                        <div key={option}> {/* Use 'option' as the unique key */}
+                            {renderTable(title, data)}
+                        </div>
+                    ) : null
+                ))}
             </>
         );
+    };
+
+
+    // Hàm export dữ liệu ra file Excel
+    const exportToExcel = async () => {
+        // Hàm lấy dữ liệu hóa đơn dựa trên selectedOptionDay
+        const getOrderData = () => {
+            switch (selectedOptionDay) {
+                case 'Hôm Nay':
+                    return dataOrderToDay;
+                case 'Hôm Qua':
+                    return dataOrderYesterday;
+                case 'Một Tuần':
+                    return dataOrder7day;
+                case 'Một Tháng':
+                    return dataOrderOneMonth;
+                case 'Một Ngày':
+                case 'Nhiều Ngày':
+                    return dataListOther;
+                default:
+                    return [];
+            }
+        };
+
+        // Hàm lấy dữ liệu biểu đồ dựa trên selectedOptionDay
+        const getChartData = () => {
+            switch (selectedOptionDay) {
+                case 'Hôm Nay':
+                    return dataColumnnToday;
+                case 'Hôm Qua':
+                    return dataColumnnYesterday;
+                case 'Một Tuần':
+                    return dataColumnnChart7Day;
+                case 'Một Tháng':
+                    return dataColumnnChartOneMonth;
+                case 'Một Ngày':
+                case 'Nhiều Ngày':
+                    return dataColumnnChartOther;
+                default:
+                    return [];
+            }
+        };
+        try {
+            const workbook = new ExcelJS.Workbook();
+
+            // Tạo worksheet cho "Danh sách Hóa đơn"
+            const worksheet1 = workbook.addWorksheet('Danh sách Hóa đơn');
+
+            // Định dạng các cột
+            worksheet1.columns = [
+                { header: 'STT', key: 'index', width: 5 },
+                { header: 'Tên Khách Hàng', key: 'fullname', width: 25 },
+                { header: 'Số Điện Thoại', key: 'phoneNumber', width: 15 },
+                { header: 'Ngày mua', key: 'date', width: 15 },
+                { header: 'Trạng thái', key: 'status', width: 15 },
+                { header: 'Tiền', key: 'amount', width: 15, style: { numFmt: '#,##0 ₫' } }
+            ];
+
+            const orderData = getOrderData();
+            orderData.forEach((order, index) => {
+                worksheet1.addRow({
+                    index: index + 1,
+                    fullname: order.user.fullname || 'Chưa có tên',
+                    phoneNumber: order.phoneNumber || 'Chưa có số điện thoại',
+                    date: new Date(order.date).toLocaleDateString('en-GB'),
+                    status: order.status,
+                    amount: order.amount,
+                });
+            });
+
+            // Thêm tổng tiền vào cuối sheet "Danh sách Hóa đơn"
+            const totalAmount = orderData.reduce((sum, order) => sum + order.amount, 0);
+            worksheet1.addRow({ date: '', status: 'Tổng Tiền', amount: totalAmount });
+
+            // Tạo worksheet cho "Biểu đồ"
+            const worksheet2 = workbook.addWorksheet('Biểu đồ');
+            const chartData = getChartData();
+
+            // Định dạng các cột
+            worksheet2.columns = [
+                { header: 'Category', key: 'category', width: 25 },
+                { header: 'Total', key: 'total', width: 15 }
+            ];
+
+            // Thêm dữ liệu cho "Biểu đồ"
+            if (chartData.length > 0) {
+                chartData.forEach((item) => {
+                    worksheet2.addRow({
+                        category: item[1],
+                        total: item[3],
+                    });
+                });
+            } else {
+                worksheet2.addRow({ category: 'Loading', total: 0 });
+            }
+
+            // Áp dụng border cho từng ô trong worksheet "Biểu đồ"
+            worksheet2.eachRow((row) => {
+                row.eachCell((cell) => {
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                });
+            });
+
+            // Tạo tên file dựa trên ngày hiện tại
+            const today = new Date();
+            const month = today.getMonth() + 1;
+            const day = today.getDate();
+            const formattedMonth = month < 10 ? `0${month}` : month;
+            const formattedDay = day < 10 ? `0${day}` : day;
+
+            const buffer = await workbook.xlsx.writeBuffer();
+            saveAs(new Blob([buffer]), `BaoCaoHoaDon-BieuDo(${formattedDay}/${formattedMonth}).xlsx`);
+            toast.success('Đã xuất file Excel thành công!');
+        } catch (error) {
+            toast.error('Xuất file Excel không thành công! Vui lòng thử lại sau!');
+        }
     };
 
 
@@ -577,16 +695,15 @@ const Admin = () => {
                             )}
 
                             <div className="select-option mb-3 ms-auto me-1">
-                                <Dropdown>
-                                    <Dropdown.Toggle variant="info" id="dropdown-basic">
-                                        Danh Sách Hóa Đơn
-                                    </Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item eventKey={"Danh Sách Hóa Đơn"}>Danh Sách Hóa Đơn</Dropdown.Item>
-                                        <Dropdown.Item eventKey={"Tài Khoản Mới"}>Tài Khoản Mới</Dropdown.Item>
-                                        <Dropdown.Item eventKey={"Tồn Kho"}>Tồn Kho</Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
+                                <Form.Select
+                                    aria-label=""
+                                    value={selectedOption}
+                                    onChange={handleSelectChange}
+                                >
+                                    <option value="Danh Sách Hóa Đơn">Danh Sách Hóa Đơn</option>
+                                    {/* <option value="Tài Khoản Mới">Tài Khoản Mới</option>
+                                    <option value="Tồn Kho">Tồn Kho</option> */}
+                                </Form.Select>
                             </div>
 
                             <div style={{ position: 'relative', display: 'inline-block' }} className='me-1'>
@@ -605,15 +722,19 @@ const Admin = () => {
                             </div>
 
                             <div className="select-option">
-                                <Dropdown>
-                                    <Dropdown.Toggle variant="info" id="dropdown-basic">
-                                        <i className="bi bi-box-arrow-down"></i> Export
-                                    </Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item href="#/action-1">Excel</Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
+                                <Form.Select
+                                    aria-label=""
+                                    onChange={(e) => {
+                                        if (e.target.value === "Excel") {
+                                            exportToExcel();
+                                        }
+                                    }}
+                                >
+                                    <option value="Export">Export</option>
+                                    <option value="Excel">Excel</option>
+                                </Form.Select>
                             </div>
+
                         </div>
                     </div>
                 </div>

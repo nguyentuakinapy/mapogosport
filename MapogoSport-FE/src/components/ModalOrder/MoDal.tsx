@@ -6,8 +6,8 @@ import React, { useEffect, useState } from 'react';
 interface OrderProps {
     showModal: boolean;
     setShowModal: (v: boolean) => void;
-    orderId: number | null; // orderId có thể là null nếu không có đơn hàng nào được chọn
-    onHide: () => void; // Hàm đóng modal
+    orderId: number | null; // orderId can be null if no order is selected
+    onHide: () => void; // Function to close modal
 }
 
 const MyVerticallyCenteredModal = ({ showModal, setShowModal, orderId, onHide }: OrderProps) => {
@@ -15,7 +15,7 @@ const MyVerticallyCenteredModal = ({ showModal, setShowModal, orderId, onHide }:
 
     useEffect(() => {
         const fetchData = async () => {
-            if (orderId) { // Chỉ gọi API khi orderId không phải null
+            if (orderId) { // Call API only when orderId is not null
                 try {
                     const response = await axios.get(`http://localhost:8080/rest/user/orders/detail/${orderId}`);
                     setDataOrderDetail(response.data);
@@ -25,7 +25,7 @@ const MyVerticallyCenteredModal = ({ showModal, setShowModal, orderId, onHide }:
             }
         };
         fetchData();
-    }, [orderId]); // Thêm orderId vào dependency array để gọi lại khi orderId thay đổi
+    }, [orderId]); // Add orderId to dependency array to re-fetch when it changes
 
     return (
         <Modal
@@ -45,12 +45,11 @@ const MyVerticallyCenteredModal = ({ showModal, setShowModal, orderId, onHide }:
                 {dataOrderDetail.length > 0 ? (
                     <ul>
                         {dataOrderDetail.map((detail, index) => (
-                            <div key={detail.orderDetailId}>
+                            <div key={index}>
                                 <p>Sản phẩm: {detail.productDetailSize.productDetail.product.name}</p>
                                 <p>Số Lượng: {detail.quantity}</p>
                                 <p>Size: {detail.productDetailSize.size.sizeName}</p>
                                 <p>Màu: {detail.productDetailSize.productDetail.color}</p>
-
                             </div>
                         ))}
                     </ul>
