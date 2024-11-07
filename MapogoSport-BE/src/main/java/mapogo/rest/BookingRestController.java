@@ -177,6 +177,10 @@ public class BookingRestController {
 		return bookingService.findBookingByOwnerIdUsername(ownerId);		
 	}
 
-
+	@PutMapping("/booking/update/status/{bookingDetailId}")
+	public void cancelBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId) {
+		 bookingDetailService.cancelBookingDetail(bookingDetailId);
+	}
+	
 	
 }

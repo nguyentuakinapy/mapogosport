@@ -209,4 +209,5 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime adjustedEndDay = endDate.withHour(23).withMinute(59).withSecond(59);
         return orderDAO.findCategoryProductTotalsByBetweenAndStatus(startDate, adjustedEndDay, statuses);
     }
+
 }

@@ -178,7 +178,7 @@ function Categories() {
                                                 <div className="user-border">
                                                     <div className="mb-3">
                                                         <Link href={"#"}>
-                                                            <Image src={`/images/${field.image}`} alt={field.name} />
+                                                            <Image src={`${field.image}`} alt={field.name} />
                                                         </Link>
                                                     </div>
                                                     <div className="content">

@@ -538,8 +538,8 @@ const BookingModal = (props: OwnerProps) => {
             },
             body: JSON.stringify({
                 username: dataUser.username,
-                fullName: fullName,
-                phoneNumber: phoneNumber,
+                fullName: isOffline ? fullName : dataUser.fullname,
+                phoneNumber: isOffline ? phoneNumber : dataUser.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
                 totalAmount,
                 paymentMethodId: paymentMethod.paymentMethodId,
                 ownerId: owner.ownerId,
@@ -590,8 +590,8 @@ const BookingModal = (props: OwnerProps) => {
             },
             body: JSON.stringify({
                 username: dataUser.username,
-                fullName: fullName,
-                phoneNumber: phoneNumber,
+                fullName: isOffline ? fullName : dataUser.fullname,
+                phoneNumber: isOffline ? phoneNumber : dataUser.phoneNumberUsers.find(item => item.active),
                 totalAmount,
                 paymentMethodId: paymentMethod.paymentMethodId,
                 ownerId: owner.ownerId,
