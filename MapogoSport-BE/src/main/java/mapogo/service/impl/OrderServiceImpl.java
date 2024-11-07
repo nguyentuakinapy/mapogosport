@@ -161,11 +161,6 @@ public class OrderServiceImpl implements OrderService {
 
 	}
 
-	@Override
-	public List<Object[]> getCategoryProductTotalsToDay() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	public List<Order> getOrdersBetweenDates(LocalDateTime startDay, LocalDateTime endDay) {
 		LocalDateTime adjustedEndDay = endDay.withHour(23).withMinute(59).withSecond(59);
@@ -196,5 +191,11 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime adjustedEndDay = endDate.withHour(23).withMinute(59).withSecond(59);
         return orderDAO.findCategoryProductTotalsByBetweenAndStatus(startDate, adjustedEndDay, statuses);
     }
+
+	@Override
+	public List<Order> findByUser_Username(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
