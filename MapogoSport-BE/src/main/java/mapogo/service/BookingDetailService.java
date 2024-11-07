@@ -14,9 +14,14 @@ public interface BookingDetailService {
 
 	List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportDetailId, LocalDate today, LocalDate endDate);
 
+	List<BookingDetail> findBookingDetailBySubscriptionKey(String subscriptionKey);
+
 	BookingDetail createBookingDetail(Map<String, Object> bd);
-	
-	BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId, LocalDate date);
-	
+
+	BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId,
+			LocalDate date);
+
 	void cancelBookingDetail(Integer bookingDetailId);
+
+	void updateBookingDetail(Map<String, Object> data);
 }

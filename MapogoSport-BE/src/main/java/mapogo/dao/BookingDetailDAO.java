@@ -22,11 +22,16 @@ public interface BookingDetailDAO extends JpaRepository<BookingDetail, Integer> 
 	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId AND b.status = true AND b.date BETWEEN :startDate AND :endDate")
 	List<BookingDetail> findBySportFieldDetailAndDateBetween(@Param("sportFieldDetailId") Integer sportFieldDetailId,
 			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
-	
+
 	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId  AND b.status = true AND b.date = :date")
-	List<BookingDetail> findBySportFieldDetailAndDay(@Param("sportFieldDetailId") Integer sportFieldDetailId,@Param("date") LocalDate date);
-	
+	List<BookingDetail> findBySportFieldDetailAndDay(@Param("sportFieldDetailId") Integer sportFieldDetailId,
+			@Param("date") LocalDate date);
+
 	@Query("SELECT b FROM BookingDetail b WHERE b.startTime = :startTime AND b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId  AND b.status = true AND b.date = :date")
 	BookingDetail findBookingDetailByStartTimeAndSportDetailId(@Param("startTime") String startTime,
 			@Param("sportFieldDetailId") Integer sportDetailId, @Param("date") LocalDate date);
+
+	@Query("SELECT b FROM BookingDetail b WHERE b.status = true AND b.subcriptionKey = :subcriptionKey")
+	List<BookingDetail> findBookingDetailBySubscriptionKey(
+			@Param("subcriptionKey") String subcriptionKey);
 }

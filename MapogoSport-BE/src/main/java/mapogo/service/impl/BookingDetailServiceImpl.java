@@ -115,6 +115,36 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			bookingDAO.save(booking);
 		}
 	}
+
+	@Override
+	public void updateBookingDetail(Map<String, Object> data) {
+		BookingDetail bd = bookingDetailDAO.findById((Integer) data.get("bookingDetailId")).get();
+		SportFieldDetail spd = sportFieldDAO.findById((Integer) data.get("idSportDetail")).get();
+		
+		Object priceObj = data.get("price");
+		Double price;
+
+		if (priceObj instanceof String) {
+			price = Double.valueOf((String) priceObj);
+		} else if (priceObj instanceof Number) {
+			price = ((Number) priceObj).doubleValue();
+		} else {
+			throw new IllegalArgumentException("totalAmount must be a String or Number");
+		}
+		
+		bd.setSportFieldDetail(spd);
+		bd.setDate(LocalDate.parse((String) data.get("dateBooking")));
+		bd.setStartTime((String) data.get("startTimeBooking"));
+		bd.setEndTime((String) data.get("endTimeBooking"));
+		bd.setPrice(price);
+//		System.err.println(data);
+		bookingDetailDAO.save(bd);
+	}
+
+	@Override
+	public List<BookingDetail> findBookingDetailBySubscriptionKey(String subscriptionKey) {
+		return bookingDetailDAO.findBookingDetailBySubscriptionKey(subscriptionKey);
+	}
 	
 	
 

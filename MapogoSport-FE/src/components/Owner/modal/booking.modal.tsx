@@ -56,7 +56,6 @@ const BookingModal = (props: OwnerProps) => {
     // BOOKING DETAIL
     const [endTime, setEndTime] = useState<string>();
     const [price, setPrice] = useState<number>();
-    const [prices, setPriceS] = useState<number[]>([]);
     const [date, setDate] = useState<string>();
 
     // BOOKING PAYMENT
@@ -293,7 +292,6 @@ const BookingModal = (props: OwnerProps) => {
         setCheckDataStatus(!checkDataStatus);
         handleClose();
     }
-
 
 
     type DateDetail = {
