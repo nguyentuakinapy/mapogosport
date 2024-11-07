@@ -48,3 +48,14 @@ interface OrderDetail {
     },
     quantity: number;
 }
+
+interface OrderMap {
+    orderId: number;
+    fullname: string;
+    date: Date;
+    amount: number;
+    address: string;
+    status: string;
+    phoneNumber: string;
+    productName: string;
+}

@@ -12,6 +12,7 @@ import { useParams } from 'next/navigation';
 import { toast } from "react-toastify";
 import { formatPrice } from '@/components/Utils/Format'
 import useSWR, { mutate } from 'swr';
+
 const StarRating = ({ setRating }) => {
     const [rating, localSetRating] = useState(0); // Trạng thái cho rating hiện tại
     const [hover, setHover] = useState(0); // Trạng thái cho sao đang được hover
@@ -252,6 +253,7 @@ const ProductDetail = () => {
                     if (data.length > 0) {
                         // Đặt kích thước mặc định đầu tiên
                         setSelectedSize(data[0].size.sizeName);
+                        setIdSize(data[0].size.sizeId);
                         setSelectedProductDetailSizeId(data[0].productDetailSizeId); // Sử dụng ID từ dữ liệu trả về
                     }
                 } catch (error) {
@@ -356,8 +358,9 @@ const ProductDetail = () => {
     return (
         <>
             <HomeLayout>
-                <Container className="mt-5 py-3 container1 bg-light" >
+                <Container className="mt-5 py-3 container1 bg-light" style={{ maxWidth: '1170px' }}>
                     <Row className='p-5'>
+                        {/* Cột hình ảnh sản phẩm */}
                         <Col className='ms-5' style={{ maxWidth: '550px' }}>
                             {imageGallery.length > 0 ? (
                                 <>
@@ -367,12 +370,8 @@ const ProductDetail = () => {
                                         alt="Main product"
                                         id="main-product-image"
                                         title={imageGallery[0][0].image}
-                                        style={{ width: '300px', height: '300px', objectFit: 'contain' }}
+                                        style={{ width: '100%', height: '400px', objectFit: 'contain' }}
                                     />
-
-                                    {/* <div>
-                                        <p>Current image: {imageGallery[0][0].image}</p>
-                                    </div> */}
                                     <div className="d-flex mt-3">
                                         {imageGallery[0][0].galleries.map((galleryItem, index) => (
                                             <img
@@ -380,10 +379,9 @@ const ProductDetail = () => {
                                                 src={`${galleryItem.name}`}
                                                 className='me-2'
                                                 alt={`Gallery image ${index + 1}`}
-                                                style={{ width: '100px', cursor: 'pointer' }}
+                                                style={{ width: '80px', height: '80px', cursor: 'pointer', objectFit: 'cover' }}
                                                 onClick={() => {
-                                                    document.getElementById('main-product-image').src = `/images/${galleryItem.name}`;
-                                                    console.log(`Selected image: ${galleryItem.name}`);
+                                                    document.getElementById('main-product-image').src = `${galleryItem.name}`;
                                                 }}
                                             />
                                         ))}
@@ -397,43 +395,42 @@ const ProductDetail = () => {
 
                         {/* Thông tin sản phẩm */}
                         <Col className='ms-5' style={{ marginLeft: '100px' }}>
-                            <h4 className='mb-4'>{findByIdProduct.name}</h4>
-
-                            <div>
-                                <span className='fs-4'>Màu:</span>
-                                {color.map((colorItem, index) => {
-                                    return (
-                                        <Button
-                                            key={index}
-                                            className="ms-2 mb-4"
-                                            variant={selectedColor === colorItem[0] ? "primary" : "secondary"}
-                                            style={{
-                                                backgroundColor: colorItem[0],
-                                                color: 'white',
-                                                borderRadius: '5px',
-                                                padding: '5px 10px',
-                                                opacity: selectedColor === colorItem[0] ? 1 : 0.7
-                                            }}
-                                            onClick={() => handleColorSelect(colorItem)}
-                                        >
-                                            {colorItem[0]}
-                                        </Button>
-                                    );
-                                })}
-                            </div>
-                            <div className='d-flex'>
-                                <span className='fs-4'>Size:</span>
-                                {size.map((item) => {
-                                    return (
-                                        <div key={item.size.sizeId}>
+                            <h4>{findByIdProduct.name}</h4>
+                            <h5 className="text-danger mt-3">
+                            {price ? formatPrice(price) : formatPrice(findByIdProduct.price)}
+                            </h5>
+                            <div className="mb-3">
+                                <span className="d-block fw-bold mb-2">Màu sắc:</span>
+                                <div className="d-flex flex-wrap">
+                                    {color.map((colorItem, index) => {
+                                        return (
                                             <Button
-                                                className={`ms-2 mb-4 ${selectedSize === item.size.sizeName ? 'text-white' : ''}`}
-                                                variant="outline-secondary"
-                                                style={{
-                                                    borderRadius: '5px',
-                                                    padding: '5px 10px',
-                                                    backgroundColor: selectedSize === item.size.sizeName ? 'gray' : ''
-                                                }}
+                                                key={index}
+                                                className="me-2 mb-2"
+                                                variant={selectedColor === colorItem[0] ? 'dark' : 'outline-secondary'}
+                                                onClick={() => handleColorSelect(colorItem)}
+                                            >
+                                                <img
+                                                    src={`${colorItem[2]}`} // Assuming the image URL is the third element in the colorItem array
+                                                    alt={colorItem[0]}
+                                                    style={{ width: '40px', height: '40px', marginRight: '10px', objectFit: 'cover' }}
+                                                />
+                                                {colorItem[0]}
+                                            </Button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className="mb-3">
+                                <span className="d-block fw-bold mb-2">Size:</span>
+                                <div className="d-flex flex-wrap">
+                                    {size.map((item) => {
+                                        return (
+                                            <Button
+                                                key={item.size.sizeId}
+                                                className="me-2 mb-2"
+                                                variant={selectedSize === item.size.sizeName ? 'dark' : 'outline-secondary'}
                                                 onClick={() => {
                                                     setSelectedSize(item.size.sizeName);
                                                     setSelectedProductDetailSizeId(item.productDetailSizeId);
@@ -441,20 +438,23 @@ const ProductDetail = () => {
                                                 }}>
                                                 {item.size.sizeName}
                                             </Button>
-                                        </div>
-                                    );
-                                })}
 
+                                        );
+                                    })}
+                                </div>
                             </div>
-                            <h5 className='mb-3'>
-                                Giá sản phẩm: {findByIdProduct.price || price}
-                            </h5>
 
-                            <div className="d-flex align-items-center mb-4">
-                                <span>Số lượng</span>
-                                <ButtonGroup className="ms-3">
+                            <div className="mb-3">
+                                <span className="d-block fw-bold mb-2">Số lượng:</span>
+                                <ButtonGroup>
                                     <Button variant="outline-secondary" onClick={decreaseQuantity}>-</Button>
-                                    <Form.Control type="text" value={quantity} readOnly className="text-center" style={{ width: '50px' }} />
+                                    <Form.Control
+                                        type="text"
+                                        value={quantity}
+                                        readOnly
+                                        className="text-center"
+                                        style={{ width: '50px' }}
+                                    />
                                     <Button variant="outline-secondary" onClick={increaseQuantity}>+</Button>
                                 </ButtonGroup>
                             </div>

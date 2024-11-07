@@ -8,4 +8,5 @@ public interface ProductReviewService {
 	List<ProductReview> findReviewsByProductId(int productId);
 	ProductReview save(ProductReview review);
 	List<ProductReview> findByUser_Username(String username);
+	void deleteReviewByUser(Integer productReviewId);
 }

@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Button, OverlayTrigger, Tooltip, Form } from 'react-bootstrap'
 import UserLayout from '@/components/User/UserLayout'
 import ModalAddAddress from '@/components/User/modal/user.addNewAddress'
 import '../types/user.scss'
@@ -11,16 +11,19 @@ import ModalUpdateAddress from '@/components/User/modal/user.updateAddress'
 export default function Address() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
+    const [addressUsers, setAddressUsers] = useState<any[]>([]);
+    const [showAddAddress, setShowAddAddress] = useState<boolean>(false);
+    const [showUpdateAddress, setShowUpdateAddress] = useState<boolean>(false);
+    const [selectedAddressUser, setSelectedAddressUser] = useState<any>(null);
 
     const removePrefix = (name: string) => {
         return name.replace(/^(Tỉnh|Thành phố|Quận|Huyện|Phường|Xã)\s*/, '').trim();
     };
 
     useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            const apiUrl = `http://localhost:8080/rest/user/${parsedUserData.username}`;
+        const username = localStorage.getItem('username');
+        if (username) {
+            const apiUrl = `http://localhost:8080/rest/user/${username}`;
             setUsernameFetchApi(apiUrl);
         }
     }, []);
@@ -31,21 +34,15 @@ export default function Address() {
         revalidateOnReconnect: false,
     });
 
-    const [addressUsers, setAddressUsers] = useState<any[]>([]); // Lưu toàn bộ địa chỉ của người dùng
-
     useEffect(() => {
         if (data && data.addressUsers) {
-            setAddressUsers(data.addressUsers); // Lưu tất cả địa chỉ
+            setAddressUsers(data.addressUsers);
         }
     }, [data]);
 
-    const [showAddAddress, setShowAddAddress] = useState<boolean>(false);
-    const [showUpdateAddress, setShowUpdateAddress] = useState<boolean>(false);
-    const [selectedAddressUser, setSelectedAddressUser] = useState<any>(null);
-
     const handleEdit = (addressUser: any) => {
-        setSelectedAddressUser(addressUser); // Lưu thông tin địa chỉ được chọn
-        setShowUpdateAddress(true); // Hiển thị modal cập nhật
+        setSelectedAddressUser(addressUser);
+        setShowUpdateAddress(true);
     };
 
     const handleDelete = (addressUserId: number) => {
@@ -58,17 +55,34 @@ export default function Address() {
                 }
             }).then(async (res) => {
                 if (!res.ok) {
-                    const errorText = await res.text();
-                    toast.error(`Xóa địa chỉ không thành công! Chi tiết lỗi: ${errorText}`);
+                    toast.error(`Xóa địa chỉ không thành công! Vui lòng thử lại sau!`);
                     return
                 }
                 mutate(usernameFetchApi);
                 toast.success('Xóa địa chỉ thành công!');
-            }).catch((error) => {
-                toast.error(`Đã xảy ra lỗi: ${error.message}`);
-            });
+            })
         }
     }
+
+    const handleUpdateActive = (addressUserId: number, activeState: boolean) => {
+        fetch(`http://localhost:8080/rest/user/addressStatus/${addressUserId}`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                active: activeState
+            }),
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return
+            }
+            mutate(usernameFetchApi);
+            toast.success('Cập nhật thành công!');
+        })
+    };
 
     return (
         <UserLayout>
@@ -84,28 +98,30 @@ export default function Address() {
                 ) : (
                     addressUsers.length > 0 ? (
                         addressUsers.map(addressUser => (
-                            <div key={addressUser.addressUserId} className='item-address d-flex justify-content-between align-items-center'>
+                            <div key={addressUser.addressUserId} className='item-address'>
                                 <div className="item-left">
-                                    <div><b>Số điện thoại: </b>{addressUser.phoneNumber}</div>
-                                    <div>
-                                        <b>Địa chỉ: </b>
-                                        {`${removePrefix(addressUser.addressDetail)}, ${removePrefix(addressUser.address.ward)}, ${removePrefix(addressUser.address.district)}, ${removePrefix(addressUser.address.province)}`}
-                                    </div>
+                                    <b>Địa chỉ: </b>
+                                    {addressUser.addressDetail}, {addressUser.address.ward}, {addressUser.address.district}, {addressUser.address.province}
                                 </div>
                                 <div className="item-right">
-                                    <div className="d-flex">
+                                    <div className="d-flex align-items-center">
+                                        <OverlayTrigger overlay={<Tooltip>Chọn làm số mặc định?</Tooltip>}>
+                                            <Form.Check type="switch" checked={addressUser.active}
+                                                onChange={() => handleUpdateActive(addressUser.addressUserId, !addressUser.active)}
+                                            />
+                                        </OverlayTrigger>
                                         <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
-                                            <div className='btn-address' onClick={() => handleEdit(addressUser)}><i className="bi bi-pencil-square"></i></div>
+                                            <div className='btn-address mx-3' onClick={() => handleEdit(addressUser)}><i className="bi bi-pencil-square"></i></div>
                                         </OverlayTrigger>
                                         <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
-                                            <div className='ms-4 btn-address' onClick={() => handleDelete(addressUser.addressUserId)}><i className='bi bi-trash3-fill'></i></div>
+                                            <div className='btn-address' onClick={() => handleDelete(addressUser.addressUserId)}><i className='bi bi-trash3-fill'></i></div>
                                         </OverlayTrigger>
                                     </div>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div>Không có địa chỉ nào</div>
+                        <div className='item-address'>Không có địa chỉ nào</div>
                     )
                 )}
             </div>

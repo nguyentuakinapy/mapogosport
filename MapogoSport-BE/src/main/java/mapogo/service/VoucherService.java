@@ -9,4 +9,5 @@ public interface VoucherService {
 	List<Voucher> findByDiscountPercent(Integer discountPercent);
 	List<Voucher> selectVoucherActive();
 	
+	List<Voucher>finAll();
 }

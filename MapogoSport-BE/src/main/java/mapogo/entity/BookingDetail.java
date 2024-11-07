@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,10 +50,20 @@ public class BookingDetail implements Serializable{
     
     @Column(name = "date")
     private LocalDate date;
+
+    @Column(name = "Status")
+    private Boolean status = true;
     
     @ManyToOne
     @JoinColumn(name = "BookingId", nullable = false)
     @JsonBackReference
     private Booking booking;
+    
+    @Column(name="SubscriptionKey")
+    private String subcriptionKey =  null;
+    
+    @Transient
+    private String fullName;
+    
 
 }

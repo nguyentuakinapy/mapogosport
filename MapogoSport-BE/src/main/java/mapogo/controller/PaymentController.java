@@ -2,11 +2,15 @@ package mapogo.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
 import jakarta.servlet.http.HttpServletRequest;
 import mapogo.dto.OrderDTO;
 import mapogo.dto.PaymentDTO;
 import mapogo.entity.Order;
+import mapogo.entity.OrderPayment;
+import mapogo.entity.User;
+import mapogo.service.OrderPaymentService;
 import mapogo.service.OrderService;
 import mapogo.utils.Config;
 
@@ -14,6 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -25,6 +30,7 @@ import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,7 +53,8 @@ public class PaymentController {
         String orderType = "other";
 //        String bankCode = req.getParameter("bankCode");
 		long amount = (long) (order.getAmount()*100);
-        String vnp_TxnRef = Config.getRandomNumber(8);
+//        String vnp_TxnRef = Config.getRandomNumber(8);
+		String vnp_TxnRef = orderId.toString();
         String vnp_IpAddr = Config.getIpAddress(req);
 
         String vnp_TmnCode = Config.vnp_TmnCode;
@@ -122,10 +129,34 @@ public class PaymentController {
 		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
 	
-	@ResponseBody
-	@GetMapping("/ok")
-	public String getMethodName(@RequestParam String param) {
-		return new String("đã thanh toán");
+	@Autowired
+	OrderPaymentService orderPaymentSevice;
+	
+	@GetMapping("/payment_info")
+	public RedirectView transaction(@RequestParam(value = "vnp_Amount") String amount,
+			@RequestParam(value = "vnp_ResponseCode") String responseCode,
+			@RequestParam(value = "vnp_TxnRef") String orderId){
+		OrderPayment orderPayment = new OrderPayment();
+		OrderPayment orderPayment1 = new OrderPayment();;
+		System.out.println("amount: "+amount);
+		System.out.println("orderId: "+orderId);
+
+		if (responseCode.equals("00")) {
+			String trimmedAmount = amount.substring(0, amount.length() - 2);
+			orderPayment.setAmount(Double.valueOf(trimmedAmount));
+			Order order = orderService.findByOrderId(Integer.parseInt(orderId));
+			orderPayment.setOrder(order);
+			orderPayment.setStatus("Đã thanh toán");
+			orderPayment.setDate(LocalDateTime.now());
+			User user = order.getUser();
+			orderPayment.setUser(user);
+			orderPayment.setReferenceCode(null);
+			orderPayment1 = orderPaymentSevice.create(orderPayment);
+		} else {
+	        return new RedirectView("/errorPage"); // URL chuyển hướng khi có lỗi
+	    }
+	    
+	    return new RedirectView("http://localhost:3000/checkout-product/successfully"); // URL chuyển hướng khi thành công
 	}
 	
 }

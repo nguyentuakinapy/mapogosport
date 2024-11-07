@@ -2,16 +2,20 @@ package mapogo.rest;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import mapogo.dto.OrderDTO;
 import mapogo.entity.Order;
@@ -32,13 +36,23 @@ public class OrderRestController {
 	OrderDetailService orderDetailService;
 
 	@GetMapping("/user/order/{username}")
-	public List<Order> getAll(@PathVariable("username") String username) {
-		return orderService.findByUser_Username(username);
+	public List<Map<String, Object>> getUserAll(@PathVariable("username") String username) {
+		return orderService.findOrderByUsername(username);
+	}
+	
+	@GetMapping("/admin/order/findAll")
+	public List<Map<String, Object>> getAdminAll() {
+		return orderService.findAllOrder();
+	}
+	
+	@PutMapping("/admin/order/update")
+	public void updateOrderStatus(@RequestBody Map<String, Object> orderData) {
+	    orderService.updateStatusOrder(orderData);
 	}
 
 	@GetMapping("/user/orders/detail/{orderId}")
 	public List<OrderDetail> getOrderDetails(@PathVariable("orderId") Integer orderId) {
-		return orderDetailService.findByOrder_OrderId(orderId);
+		return orderDetailService.findOrderDetailByOrderId(orderId);
 	}
 
 	@GetMapping("/admin/orderToDay")
@@ -55,7 +69,10 @@ public class OrderRestController {
 	public List<Object[]> getCategoryProductTotalsToDay() {
 		return orderService.getCategoryProductTotalsToDay();
 	}
-
+	@GetMapping("/admin/category-product-totals-yesterday")
+	public List<Object[]> getCategoryProductTotalsYesterday() {
+		return orderService.getCategoryProductTotalsToDay();
+	}
 
 	@GetMapping("/admin/category-product-totals-7day")
 	public List<Object[]> getCategoryProductTotals7Day() {
@@ -82,10 +99,36 @@ public class OrderRestController {
 	        @RequestParam(value = "date", required = false) LocalDateTime date,
 	        @RequestParam(value = "startDay", required = false) LocalDateTime startDay,
 	        @RequestParam(value = "endDay", required = false) LocalDateTime endDay) {
-	    return orderService.getOrdersBetweenDates(date, startDay, endDay);
+	    
+	    // Log the received parameters for debugging
+	    System.out.println("Received date: " + date);
+	    System.out.println("Received startDay: " + startDay);
+	    System.out.println("Received endDay: " + endDay);
+
+	    if (date != null) {
+	        return orderService.getOrdersForSingleDate(date);
+	    } else if (startDay != null && endDay != null) {
+	        return orderService.getOrdersBetweenDates(startDay, endDay);
+	    } else {
+	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date parameters");
+	    }
 	}
+	
 
-
+	@GetMapping("/admin/category-product-total-between")
+	public List<Object> getCategoryProductTotalBetween(
+	    @RequestParam(value = "date", required = false) LocalDateTime date,
+	    @RequestParam(value = "startDay", required = false) LocalDateTime startDay,
+	    @RequestParam(value = "endDay", required = false) LocalDateTime endDay
+	) {
+	    if (date != null) {
+	        return orderService.findCategoryProductTotalsByDateAndStatus(date);
+	    } else if (startDay != null && endDay != null) {
+	        return orderService.findCategoryProductTotalsByBetweenDateAndStatus(startDay, endDay);
+	    } else {
+	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date parameters");
+	    }
+	}
 
 	
 

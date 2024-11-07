@@ -34,12 +34,19 @@ public interface OrderDAO extends JpaRepository<Order, Integer> {
 	List<Order> findOrdersLastMonth(@Param("oneMonthAgo") LocalDateTime oneMonthAgo,
 			@Param("statuses") List<String> statuses);
 
-	// 4. Lọc theo khoảng ngày tùy chọn
-	@Query("SELECT o FROM Order o WHERE (:date IS NULL OR o.date = :date) OR (o.date BETWEEN :startDate AND :endDate)")
-	List<Order> findOrdersBetweenDates(@Param("date") LocalDateTime date, 
-	                        @Param("startDate") LocalDateTime startDate, 
-	                        @Param("endDate") LocalDateTime endDate);
+//	// 4. Lọc theo khoảng ngày tùy chọn
+//	@Query("SELECT o FROM Order o WHERE (:date IS NULL OR o.date = :date) OR (o.date BETWEEN :startDate AND :endDate)")
+//	List<Order> findOrdersBetweenDates(@Param("date") LocalDateTime date, 
+//	                        @Param("startDate") LocalDateTime startDate, 
+//	                        @Param("endDate") LocalDateTime endDate);
 
+	@Query("SELECT o FROM Order o WHERE o.date BETWEEN :startOfDay AND :endOfDay AND o.status IN :statuses")
+	List<Order> getOrdersForSingleDate(@Param("startOfDay") LocalDateTime startOfDay,
+			@Param("endOfDay") LocalDateTime endOfDay, @Param("statuses") List<String> statuses);
+
+	@Query("SELECT o FROM Order o WHERE o.date BETWEEN :startDate AND :endDate AND o.status IN :statuses")
+	List<Order> getOrdersBetweenDates(@Param("startDate") LocalDateTime startDate,
+			@Param("endDate") LocalDateTime endDate, @Param("statuses") List<String> statuses);
 
 	// total amout category to day
 	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " + "FROM CategoryProduct cp "
@@ -49,6 +56,15 @@ public interface OrderDAO extends JpaRepository<Order, Integer> {
 			+ "GROUP BY cp.categoryProductId, cp.name, cp.image")
 	List<Object[]> findCategoryProductTotalsTodayWithStatus(@Param("statuses") List<String> statuses);
 
+	// total amout category yesterday
+	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " + "FROM CategoryProduct cp "
+			+ "JOIN cp.products p " + "JOIN p.productDetails pd " + "JOIN pd.productDetailSizes pds "
+			+ "JOIN pds.orderDetails od " + "JOIN od.order o "
+			+ "WHERE o.date >= :startDate AND o.date < :endDate AND o.status IN :statuses "
+			+ "GROUP BY cp.categoryProductId, cp.name, cp.image")
+	List<Object[]> findCategoryProductTotalsYesterdayWithStatus(@Param("startDate") LocalDateTime startDate,
+			@Param("endDate") LocalDateTime endDate, @Param("statuses") List<String> statuses);
+
 	// total amout category 7 day
 	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " + "FROM CategoryProduct cp "
 			+ "JOIN cp.products p " + "JOIN p.productDetails pd " + "JOIN pd.productDetailSizes pds "
@@ -57,5 +73,38 @@ public interface OrderDAO extends JpaRepository<Order, Integer> {
 			+ "GROUP BY cp.categoryProductId, cp.name, cp.image")
 	List<Object[]> findCategoryProductTotalsLast7DaysWithStatus(@Param("startDate") LocalDateTime startDate,
 			@Param("statuses") List<String> statuses);
+
+	// total amount category for a specific day
+	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " +
+	       "FROM CategoryProduct cp " +
+	       "JOIN cp.products p " +
+	       "JOIN p.productDetails pd " +
+	       "JOIN pd.productDetailSizes pds " +
+	       "JOIN pds.orderDetails od " +
+	       "JOIN od.order o " +
+	       "WHERE o.date BETWEEN :startOfDay AND :endOfDay AND o.status IN :statuses " +
+	       "GROUP BY cp.categoryProductId, cp.name, cp.image")
+	List<Object> findCategoryProductTotalsByDateAndStatus(
+	    @Param("startOfDay") LocalDateTime startOfDay,
+	    @Param("endOfDay") LocalDateTime endOfDay,
+	    @Param("statuses") List<String> statuses
+	);
+
+	// total amount category between two dates
+	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " +
+	       "FROM CategoryProduct cp " +
+	       "JOIN cp.products p " +
+	       "JOIN p.productDetails pd " +
+	       "JOIN pd.productDetailSizes pds " +
+	       "JOIN pds.orderDetails od " +
+	       "JOIN od.order o " +
+	       "WHERE o.date BETWEEN :startDate AND :endDate AND o.status IN :statuses " +
+	       "GROUP BY cp.categoryProductId, cp.name, cp.image")
+	List<Object> findCategoryProductTotalsByBetweenAndStatus(
+	    @Param("startDate") LocalDateTime startDate,
+	    @Param("endDate") LocalDateTime endDate,
+	    @Param("statuses") List<String> statuses
+	);
+
 
 }

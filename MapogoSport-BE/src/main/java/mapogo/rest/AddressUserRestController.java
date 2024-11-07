@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.entity.AddressUser;
+import mapogo.entity.PhoneNumberUser;
 import mapogo.service.AddressUserService;
 
 @CrossOrigin("*")
@@ -41,6 +42,11 @@ public class AddressUserRestController {
 	@PutMapping("/user/address/{addressUserId}")
 	public void updateAddressUser(@PathVariable("addressUserId") Integer addressUserId, @RequestBody AddressUser updateAddress) {
 		addressUserService.updateAddressUser(addressUserId, updateAddress);
+	}
+	
+	@PutMapping("/user/addressStatus/{addressUserId}")
+	public void updatePhoneNumber(@PathVariable("addressUserId") Integer addressUserId, @RequestBody AddressUser updateAddress) {
+		addressUserService.updateStatusAddressUser(addressUserId, updateAddress);
 	}
 	
 }

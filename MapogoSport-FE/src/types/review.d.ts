@@ -9,8 +9,8 @@ interface FieldReview {
 
 interface ProductReview {
     productReviewId: number;
-    productName: string;
-    fullname: string,
+    product: Product;
+    fullname: fullname;
     rating: number;
     comment: string;
     datedAt: Date;

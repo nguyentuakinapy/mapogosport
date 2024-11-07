@@ -72,9 +72,8 @@ const ModalAddAddress = (props: UserProps) => {
             toast.error("Hãy điền đầy đủ thông tin!");
             return;
         }
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
+        const username = localStorage.getItem('username');
+        if (username) {
             fetch(`http://localhost:8080/rest/user/address/${addressUser.addressUserId}`, {
                 method: 'PUT',
                 headers: {
@@ -91,16 +90,13 @@ const ModalAddAddress = (props: UserProps) => {
                 }),
             }).then(async (res) => {
                 if (!res.ok) {
-                    const errorText = await res.text();
-                    toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
+                    toast.error(`Cập nhật không thành công! Vui lòng thử lại!`);
                     return
                 }
                 handleClose();
-                mutate(`http://localhost:8080/rest/user/${parsedUserData.username}`);
+                mutate(`http://localhost:8080/rest/user/${username}`);
                 toast.success('Cập nhật thành công!');
-            }).catch((error) => {
-                toast.error(`Đã xảy ra lỗi: ${error.message}`);
-            });
+            })
         }
     };
     if (error) {

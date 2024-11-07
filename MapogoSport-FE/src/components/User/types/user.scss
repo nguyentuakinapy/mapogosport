@@ -1,7 +1,6 @@
 .menu-user {
     background-color: #fff !important;
     border-radius: 8px;
-    margin-bottom: 15px;
     padding: 1.5rem !important;
 
     .text-center {
@@ -63,3 +62,51 @@
     border: 1px solid black !important;
     border-radius: 5px;
 }
+/*======================================================Profile CSS Start======================================================*/
+.form-control-sm,
+.form-select {
+    border: 1px solid black !important;
+    border-radius: 5px;
+}
+
+a {
+    text-decoration: none;
+    color: #dc3545;
+
+    &:hover {
+        color: #142239;
+    }
+}
+
+.btn-profile {
+    width: 20%;
+    border: 1px solid #142239;
+    background: #142239;
+    color: #fff;
+
+    &:hover {
+        background: white;
+        color: black;
+        border: 1px solid #142239;
+    }
+}
+.row {
+    .col-6 {
+        .form-floating {
+            .react-datepicker-wrapper {
+                display: block !important;
+                .react-datepicker__input-container {
+                    .form-control {
+                        padding-top: 1.625rem;
+                        padding-bottom: .4rem;
+                    }
+                }
+            }
+        }
+        .dateLabel {
+            color: rgba($color: rgb(33, 37, 41), $alpha: 0.65);
+            transform: scale(.85) translateY(-.5rem) translateX(.15rem);
+        }
+    }
+}
+/*======================================================Profile CSS End======================================================*/

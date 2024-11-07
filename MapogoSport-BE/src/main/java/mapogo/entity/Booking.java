@@ -50,7 +50,7 @@ public class Booking implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "OwnerId", nullable = false)
-    @JsonBackReference
+    @JsonManagedReference
     private Owner owner;
     
     @ManyToOne
@@ -68,6 +68,12 @@ public class Booking implements Serializable{
 	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JsonManagedReference("booking-bookingdetail")
 	private List<BookingDetail> bookingDetails;
+	
+	@Column(name="FullName")
+	private String fullName = null;
+	
+	@Column(name="PhoneNumber")
+	private String phoneNumber = null;
 	
 	@Transient
     private Map<String, Object> sportFieldInfo;

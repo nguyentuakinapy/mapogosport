@@ -6,7 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import HomeLayout from '@/components/HomeLayout';
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
-import { formatDate } from '@/components/Utils/Format';
+import { formatDate, formatDateVN } from '@/components/Utils/Format';
 import CheckoutModal from '@/components/Booking/booking.Checkout';
 import ModalReviewSportField from '@/components/Review/review.sportField';
 
@@ -18,6 +18,8 @@ type BookingsTypeOnWeek = {
 
 const SportDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+
 
     const [sportField, setSportField] = useState<SportField | null>(null);
     const [selectedSize, setSelectedSize] = useState<string>('');
@@ -44,6 +46,14 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
 
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [dataReview, setDataReview] = useState<Review[]>([]);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setStatusOnWeek();
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [checkDataStatus]);
 
     const { data: reviewData } = useSWR(`http://localhost:8080/rest/fieldReview/${params.id}`, fetcher, {
         revalidateIfStale: false,
@@ -446,11 +456,14 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                 return;
             }
             const currentDateTime = new Date();
-            const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`);
+            const formattedTime = selectedTime.replace('h', ':').padStart(5, '0');
+            const selectedDateTime = new Date(`${selectedDate}T${formattedTime}`);
             if (selectedDateTime < currentDateTime) {
                 toast.warning("Đã quá thời gian yêu cầu đặt sân!");
                 return;
             }
+            console.log(selectedDateTime);
+            console.log(currentDateTime);
             if (Array.isArray(bookingsFromAPI) && bookingsFromAPI.length > 0) {
                 for (const booking of bookingsFromAPI) {
                     const { startTime, endTime, sportFieldDetail } = booking;
@@ -597,7 +610,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                 </Form.Select>
                                 <div className="header-date">
                                     <i className="bi bi-arrow-left" onClick={() => setOnWeek('backward')}></i>
-                                    <span className="mx-3">Từ {formatDate(startWeek)} đến {formatDate(endWeek)}</span>
+                                    <span className="mx-3">Từ {formatDateVN(startWeek)} đến {formatDateVN(endWeek)}</span>
                                     <i className="bi bi-arrow-right" onClick={() => setOnWeek('forward')}></i>
                                 </div>
                                 <div className="time-frame">

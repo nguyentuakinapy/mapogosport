@@ -63,6 +63,28 @@ interface BookingDetail {
     };
     price: number;
     date: string;
+    subcriptionKey: string;
+    status: boolean
+}
+
+
+interface BookingDetailFullName {
+    bookingDetailId: number;
+    startTime: string;
+    endTime: string;
+    sportFieldDetail: {
+        sportFielDetailId: number;
+        name: string;
+        price: number;
+        peakHourPrices: number;
+        size: string;
+        status: string;
+        percentDeposit: number;
+        peakHour: string;
+    };
+    price: number;
+    date: string;
+    fullName: string
 }
 
 interface AvailableBooking {
@@ -73,4 +95,26 @@ interface AvailableBooking {
     price: number;
     peakHourPrices: number;
     percentDeposit: number;
+}
+
+interface BookingByUserMap {
+    bookingId: number;
+    sportFieldName: string;
+    totalAmount: number;
+    status: string;
+    date: Date;
+}
+
+interface BookingFindAll {
+    bookingId: number;
+    sportFieldName: string;
+    bookingUserFullname: string;
+    bookingUserPhone: string;
+    totalAmount: number;
+    status: string;
+    date: Date;
+    user: {
+        username: string;
+        fullname: string;
+    }
 }

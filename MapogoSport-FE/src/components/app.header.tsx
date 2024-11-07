@@ -14,6 +14,7 @@ import useSWR from 'swr';
 
 import ForgotPassword from './account/modal/forgotPassword.modal';
 import ChangePasswordNew from './account/modal/change-password-new.modal';
+import { useData } from '@/app/context/UserContext';
 
 
 
@@ -46,15 +47,20 @@ const CartBadge = ({ username }: { username: string }) => {
     );
 };
 
-const Header = () => {
+interface HeaderProps {
+    setRefreshKey: (v: number) => void;
+    refreshKey: number
+}
+
+const Header = (props: HeaderProps) => {
     const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
     const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
     const [showChangePasswordNew, setShowChangePasswordNew] = useState<boolean>(false);
     const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
+    const { setRefreshKey, refreshKey } = props;
 
-
-    const [userData, setUserData] = useState<User | null>(null);
+    const userData = useData();
 
     useEffect(() => {
         require('bootstrap/dist/js/bootstrap.bundle.min.js');
@@ -98,33 +104,8 @@ const Header = () => {
         fetchData();
     }, [])
 
-    const [username, setUsername] = useState<string>("");
-    useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUsername(parsedUserData.username);
-            // console.log(parsedUserData); // Kiểm tra dữ liệu
-        }
-    })
-
-    const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-    const { data, error, isLoading } = useSWR(
-        username == "" ? null : `http://localhost:8080/rest/user/${username}`, fetcher, {
-        revalidateIfStale: false,
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-    });
-
-    useEffect(() => {
-        if (data) {
-            setUserData(data);
-        }
-    }, [data])
-
     const logOut = () => {
-        sessionStorage.removeItem('user');
+        localStorage.removeItem('username');
         window.location.href = "/";
     }
 
@@ -206,7 +187,7 @@ const Header = () => {
                     ))}
                 </Container>
             </Navbar> */}
-            <LoginModal
+            <LoginModal setRefreshKey={setRefreshKey} refreshKey={refreshKey}
                 showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}
                 showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
                 showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}>

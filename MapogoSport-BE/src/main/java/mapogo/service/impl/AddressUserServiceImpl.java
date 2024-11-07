@@ -13,6 +13,7 @@ import mapogo.dao.AddressUserDAO;
 import mapogo.dao.UserDAO;
 import mapogo.entity.Address;
 import mapogo.entity.AddressUser;
+import mapogo.entity.PhoneNumberUser;
 import mapogo.entity.User;
 import mapogo.service.AddressUserService;
 
@@ -32,10 +33,12 @@ public class AddressUserServiceImpl implements AddressUserService{
 
 	@Override
 	public List<AddressUser> addAddressByUsername(String username, List<AddressUser> newAddress) {
-		User user = userDAO.findById(username).get(); // Lấy người dùng
+		User user = userDAO.findById(username).get();
 		List<AddressUser> savedAddressUsers = new ArrayList<>();
+		boolean userHasAddress = !addressUserDAO.findByUser_Username(username).isEmpty();
 		for (AddressUser addressUser : newAddress) {
 	        addressUser.setUser(user);
+	        addressUser.setActive(!userHasAddress);
 	        Address address = addressUser.getAddress();
 	        // Tìm kiếm địa chỉ đã tồn tại
 	        Address existedAddress = addressDAO.findExistedAddress(
@@ -45,10 +48,11 @@ public class AddressUserServiceImpl implements AddressUserService{
 	        );
 	        if (existedAddress != null) { // Nếu địa chỉ đã tồn tại thì sử dụng dữ liệu cũ
 				addressUser.setAddress(existedAddress);
-			} else { // Nếu không thì lưu mới
+			} else {
 				address = addressDAO.save(address); // Lưu địa chỉ mới
 	            addressUser.setAddress(address);
 			}
+	        userHasAddress = true;
 	        savedAddressUsers.add(addressUserDAO.save(addressUser));
 	    }
 		return savedAddressUsers;
@@ -57,6 +61,19 @@ public class AddressUserServiceImpl implements AddressUserService{
 	@Transactional
 	@Override
 	public void deleteAddressByUser(Integer addressUserId) {
+		AddressUser addressUser = addressUserDAO.findById(addressUserId).get();
+		
+		if (addressUser.getActive()) { // Nếu địa chỉ có active true
+			// Tìm các địa chỉ khác
+			List<AddressUser> otherAddressUsers = addressUserDAO.findByUser_Username(addressUser.getUser().getUsername());
+			for (AddressUser otherAddress: otherAddressUsers) {
+				if (!otherAddress.getAddressUserId().equals(addressUserId)) {
+					otherAddress.setActive(true);
+					addressUserDAO.save(otherAddress);
+					break; // chỉ cập nhật một số
+				}
+			}
+		}
 		addressUserDAO.deleteByAddressUserId(addressUserId);
 	}
 
@@ -64,9 +81,7 @@ public class AddressUserServiceImpl implements AddressUserService{
 	public AddressUser updateAddressUser(Integer addressUserId, AddressUser updateAddress) {
 	    Optional<AddressUser> currentAddresses = addressUserDAO.findById(addressUserId);
 	    AddressUser currentAddress = currentAddresses.get();
-
-	    // Lấy địa chỉ từ updateAddress
-	    Address newAddress = updateAddress.getAddress();
+	    Address newAddress = updateAddress.getAddress(); // Lấy địa chỉ từ updateAddress
 	    // Kiểm tra xem địa chỉ mới đã tồn tại trong cơ sở dữ liệu hay chưa
 	    Address existedAddress = addressDAO.findExistedAddress(
 	        newAddress.getWard(), 
@@ -75,13 +90,44 @@ public class AddressUserServiceImpl implements AddressUserService{
 	    );
 	    if (existedAddress != null) {// Nếu địa chỉ đã tồn tại, sử dụng địa chỉ đã có
 	        currentAddress.setAddress(existedAddress);
-	    } else {// Nếu không tồn tại, lưu địa chỉ mới
+	    } else {
 	        Address savedAddress = addressDAO.save(newAddress);
 	        currentAddress.setAddress(savedAddress);
 	    }
-
 	    currentAddress.setAddressDetail(updateAddress.getAddressDetail());
-
 	    return addressUserDAO.save(currentAddress);
+	}
+
+	@Override
+	public AddressUser updateStatusAddressUser(Integer addressUserId, AddressUser updateAdress) {
+		AddressUser addressUser = addressUserDAO.findById(addressUserId).get();
+	    if (updateAdress.getActive() != null) {
+	        boolean isCurrentlyActive = addressUser.getActive();
+
+	        if (isCurrentlyActive && !updateAdress.getActive()) { // Nếu đang active=true
+	            // Tìm địa chỉ khác có active=false
+	            List<AddressUser> otherAddressUsers = addressUserDAO.findByUser_Username(addressUser.getUser().getUsername());
+	            for (AddressUser otherAdressUser : otherAddressUsers) {
+	                if (!otherAdressUser.getAddressUserId().equals(addressUserId) && !otherAdressUser.getActive()) {
+	                	otherAdressUser.setActive(true);
+	                    addressUserDAO.save(otherAdressUser);
+	                    break;
+	                }
+	            }
+	            addressUser.setActive(false);
+	        } else if (!isCurrentlyActive && updateAdress.getActive()) { // Nếu đang active=false
+	            // Tìm và đặt tất cả các số khác về active=false
+	            List<AddressUser> otherAddressUsers = addressUserDAO.findByUser_Username(addressUser.getUser().getUsername());
+	            for (AddressUser otherAdressUser : otherAddressUsers) {
+	                if (!otherAdressUser.getAddressUserId().equals(addressUserId) && otherAdressUser.getActive()) {
+	                	otherAdressUser.setActive(false);
+	                	addressUserDAO.save(otherAdressUser);
+	                }
+	            }
+	            addressUser.setActive(true);
+	        }
+	    }
+		
+		return addressUserDAO.save(addressUser);
 	}
 }

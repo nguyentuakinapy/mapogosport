@@ -156,7 +156,7 @@
 }
 
 .div-tb {
-    height: calc(100vh - 200px);
+    height: calc(100vh - 261px);
     overflow-y: auto;
     overflow-x: auto;
     border: 1px solid #142239;
@@ -188,7 +188,7 @@
         .tb-head {
             font-weight: bold;
             position: sticky;
-            top: -1px;
+            top: 0;
             z-index: 10;
             white-space: nowrap;
 
@@ -199,11 +199,13 @@
                 color: white;
                 font-weight: normal;
             }
+
         }
 
         tbody {
 
             tr {
+
                 .title {
                     overflow: hidden;
                     white-space: nowrap;
@@ -272,29 +274,28 @@
 
 .frame-info-secondary {
     background: #f3f3f3 !important;
-    cursor: not-allowed !important;
+    cursor: pointer;
+    outline: 1px solid slategrey;
 
     .status-label {
-        cursor: not-allowed !important;
         color: #8b8b8b !important;
-    }
-
-    .status-label {
         font-weight: 700 !important;
     }
-}
 
+    &:hover {
+        background-color: #86fff3 !important;
+        transition: background-color 0.3s;
+    }
+}
 
 .frame-overdue-secondary {
     background: #f9e1e1 !important;
     cursor: not-allowed !important;
+    outline: 2px solid transparent;
 
     .status-label {
         cursor: not-allowed !important;
         color: #8b8b8b !important;
-    }
-
-    .status-label {
         font-weight: 700 !important;
     }
 }
@@ -307,14 +308,248 @@
         color: #353535 !important;
         font-weight: 700 !important;
     }
+
+    &:hover {
+        background-color: #fff7d4 !important;
+        transition: background-color 0.3s;
+    }
 }
+
 
 .frame-info-danger {
     background: #f7959f !important;
     cursor: not-allowed !important;
+    outline: 2px solid transparent;
 
     .status-label {
         cursor: not-allowed !important;
         color: white !important;
+        font-weight: 700 !important;
     }
 }
+
+.search-date {
+    flex-wrap: nowrap;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+
+    .start {
+        border-radius: 5px 0 0 5px;
+        border-width: 1px 0px 1px 1px !important;
+        border-style: solid;
+        border-color: black;
+    }
+
+    .input-group-text {
+        border-width: 1px 0;
+        border-style: solid;
+        border-color: black;
+        background: #e9ecef;
+    }
+
+    .end {
+        border-radius: 0 5px 5px 0;
+        border-width: 1px 1px 1px 0px !important;
+        border-style: solid;
+        border-color: black;
+    }
+}
+
+.date-picker-container {
+    position: relative;
+
+    .date-picker-dropdown {
+        height: 100%;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        background-color: #142239;
+        border-radius: 4px;
+    }
+}
+
+
+.col-day {
+    background-color: #142239;
+    cursor: pointer;
+
+    &.active {
+        background-color: rgb(255, 89, 0) !important; // Màu nền khi active
+    }
+
+    &:hover {
+        background-color: slategray; // Tối màu khi hover
+    }
+}
+
+/*======================================================Booking Bill CSS Start======================================================*/
+.box-ultil {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 5px solid #142239;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+
+    .btn-sd-admin {
+        background-color: #142239 !important;
+        border: 1px solid #142239 !important;
+        padding: 6px;
+        width: 190px;
+        font-size: 15px;
+
+        &:hover {
+            background-color: white !important;
+            color: black;
+        }
+    }
+}
+
+.box-table-border {
+    border: 1px solid #142239;
+    border-radius: 8px 8px 0 0;
+
+    .table {
+        text-align: center;
+
+        thead {
+            tr {
+                th {
+                    text-transform: uppercase;
+                    background-color: #142239;
+                    color: white;
+                    font-weight: normal;
+                    font-size: 14px;
+
+                    &:first-child {
+                        border-radius: 8px 0 0 0;
+                    }
+
+                    &:last-child {
+                        border-radius: 0 8px 0 0;
+                    }
+                }
+            }
+        }
+
+        tbody {
+            tr {
+                td {
+                    font-size: 15px;
+
+                    a {
+                        text-decoration: none;
+                        color: #142239;
+                        font-weight: 700;
+                    }
+
+                    .bg-badge-user {
+                        background: #142239 !important;
+                    }
+
+                    .btn-edit {
+                        color: #142239;
+                        font-size: 20px;
+                    }
+                }
+
+                .title {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    max-width: 200px;
+                }
+
+                .title-brand {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    max-width: 200px;
+                }
+            }
+        }
+    }
+}
+
+.custom-tabs {
+    .nav-item {
+        flex: 1;
+        text-align: center;
+
+        &+.nav-item {
+            margin-left: 1.5px;
+        }
+
+        &:first-child {
+            .nav-link {
+                border-radius: 8px 0 0 8px;
+            }
+        }
+
+        &:last-child {
+            .nav-link {
+                border-radius: 0 8px 8px 0;
+            }
+        }
+
+        .nav-link {
+            border-radius: 0;
+            color: #1a1a1a;
+            background-color: #f5f5f5;
+            padding: 12px 24px;
+            text-align: center;
+            font-weight: 600;
+
+            &:hover,
+            &.active {
+                background-color: #142239;
+                color: white;
+            }
+        }
+    }
+}
+
+.dropdown {
+    .dropdown-toggle {
+        width: 110px !important;
+        font-size: 11px !important;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .dropdown-menu {
+        font-size: 13px;
+        background: #142239;
+        transform: translate3d(-7.8px, 32px, 0px) !important;
+
+        .dropdown-item {
+            color: white;
+
+            &:hover {
+                color: black;
+            }
+        }
+    }
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+
+    .page-item.active {
+        .page-link {
+            background: #142239 !important;
+        }
+    }
+}
+
+.form-control {
+    border: 1px solid !important;
+}
+
+/*======================================================Booking Bill CSS End======================================================*/

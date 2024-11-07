@@ -32,7 +32,9 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "src/app/api/create-momo-payment/route.ts",
+    "src/components/Utils/jspdf-autotable.d.ts"
   ],
   "exclude": [
     "node_modules"
