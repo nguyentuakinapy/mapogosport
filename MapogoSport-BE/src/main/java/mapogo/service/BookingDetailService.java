@@ -8,6 +8,8 @@ import mapogo.entity.BookingDetail;
 
 public interface BookingDetailService {
 
+	List<Map<String, Object>> findBookingDetailByBookingId(Integer bookingId);
+
 //	List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId);
 
 	List<BookingDetail> findBySportFieldDetailAndDay(Integer sportDetailId, LocalDate date);
@@ -22,6 +24,8 @@ public interface BookingDetailService {
 			LocalDate date);
 
 	void cancelBookingDetail(Integer bookingDetailId);
+	
+	void cancelBookingDetailBySubscription(Integer bookingDetailId, String subscriptionKey);
 
 	void updateBookingDetail(Map<String, Object> data);
 }

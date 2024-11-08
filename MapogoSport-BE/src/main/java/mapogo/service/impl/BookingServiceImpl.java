@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.BookingDAO;
+import mapogo.dao.BookingDetailDAO;
 import mapogo.dao.OwnerDAO;
 import mapogo.dao.PaymentMethodDAO;
 import mapogo.dao.UserDAO;
@@ -34,6 +35,9 @@ public class BookingServiceImpl implements BookingService {
 	@Autowired
 	BookingDAO bookingDAO;
 
+	@Autowired
+	BookingDetailDAO bookingDetailDAO;
+	
 	@Autowired
 	UserDAO userDAO;
 
@@ -64,6 +68,7 @@ public class BookingServiceImpl implements BookingService {
 			bookingMap.put("totalAmount", booking.getTotalAmount());
 			bookingMap.put("status", booking.getStatus());
 			bookingMap.put("bookingUserPhone", booking.getPhoneNumber());
+			bookingMap.put("prepayPrice", booking.getPrepayPrice());
 			
 			for (BookingDetail bookingDetail : booking.getBookingDetails()) {
 	            if (bookingDetail.getSportFieldDetail() != null) {
@@ -120,14 +125,13 @@ public class BookingServiceImpl implements BookingService {
 		if (optionalBooking.isPresent()) {
 		    Booking booking = optionalBooking.get();
 		    booking.setStatus(newStatus);
+		    for (BookingDetail bookingDetail: booking.getBookingDetails()) {
+		    	bookingDetail.setStatus(newStatus);
+		    	bookingDetailDAO.save(bookingDetail);
+		    }
 		    bookingDAO.save(booking);
 		}
 		return null;
-	}
-
-	@Override
-	public List<Booking> findById(Integer id) {
-		return bookingDAO.findByBookingId(id);
 	}
 
 	@Override
@@ -140,17 +144,21 @@ public class BookingServiceImpl implements BookingService {
 		PaymentMethod p = paymentMethodDAO.findById((Integer) b.get("paymentMethodId")).get();
 		Owner o = ownerDAO.findById((Integer) b.get("ownerId")).get();
 		Voucher v = null;
-		if (((String) b.get("voucher")) != null) {
+		if (b.get("voucher") != null) {
 			v = voucherDAO.findById(Integer.parseInt((String) b.get("voucher"))).get();
 		}
 
 		Object totalAmountObj = b.get("totalAmount");
+		Object prepayPriceObj = b.get("prepayPrice");
 		Double totalAmount;
-
-		if (totalAmountObj instanceof String) {
+		Double prepayPrice;
+		
+		if (totalAmountObj instanceof String && prepayPriceObj instanceof String) {
 			totalAmount = Double.valueOf((String) totalAmountObj);
+			prepayPrice = Double.valueOf((String) prepayPriceObj);
 		} else if (totalAmountObj instanceof Number) {
 			totalAmount = ((Number) totalAmountObj).doubleValue();
+			prepayPrice = ((Number) prepayPriceObj).doubleValue();
 		} else {
 			throw new IllegalArgumentException("totalAmount must be a String or Number");
 		}
@@ -164,6 +172,7 @@ public class BookingServiceImpl implements BookingService {
 		booking.setNote((String) b.get("note"));
 		booking.setFullName((String) b.get("fullName"));
 		booking.setPhoneNumber((String) b.get("phoneNumber"));
+		booking.setPrepayPrice(prepayPrice);
 		return bookingDAO.save(booking);
 //		return null;
 	}

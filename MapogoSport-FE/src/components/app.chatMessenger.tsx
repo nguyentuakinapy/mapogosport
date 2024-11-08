@@ -35,13 +35,13 @@ export default function ChatBox() {
 
   // Khi bấm vào một đoạn chat trong danh sách
   const handleSelectChat = (chat) => {
-    console.log("username: ", chat?.username || "Không có tên");
-    
-    console.log("Phân quyền", chat?.authorities?.[0]?.authorityId || "Không có");
-  
-    setReceiver(chat?.username);  // Cập nhật receiver bằng setReceiver
-    console.log("receiver ", chat?.username);
-    
+    // console.log("username: ", chat?.username || "Không có tên");
+
+    // console.log("Phân quyền", chat?.authorities?.[0]?.authorityId || "Không có");
+
+    // setReceiver(chat?.username);  // Cập nhật receiver bằng setReceiver
+    // console.log("receiver ", chat?.username);
+
     setSelectedChat(chat?.username);
     setShowChat(true); // Hiển thị form chat khi bấm vào danh sách chat
   };
@@ -50,12 +50,12 @@ export default function ChatBox() {
     if (user) {
       const parsedUserData = JSON.parse(user) as User;
       setCurrentUser(parsedUserData);
-      console.log("user từ session: ", currentUser);
+      // console.log("user từ session: ", currentUser);
     }
   }, []);
-  useEffect(() => {
-    console.log("currentUser sau khi set: ", currentUser); // Chạy khi currentUser thay đổi
-  }, [currentUser]);
+  // useEffect(() => {
+  //   console.log("currentUser sau khi set: ", currentUser); // Chạy khi currentUser thay đổi
+  // }, [currentUser]);
 
   // Hàm fetch dữ liệu messages
   const fetchMessages = async (url: string) => {
@@ -63,11 +63,11 @@ export default function ChatBox() {
     return response.data;
   };
 
-// Sử dụng useSWR để fetch messages
-const { data, isLoading, isError, mutate } = useSWR(
-  currentUser ? `http://localhost:8080/api/messages/${currentUser.username}/${receiver}` : null,
-  fetchMessages
-);
+  // Sử dụng useSWR để fetch messages
+  const { data, isLoading, isError, mutate } = useSWR(
+    currentUser ? `http://localhost:8080/api/messages/${currentUser.username}/${receiver}` : null,
+    fetchMessages
+  );
 
 
   // get data dataByReceiverUsernameOrCurrentUser
@@ -85,10 +85,10 @@ const { data, isLoading, isError, mutate } = useSWR(
 
   useEffect(() => {
     if (dataByReceiverUsernameOrCurrentUser) {
-      console.log(
-        "Dữ liệu nhận được từ API: ",
-        dataByReceiverUsernameOrCurrentUser
-      );
+      // console.log(
+      //   "Dữ liệu nhận được từ API: ",
+      //   dataByReceiverUsernameOrCurrentUser
+      // );
 
       // Nhóm các tin nhắn theo người gửi hoặc người nhận
       const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
@@ -134,12 +134,12 @@ const { data, isLoading, isError, mutate } = useSWR(
   }, [dataByReceiverUsernameOrCurrentUser]);
 
 
-  useEffect(() => {
-    console.log(
-      "Danh sách chat real-time đã được cập nhật: dmdmdmdmdmdmdm",
-      chatListCurrentUserByDMM
-    );
-  }, [chatListCurrentUserByDMM]);
+  // useEffect(() => {
+  //   console.log(
+  //     "Danh sách chat real-time đã được cập nhật: dmdmdmdmdmdmdm",
+  //     chatListCurrentUserByDMM
+  //   );
+  // }, [chatListCurrentUserByDMM]);
 
   useEffect(() => {
     if (data) {
@@ -148,12 +148,12 @@ const { data, isLoading, isError, mutate } = useSWR(
     }
   }, [data]);
 
-  
+
 
   // Log để kiểm tra `chatListRealTime`
-  useEffect(() => {
-    console.log("chatListRealTime updated:", chatListRealTime);
-  }, [chatListRealTime]);
+  // useEffect(() => {
+  //   console.log("chatListRealTime updated:", chatListRealTime);
+  // }, [chatListRealTime]);
 
 
   useEffect(() => {
@@ -162,9 +162,9 @@ const { data, isLoading, isError, mutate } = useSWR(
     const socket = new WebSocket(`ws://localhost:8080/ws/chat`);
 
     // Khi kết nối WebSocket mở
-    socket.onopen = () => {
-      console.log("WebSocket is connected.");
-    };
+    // socket.onopen = () => {
+    //   console.log("WebSocket is connected.");
+    // };
 
     // Khi nhận được tin nhắn mới từ WebSocket
     socket.onmessage = (event) => {
@@ -193,12 +193,12 @@ const { data, isLoading, isError, mutate } = useSWR(
     }
   }, []);
 
- 
-  useEffect(() =>{
-    console.log("setSelectedChat: ", selectedChat);
-    
 
-  }, [selectedChat])
+  // useEffect(() =>{
+  //   console.log("setSelectedChat: ", selectedChat);
+
+
+  // }, [selectedChat])
 
   const handleChatToggle = () => {
     setShowChat(!showChat); //nếu true thì thực hiện mở form chat
@@ -349,9 +349,8 @@ const { data, isLoading, isError, mutate } = useSWR(
                     className="p-0"
                   >
                     <i
-                      className={`h6 bi ${
-                        isMinimized ? "bi-arrows-angle-expand" : "bi-dash-lg"
-                      }`}
+                      className={`h6 bi ${isMinimized ? "bi-arrows-angle-expand" : "bi-dash-lg"
+                        }`}
                     ></i>
                   </Button>
                   <Button
@@ -361,11 +360,10 @@ const { data, isLoading, isError, mutate } = useSWR(
                     className="p-0 mx-2"
                   >
                     <i
-                      className={`h6 bi ${
-                        isMaximized
+                      className={`h6 bi ${isMaximized
                           ? "bi-arrows-angle-contract"
                           : "bi-arrows-fullscreen"
-                      }`}
+                        }`}
                     ></i>
                   </Button>
                   <Button
@@ -388,18 +386,16 @@ const { data, isLoading, isError, mutate } = useSWR(
                     {chatListRealTime.map((msg) => (
                       <div
                         key={msg.messageId}
-                        className={`d-flex ${
-                          msg.sender.username === currentUser?.username
+                        className={`d-flex ${msg.sender.username === currentUser?.username
                             ? "justify-content-end"
                             : "justify-content-start"
-                        }`}
+                          }`}
                       >
                         <div
-                          className={`p-2 rounded mb-2 ${
-                            msg.sender.username === currentUser?.username
+                          className={`p-2 rounded mb-2 ${msg.sender.username === currentUser?.username
                               ? "bg-primary text-white"
                               : "bg-light text-dark"
-                          }`}
+                            }`}
                           style={{ maxWidth: "80%" }}
                         >
                           {msg.content}

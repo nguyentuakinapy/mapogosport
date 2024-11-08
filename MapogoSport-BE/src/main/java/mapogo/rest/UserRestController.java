@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.dao.ProductDAO;
+import mapogo.dao.UserVoucherDAO;
 import mapogo.entity.Owner;
 import mapogo.entity.Product;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
+import mapogo.entity.UserVoucher;
 import mapogo.service.EmailService;
 import mapogo.service.OwnerService;
 import mapogo.service.UserService;
@@ -35,6 +37,9 @@ public class UserRestController {
 	@Autowired
 	EmailService emailService;
 
+	@Autowired
+	UserVoucherDAO userVoucherRepository;
+	
 	@GetMapping("/user/{username}")
 	public User findUseLoginUser(@PathVariable("username") String username) {
 		return userService.findByUsername(username);

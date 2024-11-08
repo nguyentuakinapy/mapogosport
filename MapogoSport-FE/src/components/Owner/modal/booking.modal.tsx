@@ -8,7 +8,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { time } from "console";
 
 
-interface OwnerProps {
+interface BookingProps {
     showBookingModal: boolean;
     setShowBookingModal: (v: boolean) => void;
     sportDetail?: SportFieldDetail;
@@ -21,7 +21,7 @@ interface OwnerProps {
     startTimeKey: boolean
 }
 
-const BookingModal = (props: OwnerProps) => {
+const BookingModal = (props: BookingProps) => {
     const { showBookingModal, setShowBookingModal, sportDetail, startTime,
         dayStartBooking, sport, owner, checkDataStatus, setCheckDataStatus, startTimeKey } = props;
 
@@ -47,6 +47,7 @@ const BookingModal = (props: OwnerProps) => {
     // BOOKING
     const [username, setUsername] = useState<string>("");
     const [totalAmount, setTotalAmount] = useState<number>();
+    const [prepayPrice, setPrepayPrice] = useState<number>();
     const [statusBooking, setStatusBooking] = useState<string>("Đã thanh toán");
     const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
     const [note, setNote] = useState<string>("");
@@ -194,7 +195,7 @@ const BookingModal = (props: OwnerProps) => {
             setEndTime("");
             return;
         }
-        if (slTime) {
+        if (slTime && sportDetail) {
             const getTime = startTime.match(/(\d+)h(\d+)/);
             const hours = getTime ? Number(getTime[1]) : 0;
             const minutes = getTime ? Number(getTime[2]) : 0;
@@ -259,6 +260,7 @@ const BookingModal = (props: OwnerProps) => {
                 }
                 setPrice(totalAmount);
                 setTotalAmount(totalAmount);
+                setPrepayPrice(totalAmount * (sportDetail?.percentDeposit / 100))
                 setDate(dayStartBooking);
                 console.log(totalAmount);
             }
@@ -269,9 +271,28 @@ const BookingModal = (props: OwnerProps) => {
 
     const handleSave = async () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
-        if (!paymentMethod) {
-            toast.error("Phương thức thanh toán không hợp lệ!");
-            return;
+        if (isOffline) {
+            if (!fullName) {
+                toast.error("Vui lòng nhập họ và tên!");
+                return;
+            } else if (!phoneNumber) {
+                toast.error("Vui lòng nhập số điện thoại!");
+                return;
+            } else if (selectTime === "Chọn thời gian") {
+                toast.error("Vui lòng chọn thời gian!");
+                return;
+            } else if (!paymentMethod) {
+                toast.error("Phương thức thanh toán không hợp lệ!");
+                return;
+            }
+        } else {
+            if (!username) {
+                toast.error("Vui lòng nhập tên đăng nhập!");
+                return;
+            } else if (!paymentMethod) {
+                toast.error("Phương thức thanh toán không hợp lệ!");
+                return;
+            }
         }
         if (isOffline) {
             const responseUser = await fetch(`http://localhost:8080/rest/user/sportoffline`);
@@ -310,7 +331,7 @@ const BookingModal = (props: OwnerProps) => {
 
     useEffect(() => {
         setStartDate(new Date(dayStartBooking));
-        setEndDate(new Date(new Date(dayStartBooking).setDate(new Date(dayStartBooking).getDate() + 14)))
+        setEndDate(new Date(new Date(dayStartBooking).setDate(new Date(dayStartBooking).getDate() + 13)))
     }, [dayStartBooking, activeTab])
 
     const [startDate, setStartDate] = useState<Date | null>(null);
@@ -373,7 +394,7 @@ const BookingModal = (props: OwnerProps) => {
         const getHour = timeParts[0] == '30' ? 0 : Number(timeParts[0]);
         const getMinute = Number(timeParts[2]) | 0;
         const numberOfSlots = (getHour * 60 + getMinute);
-        toast.success(numberOfSlots == 0 ? 1 : numberOfSlots);
+        // toast.success(numberOfSlots == 0 ? 1 : numberOfSlots);
 
         const timeSlots = [];
 
@@ -443,7 +464,7 @@ const BookingModal = (props: OwnerProps) => {
                                 for (const item of dataBooking) {
                                     for (const time of dataTimeOnStage) {
                                         const result = isTimeWithinRange(item.startTime, item.endTime, time);
-                                        toast.warning(result);
+                                        // toast.warning(result);
                                         if (result) {
                                             setSportFieldDuplicate(prevState => ({
                                                 ...prevState,
@@ -493,9 +514,26 @@ const BookingModal = (props: OwnerProps) => {
 
     const handleSaveByPeriod = async () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
-        if (!paymentMethod) {
-            toast.error("Phương thức thanh toán không hợp lệ!");
-            return;
+
+        if (isOffline) {
+            if (!fullName) {
+                toast.error("Vui lòng nhập họ và tên!");
+                return;
+            } else if (!phoneNumber) {
+                toast.error("Vui lòng nhập số điện thoại!");
+                return;
+            } else if (!paymentMethod) {
+                toast.error("Phương thức thanh toán không hợp lệ!");
+                return;
+            }
+        } else {
+            if (!username) {
+                toast.error("Vui lòng nhập tên đăng nhập!");
+                return;
+            } else if (!paymentMethod) {
+                toast.error("Phương thức thanh toán không hợp lệ!");
+                return;
+            }
         }
 
         if (isOffline) {
@@ -539,6 +577,7 @@ const BookingModal = (props: OwnerProps) => {
                 fullName: isOffline ? fullName : dataUser.fullname,
                 phoneNumber: isOffline ? phoneNumber : dataUser.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
                 totalAmount,
+                prepayPrice,
                 paymentMethodId: paymentMethod.paymentMethodId,
                 ownerId: owner.ownerId,
                 status: statusBooking,
@@ -589,7 +628,7 @@ const BookingModal = (props: OwnerProps) => {
             body: JSON.stringify({
                 username: dataUser.username,
                 fullName: isOffline ? fullName : dataUser.fullname,
-                phoneNumber: isOffline ? phoneNumber : dataUser.phoneNumberUsers.find(item => item.active),
+                phoneNumber: isOffline ? phoneNumber : dataUser.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
                 totalAmount,
                 paymentMethodId: paymentMethod.paymentMethodId,
                 ownerId: owner.ownerId,
@@ -625,9 +664,6 @@ const BookingModal = (props: OwnerProps) => {
                 })
             }
         }
-
-
-
         toast.success("Đặt sân thành công!");
     }
 
@@ -652,11 +688,20 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     useEffect(() => {
-        setFullName("");
-        setPhoneNumber("");
-        setSelectTimeOnStage("Chọn thời gian");
+        setUsername("");
+        setOperatingTime(0);
+        setOperatingTimeFetchData(0);
+        setTotalAmount(0);
+        setPrice(0);
+        // setStartDate(null);
+        // setEndDate(null);
+        setWeekDays({});
+        setSelectedWeek([]);
+        setSportFieldDuplicate({});
         setSelectTime("Chọn thời gian");
         setIsOffline(false);
+        setFullName("");
+        setPhoneNumber("");
     }, [activeTab])
 
     const renderInputBooking = () => {
@@ -788,12 +833,20 @@ const BookingModal = (props: OwnerProps) => {
                                     <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
                                     <li><span className="fw-bold">Địa chỉ:</span> {sport && sport.address}.</li>
                                 </ul>
+                                <Row>
+                                    <Col>
+                                        Trả trước {sportDetail?.percentDeposit}%
+                                    </Col>
+                                    <Col>
+                                        Trả 100%
+                                    </Col>
+                                </Row>
                             </Col>
                             <Col>
                                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
                                 {renderInputBooking()}
                                 <FloatingLabel controlId="floatingPaymentMethod" label="Phương thức thanh toán *">
-                                    <Form.Select
+                                    <Form.Select style={{ border: '1px solid' }}
                                         value={paymentMethodId}
                                         onChange={(e) => setPaymentMethodId(Number(e.target.value))}
                                         aria-label="Default select example"
@@ -818,6 +871,7 @@ const BookingModal = (props: OwnerProps) => {
                                     minDate={new Date(dayStartBooking)}
                                     placeholderText="Từ ngày"
                                     className="form-control start"
+                                    dateFormat="dd/MM/yyyy"
                                 />
                                 <InputGroup.Text><i className="bi bi-three-dots"></i></InputGroup.Text>
                                 <DatePicker
@@ -826,10 +880,11 @@ const BookingModal = (props: OwnerProps) => {
                                     selectsEnd
                                     startDate={startDate || undefined}
                                     endDate={endDate || undefined}
-                                    minDate={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 14)) : undefined}
+                                    minDate={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 13)) : undefined}
                                     maxDate={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 30)) : undefined}
                                     placeholderText="Đến ngày"
                                     className="form-control end"
+                                    dateFormat="dd/MM/yyyy"
                                 />
                             </InputGroup>
                             <InputGroup className="search-date mb-2">
@@ -840,7 +895,7 @@ const BookingModal = (props: OwnerProps) => {
                                     aria-label="Username"
                                     aria-describedby="basic-addon1"
                                 />
-                                <Form.Select value={selectTimeOnStage} className="me-3"
+                                <Form.Select style={{ border: '1px solid' }} value={selectTimeOnStage} className="me-3"
                                     onChange={(e) => setSelectTimeOnStage(e.target.value)} aria-label="Default select example">
                                     <option value="Chọn thời gian">Chọn thời gian</option>
                                     <option value="30 phút">30 phút</option>
@@ -862,6 +917,13 @@ const BookingModal = (props: OwnerProps) => {
                                     // '#ff1f8c' : undefined }}
                                     className={`col-day border p-2 text-white ${selectedWeek.includes(weekday) ? 'active' : ''}`}>
                                     <b>{weekday}</b>
+                                    {Object.entries(weeks).map(([index, details]) => (
+                                        <div key={index}>
+                                            {details.map((detail, i) => (
+                                                <span key={i}>{detail.date}</span>
+                                            ))}
+                                        </div>
+                                    ))}
                                 </Col>
                             ))}
                         </Row>
@@ -924,7 +986,7 @@ const BookingModal = (props: OwnerProps) => {
                         :
                         <Button style={{ backgroundColor: "#142239" }}
                             disabled={Object.keys(sportFieldDuplicate).length === 0 && selectedWeek.length !== 0 ? false : true}
-                            onClick={() => handleSaveByPeriod()}>Xác nhận</Button>
+                            onClick={() => handleSaveByPeriod()}>Xác nhận 1</Button>
                     }
                 </Modal.Footer>
             </Modal >
