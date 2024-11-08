@@ -533,7 +533,7 @@ export default function BookingSport() {
     };
 
     const setStatusOnWeek = async () => {
-        console.log("Dữ liệu đã được load vào mốc giờ:", new Date().toLocaleTimeString());
+        // console.log("Dữ liệu đã được load vào mốc giờ:", new Date().toLocaleTimeString());
 
         const currentDateTime = new Date();
         const sportDetails = dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails;
@@ -881,8 +881,9 @@ export default function BookingSport() {
                                                             className={`w-10 ${getBadgeClass(statusItem)}`}
                                                             style={{ textAlign: 'center' }}
                                                         >
-                                                            <div className={`badge mx-5`}>
+                                                            <div className={`badge`}>
                                                                 <span className="status-label">{statusItem}</span><br />
+                                                                <em className="text-danger">{dayBookingData.statusDtb}</em><br />
                                                                 <b className="text-success">{bookingId == 0 ? "" :
                                                                     fullName == "Offline" ? 'Đặt tại sân' : fullName}</b>
                                                             </div>
@@ -905,7 +906,7 @@ export default function BookingSport() {
                                                         className={`w-10 hv-tb ${getBadgeClass(statusItem)}`}
                                                         style={{ textAlign: 'center' }}
                                                     >
-                                                        <div className={`badge mx-5`} style={{ position: 'relative' }}>
+                                                        <div className={`badge`} style={{ position: 'relative' }}>
                                                             <span className="status-label">{statusItem}</span><br />
                                                             <b className="text-success">{bookingId == 0 ? "" : fullName}</b>
                                                         </div>
@@ -1072,7 +1073,7 @@ export default function BookingSport() {
             setStartTimeKey(!startTimeKey);
 
             const responseBookingSubscriptionKey = await fetch(
-                `http://localhost:8080/rest/user/booking/detail/getbyday/subscriptionkey/${bkDData.subcriptionKey}`
+                `http://localhost:8080/rest/user/booking/detail/getbyday/subscriptionkey/${bkDData.subscriptionKey}`
             );
 
             if (!responseBookingSubscriptionKey.ok) {
@@ -1278,8 +1279,8 @@ export default function BookingSport() {
                 bookingDetailData={bookingDetailData} userData={userData}>
             </ViewEditBookingModal >
             <SearchBookingModal showSearchBookingModal={showSearchBookingModal} setSearchShowBookingModal={setSearchShowBookingModal}
-                dataTimeSport={dataTimeSport.filter(time => time !== "undefinedh00" && time !== null)}>
-
+                dataTimeSport={dataTimeSport.filter(time => time !== "undefinedh00" && time !== null)}
+                sportField={dataSport && dataSport[selectSport]}>
             </SearchBookingModal>
         </>
     );

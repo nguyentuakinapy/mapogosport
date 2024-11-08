@@ -318,7 +318,7 @@ const BookingModal = (props: OwnerProps) => {
                                         } else if (item.endTime == time) {
                                             continue;
                                         } else {
-                                            if (item.subcriptionKey == bookingDetailData?.subcriptionKey) {
+                                            if (item.subscriptionKey == bookingDetailData?.subscriptionKey) {
                                                 continue;
                                             } else {
                                                 isAvailable = false;
@@ -582,30 +582,46 @@ const BookingModal = (props: OwnerProps) => {
                 <Modal.Body>
                     <Row>
                         <Col>
-                            <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name}
-                                {bookingDetailData &&
-                                    new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                        new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
-                                            <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
-                                                <i
-                                                    className="bi bi-pencil-square ms-2 text-dark"
-                                                    onClick={() => setEditBooking(!editBooking)}
-                                                    style={{ cursor: 'pointer' }}
-                                                />
-                                            </OverlayTrigger>
-                                        ) : (
-                                            new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                                <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
-                                                    <i
-                                                        className="bi bi-pencil-square ms-2 text-dark"
-                                                        onClick={() => setEditBooking(!editBooking)}
-                                                        style={{ cursor: 'pointer' }}
-                                                    />
-                                                </OverlayTrigger>
+                            <div>
+                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name}
+
+                                </h6>
+                                <div>
+                                    {bookingDetailData &&
+                                        new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                            new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
+                                                <>
+                                                    <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
+                                                        <i
+                                                            className="bi bi-pencil-square ms-2 text-dark"
+                                                            onClick={() => setEditBooking(!editBooking)}
+                                                            style={{ cursor: 'pointer' }}
+                                                        />
+
+                                                    </OverlayTrigger>
+                                                    <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
+                                                        <i className="bi bi-plus-lg"></i>
+                                                    </OverlayTrigger>
+                                                </>
+                                            ) : (
+                                                new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                                    <>
+                                                        <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
+                                                            <i
+                                                                className="bi bi-pencil-square ms-2 text-dark"
+                                                                onClick={() => setEditBooking(!editBooking)}
+                                                                style={{ cursor: 'pointer' }}
+                                                            />
+                                                        </OverlayTrigger>
+                                                        <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
+                                                            <i className="bi bi-plus-lg"></i>
+                                                        </OverlayTrigger>
+                                                    </>
+                                                )
                                             )
-                                        )
-                                    )}
-                            </h6>
+                                        )}
+                                </div>
+                            </div>
                             <FloatingLabel controlId="floatingSelectTime" label="Chọn thời gian" className="mb-2">
                                 <Form.Select
                                     value={idSportDetail || ""}
@@ -716,7 +732,7 @@ const BookingModal = (props: OwnerProps) => {
 
                     </Row>
                     <Row className="mx-1 mb-2">
-                        {bookingDetailData?.subcriptionKey && (
+                        {bookingDetailData?.subscriptionKey && (
                             <>
                                 <Col onClick={() => setApplyOne(true)} className={`col-day border p-2 text-white ${applyOne ? 'active' : ''}`}>Một ngày</Col>
                                 <Col onClick={() => setApplyOne(false)} className={`col-day border p-2 text-white ${!applyOne ? 'active' : ''}`}>Tất cả ngày trong chung lịch</Col>
