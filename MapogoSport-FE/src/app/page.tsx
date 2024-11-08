@@ -412,10 +412,7 @@ export default function Home() {
         {/* VOUCHER */}
 
         <div className="App">
-          <h1>Discount Popup Demo</h1>
-          {vouchers.map((voucher) => (
-            <Popup key={voucher.voucherId} voucher={voucher} />
-          ))}
+            <Popup  />
         </div>
       </Container>
       <CreateOwnerModal showCreateOwnerModal={showCreateOwnerModal}
