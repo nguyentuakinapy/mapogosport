@@ -7,14 +7,14 @@ interface SearchBookingProps {
     showSearchBookingModal: boolean;
     setSearchShowBookingModal: (v: boolean) => void;
     dataTimeSport: string[];
+    sportField?: SportField;
 }
 
 const SearchBookingModal = (props: SearchBookingProps) => {
-    const { showSearchBookingModal, setSearchShowBookingModal, dataTimeSport } = props;
+    const { showSearchBookingModal, setSearchShowBookingModal, dataTimeSport, sportField } = props;
 
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
-    const [note, setNote] = useState<string>(''); // Ghi chú
 
 
     const handleDateChange = (date: Date | null) => {
@@ -28,8 +28,17 @@ const SearchBookingModal = (props: SearchBookingProps) => {
         }
     };
 
-    const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setNote(e.target.value)
+    const [selectedSportType, setSelectedSportType] = useState<number | null>(null);
+
+    const handleIdBySize = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newSize = e.target.value;
+        if (sportField?.sportFielDetails) {
+            const filteredIds = sportField.sportFielDetails
+                .filter(detail => detail.size === newSize)
+                .map(detail => detail.sportFielDetailId);
+            const selectedDetail = sportField.sportFielDetails.find(detail => detail.size === newSize);
+            setSelectedSportType(selectedDetail ? selectedDetail.sportFielDetailId : null);
+        }
     };
 
     const handleFindField = async () => {
@@ -87,21 +96,21 @@ const SearchBookingModal = (props: SearchBookingProps) => {
     }
     return (
         <>
-            <Modal show={showSearchBookingModal} onHide={() => handleClose()} size="lg" aria-labelledby="contained-modal-title-vcenter"
+            <Modal show={showSearchBookingModal} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
                 centered backdrop="static" keyboard={false}>
                 <Modal.Header>
                     <Modal.Title className="text-uppercase text-danger fw-bold m-auto">TÌM KIẾM SÂN</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="pt-0">
+                <Modal.Body className="pt-0 pb-0">
                     <div className="section-form-sportField bg-white">
                         <b className="title-detail-sportField">Đặt sân theo nhu cầu</b>
-                        <Form className='mt-3'>
-                            <Form.Group className='mb-3'>
+                        <Form className='mt-2'>
+                            <Form.Group className='mb-2'>
                                 <DatePicker selected={selectedDate ? new Date(selectedDate) : null}
                                     onChange={handleDateChange} className="form-control" placeholderText="Chọn ngày đặt"
                                     dateFormat="dd/MM/yyyy" minDate={new Date()} required />
                             </Form.Group>
-                            <Form.Group controlId="formTimeInput" className='mb-3'>
+                            <Form.Group controlId="formTimeInput" className='mb-2'>
                                 <Form.Select onChange={(e) => setSelectedTime(e.target.value)} defaultValue="" id="formTimeInput">
                                     <option value="" disabled>Chọn thời gian đặt</option>
                                     {dataTimeSport.map((time, index) => (
@@ -109,18 +118,12 @@ const SearchBookingModal = (props: SearchBookingProps) => {
                                     ))}
                                 </Form.Select>
                             </Form.Group>
-                            <Form.Group className="mb-3">
-                                {/* <Form.Select onChange={handleIdBySize} defaultValue="">
+                            <Form.Group className="mb-2">
+                                <Form.Select onChange={handleIdBySize} defaultValue="">
                                     {sportField?.sportFielDetails && [...new Set(sportField.sportFielDetails.map((detail) => detail.size))].map((size) => (
                                         <option value={size} key={size}>Sân {size}</option>
                                     ))}
-                                </Form.Select> */}
-                            </Form.Group>
-                            <Form.Group className='mb-3'>
-                                <FloatingLabel controlId="noteSportField" label="Ghi chú" style={{ zIndex: '0' }}>
-                                    <Form.Control as="textarea" placeholder="Leave a comment here" style={{ height: '100px' }}
-                                        maxLength={500} value={note} onChange={handleNoteChange} />
-                                </FloatingLabel>
+                                </Form.Select>
                             </Form.Group>
                             <Form.Group >
                                 <div className='btn btn-sportField' onClick={handleFindField}>Tìm sân</div>

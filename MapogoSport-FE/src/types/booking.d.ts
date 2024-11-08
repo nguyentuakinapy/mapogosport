@@ -63,7 +63,7 @@ interface BookingDetail {
     };
     price: number;
     date: string;
-    subcriptionKey: string;
+    subscriptionKey: string;
     status: boolean
 }
 
