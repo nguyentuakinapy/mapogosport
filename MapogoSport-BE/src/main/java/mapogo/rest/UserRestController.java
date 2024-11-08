@@ -42,9 +42,6 @@ public class UserRestController {
 	
 	@GetMapping("/user/{username}")
 	public User findUseLoginUser(@PathVariable("username") String username) {
-//		List<UserVoucher> userVouchers = userVoucherRepository.findAll();
-//
-//		System.out.println(userVouchers.get(0).getVoucher().getName());
 		return userService.findByUsername(username);
 	}
 
