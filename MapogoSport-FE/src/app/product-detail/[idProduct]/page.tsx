@@ -315,6 +315,7 @@ const ProductDetail = () => {
         return res.json();
     });
     const { data: cartCount, error } = useSWR(user ? `http://localhost:8080/rest/cart/count/${user.username}` : null, fetcher);
+
     const handleAddToCart = async () => {
         if (user && user.username) {
             const dataAddCart = {
@@ -353,6 +354,28 @@ const ProductDetail = () => {
             console.log("Người dùng chưa đăng nhập");
         }
     };
+    const [rating, setRating] = useState(null);
+
+    const handleClick = (value) => {
+        setRating(value);
+
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/rest/user/find-review-by-rating/${idProduct}/${value}`);
+                console.log("rating", response.data);
+                // If needed, you can update state with the fetched data here
+                setData(response.data);
+            } catch (error) {
+                console.log("error rating", error);
+            }
+        };
+
+        fetchData();
+        console.log(`Rating selected: ${value}`);
+    };
+
+
+
 
 
     return (
@@ -397,7 +420,7 @@ const ProductDetail = () => {
                         <Col className='ms-5' style={{ marginLeft: '100px' }}>
                             <h4>{findByIdProduct.name}</h4>
                             <h5 className="text-danger mt-3">
-                            {price ? formatPrice(price) : formatPrice(findByIdProduct.price)}
+                                {price ? formatPrice(price) : formatPrice(findByIdProduct.price)}
                             </h5>
                             <div className="mb-3">
                                 <span className="d-block fw-bold mb-2">Màu sắc:</span>
@@ -422,27 +445,30 @@ const ProductDetail = () => {
                                 </div>
                             </div>
 
-                            <div className="mb-3">
-                                <span className="d-block fw-bold mb-2">Size:</span>
-                                <div className="d-flex flex-wrap">
-                                    {size.map((item) => {
-                                        return (
-                                            <Button
-                                                key={item.size.sizeId}
-                                                className="me-2 mb-2"
-                                                variant={selectedSize === item.size.sizeName ? 'dark' : 'outline-secondary'}
-                                                onClick={() => {
-                                                    setSelectedSize(item.size.sizeName);
-                                                    setSelectedProductDetailSizeId(item.productDetailSizeId);
-                                                    setIdSize(item.size.sizeId);
-                                                }}>
-                                                {item.size.sizeName}
-                                            </Button>
-
-                                        );
-                                    })}
+                            {size.length > 0 && (
+                                <div className="mb-3">
+                                    <span className="d-block fw-bold mb-2">Size:</span>
+                                    <div className="d-flex flex-wrap">
+                                        {size.map((item) => {
+                                            return (
+                                                <Button
+                                                    key={item.size.sizeId}
+                                                    className="me-2 mb-2"
+                                                    variant={selectedSize === item.size.sizeName ? 'dark' : 'outline-secondary'}
+                                                    onClick={() => {
+                                                        setSelectedSize(item.size.sizeName);
+                                                        setSelectedProductDetailSizeId(item.productDetailSizeId);
+                                                        setIdSize(item.size.sizeId);
+                                                    }}
+                                                >
+                                                    {item.size.sizeName}
+                                                </Button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+
 
                             <div className="mb-3">
                                 <span className="d-block fw-bold mb-2">Số lượng:</span>
@@ -502,6 +528,18 @@ const ProductDetail = () => {
                         onHide={() => setModalShow(false)}
                     />
                     <h5 className='ms-3'>Bình luận</h5>
+                    <div className="d-flex ms-4">
+                        {[5, 4, 3, 2, 1].map((value) => (
+                            <button
+                                key={value}
+                                type="button"
+                                className='btn btn-primary ms-2'
+                                onClick={() => handleClick(value)}
+                            >
+                                {value} ★
+                            </button>
+                        ))}
+                    </div>
                     {data
                         .sort((a, b) => new Date(b.datedAt) - new Date(a.datedAt)) // Sắp xếp theo ngày từ mới đến cũ
                         .slice(0, visibleCount) // Hiển thị số bình luận theo visibleCount
