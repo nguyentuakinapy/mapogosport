@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.BookingDAO;
+import mapogo.dao.BookingDetailDAO;
 import mapogo.dao.OwnerDAO;
 import mapogo.dao.PaymentMethodDAO;
 import mapogo.dao.UserDAO;
@@ -34,6 +35,9 @@ public class BookingServiceImpl implements BookingService {
 	@Autowired
 	BookingDAO bookingDAO;
 
+	@Autowired
+	BookingDetailDAO bookingDetailDAO;
+	
 	@Autowired
 	UserDAO userDAO;
 
@@ -64,6 +68,7 @@ public class BookingServiceImpl implements BookingService {
 			bookingMap.put("totalAmount", booking.getTotalAmount());
 			bookingMap.put("status", booking.getStatus());
 			bookingMap.put("bookingUserPhone", booking.getPhoneNumber());
+			bookingMap.put("prepayPrice", booking.getPrepayPrice());
 			
 			for (BookingDetail bookingDetail : booking.getBookingDetails()) {
 	            if (bookingDetail.getSportFieldDetail() != null) {
@@ -120,9 +125,10 @@ public class BookingServiceImpl implements BookingService {
 		if (optionalBooking.isPresent()) {
 		    Booking booking = optionalBooking.get();
 		    booking.setStatus(newStatus);
-//		    for (BookingDetail bookingDetail: booking.getBookingDetails()) {
-//		    	bookingDetail.setStatus(newStatus);
-//		    } để lại nha
+		    for (BookingDetail bookingDetail: booking.getBookingDetails()) {
+		    	bookingDetail.setStatus(newStatus);
+		    	bookingDetailDAO.save(bookingDetail);
+		    }
 		    bookingDAO.save(booking);
 		}
 		return null;

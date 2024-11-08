@@ -113,6 +113,7 @@ interface BookingFindAll {
     bookingUserFullname: string;
     bookingUserPhone: string;
     totalAmount: number;
+    prepayPrice: number;
     status: string;
     date: Date;
     user: {
