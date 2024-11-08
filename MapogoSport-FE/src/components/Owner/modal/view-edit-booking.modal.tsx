@@ -59,7 +59,7 @@ const BookingModal = (props: OwnerProps) => {
                 toast.success('Hủy sân thành công!');
             })
         } else {
-            fetch(`http://localhost:8080/rest/booking/update/status/by/subcriptionKey/${bookingDetailData?.bookingDetailId}/${bookingDetailData?.subcriptionKey}`, {
+            fetch(`http://localhost:8080/rest/booking/update/status/by/subcriptionKey/${bookingDetailData?.bookingDetailId}/${bookingDetailData?.subscriptionKey}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -582,14 +582,26 @@ const BookingModal = (props: OwnerProps) => {
                 <Modal.Body>
                     <Row>
                         <Col>
-                            <div>
-                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name}
+                            <div className="d-flex  justify-content-between">
+                                {bookingDetailData &&
+                                    new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                        new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
+                                            <>
+                                                <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
+                                                    <i
+                                                        className="bi bi-pencil-square ms-2 text-dark"
+                                                        onClick={() => setEditBooking(!editBooking)}
+                                                        style={{ cursor: 'pointer' }}
+                                                    />
 
-                                </h6>
-                                <div>
-                                    {bookingDetailData &&
-                                        new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                            new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
+                                                </OverlayTrigger>
+                                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name} </h6>
+                                                <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
+                                                    <i className="bi bi-plus-lg"></i>
+                                                </OverlayTrigger>
+                                            </>
+                                        ) : (
+                                            new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
                                                 <>
                                                     <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                                                         <i
@@ -597,30 +609,15 @@ const BookingModal = (props: OwnerProps) => {
                                                             onClick={() => setEditBooking(!editBooking)}
                                                             style={{ cursor: 'pointer' }}
                                                         />
-
                                                     </OverlayTrigger>
+                                                    <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name} </h6>
                                                     <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
                                                         <i className="bi bi-plus-lg"></i>
                                                     </OverlayTrigger>
                                                 </>
-                                            ) : (
-                                                new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                                    <>
-                                                        <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
-                                                            <i
-                                                                className="bi bi-pencil-square ms-2 text-dark"
-                                                                onClick={() => setEditBooking(!editBooking)}
-                                                                style={{ cursor: 'pointer' }}
-                                                            />
-                                                        </OverlayTrigger>
-                                                        <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
-                                                            <i className="bi bi-plus-lg"></i>
-                                                        </OverlayTrigger>
-                                                    </>
-                                                )
                                             )
-                                        )}
-                                </div>
+                                        )
+                                    )}
                             </div>
                             <FloatingLabel controlId="floatingSelectTime" label="Chọn thời gian" className="mb-2">
                                 <Form.Select

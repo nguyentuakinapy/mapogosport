@@ -47,6 +47,7 @@ const BookingModal = (props: BookingProps) => {
     // BOOKING
     const [username, setUsername] = useState<string>("");
     const [totalAmount, setTotalAmount] = useState<number>();
+    const [prepayPrice, setPrepayPrice] = useState<number>();
     const [statusBooking, setStatusBooking] = useState<string>("Đã thanh toán");
     const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
     const [note, setNote] = useState<string>("");
@@ -194,7 +195,7 @@ const BookingModal = (props: BookingProps) => {
             setEndTime("");
             return;
         }
-        if (slTime) {
+        if (slTime && sportDetail) {
             const getTime = startTime.match(/(\d+)h(\d+)/);
             const hours = getTime ? Number(getTime[1]) : 0;
             const minutes = getTime ? Number(getTime[2]) : 0;
@@ -259,6 +260,7 @@ const BookingModal = (props: BookingProps) => {
                 }
                 setPrice(totalAmount);
                 setTotalAmount(totalAmount);
+                setPrepayPrice(totalAmount * (sportDetail?.percentDeposit / 100))
                 setDate(dayStartBooking);
                 console.log(totalAmount);
             }
@@ -329,7 +331,7 @@ const BookingModal = (props: BookingProps) => {
 
     useEffect(() => {
         setStartDate(new Date(dayStartBooking));
-        setEndDate(new Date(new Date(dayStartBooking).setDate(new Date(dayStartBooking).getDate() + 14)))
+        setEndDate(new Date(new Date(dayStartBooking).setDate(new Date(dayStartBooking).getDate() + 13)))
     }, [dayStartBooking, activeTab])
 
     const [startDate, setStartDate] = useState<Date | null>(null);
@@ -392,7 +394,7 @@ const BookingModal = (props: BookingProps) => {
         const getHour = timeParts[0] == '30' ? 0 : Number(timeParts[0]);
         const getMinute = Number(timeParts[2]) | 0;
         const numberOfSlots = (getHour * 60 + getMinute);
-        toast.success(numberOfSlots == 0 ? 1 : numberOfSlots);
+        // toast.success(numberOfSlots == 0 ? 1 : numberOfSlots);
 
         const timeSlots = [];
 
@@ -462,7 +464,7 @@ const BookingModal = (props: BookingProps) => {
                                 for (const item of dataBooking) {
                                     for (const time of dataTimeOnStage) {
                                         const result = isTimeWithinRange(item.startTime, item.endTime, time);
-                                        toast.warning(result);
+                                        // toast.warning(result);
                                         if (result) {
                                             setSportFieldDuplicate(prevState => ({
                                                 ...prevState,
@@ -575,6 +577,7 @@ const BookingModal = (props: BookingProps) => {
                 fullName: isOffline ? fullName : dataUser.fullname,
                 phoneNumber: isOffline ? phoneNumber : dataUser.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
                 totalAmount,
+                prepayPrice,
                 paymentMethodId: paymentMethod.paymentMethodId,
                 ownerId: owner.ownerId,
                 status: statusBooking,
@@ -830,12 +833,20 @@ const BookingModal = (props: BookingProps) => {
                                     <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
                                     <li><span className="fw-bold">Địa chỉ:</span> {sport && sport.address}.</li>
                                 </ul>
+                                <Row>
+                                    <Col>
+                                        Trả trước {sportDetail?.percentDeposit}%
+                                    </Col>
+                                    <Col>
+                                        Trả 100%
+                                    </Col>
+                                </Row>
                             </Col>
                             <Col>
                                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
                                 {renderInputBooking()}
                                 <FloatingLabel controlId="floatingPaymentMethod" label="Phương thức thanh toán *">
-                                    <Form.Select
+                                    <Form.Select style={{ border: '1px solid' }}
                                         value={paymentMethodId}
                                         onChange={(e) => setPaymentMethodId(Number(e.target.value))}
                                         aria-label="Default select example"
@@ -869,7 +880,7 @@ const BookingModal = (props: BookingProps) => {
                                     selectsEnd
                                     startDate={startDate || undefined}
                                     endDate={endDate || undefined}
-                                    minDate={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 14)) : undefined}
+                                    minDate={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 13)) : undefined}
                                     maxDate={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 30)) : undefined}
                                     placeholderText="Đến ngày"
                                     className="form-control end"
@@ -884,7 +895,7 @@ const BookingModal = (props: BookingProps) => {
                                     aria-label="Username"
                                     aria-describedby="basic-addon1"
                                 />
-                                <Form.Select value={selectTimeOnStage} className="me-3"
+                                <Form.Select style={{ border: '1px solid' }} value={selectTimeOnStage} className="me-3"
                                     onChange={(e) => setSelectTimeOnStage(e.target.value)} aria-label="Default select example">
                                     <option value="Chọn thời gian">Chọn thời gian</option>
                                     <option value="30 phút">30 phút</option>
@@ -906,6 +917,13 @@ const BookingModal = (props: BookingProps) => {
                                     // '#ff1f8c' : undefined }}
                                     className={`col-day border p-2 text-white ${selectedWeek.includes(weekday) ? 'active' : ''}`}>
                                     <b>{weekday}</b>
+                                    {Object.entries(weeks).map(([index, details]) => (
+                                        <div key={index}>
+                                            {details.map((detail, i) => (
+                                                <span key={i}>{detail.date}</span>
+                                            ))}
+                                        </div>
+                                    ))}
                                 </Col>
                             ))}
                         </Row>
