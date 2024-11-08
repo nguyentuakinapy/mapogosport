@@ -145,7 +145,7 @@ const Header = (props: HeaderProps) => {
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowForgotPassword(true)} style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
                                     {/* <hr className='m-0' /> */}
                                     <Link href='/user/profile' className={`dropdown-item text-decoration-none text-dark ${userData ? '' : 'd-none'}`}>Thông tin tài khoản</Link>
-                                    {userData?.authorities.map((item, index) => {
+                                    {userData && userData.authorities.map((item, index) => {
                                         if (item.role.name === "ROLE_USER") {
                                             return null;
                                         }
