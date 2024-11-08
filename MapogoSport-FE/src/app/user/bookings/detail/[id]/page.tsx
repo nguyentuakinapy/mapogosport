@@ -129,10 +129,10 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                             <tbody>
                                 {bookingDetail.map((booking) => (
                                     <tr key={booking?.bookingDetailId}>
-                                        <td>{booking?.date}</td>
+                                        <td>{new Date(booking?.date).toLocaleDateString('en-GB')}</td>
                                         <td>{booking?.sportFieldDetailName}</td>
                                         <td>{booking?.startTime} - {booking?.endTime}</td>
-                                        <td>{booking?.price} ₫</td>
+                                        <td>{booking?.price.toLocaleString()} ₫</td>
                                     </tr>
                                 ))}
                             </tbody>

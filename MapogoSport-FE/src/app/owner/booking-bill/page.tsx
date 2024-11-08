@@ -98,11 +98,12 @@ const OwnerBookingBill = () => {
                     <thead>
                         <tr>
                             <th style={{ width: '110px' }}>STT</th>
-                            <th style={{ width: '220px' }}>Tên sân</th>
+                            <th style={{ width: '180px' }}>Tên sân</th>
                             <th style={{ width: '200px' }}>Họ và tên</th>
                             <th>Ngày đặt</th>
                             <th>Tổng tiền</th>
-                            <th style={{ width: '200px' }}>Số điện thoại</th>
+                            <th>Còn lại</th>
+                            <th style={{ width: '100px' }}>SĐT</th>
                             <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
@@ -112,11 +113,12 @@ const OwnerBookingBill = () => {
                             filteredBookings.map((booking, index) => (
                                 <tr key={booking.bookingId}>
                                     <td className="text-start title">{`#${index + 1}`}</td>
-                                    <td className="text-start">{booking.sportFieldName}</td>
+                                    <td className="text-start title">{booking.sportFieldName}</td>
                                     <td className="title">{booking.user.username == 'sportoffline' ?
                                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
+                                    <td>{booking.status === 'Đã hủy' ? '0 đ' : `${(booking.totalAmount - booking.prepayPrice).toLocaleString()} đ`}</td>
                                     <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
                                     <td>{renderStatusDropdown(booking)}</td>
                                     <td>
@@ -137,7 +139,8 @@ const OwnerBookingBill = () => {
         const fullName = booking.user.username === 'sportoffline' ? (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname;
         return (
             (fullName && fullName.toLowerCase().includes(searchTerm)) ||
-            booking.sportFieldName.toLowerCase().includes(searchTerm)
+            booking.sportFieldName.toLowerCase().includes(searchTerm) ||
+            booking.bookingUserPhone.includes(searchTerm)
         );
     }).filter(booking => {
         switch (activeTab) {
@@ -316,7 +319,7 @@ const OwnerBookingBill = () => {
             <div className="box-ultil">
                 <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Hóa Đơn</b>
                 <div>
-                    <Form.Control type="text" placeholder="Tìm theo tên..." onChange={handleSearch} />
+                    <Form.Control type="text" placeholder="Tìm theo tên và SĐT..." onChange={handleSearch} />
                 </div>
                 <div>
                     <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={exportPDF}>Xuất File PDF</Button>

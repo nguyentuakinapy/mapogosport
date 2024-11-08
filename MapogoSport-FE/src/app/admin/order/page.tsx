@@ -133,7 +133,12 @@ const AdminOrder = () => {
         );
     };
 
-    const filteredOrders = orderData.filter(order => order.fullname.toLowerCase().includes(searchTerm)).filter(order => {
+    const filteredOrders = orderData.filter(order => {
+        return (
+            order.fullname.toLowerCase().includes(searchTerm) ||
+            order.address.toLowerCase().includes(searchTerm)
+        )
+    }).filter(order => {
         switch (activeTab) {
             case 'processing': return order.status === "Chờ xác nhận";
             case 'shipping': return order.status === "Đang vận chuyển";
@@ -306,7 +311,7 @@ const AdminOrder = () => {
             <div className="box-ultil">
                 <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Hóa Đơn</b>
                 <div>
-                    <Form.Control type="text" placeholder="Tìm theo tên người dùng..." onChange={handleSearch} />
+                    <Form.Control type="text" placeholder="Tìm theo tên và địa chỉ..." onChange={handleSearch} />
                 </div>
                 <div>
                     <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={exportPDF}>Xuất File PDF</Button>
