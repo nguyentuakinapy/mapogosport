@@ -44,7 +44,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	public List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportFieldDetailId, LocalDate today,
 			LocalDate endDate) {
 		List<BookingDetail> bookingDetails = bookingDetailDAO.findBySportFieldDetailAndDateBetween(sportFieldDetailId,
-				today, endDate);
+				today, endDate, "Đã hủy");
 		bookingDetails.forEach(bd -> {
 			User u = userDAO.findUserByBookingDetailId(bd.getBookingDetailId());
 			bd.setFullName(u.getFullname());
@@ -78,14 +78,14 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bookingDetail.setPrice(price);
 		bookingDetail.setDate(LocalDate.parse((String) bd.get("date")));
 		bookingDetail.setBooking(b);
-		bookingDetail.setSubcriptionKey((String) bd.get("subscriptionKey"));
+		bookingDetail.setSubscriptionKey((String) bd.get("subscriptionKey"));
 		return bookingDetailDAO.save(bookingDetail);
 //		return null;
 	}
 
 	@Override
 	public List<BookingDetail> findBySportFieldDetailAndDay(Integer sportDetailId, LocalDate date) {
-		List<BookingDetail> bookingDetails = bookingDetailDAO.findBySportFieldDetailAndDay(sportDetailId, date);
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findBySportFieldDetailAndDay(sportDetailId, date, "Đã hủy");
 		bookingDetails.forEach(bd -> {
 			User u = userDAO.findUserByBookingDetailId(bd.getBookingDetailId());
 			bd.setFullName(u.getFullname());
@@ -96,19 +96,19 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	@Override
 	public BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId,
 			LocalDate date) {
-		return bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date);
+		return bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date, "Đã hủy");
 	}
 
 	@Override
 	public void cancelBookingDetail(Integer bookingDetailId) {
 		BookingDetail bd = bookingDetailDAO.findById(bookingDetailId).get();
-		bd.setStatus(false);
+		bd.setStatus("Đã hủy");
 		bookingDetailDAO.save(bd);
 		Booking booking = bookingDAO.findById(bd.getBooking().getBookingId()).get();
 		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(booking.getBookingId());
 		int index = 0;
 		for (BookingDetail b : bookingDetails) {
-			if (!b.getStatus()) {
+			if (b.getStatus().equals("Đã hủy")) {
 				index++;
 			}
 		}
@@ -145,7 +145,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Override
 	public List<BookingDetail> findBookingDetailBySubscriptionKey(String subscriptionKey) {
-		return bookingDetailDAO.findBookingDetailBySubscriptionKey(subscriptionKey);
+		return bookingDetailDAO.findBookingDetailBySubscriptionKey(subscriptionKey, "Đã hủy");
 	}
 
 	@Override
@@ -156,7 +156,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		Booking booking = bookingDAO.findById(bookingDetail.getBooking().getBookingId()).get();
 
 		bookingDetailsSub.forEach(bd -> {
-			bd.setStatus(false);
+			bd.setStatus("Đã hủy");
 			bookingDetailDAO.save(bd);
 		});
 

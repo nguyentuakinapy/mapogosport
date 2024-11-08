@@ -84,6 +84,7 @@ interface BookingDetailFullName {
     };
     price: number;
     date: string;
+    status: string;
     fullName: string
 }
 

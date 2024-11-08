@@ -87,7 +87,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
     }
     return (
         <>
-            <Modal show={showSearchBookingModal} onHide={() => handleClose()} size="xxl" aria-labelledby="contained-modal-title-vcenter"
+            <Modal show={showSearchBookingModal} onHide={() => handleClose()} size="lg" aria-labelledby="contained-modal-title-vcenter"
                 centered backdrop="static" keyboard={false}>
                 <Modal.Header>
                     <Modal.Title className="text-uppercase text-danger fw-bold m-auto">TÌM KIẾM SÂN</Modal.Title>
