@@ -10,4 +10,9 @@ public interface UserVoucherService {
 	List<UserVoucher> findUserVoucher();
 	public boolean checkUserVoucher(String username, Integer voucherId);
 	List<Map<String, Object>> findByUser(String username);
+	
+	//của Mỵ từ đây
+	UserVoucher findByUserVoucherId(int userVoucherId);	
+	UserVoucher update(UserVoucher userVoucher);
+	//đến đây
 }

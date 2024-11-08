@@ -109,14 +109,14 @@ public class User implements Serializable {
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonManagedReference("user-userVoucher-reference")
-	private List<UserVoucher> UserVoucher;
+	private List<UserVoucher> UserVouchers;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private List<PhoneNumberUser> phoneNumberUsers;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonManagedReference
 	private List<Wallet> wallets;
 	
 	// QA 3/11

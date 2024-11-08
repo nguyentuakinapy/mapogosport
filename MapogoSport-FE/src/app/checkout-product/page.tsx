@@ -3,20 +3,24 @@ import HomeLayout from '@/components/HomeLayout';
 import axios from 'axios';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import { Button, InputGroup } from 'react-bootstrap';
+import { Button, Col, FloatingLabel, Form, InputGroup, Row } from 'react-bootstrap';
 import { formatPrice } from '@/components/Utils/Format';
 
 // import Button from 'react-bootstrap/Button';
 import Collapse from 'react-bootstrap/Collapse';
+import { useData } from '../context/UserContext';
+import useSWR from 'swr';
+import { toast } from 'react-toastify';
 const CheckoutPage = () => {
   const [open, setOpen] = useState(false);
   const [open_1, setOpen_1] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Dữ liệu giỏ hàng
   const [data, setData] = useState([]);
   const [cartIds, setCartIds] = useState([]);
-  const [user, setUser] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [user1, setUser1] = useState<User>();
 
   // const products = localStorage.getItem('productIds');
   useEffect(() => {
@@ -35,7 +39,7 @@ const CheckoutPage = () => {
           // Tạo đường dẫn với cartIds được nối thành chuỗi, giả sử API yêu cầu dạng này
           const response = await axios.get(`http://localhost:8080/rest/checkout_product/${cartIds.join(",")}`);
           setData(response.data); // Lưu dữ liệu giỏ hàng vào state
-          console.log(">>> check data checkout: ", response.data);
+          console.log("1>>> check data checkout: ", response.data);
         } catch (err) {
           console.log('Lỗi:', err);
         }
@@ -48,31 +52,167 @@ const CheckoutPage = () => {
     if (data && data.length > 0) {
       const total = data.reduce((sum, cart) => sum + cart.productDetailSize.price * cart.quantity, 0);
       setTotalPrice(total);
-      console.log("Tổng giá trị của giỏ hàng:", total);
+      // console.log("Tổng giá trị của giỏ hàng:", total);
+      setNewTotalPrice(total);
     }
   }, [data]);
 
-  const [addressUsers, setAddressUsers] = useState([]);
-  useEffect(() => {
-    const userSession = sessionStorage.getItem('user');
-    const user = userSession ? JSON.parse(userSession) : null;
-    setUser(user); // Cập nhật user từ sessionStorage
-    if (user) {
-      axios.get(`http://localhost:8080/rest/user/address/${user.username}`)
-        .then(response => {
-          setAddressUsers(response.data)
-          console.log(response.data);
+  // useEffect(() => {
+  //   const userSession = sessionStorage.getItem('user');
+  //   const user = userSession ? JSON.parse(userSession) : null;
+  //   setUser(user); // Cập nhật user từ sessionStorage
+  //   if (user) {
+  //     axios.get(`http://localhost:8080/rest/user/address/${user.username}`)
+  //       .then(response => {
+  //         setAddressUsers(response.data)
+  //         console.log("response.data", response.data);
+  //       })
+  //       .catch(error => console.error('Error:', error));
+  //   }
+  // }, []);
 
-        })
-        .catch(error => console.error('Error:', error));
+  const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
+  const [addressUsers, setAddressUsers] = useState([]);
+  const [phoneNumbers, setPhoneNumbers] = useState([]);
+  const [phoneNumberSelected, setPhoneNumberSelected] = useState('');
+  const [vouchers, setVouchers] = useState([]);
+  const [voucherSelected, setVoucherSelected] = useState('');
+  const [fee, setFee] = useState();
+
+  const fetcher = (url: string) => fetch(url).then(res => res.json());
+  useEffect(() => {
+    const username = localStorage.getItem('username');
+    if (username) {
+      setUsernameFetchApi(`http://localhost:8080/rest/user/${username}`);
     }
   }, []);
 
-  const [addressSelected, setAddressSelected] = useState([]);
+  const { data: userData } = useSWR(usernameFetchApi, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
+
+
+  useEffect(() => {
+    if (userData) {
+      setUser1(userData);
+      setAddressUsers(userData.addressUsers || []);
+
+      setPhoneNumbers(userData.phoneNumberUsers || []);
+      const activePhone = userData.phoneNumberUsers.find(item => item.active);
+      if (activePhone) {
+        setPhoneNumberSelected(activePhone?.phoneNumber?.phoneNumber);
+      }
+
+      const unusedVouchers = userData.userVouchers?.filter(voucher => voucher.status === "Unused");
+      setVouchers(unusedVouchers);
+    }
+  }, [userData]);
+
+  const { data: apiAddress } = useSWR("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
+
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [wards, setWards] = useState<any[]>([]);
+  const [selectedProvince, setSelectedProvince] = useState<string>('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [selectedWard, setSelectedWard] = useState<string>('');
+  const [addressDetail, setAddressDetail] = useState<string>('');
+  const [addressSelected, setAddressSelected] = useState([null]);
+
+  const [maQuan, setmaQuan] = useState();
+
+  const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const provinceName = e.target.value;
+    setSelectedProvince(provinceName);
+    const selectedProvinceData = apiAddress.find((province: any) => province.Name === provinceName);
+    setDistricts(selectedProvinceData?.Districts || []);
+    setWards([]);
+    setSelectedDistrict('');
+    setSelectedWard('');
+  };
+
+  const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const districtName = e.target.value;
+    setSelectedDistrict(districtName);
+    const selectedDistrictData = districts.find((district: any) => district.Name === districtName);
+    setmaQuan(selectedDistrictData?.Id);
+    setWards(selectedDistrictData?.Wards || []);
+    setSelectedWard('');
+  };
+  // console.log("ma quan:", maQuan);
+
+  const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const wardName = e.target.value;
+    setSelectedWard(wardName);
+  };
+
+  //tính fee ship
+  // const API_URL = 'https://partner.viettelpost.vn/v2/order/getPrice';
+
+  // async function calculateShippingFee() {
+  //   const requestData = {
+  //     "MONEY_TOTAL_OLD": 212069,
+  //     "MONEY_TOTAL": 184085,
+  //     "MONEY_TOTAL_FEE": 131410,
+  //     "MONEY_FEE": 23190,
+  //     "MONEY_COLLECTION_FEE": 12750,
+  //     "MONEY_OTHER_FEE": 0,
+  //     "MONEY_VAS": 0,
+  //     "MONEY_VAT": 16735,
+  //     "KPI_HT": 24
+  //     from_district: 79, // Mã quận người gửi
+  //     to_district: maQuan,   // Mã quận người nhận
+  //     weight: 1000,        // Trọng lượng gói hàng (1kg)
+  //     length: 30,          // Chiều dài (cm)
+  //     width: 20,           // Chiều rộng (cm)
+  //     height: 10,          // Chiều cao (cm)
+  //     service_type: 2      // Loại dịch vụ (1: tiết kiệm, 2: nhanh)
+  //   };
+  //   const API_KEY = 'eyJhbGciOiJFUzI1NiJ9.eyJzdWIiOiIwMzY2ODk5MTMzIiwiVXNlcklkIjoxNImV4cCI6MTYl7sfjAsVH0rwzKEGICj0g';
+  //   try {
+  //     const response = await axios.post(API_URL, requestData, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Token': API_KEY
+  //       }
+  //     });
+  //     console.log('Phí vận chuyển:', response.data.data.fee);
+  //     console.log('Thời gian giao hàng:', response.data.data.delivery_time);
+  //   } catch (error) {
+  //     console.error('Lỗi khi tính phí vận chuyển:', error.response ? error.response.data : error.message);
+  //   }
+  // }
+
+  useEffect(() => {
+    if (addressSelected) {
+      setSelectedProvince(addressSelected?.address?.province);
+      setSelectedDistrict(addressSelected?.address?.district);
+      setSelectedWard(addressSelected?.address?.ward);
+      setAddressDetail(addressSelected?.addressDetail);
+
+      const selectedProvinceData = apiAddress?.find((province: any) => province.Name === addressSelected?.address?.province);
+      setDistricts(selectedProvinceData?.Districts || []);
+      const selectedDistrictData = selectedProvinceData?.Districts.find((district: any) => district.Name === addressSelected?.address?.district);
+      setWards(selectedDistrictData?.Wards || []);
+      setmaQuan(selectedDistrictData?.Id);
+      // calculateShippingFee();
+    } else {
+      setSelectedProvince('');
+      setSelectedDistrict('');
+      setSelectedWard('');
+      setAddressDetail('');
+    }
+  }, [addressSelected, apiAddress]);
+
 
   const [urlPayment, setUrlPayment] = useState();
   const [order, setOrder] = useState();
-
+  const [note, setNote] = useState('');
   const [orderStatus, setOrderStatus] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
 
@@ -80,29 +220,93 @@ const CheckoutPage = () => {
     const selectedMethod = e.target.value;
     if (selectedMethod === 'COD') {
       setOrderStatus('Chờ xác nhận');
-    } else if (selectedMethod === 'VNPay') {
-      setOrderStatus('Chưa thanh toán');
+    } else if (selectedMethod === 'VNPay' || selectedMethod === "MoMo") {
+      setOrderStatus('Chờ thanh toán');
     }
     setPaymentMethod(selectedMethod);
   };
 
-  const handleCreateOrder = async () => {
-    if (!user || !addressSelected || !paymentMethod || !totalPrice) {
-      throw new Error('Thông tin đơn hàng không đầy đủ');
+  const [voucher, setVoucher] = useState();
+  const [discount, setDiscount] = useState(0);
+  const [newTotalPrice, setNewTotalPrice] = useState(0);
+
+  useEffect(() => {
+    axios.get(`http://localhost:8080/rest/findVoucher/${voucherSelected}`)
+      .then(response => {
+        setVoucher(response.data)
+        // console.log("Voucher: ", response.data);
+      })
+      .catch(error => console.error('Error:', error));
+
+  }, [voucherSelected]);
+
+  const applyVoucher = async () => {
+    if (!voucherSelected) {
+      toast.error("Vui lòng chọn mã giảm giá");
+      return;
+    }
+    if (voucher?.discountPercent && totalPrice) {
+      const calculatedDiscount = (totalPrice * voucher.discountPercent) / 100;
+      setDiscount(calculatedDiscount);
+
+      const calculatedTotalPrice = totalPrice - calculatedDiscount;
+      setNewTotalPrice(calculatedTotalPrice);
+    }
+  };
+
+  const checkForm = () => {
+    const errors = []; // Mảng lưu trữ các thông báo lỗi
+
+    if (!user1) {
+      errors.push('Người dùng không tồn tại');
+    }
+    if (!selectedProvince) {
+      errors.push('Vui lòng chọn tỉnh/thành phố');
+    }
+    if (!selectedDistrict) {
+      errors.push('Vui lòng chọn quận/huyện');
+    }
+    if (!selectedWard) {
+      errors.push('Vui lòng chọn phường/xã');
+    }
+    if (!addressDetail) {
+      errors.push('Vui lòng điền địa chỉ chi tiết');
+    }
+    if (!paymentMethod) {
+      errors.push('Vui lòng chọn phương thức thanh toán');
+    }
+    if (!totalPrice) {
+      errors.push('Tổng giá không hợp lệ');
     }
 
+    if (errors.length > 0) {
+      alert(errors.join("\n")); // Hiển thị tất cả lỗi trên một alert
+      return false; // Trả về false để biểu thị rằng kiểm tra không thành công
+    }
+
+    return true; // Trả về true nếu tất cả các trường hợp đều hợp lệ
+  };
+
+  const handleCreateOrder = async () => {
+    if (!checkForm()) {
+      setLoading(false);
+      return;
+    }
+    const addressParts = [selectedProvince, selectedDistrict, selectedWard, addressDetail];
+    const address1 = addressParts.filter(part => part).join(', ');
     const orderData = {
-      username: user.username, // Giả sử bạn có thuộc tính username trong user
-      address: `${addressSelected?.addressDetail}, ${addressSelected?.address?.ward}, ${addressSelected?.address?.district}, ${addressSelected?.address?.province}`, // Chuỗi địa chỉ đầy đủ
+      username: user1?.username,
+      address: address1,
       // phoneNumber: addressSelected.phoneNumber,
-      phoneNumber: "0123455555",
+      phoneNumber: phoneNumberSelected,
       date: new Date().toISOString(), // Chuyển đổi sang ISO string
       status: orderStatus,
-      amount: totalPrice,
+      amount: newTotalPrice,
       paymentMethod: paymentMethod,
-      voucherId: 1, // Hoặc ID voucher hợp lệ
-      note: "", // Hoặc ghi chú hợp lệ
-      shipFee: 30000.0 // Hoặc giá trị phí vận chuyển
+      voucherId: voucher?.voucherId ?? '',
+      note: note, // Hoặc ghi chú hợp lệ
+      shipFee: 0.0,// Hoặc giá trị phí vận chuyển
+      userVoucherId: voucherSelected
     };
 
     try {
@@ -119,20 +323,25 @@ const CheckoutPage = () => {
       console.error('Error creating order:', error.response?.data || error.message);
       throw new Error('Không thể tạo đơn hàng'); // Ném lại lỗi để xử lý sau
     }
-
   };
+
   const handlePaymentWithOrder = async () => {
+    setLoading(true);
 
     if (paymentMethod === "COD") {
+      const order = await handleCreateOrder();
       window.location.href = `/checkout-product/order`;
+    } else if (paymentMethod === "VNPay") {
+      const listCartCheckout = data.map(item => ({
+        productDetailSizeId: item.productDetailSize.productDetailSizeId,
+        quantity: item.quantity
+      }));
 
-
-    } else {
       try {
         const order = await handleCreateOrder();
         const paymentResponse = await axios.post(
           `http://localhost:8080/api/payment/create_payment`,
-          null,
+          listCartCheckout,
           {
             params: { orderId: order.orderId }, // truyền orderId qua params
           }
@@ -140,8 +349,28 @@ const CheckoutPage = () => {
         const paymentUrl = paymentResponse.data.url;
         // chuyển hướng đến URL thanh toán
         window.location.href = paymentUrl;
+
       } catch (error) {
+
         console.error('Error during payment:', error);
+      }
+    }else if(paymentMethod==="MoMo"){
+      // Gửi yêu cầu thanh toán tới API Next.js
+      const response = await fetch('/api/create-momo-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 50000 }),  // Số tiền cần thanh toán
+      });
+
+      const result = await response.json();
+      console.log(result);
+
+      // Nếu MoMo trả về URL thanh toán, điều hướng người dùng tới đó
+      if (result.payUrl) {
+        window.location.href = result.payUrl;
+      } else {
+        console.error('Thanh toán thất bại');
+
       }
     }
 
@@ -157,8 +386,42 @@ const CheckoutPage = () => {
             <h5 className='text-primary'>Thông tin nhận hàng</h5>
             <hr />
             <form className="mt-4">
-              {/* Email */}
-              <div className="form-floating mb-1">
+              {/* Họ và tên */}
+              <div className="form-floating mb-2">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="name"
+                  placeholder="Họ và tên"
+                  defaultValue={user1?.fullname}
+                />
+                <label htmlFor="name" style={{ color: "gray" }}>Họ và tên</label>
+              </div>
+              {/* NumberPhone */}
+              <div className="mb-2">
+                <InputGroup className="">
+                  <div className="form-floating">
+                    <select
+                      className="form-select"
+                      id="city"
+                      value={phoneNumberSelected ?? ''}
+                      onChange={(e) => setPhoneNumberSelected(e.target.value)}
+                    >
+                      {phoneNumbers.map(phoneNumber => (
+                        <option
+                          key={phoneNumber.phoneNumberUserId}
+                          value={phoneNumber.phoneNumber.phoneNumber}
+                        >
+                          {phoneNumber.phoneNumber.phoneNumber}
+                        </option>
+                      ))}
+                    </select>
+                    <label htmlFor="phone" style={{ color: "gray" }}>Số điện thoại</label>
+                  </div>
+                </InputGroup>
+              </div>
+              {/* address */}
+              <div className="form-floating mb-2">
                 <select
                   className="form-select"
                   id="city"
@@ -166,6 +429,7 @@ const CheckoutPage = () => {
                   onChange={(e) => {
                     const selectedValue = e.target.value;
                     setAddressSelected(selectedValue ? JSON.parse(selectedValue) : null);
+                    // setSelectedProvince(selectedValue ? JSON.parse(selectedValue?.address?.province ?? '') : null)
                   }}
                 >
                   <option value="">Chọn địa chỉ</option>
@@ -174,92 +438,60 @@ const CheckoutPage = () => {
                       key={addressUser.addressUserId}
                       value={JSON.stringify(addressUser)}
                     >
-                      {addressUser.phoneNumber}, {addressUser.addressDetail}, {addressUser.address.ward}, {addressUser.address.district}, {addressUser.address.province}
+                      {addressUser.addressDetail}, {addressUser.address.ward}, {addressUser.address.district}, {addressUser.address.province}
                     </option>
                   ))}
                 </select>
-
                 <label htmlFor="city" style={{ color: "gray" }}>Địa chỉ</label>
               </div>
-
-              {/* Họ và tên */}
-              <div className="form-floating mb-1">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="name"
-                  placeholder="Họ và tên"
-                  value={user?.fullname ?? ''}
-                />
-                <label htmlFor="name" style={{ color: "gray" }}>Họ và tên</label>
+              {/* tỉnh */}
+              <div className="form-floating mb-2">
+                <FloatingLabel controlId="city" label={<span>Tỉnh/Thành <b className="text-danger">*</b></span>}>
+                  <Form.Select aria-label="Floating label select example"
+                    onChange={handleProvinceChange} value={selectedProvince ?? ''} >
+                    <option>-- Nhấn để chọn --</option>
+                    {apiAddress?.map((province: any) => (
+                      <option key={province.Id} value={province.Name}>{province.Name}</option>
+                    ))}
+                  </Form.Select>
+                </FloatingLabel>
               </div>
-              <div className="mb-1">
-                <InputGroup className="">
-                  <InputGroup.Text id="basic-addon1" style={{ padding: '0', alignItems: 'normal', border: 'none' }}>
-                    <select defaultValue={'VN'}
-                      className="form-select" aria-label="Default select example">
-                      <option value="VN">VN</option>
-                      <option value="US">US</option>
-                    </select>
-                  </InputGroup.Text>
-                  <div className="form-floating">
-                    <input
-                      type="number"
-                      className="form-control"
-                      id="phone"
-                      placeholder="Số điện thoại"
-                      value={addressSelected?.phoneNumber ?? ''}
-                    />
-                    <label htmlFor="phone" style={{ color: "gray" }}>Số điện thoại</label>
-                  </div>
-                </InputGroup>
+              {/* huyện */}
+              <div className="form-floating mb-2">
+                <FloatingLabel controlId="district" label={<span>Quận/Huyện <b className="text-danger">*</b></span>}>
+                  <Form.Select aria-label="Floating label select example" onChange={handleDistrictChange}
+                    value={selectedDistrict ?? ''}>
+                    <option value="">-- Nhấn để chọn --</option>
+                    {districts.map((district) => (
+                      <option key={district.Id} value={district.Name}>{district.Name}</option>
+                    ))}
+                  </Form.Select>
+                </FloatingLabel>
               </div>
-
-
-              <div className="form-floating mb-1">
-                <input
-                  type="Text"
-                  className="form-control"
-                  id="phone"
-                  placeholder="Số điện thoại"
-                  value={addressSelected?.address?.province ?? ''}
-                />
-                <label htmlFor="city" style={{ color: "gray" }}>Tỉnh thành</label>
-              </div>
-
-              <div className="form-floating mb-1">
-                <input
-                  type="Text"
-                  className="form-control"
-                  id="phone"
-                  placeholder="Số điện thoại"
-                  value={addressSelected?.address?.district ?? ''}
-                />
-                <label htmlFor="city" style={{ color: "gray" }}>Quận</label>
-              </div>
-              <div className="form-floating mb-1">
-                <input
-                  type="Text"
-                  className="form-control"
-                  id="phone"
-                  placeholder="Số điện thoại"
-                  value={addressSelected?.address?.ward ?? ''}
-                />
-                <label htmlFor="city" style={{ color: "gray" }}>Phường</label>
+              {/* xã */}
+              <div className="form-floating mb-2">
+                <FloatingLabel controlId="ward" label={<span>Phường/Xã <b className="text-danger">*</b></span>}>
+                  <Form.Select aria-label="Floating label select example" onChange={handleWardChange}
+                    value={selectedWard ?? ''} >
+                    <option value="">-- Nhấn để chọn --</option>
+                    {wards.map((ward) => (
+                      <option key={ward.Id} value={ward.Name}>{ward.Name}</option>
+                    ))}
+                  </Form.Select>
+                </FloatingLabel>
               </div>
               {/* Địa chỉ cụ thể */}
-              <div className="form-floating mb-1">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="specificAddress"
-                  placeholder="Số nhà"
-                  value={addressSelected?.addressDetail ?? ''}
-                />
-                <label htmlFor="specificAddress" style={{ color: "gray" }}>Địa chỉ cụ thể</label>
+              <div className="form-floating mb-2">
+                <Form.Floating>
+                  <Form.Control size="sm" type="text" placeholder="Địa chỉ chi tiết"
+                    value={addressDetail ?? ''} onChange={(e) => setAddressDetail(e.target.value)} />
+                  <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
+                </Form.Floating>
               </div>
-              <div className="form-floating mb-1">
-                <textarea className="form-control" id="notes" ></textarea>
+              {/* note */}
+              <div className="form-floating">
+                <textarea className="form-control" id="notes" value={note}
+                  onChange={(e) => setNote(e.target.value)}></textarea>
                 <label htmlFor="notes" className="form-label">
                   Ghi chú (tùy chọn)
                 </label>
@@ -272,6 +504,7 @@ const CheckoutPage = () => {
             <h5 className='text-primary'>Thanh toán</h5>
             <hr />
             <div className="card list-group mt-4 my-3">
+              {/* COD */}
               <div className="card-body d-flex list-group-item align-items-center">
                 <div className="form-check flex-grow-1">
                   <input
@@ -297,6 +530,7 @@ const CheckoutPage = () => {
                   </p>
                 </div>
               </Collapse>
+              {/* Vnpay */}
               <div className="card-body d-flex list-group-item align-items-center">
                 <div className="form-check flex-grow-1">
                   <input
@@ -312,30 +546,26 @@ const CheckoutPage = () => {
                     Thanh toán qua ví điện tử VNPay
                   </label>
                 </div>
-                <i className="bi bi-cash" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}></i>
+                <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png" alt="VNPay" style={{ maxWidth: "50px" }} />
               </div>
-              {/* Collapse for bank transfer details */}
-              {/* <Collapse in={open}>
-                <div id="bank-transfer-collapse" className="card-footer">
-                  <h6>Thông tin chuyển khoản</h6>
-
-                  Hiển thị các hình ảnh của các hình thức thanh toán 
-              <div className="d-flex align-items-center mb-3">
-                <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" alt="Visa" className="me-2" style={{ width: "50px" }} />
-                <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" alt="MasterCard" className="me-2" style={{ width: "50px" }} />
-                <img src="https://thumbs.dreamstime.com/b/kiev-ukraine-september-visa-mastercard-logos-printed-white-paper-visa-mastercard-american-multinational-102631953.jpg" className="me-2" style={{ width: "50px" }} />
+              {/* MoMo */}
+              <div className="card-body d-flex list-group-item align-items-center">
+                <div className="form-check flex-grow-1">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="paymentMethod"
+                    id="vnpay"
+                    aria-expanded={open}
+                    value="MoMo"
+                    onChange={handlePaymentMethodChange}
+                  />
+                  <label className="form-check-label" htmlFor="cod">
+                    Thanh toán qua ví điện tử MoMo
+                  </label>
+                </div>
+                <img src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png" alt="MoMo" style={{ maxWidth: "50px" }} />
               </div>
-
-              {/* Thông tin chi tiết chuyển khoản 
-              <p>
-                <strong>Ngân hàng:</strong> ABC Bank <br />
-                <strong>Số tài khoản:</strong> 123456789 <br />
-                <strong>Tên tài khoản:</strong> Nguyen Van A
-              </p>
-            </div>
-          </Collapse> 
-          */}
-
             </div>
           </div>
 
@@ -350,7 +580,7 @@ const CheckoutPage = () => {
                   <div className="order-item d-flex align-items-center my-3">
                     <div className="product-image me-3 position-relative">
                       <img
-                        src="{cart.productDetailSize.productDetail.image}"
+                        src={`${cart.productDetailSize.productDetail.image}`}
                         className="img-fluid rounded-circle"
                         style={{ width: "50px", height: "50px" }}
                         alt=""
@@ -372,12 +602,24 @@ const CheckoutPage = () => {
               {/* Discount code */}
               <div className="my-3">
                 <div className="input-group">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Nhập mã giảm giá"
-                  />
-                  <button className="btn btn-apply px-4 " type="button" style={{ backgroundColor: "#fddf9f" }}>
+                  <select
+                    className="form-select"
+                    id="city"
+                    value={voucherSelected}
+                    onChange={(e) => setVoucherSelected(e.target.value)}
+                  >
+                    <option value="">Chọn mã giảm giá</option>
+                    {vouchers.map(voucher => (
+                      <option
+                        key={voucher.userVoucherId}
+                        value={voucher.userVoucherId}
+                      >
+                        {voucher?.userVoucherId}
+                      </option>
+                    ))}
+                  </select>
+                  <button className="btn btn-apply px-4 " type="button" style={{ backgroundColor: "#fddf9f" }}
+                    onClick={applyVoucher}>
                     Áp dụng
                   </button>
                 </div>
@@ -391,16 +633,16 @@ const CheckoutPage = () => {
               {/* {Phần trăm tính tiền} */}
               <div className="d-flex justify-content-between my-3 fw-light">
                 <span>Giảm giá </span>
-                <span className="fw-light">4.000 VND</span>
+                <span className="fw-light">{formatPrice(discount)}</span>
               </div>
               <div className="d-flex justify-content-between my-3 fw-light">
                 <span>Phí vận chuyển </span>
-                <span className="fw-light">31.000 VND</span>
+                <span className="fw-light">{formatPrice(0)}</span>
               </div>
               <hr />
               <div className="order-total d-flex justify-content-between">
                 <span className="fw-bold">Tổng cộng</span>
-                <span className="fw-bold text-primary">4.490.000 VND</span>
+                <span className="fw-bold text-primary">{formatPrice(newTotalPrice)}</span>
               </div>
               <div className="order-total d-flex justify-content-between my-4">
                 <a href="/cart" className="text-reset text-decoration-none">
@@ -409,7 +651,7 @@ const CheckoutPage = () => {
                   </span>
                 </a>
 
-                <Button onClick={handlePaymentWithOrder} className="btn btn-success px-3">Thanh toán</Button>
+                <Button onClick={handlePaymentWithOrder} className="btn btn-success px-3" disabled={loading}>Thanh toán</Button>
               </div>
             </div>
           </div>

@@ -13,15 +13,15 @@ public interface OrderService {
 	List<Map<String, Object>> findAllOrder();
 	Order updateStatusOrder(Map<String, Object> orderData);
 	
-	//của Mỵ từ đây
-//	List<Order> findByUser_Username(String username);
-
+	
 	// của Mỵ từ đây
 	Order createOrder(OrderDTO order);
 
 	Order findByOrderId(int orderId);
 
 	Order update(Order order);
+	
+	void delete(Order order);
 
 	// đến đây
 
