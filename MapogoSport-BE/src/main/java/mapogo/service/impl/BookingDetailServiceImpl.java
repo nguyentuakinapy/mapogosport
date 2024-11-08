@@ -2,8 +2,10 @@ package mapogo.service.impl;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,7 @@ import mapogo.dao.SportFieldDetailDAO;
 import mapogo.dao.UserDAO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
+import mapogo.entity.PhoneNumberUser;
 import mapogo.entity.SportFieldDetail;
 import mapogo.entity.User;
 import mapogo.service.BookingDetailService;
@@ -35,6 +38,36 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Autowired
 	UserDAO userDAO;
+	
+	@Override
+	public List<Map<String, Object>> findBookingDetailByBookingId(Integer bookingId) {
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId);
+		List<Map<String, Object>> resultMaps = new ArrayList<>();
+		
+		for (BookingDetail bookingDetail: bookingDetails) {
+			Map<String, Object> bookingDetailData = new HashMap<>();
+			
+			bookingDetailData.put("bookingDetailId", bookingDetail.getBookingDetailId());
+			bookingDetailData.put("date", bookingDetail.getDate());
+			bookingDetailData.put("sportFieldDetailName", bookingDetail.getSportFieldDetail().getName());
+			bookingDetailData.put("startTime", bookingDetail.getStartTime());
+			bookingDetailData.put("endTime", bookingDetail.getEndTime());
+			bookingDetailData.put("price", bookingDetail.getPrice());
+			bookingDetailData.put("status", bookingDetail.getStatus());
+			bookingDetailData.put("address", bookingDetail.getSportFieldDetail().getSportField().getAddress());
+			bookingDetailData.put("ownerFullname", bookingDetail.getSportFieldDetail().getSportField()
+					.getOwner().getUser().getFullname());
+			for (PhoneNumberUser user: bookingDetail.getSportFieldDetail().getSportField().getOwner()
+					.getUser().getPhoneNumberUsers()) {
+				if (user.getActive()) {
+					bookingDetailData.put("ownerPhoneNumberUsers", user.getPhoneNumber().getPhoneNumber());
+				}
+			}
+			
+			resultMaps.add(bookingDetailData);
+		}
+		return resultMaps;
+	}
 
 //	@Override
 //	public List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId) {

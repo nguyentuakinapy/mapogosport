@@ -56,26 +56,8 @@ public class BookingRestController {
 	}
 
 	@GetMapping("/user/booking/detail/{bookingId}")
-	public Booking getById(@PathVariable("bookingId") Integer bookingId) {
-		Booking booking = bookingService.findById(bookingId).stream().findFirst().orElse(null);
-
-		if (booking != null && !booking.getBookingDetails().isEmpty()) {
-			BookingDetail firstBookingDetail = booking.getBookingDetails().get(0);
-			SportFieldDetail sportFieldDetail = firstBookingDetail.getSportFieldDetail();
-			if (sportFieldDetail != null) {
-				SportField sportField = sportFieldDetail.getSportField();
-				if (sportField != null) {
-					Map<String, Object> sportFieldInfo = new HashMap<>(); // Tạo Map để chứa thông tin sportField
-					sportFieldInfo.put("sportFieldId", sportField.getSportFieldId());
-					sportFieldInfo.put("name", sportField.getName());
-					sportFieldInfo.put("address", sportField.getAddress());
-					sportFieldInfo.put("opening", sportField.getOpening());
-					sportFieldInfo.put("closing", sportField.getClosing());
-					booking.setSportFieldInfo(sportFieldInfo);
-				}
-			}
-		}
-		return booking;
+	public List<Map<String, Object>> getById(@PathVariable("bookingId") Integer bookingId) {
+		return bookingDetailService.findBookingDetailByBookingId(bookingId);
 	}
 
 	@GetMapping("/user/booking/detail/getbyday/{sportDetailId}/{date}")
