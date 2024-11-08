@@ -2,6 +2,7 @@ interface Booking {
     bookingId: number;
     date: Date;
     totalAmount: float;
+    prepayPrice: float;
     status: string;
     paymentMethod: {
         paymentMethodId: number;
