@@ -52,7 +52,7 @@ public class BookingDetail implements Serializable{
     private LocalDate date;
 
     @Column(name = "Status")
-    private Boolean status = true;
+    private String status = "Chưa đá";
     
     @ManyToOne
     @JoinColumn(name = "BookingId", nullable = false)
@@ -60,7 +60,7 @@ public class BookingDetail implements Serializable{
     private Booking booking;
     
     @Column(name="SubscriptionKey")
-    private String subcriptionKey =  null;
+    private String subscriptionKey =  null;
     
     @Transient
     private String fullName;
