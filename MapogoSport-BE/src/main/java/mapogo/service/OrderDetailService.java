@@ -6,4 +6,9 @@ import mapogo.entity.OrderDetail;
 
 public interface OrderDetailService {
 	List<OrderDetail> findOrderDetailByOrderId(Integer orderId);
+	
+	//của Mỵ từ đây
+	OrderDetail create(OrderDetail orderDetail);
+	void delete(OrderDetail orderDetail);
+	//đến đây
 }

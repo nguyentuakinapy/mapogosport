@@ -3,6 +3,8 @@ package mapogo.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +33,7 @@ public class Transaction {
 	
 	@ManyToOne
 	@JoinColumn(name = "WalletId")
+	@JsonBackReference
 	Wallet wallet;
 	
 	@Column(name="Amount")
