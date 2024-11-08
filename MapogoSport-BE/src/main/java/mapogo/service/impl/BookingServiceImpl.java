@@ -120,14 +120,12 @@ public class BookingServiceImpl implements BookingService {
 		if (optionalBooking.isPresent()) {
 		    Booking booking = optionalBooking.get();
 		    booking.setStatus(newStatus);
+//		    for (BookingDetail bookingDetail: booking.getBookingDetails()) {
+//		    	bookingDetail.setStatus(newStatus);
+//		    } để lại nha
 		    bookingDAO.save(booking);
 		}
 		return null;
-	}
-
-	@Override
-	public List<Booking> findById(Integer id) {
-		return bookingDAO.findByBookingId(id);
 	}
 
 	@Override

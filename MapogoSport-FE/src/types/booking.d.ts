@@ -118,3 +118,16 @@ interface BookingFindAll {
         fullname: string;
     }
 }
+
+interface BookingDetailMap {
+    bookingDetailId: number;
+    date: string;
+    sportFieldDetailName: string;
+    startTime: string;
+    endTime: string;
+    price: number;
+    status: string;
+    address: string;
+    ownerFullname: string;
+    ownerPhoneNumberUsers: string
+}

@@ -9,6 +9,11 @@ declare var H: any;
 
 const BookingsDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const [bookingDetail, setBookingDetail] = useState<BookingDetailMap[]>([]);
+    const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
+    const mapRef = useRef<HTMLDivElement | null>(null);
+    const mapInstanceRef = useRef<any>(null);
+    const apiKey = '1L5jezTEO7ul4G9cekrrqiy14XhPi_yIOhSKnsrzkZQ';
 
     const { data, isLoading, error } = useSWR(`http://localhost:8080/rest/user/booking/detail/${params.id}`, fetcher, {
         revalidateIfStale: false,
@@ -16,16 +21,10 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
         revalidateOnReconnect: false,
     });
 
-    const [booking, setBooking] = useState<Booking | null>(null);
-    const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
-    const mapRef = useRef<HTMLDivElement | null>(null);
-    const mapInstanceRef = useRef<any>(null);
-    const apiKey = '1L5jezTEO7ul4G9cekrrqiy14XhPi_yIOhSKnsrzkZQ';
-
     useEffect(() => {
         if (data) {
-            setBooking(data);
-            const address = data.sportFieldInfo?.address;
+            setBookingDetail(data);
+            const address = data[0].address;
             if (address) {
                 fetchCoordinates(address);
             }
@@ -43,6 +42,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
 
     // Load HERE Maps scripts
     useEffect(() => {
+        if (!coordinates) return;
         const loadScript = (src: string): Promise<void> => {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -127,37 +127,34 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {booking && booking.bookingDetails.map((detail) => (
-                                    <tr key={detail.bookingDetailId}>
-                                        <td>{new Date(detail.date).toLocaleDateString('en-GB')}</td>
-                                        <td>{detail.sportFieldDetail.name}</td>
-                                        <td>{detail.startTime} - {detail.endTime}</td>
-                                        <td>{detail.price.toLocaleString()} ₫</td>
+                                {bookingDetail.map((booking) => (
+                                    <tr key={booking?.bookingDetailId}>
+                                        <td>{booking?.date}</td>
+                                        <td>{booking?.sportFieldDetailName}</td>
+                                        <td>{booking?.startTime} - {booking?.endTime}</td>
+                                        <td>{booking?.price} ₫</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </Table>
-                        {booking && (
-                            <div>
-                                <div className="text-secondary mb-2 fw-bold">Địa chỉ</div>
-                                <b>{booking.sportFieldInfo?.address}</b>
-                                <Table className="my-3">
-                                    <thead>
-                                        <tr>
-                                            <th className="text-secondary">Tên chủ sân</th>
-                                            <th className="text-secondary">Số điện thoại</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td className="title">{booking.owner?.user?.fullname}</td>
-                                            <td>{booking.owner?.user?.phoneNumberUsers
-                                                .find(item => item.active)?.phoneNumber.phoneNumber || "Chưa cập nhật số điện thoại"}</td>
-                                        </tr>
-                                    </tbody>
-                                </Table>
-                            </div>
-                        )}
+                        <div>
+                            <div className="text-secondary mb-2 fw-bold">Địa chỉ</div>
+                            <b>{bookingDetail[0]?.address}</b>
+                            <Table className="my-3">
+                                <thead>
+                                    <tr>
+                                        <th className="text-secondary">Tên chủ sân</th>
+                                        <th className="text-secondary">Số điện thoại</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="title">{bookingDetail[0]?.ownerFullname}</td>
+                                        <td>{bookingDetail[0]?.ownerPhoneNumberUsers || "Chưa cập nhật số điện thoại"}</td>
+                                    </tr>
+                                </tbody>
+                            </Table>
+                        </div>
                     </Col>
                     <Col>
                         <div className="map-container">

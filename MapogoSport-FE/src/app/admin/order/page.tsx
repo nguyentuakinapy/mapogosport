@@ -20,8 +20,7 @@ const AdminOrder = () => {
     const [itemsPerPage] = useState(8);
 
     const orderStatuses = [
-        'Chờ thanh toán',
-        'Đang xử lí',
+        'Chờ xác nhận',
         'Đang vận chuyển',
         'Đã hủy',
         'Đã hoàn thành'
@@ -50,8 +49,7 @@ const AdminOrder = () => {
 
     const getStatusVariant = (status: string) => {
         switch (status) {
-            case 'Chờ thanh toán': return 'warning';
-            case 'Đang xử lí': return 'info';
+            case 'Chờ xác nhận': return 'info';
             case 'Đang vận chuyển': return 'primary';
             case 'Đã hủy': return 'danger';
             case 'Đã hoàn thành': return 'success';
@@ -102,7 +100,7 @@ const AdminOrder = () => {
                 <Table striped className="mb-0">
                     <thead>
                         <tr>
-                            <th style={{ width: '120px' }}>Mã hóa đơn</th>
+                            <th style={{ width: '120px' }}>STT</th>
                             <th style={{ width: '250px' }}>Họ và tên</th>
                             <th>Ngày mua</th>
                             <th>Tổng tiền</th>
@@ -113,11 +111,9 @@ const AdminOrder = () => {
                     </thead>
                     <tbody>
                         {filteredOrders.length > 0 ?
-                            filteredOrders.map((order) => (
+                            filteredOrders.map((order, index) => (
                                 <tr key={order.orderId}>
-                                    <td className="text-start">
-                                        <Link href={`/admin/order/${order.orderId}`} onClick={() => handleViewDetail(order)}>{`#${order.orderId}`}</Link>
-                                    </td>
+                                    <td className="text-start">{`#${index + 1}`}</td>
                                     <td className="text-start title">{order.fullname}</td>
                                     <td>{new Date(order.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${order.amount.toLocaleString()} ₫`}</td>
@@ -139,8 +135,7 @@ const AdminOrder = () => {
 
     const filteredOrders = orderData.filter(order => order.fullname.toLowerCase().includes(searchTerm)).filter(order => {
         switch (activeTab) {
-            case 'unpaid': return order.status === "Chờ thanh toán";
-            case 'processing': return order.status === "Đang xử lí";
+            case 'processing': return order.status === "Chờ xác nhận";
             case 'shipping': return order.status === "Đang vận chuyển";
             case 'cancel': return order.status === "Đã hủy";
             case 'complete': return order.status === "Đã hoàn thành";
@@ -199,12 +194,12 @@ const AdminOrder = () => {
 
             doc.text("Danh Sách Hóa Đơn", 14, 16);
 
-            const tableColumn = ["Mã HD", "Họ và tên", "Ngày mua", "Tổng tiền", "Địa chỉ", "Trạng thái"];
+            const tableColumn = ["STT", "Họ và tên", "Ngày mua", "Tổng tiền", "Địa chỉ", "Trạng thái"];
             const tableRows: string[][] = [];
 
-            filteredOrders.forEach(order => {
+            filteredOrders.forEach((order, index) => {
                 const orderData = [
-                    `#${order.orderId}`,
+                    `#${index + 1}`,
                     order.fullname,
                     new Date(order.date).toLocaleDateString('en-GB'),
                     `${order.amount.toLocaleString()} ₫`,
@@ -259,7 +254,7 @@ const AdminOrder = () => {
             const worksheet = workbook.addWorksheet('Hóa Đơn');
 
             worksheet.columns = [
-                { header: 'Mã hóa đơn', key: 'orderId', width: 15 },
+                { header: 'STT', key: 'orderId', width: 15 },
                 { header: 'Họ và tên', key: 'fullname', width: 25 },
                 { header: 'Ngày mua', key: 'date', width: 15 },
                 { header: 'Tổng tiền', key: 'amount', width: 15, style: { numFmt: '#,##0 ₫' } },
@@ -267,9 +262,9 @@ const AdminOrder = () => {
                 { header: 'Trạng thái', key: 'status', width: 15 },
             ];
 
-            filteredOrders.forEach(order => {
+            filteredOrders.forEach((order, index) => {
                 worksheet.addRow({
-                    orderId: `#${order.orderId}`,
+                    orderId: `#${index + 1}`,
                     fullname: order.fullname,
                     date: new Date(order.date).toLocaleDateString('en-GB'),
                     amount: order.amount,
@@ -323,19 +318,16 @@ const AdminOrder = () => {
                     <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                    <Nav.Link eventKey="unpaid" className="tab-link">Chờ thanh toán</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="processing" className="tab-link">Đang xử lý</Nav.Link>
+                    <Nav.Link eventKey="processing" className="tab-link">Chờ xác nhận</Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
                     <Nav.Link eventKey="shipping" className="tab-link">Đang vận chuyển</Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                    <Nav.Link eventKey="cancel" className="tab-link">Đã hủy</Nav.Link>
+                    <Nav.Link eventKey="complete" className="tab-link">Đã hoàn thành</Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                    <Nav.Link eventKey="complete" className="tab-link">Đã hoàn thành</Nav.Link>
+                    <Nav.Link eventKey="cancel" className="tab-link">Đã hủy</Nav.Link>
                 </Nav.Item>
             </Nav>
             {renderContent()}
