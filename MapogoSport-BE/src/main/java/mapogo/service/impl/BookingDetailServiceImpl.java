@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -174,6 +175,18 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bd.setPrice(price);
 //		System.err.println(data);
 		bookingDetailDAO.save(bd);
+		
+		Double totalPriceTemporary = 0.0;
+		
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bd.getBooking().getBookingId());
+		for (BookingDetail bookingDetail : bookingDetails) {
+			totalPriceTemporary = totalPriceTemporary + bookingDetail.getPrice();
+		}
+		
+		Booking b = bd.getBooking();
+		
+		b.setTotalAmount(totalPriceTemporary);
+		bookingDAO.save(b);
 	}
 
 	@Override
