@@ -151,12 +151,16 @@ public class BookingServiceImpl implements BookingService {
 		}
 
 		Object totalAmountObj = b.get("totalAmount");
+		Object prepayPriceObj = b.get("prepayPrice");
 		Double totalAmount;
-
-		if (totalAmountObj instanceof String) {
+		Double prepayPrice;
+		
+		if (totalAmountObj instanceof String && prepayPriceObj instanceof String) {
 			totalAmount = Double.valueOf((String) totalAmountObj);
+			prepayPrice = Double.valueOf((String) prepayPriceObj);
 		} else if (totalAmountObj instanceof Number) {
 			totalAmount = ((Number) totalAmountObj).doubleValue();
+			prepayPrice = ((Number) prepayPriceObj).doubleValue();
 		} else {
 			throw new IllegalArgumentException("totalAmount must be a String or Number");
 		}
@@ -170,6 +174,7 @@ public class BookingServiceImpl implements BookingService {
 		booking.setNote((String) b.get("note"));
 		booking.setFullName((String) b.get("fullName"));
 		booking.setPhoneNumber((String) b.get("phoneNumber"));
+		booking.setPrepayPrice(prepayPrice);
 		return bookingDAO.save(booking);
 //		return null;
 	}

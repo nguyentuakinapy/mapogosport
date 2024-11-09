@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,15 +39,15 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Autowired
 	UserDAO userDAO;
-	
+
 	@Override
 	public List<Map<String, Object>> findBookingDetailByBookingId(Integer bookingId) {
 		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId);
 		List<Map<String, Object>> resultMaps = new ArrayList<>();
-		
-		for (BookingDetail bookingDetail: bookingDetails) {
+
+		for (BookingDetail bookingDetail : bookingDetails) {
 			Map<String, Object> bookingDetailData = new HashMap<>();
-			
+
 			bookingDetailData.put("bookingDetailId", bookingDetail.getBookingDetailId());
 			bookingDetailData.put("date", bookingDetail.getDate());
 			bookingDetailData.put("sportFieldDetailName", bookingDetail.getSportFieldDetail().getName());
@@ -55,15 +56,15 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			bookingDetailData.put("price", bookingDetail.getPrice());
 			bookingDetailData.put("status", bookingDetail.getStatus());
 			bookingDetailData.put("address", bookingDetail.getSportFieldDetail().getSportField().getAddress());
-			bookingDetailData.put("ownerFullname", bookingDetail.getSportFieldDetail().getSportField()
-					.getOwner().getUser().getFullname());
-			for (PhoneNumberUser user: bookingDetail.getSportFieldDetail().getSportField().getOwner()
-					.getUser().getPhoneNumberUsers()) {
+			bookingDetailData.put("ownerFullname",
+					bookingDetail.getSportFieldDetail().getSportField().getOwner().getUser().getFullname());
+			for (PhoneNumberUser user : bookingDetail.getSportFieldDetail().getSportField().getOwner().getUser()
+					.getPhoneNumberUsers()) {
 				if (user.getActive()) {
 					bookingDetailData.put("ownerPhoneNumberUsers", user.getPhoneNumber().getPhoneNumber());
 				}
 			}
-			
+
 			resultMaps.add(bookingDetailData);
 		}
 		return resultMaps;
@@ -80,7 +81,11 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 				today, endDate, "Đã hủy");
 		bookingDetails.forEach(bd -> {
 			User u = userDAO.findUserByBookingDetailId(bd.getBookingDetailId());
-			bd.setFullName(u.getFullname());
+			if (u.getFullname().equals("Offline")) {
+				bd.setFullName(bd.getBooking().getFullName());
+			} else {
+				bd.setFullName(u.getFullname());
+			}
 		});
 		return bookingDetails;
 	}
@@ -118,10 +123,15 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Override
 	public List<BookingDetail> findBySportFieldDetailAndDay(Integer sportDetailId, LocalDate date) {
-		List<BookingDetail> bookingDetails = bookingDetailDAO.findBySportFieldDetailAndDay(sportDetailId, date, "Đã hủy");
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findBySportFieldDetailAndDay(sportDetailId, date,
+				"Đã hủy");
 		bookingDetails.forEach(bd -> {
 			User u = userDAO.findUserByBookingDetailId(bd.getBookingDetailId());
-			bd.setFullName(u.getFullname());
+			if (u.getFullname().equals("Offline")) {
+				bd.setFullName(bd.getBooking().getFullName());
+			} else {
+				bd.setFullName(u.getFullname());
+			}
 		});
 		return bookingDetails;
 	}
@@ -129,7 +139,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	@Override
 	public BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId,
 			LocalDate date) {
-		return bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date, "Đã hủy");
+		return bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date,
+				"Đã hủy");
 	}
 
 	@Override
@@ -174,6 +185,18 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bd.setPrice(price);
 //		System.err.println(data);
 		bookingDetailDAO.save(bd);
+
+		Double totalPriceTemporary = 0.0;
+
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bd.getBooking().getBookingId());
+		for (BookingDetail bookingDetail : bookingDetails) {
+			totalPriceTemporary = totalPriceTemporary + bookingDetail.getPrice();
+		}
+
+		Booking b = bd.getBooking();
+
+		b.setTotalAmount(totalPriceTemporary);
+		bookingDAO.save(b);
 	}
 
 	@Override
@@ -195,5 +218,12 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 		booking.setStatus("Đã hủy");
 		bookingDAO.save(booking);
+	}
+	
+	@Override
+	public void updateStatusChuaDaChangeToDaDa(Integer bookingDetailId) {
+		BookingDetail bookingDetail = bookingDetailDAO.findById(bookingDetailId).get();
+		bookingDetail.setStatus("Đã đá");
+		bookingDetailDAO.save(bookingDetail);
 	}
 }

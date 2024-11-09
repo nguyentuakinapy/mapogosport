@@ -36,18 +36,11 @@ export function UserProvider({ children, refreshKey }: UserProviderProps) {
     );
 
     useEffect(() => {
-        if (error) {
-            // console.error("Error fetching data:", error);
-        }
         if (data) {
-            console.log("Data fetched:", data);
             setUserData(data);
             sessionStorage.setItem('user', JSON.stringify(data))
         }
-    }, [data, error]);
-
-    // console.log("Username:", username);
-    // console.log("UserData in context:", userData);
+    }, [data]);
 
     return (
         <UserContext.Provider value={userData}>
@@ -58,8 +51,5 @@ export function UserProvider({ children, refreshKey }: UserProviderProps) {
 
 export function useData() {
     const userData = useContext(UserContext);
-    // if (userData === null) {
-    //     // console.warn("User data is null.");
-    // }
     return userData;
 }

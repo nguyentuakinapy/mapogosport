@@ -139,10 +139,23 @@ const Categories = () => {
                                             </div>
                                             <div className="img ratio-1-1">
                                                 <Link href="">
-                                                    <img nh-lazy="image" className="img-fluid" alt={product.name}
-                                                        src={`${typeof product.image === 'string' ? product.image : ''}`} />
+                                                    <Link href={`/product-detail/${product.productId}`}>
+                                                        <img
+                                                            className="w-100 h-100 img-fluid"
+                                                            style={{
+                                                                maxHeight: "250px",
+                                                                maxWidth: "250px",
+                                                                minHeight: "250px",
+                                                                objectFit: "cover"
+                                                            }}
+                                                            nh-lazy="image"
+                                                            alt={product.name}
+                                                            src={`${typeof product.image === 'string' ? product.image : ''}`}
+                                                        />
+                                                    </Link>
                                                 </Link>
                                             </div>
+
                                             <div className="product-action-wishlist">
                                                 <Link href='' className="btn-product-action" title="Yêu thích">
                                                     {icon[index] ? (
@@ -161,20 +174,21 @@ const Categories = () => {
                                             </div>
                                         </div>
                                         <div className="inner-content">
+                                        <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
+                                                <Link href={`/product-detail/${product.productId}`}>{product.name}</Link>
+                                            </div>
+                                            <div className="product-category ms-1">
+                                                <Link href={`/product-detail/${product.productId}`}>{product.categoryProduct.name}</Link>
+                                            </div>
                                             <div className="price">
                                                 <span className="price-amount ms-1"> {formatPrice(product.price)}</span>
                                                 {/* <span className="price-amount old-price me-1">{product.oldPrice}</span> */}
                                             </div>
-                                            <div className="product-category ms-1">
-                                                <Link href="">{product.categoryProduct.name}</Link>
-                                            </div>
-                                            <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
-                                                <Link href="">{product.name}</Link>
-                                            </div>
-                                            <div className="d-flex mt-2" style={{ justifyContent: 'space-between', width: '100%' }}>
+
+                                            {/* <div className="d-flex mt-2" style={{ justifyContent: 'space-between', width: '100%' }}>
                                                 <Link href={`/product-detail/${product.productId}`} className='btn btn-danger ms-1' style={{ fontSize: '14px', flexGrow: 1 }}>Mua Ngay</Link>
                                                 <Link href='' className='btn btn-warning ms-2 me-1' style={{ fontSize: '14px', flexGrow: 1 }}>Thêm Giỏ Hàng</Link>
-                                            </div>
+                                            </div> */}
                                             <div className="star-item star d-flex mt-1 ms-1">
                                                 <div className="icon text-warning mb-2">
                                                     <i className="bi bi-star-fill"></i>
@@ -183,7 +197,7 @@ const Categories = () => {
                                                     <i className="bi bi-star-fill"></i>
                                                     <i className="bi bi-star-fill"></i>
                                                 </div>
-                                                <div className="number">(1)</div>
+                                                <div className="number">(1) reviews</div>
                                             </div>
                                         </div>
                                     </div>

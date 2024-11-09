@@ -1,4 +1,5 @@
 
+import { useData } from '@/app/context/UserContext';
 import { useEffect, useState } from 'react';
 
 interface HeaderProps {
@@ -29,6 +30,8 @@ const translations: { [key: string]: string } = {
 export default function Header({ isAniActive, toggleAni, weather }: HeaderProps) {
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
+
+    const userData = useData();
 
     const translate = (word: string): string => {
         return translations[word.toLowerCase()] || word;
@@ -109,7 +112,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                         className="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                                 </ul>
                             </li> */}
-                            <span style={{ borderLeft: '1px solid' }} className='text-decoration-none demo me-3'><i className="bi bi-person-fill ms-3 me-1"></i>Nguyễn Tú Akina</span>
+                            <span style={{ borderLeft: '1px solid' }} className='text-decoration-none demo me-3'><i className="bi bi-person-fill ms-3 me-1"></i>{userData?.fullname}</span>
                         </ul>
                     </nav>
                 </div>
