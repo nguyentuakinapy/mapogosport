@@ -125,9 +125,11 @@ public class BookingServiceImpl implements BookingService {
 		if (optionalBooking.isPresent()) {
 		    Booking booking = optionalBooking.get();
 		    booking.setStatus(newStatus);
-		    for (BookingDetail bookingDetail: booking.getBookingDetails()) {
-		    	bookingDetail.setStatus(newStatus);
-		    	bookingDetailDAO.save(bookingDetail);
+		    if (newStatus == "Đã hủy") {
+		    	for (BookingDetail bookingDetail: booking.getBookingDetails()) {
+		    		bookingDetail.setStatus(newStatus);
+			    	bookingDetailDAO.save(bookingDetail);
+				}
 		    }
 		    bookingDAO.save(booking);
 		}

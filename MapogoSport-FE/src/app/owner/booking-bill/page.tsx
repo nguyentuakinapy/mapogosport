@@ -16,6 +16,7 @@ const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [bookingData, setBookingData] = useState<BookingFindAll[]>([]);
     const [activeTab, setActiveTab] = useState<string>('all');
+    const [username, setUsername] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8);
@@ -26,7 +27,10 @@ const OwnerBookingBill = () => {
         'Đã hủy'
     ];
 
-    const username = localStorage.getItem('username');
+    useEffect(() => {
+        const storedUsername = localStorage.getItem('username');
+        setUsername(storedUsername);
+    }, []);
 
     const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/owner/booking/findAll/${username}`, fetcher, {
         revalidateIfStale: false,
@@ -92,6 +96,9 @@ const OwnerBookingBill = () => {
     };
 
     const renderTable = (filteredBookings: BookingFindAll[]) => {
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
         return (
             <div className="box-table-border mb-4">
                 <Table striped className="mb-0">
@@ -112,13 +119,14 @@ const OwnerBookingBill = () => {
                         {filteredBookings.length > 0 ?
                             filteredBookings.map((booking, index) => (
                                 <tr key={booking.bookingId}>
-                                    <td className="text-start title">{`#${index + 1}`}</td>
+                                    <td className="text-start title">{`#${indexOfFirstItem + index + 1}`}</td>
                                     <td className="text-start title">{booking.sportFieldName}</td>
                                     <td className="title">{booking.user.username == 'sportoffline' ?
                                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
-                                    <td>{booking.status === 'Đã hủy' || booking.status === "Đã thanh toán" ? '0 đ' : `${(booking.totalAmount - booking.prepayPrice).toLocaleString()} đ`}</td>
+                                    <td>{booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0 đ'
+                                        : `${(booking.totalAmount - booking.prepayPrice).toLocaleString()} đ`}</td>
                                     <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
                                     <td>{renderStatusDropdown(booking)}</td>
                                     <td>
