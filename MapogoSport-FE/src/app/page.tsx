@@ -12,7 +12,7 @@ import RegisterModal from "@/components/account/modal/register.modal";
 import ForgotPassword from "@/components/account/modal/forgotPassword.modal";
 import ChangePasswordNew from "@/components/account/modal/change-password-new.modal";
 import Popup from "@/components/User/modal/popup-voucher.modal";
-import { useData } from "./context/UserContext";
+import { useData, UserProvider } from "./context/UserContext";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
@@ -102,7 +102,15 @@ export default function Home() {
     fetchData()
   }, [])
 
-  const userData = useData();
+  const userSession = sessionStorage.getItem('user');
+  const userData = userSession ? JSON.parse(userSession) as User : null;
+
+  const u = useData();
+
+  useEffect(() => {
+    console.log('uádasdasds', u);
+
+  }, [u]);
 
   const [hasOwnerRole, setHasOwnerRole] = useState(false);
 
@@ -111,6 +119,7 @@ export default function Home() {
     const ownerRoleExists = authorities.some(item => item.role.name === "ROLE_OWNER");
     setHasOwnerRole(ownerRoleExists);
   }, [userData]);
+
 
   return (
     <HomeLayout>
@@ -412,7 +421,7 @@ export default function Home() {
         {/* VOUCHER */}
 
         <div className="App">
-            <Popup  />
+          <Popup />
         </div>
       </Container>
       <CreateOwnerModal showCreateOwnerModal={showCreateOwnerModal}

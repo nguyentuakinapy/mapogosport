@@ -182,5 +182,9 @@ public class BookingRestController {
 		 bookingDetailService.updateBookingDetail(data);
 	}
 	
+	@PutMapping("/booking/detail/change/status/{bookingDetailId}")
+	public void updateStatusChuaDaChangeToDaDa(@PathVariable("bookingDetailId") Integer bookingDetailId) {
+		bookingDetailService.updateStatusChuaDaChangeToDaDa(bookingDetailId);
+	}
 	
 }

@@ -23,11 +23,10 @@ export default function Owner({ children }: { children: ReactNode }) {
     }, [])
 
     const getOwner = async () => {
-        const user = sessionStorage.getItem('user');
+        const username = localStorage.getItem('username');
 
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            const responseOwner = await fetch(`http://localhost:8080/rest/owner/${parsedUserData.username}`);
+        if (username) {
+            const responseOwner = await fetch(`http://localhost:8080/rest/owner/${username}`);
             if (!responseOwner.ok) {
                 throw new Error('Error fetching data');
             }
