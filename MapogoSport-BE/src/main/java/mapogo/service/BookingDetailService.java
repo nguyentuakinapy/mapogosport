@@ -28,4 +28,6 @@ public interface BookingDetailService {
 	void cancelBookingDetailBySubscription(Integer bookingDetailId, String subscriptionKey);
 
 	void updateBookingDetail(Map<String, Object> data);
+	
+	void updateStatusChuaDaChangeToDaDa(Integer bookingDetailId);
 }

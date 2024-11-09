@@ -86,7 +86,8 @@ interface BookingDetailFullName {
     price: number;
     date: string;
     status: string;
-    fullName: string
+    fullName: string;
+    subscriptionKey: string;
 }
 
 interface AvailableBooking {

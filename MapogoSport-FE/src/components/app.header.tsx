@@ -156,7 +156,11 @@ const Header = (props: HeaderProps) => {
                                         }
                                         if (item.role.name === "ROLE_ADMIN") {
                                             return (
-                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</a>
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Quản trị viên</a>
+                                            );
+                                        } else if (item.role.name === "ROLE_STAFF") {
+                                            return (
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Nhân viên</a>
                                             );
                                         }
                                         return null;

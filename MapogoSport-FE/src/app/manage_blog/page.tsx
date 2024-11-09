@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import { Table, Button, Modal, Form, Row, Col, FormCheck } from 'react-bootstrap';
+import OwnerLayout from '@/components/Owner/OwnerLayout';
 
 const BlogManagement = () => {
   const [showModal, setShowModal] = useState(false);
@@ -91,7 +92,7 @@ const BlogManagement = () => {
   };
 
   return (
-    <AdminLayout>
+    <OwnerLayout>
       <div className="container mt-5">
         {/* Bảng cho các bài viết blog */}
         <h4 className="text-center mb-4">QUẢN LÝ BLOG</h4>
@@ -315,7 +316,7 @@ const BlogManagement = () => {
           </Form>
         </Modal>
       </div>
-    </AdminLayout>
+    </OwnerLayout>
   );
 };
 

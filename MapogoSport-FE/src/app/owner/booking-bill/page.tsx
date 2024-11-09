@@ -118,7 +118,7 @@ const OwnerBookingBill = () => {
                                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
-                                    <td>{booking.status === 'Đã hủy' ? '0 đ' : `${(booking.totalAmount - booking.prepayPrice).toLocaleString()} đ`}</td>
+                                    <td>{booking.status === 'Đã hủy' || booking.status === "Đã thanh toán" ? '0 đ' : `${(booking.totalAmount - booking.prepayPrice).toLocaleString()} đ`}</td>
                                     <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
                                     <td>{renderStatusDropdown(booking)}</td>
                                     <td>

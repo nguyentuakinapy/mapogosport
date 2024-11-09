@@ -199,7 +199,7 @@ const BookingModal = (props: OwnerProps) => {
             if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
                 for (const time of dataTimeOnStage) {
                     const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
-                    console.log(result);
+                    // console.log(result);
 
                     if (result) {
                         checkTime = true;
@@ -266,17 +266,17 @@ const BookingModal = (props: OwnerProps) => {
                         }
                     }
                 }
-                console.log(`Khoảng cách giữa hai ngày là: ${timeIndex} ngày`);
+                // console.log(`Khoảng cách giữa hai ngày là: ${timeIndex} ngày`);
 
                 const bk = bookingBySubscriptionKey.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-                console.log('bk', bk);
+                // console.log('bk', bk);
 
 
                 if (sport && dateBooking && new Date().setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
                     for (const time of dataTimeOnStageAll) {
                         const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
-                        console.log(result);
+                        // console.log(result);
 
                         if (result) {
                             checkTime = true;
@@ -297,7 +297,7 @@ const BookingModal = (props: OwnerProps) => {
                     const month = String(dateTemporary.getMonth() + 1).padStart(2, '0'); // Thêm 1 vì tháng bắt đầu từ 0
                     const day = String(dateTemporary.getDate()).padStart(2, '0');  // Đảm bảo ngày luôn có 2 chữ số
 
-                    console.log(`${year}-${month}-${day}`);
+                    // console.log(`${year}-${month}-${day}`);
 
                     try {
                         const response = await fetch(
@@ -348,7 +348,7 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     const createTimeByTimeOnStageAll = async () => {
-        console.log('dataBookingBySubscriptionKey', bookingBySubscriptionKey);
+        // console.log('dataBookingBySubscriptionKey', bookingBySubscriptionKey);
 
         const timeSlots = [];
 
@@ -375,7 +375,7 @@ const BookingModal = (props: OwnerProps) => {
                 timeSlots.pop();
             }
         }
-        console.log(timeSlots);
+        // console.log(timeSlots);
 
         setDataTimeOnStageAll(timeSlots);
     }
@@ -523,7 +523,7 @@ const BookingModal = (props: OwnerProps) => {
                     }
 
                 }
-                console.log(`Khoảng cách giữa hai ngày là: ${timeIndex} ngày`);
+                // console.log(`Khoảng cách giữa hai ngày là: ${timeIndex} ngày`);
 
                 for (const b of bookingBySubscriptionKey) {
                     const dateTemporary = new Date(b.date);
@@ -533,7 +533,7 @@ const BookingModal = (props: OwnerProps) => {
                     const month = String(dateTemporary.getMonth() + 1).padStart(2, '0'); // Thêm 1 vì tháng bắt đầu từ 0
                     const day = String(dateTemporary.getDate()).padStart(2, '0');  // Đảm bảo ngày luôn có 2 chữ số
 
-                    console.log(`${year}-${month}-${day}`);
+                    // console.log(`${year}-${month}-${day}`);
 
                     fetch(`http://localhost:8080/rest/booking/update/booking/detail/${b.bookingDetailId}`, {
                         method: 'PUT',
