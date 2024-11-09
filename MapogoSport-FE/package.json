@@ -46,7 +46,7 @@
     "bootstrap-icons": "1.11.3",
     "cors": "2.8.5",
     "date-fns": "4.1.0",
-    "exceljs": "^4.4.0",
+    "exceljs": "4.4.0",
     "file-saver": "2.0.5",
     "js-cookie": "3.0.5",
     "jspdf": "2.5.2",
@@ -61,7 +61,7 @@
     "react-router-dom": "6.27.0",
     "react-toastify": "10.0.5",
     "sass": "1.79.3",
-    "socket.io-client": "^4.8.1",
+    "socket.io-client": "4.8.1",
     "swr": "2.2.5"
   },
   "devDependencies": {
