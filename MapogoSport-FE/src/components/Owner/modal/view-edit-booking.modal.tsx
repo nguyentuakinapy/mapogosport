@@ -31,7 +31,7 @@ const BookingModal = (props: OwnerProps) => {
     const [endTimeBooking, setEndTimeBooking] = useState<string>();
     const [confirmData, setConfirmData] = useState<boolean>(false);
     const [applyOne, setApplyOne] = useState<boolean>(true);
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0];
 
 
     useEffect(() => {
@@ -59,8 +59,21 @@ const BookingModal = (props: OwnerProps) => {
                 toast.success('Hủy sân thành công!');
             })
         } else {
-            toast.success('Hủy sân thành công là cc gì!');
-
+            fetch(`http://localhost:8080/rest/booking/update/status/by/subcriptionKey/${bookingDetailData?.bookingDetailId}/${bookingDetailData?.subscriptionKey}`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+            }).then(async (res) => {
+                if (!res.ok) {
+                    toast.error(`Hủy sân không thành công!`);
+                    return
+                }
+                setCheckDataStatus(!checkDataStatus);
+                handleClose();
+                toast.success('Hủy sân thành công!');
+            })
         }
     }
 
@@ -169,7 +182,6 @@ const BookingModal = (props: OwnerProps) => {
     const [dataTimeOnStage, setDataTimeOnStage] = useState<string[]>([]);
     const [dataTimeOnStageAll, setDataTimeOnStageAll] = useState<string[]>([]);
 
-
     useEffect(() => {
         createTimeByTimeOnStageAll();
     }, [bookingBySubscriptionKey])
@@ -180,7 +192,27 @@ const BookingModal = (props: OwnerProps) => {
 
         let isAvailable = true;
 
+        let checkTime = false;
+
+
         if (applyOne) {
+
+            if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
+                for (const time of dataTimeOnStage) {
+                    const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
+                    // console.log(result);
+
+                    if (result) {
+                        checkTime = true;
+                    }
+                }
+            }
+
+            if (checkTime) {
+                toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
+                return
+            }
+
             try {
                 const response = await fetch(
                     `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${dateBooking}`
@@ -215,43 +247,130 @@ const BookingModal = (props: OwnerProps) => {
                 console.error("API or JSON parsing error:", error);
             }
         } else {
-            try {
-                const response = await fetch(
-                    `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${dateBooking}`
-                );
+            if (bookingBySubscriptionKey && dateBooking) {
+                const date = new Date(dateBooking).setHours(0, 0, 0, 0);
 
+                let check = true;
+                let timeIndex = 0;
+                while (check && bookingDetailData) {
+                    const dateTemporary = new Date(bookingDetailData.date);  // Sao chép đối tượng Date từ bookingDetailData
+                    dateTemporary.setDate(dateTemporary.getDate() + timeIndex);  // Cộng thêm timeIndex ngày
+                    dateTemporary.setHours(0, 0, 0, 0);  // Đảm bảo là giờ 00:00:00.000
 
-                if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
-                const text = await response.text();
+                    if (date == dateTemporary.getTime()) {  // So sánh thời gian, vì setHours sẽ thay đổi đối tượng Date
+                        check = false;
+                    } else {
+                        if (timeIndex >= 0) {
+                            timeIndex = -timeIndex - 1;
+                        } else {
+                            timeIndex = -timeIndex; // Chuyển timeIndex về dương nếu kiểm tra xong ngày trước đó
+                        }
+                    }
+                }
+                // console.log(`Khoảng cách giữa hai ngày là: ${timeIndex} ngày`);
 
+                console.log('bookingBySubscriptionKey', bookingBySubscriptionKey);
 
+                // // Biến lưu trữ booking có ngày sớm nhất
+                // let earliestBooking = bookingBySubscriptionKey[0];
 
-                if (text) {
-                    const dataBooking = JSON.parse(text) as BookingDetail[];
-                    if (dataBooking && Object.keys(dataBooking).length > 0) {
-                        for (const item of dataBooking) {
-                            for (const time of dataTimeOnStageAll) {
-                                const result = isTimeWithinRange(item.startTime, item.endTime, time);
-                                if (!result) {
-                                    continue;
-                                } else if (item.endTime == time) {
-                                    continue;
-                                } else {
-                                    if (item.subcriptionKey == bookingDetailData?.subcriptionKey) {
-                                        continue;
-                                    } else {
-                                        isAvailable = false;
-                                        break;
+                // // Duyệt qua mảng bookingBySubscriptionKey để tìm ngày sớm nhất
+                // for (let i = 1; i < bookingBySubscriptionKey.length; i++) {
+                //     const currentBookingDate = new Date(bookingBySubscriptionKey[i].date);
+                //     const earliestBookingDate = new Date(earliestBooking.date);
+
+                //     if (currentBookingDate < earliestBookingDate) {
+                //         earliestBooking = bookingBySubscriptionKey[i];
+                //     }
+                // }
+
+                // console.log('earliestBooking', earliestBooking);
+
+                if (sport && dateBooking && new Date().setHours(0, 0, 0, 0) === new Date(dateBooking).setHours(0, 0, 0, 0)) {
+                    for (const time of dataTimeOnStageAll) {
+                        const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
+                        // console.log(result);
+
+                        if (result) {
+                            checkTime = true;
+                        }
+                    }
+                }
+
+                if (checkTime) {
+                    toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
+                    return
+                }
+
+                const bk = bookingBySubscriptionKey.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+                console.log('bk', bk[0].date);
+
+                const dateTemporaryChecked = new Date(bk[0].date);
+                dateTemporaryChecked.setDate(dateTemporaryChecked.getDate() + timeIndex);
+
+                const year = dateTemporaryChecked.getFullYear();
+                const month = String(dateTemporaryChecked.getMonth() + 1).padStart(2, '0'); // Thêm 1 vì tháng bắt đầu từ 0
+                const day = String(dateTemporaryChecked.getDate()).padStart(2, '0');  // Đảm bảo ngày luôn có 2 chữ số
+                // toast.success(new Date().getFullYear().toString()
+                //     + '-' + String(new Date().getMonth() + 1).padStart(2, '0')
+                //     + '-' + new Date().getDate().toString() + 'and' + year + '-' + month + '-' + day)
+
+                if (timeIndex !== 0 &&
+                    new Date(year + '-' + month + '-' + day).setHours(0, 0, 0, 0) < new Date(new Date().getFullYear().toString()
+                        + '-' + String(new Date().getMonth() + 1).padStart(2, '0')
+                        + '-' + new Date().getDate().toString()).setHours(0, 0, 0, 0)) {
+                    toast.warning("Ngày " + bk[0].date + " trong kỳ bị quá ngày hiện tại!")
+                    return;
+                }
+
+                for (const b of bookingBySubscriptionKey) {
+                    const dateTemporary = new Date(b.date);
+                    dateTemporary.setDate(dateTemporary.getDate() + timeIndex);
+
+                    const year = dateTemporary.getFullYear();
+                    const month = String(dateTemporary.getMonth() + 1).padStart(2, '0'); // Thêm 1 vì tháng bắt đầu từ 0
+                    const day = String(dateTemporary.getDate()).padStart(2, '0');  // Đảm bảo ngày luôn có 2 chữ số
+
+                    // console.log(`${year}-${month}-${day}`);
+
+                    try {
+                        const response = await fetch(
+                            `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${year}-${month}-${day}`
+                        );
+
+                        if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+                        const text = await response.text();
+
+                        if (text) {
+                            const dataBooking = JSON.parse(text) as BookingDetail[];
+                            if (dataBooking && Object.keys(dataBooking).length > 0) {
+                                for (const item of dataBooking) {
+                                    for (const time of dataTimeOnStageAll) {
+                                        const result = isTimeWithinRange(item.startTime, item.endTime, time);
+                                        if (!result) {
+                                            continue;
+                                        } else if (item.endTime == time) {
+                                            continue;
+                                        } else {
+                                            if (item.subscriptionKey == bookingDetailData?.subscriptionKey) {
+                                                continue;
+                                            } else {
+                                                isAvailable = false;
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
+                    } catch (error) {
+                        console.error("API or JSON parsing error:", error);
                     }
                 }
-            } catch (error) {
-                console.error("API or JSON parsing error:", error);
             }
-            toast.warning('Đang kiểm tra tất cả!');
+
+            // toast.warning('Đang kiểm tra tất cả!');
         }
 
         setConfirmData(isAvailable);
@@ -264,7 +383,7 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     const createTimeByTimeOnStageAll = async () => {
-        console.log('dataBookingBySubscriptionKey', bookingBySubscriptionKey);
+        // console.log('dataBookingBySubscriptionKey', bookingBySubscriptionKey);
 
         const timeSlots = [];
 
@@ -378,7 +497,7 @@ const BookingModal = (props: OwnerProps) => {
             } else {
                 if (timeBooking == 1) {
                     setPrice((sportDetail.price * timeBooking) / 2);
-                    toast.success((sportDetail.price * timeBooking) / 2)
+                    // toast.success((sportDetail.price * timeBooking) / 2)
                 } else {
                     setPrice((sportDetail.price * timeBooking / 2));
                     // toast.success((sportDetail.price * timeBooking / 2))
@@ -391,31 +510,93 @@ const BookingModal = (props: OwnerProps) => {
         setConfirmData(false);
     }, [startTimeBooking, endTimeBooking, idSportDetail, dateBooking, applyOne])
 
-    const handleUpdateBooking = () => {
-        fetch(`http://localhost:8080/rest/booking/update/booking/detail/${bookingDetailData?.bookingDetailId}`, {
-            method: 'PUT',
-            headers: {
-                Accept: 'application/json, text/plain, */*',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                bookingDetailId: bookingDetailData?.bookingDetailId,
-                idSportDetail,
-                dateBooking,
-                startTimeBooking,
-                endTimeBooking,
-                price
-            }),
-        }).then(async (res) => {
-            if (!res.ok) {
-                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                return
+    const handleUpdateBooking = async () => {
+        if (applyOne) {
+            fetch(`http://localhost:8080/rest/booking/update/booking/detail/${bookingDetailData?.bookingDetailId}`, {
+                method: 'PUT',
+                headers: {
+                    Accept: 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    bookingDetailId: bookingDetailData?.bookingDetailId,
+                    idSportDetail,
+                    dateBooking,
+                    startTimeBooking,
+                    endTimeBooking,
+                    price
+                }),
+            }).then(async (res) => {
+                if (!res.ok) {
+                    toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                    return
+                }
+                // mutate(usernameFetchApi);
+                setCheckDataStatus(!checkDataStatus);
+                handleClose();
+                toast.success('Cập nhật thành công!');
+            })
+        } else {
+            if (bookingBySubscriptionKey && dateBooking) {
+                const date = new Date(dateBooking).setHours(0, 0, 0, 0);
+
+                let check = true;
+                let timeIndex = 0;
+                while (check && bookingDetailData) {
+                    const dateTemporary = new Date(bookingDetailData.date);  // Sao chép đối tượng Date từ bookingDetailData
+                    dateTemporary.setDate(dateTemporary.getDate() + timeIndex);  // Cộng thêm timeIndex ngày
+                    dateTemporary.setHours(0, 0, 0, 0);  // Đảm bảo là giờ 00:00:00.000
+
+                    if (date == dateTemporary.getTime()) {  // So sánh thời gian, vì setHours sẽ thay đổi đối tượng Date
+                        check = false;
+                    } else {
+                        if (timeIndex >= 0) {
+                            timeIndex = -timeIndex - 1; // Chuyển timeIndex sang giá trị âm để kiểm tra ngày trước đó
+                        } else {
+                            timeIndex = -timeIndex; // Chuyển timeIndex về dương nếu kiểm tra xong ngày trước đó
+                        }
+                    }
+
+                }
+                // console.log(`Khoảng cách giữa hai ngày là: ${timeIndex} ngày`);
+
+                for (const b of bookingBySubscriptionKey) {
+                    const dateTemporary = new Date(b.date);
+                    dateTemporary.setDate(dateTemporary.getDate() + timeIndex);
+
+                    const year = dateTemporary.getFullYear();
+                    const month = String(dateTemporary.getMonth() + 1).padStart(2, '0'); // Thêm 1 vì tháng bắt đầu từ 0
+                    const day = String(dateTemporary.getDate()).padStart(2, '0');  // Đảm bảo ngày luôn có 2 chữ số
+
+                    // console.log(`${year}-${month}-${day}`);
+
+                    fetch(`http://localhost:8080/rest/booking/update/booking/detail/${b.bookingDetailId}`, {
+                        method: 'PUT',
+                        headers: {
+                            Accept: 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            bookingDetailId: b.bookingDetailId,
+                            idSportDetail,
+                            dateBooking: year + '-' + month + '-' + day,
+                            startTimeBooking,
+                            endTimeBooking,
+                            price
+                        }),
+                    }).then(async (res) => {
+                        if (!res.ok) {
+                            toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                            return
+                        }
+                        // mutate(usernameFetchApi);
+                        setCheckDataStatus(!checkDataStatus);
+                        handleClose();
+                    })
+                }
+                toast.success('Cập nhật thành công!');
             }
-            // mutate(usernameFetchApi);
-            setCheckDataStatus(!checkDataStatus);
-            handleClose();
-            toast.success('Cập nhật thành công!');
-        })
+        }
     }
 
     const handleClose = () => {
@@ -436,30 +617,43 @@ const BookingModal = (props: OwnerProps) => {
                 <Modal.Body>
                     <Row>
                         <Col>
-                            <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name}
+                            <div className="d-flex  justify-content-between">
                                 {bookingDetailData &&
                                     new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
                                         new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
-                                            <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
-                                                <i
-                                                    className="bi bi-pencil-square ms-2 text-dark"
-                                                    onClick={() => setEditBooking(!editBooking)}
-                                                    style={{ cursor: 'pointer' }}
-                                                />
-                                            </OverlayTrigger>
-                                        ) : (
-                                            new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                            <>
                                                 <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                                                     <i
                                                         className="bi bi-pencil-square ms-2 text-dark"
                                                         onClick={() => setEditBooking(!editBooking)}
                                                         style={{ cursor: 'pointer' }}
                                                     />
+
                                                 </OverlayTrigger>
+                                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name} </h6>
+                                                <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
+                                                    <i className="bi bi-plus-lg"></i>
+                                                </OverlayTrigger>
+                                            </>
+                                        ) : (
+                                            new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                                <>
+                                                    <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
+                                                        <i
+                                                            className="bi bi-pencil-square ms-2 text-dark"
+                                                            onClick={() => setEditBooking(!editBooking)}
+                                                            style={{ cursor: 'pointer' }}
+                                                        />
+                                                    </OverlayTrigger>
+                                                    <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name} </h6>
+                                                    <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
+                                                        <i className="bi bi-plus-lg"></i>
+                                                    </OverlayTrigger>
+                                                </>
                                             )
                                         )
                                     )}
-                            </h6>
+                            </div>
                             <FloatingLabel controlId="floatingSelectTime" label="Chọn thời gian" className="mb-2">
                                 <Form.Select
                                     value={idSportDetail || ""}
@@ -570,7 +764,7 @@ const BookingModal = (props: OwnerProps) => {
 
                     </Row>
                     <Row className="mx-1 mb-2">
-                        {bookingDetailData?.subcriptionKey && (
+                        {bookingDetailData?.subscriptionKey && (
                             <>
                                 <Col onClick={() => setApplyOne(true)} className={`col-day border p-2 text-white ${applyOne ? 'active' : ''}`}>Một ngày</Col>
                                 <Col onClick={() => setApplyOne(false)} className={`col-day border p-2 text-white ${!applyOne ? 'active' : ''}`}>Tất cả ngày trong chung lịch</Col>

@@ -1,6 +1,5 @@
 'use client'
 import React, { useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 import Header from "./app.header";
 import Footer from "./app.footer";
 import { UserProvider } from "@/app/context/UserContext";

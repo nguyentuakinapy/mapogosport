@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.ProductReviewDAO;
+import mapogo.dto.ProductHaveReviewDTO;
 import mapogo.entity.ProductReview;
 import mapogo.service.ProductReviewService;
 
@@ -34,6 +35,16 @@ public class ProductReviewServiceImpl implements ProductReviewService{
 	@Override
 	public void deleteReviewByUser(Integer productReviewId) {
 		proReviewDao.deleteById(productReviewId);
+	}
+
+	@Override
+	public List<ProductReview> findReviewByRating(Integer productId, Integer rating) {
+		return proReviewDao.FindReviewByRating(productId, rating);
+	}
+
+	@Override
+	public List<ProductHaveReviewDTO> getProductRatings() {
+		return proReviewDao.getProductRatings();
 	}
 
 }

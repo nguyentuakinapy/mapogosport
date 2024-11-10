@@ -1,4 +1,5 @@
 
+import { useData } from '@/app/context/UserContext';
 import { useEffect, useState } from 'react';
 
 interface HeaderProps {
@@ -29,6 +30,8 @@ const translations: { [key: string]: string } = {
 export default function Header({ isAniActive, toggleAni, weather }: HeaderProps) {
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
+
+    const userData = useData();
 
     const translate = (word: string): string => {
         return translations[word.toLowerCase()] || word;
@@ -61,7 +64,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     }, []);
 
     return (
-        <header className={isAniActive ? 'aniHead' : ''}>
+        <header className={`${isAniActive ? 'header-full' : 'header-normal'}`}>
             <div className="d-flex m-0 justify-content-between align-items-center m-auto">
                 <div className="d-flex justify-content-center align-items-center">
                     <i className={`bi ${isAniActive ? 'bi-list' : 'bi-filter-left'} mx-3`} onClick={() => toggleAni()} style={{ fontSize: '50px' }}></i>
@@ -86,7 +89,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                     Thời tiết {translate(weather == null ? '' : weather?.weather[0].description)}
                 </div>
                 <div className="d-flex justify-content-center align-items-center">
-                    <em id="clock"><i className="bi bi-calendar2-range-fill me-1"></i>{currentDate} <i className="bi bi-alarm-fill ms-2"></i> {currentTime}</em>
+                    <span id="clock"><i className="bi bi-calendar2-range-fill me-1"></i>{currentDate} <i className="bi bi-alarm-fill ms-2"></i> {currentTime}</span>
                 </div>
                 <div className=" d-flex justify-content-center align-items-center">
                     <nav className="navbar navbar-expand-lg p-0">
@@ -109,7 +112,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                         className="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                                 </ul>
                             </li> */}
-                            <span style={{ borderLeft: '1px solid' }} className='text-decoration-none demo me-3'><i className="bi bi-person-fill ms-3 me-1"></i>Nguyễn Tú Akina</span>
+                            <span style={{ borderLeft: '1px solid' }} className='text-decoration-none demo me-3'><i className="bi bi-person-fill ms-3 me-1"></i>{userData?.fullname}</span>
                         </ul>
                     </nav>
                 </div>

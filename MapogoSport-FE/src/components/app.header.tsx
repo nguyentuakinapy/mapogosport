@@ -49,7 +49,7 @@ const CartBadge = ({ username }: { username: string }) => {
 
 interface HeaderProps {
     setRefreshKey: (v: number) => void;
-    refreshKey: number
+    refreshKey: numberz
 }
 
 const Header = (props: HeaderProps) => {
@@ -57,7 +57,6 @@ const Header = (props: HeaderProps) => {
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
     const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
     const [showChangePasswordNew, setShowChangePasswordNew] = useState<boolean>(false);
-    const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
     const { setRefreshKey, refreshKey } = props;
 
     const userData = useData();
@@ -90,19 +89,6 @@ const Header = (props: HeaderProps) => {
     }, []); // Chạy một lần khi component được mount
 
     // Fetch CategoryField
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const reponse = await fetch('http://localhost:8080/rest/category_field')
-                const data = await reponse.json();
-                setCategoryFields(data)
-            } catch (error) {
-                console.log("Lỗi call Api rồi: ", error)
-            }
-        }
-        fetchData();
-    }, [])
 
     const logOut = () => {
         localStorage.removeItem('username');
@@ -145,7 +131,7 @@ const Header = (props: HeaderProps) => {
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowForgotPassword(true)} style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
                                     {/* <hr className='m-0' /> */}
                                     <Link href='/user/profile' className={`dropdown-item text-decoration-none text-dark ${userData ? '' : 'd-none'}`}>Thông tin tài khoản</Link>
-                                    {userData?.authorities.map((item, index) => {
+                                    {userData && userData.authorities.map((item, index) => {
                                         if (item.role.name === "ROLE_USER") {
                                             return null;
                                         }
@@ -156,7 +142,11 @@ const Header = (props: HeaderProps) => {
                                         }
                                         if (item.role.name === "ROLE_ADMIN") {
                                             return (
-                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</a>
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Quản trị viên</a>
+                                            );
+                                        } else if (item.role.name === "ROLE_STAFF") {
+                                            return (
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Nhân viên</a>
                                             );
                                         }
                                         return null;
