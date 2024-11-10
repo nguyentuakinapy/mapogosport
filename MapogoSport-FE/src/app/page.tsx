@@ -375,7 +375,7 @@ export default function Home() {
           </div>
           <div style={{ fontSize: '15px' }}>
             <Row className="my-3">
-              {products.slice(0, 8).map((product: Product) => (
+              {/* {products.slice(0, 8).map((product: Product) => (
                 <Col xs={3} key={product.productId}>
                   <div className="user-border">
                     <div className="mb-3">
@@ -396,7 +396,7 @@ export default function Home() {
                     </div>
                   </div>
                 </Col>
-              ))}
+              ))} */}
             </Row>
           </div>
         </div>
