@@ -21,7 +21,11 @@ const formatDateNotime = (dateString) => {
   });
 };
 
-
+// const formatDateForApi = (date: Date | null) => {
+//   if (!date) return '';
+//   const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+//   return utcDate.toISOString().split('T')[0];
+// };
 const formatDateForApi = (date: Date | null) => {
   if (!date) return ''; // Đảm bảo rằng nếu date là null thì trả về chuỗi rỗng
 

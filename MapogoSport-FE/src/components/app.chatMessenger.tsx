@@ -1,16 +1,19 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Form, Button, ListGroup } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css"; // Đảm bảo đã cài đặt Bootstrap Icons
 import { QueryClient, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import useSWR from "swr";
 
+import { Stomp } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
+
 export default function ChatBox() {
   interface Message {
     messageId: number;
     sender: User;
-    receiver: User;
+    receiver: User ;
     content: string;
     createAt: Date;
     isDelete: boolean;
@@ -23,28 +26,132 @@ export default function ChatBox() {
   const [isMaximized, setIsMaximized] = useState(false); // quản lý trạng thái phóng to của chat form
   const [selectedChat, setSelectedChat] = useState<string>(""); // Quản lý cuộc trò chuyện đang được chọn
   const [inputMessage, setInputMessage] = useState(""); // lưu trữ nội dung người dùng đang nhập vào ô chat
+  
 
   const [chatListRealTime, setChatListRealTime] = useState<Message[]>([]);
   // const [chatListCurrentUser, setChatListCurrentUser] = useState<Message[]>([]);
   const [chatListCurrentUserByDMM, setChatListCurrentUserByDMM] = useState<
     Message[]
   >([]);
+  const [subscribedTopics, setSubscribedTopics] = useState([]);
+
 
   const [currentUser, setCurrentUser] = useState<User | undefined>();
-  const [receiver, setReceiver] = useState<string>("nguyentuakinapy");  // Sử dụng useState cho receiver
+  const [receiver, setReceiver] = useState<string>("nguyentuakinapy"); // Sử dụng useState cho receiver
 
-  // Khi bấm vào một đoạn chat trong danh sách
-  const handleSelectChat = (chat) => {
-    // console.log("username: ", chat?.username || "Không có tên");
+const stompClient = useRef(null);
 
-    // console.log("Phân quyền", chat?.authorities?.[0]?.authorityId || "Không có");
+useEffect(() => {
+  if (!currentUser) return;
 
-    // setReceiver(chat?.username);  // Cập nhật receiver bằng setReceiver
-    // console.log("receiver ", chat?.username);
+  // Khởi tạo kết nối STOMP với WebSocket server
+  const socket = new SockJS(`http://localhost:8080/ws`);  // 1. kết nối server
+  stompClient.current = Stomp.over(socket);
 
-    setSelectedChat(chat?.username);
-    setShowChat(true); // Hiển thị form chat khi bấm vào danh sách chat
+  // Kết nối tới server STOMP
+  stompClient.current.connect(
+    {},
+    (frame) => {
+      console.log("Đã kết nối STOMP server:", frame);
+    },
+    (error) => {
+      console.error("Lỗi kết nối tới STOMP server:", error);
+    }
+  );
+
+  // Đóng kết nối khi component bị hủy
+  return () => {
+    if (stompClient.current) {
+      stompClient.current.disconnect(() => {
+        console.log("Disconnected from STOMP server");
+      });
+    }
   };
+}, [currentUser]);
+
+
+
+const handleSelectChat = (chat) => {
+  console.log("Đã vào với: ", chat?.username || "Không có tên");
+
+  setReceiver(chat?.username);
+  console.log("Người nhận là ", chat?.username);
+
+  setSelectedChat(chat?.username);
+  setShowChat(true);
+
+
+  // Tạo topic dựa trên người gửi và người nhận
+  const sortedUsers = [currentUser?.username, chat.username].sort();
+  const topic = `/topic/public/${sortedUsers[0]}-${sortedUsers[1]}`;
+
+  // Kiểm tra xem topic đã đăng ký chưa
+  if (!subscribedTopics.includes(topic)) {
+    // Nếu chưa đăng ký, thì tiến hành đăng ký
+    stompClient.current.subscribe(topic, (message) => {
+      const receivedMessage = JSON.parse(message.body);
+      console.log("Received message: ", receivedMessage);
+
+      if (receivedMessage.sender === currentUser?.username || receivedMessage.receiver === currentUser?.username) {
+        setChatListRealTime((prevMessages) => [...prevMessages, receivedMessage]);
+      }
+    });
+
+    // Cập nhật trạng thái đã đăng ký topic
+    setSubscribedTopics((prevTopics) => [...prevTopics, topic]);
+  }
+};
+
+ 
+const handleKeyEnter =()=>{
+  if(event.key === "Enter"){
+    handleSendMessage();
+  }
+}
+  
+  const handleSendMessage = () => {
+    if (
+      inputMessage.trim() !== "" &&
+      stompClient.current &&
+      stompClient.current.connected
+    ) {
+      const newMessage = {
+        sender: currentUser.username, // Tên người gửi
+        receiver: receiver, // Tên người nhận
+        content: `${inputMessage}/SENDER=${currentUser?.username}-RECEIVER=${receiver}`,
+        createdAt: new Date(),
+      };
+      console.log("Đang gửi tin nhắn");
+      console.log("newMessage ", JSON.stringify(newMessage));
+
+      // Sắp xếp tên người gửi và người nhận theo thứ tự alphabet
+      const sortedUsers = [currentUser.username, receiver].sort();
+      // const topic = `/app/chat.sendMessage`;              
+      const topic = `/app/chat.sendMessage/${sortedUsers[0]}-${sortedUsers[1]}`;
+
+      // const topic = "/app/send";  // Không cần thêm {username1}-{username2}
+
+      console.log("topic ",topic);
+      
+
+      // Gửi tin nhắn đến topic chung
+      stompClient.current.send(topic, {}, JSON.stringify(newMessage));
+
+      if(newMessage.receiver === currentUser?.username || newMessage.sender === currentUser?.username){
+        console.log("khong them");
+        
+      }else{
+        setChatListRealTime((prevMessages) => [...prevMessages, newMessage]);
+
+      }
+      // Cập nhật danh sách tin nhắn
+      console.log("chat list mớ: ", chatListRealTime);
+
+      setInputMessage(""); // Xóa input sau khi gửi
+    }
+
+  };
+
   useEffect(() => {
     const user = sessionStorage.getItem("user");
     if (user) {
@@ -53,9 +160,14 @@ export default function ChatBox() {
       // console.log("user từ session: ", currentUser);
     }
   }, []);
-  // useEffect(() => {
-  //   console.log("currentUser sau khi set: ", currentUser); // Chạy khi currentUser thay đổi
-  // }, [currentUser]);
+
+
+  useEffect(() => {
+    console.log("currentUser sau khi set: ", currentUser); // Chạy khi currentUser thay đổi
+    mutate()
+    mutateByReceiverUsernameOrCurrentUser()
+  }, [currentUser]);
+
 
   // Hàm fetch dữ liệu messages
   const fetchMessages = async (url: string) => {
@@ -65,7 +177,9 @@ export default function ChatBox() {
 
   // Sử dụng useSWR để fetch messages
   const { data, isLoading, isError, mutate } = useSWR(
-    currentUser ? `http://localhost:8080/api/messages/${currentUser.username}/${receiver}` : null,
+    currentUser
+      ? `http://localhost:8080/api/messages/${currentUser.username}/${receiver}`
+      : null,
     fetchMessages
   );
 
@@ -74,7 +188,7 @@ export default function ChatBox() {
   const {
     data: dataByReceiverUsernameOrCurrentUser,
     isLoading: isLoadByReceiverUsernameOrCurrentUser,
-    isError: isErrorByReceiverUsernameOrCurrentUser,
+    error: isErrorByReceiverUsernameOrCurrentUser,
     mutate: mutateByReceiverUsernameOrCurrentUser,
   } = useSWR(
     currentUser
@@ -133,13 +247,12 @@ export default function ChatBox() {
     }
   }, [dataByReceiverUsernameOrCurrentUser]);
 
-
-  // useEffect(() => {
-  //   console.log(
-  //     "Danh sách chat real-time đã được cập nhật: dmdmdmdmdmdmdm",
-  //     chatListCurrentUserByDMM
-  //   );
-  // }, [chatListCurrentUserByDMM]);
+  useEffect(() => {
+    console.log(
+      "Danh sách chat real-time đã được cập nhật: dmdmdmdmdmdmdm",
+      chatListCurrentUserByDMM
+    );
+  }, [chatListCurrentUserByDMM]);
 
   useEffect(() => {
     if (data) {
@@ -149,32 +262,10 @@ export default function ChatBox() {
   }, [data]);
 
 
-
   // Log để kiểm tra `chatListRealTime`
   // useEffect(() => {
   //   console.log("chatListRealTime updated:", chatListRealTime);
   // }, [chatListRealTime]);
-
-
-  useEffect(() => {
-    if (!currentUser) return;
-
-    const socket = new WebSocket(`ws://localhost:8080/ws/chat`);
-
-    // Khi kết nối WebSocket mở
-    // socket.onopen = () => {
-    //   console.log("WebSocket is connected.");
-    // };
-
-    // Khi nhận được tin nhắn mới từ WebSocket
-    socket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      setChatListRealTime((prevMessages) => [...prevMessages, message]);
-    };
-
-    // Đóng kết nối khi component bị huỷ
-    return () => socket.close();
-  }, [currentUser]);
 
   const demo = () => {
     return <h1>showChatIcon: {showChatIcon.toString()}</h1>;
@@ -193,12 +284,10 @@ export default function ChatBox() {
     }
   }, []);
 
+  useEffect(() => {
+    console.log("setSelectedChat: ", selectedChat);
+  }, [selectedChat]);
 
-  // useEffect(() =>{
-  //   console.log("setSelectedChat: ", selectedChat);
-
-
-  // }, [selectedChat])
 
   const handleChatToggle = () => {
     setShowChat(!showChat); //nếu true thì thực hiện mở form chat
@@ -214,18 +303,6 @@ export default function ChatBox() {
 
   const handleMinimizeToggle = () => {
     setIsMinimized(!isMinimized); // nếu true thì thực hiện phóng to
-  };
-  const handleSendMessage = () => {
-    if (inputMessage.trim() !== "") {
-      const newMessage = {
-        sender: currentUser,
-        receiver: selectedChat,
-        content: inputMessage,
-        createAt: new Date(),
-      };
-      socket.send(JSON.stringify(newMessage));
-      setInputMessage(""); // Clear input
-    }
   };
 
   if (isLoading) return <p>Loading messages...</p>;
@@ -277,7 +354,6 @@ export default function ChatBox() {
               </div>
               <div className="card-body overflow-auto">
                 <ListGroup>
-                  CHAT LIST THEO NGƯỜI NHẬN LÀ NGƯỜI GỬI HIỆN TẠI
                   {chatListCurrentUserByDMM.map((chatGroup, index) => {
                     // Xác định người dùng trong tin nhắn có khác với người dùng hiện tại không
                     const chatUser =
@@ -291,7 +367,7 @@ export default function ChatBox() {
                       <ListGroup.Item
                         key={chatUser?.username || index} // Dùng username làm key, hoặc index nếu không có username
                         onClick={() => handleSelectChat(chatUser)}
-                        className="d-flex flex-column"
+                        className=" d-flex flex-column"
                       >
                         <div className="d-flex align-items-center">
                           <img
@@ -383,23 +459,35 @@ export default function ChatBox() {
                     className="card-body overflow-auto"
                     style={{ height: "200px" }}
                   >
-                    {chatListRealTime.map((msg) => (
+                    {chatListRealTime.map((msg, index) => (
                       <div
-                        key={msg.messageId}
-                        className={`d-flex ${msg.sender.username === currentUser?.username
-                          ? "justify-content-end"
-                          : "justify-content-start"
+                        key={msg.messageId || index}
+                        className={`d-flex ${
+                          msg.sender.username === currentUser?.username ||
+                          msg.sender === currentUser?.username
+
+                            ? "justify-content-end"
+                            : "justify-content-start"
                           }`}
                       >
+
                         <div
-                          className={`p-2 rounded mb-2 ${msg.sender.username === currentUser?.username
-                            ? "bg-primary text-white"
-                            : "bg-light text-dark"
+                          className={`p-2 rounded mb-2 ${
+                            msg.sender.username === currentUser?.username ||
+                            msg.sender === currentUser?.username
+
+                              ? "bg-primary text-white"
+                              : "bg-light text-dark"
                             }`}
                           style={{ maxWidth: "80%" }}
                         >
+                          
                           {msg.content}
+                          {/* {msg.isDelete ? "Đã xóa tin nhắn" : msg.content}  */}
+                          
+
                         </div>
+
                       </div>
                     ))}
                   </div>
@@ -414,7 +502,7 @@ export default function ChatBox() {
                       placeholder="Nhập câu hỏi tiếp theo của bạn"
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
-                      // onKeyDown={handleKeyDown} // sự kiện key down
+                      onKeyDown={handleKeyEnter} // sự kiện key down
                       className="me-2"
                     />
                     <Button
