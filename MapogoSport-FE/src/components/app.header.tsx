@@ -145,7 +145,7 @@ const Header = (props: HeaderProps) => {
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowForgotPassword(true)} style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
                                     {/* <hr className='m-0' /> */}
                                     <Link href='/user/profile' className={`dropdown-item text-decoration-none text-dark ${userData ? '' : 'd-none'}`}>Thông tin tài khoản</Link>
-                                    {userData?.authorities.map((item, index) => {
+                                    {userData && userData.authorities.map((item, index) => {
                                         if (item.role.name === "ROLE_USER") {
                                             return null;
                                         }
@@ -156,7 +156,11 @@ const Header = (props: HeaderProps) => {
                                         }
                                         if (item.role.name === "ROLE_ADMIN") {
                                             return (
-                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</a>
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Quản trị viên</a>
+                                            );
+                                        } else if (item.role.name === "ROLE_STAFF") {
+                                            return (
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Nhân viên</a>
                                             );
                                         }
                                         return null;

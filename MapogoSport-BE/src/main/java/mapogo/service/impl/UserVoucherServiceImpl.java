@@ -2,7 +2,6 @@ package mapogo.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.UserVoucherDAO;
-import mapogo.entity.User;
 import mapogo.entity.UserVoucher;
 import mapogo.service.UserVoucherService;
 
@@ -59,4 +57,15 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 		return resultList;
 	}
 	
+	//của Mỵ từ đây
+	@Override
+	public UserVoucher findByUserVoucherId(int userVoucherId) {
+		return userVoucherDao.findById(userVoucherId).get();
+	}
+
+	@Override
+	public UserVoucher update(UserVoucher userVoucher) {
+		return userVoucherDao.save(userVoucher);
+	}
+	//đến đây
 }

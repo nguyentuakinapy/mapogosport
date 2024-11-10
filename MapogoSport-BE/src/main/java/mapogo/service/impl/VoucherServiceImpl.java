@@ -35,4 +35,10 @@ public class VoucherServiceImpl implements VoucherService{
 		return dao.findAll();
 	}
 
+	//của Mỵ từ đây
+	@Override
+	public Voucher findById(int id) {
+		return dao.findById(id).get();
+	}
+	//đến đây
 }

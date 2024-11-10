@@ -18,8 +18,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import mapogo.dao.ProductDAO;
+import mapogo.dao.ProductDetailDAO;
 import mapogo.dao.ProductDetailSizeDAO;
 import mapogo.dto.ProductDetailSizeDTO;
+import mapogo.entity.Product;
 import mapogo.entity.ProductDetail;
 import mapogo.entity.ProductDetailSize;
 import mapogo.entity.Size;
@@ -35,6 +38,10 @@ public class ProductDetailSizeRestController {
 	ObjectMapper objectMapper;
 	@Autowired
 	ProductDetailSizeDAO productDetailSizeDAO;
+	@Autowired
+	ProductDetailDAO productDetailDAO;
+	@Autowired
+	ProductDAO productDAO;
 
 	
 	@GetMapping
@@ -48,8 +55,19 @@ public class ProductDetailSizeRestController {
     public List<ProductDetailSize> findByProductDetailId(@PathVariable Integer productDetailId) {
         return productDetailSizeService.findProductDetailSize_By_ProductDetailId(productDetailId);
     }
-    
-    
+
+	
+    public void updateProductStockByProductId(Integer productId) {
+        Integer totalQuantity = productDAO.getTotalQuantityByProductId(productId);
+        Product product = productDAO.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setStock(totalQuantity != null ? totalQuantity : 0);
+        if(product.getStock() == 0) {
+        	product.setStatus("Hết hàng");
+        }else {
+        	product.setStatus("Còn hàng");
+        }
+        productDAO.save(product);
+    }
     
     @PostMapping("/create/{productDetailId}")
     public ProductDetailSize createProductDetailSize(
@@ -113,6 +131,15 @@ public class ProductDetailSizeRestController {
             ProductDetailSize savedProductDetailSize = productDetailSizeService.create(productDetailSize);
             System.err.println("Successfully saved ProductDetailSize with ID: " + savedProductDetailSize.getProductDetailSizeId());
             
+            // set product theo số lượng
+            Integer productDetailGetId = productDetailDAO.findProductIdByProductDetailId(productDetailId);
+            if (productDetailGetId != null ) {
+                updateProductStockByProductId(productDetailGetId);
+            } else {
+                System.err.println("Sản phẩm không tồn tại");
+            }
+
+
             return savedProductDetailSize;
         } catch (Exception e) {
             System.err.println("Error while saving ProductDetailSize: " + e.getMessage());
@@ -129,8 +156,18 @@ public class ProductDetailSizeRestController {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ProductDetailSize không tồn tại");
             }
             
+            Integer productDetailIdByProductDetailSizeId = productDetailSizeDAO.findProductDetailIdByProductDetailSizeId(productDetailSizeId);  
+            Integer productDetailGetId = productDetailDAO.findProductIdByProductDetailId(productDetailIdByProductDetailSizeId);
+           
             // Xóa ProductDetailSize
             productDetailSizeDAO.deleteById(productDetailSizeId);
+            
+            // Kiểm tra và lấy Product từ ProductDetail
+            if (productDetailGetId != null ) {
+                updateProductStockByProductId(productDetailGetId);
+            } else {
+                System.err.println("Sản phẩm không tồn tại");
+            }
             return ResponseEntity.ok("ProductDetailSize đã được xóa thành công");
         } catch (Exception e) {
             System.err.println("Error while deleting ProductDetailSize: " + e.getMessage());
@@ -145,6 +182,7 @@ public class ProductDetailSizeRestController {
         try {
             // Chuyển đổi dữ liệu JSON thành đối tượng ProductDetailSizeDTO
             ProductDetailSizeDTO productDetailSizeDTO = objectMapper.readValue(productDetailSizeJson, ProductDetailSizeDTO.class);
+            
             
             // Tìm `ProductDetailSize` từ database
             ProductDetailSize existingProductDetailSize = productDetailSizeDAO.findById(productDetailSizeId)
@@ -161,6 +199,15 @@ public class ProductDetailSizeRestController {
 
             // Lưu cập nhật vào database
             ProductDetailSize updatedProductDetailSize = productDetailSizeService.update(existingProductDetailSize);
+            
+            Integer productDetailIdByProductDetailSizeId = productDetailSizeDAO.findProductDetailIdByProductDetailSizeId(productDetailSizeId);  
+            Integer productDetailGetId = productDetailDAO.findProductIdByProductDetailId(productDetailIdByProductDetailSizeId);
+            // Kiểm tra và lấy Product từ ProductDetail
+               if (productDetailGetId != null ) {
+                   updateProductStockByProductId(productDetailGetId);
+               } else {
+                   System.err.println("Sản phẩm không tồn tại");
+               }
             return updatedProductDetailSize;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể cập nhật ProductDetailSize", e);

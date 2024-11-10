@@ -38,7 +38,7 @@ public class Wallet {
 	
 	@ManyToOne
 	@JoinColumn(name="Username")
-	@JsonIgnore
+	@JsonBackReference
 	User user;
 	
 	@Column(name="Balance")

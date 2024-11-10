@@ -22,4 +22,5 @@ public class OrderDTO {
     private Integer voucherId;
     private String note;
     private Double shipFee;
+    private int userVoucherId;
 }

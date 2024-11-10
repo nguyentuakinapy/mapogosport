@@ -21,9 +21,13 @@ import mapogo.entity.PaymentMethod;
 import mapogo.entity.PhoneNumberUser;
 import mapogo.entity.ProductDetailSize;
 import mapogo.entity.User;
+import mapogo.entity.UserVoucher;
+import mapogo.entity.Voucher;
 import mapogo.service.OrderService;
 import mapogo.service.PaymentMethodService;
 import mapogo.service.UserService;
+import mapogo.service.UserVoucherService;
+import mapogo.service.VoucherService;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -92,7 +96,10 @@ public class OrderServiceImpl implements OrderService {
 	UserService userService;
 	@Autowired
 	PaymentMethodService paymentService;
-
+	@Autowired
+	VoucherService voucherService;
+	@Autowired
+	UserVoucherService userVoucherService;
 	@Override
 	public Order createOrder(OrderDTO orderDTO) {
 		Order order = new Order();
@@ -104,9 +111,18 @@ public class OrderServiceImpl implements OrderService {
 		order.setStatus(orderDTO.getStatus());
 		order.setAmount(orderDTO.getAmount());
 		PaymentMethod payment = paymentService.findByName(orderDTO.getPaymentMethod());
+		System.out.println("paymentMethod:"+payment.getName());
 		order.setPaymentMethod(payment);
 		order.setNote(orderDTO.getNote());
-//		order.setVoucher();
+		
+		if (orderDTO.getVoucherId()!=null) {
+			Voucher voucher = voucherService.findById(orderDTO.getVoucherId());
+			order.setVoucher(voucher);
+			UserVoucher userVoucher = userVoucherService.findByUserVoucherId(orderDTO.getUserVoucherId());
+			userVoucher.setStatus("Used");
+			userVoucherService.update(userVoucher);
+		}
+		
 		order.setShipFee(orderDTO.getShipFee());
 
 		return orderDAO.save(order);
@@ -188,29 +204,32 @@ public class OrderServiceImpl implements OrderService {
 		return orderDAO.getOrdersBetweenDates(startDay, adjustedEndDay, statuses);
 	}
 
-	@Override
-	public List<Order> getOrdersForSingleDate(LocalDateTime date) {
-		// Adjusting start and end of day for the given date
-		LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
-		LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
-		// Fetching orders for the entire day
-		return orderDAO.getOrdersForSingleDate(startOfDay, endOfDay, statuses);
-	}
+    @Override
+    public List<Order> getOrdersForSingleDate(LocalDateTime date) {
+        // Adjusting start and end of day for the given date
+        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
+        // Fetching orders for the entire day
+        return orderDAO.getOrdersForSingleDate(startOfDay, endOfDay,statuses);
+    }
+
+    @Override
+    public List<Object> findCategoryProductTotalsByDateAndStatus(LocalDateTime date) {
+        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
+        return orderDAO.findCategoryProductTotalsByDateAndStatus(startOfDay, endOfDay, statuses);
+    }
+
+    @Override
+    public List<Object> findCategoryProductTotalsByBetweenDateAndStatus(LocalDateTime startDate, LocalDateTime endDate) {
+        LocalDateTime adjustedEndDay = endDate.withHour(23).withMinute(59).withSecond(59);
+        return orderDAO.findCategoryProductTotalsByBetweenAndStatus(startDate, adjustedEndDay, statuses);
+    }
 
 	@Override
-	public List<Object> findCategoryProductTotalsByDateAndStatus(LocalDateTime date) {
-		LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
-		LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
-		return orderDAO.findCategoryProductTotalsByDateAndStatus(startOfDay, endOfDay, statuses);
+	public void delete(Order order) {
+		orderDAO.delete(order);
 	}
-
-	@Override
-	public List<Object> findCategoryProductTotalsByBetweenDateAndStatus(LocalDateTime startDate,
-			LocalDateTime endDate) {
-		LocalDateTime adjustedEndDay = endDate.withHour(23).withMinute(59).withSecond(59);
-		return orderDAO.findCategoryProductTotalsByBetweenAndStatus(startDate, adjustedEndDay, statuses);
-	}
-
 
 
 }

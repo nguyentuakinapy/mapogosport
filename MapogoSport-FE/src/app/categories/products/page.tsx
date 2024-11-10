@@ -164,8 +164,6 @@ const Categories = () => {
                                                     </div>
                                                     <div className="number ms-2">({product.productReviews.length} bình luận)</div> {/* Display the number of comments */}
                                                 </div>
-
-                                            </div>
                                         </div>
                                     </Col>
                                 );

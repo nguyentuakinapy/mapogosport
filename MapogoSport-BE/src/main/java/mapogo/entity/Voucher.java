@@ -76,6 +76,6 @@ public class Voucher implements Serializable {
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JsonManagedReference("userVoucher-voucher-reference")
-	private List<UserVoucher> userVoucher;
+	private List<UserVoucher> userVouchers;
 
 }

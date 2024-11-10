@@ -9,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import ReactQueryProvider from "@/app/utils/UseQueryProviders/ReactQueryProvider";
 import { vi } from "date-fns/locale/vi";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
+import { UserProvider } from "@/app/context/UserContext";
 
 registerLocale('vi', vi);
 setDefaultLocale('vi');
@@ -87,8 +88,11 @@ export default function AdminLayout({
             }
         }
     }, []);
+
+    const [refreshKey, setRefreshKey] = useState<number>(0);
+
     return (
-        <>
+        <UserProvider refreshKey={refreshKey}>
             <ReactQueryProvider>
                 <Nav isAniActive={isAniActive} toggleAni={toggleAni} isActive={isActive} setIsActive={setIsActive} />
                 <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} />
@@ -99,6 +103,6 @@ export default function AdminLayout({
                 </main>
                 <ToastContainer></ToastContainer>
             </ReactQueryProvider>
-        </>
+        </UserProvider>
     )
 }

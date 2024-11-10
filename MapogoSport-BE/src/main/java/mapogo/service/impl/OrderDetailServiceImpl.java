@@ -19,4 +19,16 @@ public class OrderDetailServiceImpl implements OrderDetailService{
 		return orderDetailDAO.findByOrder_OrderId(orderId);
 	}
 
+	//của Mỵ từ đây
+	@Override
+	public OrderDetail create(OrderDetail orderDetail) {
+		return orderDetailDAO.save(orderDetail);
+	}
+
+	@Override
+	public void delete(OrderDetail orderDetail) {
+		orderDetailDAO.delete(orderDetail);		
+	}
+	//đến đây
+
 }

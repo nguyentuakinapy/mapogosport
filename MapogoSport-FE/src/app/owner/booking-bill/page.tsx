@@ -16,6 +16,7 @@ const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [bookingData, setBookingData] = useState<BookingFindAll[]>([]);
     const [activeTab, setActiveTab] = useState<string>('all');
+    const [username, setUsername] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8);
@@ -26,7 +27,10 @@ const OwnerBookingBill = () => {
         'Đã hủy'
     ];
 
-    const username = localStorage.getItem('username');
+    useEffect(() => {
+        const storedUsername = localStorage.getItem('username');
+        setUsername(storedUsername);
+    }, []);
 
     const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/owner/booking/findAll/${username}`, fetcher, {
         revalidateIfStale: false,
@@ -92,33 +96,37 @@ const OwnerBookingBill = () => {
     };
 
     const renderTable = (filteredBookings: BookingFindAll[]) => {
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
         return (
             <div className="box-table-border mb-4">
                 <Table striped className="mb-0">
                     <thead>
                         <tr>
-                            <th style={{ width: '110px' }}>Mã hóa đơn</th>
-                            <th style={{ width: '220px' }}>Tên sân</th>
+                            <th style={{ width: '110px' }}>STT</th>
+                            <th style={{ width: '180px' }}>Tên sân</th>
                             <th style={{ width: '200px' }}>Họ và tên</th>
                             <th>Ngày đặt</th>
                             <th>Tổng tiền</th>
-                            <th style={{ width: '200px' }}>Số điện thoại</th>
+                            <th>Còn lại</th>
+                            <th style={{ width: '100px' }}>SĐT</th>
                             <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredBookings.length > 0 ?
-                            filteredBookings.map((booking) => (
+                            filteredBookings.map((booking, index) => (
                                 <tr key={booking.bookingId}>
-                                    <td className="text-start title">
-                                        <Link href={`/owner/booking-bill/${booking.bookingId}`}>{`#${booking.bookingId}`}</Link>
-                                    </td>
-                                    <td className="text-start">{booking.sportFieldName}</td>
+                                    <td className="text-start title">{`#${indexOfFirstItem + index + 1}`}</td>
+                                    <td className="text-start title">{booking.sportFieldName}</td>
                                     <td className="title">{booking.user.username == 'sportoffline' ?
                                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
+                                    <td>{booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0 đ'
+                                        : `${(booking.totalAmount - booking.prepayPrice).toLocaleString()} đ`}</td>
                                     <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
                                     <td>{renderStatusDropdown(booking)}</td>
                                     <td>
@@ -139,7 +147,8 @@ const OwnerBookingBill = () => {
         const fullName = booking.user.username === 'sportoffline' ? (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname;
         return (
             (fullName && fullName.toLowerCase().includes(searchTerm)) ||
-            booking.sportFieldName.toLowerCase().includes(searchTerm)
+            booking.sportFieldName.toLowerCase().includes(searchTerm) ||
+            booking.bookingUserPhone.includes(searchTerm)
         );
     }).filter(booking => {
         switch (activeTab) {
@@ -200,12 +209,13 @@ const OwnerBookingBill = () => {
 
             doc.text("Danh Sách Hóa Đơn", 14, 16);
 
-            const tableColumn = ["Mã HD", "Họ và tên", "Ngày đặt", "Tổng tiền", "Số điện thoại", "Trạng thái"];
+            const tableColumn = ["STT", "Tên sân", "Họ và tên", "Ngày đặt", "Tổng tiền", "Số điện thoại", "Trạng thái"];
             const tableRows: string[][] = [];
 
-            filteredBookings.forEach(booking => {
+            filteredBookings.forEach((booking, index) => {
                 const orderData = [
-                    `#${booking.bookingId}`,
+                    `#${index + 1}`,
+                    booking.sportFieldName,
                     booking.user.username == 'sportoffline' ?
                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname,
                     new Date(booking.date).toLocaleDateString('en-GB'),
@@ -230,10 +240,11 @@ const OwnerBookingBill = () => {
                 columnStyles: {
                     0: { halign: 'left' },
                     1: { halign: 'left' },
-                    2: { halign: 'center' },
-                    3: { halign: 'right', cellWidth: 30 },
-                    4: { halign: 'left' },
-                    5: { halign: 'center' },
+                    2: { halign: 'left' },
+                    3: { halign: 'center' },
+                    4: { halign: 'right', cellWidth: 30 },
+                    5: { halign: 'left' },
+                    6: { halign: 'center' },
                 },
                 didParseCell: (data: any) => {
                     if (data.cell.text.length > 0) {
@@ -261,7 +272,8 @@ const OwnerBookingBill = () => {
             const worksheet = workbook.addWorksheet('Hóa Đơn');
 
             worksheet.columns = [
-                { header: 'Mã hóa đơn', key: 'orderId', width: 15 },
+                { header: 'STT', key: 'orderId', width: 15 },
+                { header: 'Tên sân', key: 'sportFieldName', width: 25 },
                 { header: 'Họ và tên', key: 'fullname', width: 25 },
                 { header: 'Ngày đặt', key: 'date', width: 15 },
                 { header: 'Tổng tiền', key: 'amount', width: 15, style: { numFmt: '#,##0 ₫' } },
@@ -269,9 +281,10 @@ const OwnerBookingBill = () => {
                 { header: 'Trạng thái', key: 'status', width: 15 },
             ];
 
-            filteredBookings.forEach(booking => {
+            filteredBookings.forEach((booking, index) => {
                 worksheet.addRow({
-                    orderId: `#${booking.bookingId}`,
+                    orderId: `#${index + 1}`,
+                    sportFieldName: booking.sportFieldName,
                     fullname: booking.user.username == 'sportoffline' ?
                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname,
                     date: new Date(booking.date).toLocaleDateString('en-GB'),
@@ -314,7 +327,7 @@ const OwnerBookingBill = () => {
             <div className="box-ultil">
                 <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Hóa Đơn</b>
                 <div>
-                    <Form.Control type="text" placeholder="Tìm theo tên..." onChange={handleSearch} />
+                    <Form.Control type="text" placeholder="Tìm theo tên và SĐT..." onChange={handleSearch} />
                 </div>
                 <div>
                     <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={exportPDF}>Xuất File PDF</Button>

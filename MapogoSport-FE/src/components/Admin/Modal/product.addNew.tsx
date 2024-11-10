@@ -35,6 +35,8 @@ interface ProductWasAdd {
   productNewId: number;
 }
 let ProductWasCreated: number;
+let canProceed = false;
+
 
 // let  ProductDetailWasCreated: number;
 
@@ -49,8 +51,8 @@ const ProductAddNew = ({
 }: UserProps) => {
   const [value, setValue] = useState("");
   const option = [
-    { label: "Còn hàng", value: "Còn hàng" },
     { label: "Hết hàng", value: "Hết hàng" },
+    { label: "Còn hàng", value: "Còn hàng" }
   ];
 
   const optionColor = [
@@ -90,14 +92,21 @@ const ProductAddNew = ({
   // Fetch ProductDetail dựa vào productId
 
   // Chỉ fetch dữ liệu khi currentProduct?.productId có giá trị
-  const { data: productDetails, error: errorProductDetails, mutate: mutateProductDetails } = useSWR<
-    ProductDetail[]
-  >(
+  const {
+    data: productDetails,
+    error: errorProductDetails,
+    mutate: mutateProductDetails,
+    isLoading: productDetailsLoading,
+  } = useSWR<ProductDetail[]>(
     currentProduct?.productId
       ? `${BASE_URL}/rest/product-detail/${currentProduct?.productId}`
       : null,
     fetcher
   );
+  useEffect(()=>{
+    console.log('productDetails', productDetails);
+    
+  }, [productDetails])
 
   const [galleries, setGalleries] = useState<Gallery[]>([]);
 
@@ -172,7 +181,6 @@ const ProductAddNew = ({
   // fetch data category
   const mutationAddProductDetail = useMutation({
     mutationFn: (putData: any) => {
-
       return axios.post(
         `http://localhost:8080/rest/product-detail/create/${putData.id}`, // id product
         putData.formData,
@@ -200,7 +208,7 @@ const ProductAddNew = ({
       "country",
       "price",
       "description",
-      "stock",
+       
     ];
     const isFormValid = validateFormFields(formValues, requiredFields);
 
@@ -255,6 +263,7 @@ const ProductAddNew = ({
       image: "",
       stock: 0,
     });
+    setDisplayPrice("");
     setNewColor("");
     setPreviewImageProductColor(null);
     setPreviewImage(null);
@@ -287,6 +296,39 @@ const ProductAddNew = ({
 
     console.log("selected Input change value: ", value);
   };
+
+  const [displayPrice, setDisplayPrice] = useState<string>("");
+  // Hàm xử lý thay đổi giá trị input
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, ""); // Loại bỏ tất cả ký tự không phải số
+    const numericValue = Number(rawValue); // Chuyển giá trị thành số
+
+    if (!isNaN(numericValue) && numericValue >= 0) {
+      // Cập nhật giá trị số vào formValues
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        price: numericValue,
+      }));
+
+      // Cập nhật giá trị hiển thị dạng tiền tệ
+      setDisplayPrice(
+        new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }).format(numericValue)
+      );
+    }
+  };
+  useEffect(() => {
+    if (formValues.price !== 0) {
+      setDisplayPrice(
+        new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }).format(formValues.price)
+      );
+    }
+  }, [formValues.price]);
 
   const handleInputChangeNumber = (
     e: React.ChangeEvent<
@@ -360,12 +402,12 @@ const ProductAddNew = ({
   // Định nghĩa hàm API để lấy gallery
 
   const handleClose = () => {
+    
     setShowAddProduct(false);
     setSelectedProductDetail([]);
     setFormValueNull(); // onFetch();
     setActiveTab("edit"); // set sang atb edit
   };
-
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (modalType === "add") {
@@ -422,56 +464,38 @@ const ProductAddNew = ({
     }
   };
   // Hàm để kiểm tra các trường bắt buộc
-  // const validateFormFields = (formValues, requiredFields) => {
-  //   const missingFields = requiredFields.filter((field) => !formValues[field]);
-
-  //   if (missingFields.length > 0) {
-  //     if (!previewImage)
-  //       toast.warning("Vui lòng chọn hình đại diện của sản phẩm.");
-
-  //     // Hiển thị thông báo lỗi cho từng trường còn thiếu
-  //     missingFields.forEach((field) => {
-  //       // console.error(`Vui lòng nhập trường: ${field}`);
-  //       toast.warning(`Vui lòng nhập trường: ${field}`);
-  //     });
-  //     return false; // Trả về false nếu có trường còn thiếu
-  //   }
-
-  //   return true; // Trả về true nếu không có trường nào thiếu
-  // };
   const [errorFields, setErrorFields] = useState({});
 
   const validateFormFields = (formValues, requiredFields) => {
     const missingFields = requiredFields.filter((field) => !formValues[field]);
-    
+
     if (missingFields.length > 0) {
       if (!previewImage)
         toast.warning("Vui lòng chọn hình đại diện của sản phẩm.");
-  
+
       // Hiển thị thông báo lỗi cho từng trường còn thiếu
       missingFields.forEach((field) => {
         toast.warning(`Vui lòng nhập trường: ${field}`);
       });
-  
+
       // Cập nhật trạng thái các trường lỗi
       const newErrorFields = {};
       missingFields.forEach((field) => {
         newErrorFields[field] = true;
       });
       setErrorFields(newErrorFields);
-  
+
       // Focus vào trường đầu tiên gặp lỗi
       const firstMissingField = missingFields[0];
       document.getElementById(firstMissingField)?.focus();
-  
+
       return false; // Trả về false nếu có trường còn thiếu
     }
-  
+
     // Xóa lỗi nếu tất cả các trường đều hợp lệ
     setErrorFields({});
     return true;
   };
-  
 
   const validateForm = () => {
     let isValid = true;
@@ -502,6 +526,8 @@ const ProductAddNew = ({
     return isValid;
   };
 
+
+
   const handleSave = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -515,7 +541,7 @@ const ProductAddNew = ({
       "country",
       "price",
       "description",
-      "stock",
+       
     ];
     const isFormValid = validateFormFields(formValues, requiredFields);
 
@@ -599,43 +625,41 @@ const ProductAddNew = ({
           }
         );
       } else if (modalType === "edit" && currentProduct) {
-        let canProceed = false;
 
         // Trường hợp sản phẩm chưa có ProductDetail nào
         if (!productDetails || productDetails.length === 0) {
-            // Chỉ cho phép nếu có đủ thông tin để tạo ProductDetail mới
-            if (
-                newColor !== "" &&
-                selectedGalleryFiles.length > 0 &&
-                previewImageProductColor !== null
-            ) {
-                canProceed = true; // Cho phép thêm ProductDetail mới nếu đủ thông tin
-            }
+          // Chỉ cho phép nếu có đủ thông tin để tạo ProductDetail mới
+          if (
+            newColor !== "" &&
+            selectedGalleryFiles.length > 0 &&
+            previewImageProductColor !== null
+          ) {
+            canProceed = true; // Cho phép thêm ProductDetail mới nếu đủ thông tin
+          }
         } else {
-            // Nếu sản phẩm đã tồn tại ProductDetail
-            if (!selectedProductDetail ) {
-                // Nếu `selectedProductDetail` là mảng rỗng, kiểm tra các điều kiện để thêm mới
-                if (
-                    newColor !== "" &&
-                    selectedGalleryFiles.length > 0 &&
-                    previewImageProductColor !== null
-                ) {
-                    canProceed = true; // Có đủ thông tin để thêm mới
-                } else {
-                    canProceed = false; // Ngăn việc tạo mới khi thiếu thông tin
-                }
+          // Nếu sản phẩm đã tồn tại ProductDetail
+          if (!selectedProductDetail) {
+            // Nếu `selectedProductDetail` là mảng rỗng, kiểm tra các điều kiện để thêm mới
+            if (
+              newColor !== "" &&
+              selectedGalleryFiles.length > 0 &&
+              previewImageProductColor !== null
+            ) {
+              canProceed = true; // Có đủ thông tin để thêm mới
             } else {
-                // Trường hợp có `selectedProductDetail` cụ thể để cập nhật
-                canProceed = true; // Cho phép cập nhật nếu đã chọn `ProductDetail`
+              canProceed = false; // Ngăn việc tạo mới khi thiếu thông tin
             }
+          } else {
+            // Trường hợp có `selectedProductDetail` cụ thể để cập nhật
+            canProceed = true; // Cho phép cập nhật nếu đã chọn `ProductDetail`
+          }
         }
-        
+
         // Kiểm tra nếu không đủ điều kiện để tiếp tục, dừng xử lý và cảnh báo
         if (!canProceed) {
-            toast.warning("Nhập ProductDetail đi, đang trống đấy");
-            return;
+          toast.warning("Nhập ProductDetail đi, đang trống đấy");
+          return;
         }
-        
 
         await mutation.mutateAsync(
           { formData: formData, id: currentProduct.productId },
@@ -702,17 +726,19 @@ const ProductAddNew = ({
     handleClose();
   };
 
+
+
   // // Fetch ProductDetailSize dựa vào productDetailId
-  const { data: productDetailSizes, error: errorProductDetailSizes, mutate } = useSWR<
-    ProductDetailSize[]
-  >(
+  const {
+    data: productDetailSizes,
+    error: errorProductDetailSizes,
+    mutate,
+  } = useSWR<ProductDetailSize[]>(
     selectedProductDetail.productDetailId
       ? `${BASE_URL}/rest/product-detail-size/${selectedProductDetail.productDetailId}`
       : null,
     fetcher
   );
-
-
 
   // Đồng bộ dữ liệu với selectedProductDetailSize
   useEffect(() => {
@@ -728,6 +754,82 @@ const ProductAddNew = ({
     return <div>Lỗi loading dữ liệu size màu chi tiết sản phẩm...</div>;
   // if (!productDetails)
   //   return <div>Đang loading dữ liệu chi tiết sản phẩm...</div>;
+  // const handleOpenTabColor = (tab: string) => {
+  //   // Kiểm tra các trường bắt buộc
+  //   const requiredFields = [
+  //     "name",
+  //     "brand",
+  //     "status",
+  //     "country",
+  //     "price",
+  //     "description",
+  //      
+  //   ];
+  //   const isFormValid = validateFormFields(formValues, requiredFields);
+
+  //   if (!isFormValid) {
+  //     return; // Dừng hàm nếu có trường chưa nhập
+  //   }
+
+  //   setActiveTab(tab); // Chuyển tab nếu đã chọn màu hoặc là tab khác
+  //   // setSelectedProductDetail([])
+  //   if(tab === "edit"){
+  //   if (
+  //     !selectedProductDetail ||
+  //     selectedProductDetail.productDetailId == null
+  //   ) {
+  //     if (
+  //       newColor ||
+  //       previewImageProductColor ||
+  //       selectedGalleryFiles.length > 0
+  //     ) {
+  //       console.log("giữ nguyên");
+  //     } else {
+  //       setSelectedProductDetail([]);
+  //       setGalleries([]);
+  //       setSelectedGalleryFiles([]);
+  //     }
+  //   } else {
+  //     // Nếu đã chọn `selectedProductDetail`, giữ nguyên giá trị hiện tại
+  //     console.log(
+  //       "Chuyển tab, giữ nguyên ProductDetail đã chọn với ID:",
+  //       selectedProductDetail.productDetailId
+  //     );
+  //     handleSelectedColor(selectedProductDetail);
+  //   }
+  // }else if(tab ==="add-details"){
+  //   setNewColor("")
+  //   setPreviewImageProductColor(null)
+  //   setSelectedProductDetail([]);
+  //   setGalleries([]);
+  //   setSelectedGalleryFiles([]);
+  // }
+  // };
+  const handleTabClick = (tab: string) => {
+    const requiredFields = [
+      "name",
+      "brand",
+      "status",
+      "country",
+      "price",
+      "description",
+       
+    ];
+    const isFormValid = validateFormFields(formValues, requiredFields);
+
+    if (!isFormValid) {
+      return; // Dừng hàm nếu có trường chưa nhập
+    }
+
+    setActiveTab(tab); // Chuyển tab nếu đã chọn màu hoặc là tab khác
+    console.log(tab);
+    setSelectedProductDetail([]);
+    setNewColor("");
+    setPreviewImageProductColor(null);
+    setGalleries([]);
+    setSelectedGalleryFiles([]);
+    console.log("form trống hoàn toàn");
+  };
   const handleOpenTabColor = (tab: string) => {
     // Kiểm tra các trường bắt buộc
     const requiredFields = [
@@ -737,7 +839,7 @@ const ProductAddNew = ({
       "country",
       "price",
       "description",
-      "stock",
+       
     ];
     const isFormValid = validateFormFields(formValues, requiredFields);
 
@@ -746,24 +848,68 @@ const ProductAddNew = ({
     }
 
     setActiveTab(tab); // Chuyển tab nếu đã chọn màu hoặc là tab khác
-    setSelectedProductDetail([]);
-    // Kiểm tra nếu `selectedProductDetail` không có `productDetailId`, đặt lại giá trị rỗng
-    if (
-      !selectedProductDetail ||
-      selectedProductDetail.productDetailId == null
-    ) {
-      setSelectedProductDetail([]);
-      setGalleries([]);
-      // setSelectedGalleryFiles([]);
-    } else {
-      // Nếu đã chọn `selectedProductDetail`, giữ nguyên giá trị hiện tại
+    console.log(tab);
+
+    if (tab === "edit") {
+      // Kiểm tra nếu `selectedProductDetail` đã được chọn
       console.log(
-        "Chuyển tab, giữ nguyên ProductDetail đã chọn với ID:",
-        selectedProductDetail.productDetailId
+        "selectedProductDetail có null ko",
+        selectedProductDetail?.productDetailId
       );
+
+      if (
+        selectedProductDetail &&
+        selectedProductDetail.productDetailId != null
+      ) {
+        // Nếu đã có `selectedProductDetail`, giữ nguyên và hiển thị các thông tin hiện tại
+        console.log(
+          "Chuyển tab, giữ nguyên ProductDetail đã chọn với ID:",
+          selectedProductDetail.productDetailId
+        );
+        handleSelectedColor(selectedProductDetail);
+      } else {
+        console.log("new cloeeeeeeeee", newColor);
+
+        if (
+          newColor != null ||
+          previewImageProductColor != null ||
+          selectedGalleryFiles != null
+        ) {
+          console.log("giữu nguyên");
+        } else {
+          setSelectedProductDetail([]);
+          setNewColor("");
+          setPreviewImageProductColor(null);
+          setGalleries([]);
+          setSelectedGalleryFiles([]);
+          // console.log("form trống hoàn toàn");
+        }
+      }
+    } else {
+      // Nếu không có giá trị nào, để form trống hoàn toàn
+      if (!selectedProductDetail) {
+        console.log("new cloeeeeeeeee", newColor);
+
+        if (
+          newColor != null ||
+          previewImageProductColor != null ||
+          selectedGalleryFiles != null
+        ) {
+          console.log("giữu nguyên");
+        } else {
+          setSelectedProductDetail([]);
+          setNewColor("");
+          setPreviewImageProductColor(null);
+          setGalleries([]);
+          setSelectedGalleryFiles([]);
+          // console.log("form trống hoàn toàn");
+        }
+      } else {
+        handleSelectedColor(selectedProductDetail);
+      }
     }
-    // setShowAlert(false); // Tắt cảnh báo nếu đã chọn màu
   };
+
   // Hàm xử lý khi chọn ảnh
   const handleImageChangeProductGallery = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -771,7 +917,10 @@ const ProductAddNew = ({
     const files = event.target.files;
     if (files) {
       const newFiles = Array.from(files); // Convert FileList to Array
+      console.log("tên ảnh: ", newFiles);
+
       setSelectedGalleryFiles((prevFiles) => [...prevFiles, ...newFiles]); // Thêm ảnh mới vào mảng
+      console.log("SelectedGalleryFiles", selectedGalleryFiles);
     }
   };
 
@@ -806,9 +955,9 @@ const ProductAddNew = ({
         `http://localhost:8080/rest/product-detail-size/delete/${productDetailSizeId}`
       );
       toast.success("xóa thành công");
-      console.log(response.data); 
+      console.log(response.data);
       mutate(); // Gọi mutate để refetch dữ liệu
-
+      onFetch();
     } catch (error) {
       toast.error("xóa không thành công");
       console.error("Error deleting ProductDetailSize:", error);
@@ -859,6 +1008,9 @@ const ProductAddNew = ({
       // Kiểm tra và thêm các file gallery đã được chọn vào FormData
       if (selectedGalleryFiles.length > 0) {
         selectedGalleryFiles.forEach((file, index) => {
+          console.log("tên file thứ: ", index + 1);
+          console.log("tên file: ", file.name);
+
           formData.append(`galleryFiles`, file); // Thêm từng file gallery vào FormData
         });
       }
@@ -880,7 +1032,7 @@ const ProductAddNew = ({
             }
 
             toast.success("Thêm sản phẩm chi tiết thành công");
-            onFetch();
+            mutateProductDetails();
           },
         }
       );
@@ -888,6 +1040,7 @@ const ProductAddNew = ({
       console.error("Error:", error);
     }
   };
+
   const handleUpdateProductDetail = async (productDetailId: number) => {
     try {
       console.log("Bắt đầu cập nhật");
@@ -959,7 +1112,9 @@ const ProductAddNew = ({
       );
 
       toast.success("Xóa sản phẩm chi tiết thành công");
-      handleClose();
+      // handleClose();
+      mutateProductDetails();
+      onFetch();
     } catch (error) {
       toast.error("Xóa sản phẩm chi tiết không thành công");
       console.error("Error deleting product:", error);
@@ -984,6 +1139,13 @@ const ProductAddNew = ({
       console.error("Error deleting product:", error);
     }
   };
+  const formatCurrency = (value) => {
+    if (value === null || value === undefined) return "";
+    return value.toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    });
+  };
 
   useEffect(() => {
     console.log(
@@ -991,6 +1153,8 @@ const ProductAddNew = ({
       productDetailWasCreated
     );
   }, [productDetailWasCreated]);
+
+
 
   return (
     <>
@@ -1054,7 +1218,7 @@ const ProductAddNew = ({
                             value={formValues.name}
                             onChange={handleInputChange}
                             isInvalid={!!errorFields.name && !formValues.name}
-                            />
+                          />
                           <Form.Label htmlFor="name">
                             Tên sản phẩm <b className="text-danger">*</b>
                           </Form.Label>
@@ -1063,14 +1227,14 @@ const ProductAddNew = ({
                       <Form.Group className="mb-3">
                         <Form.Floating>
                           <Form.Control
-                            min={0}
+                            
                             type="number"
                             placeholder="Số lượng"
-                            name="stock"
-                            value={formValues.stock || ""}
+                            // name="stock"
+                            disabled
+                            value={formValues.stock || 0}
                             onChange={handleInputChangeNumber}
-                            isInvalid={!!errorFields.stock && !formValues.stock}
-
+                            // isInvalid={!!errorFields.stock && !formValues.stock}
                           />
                           <Form.Label htmlFor="stock">
                             Số lượng <b className="text-danger">*</b>
@@ -1081,13 +1245,16 @@ const ProductAddNew = ({
                         <Form.Floating>
                           <Form.Control
                             min={0}
-                            type="number"
+                            // type="number"
+                            type="text"
                             placeholder="Giá"
                             name="price"
-                            value={formValues.price || ""}
-                            onChange={handleInputChangeNumber}
-                            isInvalid={!!errorFields.price  && !formValues.price}
-
+                            // value={formValues.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || ""}
+                            // onChange={handleInputChangeNumber}
+                            // isInvalid={!!errorFields.price  && !formValues.price}
+                            value={displayPrice} // Hiển thị giá trị tiền tệ
+                            onChange={handlePriceChange}
+                            isInvalid={!formValues.price && !!errorFields.price}
                           />
                           <Form.Label htmlFor="stock">
                             Giá <b className="text-danger">*</b>
@@ -1102,8 +1269,7 @@ const ProductAddNew = ({
                             name="brand"
                             value={formValues.brand}
                             onChange={handleInputChange}
-                            isInvalid={!!errorFields.brand  && !formValues.brand}
-
+                            isInvalid={!!errorFields.brand && !formValues.brand}
                           />
                           <Form.Label htmlFor="brand">
                             Hãng <b className="text-danger">*</b>
@@ -1137,9 +1303,9 @@ const ProductAddNew = ({
                           <Form.Control
                             as="select"
                             name="status"
+                            disabled
                             value={formValues.status}
                             onChange={handleSelect}
-
                           >
                             {option.map((option) => (
                               <option key={option.value} value={option.value}>
@@ -1162,8 +1328,9 @@ const ProductAddNew = ({
                             name="country"
                             value={formValues.country}
                             onChange={handleInputChange}
-                            isInvalid={!!errorFields.country && !formValues.country}
-
+                            isInvalid={
+                              !!errorFields.country && !formValues.country
+                            }
                           />
                           <Form.Label htmlFor="country">
                             Xuất sứ <b className="text-danger">*</b>
@@ -1182,8 +1349,10 @@ const ProductAddNew = ({
                             rows={6}
                             value={formValues.description}
                             onChange={handleInputChange}
-                            isInvalid={!!errorFields.description  && !formValues.description}
-
+                            isInvalid={
+                              !!errorFields.description &&
+                              !formValues.description
+                            }
                             style={{
                               width: "100%",
                               height: "150px",
@@ -1192,9 +1361,61 @@ const ProductAddNew = ({
                           />
                         </Form.Floating>
                       </Form.Group>
-                      <Form.Group className="mb-3">
+
+                      <Form.Group id="formImage d-flex">
+                        <Form.Label className="fw-bold">
+                          {" "}
+                          {!currentProduct?.image && !previewImage && (
+                            <p className="text-danger">Vui lòng chọn ảnh.</p>
+                          )}
+                        </Form.Label>
+
+                        {/* Hình ảnh hiển thị */}
+                        <div className="d-flex align-items-center">
+                          <div className="image-container">
+                            {!previewImage && (
+                              <Image
+                                src={formValues.image || ""}
+                                className="img-thumbnail shadow-sm" // Thêm bóng đổ
+                              />
+                            )}
+                            {/* Input để chọn ảnh, được ẩn đi */}
+                            <Form.Control
+                              id="file"
+                              className="file-input"
+                              type="file"
+                              name="image"
+                              onChange={handleImageChange}
+                              accept="image/png, image/jpeg, image/jpg"
+                            />
+
+                            {/* Nút tải ảnh */}
+                            <label htmlFor="file" className="upload-icon">
+                              <i className="bi bi-camera-fill"></i>
+                            </label>
+                          </div>
+
+                          {previewImage && (
+                            <div
+                              className="preview-image"
+                              style={{ marginLeft: "10px" }}
+                            >
+                              <Image
+                                src={previewImage}
+                                alt="Preview"
+                                fluid
+                                className="preview-img"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </Form.Group>
+
+                      {/* <Form.Group className="mb-3">
                         <Form.Label htmlFor="image" className="text-danger">
-                          Chọn hình ảnh đại diện
+                        {!currentProduct?.image && !previewImage &&(
+                            <p className="text-danger">Vui lòng chọn ảnh.</p>
+                          )}
                         </Form.Label>
                         <Form.Control
                           type="file"
@@ -1220,7 +1441,7 @@ const ProductAddNew = ({
                             />
                           </div>
                         )}
-                      </Form.Group>
+                      </Form.Group> */}
                     </Col>
                   </Row>
                 </Col>
@@ -1228,7 +1449,6 @@ const ProductAddNew = ({
                   <div>
                     {formValues.image && modalType === "edit" && (
                       <Image
-                        // src={`${formValues.image} ?? ${previewImage}`}
                         src={`${formValues.image}`}
                         alt={`formValues.image`}
                         fluid
@@ -1265,7 +1485,8 @@ const ProductAddNew = ({
                           className="d-flex align-items-center justify-content-center"
                           onClick={() => {
                             // handleOpenTabAddProductDetail("add-details");
-                            handleOpenTabColor("add-details");
+                            // handleOpenTabColor("add-details");
+                            handleTabClick("add-details");
                           }}
                           style={{
                             borderRadius: "50%",
@@ -1348,13 +1569,14 @@ const ProductAddNew = ({
             selectedProductDetail && ( // selectedProductDetail chứa dữ liệu truyền vào
               <Form>
                 <Row>
-                <Col>
-                {!selectedProductDetail?.image && !previewImageProductColor &&(
-                            <p className="text-danger">Vui lòng chọn ảnh.</p>
-                          )}
+                  <Col>
+                    {!selectedProductDetail?.image &&
+                      !previewImageProductColor && (
+                        <p className="text-danger">Vui lòng chọn ảnh.</p>
+                      )}
 
                     {/*ẢNH CHÍNH CỦA MÀU */}
-                    <Form.Group controlId="formImage d-flex">
+                    <Form.Group id="formImage d-flex">
                       <Form.Label className="fw-bold">Hình ảnh:</Form.Label>
 
                       {/* Hình ảnh hiển thị */}
@@ -1364,8 +1586,7 @@ const ProductAddNew = ({
                             src={selectedProductDetail?.image || ""}
                             className="img-thumbnail shadow-sm" // Thêm bóng đổ
                           />
-                          
-                       
+
                           {/* Input để chọn ảnh, được ẩn đi */}
                           <Form.Control
                             id="file"
@@ -1397,7 +1618,6 @@ const ProductAddNew = ({
                         )}
                       </div>
                     </Form.Group>
-                   
                   </Col>
                   <Col>
                     <Form.Group className="mb-3">
@@ -1411,14 +1631,10 @@ const ProductAddNew = ({
                               : ""
                           }
                           onChange={handleSelectColor}
-                          
                         >
                           <option>Chọn màu sắc --</option>
                           {optionColor.map((option) => (
-                            <option
-                              key={option.value}
-                              value={option.value}
-                            >
+                            <option key={option.value} value={option.value}>
                               {option.label}
                             </option>
                           ))}
@@ -1428,8 +1644,8 @@ const ProductAddNew = ({
                         </Form.Label>
                       </Form.Floating>
                     </Form.Group>
-                        {/* Bảng Gallery mẫu */}
-                        <Form.Group className="mb-4">
+                    {/* Bảng Gallery mẫu */}
+                    <Form.Group className="mb-4">
                       <Form.Label className="fs-6">Chọn thêm ảnh:</Form.Label>
 
                       {/* Custom File Input */}
@@ -1472,18 +1688,18 @@ const ProductAddNew = ({
                             </div>
                           ))
                         ) : galleries.length === 0 ? (
-                          <p className=" text-danger">Chưa có ảnh trong thư viện ảnh.</p>
+                          <p className=" text-danger">
+                            Chưa có ảnh trong thư viện ảnh.
+                          </p>
                         ) : null}
                       </div>
                     </Form.Group>
                   </Col>
                 </Row>
 
-             
-
                 {/* Bảng gallery demo*/}
                 {galleries.length > 0 && (
-                  <Form.Group controlId="formGallery">
+                  <Form.Group id="formGallery">
                     <div className="mb-3">
                       <label className="form-label fw-bold">
                         Thư viện ảnh của sản phẩm:
@@ -1495,7 +1711,7 @@ const ProductAddNew = ({
                             <div
                               key={gallery.galleryId}
                               className="position-relative me-3 mb-3 gallery-image-container" // Thêm lớp cho các hình ảnh trong gallery
-                              >
+                            >
                               <Image
                                 src={gallery.name} // Đường dẫn ảnh từ gallery.name
                                 alt={`Gallery ${gallery.galleryId}`}
@@ -1545,10 +1761,9 @@ const ProductAddNew = ({
                   </Form.Group>
                 )}
 
-
                 {/* Bảng Kích cỡ */}
                 {selectedProductDetail.productDetailId && (
-                  <Form.Group controlId="formSize">
+                  <Form.Group id="formSize">
                     {/* Khối chứa nút thêm kích cỡ */}
                     <div className="d-flex justify-content-between align-items-center">
                       <Form.Label className="fw-bold">Kích cỡ:</Form.Label>
@@ -1581,12 +1796,12 @@ const ProductAddNew = ({
                         {selectedProductDetailSize.length > 0 ? (
                           selectedProductDetailSize.map((sizeDetail, index) => (
                             <tr key={sizeDetail.productDetailSizeId}>
-                              <td>{index+1}</td>
+                              <td>{index + 1}</td>
                               <td>
                                 {sizeDetail.size?.sizeName ||
                                   "Không có kích cỡ"}
                               </td>
-                              <td>{sizeDetail.price}</td>
+                              <td>{formatCurrency(sizeDetail.price)}</td>
                               <td>{sizeDetail.quantity}</td>
                               <td className="text-center align-middle">
                                 <OverlayTrigger
@@ -1632,8 +1847,10 @@ const ProductAddNew = ({
                               className="mx-2"
                               variant="outline-primary"
                               onClick={handleAddNewSize}
-                              style={{ fontWeight: 'bold', borderRadius: '5px' }} // Tăng độ nổi bật
-
+                              style={{
+                                fontWeight: "bold",
+                                borderRadius: "5px",
+                              }} // Tăng độ nổi bật
                             >
                               Thêm kích cỡ{" "}
                               <i className="bi bi-plus-circle mx-1"></i>
@@ -1654,7 +1871,7 @@ const ProductAddNew = ({
           <Button
             variant="secondary"
             onClick={handleClose}
-            disabled={mutation.isPending || mutationAddProdcut.isPending}
+            disabled={mutation.isPending || mutationAddProdcut.isPending || productDetails?.length ===0  }
           >
             Đóng
           </Button>
@@ -1662,7 +1879,11 @@ const ProductAddNew = ({
             type="submit"
             variant="danger"
             onClick={(event) => handleSave(event)}
-            disabled={mutation.isPending || mutationAddProdcut.isPending}
+            disabled={
+              mutation.isPending ||
+              mutationAddProdcut.isPending ||
+              productDetailsLoading
+            }
           >
             Lưu
           </Button>

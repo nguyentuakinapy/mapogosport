@@ -12,8 +12,8 @@ interface LoginProps {
     setShowRegisterModal: (v: boolean) => void;
     showForgotPassword: boolean;
     setShowForgotPassword: (v: boolean) => void;
-    refreshKey: number;
-    setRefreshKey: (v: number) => void;
+    refreshKey?: number;
+    setRefreshKey?: (v: number) => void;
 }
 
 export default function Login(props: LoginProps) {

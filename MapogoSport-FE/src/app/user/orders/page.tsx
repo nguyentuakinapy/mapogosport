@@ -37,8 +37,7 @@ const Orders = () => {
 
     const getStatusVariant = (status: string) => {
         switch (status) {
-            case 'Chờ thanh toán': return 'warning';
-            case 'Đang xử lí': return 'info';
+            case 'Chờ xác nhận': return 'info';
             case 'Đang vận chuyển': return 'primary';
             case 'Đã hủy': return 'danger';
             case 'Đã hoàn thành': return 'success';
@@ -144,18 +143,17 @@ const Orders = () => {
                     <Col xs={12} md={4}>
                         <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                             <option value="">-- Trạng thái --</option>
-                            <option value="Chờ thanh toán">Chờ thanh toán</option>
-                            <option value="Đang xử lí">Đang xử lí</option>
+                            <option value="Chờ xác nhận">Chờ xác nhận</option>
                             <option value="Đang vận chuyển">Đang vận chuyển</option>
-                            <option value="Đã hủy">Đã hủy</option>
                             <option value="Đã hoàn thành">Đã hoàn thành</option>
+                            <option value="Đã hủy">Đã hủy</option>
                         </Form.Select>
                     </Col>
                     <Col xs={12} md={12} className="mt-2">
                         <Button variant="danger" style={{ width: '87%', marginRight: '9.4px' }} onClick={handleFilter}>
                             <i className="bi bi-search"></i> Tìm kiếm
                         </Button>
-                        <Button variant="secondary" style={{ width: '12%' }} onClick={handleRefresh}>
+                        <Button variant="secondary" style={{ width: '12%', padding: '6px' }} onClick={handleRefresh}>
                             <i className="bi bi-arrow-clockwise"></i> Làm mới
                         </Button>
                     </Col>
@@ -165,7 +163,7 @@ const Orders = () => {
                 <Table striped className="mb-0">
                     <thead>
                         <tr>
-                            <th style={{ width: '140px' }}>Mã đơn hàng</th>
+                            <th style={{ width: '140px' }}>STT</th>
                             <th style={{ width: '300px' }}>Tên sản phẩm</th>
                             <th>Ngày</th>
                             <th>Tình trạng</th>
