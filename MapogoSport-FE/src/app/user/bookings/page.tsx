@@ -146,7 +146,7 @@ const Bookings = () => {
                         <Button variant="danger" style={{ width: '87%', marginRight: '9.4px' }} onClick={handleFilter}>
                             <i className="bi bi-search"></i> Tìm kiếm
                         </Button>
-                        <Button variant="secondary" style={{ width: '12%' }} onClick={handleRefresh}>
+                        <Button variant="secondary" style={{ width: '12%', padding: '6px' }} onClick={handleRefresh}>
                             <i className="bi bi-arrow-clockwise"></i> Làm mới
                         </Button>
                     </Col>

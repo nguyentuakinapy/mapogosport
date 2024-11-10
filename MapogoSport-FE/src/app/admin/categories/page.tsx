@@ -4,9 +4,12 @@ import { Row, Col, Form, FormCheck, Button, Table, Image, Nav } from "react-boot
 import '../adminStyle.scss';
 import { useState, useEffect } from "react";
 import CategoryAddNew from "@/components/Admin/Modal/categoryProduct.addNew";
-
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import jsPDF from 'jspdf';
 import { toast } from "react-toastify";
 import CategoryFieldAddNew from '@/components/Admin/Modal/categoryField.addNew';
+import { RobotoBase64 } from '../../../../public/font/Roboto-Regular';
 
 const AdminProduct = () => {
 
@@ -17,7 +20,7 @@ const AdminProduct = () => {
     const [categoryField, setCategoryField] = useState<CategoryField[]>([]);
     const [currentCategoryField, setCurrentCategoryField] = useState<CategoryField | null>(null); // Updated type to allow null
     const [activeTab, setActiveTab] = useState<string>('categoriesProduct');
-
+    const [searchTerm, setSearchTerm] = useState("");
     // Pagination
     const itemsPerPage = 5;
     const [currentPage, setCurrentPage] = useState(1);
@@ -26,6 +29,10 @@ const AdminProduct = () => {
 
 
 
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value.toLowerCase());
+    };
 
     //categoriesProduct
 
@@ -113,8 +120,13 @@ const AdminProduct = () => {
         }
     }, [categoryProducts, currentCategoryProduct]);
 
+    //filter search products by name
+    const filteredCategoryProducts = categoryProducts.filter(product =>
+        product.name.toLowerCase().includes(searchTerm)
+    );
+
     //pagination CategoryProduct
-    const currentItemsCategoryProduct = categoryProducts.slice(indexOfFirstItem, indexOfLastItem);
+    const currentItemsCategoryProduct = filteredCategoryProducts.slice(indexOfFirstItem, indexOfLastItem);
     const totalPagesCategoryProduct = Math.ceil(categoryProducts.length / itemsPerPage);
     const handlePageChangeCategoryProduct = (pageNumber: number) => {
         setCurrentPage(pageNumber);
@@ -205,12 +217,149 @@ const AdminProduct = () => {
         }
     }, [categoryField, currentCategoryField]);
 
+    const filteredCategoryField = categoryField.filter(product =>
+        product.name.toLowerCase().includes(searchTerm)
+    );
+
     //pagination Category Field
-    const currentItemsCategoryField = categoryField.slice(indexOfFirstItem, indexOfLastItem);
+    const currentItemsCategoryField = filteredCategoryField.slice(indexOfFirstItem, indexOfLastItem);
     const totalPagesCategoryField = Math.ceil(categoryField.length / itemsPerPage);
     const handlePageChangeCategoryField = (pageNumber: number) => {
         setCurrentPage(pageNumber);
     };
+
+    const exportExcel = async () => {
+        try {
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Loại sản phẩm');
+
+            worksheet.columns = [
+                { header: 'Số thứ tự', key: 'stt', width: 15 },
+                { header: 'Tên hình ảnh', key: 'nameImage', width: 25 },
+                { header: 'ID loại sản phẩm', key: 'id', width: 15 },
+                { header: 'Tên loại sản phẩm', key: 'name', width: 20 },
+            ];
+            if (activeTab === 'categoriesField') {
+                worksheet.columns = [
+                    { header: 'Số thứ tự', key: 'stt', width: 15 },
+                    { header: 'Tên hình ảnh', key: 'nameImage', width: 25 },
+                    { header: 'ID loại sân', key: 'id', width: 15 },
+                    { header: 'Tên loại sân', key: 'name', width: 20 },
+                ];
+
+                filteredCategoryField.forEach((field, index) => {
+                    worksheet.addRow({
+                        stt: `#${index + 1}`,
+                        nameImage: field.image,
+                        id: field.categoriesFieldId,
+                        name: field.name,
+                    });
+                });
+            } else {
+                worksheet.columns = [
+                    { header: 'Số thứ tự', key: 'stt', width: 15 },
+                    { header: 'Tên hình ảnh', key: 'nameImage', width: 25 },
+                    { header: 'ID loại sản phẩm', key: 'id', width: 15 },
+                    { header: 'Tên loại sản phẩm', key: 'name', width: 20 },
+                ];
+
+                filteredCategoryProducts.forEach((product, index) => {
+                    worksheet.addRow({
+                        stt: `#${index + 1}`,
+                        nameImage: product.image,
+                        id: product.categoryProductId,
+                        name: product.name,
+                    });
+                });
+            }
+
+            worksheet.eachRow((row) => {
+                row.eachCell((cell) => {
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                });
+            });
+            const today = new Date();
+            const month = today.getMonth() + 1;
+            const day = today.getDate();
+            const formattedMonth = month < 10 ? `0${month}` : month;
+            const formattedDay = day < 10 ? `0${day}` : day;
+
+            const buffer = await workbook.xlsx.writeBuffer();
+            saveAs(new Blob([buffer]), `QuanLyLoai(${formattedDay}/${formattedMonth}).xlsx`);
+            toast.success('Đã xuất file Excel thành công!');
+        } catch (error) {
+            toast.error('Xuất file Excel không thành công! Vui lòng thử lại sau!');
+        }
+    };
+
+    // const exportPDF = () => {
+    //     try {
+    //         const doc: any = new jsPDF();
+
+    //         doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
+    //         doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+    //         doc.setFont("Roboto");
+
+    //         doc.text("Danh Sách Hóa Đơn", 14, 16);
+
+    //         const tableColumn = ["Số thứ tự", "Tên hình ảnh", "ID loại sản phẩm", "Tổng tiền", "Địa chỉ", "Trạng thái"];
+    //         const tableRows: string[][] = [];
+
+    //         filteredOrders.forEach(order => {
+    //             const orderData = [
+    //                 `#${order.orderId}`,
+    //                 order.fullname,
+    //                 new Date(order.date).toLocaleDateString('en-GB'),
+    //                 `${order.amount.toLocaleString()} ₫`,
+    //                 order.address,
+    //                 order.status
+    //             ];
+    //             tableRows.push(orderData);
+    //         });
+
+    //         doc.autoTable({
+    //             head: [tableColumn],
+    //             body: tableRows,
+    //             startY: 20,
+    //             theme: 'grid',
+    //             styles: {
+    //                 font: 'Roboto',
+    //                 fontSize: 10,
+    //                 cellPadding: 2,
+    //                 valign: 'middle',
+    //             },
+    //             columnStyles: {
+    //                 0: { halign: 'left' },
+    //                 1: { halign: 'left' },
+    //                 2: { halign: 'center' },
+    //                 3: { halign: 'right', cellWidth: 30 },
+    //                 4: { halign: 'left' },
+    //                 5: { halign: 'center' },
+    //             },
+    //             didParseCell: (data: any) => {
+    //                 if (data.cell.text.length > 0) {
+    //                     data.cell.text[0] = data.cell.text[0];
+    //                 }
+    //             }
+    //         });
+    //         const today = new Date();
+    //         const month = today.getMonth() + 1;
+    //         const day = today.getDate();
+    //         const formattedMonth = month < 10 ? `0${month}` : month;
+    //         const formattedDay = day < 10 ? `0${day}` : day;
+
+    //         doc.save(`HoaDonDatHang-Mapogo(${formattedDay}/${formattedMonth}).pdf`);
+    //         toast.success("Đã xuất file PDF thành công!");
+    //     } catch (error) {
+    //         toast.error("Đã xảy ra lỗi trong quá trình xuất file! Vui lòng thử lại sau!");
+    //     }
+
+    // };
 
 
     const renderContent = () => {
@@ -266,80 +415,81 @@ const AdminProduct = () => {
                                     </tr>
                                 ))}
                             </tbody>
-                            <>
-                                {totalPagesCategoryProduct > 1 && (
-                                    <div className="d-flex justify-content-center mt-3">
-                                        <nav aria-label="Page navigation example">
-                                            <ul className="pagination">
-                                                {/* First page button */}
-                                                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                    <a
-                                                        className="page-link"
-                                                        href="#"
-                                                        aria-label="First"
-                                                        onClick={() => handlePageChangeCategoryProduct(1)}
-                                                        title="Go to first page"
-                                                    >
-                                                        <span aria-hidden="true">&laquo;</span>
-                                                    </a>
-                                                </li>
 
-                                                {/* Display page numbers */}
-                                                {Array.from({ length: totalPagesCategoryProduct }, (_, index) => {
-                                                    let startPage = 1;
-                                                    let endPage = 5;
-
-                                                    if (totalPagesCategoryProduct > 5) {
-                                                        if (currentPage > 3) {
-                                                            startPage = currentPage - 2;
-                                                            endPage = currentPage + 2;
-                                                            if (endPage > totalPagesCategoryProduct) {
-                                                                endPage = totalPagesCategoryProduct;
-                                                                startPage = totalPagesCategoryProduct - 4;
-                                                            }
-                                                        }
-                                                    } else {
-                                                        endPage = totalPagesCategoryProduct;
-                                                    }
-
-                                                    if (index + 1 >= startPage && index + 1 <= endPage) {
-                                                        return (
-                                                            <li
-                                                                key={index + 1}
-                                                                className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
-                                                                title={`Go to page ${index + 1}`}
-                                                            >
-                                                                <a
-                                                                    className="page-link"
-                                                                    href="#"
-                                                                    onClick={() => handlePageChangeCategoryProduct(index + 1)}
-                                                                >
-                                                                    {index + 1}
-                                                                </a>
-                                                            </li>
-                                                        );
-                                                    }
-
-                                                    return null;
-                                                })}
-                                                {/* Last page button */}
-                                                <li className={`page-item ${currentPage === totalPagesCategoryProduct ? 'disabled' : ''}`}>
-                                                    <a
-                                                        className="page-link"
-                                                        href="#"
-                                                        aria-label="Last"
-                                                        onClick={() => handlePageChangeCategoryProduct(totalPagesCategoryProduct)}
-                                                        title="Go to last page"
-                                                    >
-                                                        <span aria-hidden="true">&raquo;</span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </nav>
-                                    </div>
-                                )}
-                            </>
                         </Table>
+                        <>
+                            {totalPagesCategoryProduct > 1 && (
+                                <div className="d-flex justify-content-center mt-3">
+                                    <nav aria-label="Page navigation example">
+                                        <ul className="pagination">
+                                            {/* First page button */}
+                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                <a
+                                                    className="page-link"
+                                                    href="#"
+                                                    aria-label="First"
+                                                    onClick={() => handlePageChangeCategoryProduct(1)}
+                                                    title="Go to first page"
+                                                >
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+
+                                            {/* Display page numbers */}
+                                            {Array.from({ length: totalPagesCategoryProduct }, (_, index) => {
+                                                let startPage = 1;
+                                                let endPage = 5;
+
+                                                if (totalPagesCategoryProduct > 5) {
+                                                    if (currentPage > 3) {
+                                                        startPage = currentPage - 2;
+                                                        endPage = currentPage + 2;
+                                                        if (endPage > totalPagesCategoryProduct) {
+                                                            endPage = totalPagesCategoryProduct;
+                                                            startPage = totalPagesCategoryProduct - 4;
+                                                        }
+                                                    }
+                                                } else {
+                                                    endPage = totalPagesCategoryProduct;
+                                                }
+
+                                                if (index + 1 >= startPage && index + 1 <= endPage) {
+                                                    return (
+                                                        <li
+                                                            key={index + 1}
+                                                            className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
+                                                            title={`Go to page ${index + 1}`}
+                                                        >
+                                                            <a
+                                                                className="page-link"
+                                                                href="#"
+                                                                onClick={() => handlePageChangeCategoryProduct(index + 1)}
+                                                            >
+                                                                {index + 1}
+                                                            </a>
+                                                        </li>
+                                                    );
+                                                }
+
+                                                return null;
+                                            })}
+                                            {/* Last page button */}
+                                            <li className={`page-item ${currentPage === totalPagesCategoryProduct ? 'disabled' : ''}`}>
+                                                <a
+                                                    className="page-link"
+                                                    href="#"
+                                                    aria-label="Last"
+                                                    onClick={() => handlePageChangeCategoryProduct(totalPagesCategoryProduct)}
+                                                    title="Go to last page"
+                                                >
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            )}
+                        </>
                         <CategoryAddNew
                             showAddCategory={showModal}
                             setShowAddCategory={handleCloseModal}
@@ -375,7 +525,7 @@ const AdminProduct = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {categoryField.map((category, index) => (
+                                {currentItemsCategoryField.map((category, index) => (
                                     <tr id={`category-${category.categoriesFieldId}`} key={category.categoriesFieldId}>
                                         {/* <td className="text-center align-middle">
                                             <FormCheck
@@ -524,13 +674,24 @@ const AdminProduct = () => {
                 </Nav.Item>
             </Nav>
             <div className="mt-3">
-                <div className="text-end py-0">
-                    <Button variant="success" className="mb-4 me-3" onClick={handleCreateClick}>
-                        <i className="bi bi-plus-square-fill"><span className='mx-1'>Tạo mới</span></i>
-                    </Button>
-                    <Button className="btn-sd-admin mb-4" style={{ background: '#142239', border: 'none' }}>
-                        <i className="bi bi-file-earmark-excel"></i><span className='mx-1'>Export</span>
-                    </Button>
+
+                <div className="text-end py-0 row">
+                    <div className='col-6 float-start'>
+                        <Form.Control type="text" placeholder="Tìm theo tên loại..." onChange={handleSearch} />
+                    </div>
+                    <div className='col-6 float-end'>
+                        <Button variant="success" className="mb-4 me-3" onClick={handleCreateClick}>
+                            <i className="bi bi-plus-square-fill"><span className='mx-1'>Tạo mới</span></i>
+                        </Button>
+                        <Button className="btn-sd-admin mb-4 me-3" style={{ background: '#142239', border: 'none' }} onClick={exportExcel}>
+                            <i className="bi bi-file-earmark-excel"></i><span className='mx-1'>Export PDF</span>
+                            
+                        </Button>
+                        <Button className="btn-sd-admin mb-4" style={{ background: '#142239', border: 'none' }} onClick={exportExcel}>
+                            <i className="bi bi-file-earmark-excel"></i><span className='mx-1'>Export Excel</span>
+                            
+                        </Button>
+                    </div>
                     {/* <Button
                         variant="danger"
                         className="mb-4 mx-2"

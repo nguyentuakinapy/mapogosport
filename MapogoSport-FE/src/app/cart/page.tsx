@@ -107,12 +107,19 @@ const Cart = () => {
     const cartIds = selectedProducts
       .map((isSelected, index) => (isSelected ? dataCart[index].cartId : null))
       .filter(id => id !== null);
-    try {
-      localStorage.setItem('CartIds', JSON.stringify(cartIds));
-      console.log(">> Saved to localStorage: ", cartIds);
-    } catch (error) {
-      console.error("Error saving to localStorage:", error);
+
+    if (cartIds.length === 0) {
+      toast.error("Vui lòng chọn ít nhất một sản phẩm để thanh toán.");
+      return;
+    } else {
+      try {
+        localStorage.setItem('CartIds', JSON.stringify(cartIds));
+        window.location.href = "/checkout-product";
+      } catch (error) {
+        console.error("Error saving to localStorage:", error);
+      }
     }
+
   };
 
   //
@@ -178,7 +185,7 @@ const Cart = () => {
           const response = await axios.get(`http://localhost:8080/rest/cart/${user.username}`);
 
           setDataCart(response.data); // Lưu dữ liệu giỏ hàng vào state
-          console.log(">>> check data Cart: ", response.data);
+          // console.log(">>> check data Cart: ", response.data);
           // Trích xuất số lượng từ dữ liệu giỏ hàng
           const cartQuantities = response.data.map((item: any) => item.quantity);
           setQuantities(cartQuantities); // Đặt số lượng vào state
@@ -236,7 +243,7 @@ const Cart = () => {
                           </td>
                           <td>
                             <img
-                              src={`/images/Images_product/${cart.productDetailSize.productDetail.image}`}
+                              src={`${cart.productDetailSize.productDetail.image}`}
                               className="img-fluid me-5 rounded-circle"
                               style={{ width: '80px', height: '80px' }}
                               alt=""
@@ -296,7 +303,6 @@ const Cart = () => {
                   className="btn btn-dark px-3 me-3 py-3 text-light mb-4"
                   type="button"
                   onClick={() => saveCartIdsToLocalStorage()}
-                  href="/checkout-product"
                 > Thanh Toán Ngay</Button>
               </div>
             </div>

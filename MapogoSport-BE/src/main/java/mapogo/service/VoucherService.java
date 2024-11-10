@@ -10,4 +10,8 @@ public interface VoucherService {
 	List<Voucher> selectVoucherActive();
 	
 	List<Voucher>finAll();
+
+	//của Mỵ từ đây
+	Voucher findById(int id);
+	//đến đây
 }

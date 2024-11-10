@@ -80,6 +80,7 @@ const handleSelectChat = (chat) => {
   setSelectedChat(chat?.username);
   setShowChat(true);
 
+
   // Tạo topic dựa trên người gửi và người nhận
   const sortedUsers = [currentUser?.username, chat.username].sort();
   const topic = `/topic/public/${sortedUsers[0]}-${sortedUsers[1]}`;
@@ -148,6 +149,7 @@ const handleKeyEnter =()=>{
 
       setInputMessage(""); // Xóa input sau khi gửi
     }
+
   };
 
   useEffect(() => {
@@ -155,15 +157,17 @@ const handleKeyEnter =()=>{
     if (user) {
       const parsedUserData = JSON.parse(user) as User;
       setCurrentUser(parsedUserData);
-      console.log("user từ session: ", currentUser);
+      // console.log("user từ session: ", currentUser);
     }
   }, []);
+
 
   useEffect(() => {
     console.log("currentUser sau khi set: ", currentUser); // Chạy khi currentUser thay đổi
     mutate()
     mutateByReceiverUsernameOrCurrentUser()
   }, [currentUser]);
+
 
   // Hàm fetch dữ liệu messages
   const fetchMessages = async (url: string) => {
@@ -178,6 +182,7 @@ const handleKeyEnter =()=>{
       : null,
     fetchMessages
   );
+
 
   // get data dataByReceiverUsernameOrCurrentUser
   const {
@@ -194,10 +199,10 @@ const handleKeyEnter =()=>{
 
   useEffect(() => {
     if (dataByReceiverUsernameOrCurrentUser) {
-      console.log(
-        "Dữ liệu nhận được từ API: ",
-        dataByReceiverUsernameOrCurrentUser
-      );
+      // console.log(
+      //   "Dữ liệu nhận được từ API: ",
+      //   dataByReceiverUsernameOrCurrentUser
+      // );
 
       // Nhóm các tin nhắn theo người gửi hoặc người nhận
       const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
@@ -256,10 +261,11 @@ const handleKeyEnter =()=>{
     }
   }, [data]);
 
+
   // Log để kiểm tra `chatListRealTime`
-  useEffect(() => {
-    console.log("chatListRealTime updated:", chatListRealTime);
-  }, [chatListRealTime]);
+  // useEffect(() => {
+  //   console.log("chatListRealTime updated:", chatListRealTime);
+  // }, [chatListRealTime]);
 
   const demo = () => {
     return <h1>showChatIcon: {showChatIcon.toString()}</h1>;
@@ -281,6 +287,7 @@ const handleKeyEnter =()=>{
   useEffect(() => {
     console.log("setSelectedChat: ", selectedChat);
   }, [selectedChat]);
+
 
   const handleChatToggle = () => {
     setShowChat(!showChat); //nếu true thì thực hiện mở form chat
@@ -418,9 +425,8 @@ const handleKeyEnter =()=>{
                     className="p-0"
                   >
                     <i
-                      className={`h6 bi ${
-                        isMinimized ? "bi-arrows-angle-expand" : "bi-dash-lg"
-                      }`}
+                      className={`h6 bi ${isMinimized ? "bi-arrows-angle-expand" : "bi-dash-lg"
+                        }`}
                     ></i>
                   </Button>
                   <Button
@@ -430,11 +436,10 @@ const handleKeyEnter =()=>{
                     className="p-0 mx-2"
                   >
                     <i
-                      className={`h6 bi ${
-                        isMaximized
+                      className={`h6 bi ${isMaximized
                           ? "bi-arrows-angle-contract"
                           : "bi-arrows-fullscreen"
-                      }`}
+                        }`}
                     ></i>
                   </Button>
                   <Button
@@ -460,18 +465,20 @@ const handleKeyEnter =()=>{
                         className={`d-flex ${
                           msg.sender.username === currentUser?.username ||
                           msg.sender === currentUser?.username
+
                             ? "justify-content-end"
                             : "justify-content-start"
-                        }`}
+                          }`}
                       >
 
                         <div
                           className={`p-2 rounded mb-2 ${
                             msg.sender.username === currentUser?.username ||
                             msg.sender === currentUser?.username
+
                               ? "bg-primary text-white"
                               : "bg-light text-dark"
-                          }`}
+                            }`}
                           style={{ maxWidth: "80%" }}
                         >
                           

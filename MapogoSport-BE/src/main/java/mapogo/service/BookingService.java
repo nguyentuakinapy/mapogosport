@@ -15,8 +15,6 @@ public interface BookingService {
 	List<Map<String, Object>> findAllBookingByOwner(String ownerUsername);
 	Order updateStatusBooking(Map<String, Object> bookingData);
 	
-	List<Booking> findById(Integer id);
-	
 	Booking createBooking(Map<String, Object> booking);
 	
 	List<Booking> findBookingAmountByOwnerAndStatus(Integer ownerId, String status);

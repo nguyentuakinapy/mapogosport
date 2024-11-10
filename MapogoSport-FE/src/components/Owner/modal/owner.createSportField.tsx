@@ -185,9 +185,11 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             });
 
     }
+    const [loading, setLoading] = useState(false);
 
     // Lưu thông tin sân thể thao và gửi ảnh lên server
     const handleSave = () => {
+        setLoading(true);
         if (!checkForm()) return;
         const sportFieldData = {
             name: fieldName,
@@ -281,7 +283,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                     <Form.Control
                                         type="number"
                                         placeholder="Giờ mở cửa"
-                                        value={Number(openTime)}
+                                        value={openTime ?? ''}
                                         min={0} // Giới hạn giá trị tối thiểu
                                         max={24} // Giới hạn giá trị tối đa
                                         onChange={(e) => {
@@ -302,7 +304,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                     <Form.Control
                                         type="number"
                                         placeholder="Giờ đóng cửa"
-                                        value={Number(closeTime)}
+                                        value={closeTime ?? ''}
                                         min={0} // Giới hạn giá trị tối thiểu
                                         max={24} // Giới hạn giá trị tối đa
                                         onChange={(e) => {
@@ -474,7 +476,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>Hủy</Button>
-                <Button variant="success" onClick={selectedSportField ? handleUpdate : handleSave}>
+                <Button variant="success" onClick={selectedSportField ? handleUpdate : handleSave} disabled={loading}>
                     {selectedSportField ? 'Lưu Thay Đổi' : 'Thêm Khu Vực'}
                 </Button>
             </Modal.Footer>

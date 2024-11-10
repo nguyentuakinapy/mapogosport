@@ -1,6 +1,5 @@
 'use client'
-import ModalAddAddress from '@/components/Owner/modal/booking.modal';
-import ModalCreateSportField from '@/components/Owner/modal/owner.createSportField';
+
 import axios from 'axios';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -8,6 +7,7 @@ import useSWR, { mutate } from 'swr';
 import { Button, OverlayTrigger, Table, Tooltip } from 'react-bootstrap';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
+import ModalCreateSportField from '@/components/Owner/modal/owner.createSportField';
 
 const SportFieldList = () => {
     const [showSportFieldModal, setShowSportFieldModal] = useState<boolean>(false)
@@ -15,13 +15,29 @@ const SportFieldList = () => {
     const userSession = sessionStorage.getItem('user');
     const user = userSession ? JSON.parse(userSession) : null;
     const [selectedSportField, setSelectedSportField] = useState(null); // State to hold the selected sport field data
+    const [userSubscription, setUserSubscription] = useState<UserSubscription>();
 
-    const fetcher = (url) => axios.get(url).then(res => res.data);
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
     const { data: sportFields, error } = useSWR(
         user ? `http://localhost:8080/rest/sportfields/lists/${user.username}` : null,
         fetcher
     );
+
+    useEffect(() => {
+        getUserSubscription();
+    }, [])
+
+    const getUserSubscription = async () => {
+        if (user) {
+            const responseOwner = await fetch(`http://localhost:8080/rest/user/subscription/${user.username}`);
+            if (!responseOwner.ok) {
+                throw new Error('Error fetching data');
+            }
+            const dataUserS = await responseOwner.json() as UserSubscription;
+            setUserSubscription(dataUserS);
+        }
+    }
 
     if (error) return <div>Error: {error.message}</div>;
     if (!sportFields) return <div>Loading...</div>;
@@ -30,6 +46,7 @@ const SportFieldList = () => {
         setSelectedSportField(sportField); // Set the selected sport field data
         setShowSportFieldModal(true); // Show the modal
     };
+
     return (
         <>
             <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>QUẢN LÝ SÂN</h3>
@@ -82,10 +99,16 @@ const SportFieldList = () => {
                 </div>
 
             ))}
+            {sportFields && Number(sportFields.length) >= Number(userSubscription?.accountPackage.limitSportFields) ?
+                <Button disabled={true} style={{ width: "100%" }} variant='danger' onClick={() => handleEditSportField(null)}>
+                    Bạn đã đạt giới hạn sân, vui lòng nâng cấp gói tài khoản để được thêm sân!
+                </Button>
+                :
+                <Button style={{ width: "100%" }} variant='danger' onClick={() => handleEditSportField(null)}>
+                    <i className="bi bi-plus-circle"></i> Thêm khu vực
+                </Button>
+            }
 
-            <Button style={{ width: "100%" }} variant='danger' onClick={() => handleEditSportField(null)}>
-                <i className="bi bi-plus-circle"></i> Thêm khu vực
-            </Button>
 
 
             {/* <ModalCreateSportField showSportFieldModal={showSportFieldModal} setShowSportFieldModal={setShowSportFieldModal} /> */}
