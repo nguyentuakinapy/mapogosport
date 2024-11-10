@@ -18,4 +18,9 @@ public interface ProductDetailSizeDAO extends JpaRepository<ProductDetailSize, I
 	  //Mỵ
 	  ProductDetailSize  findByProductDetailSizeId(Integer productDetailSizeId);
 	  //My
+	   @Query("SELECT SUM(pds.quantity) FROM ProductDetailSize pds WHERE pds.productDetail.product.productId = :productId")
+	    Integer getTotalQuantityByProductId(@Param("productId") Integer productId);
+	   
+	   @Query("SELECT pds.productDetail.id FROM ProductDetailSize pds WHERE pds.id = :productDetailSizeId")
+	    Integer findProductDetailIdByProductDetailSizeId(@Param("productDetailSizeId") Integer productDetailSizeId);
 }

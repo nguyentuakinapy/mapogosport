@@ -36,6 +36,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.util.StringUtils;
 
+import mapogo.dao.ProductDAO;
+import mapogo.dao.ProductDetailSizeDAO;
 import mapogo.entity.CategoryProduct;
 import mapogo.entity.Product;
 import mapogo.service.CategoryProductService;
@@ -59,6 +61,10 @@ public class ProductRestController {
 	
 	@Autowired
 	ProductDetailService productDetailService;
+	@Autowired
+	ProductDetailSizeDAO productDetailSizeDAO;
+	@Autowired
+	ProductDAO productDAO;
 
 	@GetMapping()
 	public List<Product> findAll() {
@@ -139,6 +145,7 @@ public class ProductRestController {
 
 //			Product createdProduct = productService.create(product);
 //			return createdProduct;
+			product.setStatus("Hết hàng");
 			Product createdProduct = productService.create(product);
 			createdProduct.getProductId();
 			System.err.println("Id vừa tạo "+createdProduct.getProductId());
@@ -166,6 +173,7 @@ public class ProductRestController {
 			if (productOriginal.isEmpty()) {
 				throw new RuntimeException("Sản phẩm không tồn tại.");
 			}
+
 
 			// Lưu lại ngày tạo cũ
 			product.setCreateDate(productOriginal.get().getCreateDate());
@@ -223,8 +231,21 @@ public class ProductRestController {
 			System.err.println("Xuất xứ: " + product.getCountry());
 			System.err.println("Hình ảnh: " + product.getImage());
 			System.err.println("Tồn kho: " + product.getStock());
-			System.err.println("Giá tiền: " + product.getPrice());
+			
+	       
 
+			System.err.println("Giá tiền: " + product.getPrice());
+			 Integer totalQuantity = productDAO.getTotalQuantityByProductId(id);
+			 System.err.println("totalQuantity "+totalQuantity);
+		        Product productGetTotal = productDAO.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+		        product.setStock(totalQuantity != null ? totalQuantity : 0);
+				System.err.println("Tồn kho sau cùng: " + product.getStock());
+				if(product.getStock() ==0) {
+					product.setStatus("Hết hàng");
+				}else {
+					product.setStatus("Còn hàng");
+				}
+				
 			// Cập nhật sản phẩm
 			Product updatedProduct = productService.update(product);
 			System.err.println("Cập nhật sản phẩm thành công: " + updatedProduct);
@@ -238,6 +259,31 @@ public class ProductRestController {
 			return null;
 		}
 	}
+	
+	@PutMapping("/{id}/mark-as-out-of-stock")
+	public ResponseEntity<Product> markAsOutOfStock(@PathVariable Integer id) {
+	    	System.err.println("id nhận đc "+ id);
+		try {
+	        Optional<Product> productOptional = productService.findById(id);
+
+	        if (productOptional.isEmpty()) {
+	        	System.err.println("sản phẩm không tồn tại");
+	            throw new RuntimeException("Sản phẩm không tồn tại.");
+	        }
+
+	        Product product = productOptional.get();
+	        product.setStatus("Hết hàng"); // Cập nhật trạng thái thành "Hết hàng"
+
+	        Product updatedProduct = productService.update(product);
+	        System.err.println("Cập nhật trạng thái sản phẩm thành công: " + updatedProduct);
+
+	        return ResponseEntity.ok(updatedProduct);
+	    } catch (Exception e) {
+	        System.err.println("Lỗi khi cập nhật trạng thái sản phẩm: " + e.getMessage());
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	    }
+	}
+
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteProduct(@PathVariable Integer id) {
