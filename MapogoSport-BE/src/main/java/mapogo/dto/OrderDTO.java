@@ -20,7 +20,6 @@ public class OrderDTO {
     private Double amount;
     private String paymentMethod;
     private Integer voucherId;
-    private String note;
     private Double shipFee;
     private int userVoucherId;
 }

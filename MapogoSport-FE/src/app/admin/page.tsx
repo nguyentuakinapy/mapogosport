@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { useData } from "../context/UserContext";
+import AuthorityComponent from "./authority/page";
 import BlogManager from "@/components/blog/blog-manager";
 
 export default function Owner({ children }: { children: ReactNode }) {
@@ -43,7 +44,7 @@ export default function Owner({ children }: { children: ReactNode }) {
             default:
                 return (
                     <div className="font-14">
-                        Loading...
+                        <AuthorityComponent />
                     </div>
                 );
         }

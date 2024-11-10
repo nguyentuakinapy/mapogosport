@@ -75,7 +75,8 @@ public class Voucher implements Serializable {
 	private List<Booking> bookings;
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JsonManagedReference("userVoucher-voucher-reference")
+//	@JsonManagedReference("userVoucher-voucher-reference")
+	@JsonBackReference  //Mỵ đổi ngày 9-11
 	private List<UserVoucher> userVouchers;
 
 }
