@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { UserProvider } from "@/app/context/UserContext";
 import { vi } from "date-fns/locale/vi";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
+import { usePathname } from "next/navigation";
 
 registerLocale('vi', vi);
 setDefaultLocale('vi');
@@ -74,37 +75,18 @@ export default function OwnerLayout({
 
     }, []);
 
-
     const [isAniActive, setIsAniActive] = useState(false);
-    const [isActive, setIsActiveNumber] = useState<number>(1);
 
     const toggleAni = () => {
         setIsAniActive(!isAniActive);
     }
-
-
-    const setIsActive = (index: number) => {
-        setIsActiveNumber(index);
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('activeIndex', index.toString());
-        }
-    };
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const savedActiveIndex = localStorage.getItem('activeIndex');
-            if (savedActiveIndex) {
-                setIsActiveNumber(Number(savedActiveIndex));
-            }
-        }
-    }, []);
 
     const [refreshKey, setRefreshKey] = useState<number>(0);
 
 
     return (
         <UserProvider refreshKey={refreshKey}>
-            <Nav isAniActive={isAniActive} toggleAni={toggleAni} isActive={isActive} setIsActive={setIsActive} />
+            <Nav isAniActive={isAniActive} toggleAni={toggleAni} />
             <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} />
 
             <main className={`main-right ${isAniActive ? 'mainRight' : ''} pb-1 `}>

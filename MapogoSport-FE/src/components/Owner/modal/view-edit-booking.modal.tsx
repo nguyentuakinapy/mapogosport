@@ -31,7 +31,7 @@ const BookingModal = (props: OwnerProps) => {
     const [endTimeBooking, setEndTimeBooking] = useState<string>();
     const [confirmData, setConfirmData] = useState<boolean>(false);
     const [applyOne, setApplyOne] = useState<boolean>(true);
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0];
 
 
     useEffect(() => {
@@ -196,6 +196,7 @@ const BookingModal = (props: OwnerProps) => {
 
 
         if (applyOne) {
+
             if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
                 for (const time of dataTimeOnStage) {
                     const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
@@ -208,7 +209,7 @@ const BookingModal = (props: OwnerProps) => {
             }
 
             if (checkTime) {
-                toast.success("trùng ngày")
+                toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
                 return
             }
 
@@ -268,12 +269,24 @@ const BookingModal = (props: OwnerProps) => {
                 }
                 // console.log(`Khoảng cách giữa hai ngày là: ${timeIndex} ngày`);
 
-                const bk = bookingBySubscriptionKey.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                console.log('bookingBySubscriptionKey', bookingBySubscriptionKey);
 
-                // console.log('bk', bk);
+                // // Biến lưu trữ booking có ngày sớm nhất
+                // let earliestBooking = bookingBySubscriptionKey[0];
 
+                // // Duyệt qua mảng bookingBySubscriptionKey để tìm ngày sớm nhất
+                // for (let i = 1; i < bookingBySubscriptionKey.length; i++) {
+                //     const currentBookingDate = new Date(bookingBySubscriptionKey[i].date);
+                //     const earliestBookingDate = new Date(earliestBooking.date);
 
-                if (sport && dateBooking && new Date().setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
+                //     if (currentBookingDate < earliestBookingDate) {
+                //         earliestBooking = bookingBySubscriptionKey[i];
+                //     }
+                // }
+
+                // console.log('earliestBooking', earliestBooking);
+
+                if (sport && dateBooking && new Date().setHours(0, 0, 0, 0) === new Date(dateBooking).setHours(0, 0, 0, 0)) {
                     for (const time of dataTimeOnStageAll) {
                         const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
                         // console.log(result);
@@ -285,8 +298,30 @@ const BookingModal = (props: OwnerProps) => {
                 }
 
                 if (checkTime) {
-                    toast.success("trùng ngày 2")
+                    toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
                     return
+                }
+
+                const bk = bookingBySubscriptionKey.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+                console.log('bk', bk[0].date);
+
+                const dateTemporaryChecked = new Date(bk[0].date);
+                dateTemporaryChecked.setDate(dateTemporaryChecked.getDate() + timeIndex);
+
+                const year = dateTemporaryChecked.getFullYear();
+                const month = String(dateTemporaryChecked.getMonth() + 1).padStart(2, '0'); // Thêm 1 vì tháng bắt đầu từ 0
+                const day = String(dateTemporaryChecked.getDate()).padStart(2, '0');  // Đảm bảo ngày luôn có 2 chữ số
+                // toast.success(new Date().getFullYear().toString()
+                //     + '-' + String(new Date().getMonth() + 1).padStart(2, '0')
+                //     + '-' + new Date().getDate().toString() + 'and' + year + '-' + month + '-' + day)
+
+                if (timeIndex !== 0 &&
+                    new Date(year + '-' + month + '-' + day).setHours(0, 0, 0, 0) < new Date(new Date().getFullYear().toString()
+                        + '-' + String(new Date().getMonth() + 1).padStart(2, '0')
+                        + '-' + new Date().getDate().toString()).setHours(0, 0, 0, 0)) {
+                    toast.warning("Ngày " + bk[0].date + " trong kỳ bị quá ngày hiện tại!")
+                    return;
                 }
 
                 for (const b of bookingBySubscriptionKey) {
@@ -375,7 +410,7 @@ const BookingModal = (props: OwnerProps) => {
                 timeSlots.pop();
             }
         }
-        // console.log(timeSlots);
+        console.log(timeSlots);
 
         setDataTimeOnStageAll(timeSlots);
     }

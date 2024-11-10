@@ -361,8 +361,8 @@ export default function ChatBox() {
                   >
                     <i
                       className={`h6 bi ${isMaximized
-                          ? "bi-arrows-angle-contract"
-                          : "bi-arrows-fullscreen"
+                        ? "bi-arrows-angle-contract"
+                        : "bi-arrows-fullscreen"
                         }`}
                     ></i>
                   </Button>
@@ -387,14 +387,14 @@ export default function ChatBox() {
                       <div
                         key={msg.messageId}
                         className={`d-flex ${msg.sender.username === currentUser?.username
-                            ? "justify-content-end"
-                            : "justify-content-start"
+                          ? "justify-content-end"
+                          : "justify-content-start"
                           }`}
                       >
                         <div
                           className={`p-2 rounded mb-2 ${msg.sender.username === currentUser?.username
-                              ? "bg-primary text-white"
-                              : "bg-light text-dark"
+                            ? "bg-primary text-white"
+                            : "bg-light text-dark"
                             }`}
                           style={{ maxWidth: "80%" }}
                         >
