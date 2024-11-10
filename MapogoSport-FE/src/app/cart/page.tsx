@@ -243,7 +243,7 @@ const Cart = () => {
                           </td>
                           <td>
                             <img
-                              src={`/images/Images_product/${cart.productDetailSize.productDetail.image}`}
+                              src={`${cart.productDetailSize.productDetail.image}`}
                               className="img-fluid me-5 rounded-circle"
                               style={{ width: '80px', height: '80px' }}
                               alt=""

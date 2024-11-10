@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.fasterxml.jackson.databind.node.DoubleNode;
+
 import jakarta.servlet.http.HttpServletRequest;
 import mapogo.dao.ProductDetailSizeDAO;
 import mapogo.dao.UserDAO;
@@ -15,6 +17,7 @@ import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
 import mapogo.entity.OrderPayment;
 import mapogo.entity.ProductDetailSize;
+import mapogo.entity.Transaction;
 import mapogo.entity.User;
 import mapogo.entity.Wallet;
 import mapogo.service.OrderDetailService;
@@ -22,11 +25,14 @@ import mapogo.service.OrderPaymentService;
 import mapogo.service.OrderService;
 import mapogo.service.ProductDetailService;
 import mapogo.service.ProductDetailSizeService;
+import mapogo.service.TransactionService;
 import mapogo.service.UserService;
 import mapogo.service.WalletService;
 import mapogo.utils.Config;
+import mapogo.utils.MoMoService;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -58,7 +64,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class PaymentController {
 	@Autowired
 	OrderService orderService;
-	
+
 	@Autowired
 	OrderPaymentService orderPaymentSevice;
 
@@ -67,16 +73,18 @@ public class PaymentController {
 
 	@Autowired
 	OrderDetailService orderDetailService;
-	
+
 	@Autowired
 	WalletService walletService;
 
+	@Autowired
+	TransactionService transactionService;
+
 //	@PostMapping("/create_payment")
 	@PostMapping("/create_payment")
-	public ResponseEntity<?> createPayment(HttpServletRequest req, @RequestParam("orderId") Integer orderId
-			, @RequestBody List<Map<String, Integer>> data)
-			throws UnsupportedEncodingException {
-		System.out.println("orderId: " + orderId);
+	public ResponseEntity<?> createPayment(HttpServletRequest req, @RequestParam("orderId") Integer orderId,
+			@RequestBody List<Map<String, Integer>> data) throws UnsupportedEncodingException {
+//		System.out.println("orderId: " + orderId);
 		Order order = orderService.findByOrderId(orderId);
 
 		String orderType = "other";
@@ -148,7 +156,7 @@ public class PaymentController {
 		paymentDTO.setMessage("successfully");
 		paymentDTO.setURL(paymentUrl);
 
-		//create OrderDetail
+		// create OrderDetail
 		for (Map<String, Integer> item : data) {
 			Integer productDetailSizeId = (Integer) item.get("productDetailSizeId");
 			ProductDetailSize pds = pdsDAO.findByProductDetailSizeId(productDetailSizeId);
@@ -165,28 +173,36 @@ public class PaymentController {
 		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
 
-
 //	@GetMapping("/payment_info")
 	@GetMapping("/payment_info")
 	public RedirectView transaction(@RequestParam(value = "vnp_Amount") String amount,
 			@RequestParam(value = "vnp_ResponseCode") String responseCode,
 			@RequestParam(value = "vnp_TxnRef") String orderId) {
-		
+
 		OrderPayment orderPayment = new OrderPayment();
 		Order order = orderService.findByOrderId(Integer.parseInt(orderId));
 		order.setStatus("Chờ xác nhận");
 		orderService.update(order);
+
+		User user = order.getUser();
+		String trimmedAmount = amount.substring(0, amount.length() - 2);
 		
-		User user = order.getUser(); 
-				
 		if (responseCode.equals("00")) {
-			//update +Balance
+			// update +Balance
 			Wallet wallet = walletService.findByUsername(user);
-					
-					
-					
-			//create orderPayment
-			String trimmedAmount = amount.substring(0, amount.length() - 2);
+			wallet.setBalance(new BigDecimal(trimmedAmount.trim()));
+			walletService.update(wallet);
+
+			// create transaction
+			Transaction transaction = new Transaction();
+			transaction.setWallet(wallet);
+			transaction.setAmount(new BigDecimal(trimmedAmount.trim()));
+			transaction.setCreatedAt(LocalDateTime.now());
+			transaction.setDescription("Nạp từ hóa đơn: " + orderId + " (VNPay)");
+			transaction.setTransactionType("+" + trimmedAmount);
+			transactionService.create(transaction);
+
+			// create orderPayment
 			orderPayment.setAmount(Double.valueOf(trimmedAmount));
 			orderPayment.setOrder(order);
 			orderPayment.setStatus("Đã thanh toán");
@@ -196,44 +212,136 @@ public class PaymentController {
 			orderPaymentSevice.create(orderPayment);
 
 			// -balance -> create transaction
-			
-			//update ProductDetailSize.Quantity
+			Transaction transaction1 = new Transaction();
+			transaction1.setWallet(wallet);
+			transaction1.setAmount(new BigDecimal(trimmedAmount.trim()));
+			transaction1.setCreatedAt(LocalDateTime.now());
+			transaction1.setDescription("Thanh toán hóa đơn: " + orderId);
+			transaction1.setTransactionType("-" + trimmedAmount);
+			transactionService.create(transaction1);
+
+			// update ProductDetailSize.Quantity
 			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
 			for (OrderDetail orderDetail : orderDetails) {
-				ProductDetailSize pds = pdsDAO.findByProductDetailSizeId(orderDetail.getProductDetailSize().getProductDetailSizeId());
-				int kho= pds.getQuantity();
-				pds.setQuantity(kho-orderDetail.getQuantity());
-				System.out.println("conf: "+pds.getQuantity());
+				ProductDetailSize pds = pdsDAO
+						.findByProductDetailSizeId(orderDetail.getProductDetailSize().getProductDetailSizeId());
+				int kho = pds.getQuantity();
+				pds.setQuantity(kho - orderDetail.getQuantity());
 				pdsDAO.save(pds);
 			}
-			 
-			
+
 			// URL chuyển hướng khi thành công
 			return new RedirectView("http://localhost:3000/checkout-product/success");
-			
+
 		} else {
 			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
 			for (OrderDetail orderDetail : orderDetails) {
-				//delete orderDetail
+				// delete orderDetail
 				orderDetailService.delete(orderDetail);
 			}
 			orderService.delete(order);
-			
+
 			// URL chuyển hướng khi có lỗi
 			return new RedirectView("http://localhost:3000/checkout-product/fail");
 		}
 
 	}
-	
-	@Autowired
-	UserService dao;
-	
-	@GetMapping("/test/{username}")
-	public Wallet getMethodName(@PathVariable("username") String username) {
-		User user = dao.findByUsername(username);
-		return walletService.findByUsername(user);
-	}
-	
 
-	
+	@Autowired
+	private MoMoService paymentService;
+
+	// @PostMapping("/create-momo-payment")
+	@PostMapping("/create-momo-payment")
+	public ResponseEntity<?> createMoMoPayment(@RequestParam("orderId") long orderId,
+			@RequestBody List<Map<String, Integer>> data) throws UnsupportedEncodingException{
+		Order order = orderService.findByOrderId((int)orderId);
+		long amountBeforeDecimal =(long) Math.floor(order.getAmount());
+		String amount =String.valueOf(amountBeforeDecimal);
+		// create OrderDetail
+		for (Map<String, Integer> item : data) {
+			Integer productDetailSizeId = (Integer) item.get("productDetailSizeId");
+			ProductDetailSize pds = pdsDAO.findByProductDetailSizeId(productDetailSizeId);
+
+			Integer quantity = (Integer) item.get("quantity");
+
+			OrderDetail orderDetail = new OrderDetail();
+			orderDetail.setOrder(order);
+			orderDetail.setProductDetailSize(pds);
+			orderDetail.setQuantity(quantity);
+
+			orderDetailService.create(orderDetail);
+		}
+		return paymentService.createMoMoPayment(amount,orderId);
+	}
+
+	// @GetMapping("/momo")
+	@GetMapping("/momo")
+	public RedirectView transaction_MoMo(@RequestParam(value = "resultCode") String resultCode,
+			@RequestParam(value = "orderId") String orderId) {
+
+		OrderPayment orderPayment = new OrderPayment();
+		Order order = orderService.findByOrderId(Integer.parseInt(orderId));
+		order.setStatus("Chờ xác nhận");
+		orderService.update(order);
+
+		User user = order.getUser();
+
+		if (resultCode.equals("0")) {
+			// update +Balance
+			Wallet wallet = walletService.findByUsername(user);
+			wallet.setBalance(new BigDecimal(order.getAmount()));
+			walletService.update(wallet);
+
+			// create transaction
+			Transaction transaction = new Transaction();
+			transaction.setWallet(wallet);
+			transaction.setAmount(new BigDecimal(order.getAmount()));
+			transaction.setCreatedAt(LocalDateTime.now());
+			transaction.setDescription("Nạp từ hóa đơn: " + orderId + " (MoMo)");
+			transaction.setTransactionType("+" + order.getAmount());
+			transactionService.create(transaction);
+
+			// create orderPayment
+			orderPayment.setAmount(order.getAmount());
+			orderPayment.setOrder(order);
+			orderPayment.setStatus("Đã thanh toán");
+			orderPayment.setDate(LocalDateTime.now());
+			orderPayment.setUser(user);
+			orderPayment.setReferenceCode("MoMo");
+			orderPaymentSevice.create(orderPayment);
+
+			// -balance -> create transaction
+			Transaction transaction1 = new Transaction();
+			transaction1.setWallet(wallet);
+			transaction1.setAmount(new BigDecimal(order.getAmount()));
+			transaction1.setCreatedAt(LocalDateTime.now());
+			transaction1.setDescription("Thanh toán hóa đơn: " + orderId);
+			transaction1.setTransactionType("-" + order.getAmount());
+			transactionService.create(transaction1);
+
+			// update ProductDetailSize.Quantity
+			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
+			for (OrderDetail orderDetail : orderDetails) {
+				ProductDetailSize pds = pdsDAO
+						.findByProductDetailSizeId(orderDetail.getProductDetailSize().getProductDetailSizeId());
+				int kho = pds.getQuantity();
+				pds.setQuantity(kho - orderDetail.getQuantity());
+				pdsDAO.save(pds);
+			}
+
+			// URL chuyển hướng khi thành công
+			return new RedirectView("http://localhost:3000/checkout-product/success");
+		} else {
+			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
+			for (OrderDetail orderDetail : orderDetails) {
+				// delete orderDetail
+				orderDetailService.delete(orderDetail);
+			}
+			orderService.delete(order);
+
+			// URL chuyển hướng khi có lỗi
+			return new RedirectView("http://localhost:3000/checkout-product/fail");
+		}
+	}
+
 }
