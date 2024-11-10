@@ -1,4 +1,4 @@
-.nav-left {
+.nav-left-block {
     position: fixed;
     width: 250px;
     height: 100%;
@@ -9,9 +9,22 @@
     /* animation: navLef 1s forwards; */
 }
 
+.nav-left-none-icon {
+    position: fixed;
+    width: 80px;
+    height: 100%;
+    background-color: white;
+    box-shadow: 2px 0 4px rgba(146, 105, 105, 0.1);
+    z-index: 1000;
+}
+
 .nav-left.hidden {
     animation: navLefRep 1s forwards;
 
+}
+
+.nav-left.hiddenRep {
+    animation: navLef 1s forwards;
 }
 
 @keyframes navLef {
@@ -34,7 +47,7 @@
     }
 }
 
-header {
+.header-normal {
     position: fixed;
     background-color: white;
     width: calc(100% - 250px);
@@ -44,8 +57,55 @@ header {
     right: 0;
 }
 
-.main-right {
+.header-full {
+    position: fixed;
+    background-color: white;
+    width: calc(100% - 80px);
+    height: 75px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    right: 0;
+}
+
+.aniHead {
+    animation: head 1s forwards;
+}
+
+.aniHeadRep {
+    animation: headRep 1s forwards;
+}
+
+@keyframes headRep {
+    0% {
+        width: 100%
+    }
+
+    100% {
+        width: calc(100% - 250px);
+    }
+}
+
+@keyframes head {
+
+    0% {
+        width: calc(100% - 250px);
+    }
+
+    100% {
+        width: 100%
+    }
+}
+
+.main-right-normal {
     margin-left: 250px;
+    padding-top: 75px;
+    background-color: rgb(232, 233, 244);
+    min-height: 100vh;
+    /* animation: mainRightRep 1s forwards; */
+}
+
+.main-right-full {
+    margin-left: 80px;
     padding-top: 75px;
     background-color: rgb(232, 233, 244);
     min-height: 100vh;
@@ -54,6 +114,11 @@ header {
 
 .mainRight {
     animation: mainRight 1s forwards;
+}
+
+
+.mainRightRep {
+    animation: mainRightRep 1s forwards;
 }
 
 @keyframes mainRightRep {
@@ -198,33 +263,4 @@ table th {
     color: green;
     font-size: 1.5rem;
     cursor: pointer;
-}
-
-.aniHead {
-    animation: head 1s forwards;
-}
-
-.aniHeadRep {
-    animation: headRep 1s forwards;
-}
-
-@keyframes headRep {
-    0% {
-        width: 100%
-    }
-
-    100% {
-        width: calc(100% - 250px);
-    }
-}
-
-@keyframes head {
-
-    0% {
-        width: calc(100% - 250px);
-    }
-
-    100% {
-        width: 100%
-    }
 }

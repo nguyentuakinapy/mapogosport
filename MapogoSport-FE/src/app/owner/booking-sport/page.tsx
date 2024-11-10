@@ -119,6 +119,7 @@ export default function BookingSport() {
 
 
     const [owner, setOwner] = useState<Owner>();
+    const [selectSport, setSelectSport] = useState<number>(0);
 
     useEffect(() => {
         getOwner();
@@ -137,7 +138,6 @@ export default function BookingSport() {
     }
 
     const [selectDate, setSelectDate] = useState<number>(0);
-    const [selectSport, setSelectSport] = useState<number>(0);
 
     const [dataSport, setDataSport] = useState<SportField[]>([])
 
@@ -1002,33 +1002,46 @@ export default function BookingSport() {
             const currentMinutes = now.getMinutes();
             console.log(currentMinutes);
 
+            // toast.success(Number(dataSport[selectSport].opening.split('h')[0]));
+            // toast.success(Number(dataSport[selectSport].closing.split('h')[0]));
+            // toast.success(Number(now.getHours()));
+
             if ((currentMinutes === 0 || currentMinutes === 30) && !hasExecuted) {
                 const dateNow = now.getFullYear().toString() + '-' + (now.getMonth() + 1).toString() + '-' + now.getDate().toString();
 
-                if (!hasExecuted && currentMinutes === 0) {
-                    await fetchBookingNotification(dateNow, now.getHours().toString() + 'h30', dataSport[selectSport].sportFieldId);
-                } else if (!hasExecuted && currentMinutes === 30) {
-                    await fetchBookingNotification(dateNow, (now.getHours() + 1).toString() + 'h00', dataSport[selectSport].sportFieldId);
+                const selectedSportData = dataSport[selectSport];
+                if (!selectedSportData) {
+                    console.error("Selected sport data is invalid");
+                    return;
                 }
 
-                if (selectDate === 0) {
-                    const updatedBookingsOnDay: BookingsTypeOnDay = { ...bookingsOnDay };
-                    Object.entries(updatedBookingsOnDay).forEach(([time, statuses]) => {
-                        updatedBookingsOnDay[time] = [];
-                    });
-                    setBookingsOnDay(updatedBookingsOnDay);
-                    setDayOnWeek();
-                } else {
-                    const updatedBookingsOnWeek = { ...bookingsOnWeek };
-                    Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                        const sportDataTemporary = { ...sportData };
-                        Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
-                            sportDataTemporary[sport] = [];
+                if (!hasExecuted && currentMinutes === 0) {
+                    await fetchBookingNotification(dateNow, now.getHours().toString() + 'h30', selectedSportData.sportFieldId);
+                } else if (!hasExecuted && currentMinutes === 30) {
+                    await fetchBookingNotification(dateNow, (now.getHours() + 1).toString() + 'h00', selectedSportData.sportFieldId);
+                }
+
+                if (now.getHours() >= Number(selectedSportData.opening.split('h')[0]) &&
+                    now.getHours() <= Number(selectedSportData.closing.split('h')[0])) {
+                    if (selectDate === 0) {
+                        const updatedBookingsOnDay: BookingsTypeOnDay = { ...bookingsOnDay };
+                        Object.entries(updatedBookingsOnDay).forEach(([time, statuses]) => {
+                            updatedBookingsOnDay[time] = [];
+                        });
+                        setBookingsOnDay(updatedBookingsOnDay);
+                        setDayOnWeek();
+                    } else {
+                        const updatedBookingsOnWeek = { ...bookingsOnWeek };
+                        Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
+                            const sportDataTemporary = { ...sportData };
+                            Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
+                                sportDataTemporary[sport] = [];
+                            })
+                            updatedBookingsOnWeek[time] = sportDataTemporary;
                         })
-                        updatedBookingsOnWeek[time] = sportDataTemporary;
-                    })
-                    setBookingsOnWeek(updatedBookingsOnWeek);
-                    setDayOnWeek();
+                        setBookingsOnWeek(updatedBookingsOnWeek);
+                        setDayOnWeek();
+                    }
                 }
                 hasExecuted = true;
             } else if (currentMinutes !== 0 && currentMinutes !== 30) {
@@ -1036,10 +1049,10 @@ export default function BookingSport() {
             }
         };
 
-        const intervalId = setInterval(checkMinuteChange, 5000);
+        const intervalId = setInterval(checkMinuteChange, 30000);
 
         return () => clearInterval(intervalId);
-    }, [selectDate, selectSport]);
+    }, [selectDate, selectSport, dataSport]);
 
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
     const [startTime, setStartTime] = useState("");
