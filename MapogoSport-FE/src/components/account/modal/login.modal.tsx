@@ -12,8 +12,8 @@ interface LoginProps {
     setShowRegisterModal: (v: boolean) => void;
     showForgotPassword: boolean;
     setShowForgotPassword: (v: boolean) => void;
-    refreshKey?: number;
-    setRefreshKey?: (v: number) => void;
+    refreshKey: number;
+    setRefreshKey: (v: number) => void;
 }
 
 export default function Login(props: LoginProps) {
@@ -42,9 +42,9 @@ export default function Login(props: LoginProps) {
             setUsername(parsedUserData.username);
             setPassword(parsedUserData.password);
             setCheckRememberMe(true);
-            console.log("Dữ liệu người dùng từ cookie:", parsedUserData);
+            // console.log("Dữ liệu người dùng từ cookie:", parsedUserData);
         } else {
-            console.log("Không có dữ liệu người dùng trong cookie.");
+            // console.log("Không có dữ liệu người dùng trong cookie.");
         }
     }, []);
 
@@ -74,7 +74,7 @@ export default function Login(props: LoginProps) {
                     const usernameLocal = dataUser.username.replace(/['"]+/g, '');
                     localStorage.setItem('username', usernameLocal);
                     // localStorage.setItem('username', dataUser.username);
-                    // sessionStorage.setItem('user', JSON.stringify(dataUser));
+                    sessionStorage.setItem('user', JSON.stringify(dataUser));
                     setRefreshKey(refreshKey + 1);
                     toast.success("Đăng nhập thành công!");
                     // if (dataUser.authorities[0].role.name == "ROLE_ADMIN") {

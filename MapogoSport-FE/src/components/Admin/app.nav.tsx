@@ -1,13 +1,22 @@
 
+import { useData } from "@/app/context/UserContext";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 interface NavProps {
     isAniActive: boolean;
     toggleAni: () => void;
-    isActive: number;
-    setIsActive: (index: number) => void;
 }
-export default function Nav({ isAniActive, isActive, setIsActive }: NavProps) {
+export default function Nav({ isAniActive, toggleAni }: NavProps) {
+    const path = usePathname();
+
+    const userData = useData();
+
+    const logOut = () => {
+        localStorage.removeItem('username');
+        sessionStorage.removeItem('user');
+        window.location.href = "/";
+    }
     return (
         <>
             <div className={`nav-left ${isAniActive ? 'hidden' : 'hiddenRep'}`}>
@@ -20,17 +29,19 @@ export default function Nav({ isAniActive, isActive, setIsActive }: NavProps) {
                 <div className="mt-5">
                     <nav className="container m-auto">
                         <ul>
-                            <li><a className={`link ${isActive == 1 ? 'active' : ''}`} href="/admin" onClick={() => setIsActive(1)}><i className="bi bi-house me-2"></i>TRANG CHỦ</a></li>
-                            <li><Link className={`link ${isActive == 3 ? 'active' : ''}`} href={"/admin/product"} onClick={() => setIsActive(3)}><i className="bi bi-box-seam me-2"></i>QUẢN LÝ SẢN PHẨM</Link></li>
-                            <li><Link className={`link ${isActive == 5 ? 'active' : ''}`} href={"/admin/order"} onClick={() => setIsActive(5)}><i className="bi bi-receipt-cutoff me-2"></i>QUẢN LÝ HÓA ĐƠN</Link></li>
-                            <li><Link className={`link ${isActive == 6 ? 'active' : ''}`} href={"/admin/subcription"} onClick={() => setIsActive(6)}><i className="bi bi-ticket-detailed me-2"></i>QUẢN LÝ GÓI</Link></li>
-                            <li><Link className={`link ${isActive == 7 ? 'active' : ''}`} href={"/admin/voucher"} onClick={() => setIsActive(7)}><i className="bi bi-ticket-detailed me-2"></i>QUẢN LÝ VOUCHER</Link></li>
-                            <li><Link className={`link ${isActive == 8 ? 'active' : ''}`} href="/admin/statistics" onClick={() => setIsActive(8)}><i className="bi bi-bar-chart me-2"></i>THỐNG KÊ</Link></li>
-                            <li><Link className={`link ${isActive == 9 ? 'active' : ''}`} href="/admin/categories" onClick={() => setIsActive(9)}><i className="bi bi-box-seam me-2"></i>QUẢN LÝ LOẠI</Link></li>
-
+                            <li><a className={`link ${path === '/admin' ? 'active' : ''}`} href="/admin" ><i className="bi bi-house me-2"></i>TRANG CHỦ</a></li>
+                            <li><Link className={`link ${path === '/admin/product' ? 'active' : ''}`} href={"/admin/product"} ><i className="bi bi-box-seam me-2"></i>QUẢN LÝ SẢN PHẨM</Link></li>
+                            <li><Link className={`link ${path === '/admin/order' ? 'active' : ''}`} href={"/admin/order"} ><i className="bi bi-receipt-cutoff me-2"></i>QUẢN LÝ HÓA ĐƠN</Link></li>
+                            <li><Link className={`link ${path === '/admin/subcription' ? 'active' : ''}`} href={"/admin/subcription"}><i className="bi bi-ticket-detailed me-2"></i>QUẢN LÝ GÓI</Link></li>
+                            <li><Link className={`link ${path === '/admin/voucher' ? 'active' : ''}`} href={"/admin/voucher"} ><i className="bi bi-ticket-detailed me-2"></i>QUẢN LÝ VOUCHER</Link></li>
+                            {userData?.authorities.find(item => item.role.name == "ROLE_ADMIN") && (
+                                <li><Link className={`link ${path === '/admin/statistics' ? 'active' : ''}`} href="/admin/statistics"><i className="bi bi-bar-chart me-2"></i>THỐNG KÊ</Link></li>
+                            )}
+                            <li><a style={{ cursor: 'pointer' }} className={`link`} onClick={() => logOut()} ><i className="bi bi-box-arrow-left me-2"></i>ĐĂNG XUẤT</a></li>
                         </ul>
                     </nav>
                 </div>
-            </div ></>
+            </div >
+        </>
     )
 }

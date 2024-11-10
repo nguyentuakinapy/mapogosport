@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { useData } from "../context/UserContext";
+import BlogManager from "@/components/blog/blog-manager";
 
 export default function Owner({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState<string>('all');
@@ -36,7 +37,7 @@ export default function Owner({ children }: { children: ReactNode }) {
             case 'deposit':
                 return (
                     <div className="font-14">
-                        chưa biết có gì bên trong
+                        <BlogManager></BlogManager>
                     </div>
                 );
             default:

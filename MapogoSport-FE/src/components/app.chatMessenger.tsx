@@ -437,8 +437,8 @@ const handleKeyEnter =()=>{
                   >
                     <i
                       className={`h6 bi ${isMaximized
-                          ? "bi-arrows-angle-contract"
-                          : "bi-arrows-fullscreen"
+                        ? "bi-arrows-angle-contract"
+                        : "bi-arrows-fullscreen"
                         }`}
                     ></i>
                   </Button>

@@ -932,7 +932,7 @@ export default function BookingSport() {
                                                             className={`w-10 ${getBadgeClass(statusItem)}`}
                                                             style={{
                                                                 textAlign: 'center',
-                                                                backgroundColor: dayBookingData.subscriptionKey ? '#00fff9' : '#f3f3f3'
+                                                                backgroundColor: dayBookingData.subscriptionKey ? '#caffcb' : '#f3f3f3'
                                                             }}
                                                         >
                                                             <div className={`badge`}>
@@ -979,18 +979,56 @@ export default function BookingSport() {
         );
     };
 
-    useEffect(() => {
-        let hasExecuted = false;
+    const [bookingNotification, setBookingNotification] = useState<BookingDetailFullName[]>();
 
-        const checkMinuteChange = () => {
+    const fetchBookingNotification = async (date: string, time: string, sportFieldId: number) => {
+        try {
+            const response = await fetch(`http://localhost:8080/rest/booking/detail/find/date/and/time/${date}/${time}/${sportFieldId}`);
+            if (!response.ok) throw new Error("Không tìm thấy sân sắp tới");
+
+            const bookingNotification = await response.json() as BookingDetailFullName[];
+            setBookingNotification(bookingNotification);
+        } catch (error) {
+            toast.error("Lỗi");
+        }
+    };
+    let hasExecuted = false;
+
+    useEffect(() => {
+
+        const checkMinuteChange = async () => {
+
             const now = new Date();
             const currentMinutes = now.getMinutes();
+            console.log(currentMinutes);
 
             if ((currentMinutes === 0 || currentMinutes === 30) && !hasExecuted) {
+                const dateNow = now.getFullYear().toString() + '-' + (now.getMonth() + 1).toString() + '-' + now.getDate().toString();
+
+                if (!hasExecuted && currentMinutes === 0) {
+                    await fetchBookingNotification(dateNow, now.getHours().toString() + 'h30', dataSport[selectSport].sportFieldId);
+                } else if (!hasExecuted && currentMinutes === 30) {
+                    await fetchBookingNotification(dateNow, (now.getHours() + 1).toString() + 'h00', dataSport[selectSport].sportFieldId);
+                }
+
                 if (selectDate === 0) {
-                    setStatusOnDay();
+                    const updatedBookingsOnDay: BookingsTypeOnDay = { ...bookingsOnDay };
+                    Object.entries(updatedBookingsOnDay).forEach(([time, statuses]) => {
+                        updatedBookingsOnDay[time] = [];
+                    });
+                    setBookingsOnDay(updatedBookingsOnDay);
+                    setDayOnWeek();
                 } else {
-                    setStatusOnWeek();
+                    const updatedBookingsOnWeek = { ...bookingsOnWeek };
+                    Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
+                        const sportDataTemporary = { ...sportData };
+                        Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
+                            sportDataTemporary[sport] = [];
+                        })
+                        updatedBookingsOnWeek[time] = sportDataTemporary;
+                    })
+                    setBookingsOnWeek(updatedBookingsOnWeek);
+                    setDayOnWeek();
                 }
                 hasExecuted = true;
             } else if (currentMinutes !== 0 && currentMinutes !== 30) {
@@ -998,10 +1036,10 @@ export default function BookingSport() {
             }
         };
 
-        const intervalId = setInterval(checkMinuteChange, 1000);
+        const intervalId = setInterval(checkMinuteChange, 5000);
 
         return () => clearInterval(intervalId);
-    }, [selectDate]);
+    }, [selectDate, selectSport]);
 
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
     const [startTime, setStartTime] = useState("");
@@ -1186,6 +1224,29 @@ export default function BookingSport() {
         setIsOpen(!isOpen);
     };;
 
+    useEffect(() => {
+
+        if (bookingNotification) {
+            const timeoutId = setTimeout(() => {
+                setNotificationModal(true);
+            }, 1000);
+
+            return () => clearTimeout(timeoutId);
+        }
+    }, [bookingNotification])
+
+    const renderNotification = () => {
+        return (
+            <div className="text-center">
+                {bookingNotification?.map(item => (
+                    <>
+                        <b key={item.bookingDetailId} className="">{item.sportFieldDetail.name} của bạn có lịch đá vào lúc {item.startTime} đến {item.endTime} (trong 30 phút nữa).</b><br />
+                    </>
+                ))}
+            </div>
+        )
+    }
+
 
     if (isLoading) return <h2>Data is comming</h2>
 
@@ -1336,7 +1397,7 @@ export default function BookingSport() {
                 dataTimeSport={dataTimeSport.filter(time => time !== "undefinedh00" && time !== null)}
                 sportField={dataSport && dataSport[selectSport]}>
             </SearchBookingModal>
-            <NotificationModal showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
+            <NotificationModal renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
             </NotificationModal>
         </>
     );

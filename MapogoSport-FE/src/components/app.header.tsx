@@ -49,7 +49,7 @@ const CartBadge = ({ username }: { username: string }) => {
 
 interface HeaderProps {
     setRefreshKey: (v: number) => void;
-    refreshKey: number
+    refreshKey: numberz
 }
 
 const Header = (props: HeaderProps) => {
@@ -57,7 +57,6 @@ const Header = (props: HeaderProps) => {
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
     const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
     const [showChangePasswordNew, setShowChangePasswordNew] = useState<boolean>(false);
-    const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
     const { setRefreshKey, refreshKey } = props;
 
     const userData = useData();
@@ -90,19 +89,6 @@ const Header = (props: HeaderProps) => {
     }, []); // Chạy một lần khi component được mount
 
     // Fetch CategoryField
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const reponse = await fetch('http://localhost:8080/rest/category_field')
-                const data = await reponse.json();
-                setCategoryFields(data)
-            } catch (error) {
-                console.log("Lỗi call Api rồi: ", error)
-            }
-        }
-        fetchData();
-    }, [])
 
     const logOut = () => {
         localStorage.removeItem('username');

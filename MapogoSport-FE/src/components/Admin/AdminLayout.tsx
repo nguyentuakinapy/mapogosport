@@ -67,34 +67,18 @@ export default function AdminLayout({
 
 
     const [isAniActive, setIsAniActive] = useState(false);
-    const [isActive, setIsActiveNumber] = useState<number>(1);
 
     const toggleAni = () => {
         setIsAniActive(!isAniActive);
     }
 
-    const setIsActive = (index: number) => {
-        setIsActiveNumber(index);
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('activeIndexAdmin', index.toString());
-        }
-    };
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const savedActiveIndex = localStorage.getItem('activeIndexAdmin');
-            if (savedActiveIndex) {
-                setIsActiveNumber(Number(savedActiveIndex));
-            }
-        }
-    }, []);
 
     const [refreshKey, setRefreshKey] = useState<number>(0);
 
     return (
         <UserProvider refreshKey={refreshKey}>
             <ReactQueryProvider>
-                <Nav isAniActive={isAniActive} toggleAni={toggleAni} isActive={isActive} setIsActive={setIsActive} />
+                <Nav isAniActive={isAniActive} toggleAni={toggleAni} />
                 <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} />
                 <main className={`main-right ${isAniActive ? 'mainRight' : ''}`}>
                     <div className="main-body">
