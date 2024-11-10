@@ -75,21 +75,28 @@ export default function OwnerLayout({
 
     }, []);
 
-    const [isAniActive, setIsAniActive] = useState(false);
+    const [isAniActive, setIsAniActive] = useState<boolean>(true);
 
     const toggleAni = () => {
         setIsAniActive(!isAniActive);
+        sessionStorage.setItem("isAniActive", JSON.stringify(!isAniActive));
     }
 
     const [refreshKey, setRefreshKey] = useState<number>(0);
 
 
+    useEffect(() => {
+        const isAniActive = sessionStorage.getItem("isAniActive");
+        if (isAniActive) {
+            setIsAniActive(JSON.parse(isAniActive));
+        }
+    }, []);
+
     return (
         <UserProvider refreshKey={refreshKey}>
-            <Nav isAniActive={isAniActive} toggleAni={toggleAni} />
+            <Nav isAniActive={isAniActive} />
             <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} />
-
-            <main className={`main-right ${isAniActive ? 'mainRight' : ''} pb-1 `}>
+            <main className={`${isAniActive ? 'main-right-full' : 'main-right-normal'}  pb-1 `}>
                 <div className="main-body">
                     {children}
                 </div>
