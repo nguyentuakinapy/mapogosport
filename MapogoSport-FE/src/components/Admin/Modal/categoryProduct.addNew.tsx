@@ -108,7 +108,7 @@ const CategoryAddNew = ({
             }
 
             // Send data to backend
-            const apiUrl = `http://localhost:8080/rest/${modalType === "add" ? "create" : `update/${currentCategory?.categoryProductId}`}`;
+            const apiUrl = `http://localhost:8080/rest/${modalType === "add" ? "create" : `update/category/product/${currentCategory?.categoryProductId}`}`;
             const response = await fetch(apiUrl, {
                 method: modalType === "add" ? 'POST' : 'PUT',
                 body: formData, // FormData already sets content type

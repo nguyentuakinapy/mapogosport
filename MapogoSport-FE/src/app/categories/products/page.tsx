@@ -124,7 +124,6 @@ const Categories = () => {
                                     : 0;
                                 console.log("AVG rating: ", averageRating);
 
-
                                 return (
                                     <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
                                         <div nh-product={product.productId} className="product-item">
@@ -164,10 +163,12 @@ const Categories = () => {
                                                     </div>
                                                     <div className="number ms-2">({product.productReviews.length} bình luận)</div> {/* Display the number of comments */}
                                                 </div>
+                                            </div>
                                         </div>
                                     </Col>
                                 );
                             })}
+
 
                             {/* Pagination */}
                             {totalPages > 1 && (

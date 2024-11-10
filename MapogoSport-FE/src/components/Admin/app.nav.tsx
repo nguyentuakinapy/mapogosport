@@ -34,6 +34,7 @@ export default function Nav({ isAniActive, toggleAni }: NavProps) {
                             <li><Link className={`link ${path === '/admin/order' ? 'active' : ''}`} href={"/admin/order"} ><i className="bi bi-receipt-cutoff me-2"></i>QUẢN LÝ HÓA ĐƠN</Link></li>
                             <li><Link className={`link ${path === '/admin/subcription' ? 'active' : ''}`} href={"/admin/subcription"}><i className="bi bi-ticket-detailed me-2"></i>QUẢN LÝ GÓI</Link></li>
                             <li><Link className={`link ${path === '/admin/voucher' ? 'active' : ''}`} href={"/admin/voucher"} ><i className="bi bi-ticket-detailed me-2"></i>QUẢN LÝ VOUCHER</Link></li>
+                            <li><Link className={`link ${path === '/admin/categories' ? 'active' : ''}`} href="/admin/categories" ><i className="bi bi-box-seam me-2"></i>QUẢN LÝ LOẠI</Link></li>
                             {userData?.authorities.find(item => item.role.name == "ROLE_ADMIN") && (
                                 <li><Link className={`link ${path === '/admin/statistics' ? 'active' : ''}`} href="/admin/statistics"><i className="bi bi-bar-chart me-2"></i>THỐNG KÊ</Link></li>
                             )}
