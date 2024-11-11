@@ -11,10 +11,11 @@ interface SportFieldDetailProps {
     selectedSportFieldDetail: any; // Thay thế `any` bằng kiểu dữ liệu cụ thể nếu có
     setSelectedSportFieldDetail: (field: any) => void;
     id: number | undefined; // Thêm id vào props và xác định kiểu dữ liệu
+    owner?: Owner
 }
 
 const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
-    const { showSportFieldDetailModal, setShowSportFieldDetailModal, selectedSportFieldDetail, setSelectedSportFieldDetail, id } = props;
+    const { showSportFieldDetailModal, setShowSportFieldDetailModal, selectedSportFieldDetail, setSelectedSportFieldDetail, id, owner } = props;
 
     const [fieldName, setFieldName] = useState("");
     const [price, setPrice] = useState<number | null>(null);
@@ -120,6 +121,7 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
             .then(response => {
                 console.log("Thông tin sân đã được lưu:", response.data);
                 mutate(`http://localhost:8080/rest/sportfielddetail/lists/${id}`);
+                mutate(`http://localhost:8080/rest/sport_field_by_owner/${owner?.ownerId}`);
                 handleClose();
             })
             .catch(error => {

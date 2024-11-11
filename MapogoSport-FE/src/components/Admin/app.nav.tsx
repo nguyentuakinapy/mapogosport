@@ -1,5 +1,6 @@
 
 import { useData } from "@/app/context/UserContext";
+import { logOut } from "@/app/utils/Log-Out";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -13,11 +14,6 @@ export default function Nav({ isAniActive, toggleAni }: NavProps) {
 
     const userData = useData();
 
-    const logOut = () => {
-        localStorage.removeItem('username');
-        sessionStorage.removeItem('user');
-        window.location.href = "/";
-    }
     return (
         <>
             {!isAniActive ?

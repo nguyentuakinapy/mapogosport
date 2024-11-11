@@ -15,6 +15,7 @@ import useSWR from 'swr';
 import ForgotPassword from './account/modal/forgotPassword.modal';
 import ChangePasswordNew from './account/modal/change-password-new.modal';
 import { useData } from '@/app/context/UserContext';
+import { logOut } from '@/app/utils/Log-Out';
 
 
 
@@ -49,7 +50,7 @@ const CartBadge = ({ username }: { username: string }) => {
 
 interface HeaderProps {
     setRefreshKey: (v: number) => void;
-    refreshKey: numberz
+    refreshKey: number;
 }
 
 const Header = (props: HeaderProps) => {
@@ -87,14 +88,6 @@ const Header = (props: HeaderProps) => {
             window.removeEventListener('scroll', handleScroll);
         };
     }, []); // Chạy một lần khi component được mount
-
-    // Fetch CategoryField
-
-    const logOut = () => {
-        localStorage.removeItem('username');
-        sessionStorage.removeItem('user');
-        window.location.href = "/";
-    }
 
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
