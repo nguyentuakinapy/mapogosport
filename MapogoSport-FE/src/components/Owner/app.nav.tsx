@@ -1,3 +1,4 @@
+import { logOut } from "@/app/utils/Log-Out";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
@@ -7,12 +8,6 @@ interface NavProps {
 }
 export default function Nav({ isAniActive }: NavProps) {
     const path = usePathname();
-
-    const logOut = () => {
-        localStorage.removeItem('username');
-        sessionStorage.removeItem('user');
-        window.location.href = "/";
-    }
 
     return (
         <>
