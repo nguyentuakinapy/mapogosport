@@ -8,34 +8,17 @@ import { formatPrice } from "@/components/Utils/Format"
 
 const Categories = () => {
 
-    const categories = [
-        { id: 1, name: "Cỏ nhân tạo", quantity: 10 },
-        { id: 2, name: "Bóng", quantity: 10 },
-        { id: 3, name: "Lưới khung thành", quantity: 10 },
-        { id: 4, name: "Máy tập bóng đá", quantity: 10 },
-        { id: 5, name: "Phụ kiện", quantity: 10 },
-    ];
-
-    const brands = [
-        { id: 1, name: "xưởng của nhà làm" },
-        { id: 2, name: "xưởng của nhà làm" },
-        { id: 3, name: "xưởng của nhà làm" },
-        { id: 4, name: "xưởng của nhà làm" },
-        { id: 5, name: "xưởng của nhà làm" },
-    ];
-
     const [products, setProducts] = useState<Product[]>([]);
     const [icon, setIcon] = useState<boolean[]>([]); // Để quản lý trạng thái của các biểu tượng
     const [categoriesProduct, setCategoriesProduct] = useState<CategoryProduct[]>([])
-
+    const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+    const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
     // Pagination
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-    const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(products.length / itemsPerPage);
     const handlePageChange = (pageNumber: number) => {
         setCurrentPage(pageNumber);
     };
@@ -77,7 +60,27 @@ const Categories = () => {
             return newIcon;
         });
     };
+    const uniqueBrands = [...new Set(products.map(product => product.brand))];
 
+    const handleCategoryChange = (categoryId: number) => {
+        setSelectedCategories(prev =>
+            prev.includes(categoryId) ? prev.filter(id => id !== categoryId) : [...prev, categoryId]
+        );
+    };
+
+    const handleBrandChange = (brand: string) => {
+        setSelectedBrands(prev =>
+            prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
+        );
+    };
+
+    const filteredProducts = products.filter(product =>
+        (selectedCategories.length === 0 || selectedCategories.includes(product.categoryProduct.categoryProductId)) &&
+        (selectedBrands.length === 0 || selectedBrands.includes(product.brand))
+    );
+
+    const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     return (
         <HomeLayout>
             <Container className='pt-5'>
@@ -96,7 +99,11 @@ const Categories = () => {
                             <div className="filter checkbox-filter">
                                 {categoriesProduct.map((category) => (
                                     <label key={category.categoryProductId} className="checkbox mb-1">
-                                        <input type="checkbox" />
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedCategories.includes(category.categoryProductId)}
+                                            onChange={() => handleCategoryChange(category.categoryProductId)}
+                                        />
                                         <span className="checkbox__label ms-2">
                                             {category.name}
                                         </span>
@@ -108,10 +115,13 @@ const Categories = () => {
                         <div className="filter-group">
                             <legend className="fs-6">Thương hiệu</legend>
                             <div className="filter checkbox-filter">
-                                {brands.map((brand) => (
-                                    <label key={brand.id} className="checkbox mb-1">
-                                        <input type="checkbox" />
-                                        <span className="checkbox__label ms-2">{brand.name}</span>
+                                {uniqueBrands.map((brand) => (
+                                    <label key={brand} className="checkbox mb-1">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedBrands.includes(brand)}
+                                            onChange={() => handleBrandChange(brand)} />
+                                        <span className="checkbox__label ms-2">{brand}</span>
                                     </label>
                                 ))}
                             </div>
@@ -174,7 +184,7 @@ const Categories = () => {
                                             </div>
                                         </div>
                                         <div className="inner-content">
-                                        <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
+                                            <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
                                                 <Link href={`/product-detail/${product.productId}`}>{product.name}</Link>
                                             </div>
                                             <div className="product-category ms-1">

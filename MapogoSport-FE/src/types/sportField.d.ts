@@ -15,6 +15,7 @@ interface SportField {
     owner: Owner;
     decription: string;
     sportFielDetails: SportFieldDetail[];
+
 }
 
 interface SportFieldDetail {
