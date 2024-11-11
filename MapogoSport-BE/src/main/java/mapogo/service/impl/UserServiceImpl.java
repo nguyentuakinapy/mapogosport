@@ -15,6 +15,7 @@ import mapogo.dao.UserSubscriptionDAO;
 import mapogo.entity.AccountPackage;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
+import mapogo.entity.UserVoucher;
 import mapogo.service.UserService;
 
 @Service
@@ -45,6 +46,11 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void updateUser(User u) {
+		if (u.getUserVouchers() != null) {
+			for (UserVoucher userVoucher: u.getUserVouchers()) {
+				userVoucher.setUser(u);
+			}
+		}
 		userDAO.save(u);
 	}
 

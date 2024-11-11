@@ -13,7 +13,7 @@ public interface BookingService {
 	
 	List<Map<String, Object>> findBookingByUsername(String username);
 	List<Map<String, Object>> findAllBookingByOwner(String ownerUsername);
-	Order updateStatusBooking(Map<String, Object> bookingData);
+	Booking updateStatusBooking(Map<String, Object> bookingData);
 	
 	Booking createBooking(Map<String, Object> booking);
 	

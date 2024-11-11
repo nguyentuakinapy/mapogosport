@@ -116,7 +116,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
             <b className='text-danger' style={{ fontSize: '20px' }}>Chi tiết đặt sân</b>
             <div style={{ fontSize: '15px' }}>
                 <Row className="my-3 booking-container">
-                    <Col className="bill-booking">
+                    <Col className="bill-booking" xs={7}>
                         <Table className="my-3">
                             <thead>
                                 <tr>
@@ -124,6 +124,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                     <th className="text-secondary">Sân</th>
                                     <th className="text-secondary">Thời gian</th>
                                     <th className="text-secondary">Giá</th>
+                                    <th className="text-secondary">Trạng thái</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -133,6 +134,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                         <td>{booking?.sportFieldDetailName}</td>
                                         <td>{booking?.startTime} - {booking?.endTime}</td>
                                         <td>{booking?.price.toLocaleString()} ₫</td>
+                                        <td>{booking.status}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -156,7 +158,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                             </Table>
                         </div>
                     </Col>
-                    <Col>
+                    <Col xs={5}>
                         <div className="map-container">
                             <div className="note-map">Nhấn vào bản đồ để xem đường đi đến sân</div>
                             <div ref={mapRef} className="map-border"></div>

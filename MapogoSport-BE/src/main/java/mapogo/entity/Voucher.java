@@ -4,9 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -15,8 +13,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -52,11 +48,6 @@ public class Voucher implements Serializable {
 	@Column(name = "EndDate", nullable = false)
 	private LocalDateTime endDate;
 
-	@ManyToOne
-	@JoinColumn(name = "CreatedBy", nullable = false)
-	@JsonBackReference("user-voucher-reference")
-	private User user;
-
 	@Column(name = "Status", nullable = false)
 	private String status;
 
@@ -75,7 +66,6 @@ public class Voucher implements Serializable {
 	private List<Booking> bookings;
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//	@JsonManagedReference("userVoucher-voucher-reference")
 	@JsonBackReference  //Mỵ đổi ngày 9-11
 	private List<UserVoucher> userVouchers;
 

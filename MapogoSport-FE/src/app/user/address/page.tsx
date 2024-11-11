@@ -10,7 +10,7 @@ import ModalUpdateAddress from '@/components/User/modal/user.updateAddress'
 
 export default function Address() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
-    const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
+    const [username, setUsername] = useState<string | null>(null);
     const [addressUsers, setAddressUsers] = useState<any[]>([]);
     const [showAddAddress, setShowAddAddress] = useState<boolean>(false);
     const [showUpdateAddress, setShowUpdateAddress] = useState<boolean>(false);
@@ -21,14 +21,11 @@ export default function Address() {
     };
 
     useEffect(() => {
-        const username = localStorage.getItem('username');
-        if (username) {
-            const apiUrl = `http://localhost:8080/rest/user/${username}`;
-            setUsernameFetchApi(apiUrl);
-        }
+        const storedUsername = localStorage.getItem('username');
+        setUsername(storedUsername);
     }, []);
 
-    const { data, error, isLoading } = useSWR(usernameFetchApi ? usernameFetchApi : null, fetcher, {
+    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -36,7 +33,8 @@ export default function Address() {
 
     useEffect(() => {
         if (data && data.addressUsers) {
-            setAddressUsers(data.addressUsers);
+            const sortedAddresses = data.addressUsers.sort((a: any, b: any) => b.active - a.active);
+            setAddressUsers(sortedAddresses);
         }
     }, [data]);
 
@@ -58,7 +56,7 @@ export default function Address() {
                     toast.error(`Xóa địa chỉ không thành công! Vui lòng thử lại sau!`);
                     return
                 }
-                mutate(usernameFetchApi);
+                mutate(`http://localhost:8080/rest/user/${username}`);
                 toast.success('Xóa địa chỉ thành công!');
             })
         }
@@ -79,7 +77,7 @@ export default function Address() {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return
             }
-            mutate(usernameFetchApi);
+            mutate(`http://localhost:8080/rest/user/${username}`);
             toast.success('Cập nhật thành công!');
         })
     };

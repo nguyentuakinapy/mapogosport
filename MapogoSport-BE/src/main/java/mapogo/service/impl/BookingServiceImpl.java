@@ -22,8 +22,6 @@ import mapogo.entity.BookingDetail;
 import mapogo.entity.Order;
 import mapogo.entity.Owner;
 import mapogo.entity.PaymentMethod;
-import mapogo.entity.PhoneNumber;
-import mapogo.entity.PhoneNumberUser;
 import mapogo.entity.SportField;
 import mapogo.entity.User;
 import mapogo.entity.Voucher;
@@ -117,7 +115,7 @@ public class BookingServiceImpl implements BookingService {
 	
 
 	@Override
-	public Order updateStatusBooking(Map<String, Object> bookingData) {
+	public Booking updateStatusBooking(Map<String, Object> bookingData) {
 		Integer bookingId = (Integer) bookingData.get("bookingId");
 		String newStatus = (String) bookingData.get("status");
 		
@@ -125,7 +123,7 @@ public class BookingServiceImpl implements BookingService {
 		if (optionalBooking.isPresent()) {
 		    Booking booking = optionalBooking.get();
 		    booking.setStatus(newStatus);
-		    if (newStatus == "Đã hủy") {
+		    if (newStatus.equals("Đã hủy")) {
 		    	for (BookingDetail bookingDetail: booking.getBookingDetails()) {
 		    		bookingDetail.setStatus(newStatus);
 			    	bookingDetailDAO.save(bookingDetail);
@@ -259,5 +257,4 @@ public class BookingServiceImpl implements BookingService {
 		return bookingDAO.findBookingByOwnerIdUsername(ownerId);
 
 	}
-
 }

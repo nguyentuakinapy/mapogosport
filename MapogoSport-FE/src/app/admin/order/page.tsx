@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link";
-import { Form, Button, Table, Nav, Pagination, Dropdown } from "react-bootstrap";
+import { Form, Button, Table, Nav, Pagination, Dropdown, InputGroup } from "react-bootstrap";
 import '../adminStyle.scss';
 import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
@@ -10,11 +10,15 @@ import { RobotoBase64 } from '../../../../public/font/Roboto-Regular';
 import { toast } from "react-toastify";
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import DatePicker from "react-datepicker";
+import 'react-datepicker/dist/react-datepicker.css';
 
 const AdminOrder = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [orderData, setOrderData] = useState<OrderMap[]>([]);
     const [activeTab, setActiveTab] = useState<string>('all');
+    const [startDate, setStartDate] = useState<Date | null>(null);
+    const [endDate, setEndDate] = useState<Date | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8);
@@ -146,6 +150,12 @@ const AdminOrder = () => {
             case 'complete': return order.status === "Đã hoàn thành";
             default: return true;
         }
+    }).filter(booking => {
+        if (startDate && endDate) {
+            const bookingDate = new Date(booking.date);
+            return bookingDate >= startDate && bookingDate <= endDate;
+        }
+        return true;
     });
 
     const renderContent = () => {
@@ -312,6 +322,20 @@ const AdminOrder = () => {
                 <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Hóa Đơn</b>
                 <div>
                     <Form.Control type="text" placeholder="Tìm theo tên và địa chỉ..." onChange={handleSearch} />
+                </div>
+                <div>
+                    <InputGroup className="search-date-booking">
+                        <DatePicker selected={startDate || undefined} onChange={(date) => setStartDate(date)}
+                            selectsStart startDate={startDate || undefined} endDate={endDate || undefined}
+                            placeholderText="Từ ngày" className="form-control start" dateFormat="dd/MM/yyyy"
+                        />
+                        <InputGroup.Text><i className="bi bi-three-dots"></i></InputGroup.Text>
+                        <DatePicker selected={endDate || undefined} onChange={(date) => setEndDate(date)}
+                            selectsEnd startDate={startDate || undefined} endDate={endDate || undefined}
+                            minDate={startDate || undefined} placeholderText="Đến ngày" className="form-control end"
+                            dateFormat="dd/MM/yyyy"
+                        />
+                    </InputGroup>
                 </div>
                 <div>
                     <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={exportPDF}>Xuất File PDF</Button>
