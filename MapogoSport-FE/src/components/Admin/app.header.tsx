@@ -19,6 +19,7 @@ const translations: { [key: string]: string } = {
     "thunderstorm": "sấm sét",
     "thunderstorm with rain": "mưa có sấm sét",
     "thunderstorm with light rain": "mưa rào có sấm sét",
+    "thunderstorm with heavy rain": "mưa to có sấm sét",
     "snow": "tuyết",
     "mist": "sương mù",
     "light rain": 'mưa nhẹ',

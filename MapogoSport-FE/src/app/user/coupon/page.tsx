@@ -8,17 +8,15 @@ import Link from "next/link";
 
 const CouponPage = () => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
-    const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
+    const [username, setUsername] = useState<string | null>(null);
     const [voucherData, setVoucherData] = useState<UserVoucher[]>([]);
 
     useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUsernameFetchApi(`http://localhost:8080/rest/user/voucher/${parsedUserData.username}`);
-        }
+        const storedUsername = localStorage.getItem('username');
+        setUsername(storedUsername);
     }, []);
-    const { data, error, isLoading } = useSWR(usernameFetchApi, fetcher, {
+
+    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -26,7 +24,7 @@ const CouponPage = () => {
 
     useEffect(() => {
         if (data) {
-            setVoucherData(data);
+            setVoucherData(data.userVouchers);
         }
     }, [data]);
 

@@ -49,6 +49,11 @@ public class BookingRestController {
 	public void updateBookingStatus(@RequestBody Map<String, Object> bookingData) {
 		bookingService.updateStatusBooking(bookingData);
 	}
+	
+	@PutMapping("/owner/bookingDetail/update")
+	public void updateBookingDetailStatus(@RequestBody Map<String, Object> bookingDetailData) {
+		bookingDetailService.updateStatusBookingDetail(bookingDetailData);
+	}
 
 	@GetMapping("/user/booking/{username}")
 	public List<Map<String, Object>> getByUser(@PathVariable("username") String username) {

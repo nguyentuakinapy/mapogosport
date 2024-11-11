@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,6 +69,28 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			resultMaps.add(bookingDetailData);
 		}
 		return resultMaps;
+	}
+	
+	@Override
+	public BookingDetail updateStatusBookingDetail(Map<String, Object> bookingDetailData) {
+		Integer bookingDetailId = (Integer) bookingDetailData.get("bookingDetailId");
+		String newStatus = (String) bookingDetailData.get("status");
+		
+		Optional<BookingDetail> optionalBookingDetail = bookingDetailDAO.findById(bookingDetailId);
+		if (optionalBookingDetail.isPresent()) {
+			BookingDetail bookingDetail = optionalBookingDetail.get();
+			bookingDetail.setStatus(newStatus);
+			bookingDetailDAO.save(bookingDetail);
+			
+			Booking booking = bookingDetail.getBooking();
+			boolean allCancel = booking.getBookingDetails().stream()
+					.allMatch(detail -> "Đã hủy".equals(detail.getStatus()));
+			if (allCancel) {
+				booking.setStatus("Đã hủy");
+				bookingDAO.save(booking);
+			}
+		}
+		return null;
 	}
 
 //	@Override

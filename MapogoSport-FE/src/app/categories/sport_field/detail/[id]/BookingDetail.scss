@@ -1,0 +1,79 @@
+.custom-tabs {
+    .nav-item {
+        flex: 1;
+        text-align: center;
+
+        &+.nav-item {
+            margin-left: 1.5px;
+        }
+
+        &:first-child {
+            .nav-link {
+                border-radius: 8px 0 0 8px;
+            }
+        }
+
+        &:last-child {
+            .nav-link {
+                border-radius: 0 8px 8px 0;
+            }
+        }
+
+        .nav-link {
+            border-radius: 0;
+            color: #1a1a1a;
+            background-color: #f5f5f5;
+            padding: 12px 24px;
+            text-align: center;
+            font-weight: 600;
+
+            &:hover,
+            &.active {
+                background-color: #142239;
+                color: white;
+            }
+        }
+    }
+}
+
+input, select, textarea {
+    border: 1px solid black !important
+}
+
+.search-date {
+    flex-wrap: nowrap;
+    display: flex;
+    justify-content: center;
+
+    .start {
+        border-radius: 5px 0 0 5px;
+        border-width: 1px 0px 1px 1px !important;
+        border-style: solid;
+        border-color: black;
+    }
+
+    .input-group-text {
+        border-width: 1px 0;
+        border-style: solid;
+        border-color: black;
+        background: #e9ecef;
+    }
+
+    .end {
+        border-radius: 0 5px 5px 0;
+        border-width: 1px 1px 1px 0px !important;
+        border-style: solid;
+        border-color: black;
+    }
+}
+
+.col-day {
+    color: black !important;
+    cursor: pointer;
+    background-color: #f5f5f5;
+
+    &:hover, &.active {
+        background-color: #142239 !important;
+        color: white !important;
+    }
+}

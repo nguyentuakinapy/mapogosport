@@ -27,12 +27,11 @@ public class UserVoucher implements Serializable{
     
     @ManyToOne
     @JoinColumn(name = "Username", nullable = false)
-    @JsonBackReference("user-userVoucher-reference")
+    @JsonBackReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "VoucherId", nullable = false)
-    @JsonBackReference("userVoucher-voucher-reference")
     private Voucher voucher;
 
     @Column(name = "Status", nullable = false)

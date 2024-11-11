@@ -98,4 +98,9 @@ public class PhoneNumberUserServiceImpl implements PhoneNumberUserService{
 		
 		return phoneNumberUserDAO.save(phoneNumberUser);
 	}
+
+	@Override
+	public PhoneNumber getCheckPhoneNumber(String phoneNumber) {
+		return phoneNumberDAO.findByPhoneNumber(phoneNumber);
+	}
 }

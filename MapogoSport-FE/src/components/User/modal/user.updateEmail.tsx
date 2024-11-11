@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { Button, Form, InputGroup, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { mutate } from "swr";
 
@@ -26,6 +26,10 @@ const ModalUpdateEmail = (props: UserProps) => {
     const handleSave = () => {
         if (!otpValue || !newEmail) {
             toast.warning("Vui lòng nhập đầy đủ thông tin!")
+            return;
+        }
+        if (!newEmail.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
+            toast.warning("Vui lòng nhập đúng định dạng email!")
             return;
         }
         const username = localStorage.getItem('username');
@@ -63,6 +67,10 @@ const ModalUpdateEmail = (props: UserProps) => {
     }
 
     const coolDownTime = async () => {
+        if (!newEmail) {
+            toast.warning("Vui lòng nhập email mới!");
+            return;
+        }
         setCheckButton(true);
         if (timeLeft) {
             clearInterval(timeLeft);
@@ -77,14 +85,14 @@ const ModalUpdateEmail = (props: UserProps) => {
                 return prevTime - 1;
             });
         }, 1000);
-        toast.success(`Mã xác nhận đang được gửi về email ${userData?.email}!`);
+        toast.success(`Mã xác nhận đang được gửi về email ${newEmail}!`);
         const response = await fetch('http://localhost:8080/rest/user/sendMail', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(userData?.email)
+            body: JSON.stringify(newEmail)
         });
         if (!response.ok) {
             throw new Error('Đã xảy ra lỗi trong quá trình gửi mã, vui lòng thử lại sau!');
@@ -99,33 +107,20 @@ const ModalUpdateEmail = (props: UserProps) => {
                     <Modal.Title className="text-uppercase text-danger">Cập nhật Email</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
-                        <div className="form-verify">
-                            <div className="border border-2 mb-2">
-                                <Row>
-                                    <Col xs={2}><i className="bi bi-envelope-at-fill fs-3 ms-4"></i></Col>
-                                    <Col xs={10}>
-                                        <div style={{ color: "#142239" }} className="fw-bold">Lấy mã xác nhận qua Email</div>
-                                        <div className="fw-bold text-danger">Email: {userData?.email}</div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <Button style={{ width: "100%", background: "#142239" }} type="submit" onClick={() => { coolDownTime() }}
-                                disabled={checkButton}>{checkButton ? timeLeft + 's' : 'Gửi mã'}</Button>
-                        </div>
-                        <Form.Group className="my-3">
-                            <Form.Label>Mã xác nhận: <b className="text-danger">*</b></Form.Label>
+                    <Form.Group>
+                        <Form.Label>Email mới: <b className="text-danger">*</b></Form.Label>
+                        <Form.Control type="email" placeholder="Nhập địa chỉ email mới"
+                            value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+                    </Form.Group>
+                    <div className="my-3">
+                        <Form.Label>Mã xác nhận: <b className="text-danger">*</b></Form.Label>
+                        <InputGroup>
                             <Form.Control type="email" placeholder="Mã OTP ######"
                                 value={otpValue} onChange={(e) => setOtpValue(e.target.value)} />
-                        </Form.Group>
-                        <div className="form-change">
-                            <Form.Group className="mt-3">
-                                <Form.Label>Email mới: <b className="text-danger">*</b></Form.Label>
-                                <Form.Control type="email" placeholder="Nhập email mới"
-                                    value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
-                            </Form.Group>
-                        </div>
-                    </Form>
+                            <Button variant="btn btn-profile" onClick={() => { coolDownTime() }}
+                                disabled={checkButton}>{checkButton ? timeLeft + 's' : 'Gửi mã'}</Button>
+                        </InputGroup>
+                    </div>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => handleClose()}>Hủy</Button>
