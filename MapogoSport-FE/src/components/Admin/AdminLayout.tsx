@@ -10,6 +10,7 @@ import ReactQueryProvider from "@/app/utils/UseQueryProviders/ReactQueryProvider
 import { vi } from "date-fns/locale/vi";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
 import { UserProvider } from "@/app/context/UserContext";
+import ChatMessenger from '@/components/app.chatMessenger';
 
 registerLocale('vi', vi);
 setDefaultLocale('vi');
@@ -93,7 +94,7 @@ export default function AdminLayout({
                         {children}
                     </div>
                 </main>
-                <ToastContainer></ToastContainer>
+                <ChatMessenger ></ChatMessenger>
             </ReactQueryProvider>
         </UserProvider>
     )

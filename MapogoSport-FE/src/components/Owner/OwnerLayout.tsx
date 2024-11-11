@@ -8,6 +8,7 @@ import { UserProvider } from "@/app/context/UserContext";
 import { vi } from "date-fns/locale/vi";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
 import { usePathname } from "next/navigation";
+import ChatMessenger from '@/components/app.chatMessenger';
 
 registerLocale('vi', vi);
 setDefaultLocale('vi');
@@ -101,6 +102,7 @@ export default function OwnerLayout({
                     {children}
                 </div>
             </main>
+            <ChatMessenger ></ChatMessenger>
         </UserProvider>
     )
 }
