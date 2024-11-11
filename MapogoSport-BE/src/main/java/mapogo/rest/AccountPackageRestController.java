@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.entity.AccountPackage;
 import mapogo.service.AccountPackageService;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 @CrossOrigin("*")
 @RequestMapping("/rest")
@@ -21,5 +25,12 @@ public class AccountPackageRestController {
 	@GetMapping("/accountpackage")
 	public List<AccountPackage> findAll(){
 		return accountPackageService.findAll();
+	}
+	
+	@PutMapping("/update/account/package/{id}")
+	public String putMethodName(@PathVariable String id, @RequestBody String entity) {
+		//TODO: process PUT request
+		
+		return entity;
 	}
 }

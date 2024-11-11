@@ -43,6 +43,10 @@ public class SizeServiceImpl implements SizeService{
 		sizeDAO.deleteById(id);
 		
 	}
+	@Override
+	   public Size findByName(String sizeName) {
+	        return sizeDAO.findBySizeName(sizeName); // Dựng hàm này trong repository để tìm theo tên
+	    }
 
 
 

@@ -249,4 +249,18 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bookingDetail.setStatus("Đã đá");
 		bookingDetailDAO.save(bookingDetail);
 	}
+
+	@Override
+	public List<BookingDetail> findByDateAndTime(LocalDate date, String time, Integer sportFieldId) {
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findByDateAndTime(date, time, sportFieldId);
+		bookingDetails.forEach(bd -> {
+			User u = userDAO.findUserByBookingDetailId(bd.getBookingDetailId());
+			if (u.getFullname().equals("Offline")) {
+				bd.setFullName(bd.getBooking().getFullName());
+			} else {
+				bd.setFullName(u.getFullname());
+			}
+		});
+		return bookingDetails;
+	}
 }

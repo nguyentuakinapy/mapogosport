@@ -120,7 +120,20 @@ export default function Home() {
     setHasOwnerRole(ownerRoleExists);
   }, [userData]);
 
+  const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const reponse = await fetch('http://localhost:8080/rest/category_field')
+        const data = await reponse.json();
+        setCategoryFields(data)
+      } catch (error) {
+        console.log("Lỗi call Api rồi: ", error)
+      }
+    }
+    fetchData();
+  }, [])
   return (
     <HomeLayout>
       <div className="search-sport">
@@ -134,8 +147,9 @@ export default function Home() {
             <div className="input-group" style={{ width: '70%', backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: '8px', padding: '10px' }}>
               <select defaultValue={0} className="form-control" style={{ borderWidth: '0 1px 0 0', borderStyle: 'solid', borderColor: 'black' }}>
                 <option value={'0'}>Lọc theo loại sân</option>
-                <option value="1">Sân cỏ nhân tạo</option>
-                <option value="2">Sân cỏ tự nhiên</option>
+                {categoryFields.map(item => (
+                  <option value={item.categoriesFieldId}>{item.name}</option>
+                ))}
               </select>
               <input type="text" className="form-control" placeholder="Nhập tên sân hoặc địa chỉ" style={{ borderWidth: '0 1px 0 1px', borderStyle: 'solid', borderColor: 'black' }} />
               <input type="text" className="form-control" placeholder="Nhập khu vực" style={{ borderWidth: '0 0 0 1px', borderStyle: 'solid', borderColor: 'black' }} />
@@ -375,7 +389,7 @@ export default function Home() {
           </div>
           <div style={{ fontSize: '15px' }}>
             <Row className="my-3">
-              {products.slice(0, 8).map((product: Product) => (
+              {/* {products.slice(0, 8).map((product: Product) => (
                 <Col xs={3} key={product.productId}>
                   <div className="user-border">
                     <div className="mb-3">
@@ -396,7 +410,7 @@ export default function Home() {
                     </div>
                   </div>
                 </Col>
-              ))}
+              ))} */}
             </Row>
           </div>
         </div>

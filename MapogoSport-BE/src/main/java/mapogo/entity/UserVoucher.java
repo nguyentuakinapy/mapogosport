@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,7 @@ public class UserVoucher implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "VoucherId", nullable = false)
+    @JsonManagedReference  //Mỵ đổi ngày 9-11
     private Voucher voucher;
 
     @Column(name = "Status", nullable = false)

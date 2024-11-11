@@ -12,5 +12,6 @@ public interface SizeService {
 	Size create(Size size);
 	Size update(Size size);
 	void deleteById(Integer id);
+	Size findByName (String size);
 	
 }

@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
 import { useData } from "../context/UserContext";
 import ProfileContent from "@/components/User/modal/user.profile";
+import BlogManager from "@/components/blog/blog-manager";
 
 
 export default function Owner({ children }: { children: ReactNode }) {
@@ -109,9 +110,7 @@ export default function Owner({ children }: { children: ReactNode }) {
                 );
             case 'post':
                 return (
-                    <div className="font-14">
-                        chưa biết có gì bên trong
-                    </div>
+                    <BlogManager></BlogManager>
                 );
             case 'bank':
                 return (

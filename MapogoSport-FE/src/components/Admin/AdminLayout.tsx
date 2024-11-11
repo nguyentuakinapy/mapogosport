@@ -10,6 +10,7 @@ import ReactQueryProvider from "@/app/utils/UseQueryProviders/ReactQueryProvider
 import { vi } from "date-fns/locale/vi";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
 import { UserProvider } from "@/app/context/UserContext";
+import ChatMessenger from '@/components/app.chatMessenger';
 
 registerLocale('vi', vi);
 setDefaultLocale('vi');
@@ -66,42 +67,34 @@ export default function AdminLayout({
     }, []);
 
 
-    const [isAniActive, setIsAniActive] = useState(false);
-    const [isActive, setIsActiveNumber] = useState<number>(1);
+    const [isAniActive, setIsAniActive] = useState<boolean>(true);
 
     const toggleAni = () => {
         setIsAniActive(!isAniActive);
+        sessionStorage.setItem("isAniActive", JSON.stringify(!isAniActive));
     }
 
-    const setIsActive = (index: number) => {
-        setIsActiveNumber(index);
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('activeIndexAdmin', index.toString());
-        }
-    };
+    const [refreshKey, setRefreshKey] = useState<number>(0);
+
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const savedActiveIndex = localStorage.getItem('activeIndexAdmin');
-            if (savedActiveIndex) {
-                setIsActiveNumber(Number(savedActiveIndex));
-            }
+        const isAniActive = sessionStorage.getItem("isAniActive");
+        if (isAniActive) {
+            setIsAniActive(JSON.parse(isAniActive));
         }
     }, []);
-
-    const [refreshKey, setRefreshKey] = useState<number>(0);
 
     return (
         <UserProvider refreshKey={refreshKey}>
             <ReactQueryProvider>
-                <Nav isAniActive={isAniActive} toggleAni={toggleAni} isActive={isActive} setIsActive={setIsActive} />
+                <Nav isAniActive={isAniActive} toggleAni={toggleAni} />
                 <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} />
-                <main className={`main-right ${isAniActive ? 'mainRight' : ''}`}>
+                <main className={`${isAniActive ? 'main-right-full' : 'main-right-normal'}  pb-1 `}>
                     <div className="main-body">
                         {children}
                     </div>
                 </main>
-                <ToastContainer></ToastContainer>
+                <ChatMessenger ></ChatMessenger>
             </ReactQueryProvider>
         </UserProvider>
     )

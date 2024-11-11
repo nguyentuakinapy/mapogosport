@@ -13,11 +13,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import mapogo.dto.ProductHaveReviewDTO;
 import mapogo.entity.Product;
 import mapogo.entity.ProductReview;
 import mapogo.service.ProductReviewService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @CrossOrigin("*")
 @RestController
@@ -65,5 +68,15 @@ public class ProductReivewRestController {
 	public void deleteByUser(@PathVariable("productReviewId") Integer productReviewId) {
 		proReviewService.deleteReviewByUser(productReviewId);
 	}
+	
+	@GetMapping("/user/find-review-by-rating/{productId}/{rating}")
+	public List<ProductReview> getMethodName(@PathVariable("productId") Integer productId, @PathVariable("rating") Integer rating) {
+		return proReviewService.findReviewByRating(productId, rating);
+	}
+	@GetMapping("/ratings")
+    public List<ProductHaveReviewDTO> getProductRatings() {
+        return proReviewService.getProductRatings();
+    }
+	
 	
 }

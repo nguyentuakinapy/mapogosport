@@ -16,4 +16,9 @@ public class WalletServiceImpl implements WalletService {
 	public Wallet findByUsername(User user) {
 		return walletDAO.findByUser(user);
 	}
+
+	@Override
+	public Wallet update(Wallet wallet) {
+		return walletDAO.save(wallet);
+	}
 }

@@ -7,4 +7,6 @@ import mapogo.entity.AccountPackage;
 public interface AccountPackageService {
 	
 	List<AccountPackage> findAll();
+	AccountPackage update(Integer id);
+	
 }

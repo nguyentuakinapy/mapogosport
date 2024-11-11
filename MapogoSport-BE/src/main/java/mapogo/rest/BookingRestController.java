@@ -192,4 +192,9 @@ public class BookingRestController {
 		bookingDetailService.updateStatusChuaDaChangeToDaDa(bookingDetailId);
 	}
 	
+	@GetMapping("/booking/detail/find/date/and/time/{date}/{time}/{sportFieldId}")
+	public List<BookingDetail> findByDateAndTime(@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+				@PathVariable("time") String time, @PathVariable("sportFieldId") Integer sportFieldId){
+		return bookingDetailService.findByDateAndTime(date, time, sportFieldId);
+	}
 }

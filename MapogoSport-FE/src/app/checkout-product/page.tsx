@@ -34,9 +34,8 @@ const CheckoutPage = () => {
   useEffect(() => {
     // Hàm lấy dữ liệu giỏ hàng
     const fetchData = async () => {
-      if (cartIds && cartIds.length > 0) { // Chỉ thực hiện khi cartIds có dữ liệu
+      if (cartIds && cartIds.length > 0) {
         try {
-          // Tạo đường dẫn với cartIds được nối thành chuỗi, giả sử API yêu cầu dạng này
           const response = await axios.get(`http://localhost:8080/rest/checkout_product/${cartIds.join(",")}`);
           setData(response.data); // Lưu dữ liệu giỏ hàng vào state
           console.log("1>>> check data checkout: ", response.data);
@@ -56,20 +55,6 @@ const CheckoutPage = () => {
       setNewTotalPrice(total);
     }
   }, [data]);
-
-  // useEffect(() => {
-  //   const userSession = sessionStorage.getItem('user');
-  //   const user = userSession ? JSON.parse(userSession) : null;
-  //   setUser(user); // Cập nhật user từ sessionStorage
-  //   if (user) {
-  //     axios.get(`http://localhost:8080/rest/user/address/${user.username}`)
-  //       .then(response => {
-  //         setAddressUsers(response.data)
-  //         console.log("response.data", response.data);
-  //       })
-  //       .catch(error => console.error('Error:', error));
-  //   }
-  // }, []);
 
   const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
   const [addressUsers, setAddressUsers] = useState([]);
@@ -100,13 +85,24 @@ const CheckoutPage = () => {
       setAddressUsers(userData.addressUsers || []);
 
       setPhoneNumbers(userData.phoneNumberUsers || []);
+      // Chọn số điện thoại đang active
       const activePhone = userData.phoneNumberUsers.find(item => item.active);
       if (activePhone) {
-        setPhoneNumberSelected(activePhone?.phoneNumber?.phoneNumber);
+        setPhoneNumberSelected(activePhone.phoneNumber.phoneNumber);
       }
 
-      const unusedVouchers = userData.userVouchers?.filter(voucher => voucher.status === "Unused");
-      setVouchers(unusedVouchers);
+      // Chọn địa chỉ có active là true
+      const activeAddress = userData.addressUsers.find(item => item.active);
+      if (activeAddress) {
+        setAddressSelected(activeAddress);
+      }
+
+      // Lấy danh sách voucher "Unused" và còn hạn sử dụng
+      const currentDate = new Date();
+      const validVouchers = userData.userVouchers?.filter(voucher => {
+        return voucher.status === "Unused" && new Date(voucher.voucher.endDate) > currentDate;
+      });
+      setVouchers(validVouchers);
     }
   }, [userData]);
 
@@ -212,9 +208,8 @@ const CheckoutPage = () => {
 
   const [urlPayment, setUrlPayment] = useState();
   const [order, setOrder] = useState();
-  const [note, setNote] = useState('');
   const [orderStatus, setOrderStatus] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('COD');
 
   const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedMethod = e.target.value;
@@ -234,7 +229,6 @@ const CheckoutPage = () => {
     axios.get(`http://localhost:8080/rest/findVoucher/${voucherSelected}`)
       .then(response => {
         setVoucher(response.data)
-        // console.log("Voucher: ", response.data);
       })
       .catch(error => console.error('Error:', error));
 
@@ -255,6 +249,8 @@ const CheckoutPage = () => {
   };
 
   const checkForm = () => {
+    setLoading(true);
+
     const errors = []; // Mảng lưu trữ các thông báo lỗi
 
     if (!user1) {
@@ -281,6 +277,7 @@ const CheckoutPage = () => {
 
     if (errors.length > 0) {
       alert(errors.join("\n")); // Hiển thị tất cả lỗi trên một alert
+      setLoading(false);
       return false; // Trả về false để biểu thị rằng kiểm tra không thành công
     }
 
@@ -288,10 +285,7 @@ const CheckoutPage = () => {
   };
 
   const handleCreateOrder = async () => {
-    if (!checkForm()) {
-      setLoading(false);
-      return;
-    }
+
     const addressParts = [selectedProvince, selectedDistrict, selectedWard, addressDetail];
     const address1 = addressParts.filter(part => part).join(', ');
     const orderData = {
@@ -304,7 +298,6 @@ const CheckoutPage = () => {
       amount: newTotalPrice,
       paymentMethod: paymentMethod,
       voucherId: voucher?.voucherId ?? '',
-      note: note, // Hoặc ghi chú hợp lệ
       shipFee: 0.0,// Hoặc giá trị phí vận chuyển
       userVoucherId: voucherSelected
     };
@@ -326,11 +319,31 @@ const CheckoutPage = () => {
   };
 
   const handlePaymentWithOrder = async () => {
-    setLoading(true);
-
-    if (paymentMethod === "COD") {
+    if (!checkForm()) {
+      setLoading(false);
+      return;
+    } else if (paymentMethod === "COD") {
       const order = await handleCreateOrder();
-      window.location.href = `/checkout-product/order`;
+      if (order) {
+        const listCartCheckout = data.map(item => ({
+          productDetailSizeId: item.productDetailSize.productDetailSizeId,
+          quantity: item.quantity
+        }));
+
+        try {
+          const orderDetailResponse = await axios.post(
+            `http://localhost:8080/rest/create_orderDetail`,
+            listCartCheckout,
+            {
+              params: { orderId: order.orderId }, // truyền orderId qua params
+            }
+          );
+
+          window.location.href = `/checkout-product/order`;
+        } catch (error) {
+          console.error('Error during payment:', error);
+        }
+      }
     } else if (paymentMethod === "VNPay") {
       const listCartCheckout = data.map(item => ({
         productDetailSizeId: item.productDetailSize.productDetailSizeId,
@@ -343,7 +356,7 @@ const CheckoutPage = () => {
           `http://localhost:8080/api/payment/create_payment`,
           listCartCheckout,
           {
-            params: { orderId: order.orderId }, // truyền orderId qua params
+            params: { orderId: order.orderId },
           }
         );
         const paymentUrl = paymentResponse.data.url;
@@ -351,26 +364,30 @@ const CheckoutPage = () => {
         window.location.href = paymentUrl;
 
       } catch (error) {
-
         console.error('Error during payment:', error);
       }
-    }else if(paymentMethod==="MoMo"){
-      // Gửi yêu cầu thanh toán tới API Next.js
-      const response = await fetch('/api/create-momo-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 50000 }),  // Số tiền cần thanh toán
-      });
+    } else if (paymentMethod === "MoMo") {
+      setLoading(true);
+      const listCartCheckout = data.map(item => ({
+        productDetailSizeId: item.productDetailSize.productDetailSizeId,
+        quantity: item.quantity
+      }));
+      try {
+        const order = await handleCreateOrder();
 
-      const result = await response.json();
-      console.log(result);
-
-      // Nếu MoMo trả về URL thanh toán, điều hướng người dùng tới đó
-      if (result.payUrl) {
-        window.location.href = result.payUrl;
-      } else {
-        console.error('Thanh toán thất bại');
-
+        const response = await axios.post(
+          'http://localhost:8080/api/payment/create-momo-payment',
+          listCartCheckout,
+          {
+            params: { orderId: order.orderId },
+          }
+        );
+        const paymentUrl = response.data.payUrl;
+        // chuyển hướng đến URL thanh toán
+        window.location.href = paymentUrl;
+      } catch (error) {
+        setLoading(false);
+        console.error('Thanh toán thất bại', error);
       }
     }
 
@@ -488,14 +505,14 @@ const CheckoutPage = () => {
                   <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
                 </Form.Floating>
               </div>
-              {/* note */}
+              {/* note
               <div className="form-floating">
                 <textarea className="form-control" id="notes" value={note}
                   onChange={(e) => setNote(e.target.value)}></textarea>
                 <label htmlFor="notes" className="form-label">
                   Ghi chú (tùy chọn)
                 </label>
-              </div>
+              </div> */}
             </form>
           </div>
 
@@ -511,7 +528,7 @@ const CheckoutPage = () => {
                     className="form-check-input"
                     type="radio"
                     name="paymentMethod"
-                    id="cod"
+                    id="cod" checked={paymentMethod === 'COD'}
                     aria-expanded={open}
                     value={"COD"}
                     onChange={handlePaymentMethodChange}
@@ -614,7 +631,7 @@ const CheckoutPage = () => {
                         key={voucher.userVoucherId}
                         value={voucher.userVoucherId}
                       >
-                        {voucher?.userVoucherId}
+                        {voucher?.voucher?.name}
                       </option>
                     ))}
                   </select>
