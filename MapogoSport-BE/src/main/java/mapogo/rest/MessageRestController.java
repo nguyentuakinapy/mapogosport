@@ -4,6 +4,7 @@ package mapogo.rest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+//import mapogo.controller.WebSocketSubscriptionListener;
 import mapogo.dao.MessageDAO;
 import mapogo.entity.Message;
 import mapogo.service.MessageService;
@@ -41,4 +42,4 @@ public class MessageRestController {
     public List<Message> getMessagesForUser(@PathVariable String receiverUsernameOrCurrentUser) {
         return messageDAO.getMessagesForUser(receiverUsernameOrCurrentUser);
     }
-}
+   }

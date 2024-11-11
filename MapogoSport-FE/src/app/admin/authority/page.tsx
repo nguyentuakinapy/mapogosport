@@ -3,7 +3,7 @@ import AuthorityModal from "@/components/Admin/Modal/authority.modal";
 import { useState } from "react";
 import { Table } from "react-bootstrap";
 
-function Test() {
+function AuthorityComponent() {
     const [showEditRole, setShowEditRole] = useState<boolean>(false)
 
     return (
@@ -43,7 +43,7 @@ function Test() {
                     </tr>
                 </thead>
                 <tbody data-bs-toggle="modal" data-bs-target="#exampleModalToggle">
-                    <tr>
+                    <tr onClick={() => setShowEditRole(true)}>
                         <td>1</td>
                         <td>Sân bóng 1</td>
                         <td>Nguyễn Văn A</td>
@@ -73,4 +73,4 @@ function Test() {
     )
 }
 
-export default Test;
+export default AuthorityComponent;

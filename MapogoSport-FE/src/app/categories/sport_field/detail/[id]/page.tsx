@@ -6,9 +6,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import HomeLayout from '@/components/HomeLayout';
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
-import { formatDate, formatDateVN } from '@/components/Utils/Format';
+import { formatDateVN } from '@/components/Utils/Format';
 import CheckoutModal from '@/components/Booking/booking.Checkout';
 import ModalReviewSportField from '@/components/Review/review.sportField';
+import '../[id]/BookingDetail.scss';
 
 type BookingsTypeOnWeek = {
     [time: string]: {
@@ -462,8 +463,6 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                 toast.warning("Đã quá thời gian yêu cầu đặt sân!");
                 return;
             }
-            console.log(selectedDateTime);
-            console.log(currentDateTime);
             if (Array.isArray(bookingsFromAPI) && bookingsFromAPI.length > 0) {
                 for (const booking of bookingsFromAPI) {
                     const { startTime, endTime, sportFieldDetail } = booking;

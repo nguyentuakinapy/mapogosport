@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 import { formatPrice } from "@/components/Utils/Format"
-
+import axios from 'axios';
 
 const Categories = () => {
 
@@ -13,6 +13,7 @@ const Categories = () => {
     const [categoriesProduct, setCategoriesProduct] = useState<CategoryProduct[]>([])
     const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+
     // Pagination
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
@@ -23,31 +24,34 @@ const Categories = () => {
         setCurrentPage(pageNumber);
     };
 
+    const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(products.length / itemsPerPage);
+    const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/rest/category-products`)
+                const response = await fetch(`http://localhost:8080/rest/category-products`);
                 const data = await response.json();
-                setCategoriesProduct(data)
-                console.log(data)
+                setCategoriesProduct(data);
+                console.log(data);
             } catch (error) {
-                console.log("Error fetch categories", error)
+                console.log("Error fetching categories", error);
             }
-        }
-        fetchData()
-    }, [])
+        };
+        fetchData();
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await fetch('http://localhost:8080/rest/products');
                 const data = await response.json();
-                console.log(data);
                 setProducts(data);
-                setIcon(new Array(data.length).fill(false)); // Khởi tạo trạng thái icon
+                setIcon(new Array(data.length).fill(false));  // Initialize icon state
+                console.log(data);
             } catch (error) {
-                console.log("Lỗi khi gọi API: ", error);
+                console.log("Error fetching products:", error);
             }
         };
         fetchData();
@@ -81,11 +85,12 @@ const Categories = () => {
 
     const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
     return (
         <HomeLayout>
             <Container className='pt-5'>
                 <Row>
-                    {/* Sidebar responsive: hidden on small screens, show on larger */}
+                    {/* Sidebar */}
                     <Col lg={2} md={3} sm={12} className="mb-3">
                         <div className="d-flex mb-3">
                             <div className="fw-bold text-uppercase filter-panel">
@@ -139,29 +144,24 @@ const Categories = () => {
                                 Danh sách sản phẩm
                             </h3>
 
-                            {/* Product Item */}
-                            {currentItems.map((product, index) => (
-                                <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
-                                    <div nh-product={product.productId} className="product-item">
-                                        <div className="inner-image mb-3">
-                                            <div className="product-status">
-                                                <div className="onsale"></div>
-                                            </div>
-                                            <div className="img ratio-1-1">
-                                                <Link href="">
-                                                    <Link href={`/product-detail/${product.productId}`}>
-                                                        <img
-                                                            className="w-100 h-100 img-fluid"
-                                                            style={{
-                                                                maxHeight: "250px",
-                                                                maxWidth: "250px",
-                                                                minHeight: "250px",
-                                                                objectFit: "cover"
-                                                            }}
-                                                            nh-lazy="image"
-                                                            alt={product.name}
-                                                            src={`${typeof product.image === 'string' ? product.image : ''}`}
-                                                        />
+                            {currentItems.map((product, index) => {
+                                // Calculate the average rating using reduce
+                                const averageRating = product.productReviews && product.productReviews.length > 0
+                                    ? product.productReviews.reduce((total, review) => total + review.rating, 0) / product.productReviews.length
+                                    : 0;
+                                console.log("AVG rating: ", averageRating);
+
+                                return (
+                                    <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
+                                        <div nh-product={product.productId} className="product-item">
+                                            <div className="inner-image mb-3">
+                                                <div className="product-status">
+                                                    <div className="onsale"></div>
+                                                </div>
+                                                <div className="img ratio-1-1">
+                                                    <Link href="">
+                                                        <img nh-lazy="image" className="img-fluid" alt={product.name}
+                                                            src={`${typeof product.image === 'string' ? product.image : ''}`} />
                                                     </Link>
                                                 </Link>
                                             </div>
@@ -194,102 +194,60 @@ const Categories = () => {
                                                 <span className="price-amount ms-1"> {formatPrice(product.price)}</span>
                                                 {/* <span className="price-amount old-price me-1">{product.oldPrice}</span> */}
                                             </div>
-
-                                            {/* <div className="d-flex mt-2" style={{ justifyContent: 'space-between', width: '100%' }}>
-                                                <Link href={`/product-detail/${product.productId}`} className='btn btn-danger ms-1' style={{ fontSize: '14px', flexGrow: 1 }}>Mua Ngay</Link>
-                                                <Link href='' className='btn btn-warning ms-2 me-1' style={{ fontSize: '14px', flexGrow: 1 }}>Thêm Giỏ Hàng</Link>
-                                            </div> */}
-                                            <div className="star-item star d-flex mt-1 ms-1">
-                                                <div className="icon text-warning mb-2">
-                                                    <i className="bi bi-star-fill"></i>
-                                                    <i className="bi bi-star-fill"></i>
-                                                    <i className="bi bi-star-fill"></i>
-                                                    <i className="bi bi-star-fill"></i>
-                                                    <i className="bi bi-star-fill"></i>
+                                            <div className="inner-content">
+                                                <div className="price">
+                                                    <span className="price-amount ms-1"> {formatPrice(product.price)}</span>
                                                 </div>
-                                                <div className="number">(1) reviews</div>
+                                                <div className="product-category ms-1">
+                                                    <Link href="">{product.categoryProduct.name}</Link>
+                                                </div>
+                                                <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
+                                                    <Link href="">{product.name}</Link>
+                                                </div>
+                                                <div className="d-flex mt-2" style={{ justifyContent: 'space-between', width: '100%' }}>
+                                                    <Link href={`/product-detail/${product.productId}`} className='btn btn-danger ms-1' style={{ fontSize: '14px', flexGrow: 1 }}>Mua Ngay</Link>
+                                                    <Link href='' className='btn btn-warning ms-2 me-1' style={{ fontSize: '14px', flexGrow: 1 }}>Thêm Giỏ Hàng</Link>
+                                                </div>
+                                                <div className="star-item star d-flex mt-1 ms-1">
+                                                    <div className="icon text-warning mb-2">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <i
+                                                                key={i}
+                                                                className={`bi bi-star${i < Math.round(averageRating) ? '-fill' : ''}`}
+                                                            ></i>
+                                                        ))}
+                                                    </div>
+                                                    <div className="number ms-2">({product.productReviews.length} bình luận)</div> {/* Display the number of comments */}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </Col>
-                            ))}
-                            <>
-                                {totalPages > 1 && (
-                                    <nav aria-label="Page navigation example">
-                                        <ul className="pagination justify-content-center">
-                                            {/* Nút về trang đầu tiên */}
-                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                <a
-                                                    className="page-link"
-                                                    href="#"
-                                                    aria-label="First"
-                                                    onClick={() => handlePageChange(1)}
-                                                    title="Go to first page"
-                                                >
-                                                    <span aria-hidden="true">&laquo;</span>
-                                                </a>
-                                            </li>
+                                    </Col>
+                                );
+                            })}
 
-                                            {/* Hiển thị 5 trang tùy theo currentPage */}
-                                            {Array.from({ length: totalPages }, (_, index) => {
-                                                let startPage = 1;
-                                                let endPage = 5;
 
-                                                // Nếu tổng số trang lớn hơn 5
-                                                if (totalPages > 5) {
-                                                    // Điều chỉnh để luôn hiển thị 5 trang
-                                                    if (currentPage > 3) {
-                                                        startPage = currentPage - 2;
-                                                        endPage = currentPage + 2;
-                                                        if (endPage > totalPages) {
-                                                            endPage = totalPages;
-                                                            startPage = totalPages - 4; // Đảm bảo vẫn hiển thị đủ 5 trang
-                                                        }
-                                                    }
-                                                } else {
-                                                    // Nếu tổng số trang ít hơn hoặc bằng 5, hiển thị tất cả
-                                                    endPage = totalPages;
-                                                }
-
-                                                // Hiển thị các trang từ startPage đến endPage
-                                                if (index + 1 >= startPage && index + 1 <= endPage) {
-                                                    return (
-                                                        <li
-                                                            key={index + 1}
-                                                            className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
-                                                            title={`Go to page ${index + 1}`}
-                                                        >
-                                                            <a
-                                                                className="page-link"
-                                                                href="#"
-                                                                onClick={() => handlePageChange(index + 1)}
-                                                            >
-                                                                {index + 1}
-                                                            </a>
-                                                        </li>
-                                                    );
-                                                }
-
-                                                return null;
-                                            })}
-                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                                <a
-                                                    className="page-link"
-                                                    href="#"
-                                                    aria-label="Last"
-                                                    onClick={() => handlePageChange(totalPages)}
-                                                    title="Go to last page"
-                                                >
-                                                    <span aria-hidden="true">&raquo;</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                )}
-                            </>
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <nav aria-label="Page navigation example">
+                                    <ul className="pagination justify-content-center">
+                                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                            <a className="page-link" href="#" onClick={() => handlePageChange(1)}>&laquo;</a>
+                                        </li>
+                                        {Array.from({ length: totalPages }, (_, index) => index + 1)
+                                            .slice(Math.max(0, currentPage - 3), Math.min(totalPages, currentPage + 2))
+                                            .map(page => (
+                                                <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
+                                                    <a className="page-link" href="#" onClick={() => handlePageChange(page)}>{page}</a>
+                                                </li>
+                                            ))}
+                                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                            <a className="page-link" href="#" onClick={() => handlePageChange(totalPages)}>&raquo;</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            )}
                         </Row>
                     </Col>
-
                 </Row>
             </Container>
         </HomeLayout>

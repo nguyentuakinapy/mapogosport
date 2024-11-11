@@ -15,6 +15,7 @@ import useSWR from 'swr';
 import ForgotPassword from './account/modal/forgotPassword.modal';
 import ChangePasswordNew from './account/modal/change-password-new.modal';
 import { useData } from '@/app/context/UserContext';
+import { logOut } from '@/app/utils/Log-Out';
 
 
 
@@ -49,7 +50,7 @@ const CartBadge = ({ username }: { username: string }) => {
 
 interface HeaderProps {
     setRefreshKey: (v: number) => void;
-    refreshKey: number
+    refreshKey: number;
 }
 
 const Header = (props: HeaderProps) => {
@@ -57,7 +58,6 @@ const Header = (props: HeaderProps) => {
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
     const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
     const [showChangePasswordNew, setShowChangePasswordNew] = useState<boolean>(false);
-    const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
     const { setRefreshKey, refreshKey } = props;
 
     const userData = useData();
@@ -88,27 +88,6 @@ const Header = (props: HeaderProps) => {
             window.removeEventListener('scroll', handleScroll);
         };
     }, []); // Chạy một lần khi component được mount
-
-    // Fetch CategoryField
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const reponse = await fetch('http://localhost:8080/rest/category_field')
-                const data = await reponse.json();
-                setCategoryFields(data)
-            } catch (error) {
-                console.log("Lỗi call Api rồi: ", error)
-            }
-        }
-        fetchData();
-    }, [])
-
-    const logOut = () => {
-        localStorage.removeItem('username');
-        sessionStorage.removeItem('user');
-        window.location.href = "/";
-    }
 
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
@@ -156,7 +135,11 @@ const Header = (props: HeaderProps) => {
                                         }
                                         if (item.role.name === "ROLE_ADMIN") {
                                             return (
-                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Admin</a>
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Quản trị viên</a>
+                                            );
+                                        } else if (item.role.name === "ROLE_STAFF") {
+                                            return (
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Nhân viên</a>
                                             );
                                         }
                                         return null;

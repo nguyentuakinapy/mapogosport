@@ -49,6 +49,11 @@ public class BookingRestController {
 	public void updateBookingStatus(@RequestBody Map<String, Object> bookingData) {
 		bookingService.updateStatusBooking(bookingData);
 	}
+	
+	@PutMapping("/owner/bookingDetail/update")
+	public void updateBookingDetailStatus(@RequestBody Map<String, Object> bookingDetailData) {
+		bookingDetailService.updateStatusBookingDetail(bookingDetailData);
+	}
 
 	@GetMapping("/user/booking/{username}")
 	public List<Map<String, Object>> getByUser(@PathVariable("username") String username) {
@@ -182,5 +187,14 @@ public class BookingRestController {
 		 bookingDetailService.updateBookingDetail(data);
 	}
 	
+	@PutMapping("/booking/detail/change/status/{bookingDetailId}")
+	public void updateStatusChuaDaChangeToDaDa(@PathVariable("bookingDetailId") Integer bookingDetailId) {
+		bookingDetailService.updateStatusChuaDaChangeToDaDa(bookingDetailId);
+	}
 	
+	@GetMapping("/booking/detail/find/date/and/time/{date}/{time}/{sportFieldId}")
+	public List<BookingDetail> findByDateAndTime(@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+				@PathVariable("time") String time, @PathVariable("sportFieldId") Integer sportFieldId){
+		return bookingDetailService.findByDateAndTime(date, time, sportFieldId);
+	}
 }

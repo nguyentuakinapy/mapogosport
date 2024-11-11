@@ -9,6 +9,7 @@ import mapogo.entity.BookingDetail;
 public interface BookingDetailService {
 
 	List<Map<String, Object>> findBookingDetailByBookingId(Integer bookingId);
+	BookingDetail updateStatusBookingDetail(Map<String, Object> bookingDetailData);
 
 //	List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId);
 
@@ -17,6 +18,8 @@ public interface BookingDetailService {
 	List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportDetailId, LocalDate today, LocalDate endDate);
 
 	List<BookingDetail> findBookingDetailBySubscriptionKey(String subscriptionKey);
+	
+	List<BookingDetail> findByDateAndTime(LocalDate date, String time, Integer sportFieldId);
 
 	BookingDetail createBookingDetail(Map<String, Object> bd);
 
@@ -28,4 +31,6 @@ public interface BookingDetailService {
 	void cancelBookingDetailBySubscription(Integer bookingDetailId, String subscriptionKey);
 
 	void updateBookingDetail(Map<String, Object> data);
+	
+	void updateStatusChuaDaChangeToDaDa(Integer bookingDetailId);
 }

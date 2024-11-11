@@ -19,6 +19,7 @@ const translations: { [key: string]: string } = {
     "thunderstorm": "sấm sét",
     "thunderstorm with rain": "mưa có sấm sét",
     "thunderstorm with light rain": "mưa rào có sấm sét",
+    "thunderstorm with heavy rain": "mưa to có sấm sét",
     "snow": "tuyết",
     "mist": "sương mù",
     "light rain": 'mưa nhẹ',
@@ -63,10 +64,8 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
         return () => clearInterval(intervalId);
     }, []);
 
-
-
     return (
-        <header className={`${isAniActive ? 'aniHead' : ''}`}>
+        <header className={`${isAniActive ? 'header-full' : 'header-normal'}`}>
             <div className="d-flex m-0 justify-content-between align-items-center m-auto">
                 <div className="d-flex justify-content-center align-items-center">
                     <i className={`bi ${isAniActive ? 'bi-list' : 'bi-filter-left'} mx-3`} onClick={() => {

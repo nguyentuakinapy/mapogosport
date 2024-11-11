@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link";
-import { Form, Button, Table, Nav, Pagination, Dropdown } from "react-bootstrap";
+import { Form, Button, Table, Nav, Pagination, Dropdown, InputGroup } from "react-bootstrap";
 import '../owner.scss'
 import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
@@ -11,22 +11,30 @@ import { toast } from "react-toastify";
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { debounce } from "lodash";
+import DatePicker from "react-datepicker";
+import 'react-datepicker/dist/react-datepicker.css';
 
 const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [bookingData, setBookingData] = useState<BookingFindAll[]>([]);
     const [activeTab, setActiveTab] = useState<string>('all');
+    const [username, setUsername] = useState<string | null>(null);
+    const [startDate, setStartDate] = useState<Date | null>(null);
+    const [endDate, setEndDate] = useState<Date | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8);
 
-    const orderStatuses = [
+    const bookingStatuses = [
         'Chờ thanh toán',
         'Đã thanh toán',
         'Đã hủy'
     ];
 
-    const username = localStorage.getItem('username');
+    useEffect(() => {
+        const storedUsername = localStorage.getItem('username');
+        setUsername(storedUsername);
+    }, []);
 
     const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/owner/booking/findAll/${username}`, fetcher, {
         revalidateIfStale: false,
@@ -72,6 +80,7 @@ const OwnerBookingBill = () => {
                 return;
             }
             mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
+            mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
             toast.success('Cập nhật thành công!');
         });
     };
@@ -81,7 +90,7 @@ const OwnerBookingBill = () => {
             <Dropdown onSelect={(newStatus) => handleStatusChange(booking.bookingId, newStatus || booking.status)}>
                 <Dropdown.Toggle disabled={booking.status == "Đã hủy"} variant={getStatusVariant(booking.status)}>{booking.status}</Dropdown.Toggle>
                 <Dropdown.Menu>
-                    {orderStatuses.map((status) => (
+                    {bookingStatuses.map((status) => (
                         <Dropdown.Item key={status} eventKey={status}>
                             {status}
                         </Dropdown.Item>
@@ -92,6 +101,9 @@ const OwnerBookingBill = () => {
     };
 
     const renderTable = (filteredBookings: BookingFindAll[]) => {
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
         return (
             <div className="box-table-border mb-4">
                 <Table striped className="mb-0">
@@ -112,22 +124,23 @@ const OwnerBookingBill = () => {
                         {filteredBookings.length > 0 ?
                             filteredBookings.map((booking, index) => (
                                 <tr key={booking.bookingId}>
-                                    <td className="text-start title">{`#${index + 1}`}</td>
+                                    <td className="text-start title">{`#${indexOfFirstItem + index + 1}`}</td>
                                     <td className="text-start title">{booking.sportFieldName}</td>
                                     <td className="title">{booking.user.username == 'sportoffline' ?
                                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
-                                    <td>{booking.status === 'Đã hủy' ? '0 đ' : `${(booking.totalAmount - booking.prepayPrice).toLocaleString()} đ`}</td>
+                                    <td>{booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0 đ'
+                                        : `${(booking.totalAmount - booking.prepayPrice).toLocaleString()} đ`}</td>
                                     <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
                                     <td>{renderStatusDropdown(booking)}</td>
                                     <td>
-                                        <Link href={`/owner/booking-bill/${booking.bookingId}`}>Xem</Link>
+                                        <Link href={`/owner/booking-bill/detail/${booking.bookingId}`}>Xem</Link>
                                     </td>
                                 </tr>
                             )) :
                             <tr>
-                                <td colSpan={7} className="text-center">Không có dữ liệu về trạng thái này!</td>
+                                <td colSpan={9} className="text-center">Không có dữ liệu về trạng thái này!</td>
                             </tr>}
                     </tbody>
                 </Table>
@@ -149,6 +162,12 @@ const OwnerBookingBill = () => {
             case 'complete': return booking.status === 'Đã thanh toán';
             default: return true;
         }
+    }).filter(booking => {
+        if (startDate && endDate) {
+            const bookingDate = new Date(booking.date);
+            return bookingDate >= startDate && bookingDate <= endDate;
+        }
+        return true;
     });
 
     const renderContent = () => {
@@ -320,6 +339,20 @@ const OwnerBookingBill = () => {
                 <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Hóa Đơn</b>
                 <div>
                     <Form.Control type="text" placeholder="Tìm theo tên và SĐT..." onChange={handleSearch} />
+                </div>
+                <div>
+                    <InputGroup className="search-date-booking">
+                        <DatePicker selected={startDate || undefined} onChange={(date) => setStartDate(date)}
+                            selectsStart startDate={startDate || undefined} endDate={endDate || undefined}
+                            placeholderText="Từ ngày" className="form-control start" dateFormat="dd/MM/yyyy"
+                        />
+                        <InputGroup.Text><i className="bi bi-three-dots"></i></InputGroup.Text>
+                        <DatePicker selected={endDate || undefined} onChange={(date) => setEndDate(date)}
+                            selectsEnd startDate={startDate || undefined} endDate={endDate || undefined}
+                            minDate={startDate || undefined} placeholderText="Đến ngày" className="form-control end"
+                            dateFormat="dd/MM/yyyy"
+                        />
+                    </InputGroup>
                 </div>
                 <div>
                     <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={exportPDF}>Xuất File PDF</Button>

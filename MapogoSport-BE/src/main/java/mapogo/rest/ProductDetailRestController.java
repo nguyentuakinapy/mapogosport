@@ -24,6 +24,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import mapogo.dao.ProductDAO;
 import mapogo.dao.ProductDetailDAO;
 import mapogo.dto.ProductDetailDTO;
 import mapogo.entity.Gallery;
@@ -61,6 +62,8 @@ public class ProductDetailRestController {
 	ProductDetailDAO productDetailDAO;
 	@Autowired
 	CloudinaryUtils cloudinaryUtils;
+	@Autowired
+	ProductDAO productDAO;
 
 	@GetMapping("/product-detail")
 	public List<ProductDetail> findAll() {
@@ -96,6 +99,12 @@ public class ProductDetailRestController {
 		return productDetailService.findByImageDetailAndGalleryByIdProductDetail(productDetailId);
 	}
 
+	@GetMapping("/cmm/{id}")
+	public Integer fine(@PathVariable Integer id) {
+	    return productDetailDAO.findProductIdByProductDetailId(id);
+	}
+
+
 //	@GetMapping("/product-detail/demo/{productDetailId}")
 //	public Optional<ProductDetail> demo(@PathVariable Integer productDetailId){
 //		return productDetailService.findByIdProduct(productDetailId);
@@ -107,6 +116,8 @@ public class ProductDetailRestController {
 			@RequestParam("productDetail") String productDetailJson, @RequestParam("fileimage") MultipartFile file,
 			@RequestParam("galleryFiles") MultipartFile[] galleryFiles) {
 		try {
+	        System.err.println("Tên file ảnh chính (fileimage): lần đầu " + file.getOriginalFilename());
+
 			
 			ProductDetailDTO productDetailDTO = objectMapper.readValue(productDetailJson, ProductDetailDTO.class);
 			
@@ -122,6 +133,7 @@ public class ProductDetailRestController {
 			// Xử lý lưu hình ảnh chính (fileimage)
 			if (!file.isEmpty()) {
 				
+		        System.err.println("Tên file ảnh chính (fileimage): " + file.getOriginalFilename());
 				String imageUrl = cloudinaryUtils.uploadImage(file);
 				System.err.println("Uploaded image URL: " + imageUrl);
 
@@ -140,8 +152,9 @@ public class ProductDetailRestController {
 			if (galleryFiles != null) {
 				for (MultipartFile galleryFile : galleryFiles) {
 					if (!galleryFile.isEmpty()) {
-					
-						String galleryImageUrl = cloudinaryUtils.uploadImage(file);
+						System.err.println("Uploaded gallery image URL: " + galleryFile.getOriginalFilename()); // img -1
+						
+						String galleryImageUrl = cloudinaryUtils.uploadImage(galleryFile);
 						System.err.println("Uploaded gallery image URL: " + galleryImageUrl);
 
 						// Tạo đối tượng Gallery và gán thông tin
@@ -242,7 +255,17 @@ public class ProductDetailRestController {
 //					.body("Lỗi khi thêm chi tiết sản phẩm: " + e.getMessage());
 //		}
 //	}
-	
+	  public void updateProductStockByProductId(Integer productId) {
+	        Integer totalQuantity = productDAO.getTotalQuantityByProductId(productId);
+	        Product product = productDAO.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
+	        product.setStock(totalQuantity != null ? totalQuantity : 0);
+	        if(product.getStock() == 0) {
+	        	product.setStatus("Hết hàng");
+	        }else {
+	        	product.setStatus("Còn hàng");
+	        }
+	        productDAO.save(product);
+	    }
 	@DeleteMapping("/product-detail/delete/{productDetailId}")
 	public ResponseEntity<?> deleteProductDetail(@PathVariable Integer productDetailId) {
 	    try {
@@ -297,112 +320,24 @@ public class ProductDetailRestController {
 
 	        // Xóa ProductDetail khỏi database
 	        System.err.println("productDetailId sẽ xóa "+productDetailId);
+	        
+            Integer productDetailGetId = productDetailDAO.findProductIdByProductDetailId(productDetailId);
+         
 	        productDetailService.delete(productDetailId);
-
+	        
+	        if (productDetailGetId != null ) {
+                updateProductStockByProductId(productDetailGetId);
+            } else {
+                System.err.println("Sản phẩm không tồn tại");
+            }
+	        
 	        return ResponseEntity.ok("Xóa thành công ProductDetail và các bản ghi liên quan cùng hình ảnh.");
 	    } catch (Exception e) {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Có lỗi xảy ra khi xóa ProductDetail.");
 	    }
 	}
 	
-//	@PutMapping("/product-detail/update/{productDetailId}")
-//	public ResponseEntity<?> updateProductDetail(
-//	        @PathVariable Integer productDetailId,
-//	        @RequestParam("productDetail") String productDetailJson,
-//	        @RequestParam(value = "fileimage", required = false) MultipartFile file,
-//	        @RequestParam(value = "galleryFiles", required = false) MultipartFile[] galleryFiles) {
-//	    try {
-//	        System.err.println("Start updating ProductDetail with ID: " + productDetailId);
-//	        System.err.println("Start updating productDetailJson with ID: " + productDetailJson);
-////	        System.err.println("Start updating galleryFiles " + galleryFiles.length);
-//
-//	        // Kiểm tra nếu ProductDetail có tồn tại
-//	        Optional<ProductDetail> existingProductDetailOptional = productDetailDAO.findById(productDetailId);
-//	        if (!existingProductDetailOptional.isPresent()) {
-//	            System.err.println("ProductDetail không tồn tại với ID: " + productDetailId);
-//	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ProductDetail không tồn tại");
-//	        }
-//	        
-//	        
-//
-//	        System.err.println("ProductDetail tồn tại. Chuyển đổi JSON thành đối tượng ProductDetail.");
-//	        // Chuyển đổi chuỗi JSON thành đối tượng ProductDetail
-//	        ProductDetailDTO updatedProductDetailDTO = objectMapper.readValue(productDetailJson, ProductDetailDTO.class);
-//	        
-//	        ProductDetail updatedProductDetail = new ProductDetail();
-//	        
-//	        
-////	        ProductDetail updatedProductDetail = objectMapper.readValue(productDetailJson, ProductDetail.class);
-//	        
-//	        System.err.println("Đối tượng ProductDetail sau khi parse từ JSON: " + updatedProductDetailDTO);
-//
-//	        
-//	        ProductDetail existingProductDetail = existingProductDetailOptional.get();
-//	        
-//        	System.err.println("existingProductDetail "+existingProductDetail.getColor());
-//
-//	        	
-//	        if (updatedProductDetail.getColor() != null && !updatedProductDetail.getColor().isEmpty()) {
-//	            // Cập nhật màu sắc nếu `updatedProductDetail.getColor()` không rỗng
-//	            existingProductDetail.setColor(existingProductDetailOptional.get().getColor());
-//	            System.err.println("Cập nhật màu sắc của ProductDetail thành: " + updatedProductDetail.getColor());
-//	        } else {
-//	            // Giữ lại màu cũ nếu `updatedProductDetail.getColor()` rỗng
-//	            System.err.println("Giữ lại màu cũ của ProductDetail.");
-//	        }
-//
-//
-//	        // Cập nhật hình ảnh chính nếu có hình ảnh mới được cung cấp
-//	        if (file != null && !file.isEmpty()) {
-//	            System.err.println("Hình ảnh chính được tải lên mới. Đang xử lý cập nhật hình ảnh.");
-//	            String oldImagePath = existingProductDetail.getImage();
-//	            if (oldImagePath != null && !oldImagePath.isEmpty()) {
-//	                String publicId = oldImagePath.substring(oldImagePath.lastIndexOf("/") + 1, oldImagePath.lastIndexOf("."));
-//	                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-//	                System.err.println("Đã xóa hình ảnh cũ với publicId: " + publicId);
-//	            }
-//
-//	            Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-//	            String imageUrl = (String) uploadResult.get("secure_url");
-//	            existingProductDetail.setImage(imageUrl);
-//	            System.err.println("Đã cập nhật hình ảnh mới cho ProductDetail với URL: " + imageUrl);
-//	        }
-//
-//	        // Thêm ảnh vào Gallery nếu có file được tải lên
-//	        
-//	        if (galleryFiles != null ) {
-//	            System.err.println("Đang xử lý các hình ảnh trong Gallery.");
-//	            for (MultipartFile galleryFile : galleryFiles) {
-//	                if (!galleryFile.isEmpty()) {
-//	                    Map<String, Object> galleryUploadResult = cloudinary.uploader().upload(galleryFile.getBytes(), ObjectUtils.emptyMap());
-//	                    String galleryImageUrl = (String) galleryUploadResult.get("secure_url");
-//
-//	                    Gallery gallery = new Gallery();
-//	                    gallery.setName(galleryImageUrl);
-//	                    gallery.setProductDetail(existingProductDetail);
-//
-//	                    galleryService.create(gallery);
-//	                    System.err.println("Đã thêm hình ảnh vào Gallery với URL: " + galleryImageUrl);
-//	                }
-//	            }
-//	        }
-//
-//	        // Cập nhật ProductDetail trong database
-//	        productDetailService.update(existingProductDetail);
-//	        System.err.println("Đã cập nhật ProductDetail trong database.");
-//
-//	        return ResponseEntity.ok("Cập nhật ProductDetail thành công");
-//
-//	    } catch (IOException e) {
-//	        System.err.println("Lỗi khi lưu ảnh sản phẩm: " + e.getMessage());
-//	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//	                .body("Lỗi khi lưu ảnh sản phẩm: " + e.getMessage());
-//	    } catch (Exception e) {
-//	        System.err.println("Lỗi khi cập nhật ProductDetail: " + e.getMessage());
-//	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//	                .body("Lỗi khi cập nhật ProductDetail: " + e.getMessage());
-//	    }
-//	}
+
 
 	@PutMapping("/product-detail/update/{productDetailId}")
 	public ResponseEntity<?> updateProductDetail(

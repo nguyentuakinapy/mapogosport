@@ -4,6 +4,8 @@ import { useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { useData } from "../context/UserContext";
+import AuthorityComponent from "./authority/page";
+import BlogManager from "@/components/blog/blog-manager";
 
 export default function Owner({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState<string>('all');
@@ -36,13 +38,13 @@ export default function Owner({ children }: { children: ReactNode }) {
             case 'deposit':
                 return (
                     <div className="font-14">
-                        chưa biết có gì bên trong
+                        <BlogManager></BlogManager>
                     </div>
                 );
             default:
                 return (
                     <div className="font-14">
-                        Loading...
+                        <AuthorityComponent />
                     </div>
                 );
         }
@@ -58,7 +60,7 @@ export default function Owner({ children }: { children: ReactNode }) {
                             <span>0 Bài Viết</span>
                             <span>0 Sân</span>
                             <span>0 Được thích</span>
-                            <span>Gói cơ bản</span>
+                            <span>{userData?.authorities.find(item => item.role.name === 'ROLE_ADMIN')?.role.name ? "Quản trị viên" : 'Nhân viên'}</span>
                         </div>
                     </div>
                 </div>
@@ -70,9 +72,12 @@ export default function Owner({ children }: { children: ReactNode }) {
                         <Nav.Item>
                             <Nav.Link eventKey="deposit" className="tab-link">Bài viết</Nav.Link>
                         </Nav.Item>
-                        <Nav.Item>
-                            <Nav.Link eventKey="withdraw" className="tab-link">Phân quyền</Nav.Link>
-                        </Nav.Item>
+                        {userData?.authorities.find(item => item.role.name === 'ROLE_ADMIN')?.role.name &&
+                            <Nav.Item>
+                                <Nav.Link eventKey="withdraw" className="tab-link">Phân quyền</Nav.Link>
+                            </Nav.Item>
+                        }
+
                     </Nav>
                     <div className="mt-3">
                         {renderContent()}

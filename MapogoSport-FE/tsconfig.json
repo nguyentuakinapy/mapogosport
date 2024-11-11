@@ -35,7 +35,7 @@
     ".next/types/**/*.ts",
     "src/app/api/create-momo-payment/route.ts",
     "src/components/Utils/jspdf-autotable.d.ts"
-  ],
+, "src/app/context/UserContext.tsx"  ],
   "exclude": [
     "node_modules"
   ]

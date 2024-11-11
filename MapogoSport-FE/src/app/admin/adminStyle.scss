@@ -126,6 +126,34 @@ body {
 
 /*======================================================Product CSS Start======================================================*/
 /*======================================================Order CSS Start======================================================*/
+.search-date-booking {
+    flex-wrap: nowrap;
+    display: flex;
+    justify-content: center;
+
+    .start {
+        border-radius: 5px 0 0 5px;
+        border-width: 1px 0px 1px 1px !important;
+        border-style: solid;
+        border-color: black;
+        width: 110px;
+    }
+
+    .input-group-text {
+        border-width: 1px 0;
+        border-style: solid;
+        border-color: black;
+        background: #e9ecef;
+    }
+
+    .end {
+        border-radius: 0 5px 5px 0;
+        border-width: 1px 1px 1px 0px !important;
+        border-style: solid;
+        border-color: black;
+        width: 110px;
+    }
+}
 .custom-tabs {
     .nav-item {
         flex: 1;

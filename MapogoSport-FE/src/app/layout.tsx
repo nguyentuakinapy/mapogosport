@@ -7,7 +7,6 @@ import "./globals.scss";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 const inter = Inter({ subsets: ['latin'] })
-import ChatMessenger from '@/components/app.chatMessenger';
 
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
@@ -31,7 +30,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         {children}
-        <ChatMessenger></ChatMessenger>
         <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -43,7 +41,7 @@ export default function RootLayout({
           draggable
           pauseOnHover={false}
           theme="dark"
-          style={{ marginTop: '75px' }}
+          style={{ marginTop: '75px', width: '400px' }}
         />
       </body>
     </html>
