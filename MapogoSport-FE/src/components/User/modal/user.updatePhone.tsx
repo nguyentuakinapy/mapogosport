@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Col, Form, InputGroup, Modal, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
+import { Button, Form, InputGroup, Modal, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { mutate } from "swr";
 
@@ -18,6 +18,14 @@ const ModalUpdatePhone = (props: UserProps) => {
     const [page, setPage] = useState<boolean>(true);
 
     const coolDownTime = async () => {
+        if (!newPhone) {
+            toast.warning("Vui lòng nhập số điện thoại mới!");
+            return;
+        }
+        if (!newPhone.match(/^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/)) {
+            toast.warning("Số điện thoại không tồn tại!");
+            return;
+        }
         setCheckButton(true);
         if (timeLeft) {
             clearInterval(timeLeft);
@@ -32,7 +40,7 @@ const ModalUpdatePhone = (props: UserProps) => {
                 return prevTime - 1;
             });
         }, 1000);
-        toast.success("Mã xác nhận đang được gửi về email!");
+        toast.success(`Mã xác nhận đang được gửi về email ${userData?.email}!`);
         const response = await fetch('http://localhost:8080/rest/user/sendMail', {
             method: 'POST',
             headers: {
@@ -80,6 +88,10 @@ const ModalUpdatePhone = (props: UserProps) => {
     }
 
     const handleDelete = (phoneNumberUserId: number) => {
+        if (userData && userData.phoneNumberUsers.length == 1) {
+            toast.warning("Vui lòng thêm số điện thoại mới trước khi xóa số này!");
+            return;
+        }
         if (window.confirm('Bạn có chắc muốn xóa số điện thoại này?')) {
             fetch(`http://localhost:8080/rest/user/phoneNumber/${phoneNumberUserId}`, {
                 method: 'DELETE',
@@ -135,26 +147,27 @@ const ModalUpdatePhone = (props: UserProps) => {
                             <i className="bi bi-plus-circle"></i> Thêm số điện thoại
                         </Button>
                         {userData && userData.phoneNumberUsers.length > 0 ?
-                            userData.phoneNumberUsers.map(item => (
-                                <div key={item.phoneNumberUserId} className="item-address" >
-                                    <div className="item-left">
-                                        <div><b>Số điện thoại:</b> {item.phoneNumber.phoneNumber}</div>
-                                    </div>
-                                    <div className="item-right">
-                                        <div className="d-flex align-items-center">
-                                            <OverlayTrigger overlay={<Tooltip>Chọn làm số mặc định?</Tooltip>}>
-                                                <Form.Check type="switch" checked={item.active}
-                                                    onChange={() => handleUpdateActive(item.phoneNumberUserId, !item.active)} />
-                                            </OverlayTrigger>
-                                            <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
-                                                <div className="ms-4 btn-address" onClick={() => handleDelete(item.phoneNumberUserId)}>
-                                                    <i className="bi bi-trash3-fill"></i>
-                                                </div>
-                                            </OverlayTrigger>
+                            userData.phoneNumberUsers.sort((a: any, b: any) => b.active - a.active)
+                                .map(item => (
+                                    <div key={item.phoneNumberUserId} className="item-address" >
+                                        <div className="item-left">
+                                            <div><b>Số điện thoại:</b> {item.phoneNumber.phoneNumber}</div>
+                                        </div>
+                                        <div className="item-right">
+                                            <div className="d-flex align-items-center">
+                                                <OverlayTrigger overlay={<Tooltip>Chọn làm số mặc định?</Tooltip>}>
+                                                    <Form.Check type="switch" checked={item.active}
+                                                        onChange={() => handleUpdateActive(item.phoneNumberUserId, !item.active)} />
+                                                </OverlayTrigger>
+                                                <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
+                                                    <div className="ms-4 btn-address" onClick={() => handleDelete(item.phoneNumberUserId)}>
+                                                        <i className="bi bi-trash3-fill"></i>
+                                                    </div>
+                                                </OverlayTrigger>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )) : (
+                                )) : (
                                 <div className="item-address">Chưa có số điện thoại nào! Vui lòng thêm số điện thoại để trải nghiệm Website một cách hoàn hảo!</div>
                             )}
                     </Modal.Body>

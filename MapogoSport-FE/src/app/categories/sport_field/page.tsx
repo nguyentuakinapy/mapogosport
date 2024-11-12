@@ -5,38 +5,27 @@ import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 import '@/app/user/types/user.scss';
 
-
-
 function Categories() {
-    const categories = [
-        { id: 1, name: "Cỏ nhân tạo", quantity: 10 },
-        { id: 2, name: "Bóng", quantity: 10 },
-        { id: 3, name: "Lưới khung thành", quantity: 10 },
-        { id: 4, name: "Máy tập bóng đá", quantity: 10 },
-        { id: 5, name: "Phụ kiện", quantity: 10 },
-    ];
 
-    const brands = [
-        { id: 1, name: "xưởng của nhà làm" },
-        { id: 2, name: "xưởng của nhà làm" },
-        { id: 3, name: "xưởng của nhà làm" },
-        { id: 4, name: "xưởng của nhà làm" },
-        { id: 5, name: "xưởng của nhà làm" },
-    ];
 
     // Pagination
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+    };
 
 
 
     const [rating, setRating] = useState<number>(1.5);
     const [sportFields, setSportFields] = useState<SportField[]>([]);
-    const [products, setProducts] = useState<Product[]>([]);
     const [icon, setIcon] = useState<boolean[]>([]); // Để quản lý trạng thái của các biểu tượng
     const [categoriesField, setCategoriesField] = useState<CategoryField[]>([])
+    const [selectedCategoryField, setSelectedCategoryField] = useState<number[]>([])
+    const [searchTerm, setSearchTerm] = useState('');
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -71,27 +60,6 @@ function Categories() {
     }, []);
 
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch('http://localhost:8080/rest/products');
-                const data = await response.json();
-                console.log(data);
-                setProducts(data);
-                setIcon(new Array(data.length).fill(false)); // Khởi tạo trạng thái icon
-            } catch (error) {
-                console.log("Lỗi khi gọi API: ", error);
-            }
-        };
-        fetchData();
-    }, []);
-
-    const currentItems = sportFields.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(sportFields.length / itemsPerPage);
-    const handlePageChange = (pageNumber: number) => {
-        setCurrentPage(pageNumber);
-    };
-
     const renderStars = (rating: number) => {
         const fullStars = Math.floor(rating);
         const halfStar = rating - fullStars >= 0.5; // Kiểm tra nếu có nửa sao
@@ -117,6 +85,26 @@ function Categories() {
         });
     };
 
+    const handelCategories = (categoryFieldId: number) => {
+        setSelectedCategoryField(prev =>
+            prev.includes(categoryFieldId) ? prev.filter(id => id !== categoryFieldId) : [...prev, categoryFieldId]
+        )
+    }
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(event.target.value);
+    };
+
+    // Filter logic
+    const filteredSportFields = sportFields
+        .filter(field =>
+            (selectedCategoryField.length === 0 || selectedCategoryField.includes(field.categoriesField.categoriesFieldId)) &&
+            (field.name.toLowerCase().includes(searchTerm.toLowerCase()) || field.address.toLowerCase().includes(searchTerm.toLowerCase()))
+        )
+    // Update pagination based on filtered results
+    const currentItems = filteredSportFields.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredSportFields.length / itemsPerPage);
+
     return (
         <HomeLayout>
             <Container className='pt-5'>
@@ -135,26 +123,42 @@ function Categories() {
                             <div className="filter checkbox-filter">
                                 {categoriesField.map((category) => (
                                     <label key={category.categoriesFieldId} className="checkbox mb-1">
-                                        <input type="checkbox" />
-                                        <span className="checkbox__label ms-2">
-                                            {category.name}
-                                        </span>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedCategoryField.includes(category.categoriesFieldId)}
+                                            onChange={() => handelCategories(category.categoriesFieldId)} />
+                                        <span className="checkbox__label ms-2">{category.name}</span>
                                     </label>
                                 ))}
                             </div>
                         </div>
 
                         <div className="filter-group">
-                            <legend className="fs-6">Thương hiệu</legend>
+                            <legend className="fs-6">Theo Vị Trí</legend>
                             <div className="filter checkbox-filter">
-                                {brands.map((brand) => (
-                                    <label key={brand.id} className="checkbox mb-1">
-                                        <input type="checkbox" />
-                                        <span className="checkbox__label ms-2">{brand.name}</span>
-                                    </label>
-                                ))}
+                                <label className="checkbox mb-1">
+                                    <input
+                                        type="radio"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    <span className="checkbox__label ms-2">
+                                        Vị trí từ gần đến xa
+                                    </span>
+                                </label>
                             </div>
                         </div>
+
+                        <div className="filter checkbox-filter mt-3">
+                            <label className="checkbox mb-1">
+                                <input
+                                    type="text"
+                                    placeholder="Tìm kiếm theo tên, địa chỉ..."
+                                    value={searchTerm}
+                                    onChange={handleSearchChange} />
+                            </label>
+                        </div>
+
                     </Col>
 
                     {/* Product list */}
@@ -178,7 +182,16 @@ function Categories() {
                                                 <div className="user-border">
                                                     <div className="mb-3">
                                                         <Link href={"#"}>
-                                                            <Image src={`${field.image}`} alt={field.name} />
+                                                            <Image
+                                                                src={`${field.image}`}
+                                                                alt={field.name}
+                                                                style={{
+                                                                    maxHeight: "200px",
+                                                                    maxWidth: "250px",
+                                                                    minHeight: "200px",
+                                                                    objectFit: "cover"
+                                                                }}
+                                                            />
                                                         </Link>
                                                     </div>
                                                     <div className="content">

@@ -78,6 +78,10 @@ public class Booking implements Serializable{
 	@Column(name="PrepayPrice")
 	private double prepayPrice;
 	
+	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Notification> notifications;
+	
 	@Transient
     private Map<String, Object> sportFieldInfo;
 }

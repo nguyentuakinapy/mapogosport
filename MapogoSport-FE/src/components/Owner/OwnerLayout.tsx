@@ -8,6 +8,8 @@ import { UserProvider } from "@/app/context/UserContext";
 import { vi } from "date-fns/locale/vi";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
 import { usePathname } from "next/navigation";
+import ChatMessenger from '@/components/app.chatMessenger';
+import { Button, Toast } from "react-bootstrap";
 
 registerLocale('vi', vi);
 setDefaultLocale('vi');
@@ -91,6 +93,11 @@ export default function OwnerLayout({
             setIsAniActive(JSON.parse(isAniActive));
         }
     }, []);
+    const [showA, setShowA] = useState(true);
+    const [showB, setShowB] = useState(true);
+
+    const toggleShowA = () => setShowA(!showA);
+    const toggleShowB = () => setShowB(!showB);
 
     return (
         <UserProvider refreshKey={refreshKey}>
@@ -100,7 +107,27 @@ export default function OwnerLayout({
                 <div className="main-body">
                     {children}
                 </div>
+                {/* <Button onClick={toggleShowA} className="mb-2">
+                    Toggle Toast <strong>with</strong> Animation
+                </Button> */}
             </main>
+            {/* <Toast
+                style={{
+                    position: 'fixed',
+                    bottom: '2%', // Hoặc vị trí bạn muốn, ví dụ 10px từ trên cùng của màn hình
+                    left: '6%', // Hoặc vị trí bạn muốn từ bên phải
+                    zIndex: 9999 // Đặt chỉ số z-index cao để Toast luôn nằm trên cùng
+                }}
+                show={showA}
+                onClose={toggleShowA}
+            >
+                <Toast.Header>
+                    <b className="me-auto text-danger">THÔNG BÁO</b>
+                    <small>11 mins ago</small>
+                </Toast.Header>
+                <Toast.Body>Bạn vừa có đơn đặt sân mới!</Toast.Body>
+            </Toast> */}
+            <ChatMessenger ></ChatMessenger>
         </UserProvider>
     )
 }

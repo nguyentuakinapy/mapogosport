@@ -156,7 +156,7 @@
 }
 
 .div-tb {
-    height: calc(100vh - 261px);
+    height: calc(100vh - 245px);
     overflow-y: auto;
     overflow-x: auto;
     border: 1px solid #142239;
@@ -332,7 +332,6 @@
     flex-wrap: nowrap;
     display: flex;
     justify-content: center;
-    margin-top: 10px;
 
     .start {
         border-radius: 5px 0 0 5px;
@@ -386,6 +385,35 @@
 }
 
 /*======================================================Booking Bill CSS Start======================================================*/
+.search-date-booking {
+    flex-wrap: nowrap;
+    display: flex;
+    justify-content: center;
+
+    .start {
+        border-radius: 5px 0 0 5px;
+        border-width: 1px 0px 1px 1px !important;
+        border-style: solid;
+        border-color: black;
+        width: 110px;
+    }
+
+    .input-group-text {
+        border-width: 1px 0;
+        border-style: solid;
+        border-color: black;
+        background: #e9ecef;
+    }
+
+    .end {
+        border-radius: 0 5px 5px 0;
+        border-width: 1px 1px 1px 0px !important;
+        border-style: solid;
+        border-color: black;
+        width: 110px;
+    }
+}
+
 .box-ultil {
     display: flex;
     justify-content: space-between;
@@ -553,3 +581,105 @@
 }
 
 /*======================================================Booking Bill CSS End======================================================*/
+
+// 
+.nav-item {
+    position: relative;
+    cursor: pointer;
+
+    .notification {
+        cursor: default !important;
+        position: absolute;
+        top: 95%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 400px;
+        max-height: 500px;
+        background-color: rgb(255, 255, 255);
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(4, 4, 4, 0.1);
+        padding: 10px;
+        z-index: 1000;
+        overflow-y: scroll;
+    }
+}
+
+.box-comment-container {
+    color: white;
+    padding: 8px;
+    border-radius: 8px;
+
+    .box-comment {
+        color: white;
+        width: 100%;
+        text-decoration: none !important;
+
+        &:hover {
+            background-color: rgb(161, 161, 161);
+            border-radius: 8px;
+        }
+    }
+
+    .btn-cmt {
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
+        cursor: pointer;
+        text-decoration: none !important;
+    }
+
+    &:last-child {
+        margin-bottom: 0px !important;
+    }
+}
+
+
+.section-form-sportField {
+    padding: 15px;
+    border-radius: 8px;
+    height: 100%;
+
+    .title-detail-sportField {
+        font-size: 18px;
+        position: relative;
+        padding-left: 15px;
+
+        &::before {
+            width: 4px;
+            background-color: #dc3545;
+            content: '';
+            height: 20px;
+            display: inline-block;
+            position: absolute;
+            top: 3px;
+            left: 0;
+        }
+    }
+
+    .react-datepicker-wrapper {
+        display: block !important;
+    }
+
+    input,
+    select,
+    textarea {
+        border: 1px solid black;
+    }
+
+    .btn-sportField {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #142239;
+        background: #142239;
+        color: white;
+        padding: 10px;
+        font-size: 15px;
+
+        &:hover {
+            background: white;
+            color: black;
+            border: 1px solid #142239;
+        }
+    }
+}

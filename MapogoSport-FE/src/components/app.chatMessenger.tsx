@@ -8,12 +8,13 @@ import useSWR from "swr";
 
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useData } from "@/app/context/UserContext";
 
 export default function ChatBox() {
   interface Message {
     messageId: number;
     sender: User;
-    receiver: User ;
+    receiver: User;
     content: string;
     createAt: Date;
     isDelete: boolean;
@@ -26,7 +27,7 @@ export default function ChatBox() {
   const [isMaximized, setIsMaximized] = useState(false); // quản lý trạng thái phóng to của chat form
   const [selectedChat, setSelectedChat] = useState<string>(""); // Quản lý cuộc trò chuyện đang được chọn
   const [inputMessage, setInputMessage] = useState(""); // lưu trữ nội dung người dùng đang nhập vào ô chat
-  
+
 
   const [chatListRealTime, setChatListRealTime] = useState<Message[]>([]);
   // const [chatListCurrentUser, setChatListCurrentUser] = useState<Message[]>([]);
@@ -36,79 +37,80 @@ export default function ChatBox() {
   const [subscribedTopics, setSubscribedTopics] = useState([]);
 
 
-  const [currentUser, setCurrentUser] = useState<User | undefined>();
+  // const [currentUser, setCurrentUser] = useState<User | null>();
+  const currentUser = useData();
+
   const [receiver, setReceiver] = useState<string>("nguyentuakinapy"); // Sử dụng useState cho receiver
 
-const stompClient = useRef(null);
+  const stompClient = useRef(null);
 
-useEffect(() => {
-  if (!currentUser) return;
+  useEffect(() => {
+    if (!currentUser) return;
 
-  // Khởi tạo kết nối STOMP với WebSocket server
-  const socket = new SockJS(`http://localhost:8080/ws`);  // 1. kết nối server
-  stompClient.current = Stomp.over(socket);
+    // Khởi tạo kết nối STOMP với WebSocket server
+    const socket = new SockJS(`http://localhost:8080/ws`);  // 1. kết nối server
+    stompClient.current = Stomp.over(socket);
 
-  // Kết nối tới server STOMP
-  stompClient.current.connect(
-    {},
-    (frame) => {
-      console.log("Đã kết nối STOMP server:", frame);
-    },
-    (error) => {
-      console.error("Lỗi kết nối tới STOMP server:", error);
-    }
-  );
+    // Kết nối tới server STOMP
+    stompClient.current.connect(
+      {},
+      (frame) => {
+        console.log("Đã kết nối STOMP server:", frame);
+      },
+      (error) => {
+        console.error("Lỗi kết nối tới STOMP server:", error);
+      }
+    );
 
-  // Đóng kết nối khi component bị hủy
-  return () => {
-    if (stompClient.current) {
-      stompClient.current.disconnect(() => {
-        console.log("Disconnected from STOMP server");
+    // Đóng kết nối khi component bị hủy
+    return () => {
+      if (stompClient.current) {
+        stompClient.current.disconnect(() => {
+          console.log("Disconnected from STOMP server");
+        });
+      }
+    };
+  }, [currentUser]);
+
+
+
+  const handleSelectChat = (chat) => {
+    console.log("Đã vào với: ", chat?.username || "Không có tên");
+
+    setReceiver(chat?.username);
+    console.log("Người nhận là ", chat?.username);
+
+    setSelectedChat(chat?.username);
+    setShowChat(true);
+
+    // Tạo topic dựa trên người gửi và người nhận
+    const sortedUsers = [currentUser?.username, chat.username].sort();
+    const topic = `/topic/public/${sortedUsers[0]}-${sortedUsers[1]}`;
+
+    // Kiểm tra xem topic đã đăng ký chưa
+    if (!subscribedTopics.includes(topic)) {
+      // Nếu chưa đăng ký, thì tiến hành đăng ký
+      stompClient.current.subscribe(topic, (message) => {
+        const receivedMessage = JSON.parse(message.body);
+        console.log("Received message: ", receivedMessage);
+
+        if (receivedMessage.sender === currentUser?.username || receivedMessage.receiver === currentUser?.username) {
+          setChatListRealTime((prevMessages) => [...prevMessages, receivedMessage]);
+        }
       });
+
+      // Cập nhật trạng thái đã đăng ký topic
+      setSubscribedTopics((prevTopics) => [...prevTopics, topic]);
     }
   };
-}, [currentUser]);
 
 
-
-const handleSelectChat = (chat) => {
-  console.log("Đã vào với: ", chat?.username || "Không có tên");
-
-  setReceiver(chat?.username);
-  console.log("Người nhận là ", chat?.username);
-
-  setSelectedChat(chat?.username);
-  setShowChat(true);
-
-
-  // Tạo topic dựa trên người gửi và người nhận
-  const sortedUsers = [currentUser?.username, chat.username].sort();
-  const topic = `/topic/public/${sortedUsers[0]}-${sortedUsers[1]}`;
-
-  // Kiểm tra xem topic đã đăng ký chưa
-  if (!subscribedTopics.includes(topic)) {
-    // Nếu chưa đăng ký, thì tiến hành đăng ký
-    stompClient.current.subscribe(topic, (message) => {
-      const receivedMessage = JSON.parse(message.body);
-      console.log("Received message: ", receivedMessage);
-
-      if (receivedMessage.sender === currentUser?.username || receivedMessage.receiver === currentUser?.username) {
-        setChatListRealTime((prevMessages) => [...prevMessages, receivedMessage]);
-      }
-    });
-
-    // Cập nhật trạng thái đã đăng ký topic
-    setSubscribedTopics((prevTopics) => [...prevTopics, topic]);
+  const handleKeyEnter = () => {
+    if (event.key === "Enter") {
+      handleSendMessage();
+    }
   }
-};
 
- 
-const handleKeyEnter =()=>{
-  if(event.key === "Enter"){
-    handleSendMessage();
-  }
-}
-  
   const handleSendMessage = () => {
     if (
       inputMessage.trim() !== "" &&
@@ -131,16 +133,16 @@ const handleKeyEnter =()=>{
 
       // const topic = "/app/send";  // Không cần thêm {username1}-{username2}
 
-      console.log("topic ",topic);
-      
+      console.log("topic ", topic);
+
 
       // Gửi tin nhắn đến topic chung
       stompClient.current.send(topic, {}, JSON.stringify(newMessage));
 
-      if(newMessage.receiver === currentUser?.username || newMessage.sender === currentUser?.username){
+      if (newMessage.receiver === currentUser?.username || newMessage.sender === currentUser?.username) {
         console.log("khong them");
-        
-      }else{
+
+      } else {
         setChatListRealTime((prevMessages) => [...prevMessages, newMessage]);
 
       }
@@ -151,16 +153,6 @@ const handleKeyEnter =()=>{
     }
 
   };
-
-  useEffect(() => {
-    const user = sessionStorage.getItem("user");
-    if (user) {
-      const parsedUserData = JSON.parse(user) as User;
-      setCurrentUser(parsedUserData);
-      // console.log("user từ session: ", currentUser);
-    }
-  }, []);
-
 
   useEffect(() => {
     console.log("currentUser sau khi set: ", currentUser); // Chạy khi currentUser thay đổi
@@ -462,29 +454,27 @@ const handleKeyEnter =()=>{
                     {chatListRealTime.map((msg, index) => (
                       <div
                         key={msg.messageId || index}
-                        className={`d-flex ${
-                          msg.sender.username === currentUser?.username ||
+                        className={`d-flex ${msg.sender.username === currentUser?.username ||
                           msg.sender === currentUser?.username
 
-                            ? "justify-content-end"
-                            : "justify-content-start"
+                          ? "justify-content-end"
+                          : "justify-content-start"
                           }`}
                       >
 
                         <div
-                          className={`p-2 rounded mb-2 ${
-                            msg.sender.username === currentUser?.username ||
+                          className={`p-2 rounded mb-2 ${msg.sender.username === currentUser?.username ||
                             msg.sender === currentUser?.username
 
-                              ? "bg-primary text-white"
-                              : "bg-light text-dark"
+                            ? "bg-primary text-white"
+                            : "bg-light text-dark"
                             }`}
                           style={{ maxWidth: "80%" }}
                         >
-                          
+
                           {msg.content}
                           {/* {msg.isDelete ? "Đã xóa tin nhắn" : msg.content}  */}
-                          
+
 
                         </div>
 

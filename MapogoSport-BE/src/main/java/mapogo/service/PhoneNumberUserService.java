@@ -2,6 +2,7 @@ package mapogo.service;
 
 import java.util.List;
 
+import mapogo.entity.PhoneNumber;
 import mapogo.entity.PhoneNumberUser;
 
 public interface PhoneNumberUserService {

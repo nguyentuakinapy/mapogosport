@@ -19,23 +19,6 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 	UserVoucherDAO userVoucherDao;
 	
 	@Override
-	public UserVoucher createUserVoucher(UserVoucher userVoucher) {
-		// TODO Auto-generated method stub
-		return userVoucherDao.save(userVoucher);
-	}
-
-	@Override
-	public List<UserVoucher> findUserVoucher() {
-		// TODO Auto-generated method stub
-		return userVoucherDao.findAll();
-	}
-
-	@Override
-	public boolean checkUserVoucher(String username, Integer voucherId) {
-		return userVoucherDao.existsByUser_UsernameAndVoucher_VoucherId(username, voucherId);	
-	}
-
-	@Override
 	public List<Map<String, Object>> findByUser(String username) {
 		List<UserVoucher> userVouchers = userVoucherDao.findByUser_Username(username);
 		List<Map<String, Object>> resultList = new ArrayList<>();
@@ -55,6 +38,23 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 			resultList.add(userVoucherData);
 		}
 		return resultList;
+	}
+	
+	@Override
+	public UserVoucher createUserVoucher(UserVoucher userVoucher) {
+		// TODO Auto-generated method stub
+		return userVoucherDao.save(userVoucher);
+	}
+
+	@Override
+	public List<UserVoucher> findUserVoucher() {
+		// TODO Auto-generated method stub
+		return userVoucherDao.findAll();
+	}
+
+	@Override
+	public boolean checkUserVoucher(String username, Integer voucherId) {
+		return userVoucherDao.existsByUser_UsernameAndVoucher_VoucherId(username, voucherId);	
 	}
 	
 	//của Mỵ từ đây

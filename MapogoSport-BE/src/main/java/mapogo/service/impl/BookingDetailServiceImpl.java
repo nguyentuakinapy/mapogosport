@@ -9,8 +9,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.BookingDAO;
@@ -39,6 +41,9 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Autowired
 	UserDAO userDAO;
+	
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
 
 	@Override
 	public List<Map<String, Object>> findBookingDetailByBookingId(Integer bookingId) {
@@ -68,6 +73,28 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			resultMaps.add(bookingDetailData);
 		}
 		return resultMaps;
+	}
+	
+	@Override
+	public BookingDetail updateStatusBookingDetail(Map<String, Object> bookingDetailData) {
+		Integer bookingDetailId = (Integer) bookingDetailData.get("bookingDetailId");
+		String newStatus = (String) bookingDetailData.get("status");
+		
+		Optional<BookingDetail> optionalBookingDetail = bookingDetailDAO.findById(bookingDetailId);
+		if (optionalBookingDetail.isPresent()) {
+			BookingDetail bookingDetail = optionalBookingDetail.get();
+			bookingDetail.setStatus(newStatus);
+			bookingDetailDAO.save(bookingDetail);
+			
+			Booking booking = bookingDetail.getBooking();
+			boolean allCancel = booking.getBookingDetails().stream()
+					.allMatch(detail -> "Đã hủy".equals(detail.getStatus()));
+			if (allCancel) {
+				booking.setStatus("Đã hủy");
+				bookingDAO.save(booking);
+			}
+		}
+		return null;
 	}
 
 //	@Override
@@ -117,6 +144,10 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bookingDetail.setDate(LocalDate.parse((String) bd.get("date")));
 		bookingDetail.setBooking(b);
 		bookingDetail.setSubscriptionKey((String) bd.get("subscriptionKey"));
+		
+		messagingTemplate.convertAndSend("/topic/bookingDetail", b.getOwner().getOwnerId());
+		messagingTemplate.convertAndSend("/topic/username", b.getOwner().getUser().getUsername());
+
 		return bookingDetailDAO.save(bookingDetail);
 //		return null;
 	}
@@ -223,7 +254,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	@Override
 	public void updateStatusChuaDaChangeToDaDa(Integer bookingDetailId) {
 		BookingDetail bookingDetail = bookingDetailDAO.findById(bookingDetailId).get();
-		bookingDetail.setStatus("Đã đá");
+		bookingDetail.setStatus("Đã hoàn thành");
 		bookingDetailDAO.save(bookingDetail);
 	}
 

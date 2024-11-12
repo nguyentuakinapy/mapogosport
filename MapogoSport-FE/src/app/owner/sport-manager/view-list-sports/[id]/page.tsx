@@ -12,11 +12,28 @@ const SportFieldDetailList = () => {
     // const [sportFieldDetail, setSportFieldDetail] = useState([]);
     const [showSportFieldDetailModal, setShowSportFieldDetailModal] = useState<boolean>(false)
     const [selectedSportFieldDetail, setSelectedSportFieldDetail] = useState(null);
+    const userSession = sessionStorage.getItem('user');
+    const user = userSession ? JSON.parse(userSession) : null;
 
     const { id } = useParams();
     const fetcher = (url) => axios.get(url).then(res => res.data);
 
+    useEffect(() => {
+        getOwner();
+    }, [user])
 
+    const [owner, setOwner] = useState<Owner>();
+
+    const getOwner = async () => {
+        if (user) {
+            const responseOwner = await fetch(`http://localhost:8080/rest/owner/${user.username}`);
+            if (!responseOwner.ok) {
+                throw new Error('Error fetching data');
+            }
+            const dataOwner = await responseOwner.json() as Owner;
+            setOwner(dataOwner);
+        }
+    }
     // Hook cho sportFieldDetail
     const { data: sportFieldDetail, error: errorDetail } = useSWR(
         id ? `http://localhost:8080/rest/sportfielddetail/lists/${id}` : null,
@@ -103,7 +120,7 @@ const SportFieldDetailList = () => {
                 setShowSportFieldDetailModal={setShowSportFieldDetailModal}
                 selectedSportFieldDetail={selectedSportFieldDetail}
                 setSelectedSportFieldDetail={setSelectedSportFieldDetail}
-                id={id} // Truyền id vào Modal
+                id={id} owner={owner} // Truyền id vào Modal
             />
         </>
 

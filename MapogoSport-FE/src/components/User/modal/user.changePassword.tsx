@@ -1,6 +1,6 @@
 import { hashPassword } from "@/components/Utils/Format";
-import { useEffect, useState } from "react";
-import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { useState } from "react";
+import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { mutate } from "swr";
 

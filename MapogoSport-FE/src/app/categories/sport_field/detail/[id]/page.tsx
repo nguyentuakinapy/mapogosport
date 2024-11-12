@@ -1,14 +1,14 @@
 "use client";
 import { Container, Row, Col, Form, Image, FloatingLabel, Table, Button } from 'react-bootstrap';
 import React, { useEffect, useState } from 'react';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
 import HomeLayout from '@/components/HomeLayout';
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
-import { formatDate, formatDateVN } from '@/components/Utils/Format';
+import { formatDateVN } from '@/components/Utils/Format';
 import CheckoutModal from '@/components/Booking/booking.Checkout';
 import ModalReviewSportField from '@/components/Review/review.sportField';
+import '../[id]/BookingDetail.scss';
+import SearchSportField from '@/components/Booking/booking.Search';
 
 type BookingsTypeOnWeek = {
     [time: string]: {
@@ -18,9 +18,6 @@ type BookingsTypeOnWeek = {
 
 const SportDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-
-
     const [sportField, setSportField] = useState<SportField | null>(null);
     const [selectedSize, setSelectedSize] = useState<string>('');
     const [priceBySizeSp, setPriceBySizeSp] = useState<{ price: number, peakHourPrices: number }>({ price: 0, peakHourPrices: 0 });
@@ -40,12 +37,9 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     const [dayStartBooking, setDayStartBooking] = useState("");
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
     const [startTimeKey, setStartTimeKey] = useState<boolean>(true);
-
-    const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    const [selectedTime, setSelectedTime] = useState<string | null>(null);
-
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [dataReview, setDataReview] = useState<Review[]>([]);
+    const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -144,8 +138,6 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
             newData.splice(0, index);
         }
         setDataTimeSport((prevData) => [...prevData, ...newData]);
-        const modifiedValidTimes = newData.slice(0, -2);
-        setValidTimes(modifiedValidTimes);
     }, [operatingTime, opening]);
 
     const getTime = () => {
@@ -353,16 +345,11 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
 
     const getBadgeClass = (status: string) => {
         switch (status) {
-            case "Đã đặt":
-                return "frame-info-secondary";
-            case "Còn trống":
-                return "frame-info-available";
-            case "Tạm đóng":
-                return "frame-info-danger";
-            case "Quá hạn":
-                return "frame-info-secondary";
-            default:
-                return "";
+            case "Đã đặt": return "frame-info-secondary";
+            case "Còn trống": return "frame-info-available";
+            case "Tạm đóng": return "frame-info-danger";
+            case "Quá hạn": return "frame-info-secondary";
+            default: return "";
         }
     };
 
@@ -406,94 +393,6 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
             setStartTimeKey(!startTimeKey);
         }
     }
-
-    const [note, setNote] = useState<string>(''); // Ghi chú
-
-    const handleDateChange = (date: Date | null) => {
-        if (date) {
-            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-            const formatted = localDate.toISOString().split('T')[0];
-            setSelectedDate(formatted);
-        } else {
-            setSelectedDate(null);
-        }
-    };
-
-    const [selectedSportType, setSelectedSportType] = useState<number | null>(null);
-
-    const handleIdBySize = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newSize = e.target.value;
-        if (sportField?.sportFielDetails) {
-            const filteredIds = sportField.sportFielDetails
-                .filter(detail => detail.size === newSize)
-                .map(detail => detail.sportFielDetailId);
-            const selectedDetail = sportField.sportFielDetails.find(detail => detail.size === newSize);
-            setSelectedSportType(selectedDetail ? selectedDetail.sportFielDetailId : null);
-        }
-    };
-
-    useEffect(() => {
-        if (sportField?.sportFielDetails) {
-            const initialSize = sportField.sportFielDetails[0].size;
-            handleIdBySize({ target: { value: initialSize } } as React.ChangeEvent<HTMLSelectElement>);
-        }
-    }, [sportField]);
-
-    const [validTimes, setValidTimes] = useState<string[]>([]);
-
-    const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setNote(e.target.value)
-    };
-
-    const handleFindField = async () => {
-        if (selectedDate && selectedTime) {
-            const response = await fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${selectedSportType}/${selectedDate}/${selectedDate}`);
-            const bookingsFromAPI: BookingDetail[] = await response.json();
-            let isBooked = false;
-            const selectedSportDetail = sportField?.sportFielDetails.find(detail => detail.sportFielDetailId === selectedSportType);
-            if (selectedSportDetail && selectedSportDetail.status === "Tạm đóng") {
-                toast.warning("Không tìm thấy sân phù hợp theo nhu cầu!");
-                return;
-            }
-            const currentDateTime = new Date();
-            const formattedTime = selectedTime.replace('h', ':').padStart(5, '0');
-            const selectedDateTime = new Date(`${selectedDate}T${formattedTime}`);
-            if (selectedDateTime < currentDateTime) {
-                toast.warning("Đã quá thời gian yêu cầu đặt sân!");
-                return;
-            }
-            console.log(selectedDateTime);
-            console.log(currentDateTime);
-            if (Array.isArray(bookingsFromAPI) && bookingsFromAPI.length > 0) {
-                for (const booking of bookingsFromAPI) {
-                    const { startTime, endTime, sportFieldDetail } = booking;
-                    if ((startTime <= selectedTime && endTime > selectedTime) &&
-                        sportFieldDetail.sportFielDetailId === selectedSportType) {
-                        isBooked = true;
-                        break;
-                    }
-                }
-            }
-            if (isBooked) {
-                toast.warning("Đã có sân được đặt trùng với yêu cầu!");
-            } else {
-                toast.success("Đã tìm thấy sân theo yêu cầu!");
-                const sportDetail = selectedSportType;
-                const startTime = selectedTime;
-                const dayStartBooking = selectedDate;
-                const selectedSportDetail = sportField?.sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
-                if (sportDetail && startTime && dayStartBooking) {
-                    setSportDetail(selectedSportDetail);
-                    setStartTime(startTime);
-                    setDayStartBooking(dayStartBooking);
-                    setShowBookingModal(true);
-                    setStartTimeKey(!startTimeKey);
-                }
-            }
-        } else {
-            toast.warning("Vui lòng chọn ngày và giờ trước khi tìm kiếm.");
-        }
-    };
 
     if (isLoading) return <HomeLayout><div>Đang tải...</div></HomeLayout>;
     if (error) return <HomeLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></HomeLayout>;
@@ -561,109 +460,71 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                         </Row>
                     </div>
                 </div>
-                <Row className='mt-3'>
-                    <Col md={3} xs={12}>
-                        <div className="section-form-sportField bg-white">
-                            <b className="title-detail-sportField">Đặt sân theo nhu cầu</b>
-                            <Form className='mt-3'>
-                                <Form.Group className='mb-3'>
-                                    <DatePicker selected={selectedDate ? new Date(selectedDate) : null}
-                                        onChange={handleDateChange} className="form-control" placeholderText="Chọn ngày đặt"
-                                        dateFormat="dd/MM/yyyy" minDate={new Date()} required />
-                                </Form.Group>
-                                <Form.Group controlId="formTimeInput" className='mb-3'>
-                                    <Form.Select onChange={(e) => setSelectedTime(e.target.value)} defaultValue="" id="formTimeInput">
-                                        <option value="" disabled>Chọn thời gian đặt</option>
-                                        {validTimes.map((time, index) => (
-                                            <option key={index} value={time}>{time}</option>
-                                        ))}
-                                    </Form.Select>
-                                </Form.Group>
-                                <Form.Group className="mb-3">
-                                    <Form.Select onChange={handleIdBySize} defaultValue="">
-                                        {sportField?.sportFielDetails && [...new Set(sportField.sportFielDetails.map((detail) => detail.size))].map((size) => (
-                                            <option value={size} key={size}>Sân {size}</option>
-                                        ))}
-                                    </Form.Select>
-                                </Form.Group>
-                                <Form.Group className='mb-3'>
-                                    <FloatingLabel controlId="noteSportField" label="Ghi chú" style={{ zIndex: '0' }}>
-                                        <Form.Control as="textarea" placeholder="Leave a comment here" style={{ height: '100px' }}
-                                            maxLength={500} value={note} onChange={handleNoteChange} />
-                                    </FloatingLabel>
-                                </Form.Group>
-                                <Form.Group className='mb-3'>
-                                    <div className='btn btn-sportField' onClick={handleFindField}>Tìm sân</div>
-                                </Form.Group>
-                            </Form>
+                <div className="book-calendar bg-white mt-3">
+                    <div className='header-book mb-4'>
+                        <div className='select-sport-container'>
+                            <Form.Select value={sportFieldDetailId} onChange={(e) => { setSportFieldDetailId(Number(e.target.value)) }}>
+                                {sportField && sportField.sportFielDetails.map((detail) => (
+                                    <option value={detail.sportFielDetailId} key={detail.sportFielDetailId}>
+                                        {detail.name}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                            <div className="btn btn-search-sport" onClick={() => setSearchShowBookingModal(true)}>Tìm sân</div>
                         </div>
-                    </Col>
-                    <Col md={9} xs={12}>
-                        <div className="book-calendar bg-white">
-                            <div className='header-book mb-4'>
-                                <Form.Select value={sportFieldDetailId} onChange={(e) => { setSportFieldDetailId(Number(e.target.value)) }}>
-                                    {sportField && sportField.sportFielDetails.map((detail) => (
-                                        <option value={detail.sportFielDetailId} key={detail.sportFielDetailId}>
-                                            {detail.name}
-                                        </option>
-                                    ))}
-                                </Form.Select>
-                                <div className="header-date">
-                                    <i className="bi bi-arrow-left" onClick={() => setOnWeek('backward')}></i>
-                                    <span className="mx-3">Từ {formatDateVN(startWeek)} đến {formatDateVN(endWeek)}</span>
-                                    <i className="bi bi-arrow-right" onClick={() => setOnWeek('forward')}></i>
-                                </div>
-                                <div className="time-frame">
-                                    <div className={`btn btn-frame ${selectedFrame === 'morning' ? 'active' : ''}`}
-                                        onClick={() => setSelectedFrame('morning')}>
-                                        Khung sáng
-                                    </div>
-                                    <div className={`btn btn-frame ms-2 ${selectedFrame === 'evening' ? 'active' : ''}`}
-                                        onClick={() => setSelectedFrame('evening')} >
-                                        Khung tối
-                                    </div>
-                                </div>
+                        <div className="header-date">
+                            <i className="bi bi-arrow-left" onClick={() => setOnWeek('backward')}></i>
+                            <span className="mx-3">Từ {formatDateVN(startWeek)} đến {formatDateVN(endWeek)}</span>
+                            <i className="bi bi-arrow-right" onClick={() => setOnWeek('forward')}></i>
+                        </div>
+                        <div className="time-frame">
+                            <div className={`btn btn-frame ${selectedFrame === 'morning' ? 'active' : ''}`}
+                                onClick={() => setSelectedFrame('morning')}>
+                                Khung sáng
                             </div>
-                            <div className='book-calendar-content'>
-                                <div className='d-flex'>
-                                    <div className='table-price'>
-                                        <Table className='text-center'>
-                                            <tbody>
-                                                {days && days.map((day, dayIndex) => (
-                                                    <tr key={dayIndex}>
-                                                        <td>{day}</td>
-                                                        {Object.entries(bookingsOnWeek).filter(([time]) => filterTimesByFrame(time))
-                                                            .map(([time, sportData], timeIndex) => {
-                                                                const sportFielDetails = sportField?.sportFielDetails.filter(detail =>
-                                                                    detail.sportFielDetailId === sportFieldDetailId
-                                                                )
-                                                                return sportFielDetails?.map((item, sportIndex) => (
-                                                                    <td key={`${time}-${item.sportFielDetailId}-${dayIndex}`}>
-                                                                        {Object.entries(sportData).map(([sport, status]) => (
-                                                                            sport === item.name && (
-                                                                                <div key={`${sport}-${timeIndex}-${dayIndex}`} className={`${getBadgeClass(status[dayIndex])}`}
-                                                                                    sport-detail={item.sportFielDetailId}
-                                                                                    time-data={time}
-                                                                                    day-data={dayYears && dayYears[dayIndex]}
-                                                                                    onClick={status[dayIndex] === 'Còn trống' ? handleBooking : undefined}>
-                                                                                    <span className='time-label'>{time}</span>
-                                                                                    <div className='status-label'>{status[dayIndex]}</div>
-                                                                                </div>
-                                                                            )
-                                                                        ))}
-                                                                    </td>
-                                                                ));
-                                                            })}
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </Table>
-                                    </div>
-                                </div>
+                            <div className={`btn btn-frame ms-2 ${selectedFrame === 'evening' ? 'active' : ''}`}
+                                onClick={() => setSelectedFrame('evening')} >
+                                Khung tối
                             </div>
                         </div>
-                    </Col>
-                </Row>
+                    </div>
+                    <div className='book-calendar-content'>
+                        <div className='d-flex'>
+                            <div className='table-price'>
+                                <Table className='text-center'>
+                                    <tbody>
+                                        {days && days.map((day, dayIndex) => (
+                                            <tr key={dayIndex}>
+                                                <td>{day}</td>
+                                                {Object.entries(bookingsOnWeek).filter(([time]) => filterTimesByFrame(time))
+                                                    .map(([time, sportData], timeIndex) => {
+                                                        const sportFielDetails = sportField?.sportFielDetails.filter(detail =>
+                                                            detail.sportFielDetailId === sportFieldDetailId
+                                                        )
+                                                        return sportFielDetails?.map((item, sportIndex) => (
+                                                            <td key={`${time}-${item.sportFielDetailId}-${dayIndex}`}>
+                                                                {Object.entries(sportData).map(([sport, status]) => (
+                                                                    sport === item.name && (
+                                                                        <div key={`${sport}-${timeIndex}-${dayIndex}`} className={`${getBadgeClass(status[dayIndex])}`}
+                                                                            sport-detail={item.sportFielDetailId} time-data={time}
+                                                                            day-data={dayYears && dayYears[dayIndex]}
+                                                                            onClick={status[dayIndex] === 'Còn trống' ? handleBooking : undefined}>
+                                                                            <span className='time-label'>{time}</span>
+                                                                            <div className='status-label'>{status[dayIndex]}</div>
+                                                                        </div>
+                                                                    )
+                                                                ))}
+                                                            </td>
+                                                        ));
+                                                    })}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </Table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div className="my-3 text-center">
                     <p>Bạn đánh giá sao về sân thể thao này?</p>
                     <Button variant="danger" onClick={() => setShowReviewModal(true)}>Đánh giá ngay</Button>
@@ -709,9 +570,11 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                     sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
                     sport={sportField} owner={sportField?.owner}
                     checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus}
-                    startTimeKey={startTimeKey} note={note}
+                    startTimeKey={startTimeKey}
                 />
                 <ModalReviewSportField showReviewModal={showReviewModal} setShowReviewModal={setShowReviewModal} fieldId={params.id} />
+                <SearchSportField showSearchBookingModal={showSearchBookingModal} setSearchShowBookingModal={setSearchShowBookingModal}
+                    dataTimeSport={dataTimeSport.filter(time => time !== "undefinedh00" && time !== null)} sportField={sportField} />
             </Container>
         </HomeLayout>
     );
