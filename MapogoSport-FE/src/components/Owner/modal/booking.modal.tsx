@@ -689,7 +689,7 @@ const BookingModal = (props: BookingProps) => {
                             />
                         </FloatingLabel>
                     )}
-                    <InputGroup.Text aria-label="Checkbox for following text input bg-white">
+                    <InputGroup.Text className="border border-dark" aria-label="Checkbox for following text input bg-white">
                         <Form.Check
                             type="checkbox"
                             label="Offline"
@@ -785,7 +785,36 @@ const BookingModal = (props: BookingProps) => {
                                         ))}
                                     </Form.Select>
                                 </FloatingLabel>
-
+                                <div className="d-flex justify-content-center mb-2">
+                                    <div className="form-check me-5">
+                                        <input
+                                            value="prepay"
+                                            // checked={checkPaymentMethod}
+                                            // onChange={handleRadioChange}
+                                            className="form-check-input border"
+                                            type="radio"
+                                            name="flexRadioDefault"
+                                            id="flexRadioDefault1"
+                                        />
+                                        <label className="form-check-label" htmlFor="flexRadioDefault1">
+                                            Thanh toán bằng ví
+                                        </label>
+                                    </div>
+                                    <div className="form-check">
+                                        <input
+                                            value="full"
+                                            // checked={!checkPaymentMethod}
+                                            // onChange={handleRadioChange}
+                                            className="form-check-input border"
+                                            type="radio"
+                                            name="flexRadioDefault"
+                                            id="flexRadioDefault2"
+                                        />
+                                        <label className="form-check-label" htmlFor="flexRadioDefault2">
+                                            Thanh toán chuyển khoản
+                                        </label>
+                                    </div>
+                                </div>
                                 <FloatingLabel controlId="floatingPaymentMethod" label="Phương thức thanh toán *">
                                     <Form.Select
                                         value={paymentMethodId}
@@ -832,14 +861,15 @@ const BookingModal = (props: BookingProps) => {
                             </div>
                         </div>
                         <Row>
-                            <Col className="px-5 text-center">
-                                <span><b> Ngày đặt: </b>{dayStartBooking}. </span><br />
-                                <span><b> Thời gian đá: </b>{startTime} - {endTime ? endTime : '???'}</span><br />
-                            </Col>
-                            <Col className="px-5 text-center">
+                            <div className="d-flex justify-content-center">
+                                <span className="mx-5"><b> Ngày đặt: </b>{dayStartBooking}. </span><br />
+                                <span className="mx-5"><b> Thời gian đá: </b>{startTime} - {endTime ? endTime : '???'}</span><br />
+                            </div>
+                            <div className="d-flex justify-content-around">
                                 <span><b>Đơn giá: </b> <em className="text-danger">{endTime ? `${priceForSelectedTime?.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
+                                <span><b>Trả trước: </b> <em className="text-danger">{sportDetail && totalAmount ? (totalAmount * (sportDetail.percentDeposit / 100)).toLocaleString("vi-VN", { style: "currency", currency: "VND", }) : '???'}</em>. </span>
                                 <span><b>Tổng tiền: </b><em className="text-danger">{price ? `${price?.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
-                            </Col>
+                            </div>
                         </Row>
                     </>
                 );
@@ -853,6 +883,36 @@ const BookingModal = (props: BookingProps) => {
                             <Col>
                                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
                                 {renderInputBooking()}
+                                <div className="d-flex justify-content-center mb-2">
+                                    <div className="form-check me-5">
+                                        <input
+                                            value="prepay"
+                                            // checked={checkPaymentMethod}
+                                            // onChange={handleRadioChange}
+                                            className="form-check-input border"
+                                            type="radio"
+                                            name="flexRadioDefault"
+                                            id="flexRadioDefault1"
+                                        />
+                                        <label className="form-check-label" htmlFor="flexRadioDefault1">
+                                            Thanh toán bằng ví
+                                        </label>
+                                    </div>
+                                    <div className="form-check">
+                                        <input
+                                            value="full"
+                                            // checked={!checkPaymentMethod}
+                                            // onChange={handleRadioChange}
+                                            className="form-check-input border"
+                                            type="radio"
+                                            name="flexRadioDefault"
+                                            id="flexRadioDefault2"
+                                        />
+                                        <label className="form-check-label" htmlFor="flexRadioDefault2">
+                                            Thanh toán chuyển khoản
+                                        </label>
+                                    </div>
+                                </div>
                                 <FloatingLabel controlId="floatingPaymentMethod" label="Phương thức thanh toán *">
                                     <Form.Select style={{ border: '1px solid' }}
                                         value={paymentMethodId}

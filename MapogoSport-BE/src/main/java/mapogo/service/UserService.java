@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import mapogo.entity.Notification;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
 
@@ -31,4 +32,6 @@ public interface UserService {
 	UserSubscription updateUserSubscription(Map<String, Object> data);
 	
 	User findUserByBookingDetailId(Integer bookingDetailId);
+	
+	List<Notification> findNotificationByUsername(String username);
 }

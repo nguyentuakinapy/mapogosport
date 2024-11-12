@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.BookingDAO;
@@ -40,6 +41,9 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Autowired
 	UserDAO userDAO;
+	
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
 
 	@Override
 	public List<Map<String, Object>> findBookingDetailByBookingId(Integer bookingId) {
@@ -140,6 +144,9 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bookingDetail.setDate(LocalDate.parse((String) bd.get("date")));
 		bookingDetail.setBooking(b);
 		bookingDetail.setSubscriptionKey((String) bd.get("subscriptionKey"));
+		
+		messagingTemplate.convertAndSend("/topic/bookingDetail", b.getOwner().getOwnerId());
+
 		return bookingDetailDAO.save(bookingDetail);
 //		return null;
 	}
