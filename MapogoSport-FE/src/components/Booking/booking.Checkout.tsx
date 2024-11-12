@@ -51,6 +51,7 @@ const BookingModal = (props: BookingProps) => {
     const [operatingTime, setOperatingTime] = useState<number>(0);
     const [operatingTimeFetchData, setOperatingTimeFetchData] = useState<number>(0);
     const [dataTime, setDataTime] = useState<String[]>();
+    const [dataTimeTemporary, setDataTimeTemporary] = useState<String[]>();
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -92,7 +93,7 @@ const BookingModal = (props: BookingProps) => {
 
     useEffect(() => {
         getTime();
-    }, [startTimeKey]);
+    }, [startTimeKey, startTime]);
 
     const getTime = () => {
         if (startTime && sport?.closing) {
@@ -134,6 +135,9 @@ const BookingModal = (props: BookingProps) => {
         }
         for (let index = 0; index < operatingTimeFetchData; index++) {
             newData.push(timeIntervals[index].label);
+        }
+        if (activeTab === 'byDay') {
+            setDataTimeTemporary(newData);
         }
     }
 
@@ -595,7 +599,7 @@ const BookingModal = (props: BookingProps) => {
                                 <FloatingLabel controlId="floatingSelectTime" label="Thời gian đá" className="mb-2">
                                     <Form.Select value={selectTime} onChange={(e) => setSelectTime(e.target.value)}>
                                         <option value="Chọn thời gian">Chọn thời gian</option>
-                                        {dataTime && dataTime.map((time, index) => (
+                                        {dataTimeTemporary && dataTimeTemporary.map((time, index) => (
                                             <option key={index} value={String(time)}>{time}</option>
                                         ))}
                                     </Form.Select>

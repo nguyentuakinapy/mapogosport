@@ -1,4 +1,4 @@
-import BookingModal from "@/components/Booking/booking.Checkout";
+import BookingModal from "@/components/Owner/modal/booking.modal";
 import { useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
@@ -173,7 +173,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
                                     onChange={handleDateChange} className="form-control" placeholderText="Chọn ngày đặt"
                                     dateFormat="dd/MM/yyyy" minDate={new Date()} required />
                             </Form.Group>
-                            <Form.Group controlId="formTimeInput" className='mb-2'>
+                            <Form.Group controlId="formTimeInput" className='mb-2 '>
                                 <Form.Select onChange={(e) => setSelectedTime(e.target.value)} defaultValue="" id="formTimeInput">
                                     <option value="" disabled>Chọn thời gian đặt</option>
                                     {validTimes.map((time, index) => (

@@ -146,6 +146,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bookingDetail.setSubscriptionKey((String) bd.get("subscriptionKey"));
 		
 		messagingTemplate.convertAndSend("/topic/bookingDetail", b.getOwner().getOwnerId());
+		messagingTemplate.convertAndSend("/topic/username", b.getOwner().getUser().getUsername());
 
 		return bookingDetailDAO.save(bookingDetail);
 //		return null;

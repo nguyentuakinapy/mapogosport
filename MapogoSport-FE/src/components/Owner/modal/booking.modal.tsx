@@ -108,7 +108,7 @@ const BookingModal = (props: BookingProps) => {
 
     useEffect(() => {
         getTime();
-    }, [startTimeKey]);
+    }, [startTimeKey, startTime]);
 
     const getTime = () => {
         if (startTime && sport?.closing) {
