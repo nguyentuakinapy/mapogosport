@@ -30,6 +30,8 @@ const AdminProduct = () => {
     []
   );
 
+
+
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [selectAllProduct, setSelectAllProduct] = useState(false);
 
@@ -83,19 +85,6 @@ const AdminProduct = () => {
     };
     fetchData();
   }, []);
-
-  // const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-  // const { data: productData, error: productError, isLoading: productIsLoading, mutate } = useSWR("http://localhost:8080/rest/products", fetcher, {
-  //     revalidateIfStale: false,
-  //     revalidateOnFocus: false,
-  //     revalidateOnReconnect: false,
-  // });
-  // const { data: categoryData, error: categoryError, isLoading: categoryIsLoading } = useSWR("http://localhost:8080/rest/category-products", fetcher, {
-  //     revalidateIfStale: false,
-  //     revalidateOnFocus: false,
-  //     revalidateOnReconnect: false,
-  // });
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryFn: async () => await getDatas(),
@@ -193,16 +182,69 @@ const AdminProduct = () => {
     }
   };
 
+  // Tìm kiếm
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+    // Xử lý khi thay đổi tab
+      const handleTabSelect = (tab) => {
+        setActiveTab(tab);
+      };
+      // Hàm loại bỏ dấu tiếng Việt
+      const removeVietnameseTones = (str) => {
+        return str
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/đ/g, "d")
+          .replace(/Đ/g, "D");
+      };
+
+      // Hàm lọc sản phẩm đã cập nhật
+      const getFilteredProducts = () => {
+        // Bước 1: Lọc theo trạng thái
+        let filtered = products;
+        if (activeTab === "inStock") {
+          filtered = products.filter((product) => product.status === "Còn hàng");
+        } else if (activeTab === "outStock") {
+          filtered = products.filter((product) => product.status === "Hết hàng");
+        }
+
+        // Bước 2: Lọc theo từ khóa tìm kiếm không dấu
+        if (searchTerm) {
+          const normalizedSearchTerm = removeVietnameseTones(searchTerm).toLowerCase();
+          filtered = filtered.filter((product) =>
+            removeVietnameseTones(product.name).toLowerCase().includes(normalizedSearchTerm)
+          );
+        }
+
+        return filtered;
+      };
+
+  // const filteredProducts = products.filter((product) =>
+  //   product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+
+  const filteredProducts = getFilteredProducts();
+
+
   // Phần phân trang
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3; // số item trên mỗi trang
 
   // Tính toán dữ liệu cho trang hiện tại
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentItems = products.slice(startIndex, startIndex + itemsPerPage);
-
-  // Tổng số trang
-  const totalPages = Math.ceil(products.length / itemsPerPage);
+  
+  // const currentItems = products.slice(startIndex, startIndex + itemsPerPage);
+  // const totalPages = Math.ceil(products.length / itemsPerPage);
+  
+  const currentItems = filteredProducts.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   // Xử lý khi bấm vào trang mới
   const handlePageChange = (page) => {
@@ -222,7 +264,6 @@ const AdminProduct = () => {
     }
   };
 
-
   const handleLastPage = () => {
     setCurrentPage(totalPages);
   };
@@ -231,13 +272,39 @@ const AdminProduct = () => {
   };
 
   const formatCurrency = (value) => {
-    if (value === null || value === undefined) return '';
-    return value.toLocaleString('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
+    if (value === null || value === undefined) return "";
+    return value.toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND",
     });
   };
-  
+
+        // Hàm để cập nhật trạng thái sản phẩm thành "Hết hàng"
+      const markProductAsOutOfStock = async (productId: number) => {
+        console.log("productId ",productId);
+        
+        const confirmed = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
+
+        if (!confirmed) {
+          return; // Nếu người dùng không xác nhận, thoát khỏi hàm
+        }
+        try {
+          const response = await axios.put(
+            `${BASE_URL}/rest/products/${productId}/mark-as-out-of-stock`
+          );
+          toast.success("Cập nhật trạng thái sản phẩm thành công");
+
+          // Sử dụng mutate để cập nhật lại dữ liệu sản phẩm
+          // mutate(`${BASE_URL}/rest/products`);
+          refetch();
+
+          return response.data;
+        } catch (error) {
+          console.error("Lỗi khi cập nhật trạng thái sản phẩm:", error);
+          toast.error("Lỗi khi cập nhật trạng thái sản phẩm");
+          throw error;
+        }
+      };
 
   const renderContent = () => {
     return (
@@ -288,8 +355,8 @@ const AdminProduct = () => {
                     </div>
                     <div>
                       {/* <span>Giá:</span> <strong>{product.price}</strong> */}
-                      <span>Giá:</span> <strong>{formatCurrency(product.price)}</strong>
-
+                      <span>Giá:</span>{" "}
+                      <strong>{formatCurrency(product.price)}</strong>
                     </div>
                     <div>
                       <span>Hãng:</span> <strong>{product.brand}</strong>
@@ -309,7 +376,7 @@ const AdminProduct = () => {
                     </div>
                     <div>
                       <span>Số lượng:</span>
-                      <Badge bg={product.stock > 1 ? "primary" : "danger"}>
+                      <Badge bg={product.stock >= 1 ? "primary" : "danger"}>
                         {product.stock}
                       </Badge>
                     </div>
@@ -328,7 +395,9 @@ const AdminProduct = () => {
                       <Button
                         variant="danger"
                         className="m-1"
-                        onClick={() => handleDelete(product.productId)}
+                        // onClick={() => handleDelete(product.productId)}
+                        disabled={ product.status === "Hết hàng" }
+                        onClick={() => markProductAsOutOfStock(product.productId)}
                       >
                         <i className="bi bi-trash3-fill"></i>
                       </Button>
@@ -354,6 +423,19 @@ const AdminProduct = () => {
         <b className="text-danger" style={{ fontSize: "20px" }}>
           Quản Lý Sản Phẩm
         </b>
+        <input
+        type="text"
+        placeholder="Tìm kiếm sản phẩm..."
+        value={searchTerm}
+        onChange={handleSearchChange}
+        style={{
+          padding: "5px 10px",
+          fontSize: "14px",
+          borderRadius: "5px",
+          border: "1px solid #ddd",
+          width: "200px"
+        }}
+      />
         <Button
           className="btn-sd-admin"
           style={{ fontSize: "15px" }}
@@ -365,7 +447,8 @@ const AdminProduct = () => {
       <Nav
         variant="pills"
         activeKey={activeTab}
-        onSelect={(selectedKey) => setActiveTab(selectedKey as string)}
+        // onSelect={(selectedKey) => setActiveTab(selectedKey as string)}
+        onSelect={(selectedKey) => handleTabSelect(selectedKey)}
         className="custom-tabs my-3"
       >
         <Nav.Item>
@@ -386,7 +469,7 @@ const AdminProduct = () => {
       </Nav>
 
       <div className="mt-3">
-        {renderContent()}
+        {renderContent(currentItems)}
 
         <div className="pagination ">
           <div className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
@@ -400,37 +483,44 @@ const AdminProduct = () => {
             </div>
           </div>
           {/* Nút "Lùi" */}
-          <button 
-          className="btn btn-primary mx-1 active"
-          onClick={handlePrevPage} disabled={currentPage === 1}>
-            {/* Lùi */}	&lt;
+          <button
+            className="btn btn-primary mx-1 active"
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+          >
+            {/* Lùi */} &lt;
           </button>
           {Array.from({ length: totalPages }, (_, index) => (
             <button
               // className="btn btn-primary mx-1 active"
-              className={`btn mx-1 ${currentPage === index + 1 ? "btn-primary active" : "btn-secondary"}`}
+              className={`btn mx-1 ${
+                currentPage === index + 1
+                  ? "btn-primary active"
+                  : "btn-secondary"
+              }`}
               key={index + 1}
               onClick={() => handlePageChange(index + 1)}
-              disabled={currentPage === index + 1}>
+              disabled={currentPage === index + 1}
+            >
               {index + 1}
-              
             </button>
           ))}
           {/* Nút "Tới" */}
           <button
-          className="btn btn-primary mx-1 active"
+            className="btn btn-primary mx-1 active"
             onClick={handleNextPage}
-            disabled={currentPage === totalPages}>
-            {/* Tới */}	&gt;
+            disabled={currentPage === totalPages}
+          >
+            {/* Tới */} &gt;
           </button>
-           {/* Nút "Tới trang cuối" */}
-           <button
-          className="btn btn-primary mx-1"
-          onClick={handleLastPage}
-          disabled={currentPage === totalPages}
-        >
-          &raquo;
-        </button>
+          {/* Nút "Tới trang cuối" */}
+          <button
+            className="btn btn-primary mx-1"
+            onClick={handleLastPage}
+            disabled={currentPage === totalPages}
+          >
+            &raquo;
+          </button>
         </div>
       </div>
 

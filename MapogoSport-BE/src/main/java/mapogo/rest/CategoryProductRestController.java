@@ -66,7 +66,7 @@ public class CategoryProductRestController {
 		return categoryProductService.createCategoryProduct(categoryProduct);
 	}
 
-	@PutMapping("/update/{id}")
+	@PutMapping("/update/category/product/{id}")
 	public CategoryProduct updateCategoryProduct(@PathVariable("id") Integer id,
 			@RequestParam("category") String categoryProductJson,
 			@RequestParam(value = "fileImage", required = false) MultipartFile file) {

@@ -18,6 +18,15 @@ public class AccountPackageServiceImpl implements AccountPackageService{
 	public List<AccountPackage> findAll() {
 		return accountPackageDAO.findAll();
 	}
+
+	@Override
+	public AccountPackage update(Integer id) {
+		AccountPackage existPackage = accountPackageDAO.findById(id).get();
+		if(existPackage != null) {
+			accountPackageDAO.save(existPackage);
+		}
+		return existPackage;
+	}
 	
 
 

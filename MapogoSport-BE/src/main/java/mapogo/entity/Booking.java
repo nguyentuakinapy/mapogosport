@@ -75,6 +75,9 @@ public class Booking implements Serializable{
 	@Column(name="PhoneNumber")
 	private String phoneNumber = null;
 	
+	@Column(name="PrepayPrice")
+	private double prepayPrice;
+	
 	@Transient
     private Map<String, Object> sportFieldInfo;
 }

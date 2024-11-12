@@ -19,19 +19,25 @@ public interface BookingDetailDAO extends JpaRepository<BookingDetail, Integer> 
 //	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId AND b.date = CURRENT_DATE")
 //	List<BookingDetail> findBySportFieldDetailAndToday(@Param("sportFieldDetailId") Integer sportFieldDetailId);
 
-	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId AND b.status = true AND b.date BETWEEN :startDate AND :endDate")
+	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId AND b.status != :status AND b.date BETWEEN :startDate AND :endDate")
 	List<BookingDetail> findBySportFieldDetailAndDateBetween(@Param("sportFieldDetailId") Integer sportFieldDetailId,
-			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("status") String status);
 
-	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId  AND b.status = true AND b.date = :date")
+	@Query("SELECT b FROM BookingDetail b WHERE b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId  AND b.status != :status AND b.date = :date")
 	List<BookingDetail> findBySportFieldDetailAndDay(@Param("sportFieldDetailId") Integer sportFieldDetailId,
-			@Param("date") LocalDate date);
+			@Param("date") LocalDate date, @Param("status") String status);
 
-	@Query("SELECT b FROM BookingDetail b WHERE b.startTime = :startTime AND b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId  AND b.status = true AND b.date = :date")
+	@Query("SELECT b FROM BookingDetail b WHERE b.startTime = :startTime AND b.sportFieldDetail.sportFielDetailId = :sportFieldDetailId  AND b.status != :status AND b.date = :date")
 	BookingDetail findBookingDetailByStartTimeAndSportDetailId(@Param("startTime") String startTime,
-			@Param("sportFieldDetailId") Integer sportDetailId, @Param("date") LocalDate date);
+			@Param("sportFieldDetailId") Integer sportDetailId, @Param("date") LocalDate date,  @Param("status") String status);
 
-	@Query("SELECT b FROM BookingDetail b WHERE b.status = true AND b.subcriptionKey = :subcriptionKey")
+	@Query("SELECT b FROM BookingDetail b WHERE b.status != :status AND b.subscriptionKey = :subscriptionKey")
 	List<BookingDetail> findBookingDetailBySubscriptionKey(
-			@Param("subcriptionKey") String subcriptionKey);
+			@Param("subscriptionKey") String subcriptionKey,  @Param("status") String status);
+	
+	@Query("SELECT b FROM BookingDetail b WHERE b.subscriptionKey = :subscriptionKey")
+	List<BookingDetail> findBySubscriptionKey(@Param("subscriptionKey") String subscriptionKey);
+	
+	@Query("SELECT b FROM BookingDetail b WHERE b.date = :date and b.startTime = :time and b.sportFieldDetail.sportField.sportFieldId = :sportFieldId")
+	List<BookingDetail> findByDateAndTime(@Param("date") LocalDate date, @Param("time") String time, @Param("sportFieldId") Integer sportFieldId);;
 }

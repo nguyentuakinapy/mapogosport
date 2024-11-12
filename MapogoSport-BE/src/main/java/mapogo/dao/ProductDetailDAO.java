@@ -54,5 +54,8 @@ public interface ProductDetailDAO extends JpaRepository<ProductDetail, Integer> 
 		
 		@Query("SELECT o.product.productId FROM ProductDetail o WHERE o.productDetailId = :productDetailId")
 		ProductDetail findProduct_Id_By_Product_Detail_Id(@Param("productDetailId") Integer productDetailId);
+		
+		   @Query("SELECT pd.product.id FROM ProductDetail pd WHERE pd.id = :productDetailId")
+		    Integer findProductIdByProductDetailId(@Param("productDetailId") Integer productDetailId);
 
 }
