@@ -1,5 +1,6 @@
 package mapogo.rest;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -12,10 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import mapogo.dao.ProductDAO;
+import mapogo.dao.UserDAO;
 import mapogo.dao.UserVoucherDAO;
 import mapogo.entity.Owner;
 import mapogo.entity.Product;
@@ -43,6 +47,11 @@ public class UserRestController {
 	@GetMapping("/user/{username}")
 	public User findUseLoginUser(@PathVariable("username") String username) {
 		return userService.findByUsername(username);
+	}
+	
+	@PostMapping("/user/avatar/{username}")
+	public void uploadAvatar(@PathVariable("username") String username, @RequestParam("avatar") MultipartFile file) throws IOException {
+		userService.uploadAvatar(username, file);
 	}
 
 	@GetMapping("/user")

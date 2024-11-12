@@ -1,11 +1,10 @@
 import { formatDateNotime, formatPrice } from "@/components/Utils/Format";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, Nav } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import 'react-datepicker/dist/react-datepicker.css';
-import { time } from "console";
 
 
 interface BookingProps {
@@ -24,46 +23,31 @@ interface BookingProps {
 const BookingModal = (props: BookingProps) => {
     const { showBookingModal, setShowBookingModal, sportDetail, startTime,
         dayStartBooking, sport, owner, checkDataStatus, setCheckDataStatus, startTimeKey } = props;
-
     const [selectTime, setSelectTime] = useState<string>('Chọn thời gian');
     const [selectTimeOnStage, setSelectTimeOnStage] = useState<string>('Chọn thời gian');
     const [isOffline, setIsOffline] = useState(false);
     const [activeTab, setActiveTab] = useState<string>('all');
-
-    const [booking, setBooking] = useState<Booking>();
-
     const [dataPaymentMethod, setDataPaymentMethod] = useState<PaymentMethod[]>();
     const [checkPrepayPrice, setCheckPrepayPrice] = useState<boolean>(true);
+    const [username, setUsername] = useState<string>("");
+    const [totalAmount, setTotalAmount] = useState<number>();
+    const [prepayPrice, setPrepayPrice] = useState<number>();
+    const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
+    const [fullName, setFullName] = useState<string>("");
+    const [phoneNumber, setPhoneNumber] = useState<string>("");
 
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-    const { data, error, isLoading } = useSWR(
-        `http://localhost:8080/rest/paymentMethod`, fetcher, {
+    const { data } = useSWR(`http://localhost:8080/rest/paymentMethod`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
 
-    // BOOKING
-    const [username, setUsername] = useState<string>("");
-    const [totalAmount, setTotalAmount] = useState<number>();
-    const [prepayPrice, setPrepayPrice] = useState<number>();
-    const [statusBooking, setStatusBooking] = useState<string>("Chờ thanh toán");
-    const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
-    const [note, setNote] = useState<string>("");
-    const [fullName, setFullName] = useState<string>("");
-    const [phoneNumber, setPhoneNumber] = useState<string>("");
-
     // BOOKING DETAIL
     const [endTime, setEndTime] = useState<string>();
     const [price, setPrice] = useState<number>();
-    const [date, setDate] = useState<string>();
-
-    // BOOKING PAYMENT
-    const [amount, setAmount] = useState<number>();
-    const [statusPayment, setStatusPayment] = useState<string>("0");
-    const [referenceCode, setReferenceCode] = useState<string>("0");
 
     useEffect(() => {
         setDataPaymentMethod(data);
@@ -127,23 +111,12 @@ const BookingModal = (props: BookingProps) => {
     }, [startTimeKey]);
 
     const getTime = () => {
-        if (startTime && typeof startTime === 'string' && sport?.closing && typeof sport?.closing === 'string') {
+        if (startTime && sport?.closing) {
             const [openHour, openMinute] = startTime.split("h").map(Number);
             const [closeHour, closeMinute] = sport.closing.split("h").map(Number);
-
-            if (openHour !== undefined && openMinute !== undefined && closeHour !== undefined && closeMinute !== undefined) {
-                const totalOpenMinutes = openHour * 60 + openMinute;
-                const totalCloseMinutes = closeHour * 60 + closeMinute;
-
-                const operatingTimeInHours = (totalCloseMinutes - totalOpenMinutes) / 60;
-
-                setOperatingTime(operatingTimeInHours);
-            } else {
-                // console.log('Không thể tách giờ và phút.');
-
-            }
-        } else {
-            // console.log('Giá trị giờ không hợp lệ.');
+            const totalOpenMinutes = openHour * 60 + openMinute;
+            const totalCloseMinutes = closeHour * 60 + closeMinute;
+            setOperatingTime((totalCloseMinutes - totalOpenMinutes) / 60);
         }
     };
 
@@ -178,7 +151,6 @@ const BookingModal = (props: BookingProps) => {
         for (let index = 0; index < operatingTimeFetchData; index++) {
             newData.push(timeIntervals[index].label);
         }
-        // setDataTime(newData);
         if (activeTab === 'all') {
             setDataTimeTemporary(newData);
         }
@@ -232,9 +204,8 @@ const BookingModal = (props: BookingProps) => {
                 }
 
                 setEndTime(`${endHour}h${endMinute > 0 ? endMinute : '00'}`);
-                // toast.success(`${endHour}h${endMinute > 0 ? endMinute : '00'}`);
-
-                const selectedPrice = sportDetail?.price || 0; // giá cơ bản cho mỗi giờ
+                const hetcuu = (`${endHour}h${endMinute > 0 ? endMinute : '00'}`);
+                const selectedPrice = calculateBookingPrice(sportDetail, startTime, hetcuu);
                 let totalAmount = 0;
 
                 let totalTimeInHours: number = 0;
@@ -264,8 +235,6 @@ const BookingModal = (props: BookingProps) => {
                 setPrice(totalAmount);
                 setTotalAmount(totalAmount);
                 setPrepayPrice(totalAmount * (sportDetail?.percentDeposit / 100))
-                setDate(dayStartBooking);
-                // console.log(totalAmount);
             }
         }
     }
@@ -374,7 +343,6 @@ const BookingModal = (props: BookingProps) => {
             }
         }
 
-        // console.log(days);
         setWeekDays(days); // Cập nhật state với các ngày trong tuần
     };
 
@@ -397,7 +365,6 @@ const BookingModal = (props: BookingProps) => {
         const getHour = timeParts[0] == '30' ? 0 : Number(timeParts[0]);
         const getMinute = Number(timeParts[2]) | 0;
         const numberOfSlots = (getHour * 60 + getMinute);
-        // toast.success(numberOfSlots == 0 ? 1 : numberOfSlots);
 
         const timeSlots = [];
 
@@ -422,7 +389,7 @@ const BookingModal = (props: BookingProps) => {
             }
         }
         setEndTime(timeSlots[timeSlots.length - 1]);
-        setDataTime(['30 phút', '1 giờ', '1 giờ 30 phút', '2 giờ', '2 giờ 30 phút', '3 giờ']);
+        setDataTime(['1 giờ', '1 giờ 30 phút', '2 giờ', '2 giờ 30 phút', '3 giờ']);
         timeSlots.pop();
         setDataTimeOnStage(timeSlots);
     };
@@ -436,7 +403,6 @@ const BookingModal = (props: BookingProps) => {
             const dateWeek = weekDays[week];
             for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
                 bookings.map(b => {
-                    // console.log('b', b.date);
                     index = index + 1;
                 })
             }
@@ -459,7 +425,6 @@ const BookingModal = (props: BookingProps) => {
 
                         if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
                         const text = await response.text();
-                        // console.log(text);
 
                         if (text) {
                             const dataBooking = JSON.parse(text) as BookingDetail[];
@@ -467,7 +432,6 @@ const BookingModal = (props: BookingProps) => {
                                 for (const item of dataBooking) {
                                     for (const time of dataTimeOnStage) {
                                         const result = isTimeWithinRange(item.startTime, item.endTime, time);
-                                        // toast.warning(result);
                                         if (result) {
                                             setSportFieldDuplicate(prevState => ({
                                                 ...prevState,
@@ -583,15 +547,15 @@ const BookingModal = (props: BookingProps) => {
                 prepayPrice: checkPrepayPrice ? prepayPrice : totalAmount,
                 paymentMethodId: paymentMethod.paymentMethodId,
                 ownerId: owner.ownerId,
-                status: checkPrepayPrice ? statusBooking : "Đã thanh toán",
+                status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
                 voucher: null,
-                note
+                checkOwner: "user"
             })
         })
 
         const resBooking = await responseBooking.json() as Booking;
 
-        const responseBookingDetail = await fetch('http://localhost:8080/rest/booking/detail', {
+        await fetch('http://localhost:8080/rest/booking/detail', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -607,7 +571,6 @@ const BookingModal = (props: BookingProps) => {
                 subscriptionKey: activeTab !== 'all' ? 'createKey' : null
             })
         });
-        const resBookingDetail = await responseBookingDetail.json() as BookingDetail;
 
         toast.success("Đặt sân thành công!");
     }
@@ -638,7 +601,7 @@ const BookingModal = (props: BookingProps) => {
                 ownerId: owner.ownerId,
                 status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
                 voucher: null,
-                note
+                checkOwner: "user"
             })
         })
 
@@ -648,7 +611,7 @@ const BookingModal = (props: BookingProps) => {
             const dateWeek = weekDays[week];
             for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
                 bookings.map(async b => {
-                    const responseBookingDetail = await fetch('http://localhost:8080/rest/booking/detail', {
+                    await fetch('http://localhost:8080/rest/booking/detail', {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json, text/plain, */*',
@@ -664,7 +627,6 @@ const BookingModal = (props: BookingProps) => {
                             subscriptionKey: activeTab !== 'all' ? `keybooking${resBooking.bookingId}` : ""
                         })
                     });
-                    const resBookingDetail = await responseBookingDetail.json() as BookingDetail;
                 })
             }
         }
@@ -678,8 +640,6 @@ const BookingModal = (props: BookingProps) => {
         setOperatingTimeFetchData(0);
         setTotalAmount(0);
         setPrice(0);
-        // setStartDate(null);
-        // setEndDate(null);
         setWeekDays({});
         setSelectedWeek([]);
         setActiveTab("all");
@@ -697,8 +657,6 @@ const BookingModal = (props: BookingProps) => {
         setOperatingTimeFetchData(0);
         setTotalAmount(0);
         setPrice(0);
-        // setStartDate(null);
-        // setEndDate(null);
         setWeekDays({});
         setSelectedWeek([]);
         setSportFieldDuplicate({});
@@ -757,31 +715,60 @@ const BookingModal = (props: BookingProps) => {
 
     const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCheckPrepayPrice(event.target.value === 'prepay');
-        if (event.target.value === 'prepay') {
-            toast.success("ok")
-
-        } else {
-            toast.success("ok1")
-
-        }
     };
+
+    const calculateBookingPrice = (sportDetail: any, startTime: any, endTime: any) => {
+        const { peakHour, peakHourPrices, price } = sportDetail;
+
+        const [peakStart, peakEnd] = peakHour.split('-');
+        const [peakStartHour, peakStartMin] = peakStart.split('h').map(Number);
+        const [peakEndHour, peakEndMin] = peakEnd.split('h').map(Number);
+
+        const [timeStartHour, timeStartMin] = startTime.split('h').map(Number);
+
+        if (!endTime) return price;
+        const [timeEndHour, timeEndMin] = endTime.split('h').map(Number);
+
+        const peakStartInMinutes = peakStartHour * 60 + peakStartMin;
+        const peakEndInMinutes = peakEndHour * 60 + peakEndMin;
+
+        const startTimeInMinutes = timeStartHour * 60 + timeStartMin;
+        const endTimeInMinutes = timeEndHour * 60 + timeEndMin;
+
+        const isPeakHour = (
+            (startTimeInMinutes >= peakStartInMinutes && startTimeInMinutes < peakEndInMinutes) ||
+            (endTimeInMinutes > peakStartInMinutes && endTimeInMinutes <= peakEndInMinutes) ||
+            (startTimeInMinutes < peakStartInMinutes && endTimeInMinutes > peakEndInMinutes)
+        );
+
+        return isPeakHour ? peakHourPrices : price;
+    };
+
+    const renderSportFieldInfor = () => {
+        return (
+            <>
+                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
+                <ul>
+                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {formatPrice(sportDetail && sportDetail.price)}.</li>
+                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {formatPrice(sportDetail && sportDetail.peakHourPrices)}.</li>
+                    <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>
+                    <li><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}.</li>
+                    <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
+                    <li><span className="fw-bold">Địa chỉ:</span> {sport && sport.address}.</li>
+                </ul>
+            </>
+        )
+    }
 
     const renderContent = () => {
         switch (activeTab) {
             case 'all':
+                const priceForSelectedTime = sportDetail ? calculateBookingPrice(sportDetail, startTime, endTime) : null;
                 return (
                     <>
                         <Row>
                             <Col>
-                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
-                                <ul>
-                                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {formatPrice(sportDetail && sportDetail.price)}.</li>
-                                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {formatPrice(sportDetail && sportDetail.peakHourPrices)}.</li>
-                                    <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>
-                                    <li><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}.</li>
-                                    <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
-                                    <li><span className="fw-bold">Địa chỉ:</span> {sport && sport.address}.</li>
-                                </ul>
+                                {renderSportFieldInfor()}
                             </Col>
                             <Col>
                                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
@@ -850,18 +837,10 @@ const BookingModal = (props: BookingProps) => {
                                 <span><b> Thời gian đá: </b>{startTime} - {endTime ? endTime : '???'}</span><br />
                             </Col>
                             <Col className="px-5 text-center">
-                                <span><b>Đơn giá: </b> <em className="text-danger">{sportDetail?.price.toLocaleString("vi-VN", { style: "currency", currency: "VND", })}</em>. </span><br />
-                                <span><b>Tổng tiền: </b><em className="text-danger">{price ? price.toLocaleString("vi-VN", { style: "currency", currency: "VND", }) : '???'}</em>. </span><br />
+                                <span><b>Đơn giá: </b> <em className="text-danger">{endTime ? `${priceForSelectedTime?.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
+                                <span><b>Tổng tiền: </b><em className="text-danger">{price ? `${price?.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
                             </Col>
                         </Row>
-                        <Form.Group className="mt-3 px-4">
-                            <Form.Control as="textarea" rows={3}
-                                type="text"
-                                placeholder="Ghi chú!"
-                                value={note}
-                                onChange={(e) => setNote(e.target.value)}
-                            />
-                        </Form.Group>
                     </>
                 );
             case 'deposit':
@@ -869,23 +848,7 @@ const BookingModal = (props: BookingProps) => {
                     <>
                         <Row>
                             <Col>
-                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
-                                <ul style={{ listStyle: 'none' }}>
-                                    <li className="pb-1"><span className="fw-bold">Giá sân:</span> {sportDetail?.price.toLocaleString()}/giờ</li>
-                                    <li className="pb-1"><span className="fw-bold">Giá sân giờ vàng:</span> {sportDetail?.peakHourPrices.toLocaleString()}/giờ</li>
-                                    <li className="pb-1"><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}</li>
-                                    <li className="pb-1"><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}</li>
-                                    <li className="pb-1"><span className="fw-bold">Trạng thái:</span> {sport && sport.status}</li>
-                                    <li><span className="fw-bold">Địa chỉ:</span> {sport && sport.address}</li>
-                                </ul>
-                                <Row>
-                                    <Col>
-
-                                    </Col>
-                                    <Col>
-
-                                    </Col>
-                                </Row>
+                                {renderSportFieldInfor()}
                             </Col>
                             <Col>
                                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
@@ -1015,14 +978,6 @@ const BookingModal = (props: BookingProps) => {
                             <span><b>Trả trước: </b> <em className="text-danger">{sportDetail && totalAmount ? (totalAmount * (sportDetail.percentDeposit / 100)).toLocaleString("vi-VN", { style: "currency", currency: "VND", }) : '???'}</em>. </span>
                             <span><b>Tổng tiền: </b><em className="text-danger">{totalAmount ? totalAmount.toLocaleString("vi-VN", { style: "currency", currency: "VND", }) : '???'}</em>. </span>
                         </div>
-                        <Form.Group className="mt-2 px-4">
-                            <Form.Control as="textarea" rows={3}
-                                type="text"
-                                placeholder="Ghi chú!"
-                                value={note}
-                                onChange={(e) => setNote(e.target.value)}
-                            />
-                        </Form.Group>
                     </>
                 );
             default:

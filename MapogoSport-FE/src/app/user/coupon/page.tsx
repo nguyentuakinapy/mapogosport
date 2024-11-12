@@ -16,7 +16,7 @@ const CouponPage = () => {
         setUsername(storedUsername);
     }, []);
 
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/${username}`, fetcher, {
+    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/voucher/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -24,7 +24,7 @@ const CouponPage = () => {
 
     useEffect(() => {
         if (data) {
-            setVoucherData(data.userVouchers);
+            setVoucherData(data);
         }
     }, [data]);
 
