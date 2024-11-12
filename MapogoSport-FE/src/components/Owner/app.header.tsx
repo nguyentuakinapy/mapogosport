@@ -1,7 +1,11 @@
 import { useData } from '@/app/context/UserContext';
+import { Stomp } from '@stomp/stompjs';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { NavDropdown } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import SockJS from 'sockjs-client';
+import { formatDateNotime } from '../Utils/Format';
+import { Row } from 'react-bootstrap';
 interface HeaderProps {
     isAniActive: boolean;
     toggleAni: () => void;
@@ -31,12 +35,32 @@ const translations: { [key: string]: string } = {
 export default function Header({ isAniActive, toggleAni, weather }: HeaderProps) {
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
+    const [hideNotification, setHideNotification] = useState<boolean>(false);
+    const [notification, setNotification] = useState<NotificationUser[]>();
     const userData = useData();
+    const [checkBooking, setCheckBooking] = useState<number>();
+    const [checkNotification, setCheckNotification] = useState<number>();
 
+    useEffect(() => {
+        if (userData) {
+            getNotification(userData.username)
+        }
+    }, [userData, checkBooking, checkNotification]);
+
+    const getNotification = async (username: string) => {
+        const response = await fetch(`http://localhost:8080/rest/user/notification/${username}`);
+        if (!response.ok) throw new Error("Không tìm thấy sân sắp tới");
+
+        const notification = await response.json() as NotificationUser[];
+        if (notification?.length >= 1) {
+            setNotification(notification);
+        }
+    }
 
     const translate = (word: string): string => {
         return translations[word.toLowerCase()] || word;
     };
+
     useEffect(() => {
         const updateDateTime = () => {
             const now = new Date();
@@ -62,6 +86,25 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
         updateDateTime();
         const intervalId = setInterval(updateDateTime, 1000);
         return () => clearInterval(intervalId);
+    }, []);
+
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            stompClient.subscribe('/topic/bookingDetail', (message) => {
+                setCheckBooking(Number(message.body))
+            });
+
+            stompClient.subscribe('/topic/notification', (message) => {
+                setCheckNotification(Number(message.body))
+            });
+        });
+
+        return () => {
+            stompClient.disconnect();
+        };
     }, []);
 
     return (
@@ -101,22 +144,48 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                             <li className="nav-item me-2 ">
                                 <a href="" className="nav-link"><i className="bi bi-chat-left" style={{ fontSize: 'large' }}></i></a>
                             </li>
-                            <li className="nav-item me-2 ">
-                                <a href="" className="nav-link"><i className="bi bi-bell" style={{ fontSize: 'large' }}></i></a>
-                            </li>
-                            {/* <li className="nav-item dropdown" style={{ borderLeft: '1px solid' }}>
-                                <a href="#" className="nav-link d-flex align-items-center me-4" role="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <div className="img" style={{ backgroundImage: 'url()' }}></div>
-                                    <span>Nguyễn Tú</span>
+                            <li className="nav-item me-3" >
+                                <a onClick={() => setHideNotification(!hideNotification)} className="nav-link">
+                                    <i className="bi bi-bell" style={{ fontSize: 'large' }}></i>
                                 </a>
-                                <ul className="dropdown-menu">
-                                    <li><a className="dropdown-item" href="#"><i className="bi bi-person me-2"></i>Profile</a></li>
-                                    <li><a className="dropdown-item" href="#"><i
-                                        className="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                                </ul>
-                            </li> */}
-                            <span style={{ borderLeft: '1px solid' }} className='text-decoration-none demo me-3'><i className="bi bi-person-fill ms-3 me-1"></i>{userData?.fullname}</span>
+                                <span onClick={() => setHideNotification(!hideNotification)} style={{ top: '12%', left: '85%', fontSize: '10px' }}
+                                    className="position-absolute translate-middle badge rounded-pill bg-danger">
+                                    {notification ? notification.filter(item => item.isRead === false).length : 0}
+                                </span>
+                                <div className={`notification ${hideNotification ? 'd-block' : 'd-none'}`} >
+                                    <div className="d-flex align-items-center">
+                                        <h4 className='fw-bold text-danger'>Thông báo</h4>
+                                        <i className="bi bi-three-dots ms-auto"></i>
+                                    </div>
+                                    <button style={{ backgroundColor: '#142239' }} className='btn w-100 ms-auto mb-2'>Đánh dấu tất cả là đã đọc</button>
+
+                                    {notification &&
+                                        notification.sort((a, b) => b.notificationId - a.notificationId).map(item => {
+                                            return (
+                                                <>
+                                                    <div className="box-comment-container mb-2">
+                                                        <div className="d-flex justify-content-between align-items-center">
+                                                            <Link href={``}
+                                                                className="box-comment" style={{ fontSize: '15px' }}>
+                                                                <b>{item.title}</b>
+                                                                <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
+                                                                    <div className='me-2'>{item.message}</div>
+                                                                    <span>{formatDateNotime(item.createdAt)}</span>
+                                                                </div>
+                                                            </Link>
+                                                            <div className="btn-cmt" >
+                                                                <i className="bi bi-trash3-fill fs-5"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )
+                                        })}
+                                </div>
+                            </li>
+                            <span style={{ borderLeft: '1px solid' }} className='text-decoration-none demo me-3'>
+                                <div className="img ms-2 shadow" style={{ backgroundImage: `url(${userData?.avatar ? userData.avatar : ''})` }}></div>{userData?.fullname}
+                            </span>
                         </ul>
                     </nav>
                 </div>

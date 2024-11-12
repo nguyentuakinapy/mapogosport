@@ -14,7 +14,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
     const { showCreateOwnerModal, setShowCreateOwnerModal, userData } = props;
 
     const [authority, setAuthority] = useState<number>(3);
-
+    const [checkPaymentMethod, setCheckPaymentMethod] = useState<boolean>(true);
 
     const [accountPackage, setAccountPackage] = useState<AccountPackage[]>();
     const [accountPackageTemporary, setAccountPackageTemporary,] = useState<AccountPackage>();
@@ -26,7 +26,6 @@ const CreateOwnerModal = (props: OwnerProps) => {
     const [bankAccount, setBankAccount] = useState<string>("");
     const [momoAccount, setMomoAccount] = useState<string>("");
     const [vnpayAccount, setVnpayAccount] = useState<string>("");
-
 
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -63,7 +62,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
         setPage(false);
     }
 
-    const handleSubmit = async () => {
+    const createOwnerAccount = async () => {
         const responseUserSubscription = await fetch('http://localhost:8080/rest/user/subscription', {
             method: 'POST',
             headers: {
@@ -135,6 +134,21 @@ const CreateOwnerModal = (props: OwnerProps) => {
         }
     }
 
+    const handleSubmit = async () => {
+        if (checkPaymentMethod) {
+            toast.warning("Số dư của bạn không đủ");
+            // createOwnerAccount();
+        } else {
+            // createOwnerAccount();
+        }
+
+
+    }
+
+    const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setCheckPaymentMethod(event.target.value === 'prepay');
+    };
+
     return (
         <Modal show={showCreateOwnerModal} onHide={() => handleClose()} size="xl" aria-labelledby="contained-modal-title-vcenter"
             centered backdrop="static" keyboard={false}>
@@ -163,16 +177,13 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                 </Col>
                             )
                         })}
-                        <Button onClick={() => {
-                            setShowCreateOwnerModal(false)
-                        }} className="btn btn-secondary mt-3">Hủy</Button>
                     </Row>
                     :
                     <Row>
                         <Col>
                             <h6 style={{ textTransform: 'uppercase' }} className="text-danger text-center fw-bold">Thông tin cá nhân</h6>
                             <Row>
-                                <Col>
+                                <Col md={9}>
                                     <div className="form-floating mb-3">
                                         <input type="text" className="form-control"
                                             value={userData?.fullname} disabled
@@ -183,12 +194,19 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                 <Col>
                                     <div className="form-floating mb-3">
                                         <input type="text" className="form-control"
-                                            value={userData?.email} disabled
+                                            value={userData?.gender == 0 ? 'Nam' : 'Nữ'} disabled
                                         />
-                                        <label>Email <b className="text-danger">*</b></label>
+                                        <label>Giới tính </label>
                                     </div>
+
                                 </Col>
                             </Row>
+                            <div className="form-floating mb-3">
+                                <input type="text" className="form-control"
+                                    value={userData?.email} disabled
+                                />
+                                <label>Email <b className="text-danger">*</b></label>
+                            </div>
                             <div className="form-floating mb-3">
                                 <select className="form-select">
                                     {userData && userData.addressUsers.length > 0 &&
@@ -197,32 +215,25 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                         ))
                                     }
                                 </select>
-                                <label>Sổ địa chỉ <b className="text-danger">*</b></label>
+                                <label>Sổ địa chỉ</label>
                             </div>
                             <Row>
-                                <Col>
-                                    <div className="form-floating mb-3">
-                                        <select className="form-select">
-                                            {userData && userData.addressUsers.length > 0 &&
-                                                userData.phoneNumberUsers.map((pNu, index) => (
-                                                    <option selected={index === 0} key={pNu.phoneNumberUserId} value={pNu.phoneNumber.phoneNumber}>{pNu.phoneNumber.phoneNumber}.</option>
-                                                ))
-                                            }
-                                        </select>
-                                        <label>Số điện thoại <b className="text-danger">*</b></label>
-                                    </div>
-                                </Col>
-                                <Col>
-                                    <div className="form-floating mb-3">
-                                        <input type="text" className="form-control"
-                                            value={userData?.gender == 0 ? 'Nam' : 'Nữ'} disabled
-                                        />
-                                        <label>Giới tính <b className="text-danger">*</b></label>
-                                    </div>
-                                </Col>
+                                <div className="form-floating mb-3">
+                                    <select className="form-select">
+
+                                        {userData && userData.addressUsers.length > 0 ?
+                                            userData.phoneNumberUsers.map((pNu, index) => (
+                                                <option selected={index === 0} key={pNu.phoneNumberUserId} value={pNu.phoneNumber.phoneNumber}>{pNu.phoneNumber.phoneNumber}.</option>
+                                            ))
+                                            :
+                                            <option value="">Bạn chưa thêm số điện thoại</option>
+                                        }
+                                    </select>
+                                    <label className="ms-3">Số điện thoại</label>
+                                </div>
                             </Row>
-                            <h6 style={{ textTransform: 'uppercase' }} className="text-danger text-center fw-bold">Thông tin chủ sân</h6>
-                            <div className="form-floating mb-3">
+                            {/* <h6 style={{ textTransform: 'uppercase' }} className="text-danger text-center fw-bold">Thông tin chủ sân</h6>
+                                 <div className="form-floating mb-3">
                                 <input
                                     value={bankAccount}
                                     onChange={(e) => setBankAccount(e.target.value)}
@@ -260,11 +271,11 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                     required
                                 />
                                 <label htmlFor="vnpayAccount">VNPAY Account <b className="text-danger">*</b></label>
-                            </div>
+                            </div> */}
                         </Col>
                         <Col>
                             <h6 style={{ textTransform: 'uppercase' }} className="text-danger text-center fw-bold">
-                                Chức năng {accountPackageTemporary?.packageName}</h6>
+                                Chức năng và thanh toán {accountPackageTemporary?.packageName}</h6>
                             <Col >
                                 <div className=" my-3">
                                     {accountPackageTemporary?.accountPackageBenefits.map(apb => {
@@ -277,24 +288,60 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                     })}
                                 </div>
                             </Col>
-
-                            <h6 style={{ textTransform: 'uppercase' }} className="text-danger text-center fw-bold mt-3">
-                                Thanh toán</h6>
-                            <div className="form-floating mb-3">
-                                <select value={paymentMethodId}
-                                    onChange={(e) => setPaymentMethodId(Number(e.target.value))}
-                                    className="form-select" aria-label="Default select example">
-                                    {dataPaymentMethod && (
-                                        dataPaymentMethod.map((item) => (
-                                            <option key={item.paymentMethodId} value={item.paymentMethodId}>{item.name}</option>
-                                        ))
-                                    )}
-                                </select>
-                                <label>Phương thức thanh toán <b className="text-danger">*</b></label>
+                            <div className="d-flex justify-content-center mb-3">
+                                <div className="form-check me-5">
+                                    <input
+                                        value="prepay"
+                                        checked={checkPaymentMethod}
+                                        onChange={handleRadioChange}
+                                        className="form-check-input border"
+                                        type="radio"
+                                        name="flexRadioDefault"
+                                        id="flexRadioDefault1"
+                                    />
+                                    <label className="form-check-label" htmlFor="flexRadioDefault1">
+                                        Thanh toán bằng ví
+                                    </label>
+                                </div>
+                                <div className="form-check">
+                                    <input
+                                        value="full"
+                                        checked={!checkPaymentMethod}
+                                        onChange={handleRadioChange}
+                                        className="form-check-input border"
+                                        type="radio"
+                                        name="flexRadioDefault"
+                                        id="flexRadioDefault2"
+                                    />
+                                    <label className="form-check-label" htmlFor="flexRadioDefault2">
+                                        Thanh toán chuyển khoản
+                                    </label>
+                                </div>
                             </div>
+                            {checkPaymentMethod ?
+                                <div className="form-floating mb-3">
+                                    <input type="text" className="form-control"
+                                        value={(9999999999999999).toLocaleString() + ' đ'} disabled
+                                    />
+                                    <label>Số dư ví của bạn<b className="text-danger">*</b></label>
+                                </div>
+                                :
+                                <div className="form-floating mb-3">
+                                    <select value={paymentMethodId}
+                                        onChange={(e) => setPaymentMethodId(Number(e.target.value))}
+                                        className="form-select" aria-label="Default select example">
+                                        {dataPaymentMethod && (
+                                            dataPaymentMethod.map((item) => (
+                                                <option key={item.paymentMethodId} value={item.paymentMethodId}>{item.name}</option>
+                                            ))
+                                        )}
+                                    </select>
+                                    <label>Phương thức thanh toán <b className="text-danger">*</b></label>
+                                </div>
+                            }
                             <b>Giá:</b> <b className="text-danger mb-3">{accountPackageTemporary?.price == 0 ? 'Miễn phí' : formatPrice(accountPackageTemporary?.price)}</b><br />
                             <b className="me-2">Hạn sử dụng:</b>
-                            {accountPackageTemporary && accountPackageTemporary.durationDays === 0 ? (
+                            {accountPackageTemporary && accountPackageTemporary.price === 0 ? (
                                 <b className="text-danger mb-3">Không giới hạn</b>
                             ) : (
                                 <>
@@ -306,18 +353,19 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                 </>
                             )}
                         </Col>
-                        <div className="d-flex justify-content-around">
-                            <Button onClick={() => setPage(true)} className="btn btn-primary">Quay lại</Button>
-                            <Button onClick={() => handleSubmit()} className="btn btn-danger">Thanh toán</Button>
-                            <Button onClick={() => {
-                                setShowCreateOwnerModal(false), setTimeout(() => {
-                                    setPage(true)
-                                }, 500);
-                            }} className="btn btn-secondary">Hủy</Button>
-                        </div>
+
                     </Row>
                 }
             </Modal.Body>
+            <Modal.Footer className="d-flex justify-content-around">
+                <Button onClick={() => setPage(true)} className="btn btn-primary">Quay lại</Button>
+                <Button onClick={() => handleSubmit()} className="btn btn-danger">Thanh toán</Button>
+                <Button onClick={() => {
+                    setShowCreateOwnerModal(false), setTimeout(() => {
+                        setPage(true)
+                    }, 500);
+                }} className="btn btn-secondary">Hủy</Button>
+            </Modal.Footer>
         </Modal >
     )
 }

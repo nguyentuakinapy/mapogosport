@@ -13,6 +13,7 @@ import mapogo.dao.AccountPackageDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.UserSubscriptionDAO;
 import mapogo.entity.AccountPackage;
+import mapogo.entity.Notification;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
 import mapogo.entity.UserVoucher;
@@ -97,5 +98,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User findUserByBookingDetailId(Integer bookingDetailId) {
 		return userDAO.findUserByBookingDetailId(bookingDetailId);
+	}
+
+	@Override
+	public List<Notification> findNotificationByUsername(String username) {
+		User u = userDAO.findById(username).get();
+		return u.getNotifications();
 	}
 }

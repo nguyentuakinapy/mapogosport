@@ -197,21 +197,21 @@ const BookingModal = (props: OwnerProps) => {
 
         if (applyOne) {
 
-            if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
-                for (const time of dataTimeOnStage) {
-                    const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
-                    // console.log(result);
+            // if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
+            //     for (const time of dataTimeOnStage) {
+            //         const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
+            //         // console.log(result);
 
-                    if (result) {
-                        checkTime = true;
-                    }
-                }
-            }
+            //         if (result) {
+            //             checkTime = true;
+            //         }
+            //     }
+            // }
 
-            if (checkTime) {
-                toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
-                return
-            }
+            // if (checkTime) {
+            //     toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
+            //     return
+            // }
 
             try {
                 const response = await fetch(
@@ -618,26 +618,39 @@ const BookingModal = (props: OwnerProps) => {
                     <Row>
                         <Col>
                             <div className="d-flex  justify-content-between">
-                                {bookingDetailData &&
-                                    new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                        new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
-                                            <>
+                                {bookingDetailData && (
+                                    <>
+                                        {/* Kiểm tra ngày hiện tại và ngày đặt */}
+                                        {new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) &&
+                                            (new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
                                                 <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                                                     <i
                                                         className="bi bi-pencil-square ms-2 text-dark"
                                                         onClick={() => setEditBooking(!editBooking)}
                                                         style={{ cursor: 'pointer' }}
                                                     />
+                                                </OverlayTrigger>
+                                            ) : (
+                                                new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                                    <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
+                                                        <i className="bi bi-plus-lg" style={{ cursor: 'pointer' }} />
+                                                    </OverlayTrigger>
+                                                )
+                                            ))
+                                        }
 
-                                                </OverlayTrigger>
-                                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name} </h6>
+                                        <h6 className="text-uppercase text-danger fw-bold text-center">
+                                            Thông tin đặt - {bookingDetailData?.sportFieldDetail.name}
+                                        </h6>
+
+                                        {/* Hiển thị điều kiện tương tự lần thứ hai */}
+                                        {new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) &&
+                                            (new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
                                                 <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
-                                                    <i className="bi bi-plus-lg"></i>
+                                                    <i className="bi bi-plus-lg" style={{ cursor: 'pointer' }} />
                                                 </OverlayTrigger>
-                                            </>
-                                        ) : (
-                                            new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                                <>
+                                            ) : (
+                                                new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
                                                     <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                                                         <i
                                                             className="bi bi-pencil-square ms-2 text-dark"
@@ -645,14 +658,12 @@ const BookingModal = (props: OwnerProps) => {
                                                             style={{ cursor: 'pointer' }}
                                                         />
                                                     </OverlayTrigger>
-                                                    <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name} </h6>
-                                                    <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
-                                                        <i className="bi bi-plus-lg"></i>
-                                                    </OverlayTrigger>
-                                                </>
-                                            )
-                                        )
-                                    )}
+                                                )
+                                            ))
+                                        }
+                                    </>
+                                )}
+
                             </div>
                             <FloatingLabel controlId="floatingSelectTime" label="Chọn thời gian" className="mb-2">
                                 <Form.Select
