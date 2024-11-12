@@ -606,14 +606,13 @@
 }
 
 .box-comment-container {
-    background: #142239;
     color: white;
     padding: 8px;
     border-radius: 8px;
 
     .box-comment {
         color: white;
-        width: 95%;
+        width: 100%;
         text-decoration: none !important;
 
         &:hover {

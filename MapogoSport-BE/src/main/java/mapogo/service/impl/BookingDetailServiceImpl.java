@@ -254,7 +254,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	@Override
 	public void updateStatusChuaDaChangeToDaDa(Integer bookingDetailId) {
 		BookingDetail bookingDetail = bookingDetailDAO.findById(bookingDetailId).get();
-		bookingDetail.setStatus("Đã đá");
+		bookingDetail.setStatus("Đã hoàn thành");
 		bookingDetailDAO.save(bookingDetail);
 	}
 

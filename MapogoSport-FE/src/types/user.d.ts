@@ -64,4 +64,6 @@ interface NotificationUser {
     isRead: boolean
     createdAt: string
     updatedAt: string
+    booking: Booking
+    order: Order
 }

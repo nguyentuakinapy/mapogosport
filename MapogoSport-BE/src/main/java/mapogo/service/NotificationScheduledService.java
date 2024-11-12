@@ -59,7 +59,7 @@ public class NotificationScheduledService {
 				if (newMinute == 30) {
 					newMinute = 00;
 					newHour += 1;
-				} else if (newMinute == 00){
+				} else if (newMinute == 00) {
 					newMinute = 30;
 				}
 
@@ -77,14 +77,16 @@ public class NotificationScheduledService {
 					Notification n = new Notification();
 					n.setUser(bd.getBooking().getOwner().getUser());
 					n.setTitle("Khu vực " + spf.getName());
-					n.setMessage(bd.getSportFieldDetail().getName() + " sẽ bắt đầu đá lúc " + bd.getStartTime());
+					n.setMessage(bd.getSportFieldDetail().getName() + " sẽ bắt đầu đá lúc " + bd.getStartTime()
+							+ " đến " + bd.getEndTime());
 					n.setType("info");
-
+					n.setBooking(bd.getBooking());
 					// Lưu và gửi thông báo
 					notificationDAO.save(n);
 				});
 				messagingTemplate.convertAndSend("/topic/notification", spf.getOwner().getOwnerId());
 			}
+//			messagingTemplate.convertAndSend("/topic/notification", spf.getOwner().getOwnerId());
 		});
 
 		// Tuỳ chọn: Gửi thông tin ngày và phút nếu cần
@@ -92,7 +94,10 @@ public class NotificationScheduledService {
 		// now.getMinute());
 		// System.err.println(formattedDate + "-" + now.getMinute());
 	}
-
-//	@Scheduled(cron = "0 0,30 * * * *")
-
+//
+////	@Scheduled(cron = "0 0,30 * * * *")
+//	@Scheduled(fixedRate = 1000)
+//	public void printMessage1() {
+//		System.err.println("Tus askdjhaskjdaskdhask");
+//	}
 }
