@@ -4,6 +4,7 @@ package mapogo.service;
 import java.util.List;
 import java.util.Map;
 
+import mapogo.entity.Notification;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
 
@@ -26,4 +27,6 @@ public interface UserService {
 	UserSubscription updateUserSubscription(Map<String, Object> data);
 	
 	User findUserByBookingDetailId(Integer bookingDetailId);
+	
+	List<Notification> findNotificationByUsername(String username);
 }

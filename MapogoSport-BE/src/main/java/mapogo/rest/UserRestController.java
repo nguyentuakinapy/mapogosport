@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.dao.ProductDAO;
 import mapogo.dao.UserVoucherDAO;
+import mapogo.entity.Notification;
 import mapogo.entity.Owner;
 import mapogo.entity.Product;
 import mapogo.entity.User;
@@ -119,5 +120,10 @@ public class UserRestController {
 	@GetMapping("/user/getbysportdetailid/{id}")
 	public User findTestr(@PathVariable("id") Integer id) {
 		return userService.findUserByBookingDetailId(id);
+	}
+	
+	@GetMapping("/user/notification/{username}")
+	public List<Notification> findNotificationByUsername(@PathVariable("username") String username){
+		return userService.findNotificationByUsername(username);
 	}
 }

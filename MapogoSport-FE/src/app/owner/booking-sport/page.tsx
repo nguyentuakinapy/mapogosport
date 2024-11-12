@@ -6,10 +6,12 @@ import NotificationModal from "@/components/Owner/modal/notification.modal";
 import SearchBookingModal from "@/components/Owner/modal/search-booking.modal";
 import ViewEditBookingModal from "@/components/Owner/modal/view-edit-booking.modal";
 import { formatDateVN } from "@/components/Utils/Format";
+import { Stomp } from "@stomp/stompjs";
 import { useEffect, useRef, useState } from "react";
 import { Col, Row, Table } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
+import SockJS from "sockjs-client";
 
 type BookingsTypeOnDay = {
     [time: string]: BookingDetails[];
@@ -86,6 +88,23 @@ export default function BookingSport() {
     const user = useData();
     const [owner, setOwner] = useState<Owner>();
     const [selectSport, setSelectSport] = useState<number>(0);
+    const [checkBooking, setCheckBooking] = useState<number>();
+
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            stompClient.subscribe('/topic/bookingDetail', (message) => {
+                setCheckBooking(Number(message.body))
+            });
+        });
+
+        // Cleanup khi component unmount
+        return () => {
+            stompClient.disconnect();
+        };
+    }, []);
 
     useEffect(() => {
         getOwner();
@@ -300,25 +319,7 @@ export default function BookingSport() {
     };
 
     useEffect(() => {
-        if (selectDate === 0) {
-            const updatedBookingsOnDay: BookingsTypeOnDay = { ...bookingsOnDay };
-            Object.entries(updatedBookingsOnDay).forEach(([time, statuses]) => {
-                updatedBookingsOnDay[time] = [];
-            });
-            setBookingsOnDay(updatedBookingsOnDay);
-            setDayOnWeek();
-        } else {
-            const updatedBookingsOnWeek = { ...bookingsOnWeek };
-            Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                const sportDataTemporary = { ...sportData };
-                Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
-                    sportDataTemporary[sport] = [];
-                })
-                updatedBookingsOnWeek[time] = sportDataTemporary;
-            })
-            setBookingsOnWeek(updatedBookingsOnWeek);
-            setDayOnWeek();
-        }
+        refreshStatusBooking();
     }, [onDay, startWeek, endWeek, selectDate, checkDataBooking, selectSport]);
 
     useEffect(() => {
@@ -336,37 +337,42 @@ export default function BookingSport() {
 
     const [isFirstRender, setIsFirstRender] = useState(true);
 
+    const refreshStatusBooking = () => {
+        if (selectDate === 0) {
+            const updatedBookingsOnDay = { ...bookingsOnDay };
+            Object.entries(updatedBookingsOnDay).forEach(([time, statuses]) => {
+                updatedBookingsOnDay[time] = [];
+            });
+            setBookingsOnDay(updatedBookingsOnDay);
+            setDayOnWeek();
+        } else {
+            const updatedBookingsOnWeek = { ...bookingsOnWeek };
+            Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
+                const sportDataTemporary = { ...sportData };
+                Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
+                    sportDataTemporary[sport] = [];
+                });
+                updatedBookingsOnWeek[time] = sportDataTemporary;
+            });
+            setBookingsOnWeek(updatedBookingsOnWeek);
+            setDayOnWeek();
+        }
+    }
+
     useEffect(() => {
         if (isFirstRender) {
             setIsFirstRender(false);
             return;
         }
-
-        const timeoutId = setTimeout(() => {
-            if (selectDate === 0) {
-                const updatedBookingsOnDay = { ...bookingsOnDay };
-                Object.entries(updatedBookingsOnDay).forEach(([time, statuses]) => {
-                    updatedBookingsOnDay[time] = [];
-                });
-                setBookingsOnDay(updatedBookingsOnDay);
-                setDayOnWeek();
-            } else {
-                const updatedBookingsOnWeek = { ...bookingsOnWeek };
-                Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                    const sportDataTemporary = { ...sportData };
-                    Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
-                        sportDataTemporary[sport] = [];
-                    });
-                    updatedBookingsOnWeek[time] = sportDataTemporary;
-                });
-                setBookingsOnWeek(updatedBookingsOnWeek);
-                setDayOnWeek();
-            }
-        }, 500);
-
-        return () => clearTimeout(timeoutId);
+        refreshStatusBooking();
     }, [checkDataStatus]);
 
+    useEffect(() => {
+        if (owner && checkBooking === owner.ownerId) {
+            // toast.success("checkBooking" + checkBooking)
+            refreshStatusBooking();
+        }
+    }, [checkBooking]);
 
     const setStatusOnDay = async () => {
 
@@ -927,25 +933,25 @@ export default function BookingSport() {
                         await fetchBookingNotification(dateNow, (now.getHours() + 1).toString() + 'h00', selectedSportData.sportFieldId);
                     }
 
-                    if (selectDate === 0) {
-                        const updatedBookingsOnDay: BookingsTypeOnDay = { ...bookingsOnDay };
-                        Object.entries(updatedBookingsOnDay).forEach(([time, statuses]) => {
-                            updatedBookingsOnDay[time] = [];
-                        });
-                        setBookingsOnDay(updatedBookingsOnDay);
-                        setDayOnWeek();
-                    } else {
-                        const updatedBookingsOnWeek = { ...bookingsOnWeek };
-                        Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                            const sportDataTemporary = { ...sportData };
-                            Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
-                                sportDataTemporary[sport] = [];
-                            })
-                            updatedBookingsOnWeek[time] = sportDataTemporary;
+                    // if (selectDate === 0) {
+                    const updatedBookingsOnDay: BookingsTypeOnDay = { ...bookingsOnDay };
+                    Object.entries(updatedBookingsOnDay).forEach(([time, statuses]) => {
+                        updatedBookingsOnDay[time] = [];
+                    });
+                    setBookingsOnDay(updatedBookingsOnDay);
+                    setDayOnWeek();
+                    // } else {
+                    const updatedBookingsOnWeek = { ...bookingsOnWeek };
+                    Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
+                        const sportDataTemporary = { ...sportData };
+                        Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
+                            sportDataTemporary[sport] = [];
                         })
-                        setBookingsOnWeek(updatedBookingsOnWeek);
-                        setDayOnWeek();
-                    }
+                        updatedBookingsOnWeek[time] = sportDataTemporary;
+                    })
+                    setBookingsOnWeek(updatedBookingsOnWeek);
+                    setDayOnWeek();
+                    // }
                 }
                 hasExecuted = true;
             } else if (currentMinutes !== 0 && currentMinutes !== 30) {
@@ -1050,13 +1056,14 @@ export default function BookingSport() {
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
 
         const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
-
+        toast.success(selectedSportDetail?.sportFielDetailId)
         const responseBookingDetail = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${startTime}/${selectedSportDetail?.sportFielDetailId}/${dayStartBooking}`);
         if (!responseBookingDetail.ok) {
             throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
         }
 
         const bkDData = await responseBookingDetail.json() as BookingDetail;
+        console.log(bkDData);
 
         const responsePaymentMethod = await fetch(`http://localhost:8080/rest/paymentMethod/by/bookingdetailid/${bkDData.bookingDetailId}`);
         if (!responsePaymentMethod.ok) {
@@ -1150,6 +1157,7 @@ export default function BookingSport() {
 
             return () => clearTimeout(timeoutId);
         }
+
     }, [bookingNotification])
 
     const renderNotification = () => {
@@ -1169,9 +1177,11 @@ export default function BookingSport() {
             <div className="d-flex align-items-center justify-content-between">
                 <i onClick={toggleFullScreen} className="bi bi-fullscreen fs-5"></i>
                 <h3 className="text-danger fw-bold" style={{ fontSize: '20px' }}> LỊCH ĐẶT SÂN</h3>
-                <i onClick={() => setNotificationModal(true)} className="bi bi-question-circle fs-5"></i>
+                <a href="#ngon">
+                    <i className="bi bi-question-circle fs-5"></i>
+                </a>
             </div>
-            <Row className="align-items-center my-3 text-center">
+            <Row className="align-items-center mb-3 text-center">
                 <Col md={4}>
                     <Row className="g-0 toggle-row">
                         <Col className={`toggle-col ${selectDate === 0 ? 'active' : ''}`}

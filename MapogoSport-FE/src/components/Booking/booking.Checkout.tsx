@@ -246,20 +246,21 @@ const BookingModal = (props: BookingProps) => {
 
     const handleSave = async () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
-        if (!username) {
-            toast.error("Vui lòng nhập tên đăng nhập!");
-            return;
-        } else if (!paymentMethod) {
+        // if (!username) {
+        //     toast.error("Vui lòng nhập tên đăng nhập!");
+        //     return;
+        // } else
+        if (!paymentMethod) {
             toast.error("Phương thức thanh toán không hợp lệ!");
             return;
         }
-        const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
-        if (!responseUser.ok) {
-            toast.error('Tên người dùng không tồn tại!');
-            return;
-        }
-        const dataUser = await responseUser.json() as User;
-        createBooking(paymentMethod, dataUser);
+        // const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
+        // if (!responseUser.ok) {
+        //     toast.error('Tên người dùng không tồn tại!');
+        //     return;
+        // }
+        // const dataUser = await responseUser.json() as User;
+        createBooking(paymentMethod, userData);
 
         setCheckDataStatus(!checkDataStatus);
         handleClose();
@@ -499,7 +500,8 @@ const BookingModal = (props: BookingProps) => {
                 ownerId: owner.ownerId,
                 status: checkPrepayPrice ? statusBooking : "Đã thanh toán",
                 voucher: null,
-                note
+                note,
+                checkOwner: "user"
             })
         })
 

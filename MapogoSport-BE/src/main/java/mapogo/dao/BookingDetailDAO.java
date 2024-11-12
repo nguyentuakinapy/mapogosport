@@ -39,5 +39,5 @@ public interface BookingDetailDAO extends JpaRepository<BookingDetail, Integer> 
 	List<BookingDetail> findBySubscriptionKey(@Param("subscriptionKey") String subscriptionKey);
 	
 	@Query("SELECT b FROM BookingDetail b WHERE b.date = :date and b.startTime = :time and b.sportFieldDetail.sportField.sportFieldId = :sportFieldId")
-	List<BookingDetail> findByDateAndTime(@Param("date") LocalDate date, @Param("time") String time, @Param("sportFieldId") Integer sportFieldId);;
+	List<BookingDetail> findByDateAndTime(@Param("date") LocalDate date, @Param("time") String time, @Param("sportFieldId") Integer sportFieldId);
 }

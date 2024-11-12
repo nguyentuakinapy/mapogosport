@@ -104,7 +104,7 @@ public class User implements Serializable {
 	private List<Owner> owners;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonManagedReference
+	@JsonIgnore
 	private List<UserVoucher> userVouchers;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -123,6 +123,10 @@ public class User implements Serializable {
 	@OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<Message> receivedMessages;
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Notification> notifications;
 
 }
 
