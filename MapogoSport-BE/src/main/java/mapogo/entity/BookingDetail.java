@@ -52,7 +52,7 @@ public class BookingDetail implements Serializable{
     private LocalDate date;
 
     @Column(name = "Status")
-    private String status = "Chưa đá";
+    private String status = "Chưa bắt đầu";
     
     @ManyToOne
     @JoinColumn(name = "BookingId", nullable = false)
@@ -65,5 +65,9 @@ public class BookingDetail implements Serializable{
     @Transient
     private String fullName;
     
-
+    @Transient
+    private PaymentMethod paymentMethod;
+    
+    @Transient
+    private User user;
 }

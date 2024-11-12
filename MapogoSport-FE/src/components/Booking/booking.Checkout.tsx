@@ -599,9 +599,15 @@ const BookingModal = (props: BookingProps) => {
                                 <FloatingLabel controlId="floatingSelectTime" label="Thời gian đá" className="mb-2">
                                     <Form.Select value={selectTime} onChange={(e) => setSelectTime(e.target.value)}>
                                         <option value="Chọn thời gian">Chọn thời gian</option>
-                                        {dataTimeTemporary && dataTimeTemporary.map((time, index) => (
+                                        {/* {dataTimeTemporary && dataTimeTemporary.map((time, index) => (
                                             <option key={index} value={String(time)}>{time}</option>
-                                        ))}
+                                        ))} */}
+                                        <option value="Chọn thời gian">Chọn thời gian đá</option>
+                                        <option value="1 giờ">1 giờ</option>
+                                        <option value="1 giờ 30 phút">1 giờ 30 phút</option>
+                                        <option value="2 giờ">2 giờ</option>
+                                        <option value="2 giờ 30 phút">2 giờ 30 phút</option>
+                                        <option value="3 giờ">3 giờ</option>
                                     </Form.Select>
                                 </FloatingLabel>
                                 <FloatingLabel controlId="floatingPaymentMethod" label={<span>Phương thức thanh toán <span className="text-danger">*</span></span>}>
@@ -761,7 +767,7 @@ const BookingModal = (props: BookingProps) => {
             <Modal show={showBookingModal} onHide={() => handleClose()} size="xl" aria-labelledby="contained-modal-title-vcenter"
                 centered backdrop="static" keyboard={false}>
                 <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)}
-                    className="custom-tabs mb-3 mx-2">
+                    className="custom-tabs mb-3 mt-3 mx-2">
                     <Nav.Item>
                         <Nav.Link eventKey="byDay" className="tab-link">ĐẶT SÂN THEO NGÀY</Nav.Link>
                     </Nav.Item>

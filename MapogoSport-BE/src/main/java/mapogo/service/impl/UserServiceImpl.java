@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import mapogo.dao.AccountPackageDAO;
+import mapogo.dao.NotificationDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.UserSubscriptionDAO;
 import mapogo.entity.AccountPackage;
@@ -26,15 +28,21 @@ import mapogo.utils.CloudinaryUtils;
 public class UserServiceImpl implements UserService {
 	@Autowired
 	UserDAO userDAO;
-	
+
 	@Autowired
 	AccountPackageDAO accountPackageDAO;
-	
+
 	@Autowired
 	UserSubscriptionDAO userSubscriptionDAO;
-	
+
+	@Autowired
+	NotificationDAO notificationDAO;
+
 	@Autowired
 	CloudinaryUtils cloudinaryUtils;
+
+	@Autowired
+	SimpMessagingTemplate messagingTemplate;
 
 	@Override
 	public User findByUsername(String username) {
@@ -54,7 +62,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void updateUser(User u) {
 		if (u.getUserVouchers() != null) {
-			for (UserVoucher userVoucher: u.getUserVouchers()) {
+			for (UserVoucher userVoucher : u.getUserVouchers()) {
 				userVoucher.setUser(u);
 			}
 		}
@@ -69,22 +77,22 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserSubscription saveUserSubcription(Map<String, Object> data) {
 		UserSubscription uS = new UserSubscription();
-		
+
 		AccountPackage ap = accountPackageDAO.findById((Integer) data.get("accountPackageId")).get();
 		User u = userDAO.findById((String) data.get("username")).get();
-	    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
 		uS.setAccountPackage(ap);
 		uS.setUser(u);
 
-	    try {
-	        uS.setStartDay(dateFormat.parse((String) data.get("startDay")));
-	        uS.setEndDay(dateFormat.parse((String) data.get("endDay")));
-	    } catch (ParseException e) {
-	        e.printStackTrace();
-	    }
+		try {
+			uS.setStartDay(dateFormat.parse((String) data.get("startDay")));
+			uS.setEndDay(dateFormat.parse((String) data.get("endDay")));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 
-	    uS.setStatus((String) data.get("status"));
+		uS.setStatus((String) data.get("status"));
 		return userSubscriptionDAO.save(uS);
 	}
 
@@ -108,26 +116,54 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String uploadAvatar(String username, MultipartFile file) throws IOException {
-	    Map<String, Object> uploadResult = cloudinaryUtils.uploadImage2(file);
-	    String avtUrl = (String) uploadResult.get("secure_url");
-	    User user = userDAO.findById(username).get();
+		Map<String, Object> uploadResult = cloudinaryUtils.uploadImage2(file);
+		String avtUrl = (String) uploadResult.get("secure_url");
+		User user = userDAO.findById(username).get();
 
-	    if (user.getAvatar() != null) {
-	        String oldPublicId = cloudinaryUtils.extractPublicIdFromUrl(user.getAvatar());
-	        System.out.println(oldPublicId);
-	        cloudinaryUtils.deleteImage(oldPublicId);
-	    }
+		if (user.getAvatar() != null) {
+			String oldPublicId = cloudinaryUtils.extractPublicIdFromUrl(user.getAvatar());
+			System.out.println(oldPublicId);
+			cloudinaryUtils.deleteImage(oldPublicId);
+		}
 
-	    user.setAvatar(avtUrl);
-	    userDAO.save(user);
-	    
-	    return avtUrl;
-  }
-  
-  @Override
+		user.setAvatar(avtUrl);
+		userDAO.save(user);
+
+		return avtUrl;
+	}
+
+	@Override
 	public List<Notification> findNotificationByUsername(String username) {
 		User u = userDAO.findById(username).get();
-		return u.getNotifications();
+		List<Notification> notifications = u.getNotifications();
+		return notifications;
+	}
 
+	@Override
+	public void setViewNotification(String username) {
+		User u = userDAO.findById(username).get();
+		u.getNotifications().forEach(item -> {
+			item.setIsRead(true);
+			notificationDAO.save(item);
+		});
+
+		messagingTemplate.convertAndSend("/topic/username", u.getUsername());
+	}
+
+	@Override
+	public void deleteNotification(String username) {
+		notificationDAO.deleteByUsername(username);
+
+		messagingTemplate.convertAndSend("/topic/username", username);
+	}
+	
+	@Override
+	public void setIsReadNotification(Integer notificationId) {
+		Notification n = notificationDAO.findById(notificationId).get();
+		n.setIsRead(true);
+		
+		notificationDAO.save(n);
+		
+		messagingTemplate.convertAndSend("/topic/username", n.getUser().getUsername());
 	}
 }
