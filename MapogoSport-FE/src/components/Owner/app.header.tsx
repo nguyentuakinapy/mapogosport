@@ -100,6 +100,11 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
             stompClient.subscribe('/topic/notification', (message) => {
                 setCheckNotification(Number(message.body))
             });
+
+            stompClient.subscribe('/topic/username', (message) => {
+                toast.success(message.body)
+                getNotification(message.body);
+            });
         });
 
         return () => {

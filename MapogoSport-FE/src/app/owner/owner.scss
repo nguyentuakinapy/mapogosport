@@ -634,3 +634,53 @@
         margin-bottom: 0px !important;
     }
 }
+
+
+.section-form-sportField {
+    padding: 15px;
+    border-radius: 8px;
+    height: 100%;
+
+    .title-detail-sportField {
+        font-size: 18px;
+        position: relative;
+        padding-left: 15px;
+
+        &::before {
+            width: 4px;
+            background-color: #dc3545;
+            content: '';
+            height: 20px;
+            display: inline-block;
+            position: absolute;
+            top: 3px;
+            left: 0;
+        }
+    }
+
+    .react-datepicker-wrapper {
+        display: block !important;
+    }
+
+    input,
+    select,
+    textarea {
+        border: 1px solid black;
+    }
+
+    .btn-sportField {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #142239;
+        background: #142239;
+        color: white;
+        padding: 10px;
+        font-size: 15px;
+
+        &:hover {
+            background: white;
+            color: black;
+            border: 1px solid #142239;
+        }
+    }
+}

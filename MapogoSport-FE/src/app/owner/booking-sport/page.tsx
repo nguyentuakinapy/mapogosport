@@ -364,7 +364,7 @@ export default function BookingSport() {
                             bookingId: 0,
                             fullName: "",
                             statusDtb: "",
-                            subscriptionKey: ""
+                            subscriptionKey: "" 
                         };
                     }
                     setBookingsOnDay(prevBookingsOnDay => ({
