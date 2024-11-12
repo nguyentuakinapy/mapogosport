@@ -35,56 +35,8 @@ export default function BookingSport() {
     const [showViewOrEditBookingModal, setShowViewOrEditBookingModal] = useState<boolean>(false);
     const [showNotificationModal, setNotificationModal] = useState<boolean>(false);
     const [checkDataStatus, setCheckDataStatus] = useState<boolean>(true);
-
-    const [bookingsOnDay, setBookingsOnDay] = useState<BookingsTypeOnDay>({
-        // "6h00": ["Đã đặt", "Tạm đóng", "Còn trống"],
-        // "6h10": ["Đã đặt", "Tạm đóng"]
-
-    });
-
-    const [bookingsOnWeek, setBookingsOnWeek] = useState<BookingsTypeOnWeek>({
-        //     "6h00": {
-        //         "Sân 1": [
-        //             { status: "Đã đặt", bookingId: 101 },
-        //             { status: "Tạm đóng", bookingId: 102 },
-        //             { status: "Còn trống", bookingId: 103 },
-        //             { status: "Đã đặt", bookingId: 101 }, // Same bookingId as first slot
-        //             { status: "Còn trống", bookingId: 104 },
-        //             { status: "Tạm đóng", bookingId: 102 }, // Same bookingId as second slot
-        //             { status: "Còn trống", bookingId: 105 }
-        //         ],
-        //         "Sân 2": [
-        //             { status: "Còn trống", bookingId: 201 },
-        //             { status: "Đã đặt", bookingId: 202 },
-        //             { status: "Còn trống", bookingId: 201 }, // Same bookingId as first slot
-        //             { status: "Tạm đóng", bookingId: 203 },
-        //             { status: "Còn trống", bookingId: 204 },
-        //             { status: "Đã đặt", bookingId: 202 }, // Same bookingId as second slot
-        //             { status: "Tạm đóng", bookingId: 205 }
-        //         ]
-        //     },
-        //     "6h30": {
-        //         "Sân 1": [
-        //             { status: "Đã đặt", bookingId: 106 },
-        //             { status: "Còn trống", bookingId: 107 },
-        //             { status: "Tạm đóng", bookingId: 108 },
-        //             { status: "Đã đặt", bookingId: 106 }, // Same bookingId as first slot
-        //             { status: "Còn trống", bookingId: 109 },
-        //             { status: "Tạm đóng", bookingId: 108 }, // Same bookingId as third slot
-        //             { status: "Còn trống", bookingId: 110 }
-        //         ],
-        //         "Sân 2": [
-        //             { status: "Còn trống", bookingId: 205 },
-        //             { status: "Đã đặt", bookingId: 206 },
-        //             { status: "Còn trống", bookingId: 207 },
-        //             { status: "Đã đặt", bookingId: 206 }, // Same bookingId as second slot
-        //             { status: "Tạm đóng", bookingId: 208 },
-        //             { status: "Còn trống", bookingId: 207 }, // Same bookingId as third slot
-        //             { status: "Đã đặt", bookingId: 209 }
-        //         ]
-        //     },
-    })
-
+    const [bookingsOnDay, setBookingsOnDay] = useState<BookingsTypeOnDay>({});
+    const [bookingsOnWeek, setBookingsOnWeek] = useState<BookingsTypeOnWeek>({})
     const user = useData();
     const [owner, setOwner] = useState<Owner>();
     const [selectSport, setSelectSport] = useState<number>(0);
@@ -145,7 +97,6 @@ export default function BookingSport() {
     }, [dataSport, selectSport])
 
     const [opening, setOpening] = useState<number>();
-    const [closing, setClosing] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);
 
     const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
@@ -229,16 +180,9 @@ export default function BookingSport() {
                 const numberClose = close.match(/\d+/);
                 if (numberOpen && numberClose) {
                     setOpening(Number(numberOpen[0]));
-                    setClosing(Number(numberClose[0]));
                     setOperatingTime(Number(numberClose[0]) - Number(numberOpen[0]));
-                } else {
-                    // console.log('Không tìm thấy số trong chuỗi mở cửa.');
                 }
-            } else {
-                // console.log('Giá trị mở cửa không hợp lệ:', open);
             }
-        } else {
-            // console.log('Không có dữ liệu thể thao hợp lệ hoặc selectSport không hợp lệ:', selectSport);
         }
     }
 

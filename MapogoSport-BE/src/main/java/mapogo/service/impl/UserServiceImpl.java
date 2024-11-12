@@ -1,5 +1,6 @@
 package mapogo.service.impl;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import mapogo.dao.AccountPackageDAO;
 import mapogo.dao.UserDAO;
@@ -18,6 +20,7 @@ import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
 import mapogo.entity.UserVoucher;
 import mapogo.service.UserService;
+import mapogo.utils.CloudinaryUtils;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,6 +32,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	UserSubscriptionDAO userSubscriptionDAO;
+	
+	@Autowired
+	CloudinaryUtils cloudinaryUtils;
 
 	@Override
 	public User findByUsername(String username) {
@@ -101,8 +107,27 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public String uploadAvatar(String username, MultipartFile file) throws IOException {
+	    Map<String, Object> uploadResult = cloudinaryUtils.uploadImage2(file);
+	    String avtUrl = (String) uploadResult.get("secure_url");
+	    User user = userDAO.findById(username).get();
+
+	    if (user.getAvatar() != null) {
+	        String oldPublicId = cloudinaryUtils.extractPublicIdFromUrl(user.getAvatar());
+	        System.out.println(oldPublicId);
+	        cloudinaryUtils.deleteImage(oldPublicId);
+	    }
+
+	    user.setAvatar(avtUrl);
+	    userDAO.save(user);
+	    
+	    return avtUrl;
+  }
+  
+  @Override
 	public List<Notification> findNotificationByUsername(String username) {
 		User u = userDAO.findById(username).get();
 		return u.getNotifications();
+
 	}
 }

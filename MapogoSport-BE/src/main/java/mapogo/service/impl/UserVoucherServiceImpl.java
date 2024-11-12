@@ -1,6 +1,9 @@
 package mapogo.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,28 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 
 	@Autowired 
 	UserVoucherDAO userVoucherDao;
+	
+	@Override
+	public List<Map<String, Object>> findByUser(String username) {
+		List<UserVoucher> userVouchers = userVoucherDao.findByUser_Username(username);
+		List<Map<String, Object>> resultList = new ArrayList<>();
+		
+		for (UserVoucher userVoucher: userVouchers) {
+			Map<String, Object> userVoucherData = new HashMap<>();
+	        userVoucherData.put("userVoucherId", userVoucher.getUserVoucherId());
+	        userVoucherData.put("status", userVoucher.getStatus());
+	        userVoucherData.put("date", userVoucher.getDate());
+	        
+			Map<String, Object> voucherData = new HashMap<>();
+			voucherData.put("voucherId", userVoucher.getVoucher().getVoucherId());
+			voucherData.put("name", userVoucher.getVoucher().getName());
+			voucherData.put("endDate", userVoucher.getVoucher().getEndDate());
+			
+			userVoucherData.put("voucher", voucherData);
+			resultList.add(userVoucherData);
+		}
+		return resultList;
+	}
 	
 	@Override
 	public UserVoucher createUserVoucher(UserVoucher userVoucher) {

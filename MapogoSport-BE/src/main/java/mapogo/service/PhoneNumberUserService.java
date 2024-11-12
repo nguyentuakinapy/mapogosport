@@ -9,5 +9,4 @@ public interface PhoneNumberUserService {
 	void deletePhoneNumberByUser(Integer phoneNumberUserId);
 	List<PhoneNumberUser> addPhoneNumberByUsername(String username, List<PhoneNumberUser> newPhoneNumber);
 	PhoneNumberUser updatePhoneNumberUser(Integer phoneNumberUserId, PhoneNumberUser updatePhoneNumber);
-	PhoneNumber getCheckPhoneNumber(String phoneNumber);
 }

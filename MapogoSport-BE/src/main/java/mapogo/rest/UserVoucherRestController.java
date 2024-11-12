@@ -1,6 +1,7 @@
 package mapogo.rest;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -36,5 +37,10 @@ public class UserVoucherRestController {
 	@GetMapping("/userVoucher/check/{username}/{voucherId}")
 	public Boolean checkUserHasVoucher(@PathVariable String username, @PathVariable Integer voucherId) {
 	    return userVoucherService.checkUserVoucher(username, voucherId);
+	}
+	
+	@GetMapping("/user/voucher/{username}")
+	public List<Map<String, Object>> findByUser(@PathVariable("username") String username) {
+		return userVoucherService.findByUser(username);
 	}
 }
