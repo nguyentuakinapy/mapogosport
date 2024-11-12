@@ -190,8 +190,8 @@ public class PaymentController {
 		if (responseCode.equals("00")) {
 			// update +Balance
 			Wallet wallet = walletService.findByUsername(user);
-			wallet.setBalance(new BigDecimal(trimmedAmount.trim()));
-			walletService.update(wallet);
+//			wallet.setBalance(new BigDecimal(trimmedAmount.trim()));
+//			walletService.update(wallet);
 
 			// create transaction
 			Transaction transaction = new Transaction();
@@ -212,6 +212,7 @@ public class PaymentController {
 			orderPaymentSevice.create(orderPayment);
 
 			// -balance -> create transaction
+			
 			Transaction transaction1 = new Transaction();
 			transaction1.setWallet(wallet);
 			transaction1.setAmount(new BigDecimal(trimmedAmount.trim()));

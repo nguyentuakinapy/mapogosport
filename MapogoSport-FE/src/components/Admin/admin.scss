@@ -16,7 +16,7 @@
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 
       // Khi hover vào vòng tròn màu, nút delete cũng nổi bật hơn
-      + .button-delete-color {
+      +.button-delete-color {
         opacity: 1;
         transform: scale(1.1);
       }
@@ -50,6 +50,7 @@
     }
   }
 }
+
 /*Kết thúc SCSS màu sản phẩm và nút delete sản phẩm*/
 
 .text-center {
@@ -57,13 +58,15 @@
     display: inline-block;
     position: relative;
     overflow: hidden;
+
     .avatar-edit {
       position: absolute;
       bottom: -1px;
       width: 100%;
       text-align: center;
       z-index: 9;
-      input + label {
+
+      input+label {
         margin-bottom: 0;
         background-color: #000;
         cursor: pointer;
@@ -72,10 +75,12 @@
         color: #fff;
         text-decoration: none;
       }
+
       input {
         display: none;
       }
     }
+
     .avatar-preview {
       div {
         width: 20rem; // Có thể thay đổi kích thước theo ý muốn
@@ -146,13 +151,18 @@
 }
 
 tbody tr:hover {
-  background-color: #f1f1f1; /* Thay đổi màu nền khi hover */
-}
-.form-group {
-  margin-bottom: 20px; /* Tăng khoảng cách giữa các nhóm form */
+  background-color: #f1f1f1;
+  /* Thay đổi màu nền khi hover */
 }
 
-input.is-invalid, select.is-invalid, textarea.is-invalid {
+.form-group {
+  margin-bottom: 20px;
+  /* Tăng khoảng cách giữa các nhóm form */
+}
+
+input.is-invalid,
+select.is-invalid,
+textarea.is-invalid {
   // border-color: #dc3545;
   // background-color: #f8d7da;
 }
@@ -160,6 +170,22 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
 
 
 
+.form-floating {
+  .react-datepicker-wrapper {
+    display: block !important;
 
+    .react-datepicker__input-container {
+      .form-control {
+        padding-top: 1.625rem;
+        padding-bottom: .4rem;
+      }
+    }
+  }
+}
+
+.dateLabel {
+  color: rgba($color: rgb(33, 37, 41), $alpha: 0.65);
+  transform: scale(.85) translateY(-.5rem) translateX(.15rem);
+}
 
 /*======================================================Modal Product CSS End======================================================*/
