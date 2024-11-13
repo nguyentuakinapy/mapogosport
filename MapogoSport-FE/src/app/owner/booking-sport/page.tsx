@@ -678,7 +678,13 @@ export default function BookingSport() {
                                     rowSpan={bookingCounts[status.bookingId]}
                                     onClick={handleViewDataOnDay}
                                     time-data={time}
-                                    style={{ backgroundColor: status.subscriptionKey ? '#00fff9' : '#f3f3f3' }}
+                                    style={{
+                                        backgroundColor: status.subscriptionKey && status.subscriptionKey.includes("keybooking")
+                                            ? '#e0ffd7'
+                                            : status.subscriptionKey && status.subscriptionKey.includes("addNew")
+                                                ? '#f5e2ff'
+                                                : '#f3f3f3'
+                                    }}
                                     sport-detail={
                                         dataSport &&
                                             dataSport[selectSport] &&
@@ -798,7 +804,11 @@ export default function BookingSport() {
                                                             className={`w-10 ${getBadgeClass(statusItem)}`}
                                                             style={{
                                                                 textAlign: 'center',
-                                                                backgroundColor: dayBookingData.subscriptionKey ? '#caffcb' : '#f3f3f3'
+                                                                backgroundColor: dayBookingData.subscriptionKey && dayBookingData.subscriptionKey.includes("keybooking")
+                                                                    ? '#e0ffd7'
+                                                                    : dayBookingData.subscriptionKey && dayBookingData.subscriptionKey.includes("addNew")
+                                                                        ? '#f5e2ff'
+                                                                        : '#f3f3f3'
                                                             }}
                                                         >
                                                             <div className={`badge`}>

@@ -51,15 +51,15 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
 
     const getNotification = async (username: string) => {
         const response = await fetch(`http://localhost:8080/rest/user/notification/${username}`);
-        if (!response.ok) throw new Error("Không tìm thấy sân sắp tới");
+        if (!response.ok) return;
 
         const notification = await response.json() as NotificationUser[];
         // if (notification?.length >= 1) {
         setNotification(notification);
         // }
-        if (checkNotification) {
-            toast.success(notification[notification.length - 1].title);
-        }
+        // if (checkNotification) {
+        //     toast.success(notification[notification.length - 1].title);
+        // }
     }
 
     const translate = (word: string): string => {
