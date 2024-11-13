@@ -12,7 +12,10 @@ public interface UserVoucherService {
 	public boolean checkUserVoucher(String username, Integer voucherId);
 	
 	//của Mỵ từ đây
-	UserVoucher findByUserVoucherId(int userVoucherId);	
+	UserVoucher findByUser_UsernameAndVoucher_VoucherId(String username, Integer voucherId);	
+
 	UserVoucher update(UserVoucher userVoucher);
+	
+	List<UserVoucher> findByUsername(String username);
 	//đến đây
 }

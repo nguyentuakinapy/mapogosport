@@ -13,5 +13,7 @@ public interface VoucherService {
 
 	//của Mỵ từ đây
 	Voucher findById(int id);
+	List<Voucher> findByUserName(String username);
+
 	//đến đây
 }

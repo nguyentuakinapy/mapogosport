@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.entity.UserVoucher;
+import mapogo.entity.Voucher;
 import mapogo.service.UserVoucherService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,4 +44,5 @@ public class UserVoucherRestController {
 	public List<Map<String, Object>> findByUser(@PathVariable("username") String username) {
 		return userVoucherService.findByUser(username);
 	}
+	
 }

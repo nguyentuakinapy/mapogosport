@@ -58,14 +58,22 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 	}
 	
 	//của Mỵ từ đây
-	@Override
-	public UserVoucher findByUserVoucherId(int userVoucherId) {
-		return userVoucherDao.findById(userVoucherId).get();
-	}
-
+	
+	
 	@Override
 	public UserVoucher update(UserVoucher userVoucher) {
 		return userVoucherDao.save(userVoucher);
 	}
+
+	@Override
+	public List<UserVoucher> findByUsername(String username) {
+		return userVoucherDao.findByUser_Username(username);
+	}
+
+	@Override
+	public UserVoucher findByUser_UsernameAndVoucher_VoucherId(String username, Integer voucherId) {
+		return userVoucherDao.findByUser_UsernameAndVoucher_VoucherId(username, voucherId);
+	}
+
 	//đến đây
 }
