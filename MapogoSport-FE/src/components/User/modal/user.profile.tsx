@@ -2,7 +2,6 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Row, Col, Form, FloatingLabel, Button } from 'react-bootstrap';
-import UserLayout from '@/components/User/UserLayout';
 import ModalUpdateEmail from '@/components/User/modal/user.updateEmail';
 import '../types/user.scss';
 import useSWR, { mutate } from 'swr';
@@ -111,7 +110,7 @@ const ProfileContent: React.FC<ProfileContentProps> = React.memo(({ usernameFetc
                                 <Form.Label className='dateLabel'>Ngày sinh</Form.Label>
                             </Form.Floating>
                         </Form.Group>
-        
+
                         <Form.Group className="mb-3">
                             <Form.Label className='me-1'><b>Email:</b></Form.Label>
                             {email}

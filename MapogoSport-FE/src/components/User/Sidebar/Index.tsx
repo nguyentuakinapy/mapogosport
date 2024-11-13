@@ -47,7 +47,7 @@ const Sidebar = () => {
     const pathname = usePathname();
     const userData = useData();
     const [name, setName] = useState('');
-    const [avatar, setAvatar] = useState<string>();
+    const [avatar, setAvatar] = useState<string | null>();
 
     useEffect(() => {
         const activeItem = menuGroups.flatMap(group => group.menuItems)
@@ -61,7 +61,7 @@ const Sidebar = () => {
     useEffect(() => {
         if (userData) {
             setName(userData.fullname || '');
-            setAvatar(userData.avatar ? userData.avatar : '');
+            setAvatar(userData.avatar ? userData.avatar : null);
         }
     }, [userData]);
 

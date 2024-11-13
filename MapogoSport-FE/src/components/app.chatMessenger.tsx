@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { Form, Button, ListGroup } from "react-bootstrap";
@@ -9,6 +10,7 @@ import useSWR from "swr";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useData } from "@/app/context/UserContext";
+import { toast } from "react-toastify";
 
 export default function ChatBox() {
 
@@ -65,18 +67,15 @@ export default function ChatBox() {
       handleSelectChat(adminDefault);  // Chỉ gọi khi isConnected là true
     }
   }, [isConnected, adminDefault, chatListCurrentUserByDMM, selectedChat]);
-  // useEffect(() => {
-  //   if (adminDefault && chatListCurrentUserByDMM.length === 0 && selectedChat === "") {
-  //     console.log("adminDefault ssssssssssssssss", adminDefault);
-  //     handleSelectChat(adminDefault);
 
-  //   }
-  // }, [adminDefault, chatListCurrentUserByDMM, selectedChat]);
 
   // Xử lý kiểm tra quyền và thiết lập username nếu cần
   useEffect(() => {
     if (currentUser) {
       const highestRole = getHighestRole(currentUser);
+      // toast.success("hifhr role: "+ highestRole)
+      // toast.success("chatListCurrentUserByDMM: "+ chatListCurrentUserByDMM.length)
+
       if ((highestRole === "ROLE_USER" || highestRole === "ROLE_OWNER") && chatListCurrentUserByDMM.length === 0) {
         setUsername("myntd");
       }
@@ -131,7 +130,39 @@ export default function ChatBox() {
   }, [currentUser]);
 
 
+  const [topicCurrent, setTopicCurrent] = useState<string>("");
 
+  useEffect(() => {
+    if(!isLoadByReceiverUsernameOrCurrentUser){
+       if (topicCurrent && isConnected && !subscribedTopics.includes(topicCurrent)) {
+      console.log("Đăng ký topic:", topicCurrent);
+
+      // Đăng ký topic
+      const subscription = stompClient.current.subscribe(topicCurrent, (message) => {
+        const receivedMessage = JSON.parse(message.body);
+        if (
+          receivedMessage.sender === currentUser?.username ||
+          receivedMessage.receiver === currentUser?.username
+        ) {
+          setChatListRealTime((prevMessages) => [...prevMessages, receivedMessage]);
+          mutate();
+          mutateByReceiverUsernameOrCurrentUser();
+        }
+      });
+
+      // Thêm topic vào danh sách đã đăng ký
+      setSubscribedTopics((prevTopics) => [...prevTopics, topicCurrent]);
+
+      // Hủy đăng ký khi topicCurrent thay đổi hoặc component bị hủy
+      return () => {
+        console.log("Hủy đăng ký topic:", topicCurrent);
+        subscription.unsubscribe();
+        setSubscribedTopics((prevTopics) => prevTopics.filter((topic) => topic !== topicCurrent));
+      };
+    }
+    }
+   
+  }, [topicCurrent, isConnected]);  // useEffect sẽ chạy khi topicCurrent hoặc isConnected thay đổi
 
   const handleSelectChat = (chat: User) => {
     console.log("Đã vào với: ", chat?.username || "Không có tên");
@@ -140,40 +171,22 @@ export default function ChatBox() {
     console.log("Người nhận là ", chat?.username);
 
     setSelectedChat(chat?.username);
-    setShowChat(true);
+    if(chatListCurrentUserByDMM.length === 0){
+      setShowChat(false);
+    }else{
+      setShowChat(true);
+    }
+    
 
     // Tạo topic dựa trên người gửi và người nhận
     const sortedUsers = [currentUser?.username, chat.username].sort();
     const topic = `/topic/public/${sortedUsers[0]}-${sortedUsers[1]}`;
 
-
-    console.log("Topic tạo ra là:", topic);
-    console.log("IsConnected:", isConnected, "Đã đăng ký:", subscribedTopics);
-
-    // Kiểm tra xem topic đã đăng ký chưa
-    if (isConnected && !subscribedTopics.includes(topic)) {
-      // Nếu chưa đăng ký, thì tiến hành đăng ký
-      console.log("bắt đầu đăng ký topic");
-
-      stompClient.current.subscribe(topic, (message) => {
-        console.log("tiếp tục đăng ký ");
-
-        const receivedMessage = JSON.parse(message.body);
-        console.log("Received message: ", receivedMessage);
-
-        if (receivedMessage.sender === currentUser?.username || receivedMessage.receiver === currentUser?.username) {
-          console.log("chuẩn bị thêm đây");
-
-          setChatListRealTime((prevMessages) => [...prevMessages, receivedMessage]);
-          mutate()
-          mutateByReceiverUsernameOrCurrentUser()
-        }
-      });
-
-      // Cập nhật trạng thái đã đăng ký topic
-      setSubscribedTopics((prevTopics) => [...prevTopics, topic]);
-    }
+    // Cập nhật topic hiện tại (sẽ kích hoạt useEffect để đăng ký hoặc hủy đăng ký)
+    setTopicCurrent(topic);
+    console.log("Topic hiện tại là:", topic);
   };
+
 
 
   const handleKeyEnter = () => {
@@ -322,11 +335,6 @@ export default function ChatBox() {
   }, [data]);
 
 
-  // Log để kiểm tra `chatListRealTime`
-  // useEffect(() => {
-  //   console.log("chatListRealTime updated:", chatListRealTime);
-  // }, [chatListRealTime]);
-
   const demo = () => {
     return <h1>showChatIcon: {showChatIcon.toString()}</h1>;
   };
@@ -396,7 +404,7 @@ export default function ChatBox() {
               // onClick={username != "" ? handleChatToggle : handleChatListToggle }
               onClick={handleChatListToggle}
             // Khi click vào icon sẽ mở form chat nhấn vào sẽ thành TRUE
-            >{username}
+            >
               <img
                 src="/images/mail_giphy.webp"
                 alt="Messenger"
@@ -466,7 +474,7 @@ export default function ChatBox() {
                               }}
                             />
                             <strong>
-                              {index + 1} - {chatUser?.username || "Không có tên"}
+                              {index + 1} - {chatUser?.fullname || "Không có tên"}
                             </strong>
                           </div>
                           <div>
@@ -476,10 +484,36 @@ export default function ChatBox() {
                       );
                     })
                   ) : (
-                    <div className="text-center">
-                      <i className="bi bi-emoji-frown h1 "></i>
+                    <div className="text-center ">
+                      <ListGroup.Item
+                         
+                          onClick={() => handleChatToggle()}
+                          className="d-flex flex-column rounded"
+                        >
+                          <div className="d-flex align-items-center">
+                            <img
+                              src={adminDefault?.avatar || '/chat_page/assets/images/users/user-5.png'}
+                              alt={adminDefault?.username || "Không có tên"}
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "50%",
+                                marginRight: "10px",
+                              }}
+                            />
+                            <strong>
+                              {adminDefault?.fullname || "Không có tên"}
+                            </strong>
+                          </div>
+                          <div>
+                            <p className="mb-1 r-100">Chat với admin</p>
+                          </div>
+                        </ListGroup.Item>
+                        {/* <i className="bi bi-emoji-frown h1 "></i>
                       <p className="text-center h6 mt-2">Chưa có danh sách chat</p>
+                       */}
                     </div>
+                      
                   )}
                 </ListGroup>
 

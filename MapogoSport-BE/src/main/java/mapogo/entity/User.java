@@ -111,9 +111,9 @@ public class User implements Serializable {
 	@JsonManagedReference
 	private List<PhoneNumberUser> phoneNumberUsers;
 	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonManagedReference
-	private List<Wallet> wallets;
+	private Wallet wallet;
 	
 	// QA 3/11
 	@OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)

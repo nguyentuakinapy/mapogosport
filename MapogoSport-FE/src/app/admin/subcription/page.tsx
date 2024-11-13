@@ -4,6 +4,7 @@ import { Button, Col, Modal, Row, Form } from 'react-bootstrap';
 import useSWR from 'swr';
 import { formatPrice } from '@/components/Utils/Format';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const SubcriptionPage = () => {
     const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -23,6 +24,7 @@ const SubcriptionPage = () => {
     useEffect(() => {
         console.log(dataBenefit);
     }, [dataBenefit]);
+
     const [modalShow, setModalShow] = useState(false); // Edit modal
     const [modalCreateShow, setModalCreateShow] = useState(false); // Create modal
     const [selectedPackage, setSelectedPackage] = useState(null);
@@ -32,20 +34,66 @@ const SubcriptionPage = () => {
         price: 0,
         durationDays: '',
         limitBookings: '',
+        limitSportFields: '',
         accountPackageBenefits: [{ benefit: { description: '' } }],
     });
 
 
     // Open modal and set up the package to be edited
-    function handleEdit(pkg) {
+    const handleEdit = (pkg) => {
         setSelectedPackage(pkg);
         setModalShow(true);
     }
 
+    const handleDelete = async (pkg) => {
+        try {
+            // Yêu cầu người dùng xác nhận trước khi xóa
+            const confirmed = window.confirm("Bạn có chắc chắn muốn xóa gói này?");
+            if (!confirmed) return; // Thoát nếu người dùng hủy
+
+            // Xóa gói tài khoản (nếu cần thiết)
+            const packageDeleteResponse = await axios.delete(`http://localhost:8080/rest/delete/account-package/${pkg.accountPackageId}`);
+            if (packageDeleteResponse.status !== 200) throw new Error('Xóa gói tài khoản thất bại');
+
+            // Xóa từng lợi ích trong gói tài khoản
+            const benefitDeletionPromises = pkg.accountPackageBenefits.map(async (benefit) => {
+                const benefitId = benefit.accountPackageBenefitId;
+
+                // Gửi yêu cầu xóa lợi ích từ server
+                const response = await axios.delete(`http://localhost:8080/rest/delete-account-package-benefits/${benefitId}`);
+                if (response.status !== 200) {
+                    throw new Error(`Xóa lợi ích với ID: ${benefitId} thất bại`);
+                }
+
+                // Trả về ID lợi ích đã xóa để cập nhật lại giao diện
+                return benefit.accountPackageBenefitId;
+            });
+
+            // Chờ tất cả các lệnh xóa lợi ích hoàn thành
+            const deletedBenefitIds = await Promise.all(benefitDeletionPromises);
+
+            // Cập nhật lại danh sách lợi ích sau khi xóa
+            pkg.accountPackageBenefits = pkg.accountPackageBenefits.filter((benefit) =>
+                !deletedBenefitIds.includes(benefit.accountPackageBenefitId)
+            );
+
+            // Tải lại dữ liệu sau khi xóa thành công
+            await mutate();
+            toast.success("Xóa gói thành công!");
+        } catch (error) {
+            console.error('Lỗi khi xóa lợi ích:', error);
+            toast.error("Có lỗi xảy ra khi xóa lợi ích!");
+        }
+    }
+
+
+
+
     // Open modal for creating a new package
-    function handleCreate() {
+    const handleCreate = () => {
         setModalCreateShow(true);
     }
+
 
     // Initialize editedPackage only once when selectedPackage changes
     useEffect(() => {
@@ -55,7 +103,7 @@ const SubcriptionPage = () => {
     }, [selectedPackage, modalShow]);
 
     // Handle change for the edited package
-    function handleChange(e) {
+    const handleChange = (e) => {
         const { name, value } = e.target;
         setEditedPackage((prev) => ({
             ...prev,
@@ -64,7 +112,7 @@ const SubcriptionPage = () => {
     }
 
     // Handle change for the new package
-    function handleNewPackageChange(e) {
+    const handleNewPackageChange = (e) => {
         const { name, value } = e.target;
         setNewPackage((prev) => ({
             ...prev,
@@ -73,7 +121,7 @@ const SubcriptionPage = () => {
     }
 
     // Handle benefit change for the edited package
-    function handleBenefitChange(e, idx) {
+    const handleBenefitChange = (e, idx) => {
         const { value } = e.target;
         const updatedBenefits = [...editedPackage.accountPackageBenefits];
         updatedBenefits[idx].benefit.description = value;
@@ -86,7 +134,7 @@ const SubcriptionPage = () => {
 
 
     // Save the updated package to the backend
-    async function handleSaveUpdate() {
+    const handleSaveUpdate = async () => {
         try {
             const response = await fetch(`http://localhost:8080/rest/updateAccountPackage/${editedPackage.accountPackageId}`, {
                 method: 'PUT',
@@ -105,25 +153,98 @@ const SubcriptionPage = () => {
             console.error('Error updating package:', error);
         }
     }
-    const [selectedBenefitId, setSelectedBenefitId] = useState('');
 
-
-    async function handleCreateSave() {
+    const handleCreateSave = async () => {
         try {
-            console.log("sss", selectedBenefitId);
+            // Step 1: Validate mandatory fields
+            if (!newPackage.packageName || !newPackage.price || !newPackage.durationDays || !newPackage.limitBookings || newPackage.limitSportFields === '') {
+                toast.error("Vui lòng điền đầy đủ thông tin gói đăng ký!");
+                return; // Stop execution if any required field is missing
+            }
+
+            // Step 2: Check for at least one benefit
+            if (benefitSelections.length === 0 || benefitSelections.some(selection => !selection.benefitId || !selection.description)) {
+                toast.error("Vui lòng chọn ít nhất một lợi ích!");
+                return;
+            }
+
+            // Step 3: Remove duplicates from benefit selections
+            const uniqueBenefitIds = new Set();
+            const uniqueBenefits = benefitSelections.filter((selection) => {
+                if (uniqueBenefitIds.has(selection.benefitId)) {
+                    return false;  // Skip if the benefitId is already used
+                }
+                uniqueBenefitIds.add(selection.benefitId);  // Add to the set
+                return true;
+            });
+
+            // Prepare the package data to send to the server
+            const packageInfo = {
+                packageName: newPackage.packageName,
+                price: newPackage.price,
+                durationDays: newPackage.durationDays,
+                limitBookings: newPackage.limitBookings,
+                limitSportFields: newPackage.limitSportFields || 0, // Ensure it's not null
+                accountPackageBenefits: uniqueBenefits.map((selection) => ({
+                    benefit: {
+                        benefitId: selection.benefitId
+                    }
+                }))
+            };
+
+            // Step 4: Send data to the backend (using your API endpoint)
+            const response = await fetch('http://localhost:8080/rest/create-account-package', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(packageInfo),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create the subscription package');
+            }
+
+            // Step 5: After successful save, update the UI
+            await mutate();  // Re-fetch the data from the server to update the subscription list
+            setModalCreateShow(false);  // Close the modal
+            toast.success("Gói đăng ký đã được tạo thành công!");  // Show success message
 
         } catch (error) {
             console.error('Error creating package:', error);
+            toast.error("Có lỗi xảy ra khi tạo gói đăng ký!");  // Show error message
         }
     }
 
+
+
+
+    // Hàm xử lý khi chọn lợi ích từ dropdown
+    const handleBenefitSelectChange = (e, index) => {
+        const { value } = e.target;
+        const selectedBenefit = dataBenefit.find((benefit) => benefit.description === value);
+        const updatedSelections = [...benefitSelections];
+        updatedSelections[index] = { benefitId: selectedBenefit.benefitId, description: value };
+        setBenefitSelections(updatedSelections);
+
+        // Cập nhật vào newPackage
+        setNewPackage((prev) => ({
+            ...prev,
+            accountPackageBenefits: updatedSelections.map((item) => ({
+                benefit: { description: item.description },
+            })),
+        }));
+    }
 
 
     // Memoize the modal for editing package
     const modalUpdate = useMemo(() => (
         <Modal
             show={modalShow}
-            onHide={() => setModalShow(false)}
+            onHide={() => {
+                setModalShow(false);
+                setEditedPackage(null); // Reset the edited package when modal is closed
+            }}
             size="lg"
             aria-labelledby="contained-modal-title-vcenter"
             centered
@@ -171,6 +292,15 @@ const SubcriptionPage = () => {
                             onChange={handleChange}
                         />
                     </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Số sân tối đa</Form.Label>
+                        <Form.Control
+                            type="number"
+                            name="limitSportFields"
+                            value={editedPackage?.limitSportFields || ''}
+                            onChange={handleChange}
+                        />
+                    </Form.Group>
                     <div className="my-3">
                         <h5>Lợi ích</h5>
                         {editedPackage?.accountPackageBenefits?.map((benefitItem, idx) => (
@@ -193,11 +323,64 @@ const SubcriptionPage = () => {
         </Modal>
     ), [modalShow, editedPackage]);
 
+
+
+    const [benefitSelections, setBenefitSelections] = useState([{ benefitId: '', description: '' }]);
+    // Hàm để thêm một dropdown mới cho lựa chọn lợi ích
+    const addBenefitSelection = () => {
+        setModalCreateShow(false); // Đóng modal trước
+        setBenefitSelections((prev) => [...prev, { benefitId: '', description: '' }]);
+
+        setTimeout(() => {
+            setModalCreateShow(true); // Mở lại modal sau khi cập nhật
+        }, 0);
+    };
+    const handleRemoveBenefitSelection = (index) => {
+        setBenefitSelections((prev) => prev.filter((_, i) => i !== index));
+
+        // Cập nhật lại `newPackage` để loại bỏ lợi ích đã xóa
+        setNewPackage((prev) => ({
+            ...prev,
+            accountPackageBenefits: benefitSelections
+                .filter((_, i) => i !== index) // loại bỏ lợi ích đã xóa
+                .map((item) => ({
+                    benefit: { description: item.description },
+                })),
+        }));
+    };
+
+
+    const [benefitData, setBenefitData] = useState('');
+
+
+
+    const handleOnchangeBenefit = (e) => {
+        const value = e.target.value;
+        setBenefitData(value);
+    };
+
+    const handleAddBenefit = () => {
+        console.log("check data value: ", benefitData);
+
+    };
+
+
     // Memoize the modal for creating new package
     const modalCreate = useMemo(() => (
         <Modal
             show={modalCreateShow}
-            onHide={() => setModalCreateShow(false)}
+            onHide={() => {
+                setModalCreateShow(false);
+                setNewPackage({
+                    packageName: '',
+                    price: 0,
+                    durationDays: '',
+                    limitBookings: '',
+                    limitSportFields: '',
+                    accountPackageBenefits: [{ benefit: { description: '' } }],
+                }); // Reset new package when modal is closed
+                setBenefitSelections([{ benefitId: '', description: '' }]); // Reset benefit selections
+            }}
             size="lg"
             aria-labelledby="contained-modal-title-vcenter"
             centered
@@ -245,35 +428,61 @@ const SubcriptionPage = () => {
                             onChange={handleNewPackageChange}
                         />
                     </Form.Group>
-                    <div className="my-3">
-                        <h5>Lợi ích</h5>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Số sân tối đa</Form.Label>
                         <Form.Control
-                            as="select"
-                            className="mb-2"
-                            value={selectedBenefitId || ''} // Ensure the select dropdown reflects the selected value
-                            onChange={(e) => {
-                                const newBenefitId = e.target.value;
-                                setSelectedBenefitId(newBenefitId);
-                                console.log(newBenefitId);  // Check if value is being updated correctly
-                            }}
-
-                        >
-                            <option value="">----chọn lợi ích-----</option>
-                            {dataBenefit && dataBenefit.length > 0 ? (
-                                dataBenefit.map((benefit) => (
-                                    <option key={benefit.benefitId} value={benefit.benefitId}>
-                                        {benefit.description}
-                                    </option>
-                                ))
-                            ) : (
-                                <option value="">No benefits available</option>
-                            )}
-
-                        </Form.Control>
+                            type="number"
+                            name="limitSportFields"
+                            value={newPackage.limitSportFields}
+                            onChange={handleNewPackageChange}
+                        />
+                    </Form.Group>
+                    <div className="d-flex">
+                        <Form.Group className="mb-3 w-75">
+                            <Form.Label>Thêm lợi ích (nếu có)</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={benefitData}
+                                onChange={handleOnchangeBenefit}
+                            />
+                        </Form.Group>
+                        <Button onClick={handleAddBenefit} className="w-25 m-auto mb-3 ms-2">
+                            Thêm
+                        </Button>
 
                     </div>
 
-
+                    {/* // UI cho phần chọn lợi ích */}
+                    <div className="my-3">
+                        <h5>Lợi ích</h5>
+                        {benefitSelections.map((selection, index) => (
+                            <div key={index} className="d-flex align-items-center mb-2">
+                                <Form.Control
+                                    as="select"
+                                    value={selection.description || ''}
+                                    onChange={(e) => handleBenefitSelectChange(e, index)}
+                                    className="me-2" // thêm margin bên phải
+                                >
+                                    <option value="">----chọn lợi ích-----</option>
+                                    {dataBenefit && dataBenefit.length > 0 ? (
+                                        dataBenefit.map((benefit) => (
+                                            <option key={benefit.benefitId} value={benefit.description}>
+                                                {benefit.description}
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option value="">No benefits available</option>
+                                    )}
+                                </Form.Control>
+                                {index > 0 && ( // Điều kiện để chỉ hiển thị nút xóa từ phần tử thứ 2 trở đi
+                                    <Button variant="danger" onClick={() => handleRemoveBenefitSelection(index)}>
+                                        Xóa
+                                    </Button>
+                                )}
+                            </div>
+                        ))}
+                        <Button variant="link" onClick={addBenefitSelection}>+ Thêm lợi ích</Button>
+                    </div>
                 </Form>
             </Modal.Body>
             <Modal.Footer>
@@ -307,7 +516,11 @@ const SubcriptionPage = () => {
                                     ))}
                                 </div>
                                 <b className="text-danger ms-3">{formatPrice(pkg.price) || "Miễn phí"} VND</b>
-                                <Button className="btn-sub" onClick={() => handleEdit(pkg)}>Sửa</Button>
+                                <div className="d-flex">
+                                    <Button className="btn-sub w-75" onClick={() => handleEdit(pkg)}>Sửa</Button>
+                                    <Button className="btn-sub w-25" onClick={() => handleDelete(pkg)}>Xóa</Button>
+                                </div>
+
                             </div>
                         </Col>
                     ))}
