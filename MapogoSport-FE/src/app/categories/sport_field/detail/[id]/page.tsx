@@ -515,6 +515,9 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                 <div className="btn-option-icon">
                                     <i className="bi bi-heart-fill"></i>
                                 </div>
+                                <div className="btn-option-icon ">
+                                <i className="bi bi-chat-dots-fill text-primary"></i>
+                                </div>
                             </div>
                         </div>
                         <Row>
