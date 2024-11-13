@@ -41,9 +41,16 @@ export default function BookingSport() {
     const user = useData();
     const [owner, setOwner] = useState<Owner>();
     const [selectSport, setSelectSport] = useState<number>(0);
-    const [checkBooking, setCheckBooking] = useState<number>();
-    const [checkNotification, setCheckNotification] = useState<number>();
+    const [checkBooking, setCheckBooking] = useState<number>(1);
+    const [checkNotification, setCheckNotification] = useState<number>(1);
     const [checkOwner, setCheckOwner] = useState<number>();
+    const [selectDate, setSelectDate] = useState<number>(0);
+    const [dataSport, setDataSport] = useState<SportField[]>([])
+    const [days, setDays] = useState<string[]>();
+    const [dayYears, setDayYears] = useState<string[]>();
+    const [opening, setOpening] = useState<number>();
+    const [operatingTime, setOperatingTime] = useState<number>(0);
+    const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
 
     useEffect(() => {
         const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
@@ -51,11 +58,12 @@ export default function BookingSport() {
 
         stompClient.connect({}, () => {
             stompClient.subscribe('/topic/bookingDetail', (message) => {
-                setCheckBooking(Number(message.body))
+                setCheckBooking(prev => prev + 1);
+                setCheckOwner(Number(message.body));
             });
 
             stompClient.subscribe('/topic/notification', (message) => {
-                setCheckNotification(Number(message.body) + 1);
+                setCheckNotification(prev => prev + 1);
                 setCheckOwner(Number(message.body));
             });
         });
@@ -85,10 +93,6 @@ export default function BookingSport() {
         }
     }
 
-    const [selectDate, setSelectDate] = useState<number>(0);
-
-    const [dataSport, setDataSport] = useState<SportField[]>([])
-
     const getSport = async () => {
         if (owner) {
             const responseSport = await fetch(`http://localhost:8080/rest/sport_field_by_owner/${owner.ownerId}`);
@@ -104,10 +108,7 @@ export default function BookingSport() {
         getTime();
     }, [dataSport, selectSport])
 
-    const [opening, setOpening] = useState<number>();
-    const [operatingTime, setOperatingTime] = useState<number>(0);
 
-    const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
 
     useEffect(() => {
         if (dataTimeSport.length > 0) {
@@ -193,9 +194,6 @@ export default function BookingSport() {
             }
         }
     }
-
-    const [days, setDays] = useState<string[]>();
-    const [dayYears, setDayYears] = useState<string[]>();
 
     useEffect(() => {
         setDayOnWeek();
@@ -318,7 +316,6 @@ export default function BookingSport() {
         }
         const timeoutId = setTimeout(() => {
             refreshStatusBooking();
-
         }, 500);
 
         return () => clearTimeout(timeoutId);
@@ -326,7 +323,7 @@ export default function BookingSport() {
     }, [checkDataStatus]);
 
     useEffect(() => {
-        if (owner && checkBooking === owner.ownerId) {
+        if (owner && checkOwner === owner.ownerId && checkNotification == checkNotification) {
             // toast.success("checkBooking" + checkBooking)
             const timeoutId = setTimeout(() => {
                 refreshStatusBooking();
@@ -867,7 +864,7 @@ export default function BookingSport() {
 
     // Notification
     useEffect(() => {
-        if (checkOwner === owner?.ownerId) {
+        if (owner && checkOwner === owner.ownerId) {
             const now = new Date();
             const currentMinutes = now.getMinutes();
             console.log(currentMinutes);
@@ -886,14 +883,12 @@ export default function BookingSport() {
                 } else if (!hasExecuted && currentMinutes === 30) {
                     await fetchBookingNotification(dateNow, (now.getHours() + 1).toString() + 'h00', selectedSportData.sportFieldId);
                 }
-                // toast.success("NGON")
-                // await fetchBookingNotification(dateNow, '22h00', selectedSportData.sportFieldId);
             }
 
             getHetCuu();
             refreshStatusBooking();
         }
-    }, [selectDate, selectSport, dataSport, checkBooking, checkNotification, checkOwner]);
+    }, [selectDate, selectSport, dataSport, checkNotification, checkOwner]);
 
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
     const [startTime, setStartTime] = useState("");
@@ -1096,7 +1091,7 @@ export default function BookingSport() {
             <div className="text-center">
                 {bookingNotification?.map(item => (
                     <>
-                        <b key={item.bookingDetailId} className="">{item.sportFieldDetail.name} của bạn có lịch đá vào lúc {item.startTime} đến {item.endTime} (trong 30 phút nữa).</b><br />
+                        <b key={item.bookingDetailId} className="fs-16">{item.sportFieldDetail.name} của bạn có lịch đá vào lúc {item.startTime} đến {item.endTime} (trong 30 phút nữa).</b><br />
                     </>
                 ))}
             </div>

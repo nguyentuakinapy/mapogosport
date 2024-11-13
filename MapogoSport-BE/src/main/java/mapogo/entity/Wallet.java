@@ -40,7 +40,7 @@ public class Wallet {
 	@JoinColumn(name="Username")
 	@JsonBackReference
 	User user;
-	
+		
 	@Column(name="Balance")
 	BigDecimal balance;
 	

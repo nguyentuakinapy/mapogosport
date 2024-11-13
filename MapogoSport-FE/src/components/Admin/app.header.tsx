@@ -40,7 +40,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     const [hideNotification, setHideNotification] = useState<boolean>(false);
     const [notification, setNotification] = useState<NotificationUser[]>();
     const userData = useData();
-    const [checkNotification, setCheckNotification] = useState<number>();
+    const [checkNotification, setCheckNotification] = useState<number>(1);
     const path = usePathname();
 
     useEffect(() => {
@@ -100,7 +100,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
 
         stompClient.connect({}, () => {
             stompClient.subscribe('/topic/notification', (message) => {
-                setCheckNotification(Number(message.body))
+                setCheckNotification(prev => prev + 1);
             });
 
             stompClient.subscribe('/topic/username', (message) => {
