@@ -2,6 +2,7 @@ package mapogo.entity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -44,10 +45,12 @@ public class Voucher implements Serializable {
 	private Integer quantity;
 
 	@Column(name = "CreateDate", nullable = false)
-	private LocalDateTime createDate;
+	private Date createDate;  // QA sửa 12/11
+//	private LocalDateTime createDate;
 
 	@Column(name = "EndDate", nullable = false)
-	private LocalDateTime endDate;
+	private Date endDate; // QA sửa 12/11
+//	private LocalDateTime endDate;
 
 	@Column(name = "Status", nullable = false)
 	private String status;
@@ -56,7 +59,11 @@ public class Voucher implements Serializable {
 	private String discountCode;
 
 	@Column(name = "ActiveDate", nullable = false)
-	private LocalDateTime activeDate;
+	private Date activeDate; // QA sửa 12/11
+//	private LocalDateTime activeDate;
+	
+	@Column(name = "CreatedBy", nullable = false)
+	private String createdBy;
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JsonIgnore
