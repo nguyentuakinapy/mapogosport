@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,7 +34,7 @@ public class Transaction {
 	
 	@ManyToOne
 	@JoinColumn(name = "WalletId")
-	@JsonBackReference
+	@JsonIgnore
 	Wallet wallet;
 	
 	@Column(name="Amount")
