@@ -108,14 +108,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String uploadAvatar(String username, MultipartFile file) throws IOException {
-	    Map<String, Object> uploadResult = cloudinaryUtils.uploadImage2(file);
-	    String avtUrl = (String) uploadResult.get("secure_url");
+	    String avtUrl = cloudinaryUtils.uploadImage(file);
 	    User user = userDAO.findById(username).get();
 
 	    if (user.getAvatar() != null) {
-	        String oldPublicId = cloudinaryUtils.extractPublicIdFromUrl(user.getAvatar());
-	        System.out.println(oldPublicId);
-	        cloudinaryUtils.deleteImage(oldPublicId);
+	        String oldAVT = user.getAvatar();
+	        cloudinaryUtils.deleteImage(oldAVT);
 	    }
 
 	    user.setAvatar(avtUrl);

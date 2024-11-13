@@ -66,30 +66,51 @@ const BookingModal = (props: BookingProps) => {
     }, [data]);
 
     useEffect(() => {
+        checkTimeBooking();
+    }, [operatingTime]);
+
+    const checkTimeBooking = async () => {
         if (!startTime || !dayStartBooking) return;
-        const calculateBookingTimes = () => {
-            const times = [startTime];
-            for (let i = 0; i < operatingTime * 2; i++) {
-                const [hour] = times[i].match(/\d+/) || [];
-                times.push(times[i].includes("h30") ? `${Number(hour) + 1}h00` : `${hour}h30`);
-            }
-            return times;
-        };
 
-        const checkBookingAvailability = async (times: any) => {
-            for (let i = 0; i < Math.min(times.length, 6); i++) {
-                const response = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${times[i]}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`);
+        const newData = [startTime];
+        for (let i = 0; i < operatingTime * 2; i++) {
+            const getTime = newData[i].match(/\d+/);
+            if (getTime) {
+                const hour = Number(getTime[0]);
+                newData.push(newData[i].includes("h30") ? `${hour + 1}h00` : `${hour}h30`);
+            }
+        }
+
+        let count = 0;
+        for (const time of newData) {
+            if (count >= 6) {
+                setOperatingTimeFetchData(6);
+                break;
+            }
+
+            try {
+                const response = await fetch(
+                    `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
+                );
+
                 if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
-                const data = await response.text();
-                if (data) {
-                    setOperatingTimeFetchData(i);
-                    break;
-                }
-            }
-        };
+                const text = await response.text();
 
-        checkBookingAvailability(calculateBookingTimes());
-    }, [operatingTime, startTime, dayStartBooking]);
+                if (text) {
+                    const dataBooking = JSON.parse(text);
+                    if (dataBooking && Object.keys(dataBooking).length > 0) {
+                        setOperatingTimeFetchData(count);
+                        break;
+                    }
+                } else {
+                    setOperatingTimeFetchData(count);
+                }
+            } catch (error) {
+                console.error("API or JSON parsing error:", error);
+            }
+            count++;
+        }
+    };
 
     useEffect(() => {
         getTime();
@@ -137,7 +158,7 @@ const BookingModal = (props: BookingProps) => {
             newData.push(timeIntervals[index].label);
         }
         if (activeTab === 'byDay') {
-            setDataTimeTemporary(newData);
+            setDataTimeTemporary(newData.slice(1));
         }
     }
 

@@ -30,7 +30,11 @@ interface User {
             },
             active: boolean;
         }
-    ]
+    ],
+    wallet: {
+        walletId: number;
+        balance: number;
+    }
 }
 
 interface Authorities {

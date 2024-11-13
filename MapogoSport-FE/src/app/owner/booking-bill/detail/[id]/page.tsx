@@ -24,15 +24,15 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
 
     const getStatusVariant = (status: string) => {
         switch (status) {
-            case 'Đã đá': return 'success';
-            case 'Chưa đá': return 'info';
+            case 'Đã hoàn thành': return 'success';
+            case 'Chưa bắt đầu': return 'info';
             case 'Đã hủy': return 'danger';
             default: return 'secondary';
         }
     };
 
     const bookingStatuses = [
-        'Đã đá',
+        'Đã hoàn thành',
         'Đã hủy'
     ];
 
@@ -42,26 +42,27 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
         const bookingDateTime = new Date(`${date}T${formattedTime}:00`);
         const diffMinutes = (currentDateTime.getTime() - bookingDateTime.getTime()) / (1000 * 60);
 
-        if (currentStatus === "Chưa đá" && targetStatus === "Đã hủy") { // Chỉ cho đổi "Chưa đá" sang "Đã hủy"
+        if (currentStatus === "Chưa bắt đầu" && targetStatus === "Đã hủy") { // Chỉ cho đổi "Chưa đá" sang "Đã hủy"
             return true;
         }
         // Trong vòng 15 phút, cho đổi qua lại giữa "Đã đá" và "Đã hủy"
-        if ((currentStatus === "Đã đá" || currentStatus === "Đã hủy") && (targetStatus === "Đã đá" || targetStatus === "Đã hủy")) {
+        if ((currentStatus === "Đã hoàn thành" || currentStatus === "Đã hủy") &&
+            (targetStatus === "Đã hoàn thành" || targetStatus === "Đã hủy")) {
             return diffMinutes >= 0 && diffMinutes <= 15;
         }
 
         return false;
     };
 
-    const handleStatusChange = (bookingDetailId: number, newStatus: string) => {
-        fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
+    const handleStatusChange = async (bookingDetailId: number, newStatus: string) => {
+        await fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ bookingDetailId, status: newStatus }),
-        }).then(async (res) => {
+        }).then((res) => {
             if (!res.ok) {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return;
