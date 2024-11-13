@@ -29,7 +29,6 @@ const BookingModal = (props: OwnerProps) => {
     const [idSportDetail, setIdSportDetail] = useState<number>();
     const [idSportDetailTemporary, setIdSportDetailTemporary] = useState<number>();
     const [startTimeBooking, setStartTimeBooking] = useState<string>();
-    const [startTimeBookingTemporary, setStartTimeBookingTemporary] = useState<string>();
     const [endTimeBooking, setEndTimeBooking] = useState<string>();
     const [confirmData, setConfirmData] = useState<boolean>(false);
     const [applyOne, setApplyOne] = useState<boolean>(true);
@@ -45,7 +44,6 @@ const BookingModal = (props: OwnerProps) => {
         setDateBooking(bookingDetailData?.date);
         setDateBookingTemporary(bookingDetailData?.date);
         setStartTimeBooking(bookingDetailData?.startTime);
-        setStartTimeBookingTemporary(bookingDetailData?.startTime);
         setEndTimeBooking(bookingDetailData?.endTime);
         setIdSportDetail(bookingDetailData?.sportFieldDetail.sportFielDetailId);
         setIdSportDetailTemporary(bookingDetailData?.sportFieldDetail.sportFielDetailId);
@@ -634,9 +632,12 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     const handleClose = () => {
-        setApplyOne(true);
-        setConfirmData(false);
         setEditBooking(true);
+        setConfirmData(false);
+        setApplyOne(true);
+        setIsAddBooking(false);
+        setConfirmNewData(false);
+
         setShowViewOrEditBookingModal(false);
     }
 
@@ -656,6 +657,7 @@ const BookingModal = (props: OwnerProps) => {
 
         setNewIdSportBooking(sport?.sportFielDetails[0].sportFielDetailId)
         setIsAddBooking(!isAddBooking);
+        setEditBooking(true);
     }
 
     useEffect(() => {
@@ -667,20 +669,20 @@ const BookingModal = (props: OwnerProps) => {
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == newIdSportBooking);
 
         if (bookingDetailData && newEndTimeBooking && bookingDetailData.endTime && sportDetail) {
-            toast.success("gias")
+            // toast.success("gias")
 
             const timeBooking = calculateTimeDifference(bookingDetailData.endTime, newEndTimeBooking) / 30;
 
             if (isEven(timeBooking)) {
                 setNewPriceBooking(sportDetail.price * timeBooking / 2);
-                toast.success(sportDetail.price * timeBooking / 2);
+                // toast.success(sportDetail.price * timeBooking / 2);
             } else {
                 if (timeBooking == 1) {
                     setNewPriceBooking((sportDetail.price * timeBooking) / 2);
-                    toast.success((sportDetail.price * timeBooking) / 2)
+                    // toast.success((sportDetail.price * timeBooking) / 2)
                 } else {
                     setNewPriceBooking((sportDetail.price * timeBooking / 2));
-                    toast.success((sportDetail.price * timeBooking / 2))
+                    // toast.success((sportDetail.price * timeBooking / 2))
                 }
             }
         }
@@ -821,22 +823,31 @@ const BookingModal = (props: OwnerProps) => {
                                 {bookingDetailData && (
                                     <>
                                         {/* Kiểm tra ngày hiện tại và ngày đặt */}
-                                        {new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) &&
-                                            (new Date().getHours() <= parseInt(bookingDetailData.endTime.split('h')[0]) ? (
-                                                <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
+                                        {new Date().setHours(0, 0, 0, 0) === new Date(bookingDetailData.date).setHours(0, 0, 0, 0) ?
+                                            (new Date().getHours() * 60) + new Date().getMinutes() < (parseInt(bookingDetailData.endTime.split('h')[0]) * 60) + parseInt(bookingDetailData.endTime.split('h')[1]) && (
+                                                <OverlayTrigger overlay={<Tooltip>Sửa {new Date().setHours(0, 0, 0, 0)} - {new Date(bookingDetailData.date).setHours(0, 0, 0, 0)}</Tooltip>}>
                                                     <i
                                                         className="bi bi-pencil-square ms-2 text-dark"
-                                                        onClick={() => setEditBooking(!editBooking)}
+                                                        onClick={() => {
+                                                            setEditBooking(!editBooking),
+                                                                setIsAddBooking(false)
+                                                        }}
                                                         style={{ cursor: 'pointer' }}
                                                     />
                                                 </OverlayTrigger>
-                                            ) : (
-                                                new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                                    <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
-                                                        <i onClick={() => handleAddBooking()} className="bi bi-plus-lg" style={{ cursor: 'pointer' }} />
-                                                    </OverlayTrigger>
-                                                )
-                                            ))
+                                            )
+                                            :
+                                            new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) &&
+                                            <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
+                                                <i
+                                                    className="bi bi-pencil-square ms-2 text-dark"
+                                                    onClick={() => {
+                                                        setEditBooking(!editBooking),
+                                                            setIsAddBooking(false)
+                                                    }}
+                                                    style={{ cursor: 'pointer' }}
+                                                />
+                                            </OverlayTrigger>
                                         }
 
                                         <h6 className="text-uppercase text-danger m-auto fw-bold text-center">
@@ -844,22 +855,24 @@ const BookingModal = (props: OwnerProps) => {
                                         </h6>
 
                                         {/* Hiển thị điều kiện tương tự lần thứ hai */}
-                                        {new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) &&
-                                            (new Date().getHours() <= parseInt(bookingDetailData.endTime.split('h')[0]) ? (
+                                        {new Date().setHours(0, 0, 0, 0) === new Date(bookingDetailData.date).setHours(0, 0, 0, 0) ?
+                                            (new Date().getHours() * 60) + new Date().getMinutes()
+                                            < (parseInt(bookingDetailData.endTime.split('h')[0]) * 60) +
+                                            parseInt(bookingDetailData.endTime.split('h')[1]) && (
                                                 <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
-                                                    <i onClick={() => handleAddBooking()} className="bi bi-plus-lg" style={{ cursor: 'pointer' }} />
+                                                    <button disabled={(new Date().getHours() * 60) + new Date().getMinutes()
+                                                        >= (parseInt(bookingDetailData.endTime.split('h')[0]))} style={{ border: 'none', backgroundColor: 'white' }}>
+                                                        <i onClick={() => handleAddBooking()} className="bi bi-plus-lg" style={{ cursor: 'pointer' }} />
+                                                    </button>
                                                 </OverlayTrigger>
-                                            ) : (
-                                                new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                                    <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
-                                                        <i
-                                                            className="bi bi-pencil-square ms-2 text-dark"
-                                                            onClick={() => setEditBooking(!editBooking)}
-                                                            style={{ cursor: 'pointer' }}
-                                                        />
-                                                    </OverlayTrigger>
-                                                )
-                                            ))
+                                            )
+                                            :
+                                            new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) &&
+                                            <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
+                                                <button style={{ border: 'none', backgroundColor: 'white' }}>
+                                                    <i onClick={() => handleAddBooking()} className="bi bi-plus-lg" style={{ cursor: 'pointer' }} />
+                                                </button>
+                                            </OverlayTrigger>
                                         }
                                     </>
                                 )}
@@ -1066,7 +1079,7 @@ const BookingModal = (props: OwnerProps) => {
 
                     </Row>
                     <Row className="mx-1 mb-2">
-                        {bookingDetailData?.subscriptionKey.includes('keybooking') && (
+                        {bookingDetailData?.subscriptionKey && bookingDetailData.subscriptionKey.includes('keybooking') && (
                             <>
                                 <Col onClick={() => setApplyOne(true)} className={`col-day border p-2 text-white ${applyOne ? 'active' : ''}`}>Một ngày</Col>
                                 <Col onClick={() => setApplyOne(false)} className={`col-day border p-2 text-white ${!applyOne ? 'active' : ''}`}>Tất cả ngày trong chung lịch</Col>
@@ -1093,7 +1106,7 @@ const BookingModal = (props: OwnerProps) => {
                                             confirmData ? (
                                                 <button onClick={() => handleUpdateBooking()} className="btn btn-danger m-auto" style={{ width: '97%' }}>Cập nhật</button>
                                             ) : (
-                                                <button onClick={() => confirmDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm 123</button>
+                                                <button onClick={() => confirmDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm tra chỉnh sửa sân</button>
                                             )
                                         ) :
                                             <button className="btn btn-danger m-auto" onClick={() => handleCancelBookingDetail()} style={{ width: '97%' }}>Hủy đặt sân</button>
