@@ -6,10 +6,13 @@ import { useState, useEffect } from "react";
 import CategoryAddNew from "@/components/Admin/Modal/categoryProduct.addNew";
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import 'jspdf-autotable';
 import jsPDF from 'jspdf';
+import { RobotoBase64 } from '../../../../public/font/Roboto-Regular';
 import { toast } from "react-toastify";
 import CategoryFieldAddNew from '@/components/Admin/Modal/categoryField.addNew';
-import { RobotoBase64 } from '../../../../public/font/Roboto-Regular';
+
+
 
 const AdminProduct = () => {
 
@@ -127,7 +130,7 @@ const AdminProduct = () => {
 
     //pagination CategoryProduct
     const currentItemsCategoryProduct = filteredCategoryProducts.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPagesCategoryProduct = Math.ceil(categoryProducts.length / itemsPerPage);
+    const totalPagesCategoryProduct = Math.ceil(filteredCategoryProducts.length / itemsPerPage);
     const handlePageChangeCategoryProduct = (pageNumber: number) => {
         setCurrentPage(pageNumber);
     };
@@ -297,69 +300,106 @@ const AdminProduct = () => {
         }
     };
 
-    // const exportPDF = () => {
-    //     try {
-    //         const doc: any = new jsPDF();
+    const exportPDF = () => {
+        try {
+            const doc: any = new jsPDF();
 
-    //         doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
-    //         doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
-    //         doc.setFont("Roboto");
+            doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
+            doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+            doc.setFont("Roboto");
 
-    //         doc.text("Danh Sách Hóa Đơn", 14, 16);
+            doc.text("Danh Sách Quản Lý Loại", 14, 16);
+            if (activeTab === 'categoriesField') {
+                const tableColumn = ["Số thứ tự", "Tên hình ảnh", "ID loại sân", "Tên loại sân"];
+                const tableRows: string[][] = [];
 
-    //         const tableColumn = ["Số thứ tự", "Tên hình ảnh", "ID loại sản phẩm", "Tổng tiền", "Địa chỉ", "Trạng thái"];
-    //         const tableRows: string[][] = [];
+                filteredCategoryField.forEach((categories, index) => {
+                    const categoryData = [
+                        `#${index + 1}`,
+                        categories.image,
+                        categories.categoriesFieldId.toString(),
+                        categories.name
+                    ];
+                    tableRows.push(categoryData);
+                    doc.autoTable({
+                        head: [tableColumn],
+                        body: tableRows,
+                        startY: 20,
+                        theme: 'grid',
+                        styles: {
+                            font: 'Roboto',
+                            fontSize: 10,
+                            cellPadding: 2,
+                            valign: 'middle',
+                        },
+                        columnStyles: {
+                            0: { halign: 'left' },
+                            1: { halign: 'left' },
+                            2: { halign: 'center' },
+                            3: { halign: 'right', cellWidth: 30 },
+                            4: { halign: 'left' },
+                        },
+                        didParseCell: (data: any) => {
+                            if (data.cell.text.length > 0) {
+                                data.cell.text[0] = data.cell.text[0];
+                            }
+                        }
+                    });
+                });
+            } else {
+                const tableColumn = ["Số thứ tự", "Tên hình ảnh", "ID loại sản phẩm", "Tên loại sản phẩm"];
+                const tableRows: string[][] = [];
 
-    //         filteredOrders.forEach(order => {
-    //             const orderData = [
-    //                 `#${order.orderId}`,
-    //                 order.fullname,
-    //                 new Date(order.date).toLocaleDateString('en-GB'),
-    //                 `${order.amount.toLocaleString()} ₫`,
-    //                 order.address,
-    //                 order.status
-    //             ];
-    //             tableRows.push(orderData);
-    //         });
+                filteredCategoryProducts.forEach((product, index) => {
+                    const categoryProductData = [
+                        `#${index + 1}`,
+                        product.image,
+                        product.categoryProductId.toString(),
+                        product.name
+                    ];
+                    tableRows.push(categoryProductData);
+                });
+                doc.autoTable({
+                    head: [tableColumn],
+                    body: tableRows,
+                    startY: 20,
+                    theme: 'grid',
+                    styles: {
+                        font: 'Roboto',
+                        fontSize: 10,
+                        cellPadding: 2,
+                        valign: 'middle',
+                    },
+                    columnStyles: {
+                        0: { halign: 'left' },
+                        1: { halign: 'left' },
+                        2: { halign: 'center' },
+                        3: { halign: 'right', cellWidth: 30 },
+                        4: { halign: 'left' },
+                    },
+                    didParseCell: (data: any) => {
+                        if (data.cell.text.length > 0) {
+                            data.cell.text[0] = data.cell.text[0];
+                        }
+                    }
+                });
+            }
 
-    //         doc.autoTable({
-    //             head: [tableColumn],
-    //             body: tableRows,
-    //             startY: 20,
-    //             theme: 'grid',
-    //             styles: {
-    //                 font: 'Roboto',
-    //                 fontSize: 10,
-    //                 cellPadding: 2,
-    //                 valign: 'middle',
-    //             },
-    //             columnStyles: {
-    //                 0: { halign: 'left' },
-    //                 1: { halign: 'left' },
-    //                 2: { halign: 'center' },
-    //                 3: { halign: 'right', cellWidth: 30 },
-    //                 4: { halign: 'left' },
-    //                 5: { halign: 'center' },
-    //             },
-    //             didParseCell: (data: any) => {
-    //                 if (data.cell.text.length > 0) {
-    //                     data.cell.text[0] = data.cell.text[0];
-    //                 }
-    //             }
-    //         });
-    //         const today = new Date();
-    //         const month = today.getMonth() + 1;
-    //         const day = today.getDate();
-    //         const formattedMonth = month < 10 ? `0${month}` : month;
-    //         const formattedDay = day < 10 ? `0${day}` : day;
 
-    //         doc.save(`HoaDonDatHang-Mapogo(${formattedDay}/${formattedMonth}).pdf`);
-    //         toast.success("Đã xuất file PDF thành công!");
-    //     } catch (error) {
-    //         toast.error("Đã xảy ra lỗi trong quá trình xuất file! Vui lòng thử lại sau!");
-    //     }
+            const today = new Date();
+            const month = today.getMonth() + 1;
+            const day = today.getDate();
+            const formattedMonth = month < 10 ? `0${month}` : month;
+            const formattedDay = day < 10 ? `0${day}` : day;
 
-    // };
+            doc.save(`QuanLyLoai-Mapogo(${formattedDay}/${formattedMonth}).pdf`);
+            toast.success("Đã xuất file PDF thành công!");
+        } catch (error) {
+            toast.error("Đã xảy ra lỗi trong quá trình xuất file! Vui lòng thử lại sau!");
+            console.log(error)
+        }
+
+    };
 
 
     const renderContent = () => {
@@ -380,7 +420,7 @@ const AdminProduct = () => {
                             <tbody>
                                 {currentItemsCategoryProduct.map((category, index) => (
                                     <tr id={`category-${category.categoryProductId}`} key={category.categoryProductId}>
-                                        <td className="text-center align-middle">{index + 1}</td>
+                                        <td className="text-center align-middle">{indexOfFirstItem + index + 1}</td>
                                         <td className="text-center align-middle">
                                             <Link href="#">
                                                 <Image
@@ -495,7 +535,7 @@ const AdminProduct = () => {
                             setShowAddCategory={handleCloseModal}
                             currentCategory={currentCategoryProduct}
                             modalType={modalType}
-                            onSave={handleAddNewCategory}
+                            onSave={() => handleAddNewCategory}
                         />
                     </div>
                 );
@@ -540,7 +580,7 @@ const AdminProduct = () => {
                                                 }}
                                             />
                                         </td> */}
-                                        <td className="text-center align-middle">{index + 1}</td>
+                                        <td className="text-center align-middle">{indexOfFirstItem +index + 1}</td>
                                         <td className="text-center align-middle">
                                             <Link href="#">
                                                 <Image
@@ -652,7 +692,7 @@ const AdminProduct = () => {
                             setShowAddCategory={handleCloseModalField}
                             currentCategory={currentCategoryField}
                             modalType={modalType}
-                            onSave={handleAddNewCategoryField}
+                            onSave={()=>handleAddNewCategoryField}
                         />
                     </div>
                 );
@@ -683,13 +723,13 @@ const AdminProduct = () => {
                         <Button variant="success" className="mb-4 me-3" onClick={handleCreateClick}>
                             <i className="bi bi-plus-square-fill"><span className='mx-1'>Tạo mới</span></i>
                         </Button>
-                        <Button className="btn-sd-admin mb-4 me-3" style={{ background: '#142239', border: 'none' }} onClick={exportExcel}>
-                            <i className="bi bi-file-earmark-excel"></i><span className='mx-1'>Export PDF</span>
-                            
+                        <Button className="btn-sd-admin mb-4 me-3" style={{ background: '#142239', border: 'none' }} onClick={exportPDF}>
+                        <i className="bi bi-file-earmark-pdf"></i><span className='mx-1'>Export PDF</span>
+
                         </Button>
                         <Button className="btn-sd-admin mb-4" style={{ background: '#142239', border: 'none' }} onClick={exportExcel}>
                             <i className="bi bi-file-earmark-excel"></i><span className='mx-1'>Export Excel</span>
-                            
+
                         </Button>
                     </div>
                     {/* <Button

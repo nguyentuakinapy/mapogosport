@@ -4,13 +4,13 @@ import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
 import { formatPrice } from "@/components/Utils/Format"
 
-interface ModalTableDetailCustomerProps {
+interface ModalTableDetailCustomerByFullNameProps {
     showModal: boolean;
     onClose: () => void;
     data: Booking[]
 }
 
-const ModalTableDetailCustomer = ({ showModal, onClose, data }: ModalTableDetailCustomerProps) => {
+const ModalTableDetailCustomerByFullName = ({ showModal, onClose, data }: ModalTableDetailCustomerByFullNameProps) => {
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -138,4 +138,4 @@ const ModalTableDetailCustomer = ({ showModal, onClose, data }: ModalTableDetail
     );
 };
 
-export default ModalTableDetailCustomer;
+export default ModalTableDetailCustomerByFullName;

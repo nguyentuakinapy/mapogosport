@@ -23,7 +23,7 @@ const Popup = () => {
       const timeDifference = midnight.getTime() - now.getTime();
       const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
       const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-      const seconds = Math.floor((timeDifference / 1000) % 60);
+      const seconds = Math.floor((timeDifference / 1000) % 60)
 
       return `${hours} : ${minutes} : ${seconds}`;
     };

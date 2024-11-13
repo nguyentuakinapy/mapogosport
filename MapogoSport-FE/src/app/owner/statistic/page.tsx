@@ -13,11 +13,19 @@ import ModalTableDetail from '@/components/Owner/modal/tableDetailStatictis.moda
 import CustomerLineChart from '@/components/Owner/Statistic/CustomerLineChart';
 import { userAgent } from 'next/server';
 import ModalTableDetailCustomer from '@/components/Owner/modal/tableDetailCustomer.modal';
+import ModalTableDetailCustomerByFullName from '@/components/Owner/modal/tableDetailCustomerByFullName.modal,';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import 'jspdf-autotable';
+import jsPDF from 'jspdf';
+import { RobotoBase64 } from '../../../../public/font/Roboto-Regular';
+import { toast } from 'react-toastify';
 
 
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [activeTabCustomer, setActiveTabCustomer] = useState('offline');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [bookingSuccess, setBookingSuccess] = useState<Booking[]>([]);
@@ -26,7 +34,7 @@ export default function Home() {
   const [owner, setOwner] = useState<Owner>();
   const [selectedFieldId, setSelectedFieldId] = useState<number | null>(null);
   const [selectSportFieldDetail, setSelectSportFieldDetail] = useState<any>([]);
-  const [sportFieldDetailIds, setSportFieldDetailIds] = useState<number[]>([]); 
+  const [sportFieldDetailIds, setSportFieldDetailIds] = useState<number[]>([]);
   const [revenueBySportFieldDetail, setRevenueBySportFieldDetail] = useState<any>([])
   const [chartData, setChartData] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -40,23 +48,32 @@ export default function Home() {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [customerData, setCustomerData] = useState<any[]>([]);
-  const [rankCustomer, setRankCustomer] = useState<any[]>([])
+  const [rankCustomerOffline, setRankCustomerOffline] = useState<any[]>([])
+  const [rankCustomerOnline, setRankCustomerOnline] = useState<any[]>([])
   const [selectedUsername, setSelectedUsername] = useState<string | null>(null)
   const [showModalRank, setShowModalRank] = useState(false);
+  const [showModalRankOffline, setShowModalRankOffline] = useState(false);
   const [bookingByUsernameModal, setBookingByUsernameModal] = useState<Booking[]>([])
+  const [bookingByFullNameOffline, setBookingByFullNameOffline] = useState<Booking[]>([])
   // Pagination
   const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-  const currentItems = rankCustomer.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(rankCustomer.length / itemsPerPage);
+  //Offline
+  const currentItems = rankCustomerOffline.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(rankCustomerOffline.length / itemsPerPage);
+  //Online
+  const currentItemsOnline = rankCustomerOnline.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPagesOnline = Math.ceil(rankCustomerOnline.length / itemsPerPage);
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
-
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeTabCustomer])
   const years = Array.from(new Array(10), (val, index) => currentYear - index);
 
   // Definition getOwner function
@@ -100,6 +117,11 @@ export default function Home() {
       fetchData();
     }
   }, [owner]);
+
+  const bookingIds = bookingSuccess.map(booking => booking.bookingId);
+  const bookingIdsString = bookingIds.join(',');
+  console.log("id Booking theo owner", bookingIdsString)
+
 
   // Fetch sportField by Owner
   useEffect(() => {
@@ -154,11 +176,11 @@ export default function Home() {
 
   //Fetch bookingdetail by sportField and ownerId
   useEffect(() => {
-    if (owner?.ownerId && sportFieldDetailIds.length > 0) {
+    if (owner?.ownerId && sportFieldDetailIds.length > 0 && bookingIdsString) {
       const fetchData = async () => {
         try {
           const idsString = sportFieldDetailIds.join(',');
-          const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportField/byowner/${idsString}/${owner?.ownerId}`);
+          const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportField/byowner/${idsString}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
           const data = await response.json();
           setBookingdetailBySportField(data)
           console.log("bookingDetail", data)
@@ -168,16 +190,21 @@ export default function Home() {
       }
       fetchData()
     }
-  }, [owner?.ownerId, sportFieldDetailIds])
+  }, [owner?.ownerId, sportFieldDetailIds, bookingIdsString])
+
+  //Calculate total price from booking details
+  const totalBookingPrice = bookingdetailBySportField.reduce((total, bookingDetail) => {
+    return total + bookingDetail.price;
+  }, 0);
 
   //Fetch data revenueField by sportFieldDetail
 
   useEffect(() => {
-    if (sportFieldDetailIds.length > 0) {
+    if (sportFieldDetailIds.length > 0 && bookingIdsString) {
       const fetchData = async () => {
         try {
           const idsString = sportFieldDetailIds.join(',');
-          const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportFieldDetail/${idsString}`);
+          const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportFieldDetail/${idsString}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
           const data = await response.json();
           setRevenueBySportFieldDetail(data)
           const formattedData = [
@@ -192,12 +219,9 @@ export default function Home() {
       }
       fetchData()
     }
-  }, [sportFieldDetailIds])
+  }, [sportFieldDetailIds, bookingIdsString])
 
-  // Calculate total price from booking details
-  const totalBookingPrice = bookingdetailBySportField.reduce((total, bookingDetail) => {
-    return total + bookingDetail.price;
-  }, 0);
+
 
   //Calculate total totalAmount from booking
   const totalAmountBooking = bookingSuccess.reduce((totalAmount, booking) => {
@@ -242,6 +266,9 @@ export default function Home() {
     }
   }, [owner, startDate, endDate]);
 
+  const bookingIdsDate = bookingSuccessByDate.map(booking => booking.bookingId);
+  const bookingIdsStringDate = bookingIdsDate.join(',');
+  console.log("id Booking theo owner by Date", bookingIdsStringDate)
 
   //Calculate total totalAmount from booking
   const totalAmountBookingByDate = bookingSuccessByDate.reduce((totalAmount, booking) => {
@@ -252,7 +279,7 @@ export default function Home() {
 
   //Fetch bookingdetail by sportField and ownerId by Date
   useEffect(() => {
-    if (owner?.ownerId && sportFieldDetailIds.length > 0) {
+    if (owner?.ownerId && sportFieldDetailIds.length > 0 && bookingIdsStringDate) {
       const fetchData = async () => {
         try {
           // Ensure endDate is set to startDate if only startDate is provided
@@ -270,7 +297,7 @@ export default function Home() {
 
           // Fetch data from the API
           const response = await fetch(
-            `http://localhost:8080/rest/bookingDetail/byOwner/bySportField/byDate/${idsString}/${owner?.ownerId}/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`
+            `http://localhost:8080/rest/bookingDetail/byOwner/bySportField/byDate/${idsString}/${bookingIdsStringDate}/Đã hoàn thành,Chưa bắt đầu/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`
           );
 
           if (!response.ok) {
@@ -287,7 +314,7 @@ export default function Home() {
 
       fetchData();
     }
-  }, [owner?.ownerId, sportFieldDetailIds, startDate, endDate]);
+  }, [owner?.ownerId, sportFieldDetailIds, bookingIdsStringDate, startDate, endDate]);
 
 
   // Calculate total price from booking details
@@ -298,7 +325,7 @@ export default function Home() {
   //Fetch data revenueField by sportFieldDetail by Date
 
   useEffect(() => {
-    if (sportFieldDetailIds.length > 0) {
+    if (sportFieldDetailIds.length > 0 && bookingIdsStringDate) {
       const fetchData = async () => {
         try {
           //set startDate for endDate when endDate is isEmty
@@ -310,7 +337,7 @@ export default function Home() {
             return utcDate.toISOString().split('T')[0];
           };
           const idsString = sportFieldDetailIds.join(',');
-          const response = await fetch(`http://localhost:8080/rest/bookingDetail/bySportField/byDate/${idsString}/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`);
+          const response = await fetch(`http://localhost:8080/rest/bookingDetail/bySportField/byDate/${idsString}/${bookingIdsStringDate}/Đã hoàn thành,Chưa bắt đầu/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`);
           const data = await response.json();
           const formattedData = [
             ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
@@ -324,7 +351,7 @@ export default function Home() {
       }
       fetchData()
     }
-  }, [sportFieldDetailIds, startDate, endDate])
+  }, [sportFieldDetailIds, bookingIdsStringDate, startDate, endDate])
 
   // Function handel detail table
 
@@ -338,7 +365,7 @@ export default function Home() {
     // Fetch modal data based on the provided id
     const fetchModalData = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/rest/bookingdetail/bysportFieldDetail/${id}`);
+        const response = await fetch(`http://localhost:8080/rest/bookingdetail/bysportFieldDetail/${id}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
         const data = await response.json();
         setBookingDetailBySpFDetail(data); // Store modal-specific data
         console.log("Booking Detail by SportFieldDetail for Modal", data);
@@ -406,14 +433,14 @@ export default function Home() {
     }
   }, [owner?.ownerId, selectedYear])
 
-  //Fetch rank customer
+  //Fetch rank customer offline
   useEffect(() => {
     if (owner?.ownerId) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`http://localhost:8080/rest/booking/customer/byOwner/byUsername/${owner?.ownerId}`)
+          const response = await fetch(`http://localhost:8080/rest/booking/customer/byOwner/byUsernameOffline/${owner?.ownerId}`)
           const data = await response.json()
-          setRankCustomer(data)
+          setRankCustomerOffline(data)
         } catch (error) {
           console.log("Error fetch data rank customer", error)
         }
@@ -422,14 +449,32 @@ export default function Home() {
     }
   }, [owner?.ownerId])
 
+  //Fetch rank customer online 
+  useEffect(() => {
+    if (owner?.ownerId) {
+      const fetchData = async () => {
+        try {
+          const response = await fetch(`http://localhost:8080/rest/booking/rank/customer/online/byOwerId/${owner?.ownerId}`)
+          const data = await response.json()
+          setRankCustomerOnline(data)
+
+        } catch (error) {
+          console.log("Error fetch data rank customer", error)
+        }
+      }
+      fetchData()
+    }
+  }, [owner?.ownerId])
+
+  // Detail modal rank by username
   const handleOpenModalRank = (username: string) => {
     setSelectedUsername(username); // Update state immediately
-    console.log("username",username)
+    console.log("username", username)
     setShowModalRank(true);
     // Fetch modal data based on the provided username
     const fetchModalData = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/rest/user/booking/${username}`);
+        const response = await fetch(`http://localhost:8080/rest/booking/rank/customer/online/${username}`);
         const data = await response.json();
         setBookingByUsernameModal(data); // Store modal-specific data
         console.log("Booking Detail Customer", data);
@@ -444,6 +489,140 @@ export default function Home() {
     setShowModalRank(false);
     setBookingByUsernameModal([]);
   }
+
+  //Detail modal rank by fullname
+  const handleOpenModalRankOffline = (fullname: string) => {
+    setSelectedUsername(fullname); // Update state immediately
+    console.log("fullName", fullname)
+    setShowModalRankOffline(true);
+    // Fetch modal data based on the provided username
+    const fetchModalData = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/rest/booking/detail/tableCustomer/byFullname/${fullname}`);
+        const data = await response.json();
+        setBookingByFullNameOffline(data); // Store modal-specific data
+        console.log("Booking Detail Customer Rank Offline", data);
+      } catch (error) {
+        console.log("Error fetching modal booking details", error);
+      }
+    };
+    fetchModalData();
+  };
+
+  const handleCloseModalRankOffline = () => {
+    setShowModalRankOffline(false);
+    setBookingByFullNameOffline([]);
+  }
+
+  const exportExcel = async () => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Loại sản phẩm');
+
+      worksheet.columns = [
+        { header: 'Số thứ tự', key: 'stt', width: 15 },
+        { header: 'Thời gian', key: 'time', width: 25 },
+        { header: 'Tên sân', key: 'name', width: 15 },
+        { header: 'Tổng doanh thu', key: 'totalRevenue', width: 20 },
+        { header: 'Doanh thu', key: 'revenue', width: 20 },
+        { header: 'Tỉ lệ', key: 'rate', width: 20 },
+      ];
+
+      chartData.slice(1).forEach((field, index) => {
+        worksheet.addRow({
+          stt: `#${index + 1}`,
+          time: `${new Date(field[2]).toLocaleDateString('en-GB')} / ${new Date(field[3]).toLocaleDateString('en-GB')}`,
+          name: field[0],
+          totalRevenue: formatPrice(totalBookingPrice),
+          revenue: formatPrice(field[1]),
+          rate: `${(field[1] / totalBookingPrice * 100).toFixed(1)}%`,
+        });
+      });
+
+      worksheet.eachRow((row) => {
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, 'Doanh thu.xlsx');
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+    }
+  };
+
+  const exportPDF = () => {
+    try {
+      const doc: any = new jsPDF();
+
+      doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
+      doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+      doc.setFont("Roboto");
+
+      doc.text("Danh Sách Doanh Thu", 14, 16);
+      const tableColumn = ["Số thứ tự", "Thời gian", "Tên sân", "Tổng doanh thu", "Doanh thu", "Tỉ lệ"];
+      const tableRows: string[][] = [];
+
+      chartData.slice(1).forEach((field, index) => {
+        const revenueData = [
+          `#${index + 1}`,
+          `${new Date(field[2]).toLocaleDateString('en-GB')} / ${new Date(field[3]).toLocaleDateString('en-GB')}`,
+          field[0],
+          formatPrice(totalBookingPrice),
+          formatPrice(field[1]),
+          `${(field[1] / totalBookingPrice * 100).toFixed(1)}%`,
+        ];
+        tableRows.push(revenueData);
+        doc.autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: 20,
+          theme: 'grid',
+          styles: {
+            font: 'Roboto',
+            fontSize: 10,
+            cellPadding: 2,
+            valign: 'middle',
+          },
+          columnStyles: {
+            0: { halign: 'left' },
+            1: { halign: 'left' },
+            2: { halign: 'center' },
+            3: { halign: 'right', cellWidth: 30 },
+            4: { halign: 'left' },
+            5: { halign: 'left' },
+          },
+          didParseCell: (data: any) => {
+            if (data.cell.text.length > 0) {
+              data.cell.text[0] = data.cell.text[0];
+            }
+          }
+        });
+      });
+
+
+
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const day = today.getDate();
+      const formattedMonth = month < 10 ? `0${month}` : month;
+      const formattedDay = day < 10 ? `0${day}` : day;
+
+      doc.save(`QuanLyLoai-Mapogo(${formattedDay}/${formattedMonth}).pdf`);
+      toast.success("Đã xuất file PDF thành công!");
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi trong quá trình xuất file! Vui lòng thử lại sau!");
+      console.log(error)
+    }
+
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -475,17 +654,17 @@ export default function Home() {
                     </select>
 
 
+
                   </div>
                   <div className="col-6 card-title text-end " style={{ fontSize: '20px' }}>
-
+                    <span className="price-amount">Tổng doanh thu: {formatPrice(
+                      startDate || endDate ? totalAmountBookingByDate ?? 0 : totalAmountBooking
+                    )} </span>
                   </div>
                 </div>
                 <div className="row">
-                  <div className="col-3">
-                    <span className="price-amount">{formatPrice(
-                      startDate || endDate ? totalAmountBookingByDate ?? 0 : totalAmountBooking
-                    )} /</span>
-                    <span className="price-amount">{formatPrice(
+                  <div className="col-3 mt-2">
+                    <span className="price-amount">Doanh thu theo khu vực: {formatPrice(
                       startDate || endDate ? totalBookingDetailPriceByDate ?? 0 : totalBookingPrice
                     )} </span>
                   </div>
@@ -499,6 +678,7 @@ export default function Home() {
                         endDate={endDate || undefined}
                         placeholderText="Từ ngày"
                         className="form-control start"
+                        dateFormat={"dd/MM/yyyy"}
                       />
                       <InputGroup.Text><i className="bi bi-three-dots"></i></InputGroup.Text>
                       <DatePicker
@@ -510,12 +690,30 @@ export default function Home() {
                         minDate={startDate || undefined}
                         placeholderText="Đến ngày"
                         className="form-control end"
+                        dateFormat={"dd/MM/yyyy"}
                       />
                     </InputGroup>
                   </div>
-                  <div className="col-2 ">
-                    <Button variant="outline-dark" className='float-end' style={{ fontSize: '15px', cursor: 'pointer' }}>Export  <FontAwesomeIcon icon={faFileExport} /></Button>
+                  <div className="col-2 d-flex align-items-center float-end">
+                    <select
+                      className="form-select float-end"
+                      style={{ fontSize: '15px', cursor: 'pointer' }}
+                      aria-label="Export format"
+                      onChange={(e) => {
+                        if (e.target.value === 'excel') {
+                          exportExcel();
+                        } else if (e.target.value === 'pdf') {
+                          exportPDF();
+                        }
+                      }}
+                    >
+                      <option value="">Xuất file </option>
+                      <option value="pdf">PDF</option>
+                      <option value="excel">Excel</option>
+                    </select>
+                    {/* <Button variant="outline-dark">Export</Button> */}
                   </div>
+
 
                 </div>
 
@@ -585,15 +783,17 @@ export default function Home() {
       case 'withdraw':
         return (
           <>
+            {/* Nội dung chính của switch 'withdraw' */}
             <ModalTableDetailCustomer showModal={showModalRank} onClose={handleCloseModalRank} data={bookingByUsernameModal} />
+            <ModalTableDetailCustomerByFullName showModal={showModalRankOffline} onClose={handleCloseModalRankOffline} data={bookingByFullNameOffline} />
             <div className="card mb-3">
               <div className="card-body">
                 <div className="row mt-0">
                   <div className="col-10 card-title d-flex">
                     <h4 style={{ fontSize: '20px', marginTop: '5px' }}> <i className="bi bi-box"></i> Khách hàng </h4>
                   </div>
-                  <div className="col-2 ">
-                    <Button variant="outline-dark" className='float-end' style={{ fontSize: '15px', cursor: 'pointer' }}>Export  <FontAwesomeIcon icon={faFileExport} /></Button>
+                  <div className="col-2">
+                    <Button variant="outline-dark" className='float-end' style={{ fontSize: '15px', cursor: 'pointer' }}>Export <FontAwesomeIcon icon={faFileExport} /></Button>
                   </div>
                 </div>
                 <div className="row">
@@ -603,13 +803,14 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            {/* Statictis Customer */}
+
+            {/* Thống kê khách hàng */}
             <div className='row'>
               <div className="row mt-0">
                 <div className="col-10 card-title d-flex">
                   <h4>Thống kê khách hàng</h4>
                 </div>
-                <div className="col-2 card-title text-end " style={{ fontSize: '20px' }}>
+                <div className="col-2 card-title text-end" style={{ fontSize: '20px' }}>
                   <select id="yearSelect" value={selectedYear} onChange={handleYearChange}>
                     {years.map((year) => (
                       <option key={year} value={year}>{year}</option>
@@ -631,131 +832,165 @@ export default function Home() {
                   </tr>
                 </thead>
                 <tbody>
-                  {customerData.slice(1).map((field, index) => {
-                    return (
-                      <tr key={index}>
-                        <td>{index + 1}</td>
-                        <td>
-                          {field[0]}
-                        </td>
-                        <td>{field[1]}</td>
-                      </tr>
-                    );
-                  })}
+                  {customerData.slice(1).map((field, index) => (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>{field[0]}</td>
+                      <td>{field[1]}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </Table>
             </div>
 
             <div>
-              <h4 className='bg-dark text-light p-3'>Bảng xếp hạng khách hàng</h4>
-              <Table striped bordered hover>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Họ và tên khách hàng</th>
-                    <th>Lượt đặt</th>
-                    <th>Chi tiết</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentItems.map((field, index) => {
-                    return (
-                      <tr key={index}>
-                        <td>{index + 1}</td>
-                        <td>
-                          {field[2]}
-                        </td>
-                        <td>{field[0]}</td>
-                        <td><button
-                          style={{ cursor: 'pointer' }}
-                          className="bg-success border-0"
-                          onClick={
-                            () => {
-                              handleOpenModalRank(field[1])
-                            }
-                          }
-                        >
-                          <i className="bi bi-eye-fill text-light"></i>
-                        </button></td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </Table>
-              <>
-                {totalPages > 1 && (
-                  <nav aria-label="Page navigation example">
-                    <ul className="pagination justify-content-center">
-                      {/* Nút về trang đầu tiên */}
-                      <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                        <a
-                          className="page-link"
-                          href="#"
-                          aria-label="First"
-                          onClick={() => handlePageChange(1)}
-                          title="Go to first page"
-                        >
-                          <span aria-hidden="true">&laquo;</span>
-                        </a>
-                      </li>
+              <h4 className='bg-dark text-light p-3'><i className="bi bi-graph-down me-2"></i>Bảng xếp hạng khách hàng</h4>
 
-                      {/* Hiển thị 5 trang tùy theo currentPage */}
-                      {Array.from({ length: totalPages }, (_, index) => {
-                        let startPage = 1;
-                        let endPage = 5;
+              {/* Nav Tab */}
+              <Nav variant="pills" activeKey={activeTabCustomer} onSelect={(selectedKey) => setActiveTabCustomer(selectedKey as string)} className="custom-tabs">
+                <Nav.Item>
+                  <Nav.Link eventKey="offline" className="tab-link">Khách hàng đặt Offline</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="online" className="tab-link">Khách hàng đặt Online</Nav.Link>
+                </Nav.Item>
+              </Nav>
 
-                        // Nếu tổng số trang lớn hơn 5
-                        if (totalPages > 5) {
-                          // Điều chỉnh để luôn hiển thị 5 trang
-                          if (currentPage > 3) {
-                            startPage = currentPage - 2;
-                            endPage = currentPage + 2;
-                            if (endPage > totalPages) {
-                              endPage = totalPages;
-                              startPage = totalPages - 4; // Đảm bảo vẫn hiển thị đủ 5 trang
-                            }
-                          }
-                        } else {
-                          // Nếu tổng số trang ít hơn hoặc bằng 5, hiển thị tất cả
-                          endPage = totalPages;
-                        }
-
-                        // Hiển thị các trang từ startPage đến endPage
-                        if (index + 1 >= startPage && index + 1 <= endPage) {
-                          return (
-                            <li
-                              key={index + 1}
-                              className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
-                              title={`Go to page ${index + 1}`}
-                            >
-                              <a
-                                className="page-link"
-                                href="#"
-                                onClick={() => handlePageChange(index + 1)}
+              {/* Nội dung Tab */}
+              <div className="tab-content mt-3">
+                {activeTabCustomer === "offline" && (
+                  <div>
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Họ và tên khách hàng</th>
+                          <th>Lượt đặt</th>
+                          <th>Chi tiết</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentItems.map((field, index) => (
+                          <tr key={index}>
+                            <td>{indexOfFirstItem + index + 1}</td>
+                            <td>{field[2]}</td>
+                            <td>{field[0]}</td>
+                            <td>
+                              <button
+                                style={{ cursor: 'pointer' }}
+                                className="bg-success border-0"
+                                onClick={() => handleOpenModalRankOffline(field[2])}
                               >
-                                {index + 1}
-                              </a>
-                            </li>
-                          );
-                        }
+                                <i className="bi bi-eye-fill text-light"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <nav aria-label="Page navigation example">
+                        <ul className="pagination justify-content-center">
+                          {/* First Page */}
+                          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                            <a className="page-link" style={{ cursor: 'pointer' }} aria-label="First" onClick={() => handlePageChange(1)} title="Go to first page">
+                              <span aria-hidden="true">&laquo;</span>
+                            </a>
+                          </li>
 
-                        return null;
-                      })}
-                      <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                        <a
-                          className="page-link"
-                          href="#"
-                          aria-label="Last"
-                          onClick={() => handlePageChange(totalPages)}
-                          title="Go to last page"
-                        >
-                          <span aria-hidden="true">&raquo;</span>
-                        </a>
-                      </li>
-                    </ul>
-                  </nav>
+                          {/* Page Numbers */}
+                          {Array.from({ length: totalPages }, (_, index) => {
+                            const pageNumber = index + 1;
+                            return (
+                              pageNumber >= Math.max(1, currentPage - 2) && pageNumber <= Math.min(totalPages, currentPage + 2) && (
+                                <li key={pageNumber} className={`page-item ${currentPage === pageNumber ? 'active' : ''}`}>
+                                  <a className="page-link" style={{ cursor: 'pointer' }} onClick={() => handlePageChange(pageNumber)}>{pageNumber}</a>
+                                </li>
+                              )
+                            );
+                          })}
+
+                          {/* Last Page */}
+                          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                            <a className="page-link" style={{ cursor: 'pointer' }} aria-label="Last" onClick={() => handlePageChange(totalPages)} title="Go to last page">
+                              <span aria-hidden="true">&raquo;</span>
+                            </a>
+                          </li>
+                        </ul>
+                      </nav>
+                    )}
+                  </div>
                 )}
-              </>
+                {activeTabCustomer === "online" && (
+                  <div>
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Họ và tên khách hàng</th>
+                          <th>Lượt đặt</th>
+                          <th>Chi tiết</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentItemsOnline.map((field, index) => (
+                          <tr key={index}>
+                            <td>{indexOfFirstItem + index + 1}</td>
+                            <td>{field[2]}</td>
+                            <td>{field[0]}</td>
+                            <td>
+                              <button
+                                style={{ cursor: 'pointer' }}
+                                className="bg-success border-0"
+                                onClick={() => handleOpenModalRank(field[1])}
+                              >
+                                <i className="bi bi-eye-fill text-light"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                    {/* Pagination */}
+                    {totalPagesOnline > 1 && (
+                      <nav aria-label="Page navigation example">
+                        <ul className="pagination justify-content-center">
+                          {/* First Page */}
+                          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                            <a className="page-link" style={{ cursor: 'pointer' }} aria-label="First" onClick={() => handlePageChange(1)} title="Go to first page">
+                              <span aria-hidden="true">&laquo;</span>
+                            </a>
+                          </li>
+
+                          {/* Page Numbers */}
+                          {Array.from({ length: totalPages }, (_, index) => {
+                            const pageNumber = index + 1;
+                            return (
+                              pageNumber >= Math.max(1, currentPage - 2) && pageNumber <= Math.min(totalPagesOnline, currentPage + 2) && (
+                                <li key={pageNumber} className={`page-item ${currentPage === pageNumber ? 'active' : ''}`}>
+                                  <a className="page-link" style={{ cursor: 'pointer' }} onClick={() => handlePageChange(pageNumber)}>{pageNumber}</a>
+                                </li>
+                              )
+                            );
+                          })}
+
+                          {/* Last Page */}
+                          <li className={`page-item ${currentPage === totalPagesOnline ? 'disabled' : ''}`}>
+                            <a className="page-link" style={{ cursor: 'pointer' }} aria-label="Last" onClick={() => handlePageChange(totalPagesOnline)} title="Go to last page">
+                              <span aria-hidden="true">&raquo;</span>
+                            </a>
+                          </li>
+                        </ul>
+                      </nav>
+                    )}
+                  </div>
+                )}
+              </div>
+
+
+
+
             </div>
           </>
         );

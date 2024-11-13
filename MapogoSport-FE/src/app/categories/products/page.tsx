@@ -140,6 +140,14 @@ const Categories = () => {
                             </h3>
 
                             {/* Product Item */}
+                            {currentItems.length === 0 ? (
+                                <div className='text-center' style={{marginTop:"15%"}}>
+                                    <h1 className='text-center'><i className="bi bi-bag-x"></i></h1>
+                                    <p>Không tìm thấy sản phẩm.</p>
+                                </div>
+                                
+                            ) : null
+                            }
                             {currentItems.map((product, index) => (
                                 <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
                                     <div nh-product={product.productId} className="product-item">

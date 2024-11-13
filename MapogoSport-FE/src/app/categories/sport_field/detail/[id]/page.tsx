@@ -48,6 +48,8 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [dataReview, setDataReview] = useState<Review[]>([]);
 
+    const [gallery, setGallery] = useState<GalleryField[]>([])
+
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             setStatusOnWeek();
@@ -94,6 +96,24 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
             getTime()
         };
     }, [sportField]);
+
+
+      // handel Gallery sportField
+
+      useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/rest/sportfield/gallery/${params.id}`)
+                const data = await response.json()
+                setGallery(data)
+                console.log("data hht", data)
+            } catch (error) {
+                console.log("Lỗi khi fetch data Gallery", error)
+            }
+        }
+        fetchData()
+    }, [])
+
 
     useEffect(() => {
         if (dataTimeSport.length > 0 && sportField?.sportFielDetails) {
@@ -494,6 +514,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         }
     };
 
+  
     if (isLoading) return <HomeLayout><div>Đang tải...</div></HomeLayout>;
     if (error) return <HomeLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></HomeLayout>;
 
@@ -519,7 +540,36 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                         </div>
                         <Row>
                             <Col lg={8}>
-                                <Image src="/img/demo-sport.jpg" width={850} height={450} rounded />
+                                {gallery.length > 0 ? (
+                                    <>
+                                        <div id="carouselExampleControls" className="carousel slide mt-3" data-bs-ride="carousel">
+                                            <div className="carousel-inner">
+                                                {gallery.map((galleryItem, index) => (
+                                                    <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
+                                                        <img
+                                                            src={`${galleryItem.image}`}
+                                                            className="d-block w-100 h-100"
+                                                            alt={`Gallery image ${index + 1}`}
+                                                            style={{ width: '100px', maxHeight: '450px', objectFit: 'cover', cursor: 'pointer' }} 
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                                                <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                <span className="visually-hidden">Previous</span>
+                                            </button>
+                                            <button className="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                                                <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                                                <span className="visually-hidden">Next</span>
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    sportField && <Image src={sportField.image} width={850} height={450} rounded />
+                                    
+                                )}
+                            
                             </Col>
                             <Col lg={4}>
                                 <div className="sportField-info-detail bg-white">
