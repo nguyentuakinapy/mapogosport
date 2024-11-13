@@ -1,6 +1,12 @@
 
 import { useData } from '@/app/context/UserContext';
+import { Stomp } from '@stomp/stompjs';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import SockJS from 'sockjs-client';
+import { formatDateNotime } from '../Utils/Format';
+import { usePathname } from 'next/navigation';
 
 interface HeaderProps {
     isAniActive: boolean;
@@ -31,8 +37,30 @@ const translations: { [key: string]: string } = {
 export default function Header({ isAniActive, toggleAni, weather }: HeaderProps) {
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
-
+    const [hideNotification, setHideNotification] = useState<boolean>(false);
+    const [notification, setNotification] = useState<NotificationUser[]>();
     const userData = useData();
+    const [checkNotification, setCheckNotification] = useState<number>();
+    const path = usePathname();
+
+    useEffect(() => {
+        if (userData) {
+            getNotification(userData.username)
+        }
+    }, [userData, checkNotification]);
+
+    const getNotification = async (username: string) => {
+        const response = await fetch(`http://localhost:8080/rest/user/notification/${username}`);
+        if (!response.ok) throw new Error("Không tìm thấy sân sắp tới");
+
+        const notification = await response.json() as NotificationUser[];
+        // if (notification?.length >= 1) {
+        setNotification(notification);
+        // }
+        if (checkNotification) {
+            toast.success(notification[notification.length - 1].title);
+        }
+    }
 
     const translate = (word: string): string => {
         return translations[word.toLowerCase()] || word;
@@ -63,6 +91,76 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
         const intervalId = setInterval(updateDateTime, 1000);
         return () => clearInterval(intervalId);
     }, []);
+
+
+
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            stompClient.subscribe('/topic/notification', (message) => {
+                setCheckNotification(Number(message.body))
+            });
+
+            stompClient.subscribe('/topic/username', (message) => {
+                getNotification(message.body);
+            });
+        });
+
+        return () => {
+            stompClient.disconnect();
+        };
+    }, []);
+
+    const handleViewNotification = (username: string) => {
+        fetch(`http://localhost:8080/rest/user/notification/${username}`, {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return
+            }
+            // toast.success('Cập nhật thành công!');
+        })
+    }
+
+    const handleIsReadNotification = (notificationId: number) => {
+        fetch(`http://localhost:8080/rest/user/notification/is/read/${notificationId}`, {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return
+            }
+            // toast.success('Cập nhật thành công!');
+        })
+        // setHideNotification(!hideNotification);
+    }
+
+    const handleDeleteNotification = (username: string) => {
+        fetch(`http://localhost:8080/rest/user/notification/${username}`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return
+            }
+            // toast.success('Cập nhật thành công!');
+        })
+    }
 
     return (
         <header className={`${isAniActive ? 'header-full' : 'header-normal'}`}>
@@ -98,22 +196,62 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                             <li className="nav-item me-2 ">
                                 <a href="" className="nav-link"><i className="bi bi-chat-left" style={{ fontSize: 'large' }}></i></a>
                             </li>
-                            <li className="nav-item me-2 ">
-                                <a href="" className="nav-link"><i className="bi bi-bell" style={{ fontSize: 'large' }}></i></a>
-                            </li>
-                            {/* <li className="nav-item dropdown" style={{ borderLeft: '1px solid' }}>
-                                <a href="#" className="nav-link d-flex align-items-center me-4" role="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <div className="img" style={{ backgroundImage: 'url()' }}></div>
-                                    <span>Nguyễn Tú</span>
+                            <li className="nav-item me-3" >
+                                <a onClick={() => setHideNotification(!hideNotification)} className="nav-link">
+                                    <i className="bi bi-bell" style={{ fontSize: 'large' }}></i>
                                 </a>
-                                <ul className="dropdown-menu">
-                                    <li><a className="dropdown-item" href="#"><i className="bi bi-person me-2"></i>Profile</a></li>
-                                    <li><a className="dropdown-item" href="#"><i
-                                        className="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                                </ul>
-                            </li> */}
-                            <span style={{ borderLeft: '1px solid' }} className='text-decoration-none demo me-3'><i className="bi bi-person-fill ms-3 me-1"></i>{userData?.fullname}</span>
+                                <span onClick={() => setHideNotification(!hideNotification)} style={{ top: '12%', left: '85%', fontSize: '10px' }}
+                                    className="position-absolute translate-middle badge rounded-pill bg-danger">
+                                    {notification ? notification.filter(item => item.isRead === false).length : 0}
+                                </span>
+                                <div className={`notification ${hideNotification ? 'd-block' : 'd-none'}`} >
+                                    <div className="d-flex align-items-center">
+                                        <h4 className='fw-bold text-danger'>Thông báo</h4>
+                                        <i onClick={() => {
+                                            userData && handleDeleteNotification(userData.username)
+                                        }} style={{ cursor: 'pointer', fontSize: '28px' }} className="ms-auto bi bi-trash3-fill"></i>
+                                    </div>
+                                    <button onClick={() => {
+                                        userData && handleViewNotification(userData.username)
+                                    }} style={{ backgroundColor: '#142239' }} className='btn w-100 ms-auto mb-2'>Đánh dấu tất cả là đã đọc</button>
+
+                                    {notification && notification?.length > 0 ?
+                                        notification.sort((a, b) => b.notificationId - a.notificationId).map(item => {
+                                            return (
+                                                <>
+                                                    <div className="box-comment-container mb-2"
+                                                        style={{
+                                                            backgroundColor: item.isRead ? '#f5f5f5' : '#142239'
+                                                        }}>
+                                                        <div className="d-flex justify-content-between align-items-center">
+                                                            <Link
+                                                                onClick={() => handleIsReadNotification(item.notificationId)}
+                                                                href={`${path.includes("admin") && item.order ? `/admin/order/${item.order.orderId}` : item.booking ? `/owner/booking-bill/detail/${item.booking.bookingId}` : ''}`}
+                                                                className="box-comment" style={{
+                                                                    fontSize: '15px',
+                                                                    color: item.isRead ? 'black' : undefined
+                                                                }}>
+                                                                <b>{item.title}</b>
+                                                                <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
+                                                                    <div className=''>{item.message}</div>
+                                                                    <div className='ms-auto'>{formatDateNotime(item.createdAt)}</div>
+                                                                </div>
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )
+                                        })
+                                        :
+                                        <div className='my-5 text-center'>
+                                            <b >BẠN CHƯA CÓ THÔNG BÁO NÀO</b>
+                                        </div>
+                                    }
+                                </div>
+                            </li>
+                            <span style={{ borderLeft: '1px solid' }} className='text-decoration-none demo me-3'>
+                                <div className="img ms-2 shadow" style={{ backgroundImage: `url(${userData?.avatar ? userData.avatar : ''})` }}></div>{userData?.fullname}
+                            </span>
                         </ul>
                     </nav>
                 </div>

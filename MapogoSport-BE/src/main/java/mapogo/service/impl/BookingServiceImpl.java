@@ -183,8 +183,9 @@ public class BookingServiceImpl implements BookingService {
 			Notification n = new Notification();
 			n.setUser(o.getUser());
 			n.setTitle("Đặt sân mới");
-			n.setMessage((String) b.get("fullName") + "- Vừa đặt sân. Tổng tiền: " + totalAmount);
+			n.setMessage(u.getFullname() + " Vừa đặt sân.");
 			n.setType("info");
+			n.setBooking(booking);
 			notificationDAO.save(n);
 		}
 	

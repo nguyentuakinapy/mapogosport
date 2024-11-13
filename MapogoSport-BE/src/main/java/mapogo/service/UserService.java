@@ -34,4 +34,10 @@ public interface UserService {
 	User findUserByBookingDetailId(Integer bookingDetailId);
 	
 	List<Notification> findNotificationByUsername(String username);
+	
+	void setViewNotification(String username);
+	
+	void deleteNotification(String username);
+	
+	void setIsReadNotification(Integer notificationId);
 }

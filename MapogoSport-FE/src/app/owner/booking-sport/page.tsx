@@ -24,6 +24,7 @@ type BookingDetails = {
     statusDtb: string;
     subscriptionKey: string;
 }
+
 type BookingsTypeOnWeek = {
     [time: string]: {
         [sport: string]: BookingDetails[];
@@ -41,6 +42,8 @@ export default function BookingSport() {
     const [owner, setOwner] = useState<Owner>();
     const [selectSport, setSelectSport] = useState<number>(0);
     const [checkBooking, setCheckBooking] = useState<number>();
+    const [checkNotification, setCheckNotification] = useState<number>();
+    const [checkOwner, setCheckOwner] = useState<number>();
 
     useEffect(() => {
         const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
@@ -49,6 +52,11 @@ export default function BookingSport() {
         stompClient.connect({}, () => {
             stompClient.subscribe('/topic/bookingDetail', (message) => {
                 setCheckBooking(Number(message.body))
+            });
+
+            stompClient.subscribe('/topic/notification', (message) => {
+                setCheckNotification(Number(message.body) + 1);
+                setCheckOwner(Number(message.body));
             });
         });
 
@@ -308,13 +316,23 @@ export default function BookingSport() {
             setIsFirstRender(false);
             return;
         }
-        refreshStatusBooking();
+        const timeoutId = setTimeout(() => {
+            refreshStatusBooking();
+
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+
     }, [checkDataStatus]);
 
     useEffect(() => {
         if (owner && checkBooking === owner.ownerId) {
             // toast.success("checkBooking" + checkBooking)
-            refreshStatusBooking();
+            const timeoutId = setTimeout(() => {
+                refreshStatusBooking();
+            }, 500);
+
+            return () => clearTimeout(timeoutId);
         }
     }, [checkBooking]);
 
@@ -364,7 +382,7 @@ export default function BookingSport() {
                             bookingId: 0,
                             fullName: "",
                             statusDtb: "",
-                            subscriptionKey: "" 
+                            subscriptionKey: ""
                         };
                     }
                     setBookingsOnDay(prevBookingsOnDay => ({
@@ -406,7 +424,7 @@ export default function BookingSport() {
 
                         let check = true;
 
-                        if (timeIndex >= 0 && item.status == "Chưa đá" && timeDate < currentDateTime) {
+                        if (timeIndex >= 0 && item.status == "Chưa bắt đầu" && timeDate < currentDateTime) {
                             // console.log(item.fullName);
                             fetch(`http://localhost:8080/rest/booking/detail/change/status/${item.bookingDetailId}`, {
                                 method: 'PUT',
@@ -424,7 +442,7 @@ export default function BookingSport() {
                                     status: "Đã đặt",
                                     bookingId: item.bookingDetailId,
                                     fullName: item.fullName,
-                                    statusDtb: check ? item.status : "Đã đá",
+                                    statusDtb: check ? item.status : "Đã hoàn thành",
                                     subscriptionKey: item.subscriptionKey
                                 };
                             } else if (statuses[index] && statuses[index].status == "Đã đặt") {
@@ -547,7 +565,7 @@ export default function BookingSport() {
 
                                     let check = true;
 
-                                    if (timeIndex >= 0 && item.status == "Chưa đá" && timeDate < currentDateTime) {
+                                    if (timeIndex >= 0 && item.status == "Chưa bắt đầu" && timeDate < currentDateTime) {
                                         // console.log(item.fullName);
                                         fetch(`http://localhost:8080/rest/booking/detail/change/status/${item.bookingDetailId}`, {
                                             method: 'PUT',
@@ -565,7 +583,7 @@ export default function BookingSport() {
                                                 status: "Đã đặt",
                                                 bookingId: item.bookingDetailId,
                                                 fullName: item.fullName,
-                                                statusDtb: check ? item.status : "Đã đá",
+                                                statusDtb: check ? item.status : "Đã hoàn thành",
                                                 subscriptionKey: item.subscriptionKey
                                             };
                                         } else if (sportData[sport][dayIndex].status === "Còn trống") {
@@ -769,7 +787,7 @@ export default function BookingSport() {
                                                 } else {
                                                     displayedBookingIds.add(bookingId);
                                                     return (
-                                                        <td
+                                                        <td id={'ngon'}
                                                             key={`${time}-${item.sportFielDetailId}-${dayIndex}`}
                                                             rowSpan={bookingCounts[bookingId]} // Gán rowSpan cho ô đầu tiên
                                                             sport-detail={dataSport &&
@@ -849,64 +867,33 @@ export default function BookingSport() {
 
     // Notification
     useEffect(() => {
-        const checkMinuteChange = async () => {
-
+        if (checkOwner === owner?.ownerId) {
             const now = new Date();
             const currentMinutes = now.getMinutes();
             console.log(currentMinutes);
 
-            // toast.success(Number(dataSport[selectSport].opening.split('h')[0]));
-            // toast.success(Number(dataSport[selectSport].closing.split('h')[0]));
-            // toast.success(Number(now.getHours()));
+            const dateNow = now.getFullYear().toString() + '-' + (now.getMonth() + 1).toString() + '-' + now.getDate().toString();
 
-            if ((currentMinutes === 0 || currentMinutes === 30) && !hasExecuted) {
-                const dateNow = now.getFullYear().toString() + '-' + (now.getMonth() + 1).toString() + '-' + now.getDate().toString();
+            const selectedSportData = dataSport[selectSport];
 
-                const selectedSportData = dataSport[selectSport];
-                if (!selectedSportData) {
-                    console.error("Selected sport data is invalid");
-                    return;
-                }
-
-                if (now.getHours() >= Number(selectedSportData.opening.split('h')[0]) &&
-                    now.getHours() <= Number(selectedSportData.closing.split('h')[0])) {
-
-                    if (!hasExecuted && currentMinutes === 0) {
-                        await fetchBookingNotification(dateNow, now.getHours().toString() + 'h30', selectedSportData.sportFieldId);
-                    } else if (!hasExecuted && currentMinutes === 30) {
-                        await fetchBookingNotification(dateNow, (now.getHours() + 1).toString() + 'h00', selectedSportData.sportFieldId);
-                    }
-
-                    // if (selectDate === 0) {
-                    const updatedBookingsOnDay: BookingsTypeOnDay = { ...bookingsOnDay };
-                    Object.entries(updatedBookingsOnDay).forEach(([time, statuses]) => {
-                        updatedBookingsOnDay[time] = [];
-                    });
-                    setBookingsOnDay(updatedBookingsOnDay);
-                    setDayOnWeek();
-                    // } else {
-                    const updatedBookingsOnWeek = { ...bookingsOnWeek };
-                    Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                        const sportDataTemporary = { ...sportData };
-                        Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
-                            sportDataTemporary[sport] = [];
-                        })
-                        updatedBookingsOnWeek[time] = sportDataTemporary;
-                    })
-                    setBookingsOnWeek(updatedBookingsOnWeek);
-                    setDayOnWeek();
-                    // }
-                }
-                hasExecuted = true;
-            } else if (currentMinutes !== 0 && currentMinutes !== 30) {
-                hasExecuted = false;
+            if (!selectedSportData) {
+                console.error("Selected sport data is invalid");
+                return;
             }
-        };
+            const getHetCuu = async () => {
+                if (!hasExecuted && currentMinutes === 0) {
+                    await fetchBookingNotification(dateNow, now.getHours().toString() + 'h30', selectedSportData.sportFieldId);
+                } else if (!hasExecuted && currentMinutes === 30) {
+                    await fetchBookingNotification(dateNow, (now.getHours() + 1).toString() + 'h00', selectedSportData.sportFieldId);
+                }
+                // toast.success("NGON")
+                // await fetchBookingNotification(dateNow, '22h00', selectedSportData.sportFieldId);
+            }
 
-        const intervalId = setInterval(checkMinuteChange, 30000);
-
-        return () => clearInterval(intervalId);
-    }, [selectDate, selectSport, dataSport]);
+            getHetCuu();
+            refreshStatusBooking();
+        }
+    }, [selectDate, selectSport, dataSport, checkBooking, checkNotification, checkOwner]);
 
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
     const [startTime, setStartTime] = useState("");
@@ -1000,7 +987,7 @@ export default function BookingSport() {
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
 
         const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
-        toast.success(selectedSportDetail?.sportFielDetailId)
+        // toast.success(selectedSportDetail?.sportFielDetailId)
         const responseBookingDetail = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${startTime}/${selectedSportDetail?.sportFielDetailId}/${dayStartBooking}`);
         if (!responseBookingDetail.ok) {
             throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
@@ -1097,7 +1084,7 @@ export default function BookingSport() {
         if (bookingNotification) {
             const timeoutId = setTimeout(() => {
                 setNotificationModal(true);
-            }, 1000);
+            }, 500);
 
             return () => clearTimeout(timeoutId);
         }

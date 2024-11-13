@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,7 +31,7 @@ public class Notification {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "NotificationId")
-	private Long notificationId;
+	private Integer notificationId;
 
 	@ManyToOne
 	@JoinColumn(name = "Username", nullable = false)
@@ -53,6 +54,15 @@ public class Notification {
 
 	@Column(name = "Updated_At")
 	private LocalDateTime updatedAt = LocalDateTime.now();
-	
-	
+
+	@ManyToOne
+	@JoinColumn(name = "Booking_Id", nullable = true)
+	@JsonManagedReference
+	private Booking booking = null;
+
+	@ManyToOne
+	@JoinColumn(name = "Order_Id", nullable = true)
+	@JsonManagedReference
+	private Order order = null;
+
 }

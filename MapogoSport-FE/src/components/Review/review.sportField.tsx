@@ -46,34 +46,49 @@ const ModalReviewSportField = (props: ReviewProps) => {
     const [rating, setRating] = useState(0); // Trạng thái cho rating
     const [comment, setComment] = useState(''); // Trạng thái cho bình luận
 
-    const handleRatingSubmit = () => {
+    const handleRatingSubmit = async () => {
         const username = localStorage.getItem('username');
-        if (username) {
-            fetch('http://localhost:8080/rest/fieldReview/save', {
+        if (!username) {
+            toast.warning("Vui lòng đăng nhập để thực hiện chức năng này!");
+            return;
+        }
+
+        try {
+            // Check if the user already reviewed this field
+            const existingReviewResponse = await fetch(`http://localhost:8080/rest/fieldReview/${fieldId}/user/${username}`);
+            const existingReview = await existingReviewResponse.json();
+
+            if (existingReview) {
+                toast.warning("Bạn chỉ có thể đánh giá một lần!");
+                return;
+            }
+
+            // Proceed with review submission
+            const response = await fetch('http://localhost:8080/rest/fieldReview/save', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     sportFieldId: fieldId,
                     username: username,
                     rating: rating,
                     comment: comment,
-                    datedAt: new Date()
+                    datedAt: new Date(),
                 })
-            }).then(res => res.json()).then(res => {
-                if (res) {
-                    toast.success("Gửi đánh giá thành công !");
-                    handleClose();
-                    mutate(`http://localhost:8080/rest/fieldReview/${fieldId}`);
-                } else {
-                    toast.error("Gửi đánh giá không thành công!");
-                }
             });
-        } else {
-            toast.warning("Vui lòng đăng nhập để thực hiện chức năng này!");
+
+            if (response.ok) {
+                toast.success("Gửi đánh giá thành công!");
+                handleClose();
+                mutate(`http://localhost:8080/rest/fieldReview/${fieldId}`);
+            } else {
+                toast.error("Gửi đánh giá không thành công!");
+            }
+        } catch (error) {
+            console.error("Lỗi khi gửi đánh giá:", error);
+            toast.error("Đã xảy ra lỗi khi gửi đánh giá. Vui lòng thử lại.");
         }
     };
+
 
     const handleClose = () => {
         setShowReviewModal(false);

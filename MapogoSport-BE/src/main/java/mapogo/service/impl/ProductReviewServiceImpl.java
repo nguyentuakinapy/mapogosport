@@ -2,29 +2,57 @@ package mapogo.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import mapogo.dao.ProductDAO;
 import mapogo.dao.ProductReviewDAO;
 import mapogo.dto.ProductHaveReviewDTO;
+import mapogo.dto.ProductReviewDTO;
+import mapogo.entity.Product;
+import mapogo.entity.ProductDetailSize;
 import mapogo.entity.ProductReview;
 import mapogo.service.ProductReviewService;
-
+import mapogo.service.ProductService;
 
 @Service
-public class ProductReviewServiceImpl implements ProductReviewService{
+public class ProductReviewServiceImpl implements ProductReviewService {
 	@Autowired
 	ProductReviewDAO proReviewDao;
+	@Autowired
+	ProductService productService;
+	@Autowired
+	ProductDAO productDao;
+	@Autowired
+	UserServiceImpl userImpl;
 
 	public List<ProductReview> findReviewsByProductId(int productId) {
 		return proReviewDao.findReviewsByProductId(productId);
 	}
 
-	public ProductReview save(ProductReview review) {
-		//Mỵ
-		review.setDatedAt(LocalDateTime.now());
-		return proReviewDao.save(review);
+	public ProductReviewDTO save(ProductReviewDTO reviewDTO) {
+		reviewDTO.setDatedAt(LocalDateTime.now());
+		// Convert DTO to entity before saving
+
+		Product product = productDao.findById(reviewDTO.getProductId()).orElseThrow(
+				() -> new NoSuchElementException("productId not found for ID: " + reviewDTO.getProductId()));
+		
+		ProductReview reviewEntity = new ProductReview();
+		reviewEntity.setProduct(product);
+		reviewEntity.setUser(userImpl.findByUsername(reviewDTO.getUserName()));
+		reviewEntity.setRating(reviewDTO.getRating());
+		reviewEntity.setComment(reviewDTO.getComment());
+		reviewEntity.setDatedAt(reviewDTO.getDatedAt());
+
+		// Save entity
+		ProductReview savedReview = proReviewDao.save(reviewEntity);
+
+		// Return DTO back after saving
+		return new ProductReviewDTO(savedReview.getProductReviewId(), savedReview.getProduct().getProductId(),
+				savedReview.getUser().getUsername(), savedReview.getRating(), savedReview.getComment(), savedReview.getDatedAt());
 	}
 
 	@Override

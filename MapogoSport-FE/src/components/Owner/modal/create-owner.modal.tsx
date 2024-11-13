@@ -57,7 +57,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
     }
 
     const handleClick = (ap: AccountPackage) => {
-        toast.success(ap.packageName)
+        // toast.success(ap.packageName)
         setAccountPackageTemporary(ap);
         setPage(false);
     }
@@ -139,6 +139,8 @@ const CreateOwnerModal = (props: OwnerProps) => {
             toast.warning("Số dư của bạn không đủ");
             // createOwnerAccount();
         } else {
+            toast.warning("Số dư của ádnjbhasdhjasdhiasod không đủ");
+
             // createOwnerAccount();
         }
 
@@ -331,9 +333,15 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                         onChange={(e) => setPaymentMethodId(Number(e.target.value))}
                                         className="form-select" aria-label="Default select example">
                                         {dataPaymentMethod && (
-                                            dataPaymentMethod.map((item) => (
-                                                <option key={item.paymentMethodId} value={item.paymentMethodId}>{item.name}</option>
-                                            ))
+                                            dataPaymentMethod.map((item) => {
+                                                if (item.paymentMethodId === 6) {
+                                                    return null;
+                                                } else {
+                                                    return (
+                                                        <option key={item.paymentMethodId} value={item.paymentMethodId}>{item.name}</option>
+                                                    )
+                                                }
+                                            })
                                         )}
                                     </select>
                                     <label>Phương thức thanh toán <b className="text-danger">*</b></label>
@@ -358,8 +366,10 @@ const CreateOwnerModal = (props: OwnerProps) => {
                 }
             </Modal.Body>
             <Modal.Footer className="d-flex justify-content-around">
-                <Button onClick={() => setPage(true)} className="btn btn-primary">Quay lại</Button>
-                <Button onClick={() => handleSubmit()} className="btn btn-danger">Thanh toán</Button>
+                {!page && (
+                    <><Button onClick={() => setPage(true)} className="btn btn-primary">Quay lại</Button>
+                        <Button onClick={() => handleSubmit()} className="btn btn-danger">Thanh toán</Button></>
+                )}
                 <Button onClick={() => {
                     setShowCreateOwnerModal(false), setTimeout(() => {
                         setPage(true)

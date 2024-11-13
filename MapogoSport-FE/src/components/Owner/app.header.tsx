@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
 import { formatDateNotime } from '../Utils/Format';
 import { Row } from 'react-bootstrap';
+import { usePathname } from 'next/navigation';
 interface HeaderProps {
     isAniActive: boolean;
     toggleAni: () => void;
@@ -40,6 +41,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     const userData = useData();
     const [checkBooking, setCheckBooking] = useState<number>();
     const [checkNotification, setCheckNotification] = useState<number>();
+    const path = usePathname();
 
     useEffect(() => {
         if (userData) {
@@ -52,8 +54,11 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
         if (!response.ok) throw new Error("Không tìm thấy sân sắp tới");
 
         const notification = await response.json() as NotificationUser[];
-        if (notification?.length >= 1) {
-            setNotification(notification);
+        // if (notification?.length >= 1) {
+        setNotification(notification);
+        // }
+        if (checkNotification) {
+            toast.success(notification[notification.length - 1].title);
         }
     }
 
@@ -102,7 +107,6 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
             });
 
             stompClient.subscribe('/topic/username', (message) => {
-                toast.success(message.body)
                 getNotification(message.body);
             });
         });
@@ -111,6 +115,55 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
             stompClient.disconnect();
         };
     }, []);
+
+    const handleViewNotification = (username: string) => {
+        fetch(`http://localhost:8080/rest/user/notification/${username}`, {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return
+            }
+            // toast.success('Cập nhật thành công!');
+        })
+    }
+
+    const handleIsReadNotification = (notificationId: number) => {
+        fetch(`http://localhost:8080/rest/user/notification/is/read/${notificationId}`, {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return
+            }
+            // toast.success('Cập nhật thành công!');
+        })
+        // setHideNotification(!hideNotification);
+    }
+
+    const handleDeleteNotification = (username: string) => {
+        fetch(`http://localhost:8080/rest/user/notification/${username}`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return
+            }
+            // toast.success('Cập nhật thành công!');
+        })
+    }
 
     return (
         <header className={`${isAniActive ? 'header-full' : 'header-normal'}`}>
@@ -160,32 +213,46 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                 <div className={`notification ${hideNotification ? 'd-block' : 'd-none'}`} >
                                     <div className="d-flex align-items-center">
                                         <h4 className='fw-bold text-danger'>Thông báo</h4>
-                                        <i className="bi bi-three-dots ms-auto"></i>
+                                        <i onClick={() => {
+                                            userData && handleDeleteNotification(userData.username)
+                                        }} style={{ cursor: 'pointer', fontSize: '28px' }} className="ms-auto bi bi-trash3-fill"></i>
                                     </div>
-                                    <button style={{ backgroundColor: '#142239' }} className='btn w-100 ms-auto mb-2'>Đánh dấu tất cả là đã đọc</button>
+                                    <button onClick={() => {
+                                        userData && handleViewNotification(userData.username)
+                                    }} style={{ backgroundColor: '#142239' }} className='btn w-100 ms-auto mb-2'>Đánh dấu tất cả là đã đọc</button>
 
-                                    {notification &&
+                                    {notification && notification?.length > 0 ?
                                         notification.sort((a, b) => b.notificationId - a.notificationId).map(item => {
                                             return (
                                                 <>
-                                                    <div className="box-comment-container mb-2">
+                                                    <div className="box-comment-container mb-2"
+                                                        style={{
+                                                            backgroundColor: item.isRead ? '#f5f5f5' : '#142239'
+                                                        }}>
                                                         <div className="d-flex justify-content-between align-items-center">
-                                                            <Link href={``}
-                                                                className="box-comment" style={{ fontSize: '15px' }}>
+                                                            <Link
+                                                                onClick={() => handleIsReadNotification(item.notificationId)}
+                                                                href={`${path.includes("owner") && item.booking ? `/owner/booking-bill/detail/${item.booking.bookingId}` : item.order ? `/admin/order/${item.order.orderId}` : ''}`}
+                                                                className="box-comment" style={{
+                                                                    fontSize: '15px',
+                                                                    color: item.isRead ? 'black' : undefined
+                                                                }}>
                                                                 <b>{item.title}</b>
                                                                 <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
-                                                                    <div className='me-2'>{item.message}</div>
-                                                                    <span>{formatDateNotime(item.createdAt)}</span>
+                                                                    <div className=''>{item.message}</div>
+                                                                    <div className='ms-auto'>{formatDateNotime(item.createdAt)}</div>
                                                                 </div>
                                                             </Link>
-                                                            <div className="btn-cmt" >
-                                                                <i className="bi bi-trash3-fill fs-5"></i>
-                                                            </div>
                                                         </div>
                                                     </div>
                                                 </>
                                             )
-                                        })}
+                                        })
+                                        :
+                                        <div className='my-5 text-center'>
+                                            <b >BẠN CHƯA CÓ THÔNG BÁO NÀO</b>
+                                        </div>
+                                    }
                                 </div>
                             </li>
                             <span style={{ borderLeft: '1px solid' }} className='text-decoration-none demo me-3'>
