@@ -26,12 +26,6 @@ const ModalUpdatePhone = (props: UserProps) => {
             toast.warning("Số điện thoại không tồn tại!");
             return;
         }
-        const resp = await fetch(`http://localhost:8080/rest/user/checkPhoneNumber/${newPhone}`);
-        const dataAPI = await resp.json();
-        if (dataAPI) {
-            toast.warning("Số điện thoại đã tồn tại! Vui lòng chọn số khác!");
-            return;
-        }
         setCheckButton(true);
         if (timeLeft) {
             clearInterval(timeLeft);

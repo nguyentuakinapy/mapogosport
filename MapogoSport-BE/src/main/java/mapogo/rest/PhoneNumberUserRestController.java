@@ -38,9 +38,4 @@ public class PhoneNumberUserRestController {
 	public void updatePhoneNumber(@PathVariable("phoneNumberUserId") Integer phoneNumberUserId, @RequestBody PhoneNumberUser updatePhoneNumber) {
 		phoneNumberUserService.updatePhoneNumberUser(phoneNumberUserId, updatePhoneNumber);
 	}
-	
-	@GetMapping("/user/checkPhoneNumber/{phoneNumber}")
-	public PhoneNumber getCheck(@PathVariable("phoneNumber") String phoneNumber) {
-		return phoneNumberUserService.getCheckPhoneNumber(phoneNumber);
-	}
 }

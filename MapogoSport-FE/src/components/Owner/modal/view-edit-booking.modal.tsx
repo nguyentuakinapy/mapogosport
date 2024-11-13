@@ -17,7 +17,6 @@ interface OwnerProps {
     paymentMethod?: PaymentMethod
     sport?: SportField;
     bookingBySubscriptionKey?: BookingDetail[];
-
 }
 
 const BookingModal = (props: OwnerProps) => {
@@ -26,8 +25,11 @@ const BookingModal = (props: OwnerProps) => {
 
     const [editBooking, setEditBooking] = useState<boolean>(true);
     const [dateBooking, setDateBooking] = useState<string>();
+    const [dateBookingTemporary, setDateBookingTemporary] = useState<string>();
     const [idSportDetail, setIdSportDetail] = useState<number>();
+    const [idSportDetailTemporary, setIdSportDetailTemporary] = useState<number>();
     const [startTimeBooking, setStartTimeBooking] = useState<string>();
+    const [startTimeBookingTemporary, setStartTimeBookingTemporary] = useState<string>();
     const [endTimeBooking, setEndTimeBooking] = useState<string>();
     const [confirmData, setConfirmData] = useState<boolean>(false);
     const [applyOne, setApplyOne] = useState<boolean>(true);
@@ -36,9 +38,12 @@ const BookingModal = (props: OwnerProps) => {
 
     useEffect(() => {
         setDateBooking(bookingDetailData?.date);
+        setDateBookingTemporary(bookingDetailData?.date);
         setStartTimeBooking(bookingDetailData?.startTime);
+        setStartTimeBookingTemporary(bookingDetailData?.startTime);
         setEndTimeBooking(bookingDetailData?.endTime);
         setIdSportDetail(bookingDetailData?.sportFieldDetail.sportFielDetailId);
+        setIdSportDetailTemporary(bookingDetailData?.sportFieldDetail.sportFielDetailId);
     }, [bookingDetailData])
 
     const handleCancelBookingDetail = () => {
@@ -105,9 +110,7 @@ const BookingModal = (props: OwnerProps) => {
 
         if (option && time) {
             if (checkTime) {
-                if (hourClose == startHours && minuteClose == startMinutes) {
-                    toast.success("Vượt quá thời gian đóng cửa!")
-                } else if (timeBookingStart && timeBookingEnd &&
+                if (timeBookingStart && timeBookingEnd &&
                     (Number(timeBookingStart[1]) * 60 + Number(timeBookingStart[2]))
                     == (Number(timeBookingEnd[1]) * 60 + Number(timeBookingEnd[2]) - 30)) {
                     toast.success("Thời gian đặt cách nhau tối thiểu 30 phút!")
@@ -115,7 +118,8 @@ const BookingModal = (props: OwnerProps) => {
                     setStartTimeBooking(increaseTime(time))
                 }
             } else {
-                if (hourClose == startHours && minuteClose == startMinutes) {
+                if (timeBookingEnd &&
+                    sport?.closing === timeBookingEnd[1].toString() + "h" && minuteClose === Number(timeBookingEnd[2])) {
                     toast.success("Vượt quá thời gian đóng cửa!")
                 } else if (startTimeBooking && endTimeBooking &&
                     calculateTimeDifference(startTimeBooking, endTimeBooking) / 30 >= 6) {
@@ -125,14 +129,15 @@ const BookingModal = (props: OwnerProps) => {
                 }
             }
         } else if (time) {
+
             if (checkTime) {
-                if (checkDay && startHours === hourToday && minuteToday === startMinutes) {
+                if (checkDay && startHours <= hourToday && minuteToday <= startMinutes) {
                     toast.success("Vượt quá thời gian cần đặt hiện tại!")
-                } else if (hourOpen == startHours && minuteOpen == startMinutes) {
-                    toast.success("Vượt quá thời gian mở cửa!")
                 } else if (startTimeBooking && endTimeBooking &&
                     calculateTimeDifference(startTimeBooking, endTimeBooking) / 30 >= 6) {
                     toast.success("Chỉ được đặt tối đa 3 tiếng!")
+                } else if (sport?.opening === startHours.toString() + "h" && minuteOpen === startMinutes) {
+                    toast.success("Vượt quá thời gian mở cửa!")
                 } else {
                     setStartTimeBooking(reduceTime(time))
                 }
@@ -196,56 +201,58 @@ const BookingModal = (props: OwnerProps) => {
 
 
         if (applyOne) {
+            if (dateBookingTemporary != dateBooking && idSportDetailTemporary != idSportDetail) {
+                if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
+                    for (const time of dataTimeOnStage) {
+                        const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
+                        // console.log(result);
 
-            if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
-                for (const time of dataTimeOnStage) {
-                    const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
-                    // console.log(result);
-
-                    if (result) {
-                        checkTime = true;
+                        if (result) {
+                            checkTime = true;
+                        }
                     }
                 }
-            }
 
-            if (checkTime) {
-                toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
-                return
-            }
+                if (checkTime) {
+                    toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
+                    return
+                }
+            } else {
+                try {
+                    const response = await fetch(
+                        `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${dateBooking}`
+                    );
 
-            try {
-                const response = await fetch(
-                    `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${dateBooking}`
-                );
+                    if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+                    const text = await response.text();
 
-                if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
-                const text = await response.text();
-
-                if (text) {
-                    const dataBooking = JSON.parse(text) as BookingDetail[];
-                    if (dataBooking && Object.keys(dataBooking).length > 0) {
-                        for (const item of dataBooking) {
-                            for (const time of dataTimeOnStage) {
-                                const result = isTimeWithinRange(item.startTime, item.endTime, time);
-                                if (!result) {
-                                    continue;
-                                } else if (item.endTime == time) {
-                                    continue;
-                                } else {
-                                    if (item.bookingDetailId == bookingDetailData?.bookingDetailId) {
+                    if (text) {
+                        const dataBooking = JSON.parse(text) as BookingDetail[];
+                        if (dataBooking && Object.keys(dataBooking).length > 0) {
+                            for (const item of dataBooking) {
+                                for (const time of dataTimeOnStage) {
+                                    const result = isTimeWithinRange(item.startTime, item.endTime, time);
+                                    if (!result) {
+                                        continue;
+                                    } else if (item.endTime == time) {
                                         continue;
                                     } else {
-                                        isAvailable = false;
-                                        break;
+                                        if (item.bookingDetailId == bookingDetailData?.bookingDetailId) {
+                                            continue;
+                                        } else {
+                                            isAvailable = false;
+                                            break;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                } catch (error) {
+                    console.error("API or JSON parsing error:", error);
                 }
-            } catch (error) {
-                console.error("API or JSON parsing error:", error);
             }
+
         } else {
             if (bookingBySubscriptionKey && dateBooking) {
                 const date = new Date(dateBooking).setHours(0, 0, 0, 0);
@@ -618,26 +625,39 @@ const BookingModal = (props: OwnerProps) => {
                     <Row>
                         <Col>
                             <div className="d-flex  justify-content-between">
-                                {bookingDetailData &&
-                                    new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                        new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
-                                            <>
+                                {bookingDetailData && (
+                                    <>
+                                        {/* Kiểm tra ngày hiện tại và ngày đặt */}
+                                        {new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) &&
+                                            (new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
                                                 <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                                                     <i
                                                         className="bi bi-pencil-square ms-2 text-dark"
                                                         onClick={() => setEditBooking(!editBooking)}
                                                         style={{ cursor: 'pointer' }}
                                                     />
+                                                </OverlayTrigger>
+                                            ) : (
+                                                new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                                    <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
+                                                        <i className="bi bi-plus-lg" style={{ cursor: 'pointer' }} />
+                                                    </OverlayTrigger>
+                                                )
+                                            ))
+                                        }
 
-                                                </OverlayTrigger>
-                                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name} </h6>
+                                        <h6 className="text-uppercase text-danger m-auto fw-bold text-center">
+                                            Thông tin đặt - {bookingDetailData?.sportFieldDetail.name}
+                                        </h6>
+
+                                        {/* Hiển thị điều kiện tương tự lần thứ hai */}
+                                        {new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) &&
+                                            (new Date().getHours() < parseInt(bookingDetailData.endTime.split('h')[0]) ? (
                                                 <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
-                                                    <i className="bi bi-plus-lg"></i>
+                                                    <i className="bi bi-plus-lg" style={{ cursor: 'pointer' }} />
                                                 </OverlayTrigger>
-                                            </>
-                                        ) : (
-                                            new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                                <>
+                                            ) : (
+                                                new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
                                                     <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                                                         <i
                                                             className="bi bi-pencil-square ms-2 text-dark"
@@ -645,14 +665,12 @@ const BookingModal = (props: OwnerProps) => {
                                                             style={{ cursor: 'pointer' }}
                                                         />
                                                     </OverlayTrigger>
-                                                    <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin đặt - {bookingDetailData?.sportFieldDetail.name} </h6>
-                                                    <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
-                                                        <i className="bi bi-plus-lg"></i>
-                                                    </OverlayTrigger>
-                                                </>
-                                            )
-                                        )
-                                    )}
+                                                )
+                                            ))
+                                        }
+                                    </>
+                                )}
+
                             </div>
                             <FloatingLabel controlId="floatingSelectTime" label="Chọn thời gian" className="mb-2">
                                 <Form.Select
@@ -687,10 +705,35 @@ const BookingModal = (props: OwnerProps) => {
                                 </FloatingLabel>
                                 {!editBooking && (
                                     <>
-                                        <Button disabled={editBooking} onClick={() => changeTime(false, true, startTimeBooking)} variant="outline-secondary mb-2" id="button-addon1">
-                                            <i className="bi bi-chevron-up"></i>
+                                        <Button
+                                            disabled={
+                                                editBooking ||
+                                                (() => {
+                                                    if (!startTimeBooking) return true;
+                                                    const [hours, minutes] = startTimeBooking.split('h').map(Number);
+                                                    const bookingTime = new Date();
+                                                    bookingTime.setHours(hours, minutes, 0, 0); // Đặt giờ và phút từ startTimeBooking
+                                                    return bookingTime.getTime() <= Date.now(); // So sánh với thời gian hiện tại
+                                                })()
+                                            }
+                                            onClick={() => changeTime(false, true, startTimeBooking)}
+                                            variant="outline-secondary mb-2"
+                                            id="button-addon1"
+                                        >    <i className="bi bi-chevron-up"></i>
                                         </Button>
-                                        <Button disabled={editBooking} onClick={() => changeTime(true, true, startTimeBooking)} variant="outline-secondary mb-2" id="button-addon1">
+
+                                        <Button
+                                            disabled={
+                                                editBooking ||
+                                                (() => {
+                                                    if (!startTimeBooking) return true;
+                                                    const [hours, minutes] = startTimeBooking.split('h').map(Number);
+                                                    const bookingTime = new Date();
+                                                    bookingTime.setHours(hours, minutes, 0, 0); // Đặt giờ và phút từ startTimeBooking
+                                                    return bookingTime.getTime() <= Date.now(); // So sánh với thời gian hiện tại
+                                                })()
+                                            }
+                                            onClick={() => changeTime(true, true, startTimeBooking)} variant="outline-secondary mb-2" id="button-addon1">
                                             <i className="bi bi-chevron-down"></i>
                                         </Button>
                                     </>

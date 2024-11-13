@@ -1,21 +1,21 @@
-import BookingModal from "@/components/Owner/modal/booking.modal";
 import { useEffect, useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
-import DatePicker from "react-datepicker";
+import { Button, Form, Modal } from "react-bootstrap"
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
+import CheckoutModal from '@/components/Booking/booking.Checkout';
 
 interface SearchBookingProps {
     showSearchBookingModal: boolean;
     setSearchShowBookingModal: (v: boolean) => void;
     dataTimeSport: string[];
-    sportField?: SportField;
+    sportField?: SportField | null;
 }
 
-const SearchBookingModal = (props: SearchBookingProps) => {
+const SearchSportField = (props: SearchBookingProps) => {
     const { showSearchBookingModal, setSearchShowBookingModal, sportField } = props;
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
-    const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
     const [selectedSportType, setSelectedSportType] = useState<number | null>(null);
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
     const [startTime, setStartTime] = useState("");
@@ -100,7 +100,6 @@ const SearchBookingModal = (props: SearchBookingProps) => {
         if (index !== -1) {
             newData.splice(0, index);
         }
-        setDataTimeSport((prevData) => [...prevData, ...newData]);
         const modifiedValidTimes = newData.slice(0, -2);
         setValidTimes(modifiedValidTimes);
     }, [operatingTime, opening]);
@@ -156,6 +155,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
     };
 
     const handleClose = () => {
+        setSelectedDate('');
         setSearchShowBookingModal(false);
     }
     return (
@@ -173,7 +173,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
                                     onChange={handleDateChange} className="form-control" placeholderText="Chọn ngày đặt"
                                     dateFormat="dd/MM/yyyy" minDate={new Date()} required />
                             </Form.Group>
-                            <Form.Group controlId="formTimeInput" className='mb-2 '>
+                            <Form.Group controlId="formTimeInput" className='mb-2'>
                                 <Form.Select onChange={(e) => setSelectedTime(e.target.value)} defaultValue="" id="formTimeInput">
                                     <option value="" disabled>Chọn thời gian đặt</option>
                                     {validTimes.map((time, index) => (
@@ -200,12 +200,14 @@ const SearchBookingModal = (props: SearchBookingProps) => {
                     </Button>
                 </Modal.Footer>
             </Modal >
-            <BookingModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
+            <CheckoutModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
                 sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
                 sport={sportField} owner={sportField?.owner}
-                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey} />
+                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus}
+                startTimeKey={startTimeKey}
+            />
         </>
     )
 }
 
-export default SearchBookingModal;
+export default SearchSportField;

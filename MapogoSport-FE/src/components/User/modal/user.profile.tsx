@@ -111,7 +111,7 @@ const ProfileContent: React.FC<ProfileContentProps> = React.memo(({ usernameFetc
                                 <Form.Label className='dateLabel'>Ngày sinh</Form.Label>
                             </Form.Floating>
                         </Form.Group>
-
+        
                         <Form.Group className="mb-3">
                             <Form.Label className='me-1'><b>Email:</b></Form.Label>
                             {email}

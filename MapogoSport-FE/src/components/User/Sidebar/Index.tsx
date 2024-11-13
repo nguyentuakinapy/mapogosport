@@ -4,8 +4,10 @@ import '../types/user.scss'
 import useLocalStorage from "../useLocalStorage";
 import SidebarItem from "./SideBarItem";
 import { useEffect, useState } from 'react';
-import useSWR from 'swr';
 import { useData } from '@/app/context/UserContext';
+import Image from 'react-bootstrap/Image';
+import { toast } from 'react-toastify';
+import { mutate } from 'swr';
 
 const menuGroups = [
     {
@@ -43,9 +45,7 @@ const menuGroups = [
 const Sidebar = () => {
     const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
     const pathname = usePathname();
-
     const userData = useData();
-
     const [name, setName] = useState('');
     const [avatar, setAvatar] = useState<string>();
 
@@ -61,21 +61,44 @@ const Sidebar = () => {
     useEffect(() => {
         if (userData) {
             setName(userData.fullname || '');
-            setAvatar(userData.avatar ? userData.avatar : 'avatar-init.gif');
+            setAvatar(userData.avatar ? userData.avatar : '');
         }
     }, [userData]);
+
+    const handleAvatarChange = async (event: any) => {
+        const file = event.target.files[0];
+        if (file) {
+            const formData = new FormData();
+            formData.append("avatar", file);
+            try {
+                const response = await fetch(`http://localhost:8080/rest/user/avatar/${userData?.username}`, {
+                    method: 'POST',
+                    body: formData,
+                });
+                if (!response) {
+                    toast.error(`Thêm ảnh không thành công! Vui lòng thử lại sau!`);
+                    return;
+                }
+                const newAvatarUrl = await response.text();
+                setAvatar(newAvatarUrl);
+                toast.success("Thêm ảnh thành công!");
+                mutate(`http://localhost:8080/rest/user/avatar/${userData?.username}`);
+            } catch (error) {
+                console.error("Thêm ảnh không thành công: ", error);
+            }
+        }
+    };
 
     return (
         <div className="menu-user" style={{ height: '100%' }}>
             <div className="text-center">
                 <div className="avatar-upload">
                     <div className="avatar-edit">
-                        <input type="file" name="avatar" id="imageUpload"
-                            accept="image/jpeg, image/png" style={{ display: 'none' }} />
+                        <input type="file" id="imageUpload" accept="image/*" onChange={handleAvatarChange} />
                         <label htmlFor="imageUpload" className="btn btn-link"> Sửa </label>
                     </div>
                     <div className="avatar-preview">
-                        <div style={userData ? { backgroundImage: `url("/images/${avatar}")` } : { backgroundImage: `url("/images/avatar-init.gif")` }}></div>
+                        <div style={userData?.avatar ? { backgroundImage: `url(${avatar})` } : { backgroundImage: `url("/images/avatar-init.gif")` }}></div>
                     </div>
                 </div>
                 <div className="text-dark fw-bold mb-3">{name}</div>

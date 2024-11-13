@@ -60,7 +60,7 @@ public class SportField implements Serializable{
     @Column(name = "Decription", nullable = false)
     private String decription;
 
-    @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sportField", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<SportFieldDetail> sportFielDetails;
 
