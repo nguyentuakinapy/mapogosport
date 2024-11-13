@@ -10,6 +10,7 @@ import { formatDateVN } from '@/components/Utils/Format';
 import CheckoutModal from '@/components/Booking/booking.Checkout';
 import ModalReviewSportField from '@/components/Review/review.sportField';
 import '../[id]/BookingDetail.scss';
+import axios from 'axios';
 
 type BookingsTypeOnWeek = {
     [time: string]: {
@@ -493,6 +494,30 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
             toast.warning("Vui lòng chọn ngày và giờ trước khi tìm kiếm.");
         }
     };
+    const [filteredData, setFilteredData] = useState(null); // State to store filtered reviews
+    const [rating, setRating] = useState(null);
+    const handleClick = (value) => {
+        setRating(value);
+
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/rest/find-fielreview-by-rating/${params.id}/${value}`);
+                if (response.data) {
+                    setFilteredData(response.data); // Update filtered data with reviews matching the rating
+                    // console.log("Filtered reviews by rating:", response.data);
+                } else {
+                    console.log("No reviews found for this rating.");
+
+                }
+            } catch (error) {
+                console.log("Error fetching rating data:", error);
+
+            }
+        };
+
+        fetchData();
+        // console.log(`Rating selected: ${value}`);
+    };
 
     if (isLoading) return <HomeLayout><div>Đang tải...</div></HomeLayout>;
     if (error) return <HomeLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></HomeLayout>;
@@ -668,29 +693,44 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                     <Button variant="danger" onClick={() => setShowReviewModal(true)}>Đánh giá ngay</Button>
                 </div>
                 <h5 className='ms-3'>Bình luận</h5>
-                {dataReview.sort((a: any, b: any) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime()) // Sắp xếp theo ngày từ mới đến cũ
-                    .slice(0, visibleCount) // Hiển thị số bình luận theo visibleCount
-                    .map((review: any) => (
+                <div className="d-flex ms-4">
+                    {[5, 4, 3, 2, 1].map((value) => (
+                        <button
+                            key={value}
+                            type="button"
+                            className='btn btn-primary ms-2'
+                            onClick={() => handleClick(value)}
+                        >
+                            {value} ★
+                        </button>
+                    ))}
+                </div>
+
+
+                {/* // Rendering filtered reviews if available, otherwise full review data */}
+                {(filteredData || dataReview)
+                    .sort((a, b) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime())
+                    .slice(0, visibleCount)
+                    .map((review) => (
                         <Row className="mt-4 ms-5" key={review.fieldReviewId}>
                             <Col>
                                 <Image
                                     src="/img/avatar.jpg"
                                     alt="Hình ảnh thu nhỏ"
-                                    width={35} // Kích thước hình ảnh thu nhỏ
+                                    width={35}
                                     height={35}
-                                    className="rounded-circle" // Sử dụng lớp tiện ích Bootstrap để tạo hình tròn
+                                    className="rounded-circle"
                                 />
-                                <span className='me-4'>{review.user.fullname}</span> {/* Truy cập fullname từ user */}
+                                <span className='me-4'>{review.user.fullname}</span>
                                 <i className="bi bi-calendar me-2"></i>
                                 <span>{new Date(review.datedAt).toLocaleString('vi-VN')}</span>
 
                                 <div>
-                                    {/* Hiển thị đánh giá sao dựa trên giá trị rating */}
                                     <span className="text-warning ms-5 fs-3">
-                                        {'★'.repeat(review.rating)} {/* Hiển thị sao đầy */}
+                                        {'★'.repeat(review.rating)}
                                     </span>
                                     <br />
-                                    <span className='ms-5'>{review.comment}</span> {/* Hiển thị bình luận đánh giá */}
+                                    <span className='ms-5'>{review.comment}</span>
                                 </div>
                             </Col>
                         </Row>

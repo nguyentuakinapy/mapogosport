@@ -2,8 +2,10 @@ package mapogo.rest;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.dto.FieldReviewDTO;
 import mapogo.entity.FieldReview;
+import mapogo.entity.ProductReview;
 import mapogo.service.FieldReviewService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,4 +46,21 @@ public class FieldReviewRestController {
 	public void deleteByUser(@PathVariable("fieldReviewId") Integer fieldReviewId) {
 		fieldReviewService.deleteReviewByUser(fieldReviewId);
 	}
+	@GetMapping("/find-fielreview-by-rating/{fieldId}/{rating}")
+	public List<FieldReview> getMethodName(@PathVariable("fieldId") Integer fieldId,
+			@PathVariable("rating") Integer rating) {
+		return fieldReviewService.findReviewByRating(fieldId, rating);
+	}
+	
+	@GetMapping("/{fieldId}/user/{username}")
+	public ResponseEntity<?> checkUserReview(@PathVariable Integer fieldId, @PathVariable String username) {
+	    Optional<FieldReview> existingReview = fieldReviewService.findBySportField_SportFieldIdAndUser_Username(fieldId, username);
+	    
+	    if (existingReview.isPresent()) {
+	        return ResponseEntity.ok(existingReview.get());
+	    } else {
+	        return ResponseEntity.noContent().build();
+	    }
+	}
+
 }

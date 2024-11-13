@@ -11,5 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AccountPackageBenefitDTO {
      Integer accountPackageBenefitId;
+     AccountPackageDTO accontPackage;
      BenefitDTO benefit; // Lợi ích đi kèm trong gói
 }
