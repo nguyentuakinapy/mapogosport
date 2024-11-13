@@ -199,23 +199,17 @@ public class BookingServiceImpl implements BookingService {
 		return bookingDAO.findBookingByOwnerAndStatus(ownerId, status);
 	}
 
+
 	@Override
-	public List<BookingDetail> findBookingDetailBySportFieldAndOwner(List<Integer> sportFielDetailIds,
-			Integer ownerId) {
+	public List<Object[]> findRevenueBySportFieldDetailIds(List<Integer> sportFieldDetailIds, List<Integer> bookingId, List<String> status) {
 		// TODO Auto-generated method stub
-		return bookingDAO.findBookingDetailBySportFieldIdsAndOwner(sportFielDetailIds, ownerId);
+		return bookingDAO.findRevenueBySportFieldDetailIds(sportFieldDetailIds, bookingId, status);
 	}
 
 	@Override
-	public List<Object[]> findRevenueBySportFieldDetailIds(List<Integer> sportFieldDetailIds) {
+	public List<BookingDetail> findBookingDetailBySportFieldId(Integer sportFieldDetailIds, List<Integer> bookingId, List<String> status) {
 		// TODO Auto-generated method stub
-		return bookingDAO.findRevenueBySportFieldDetailIds(sportFieldDetailIds);
-	}
-
-	@Override
-	public List<BookingDetail> findBookingDetailBySportFieldId(Integer sportFieldDetailIds) {
-		// TODO Auto-generated method stub
-		return bookingDAO.findBookingDetailBySportFieldId(sportFieldDetailIds);
+		return bookingDAO.findBookingDetailBySportFieldId(sportFieldDetailIds, bookingId, status);
 	}
 
 	@Override
@@ -227,19 +221,19 @@ public class BookingServiceImpl implements BookingService {
 	}
 
 	@Override
-	public List<BookingDetail> findBookingDetailByDate(List<Integer> sportFielDetailIds, Integer ownerId,
+	public List<BookingDetail> findBookingDetailByDate(List<Integer> sportFielDetailIds, List<Integer> bookingId, List<String> status,
 			String startDate, String endDate) {
 		Date sqlStartDate = Date.valueOf(startDate);
 		Date sqlEndDate = Date.valueOf(endDate);
-		return bookingDAO.findBookingDetailByDate(sportFielDetailIds, ownerId, sqlStartDate, sqlEndDate);
+		return bookingDAO.findBookingDetailByDate(sportFielDetailIds, bookingId, status, sqlStartDate, sqlEndDate);
 	}
 
 	@Override
-	public List<Object[]> findRevenueBySportFieldDetailIdsByDate(List<Integer> sportFieldDetailIds, String startDate,
+	public List<Object[]> findRevenueBySportFieldDetailIdsByDate(List<Integer> sportFieldDetailIds,  List<Integer> bookingId, List<String> status, String startDate,
 			String endDate) {
 		Date sqlStartDate = Date.valueOf(startDate);
 		Date sqlEndDate = Date.valueOf(endDate);
-		return bookingDAO.findRevenueBySportFieldDetailIdsByDate(sportFieldDetailIds, sqlStartDate, sqlEndDate);
+		return bookingDAO.findRevenueBySportFieldDetailIdsByDate(sportFieldDetailIds, bookingId, status, sqlStartDate, sqlEndDate);
 	}
 
 	@Override
@@ -268,9 +262,35 @@ public class BookingServiceImpl implements BookingService {
 	}
 
 	@Override
-	public List<Object[]> findBookingByOwnerIdUsername(Integer ownerId) {
+	public List<Object[]> findBookingByOwnerIdUsernameOffline(Integer ownerId) {
 		// TODO Auto-generated method stub
-		return bookingDAO.findBookingByOwnerIdUsername(ownerId);
+		return bookingDAO.findBookingByOwnerIdUsernameOffline(ownerId);
 
 	}
+
+	@Override
+	public List<BookingDetail> findBookingDetailBySportFieldAndOwner(List<Integer> sportFielDetailIds, List<Integer> bookingId,
+			List<String> status) {
+		// TODO Auto-generated method stub
+		return bookingDAO.findBookingDetailBySportFieldIdsAndOwner(sportFielDetailIds, bookingId, status);
+	}
+
+	@Override
+	public List<Booking> findByFullNameOffline(String fullName) {
+		// TODO Auto-generated method stub
+		return bookingDAO.findByFullNameOffline(fullName);
+	}
+
+	@Override
+	public List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(Integer ownerId) {
+		// TODO Auto-generated method stub
+		return bookingDAO.findBookingByOwnerIdExcludingUsernameOffline(ownerId);
+	}
+
+	@Override
+	public List<Booking> findByUsername(String username) {
+		// TODO Auto-generated method stub
+		return bookingDAO.findByUser_Username(username);
+	}
+
 }

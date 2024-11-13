@@ -19,19 +19,19 @@ public interface BookingService {
 	
 	List<Booking> findBookingAmountByOwnerAndStatus(Integer ownerId, String status);
 	
-	List<BookingDetail> findBookingDetailBySportFieldAndOwner(List<Integer> sportFielDetailIds, Integer ownerId);
+	List<BookingDetail> findBookingDetailBySportFieldAndOwner(List<Integer> sportFielDetailIds, List<Integer> bookingId, List<String> status);
 
-	List<Object[]> findRevenueBySportFieldDetailIds(List<Integer> sportFieldDetailIds);
+	List<Object[]> findRevenueBySportFieldDetailIds(List<Integer> sportFieldDetailIds, List<Integer> bookingId, List<String> status);
 	
-	List<BookingDetail> findBookingDetailBySportFieldId(Integer sportFieldDetailIds);
+	List<BookingDetail> findBookingDetailBySportFieldId(Integer sportFieldDetailIds, List<Integer> bookingId, List<String> status);
 	
 	//Revenue by Date
 	
 	List<Booking> findRevenueByDate(String status,Integer ownerId, String startDate, String endDate);
 	
-	List<BookingDetail> findBookingDetailByDate(List<Integer> sportFielDetailIds, Integer ownerId, String startDate, String endDate);
+	List<BookingDetail> findBookingDetailByDate(List<Integer> sportFielDetailIds, List<Integer> bookingId, List<String> status, String startDate, String endDate);
 	
-	List<Object[]> findRevenueBySportFieldDetailIdsByDate(List<Integer> sportFieldDetailIds, String startDate, String endDate);
+	List<Object[]> findRevenueBySportFieldDetailIdsByDate(List<Integer> sportFieldDetailIds, List<Integer> bookingId, List<String> status, String startDate, String endDate);
 	
 	//Chart Customer
 	
@@ -39,7 +39,13 @@ public interface BookingService {
 	
 	Map<Integer, Integer> findCustomerCountsByMonth(Integer year, Integer ownerId);
 	
-	List<Object[]> findBookingByOwnerIdUsername(Integer ownerId);
+	List<Object[]> findBookingByOwnerIdUsernameOffline(Integer ownerId);
+	
+	List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(Integer ownerId);
+	
+	List<Booking> findByFullNameOffline(String fullName);
+	
+	List<Booking> findByUsername(String username);
 	
 
 }

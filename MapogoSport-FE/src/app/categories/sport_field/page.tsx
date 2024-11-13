@@ -133,22 +133,6 @@ function Categories() {
                             </div>
                         </div>
 
-                        <div className="filter-group">
-                            <legend className="fs-6">Theo Vị Trí</legend>
-                            <div className="filter checkbox-filter">
-                                <label className="checkbox mb-1">
-                                    <input
-                                        type="radio"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                    <span className="checkbox__label ms-2">
-                                        Vị trí từ gần đến xa
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-
                         <div className="filter checkbox-filter mt-3">
                             <label className="checkbox mb-1">
                                 <input
@@ -177,6 +161,14 @@ function Categories() {
                                 {/* <h3 className="fw-bold mt-5">SÂN THỂ THAO MỚI</h3> */}
                                 <div style={{ fontSize: '15px' }}>
                                     <Row className="my-3">
+                                        {currentItems.length === 0 ? (
+                                            <div className='text-center' style={{ marginTop: "15%" }}>
+                                                <h1 className='text-center'><i className="bi bi-bag-x"></i></h1>
+                                                <p>Không tìm thấy sản phẩm.</p>
+                                            </div>
+
+                                        ) : null
+                                        }
                                         {currentItems.map((field: SportField) => (
                                             <Col xs={3} key={field.sportFieldId}>
                                                 <div className="user-border">
