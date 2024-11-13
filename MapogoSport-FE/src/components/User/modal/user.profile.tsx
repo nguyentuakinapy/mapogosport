@@ -2,7 +2,6 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Row, Col, Form, FloatingLabel, Button } from 'react-bootstrap';
-import UserLayout from '@/components/User/UserLayout';
 import ModalUpdateEmail from '@/components/User/modal/user.updateEmail';
 import '../types/user.scss';
 import useSWR, { mutate } from 'swr';

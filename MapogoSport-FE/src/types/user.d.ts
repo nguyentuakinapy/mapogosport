@@ -30,7 +30,11 @@ interface User {
             },
             active: boolean;
         }
-    ]
+    ],
+    wallet: {
+        walletId: number;
+        balance: number;
+    }
 }
 
 interface Authorities {
@@ -53,4 +57,17 @@ interface UserSubscription {
 
 interface SubscriptionPayments {
 
+}
+
+interface NotificationUser {
+    notificationId: number
+    user: User
+    title: string
+    message: string
+    type: string
+    isRead: boolean
+    createdAt: string
+    updatedAt: string
+    booking: Booking
+    order: Order
 }

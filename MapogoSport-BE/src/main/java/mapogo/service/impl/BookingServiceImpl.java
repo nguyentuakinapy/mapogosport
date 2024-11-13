@@ -13,12 +13,14 @@ import org.springframework.stereotype.Service;
 
 import mapogo.dao.BookingDAO;
 import mapogo.dao.BookingDetailDAO;
+import mapogo.dao.NotificationDAO;
 import mapogo.dao.OwnerDAO;
 import mapogo.dao.PaymentMethodDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.VoucherDAO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
+import mapogo.entity.Notification;
 import mapogo.entity.Order;
 import mapogo.entity.Owner;
 import mapogo.entity.PaymentMethod;
@@ -35,7 +37,7 @@ public class BookingServiceImpl implements BookingService {
 
 	@Autowired
 	BookingDetailDAO bookingDetailDAO;
-	
+
 	@Autowired
 	UserDAO userDAO;
 
@@ -47,18 +49,21 @@ public class BookingServiceImpl implements BookingService {
 
 	@Autowired
 	VoucherDAO voucherDAO;
+	
+	@Autowired
+	NotificationDAO notificationDAO;
 
 	@Override
 	public List<Booking> findAll() {
 		return bookingDAO.findAll();
 	}
-	
+
 	@Override
 	public List<Map<String, Object>> findAllBookingByOwner(String ownerUsername) {
 		List<Booking> bookings = bookingDAO.findByOwner_User_Username(ownerUsername);
 		List<Map<String, Object>> resultList = new ArrayList<>();
-		
-		for (Booking booking: bookings) {
+
+		for (Booking booking : bookings) {
 			Map<String, Object> bookingMap = new HashMap<>();
 			bookingMap.put("bookingId", booking.getBookingId());
 			bookingMap.put("bookingUserFullname", booking.getFullName());
@@ -67,24 +72,24 @@ public class BookingServiceImpl implements BookingService {
 			bookingMap.put("status", booking.getStatus());
 			bookingMap.put("bookingUserPhone", booking.getPhoneNumber());
 			bookingMap.put("prepayPrice", booking.getPrepayPrice());
-			
+
 			for (BookingDetail bookingDetail : booking.getBookingDetails()) {
-	            if (bookingDetail.getSportFieldDetail() != null) {
-	                SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
-	                if (sportField != null) {
-	                    bookingMap.put("sportFieldName", sportField.getName());
-	                }
-	            }
-	        }
-			
+				if (bookingDetail.getSportFieldDetail() != null) {
+					SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
+					if (sportField != null) {
+						bookingMap.put("sportFieldName", sportField.getName());
+					}
+				}
+			}
+
 			Map<String, Object> userMap = new HashMap<>();
 			if (booking.getUser() != null) {
 				userMap.put("username", booking.getUser().getUsername());
 				userMap.put("fullname", booking.getUser().getFullname());
 			}
-			
+
 			bookingMap.put("user", userMap);
-	        resultList.add(bookingMap);
+			resultList.add(bookingMap);
 		}
 		return resultList;
 	}
@@ -93,43 +98,42 @@ public class BookingServiceImpl implements BookingService {
 	public List<Map<String, Object>> findBookingByUsername(String username) {
 		List<Booking> bookings = bookingDAO.findByUser_Username(username);
 		List<Map<String, Object>> resultList = new ArrayList<>();
-		
-		for (Booking booking: bookings) {
+
+		for (Booking booking : bookings) {
 			Map<String, Object> bookingMap = new HashMap<>();
 			bookingMap.put("bookingId", booking.getBookingId());
 			bookingMap.put("date", booking.getDate());
 			bookingMap.put("totalAmount", booking.getTotalAmount());
 			bookingMap.put("status", booking.getStatus());
 			for (BookingDetail bookingDetail : booking.getBookingDetails()) {
-	            if (bookingDetail.getSportFieldDetail() != null) {
-	                SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
-	                if (sportField != null) {
-	                    bookingMap.put("sportFieldName", sportField.getName());
-	                }
-	            }
-	        }
-	        resultList.add(bookingMap);
+				if (bookingDetail.getSportFieldDetail() != null) {
+					SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
+					if (sportField != null) {
+						bookingMap.put("sportFieldName", sportField.getName());
+					}
+				}
+			}
+			resultList.add(bookingMap);
 		}
 		return resultList;
 	}
-	
 
 	@Override
 	public Booking updateStatusBooking(Map<String, Object> bookingData) {
 		Integer bookingId = (Integer) bookingData.get("bookingId");
 		String newStatus = (String) bookingData.get("status");
-		
+
 		Optional<Booking> optionalBooking = bookingDAO.findById(bookingId);
 		if (optionalBooking.isPresent()) {
-		    Booking booking = optionalBooking.get();
-		    booking.setStatus(newStatus);
-		    if (newStatus.equals("Đã hủy")) {
-		    	for (BookingDetail bookingDetail: booking.getBookingDetails()) {
-		    		bookingDetail.setStatus(newStatus);
-			    	bookingDetailDAO.save(bookingDetail);
+			Booking booking = optionalBooking.get();
+			booking.setStatus(newStatus);
+			if (newStatus.equals("Đã hủy")) {
+				for (BookingDetail bookingDetail : booking.getBookingDetails()) {
+					bookingDetail.setStatus(newStatus);
+					bookingDetailDAO.save(bookingDetail);
 				}
-		    }
-		    bookingDAO.save(booking);
+			}
+			bookingDAO.save(booking);
 		}
 		return null;
 	}
@@ -152,7 +156,7 @@ public class BookingServiceImpl implements BookingService {
 		Object prepayPriceObj = b.get("prepayPrice");
 		Double totalAmount;
 		Double prepayPrice;
-		
+
 		if (totalAmountObj instanceof String && prepayPriceObj instanceof String) {
 			totalAmount = Double.valueOf((String) totalAmountObj);
 			prepayPrice = Double.valueOf((String) prepayPriceObj);
@@ -168,12 +172,24 @@ public class BookingServiceImpl implements BookingService {
 		booking.setPaymentMethod(p);
 		booking.setOwner(o);
 		booking.setStatus((String) b.get("status"));
-		booking.setVoucher(v);
+		booking.setVoucher(null);
 		booking.setNote((String) b.get("note"));
 		booking.setFullName((String) b.get("fullName"));
 		booking.setPhoneNumber((String) b.get("phoneNumber"));
 		booking.setPrepayPrice(prepayPrice);
-		return bookingDAO.save(booking);
+		bookingDAO.save(booking);
+		
+		if (((String) b.get("checkOwner")).equals("user")) {
+			Notification n = new Notification();
+			n.setUser(o.getUser());
+			n.setTitle("Đặt sân mới");
+			n.setMessage(u.getFullname() + " Vừa đặt sân.");
+			n.setType("info");
+			n.setBooking(booking);
+			notificationDAO.save(n);
+		}
+	
+		return booking;
 //		return null;
 	}
 
@@ -229,15 +245,15 @@ public class BookingServiceImpl implements BookingService {
 	@Override
 	public Map<Integer, Integer> findCustomerCountsByMonth(Integer year, Integer ownerId) {
 		List<Object[]> results = bookingDAO.findCustomerCountsByMonth(year, ownerId);
-		
-		//Khởi tạo Map với 12 tháng
-		Map<Integer,Integer> customerCountsByMonth = new HashMap<>();
-		for(int i = 1; i<=12; i++) {
+
+		// Khởi tạo Map với 12 tháng
+		Map<Integer, Integer> customerCountsByMonth = new HashMap<>();
+		for (int i = 1; i <= 12; i++) {
 			customerCountsByMonth.put(i, 0);
 		}
-			
-		//Cập nhật Map với dữ liệu 
-		for(Object[] result : results) {
+
+		// Cập nhật Map với dữ liệu
+		for (Object[] result : results) {
 			Integer month = (Integer) result[0];
 			Long count = (Long) result[1];
 			customerCountsByMonth.put(month, count.intValue());

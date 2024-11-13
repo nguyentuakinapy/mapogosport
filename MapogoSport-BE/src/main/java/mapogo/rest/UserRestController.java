@@ -1,5 +1,6 @@
 package mapogo.rest;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -12,11 +13,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import mapogo.dao.ProductDAO;
+import mapogo.dao.UserDAO;
 import mapogo.dao.UserVoucherDAO;
+import mapogo.entity.Notification;
 import mapogo.entity.Owner;
 import mapogo.entity.Product;
 import mapogo.entity.User;
@@ -39,10 +44,16 @@ public class UserRestController {
 
 	@Autowired
 	UserVoucherDAO userVoucherRepository;
-	
+
 	@GetMapping("/user/{username}")
 	public User findUseLoginUser(@PathVariable("username") String username) {
 		return userService.findByUsername(username);
+	}
+
+	@PostMapping("/user/avatar/{username}")
+	public void uploadAvatar(@PathVariable("username") String username, @RequestParam("avatar") MultipartFile file)
+			throws IOException {
+		userService.uploadAvatar(username, file);
 	}
 
 	@GetMapping("/user")
@@ -79,7 +90,7 @@ public class UserRestController {
 		emailService.sendEmail(email, "MapogoSport",
 				"Bạn đã thay đổi mật khẩu tài khoản. Nếu đó không phải là bạn, vui lòng liên hệ với chúng tôi ngay.");
 	}
-	
+
 	@PostMapping("/user/updateEmail/sendMail")
 	public void sendUpdateMail(@RequestBody Map<String, String> requestBody) {
 		String email = requestBody.get("email");
@@ -94,7 +105,7 @@ public class UserRestController {
 	public Owner findByUser(@PathVariable("id") String username) {
 		return ownerService.findByUsername(username);
 	}
-	
+
 	@PostMapping("/owner")
 	public Owner saveOwner(@RequestBody Map<String, Object> requestBody) {
 		return ownerService.save(requestBody);
@@ -104,20 +115,40 @@ public class UserRestController {
 	public UserSubscription saveUserSubscription(@RequestBody Map<String, Object> requestBody) {
 		return userService.saveUserSubcription(requestBody);
 	}
-	
+
 	@PutMapping("/user/subscription/{userSubscriptionId}")
-	public void updateUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId, 
+	public void updateUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId,
 			@RequestBody Map<String, Object> requestBody) {
 		userService.updateUserSubscription(requestBody);
 	}
-	
+
 	@GetMapping("/user/subscription/{id}")
 	public UserSubscription findUserSubscriptionByUser(@PathVariable("id") String username) {
 		return userService.findUserSubscriptionByUser(username);
 	}
-	
+
 	@GetMapping("/user/getbysportdetailid/{id}")
 	public User findTestr(@PathVariable("id") Integer id) {
 		return userService.findUserByBookingDetailId(id);
+	}
+
+	@GetMapping("/user/notification/{username}")
+	public List<Notification> findNotificationByUsername(@PathVariable("username") String username) {
+		return userService.findNotificationByUsername(username);
+	}
+
+	@PutMapping("/user/notification/{username}")
+	public void setViewNotification(@PathVariable("username") String username) {
+		userService.setViewNotification(username);
+	}
+	
+	@PutMapping("/user/notification/is/read/{notificationId}")
+	public void setIsReadNotification(@PathVariable("notificationId") Integer notificationId) {
+		userService.setIsReadNotification(notificationId);
+	}
+
+	@DeleteMapping("/user/notification/{username}")
+	public void deleteNotification(@PathVariable("username") String username) {
+		userService.deleteNotification(username);
 	}
 }
