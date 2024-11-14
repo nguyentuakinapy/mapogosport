@@ -229,21 +229,24 @@ const BookingModal = (props: OwnerProps) => {
 
         if (applyOne) {
             // if (dateBookingTemporary != dateBooking && idSportDetailTemporary != idSportDetail) {
-            if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
-                for (const time of dataTimeOnStage) {
-                    const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
-                    // console.log(result);
+            if (bookingDetailData && new Date(bookingDetailData.date).setHours(0, 0, 0, 0) !== new Date().setHours(0, 0, 0, 0)) {
+                if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
+                    for (const time of dataTimeOnStage) {
+                        const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
+                        // console.log(result);
 
-                    if (result) {
-                        checkTime = true;
+                        if (result) {
+                            checkTime = true;
+                        }
                     }
+                }
+
+                if (checkTime) {
+                    toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
+                    return
                 }
             }
 
-            if (checkTime) {
-                toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
-                return
-            }
             // } else {
             try {
                 const response = await fetch(
@@ -1103,7 +1106,6 @@ const BookingModal = (props: OwnerProps) => {
                                         )
                                     ) : (
                                         <button className="btn btn-danger m-auto" onClick={() => handleCancelBookingDetail()} style={{ width: '97%' }}>Hủy đặt sân</button>
-
                                     )
                                 )
                             ) : (
