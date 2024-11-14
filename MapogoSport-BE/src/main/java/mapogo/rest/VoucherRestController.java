@@ -69,15 +69,15 @@ public class VoucherRestController {
 		  return new ResponseEntity<>(deleteVoucher, HttpStatus.CREATED);
 	  }
 	  
-	// của Mỵ từ đây
-	@Autowired
-	UserVoucherService userVoucherService;
-
-	@GetMapping("/findVoucher/{userVoucherId}")
-	public Voucher getfindVoucher(@PathVariable("userVoucherId") int userVoucherId) {
-		UserVoucher userVoucher = userVoucherService.findByUserVoucherId(userVoucherId);
-		Voucher voucher = userVoucher.getVoucher();
-		return voucher;
-	}
+//	// của Mỵ từ đây
+//	@Autowired
+//	UserVoucherService userVoucherService;
+//
+//	@GetMapping("/findVoucher/{userVoucherId}")
+//	public Voucher getfindVoucher(@PathVariable("userVoucherId") int userVoucherId) {
+//		UserVoucher userVoucher = userVoucherService.findByUserVoucherId(userVoucherId);
+//		Voucher voucher = userVoucher.getVoucher();
+//		return voucher;
+//	}
 	// đến đây
 }
