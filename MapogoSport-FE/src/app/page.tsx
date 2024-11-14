@@ -439,11 +439,12 @@ export default function Home() {
         </div>
       </Container>
       <CreateOwnerModal showCreateOwnerModal={showCreateOwnerModal}
-        setShowCreateOwnerModal={setShowCreateOwnerModal} userData={userData} />
+        setShowCreateOwnerModal={setShowCreateOwnerModal} userData={userData || undefined} />
       <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}
         showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
         showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}></LoginModal>
-      <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
+      <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
+        showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
       <ForgotPassword showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}
         showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew}
       ></ForgotPassword>

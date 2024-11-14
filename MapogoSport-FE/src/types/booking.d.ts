@@ -37,6 +37,9 @@ interface Booking {
         sportFieldId: number;
         opening: string;
     };
+    fullName: string;
+    phoneNumber: string;
+    prepayPrice: number;
 }
 
 interface bookingPayment {
@@ -65,7 +68,8 @@ interface BookingDetail {
     price: number;
     date: string;
     subscriptionKey: string;
-    status: boolean
+    status: boolean;
+  
 }
 
 
@@ -135,3 +139,4 @@ interface BookingDetailMap {
     ownerFullname: string;
     ownerPhoneNumberUsers: string
 }
+

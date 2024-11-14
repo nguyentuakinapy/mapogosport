@@ -41,6 +41,7 @@ const ModalTableDetailCustomer = ({ showModal, onClose, data }: ModalTableDetail
                     <thead>
                         <tr>
                             <th>#</th>
+                            <th>Tên khách hàng</th>
                             <th>Ngày đặt</th>
                             <th>Tổng tiền</th>
                         </tr>
@@ -48,8 +49,9 @@ const ModalTableDetailCustomer = ({ showModal, onClose, data }: ModalTableDetail
                     <tbody>
                         {currentItems.map((booking, index) => (
                             <tr key={index}>
-                                <td>{index + 1}</td>
-                                <td>{booking.date}</td>
+                                <td>{indexOfFirstItem+index + 1}</td>
+                                <td>{booking.fullName}</td>
+                                <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                 <td>{formatPrice(booking.totalAmount)}</td>
                             </tr>
                         ))}

@@ -52,7 +52,7 @@ public class FieldReviewRestController {
 		return fieldReviewService.findReviewByRating(fieldId, rating);
 	}
 	
-	@GetMapping("/{fieldId}/user/{username}")
+	@GetMapping("/fieldReview/{fieldId}/user/{username}")
 	public ResponseEntity<?> checkUserReview(@PathVariable Integer fieldId, @PathVariable String username) {
 	    Optional<FieldReview> existingReview = fieldReviewService.findBySportField_SportFieldIdAndUser_Username(fieldId, username);
 	    
@@ -62,5 +62,4 @@ public class FieldReviewRestController {
 	        return ResponseEntity.noContent().build();
 	    }
 	}
-
 }

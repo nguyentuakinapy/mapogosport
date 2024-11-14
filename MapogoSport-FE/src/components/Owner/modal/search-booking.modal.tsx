@@ -1,5 +1,6 @@
-import { use, useEffect, useState } from "react";
-import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, Nav } from "react-bootstrap";
+import BookingModal from "@/components/Owner/modal/booking.modal";
+import { useEffect, useState } from "react";
+import { Button, Form, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
 
@@ -12,46 +13,44 @@ interface SearchBookingProps {
 
 const SearchBookingModal = (props: SearchBookingProps) => {
     const { showSearchBookingModal, setSearchShowBookingModal, sportField } = props;
-
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
-
     const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
+    const [selectedSportType, setSelectedSportType] = useState<number | null>(null);
+    const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
+    const [startTime, setStartTime] = useState("");
+    const [dayStartBooking, setDayStartBooking] = useState("");
+    const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
+    const [startTimeKey, setStartTimeKey] = useState<number>(1);
+    const [validTimes, setValidTimes] = useState<string[]>([]);
+    const [opening, setOpening] = useState<number>();
+    const [operatingTime, setOperatingTime] = useState<number>(0);
+    const [checkDataStatus, setCheckDataStatus] = useState<boolean>(true);
+
+    useEffect(() => {
+        if (sportField && sportField.sportFielDetails) {
+            const defaultSportType = sportField.sportFielDetails[0]?.sportFielDetailId || null;
+            setSelectedSportType(defaultSportType);
+        }
+    }, [sportField]);
 
     const handleDateChange = (date: Date | null) => {
         if (date) {
             const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
             const formatted = localDate.toISOString().split('T')[0];
-            toast.success(formatted)
-            toast.success(selectedTime)
             setSelectedDate(formatted);
         } else {
             setSelectedDate(null);
         }
     };
 
-    const [selectedSportType, setSelectedSportType] = useState<number | null>(null);
-
     const handleIdBySize = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newSize = e.target.value;
         if (sportField?.sportFielDetails) {
-            const filteredIds = sportField.sportFielDetails
-                .filter(detail => detail.size === newSize)
-                .map(detail => detail.sportFielDetailId);
             const selectedDetail = sportField.sportFielDetails.find(detail => detail.size === newSize);
             setSelectedSportType(selectedDetail ? selectedDetail.sportFielDetailId : null);
         }
     };
-
-    const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
-    const [startTime, setStartTime] = useState("");
-    const [dayStartBooking, setDayStartBooking] = useState("");
-    const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
-    const [startTimeKey, setStartTimeKey] = useState<boolean>(true);
-    const [validTimes, setValidTimes] = useState<string[]>([]);
-
-    const [opening, setOpening] = useState<number>();
-    const [operatingTime, setOperatingTime] = useState<number>(0);
 
     useEffect(() => {
         if (sportField) {
@@ -112,19 +111,21 @@ const SearchBookingModal = (props: SearchBookingProps) => {
             const bookingsFromAPI: BookingDetail[] = await response.json();
             let isBooked = false;
             const selectedSportDetail = sportField?.sportFielDetails.find(detail => detail.sportFielDetailId === selectedSportType);
+
             if (selectedSportDetail && selectedSportDetail.status === "Tạm đóng") {
                 toast.warning("Không tìm thấy sân phù hợp theo nhu cầu!");
                 return;
             }
+
             const currentDateTime = new Date();
             const formattedTime = selectedTime.replace('h', ':').padStart(5, '0');
             const selectedDateTime = new Date(`${selectedDate}T${formattedTime}`);
+
             if (selectedDateTime < currentDateTime) {
                 toast.warning("Đã quá thời gian yêu cầu đặt sân!");
                 return;
             }
-            // console.log(selectedDateTime);
-            // console.log(currentDateTime);
+
             if (Array.isArray(bookingsFromAPI) && bookingsFromAPI.length > 0) {
                 for (const booking of bookingsFromAPI) {
                     const { startTime, endTime, sportFieldDetail } = booking;
@@ -135,20 +136,19 @@ const SearchBookingModal = (props: SearchBookingProps) => {
                     }
                 }
             }
+
             if (isBooked) {
                 toast.warning("Đã có sân được đặt trùng với yêu cầu!");
             } else {
                 toast.success("Đã tìm thấy sân theo yêu cầu!");
-                const sportDetail = selectedSportType;
-                const startTime = selectedTime;
-                const dayStartBooking = selectedDate;
-                const selectedSportDetail = sportField?.sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
-                if (sportDetail && startTime && dayStartBooking) {
+                const selectedSportDetail = sportField?.sportFielDetails.find(item => item.sportFielDetailId === selectedSportType);
+                if (selectedSportDetail) {
+                    setStartTimeKey(startTimeKey + 20);
                     setSportDetail(selectedSportDetail);
-                    setStartTime(startTime);
-                    setDayStartBooking(dayStartBooking);
+                    setStartTime(selectedTime);
+                    setDayStartBooking(selectedDate);
                     setShowBookingModal(true);
-                    setStartTimeKey(!startTimeKey);
+                    handleClose();
                 }
             }
         } else {
@@ -164,18 +164,17 @@ const SearchBookingModal = (props: SearchBookingProps) => {
             <Modal show={showSearchBookingModal} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
                 centered backdrop="static" keyboard={false}>
                 <Modal.Header>
-                    <Modal.Title className="text-uppercase text-danger fw-bold m-auto">TÌM KIẾM SÂN</Modal.Title>
+                    <Modal.Title className="text-uppercase text-danger fw-bold m-auto">Đặt sân theo nhu cầu</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="pt-0 pb-0">
                     <div className="section-form-sportField bg-white">
-                        <b className="title-detail-sportField">Đặt sân theo nhu cầu</b>
                         <Form className='mt-2'>
                             <Form.Group className='mb-2'>
                                 <DatePicker selected={selectedDate ? new Date(selectedDate) : null}
                                     onChange={handleDateChange} className="form-control" placeholderText="Chọn ngày đặt"
                                     dateFormat="dd/MM/yyyy" minDate={new Date()} required />
                             </Form.Group>
-                            <Form.Group controlId="formTimeInput" className='mb-2'>
+                            <Form.Group controlId="formTimeInput" className='mb-2 '>
                                 <Form.Select onChange={(e) => setSelectedTime(e.target.value)} defaultValue="" id="formTimeInput">
                                     <option value="" disabled>Chọn thời gian đặt</option>
                                     {validTimes.map((time, index) => (
@@ -202,6 +201,10 @@ const SearchBookingModal = (props: SearchBookingProps) => {
                     </Button>
                 </Modal.Footer>
             </Modal >
+            <BookingModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
+                sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
+                sport={sportField} owner={sportField?.owner}
+                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey + 1} />
         </>
     )
 }
