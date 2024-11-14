@@ -176,7 +176,7 @@ const Header = (props: HeaderProps) => {
                 showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
                 showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}>
             </LoginModal>
-            <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
+            <RegisterModal setRefreshKey={setRefreshKey} refreshKey={refreshKey} showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
             <ForgotPassword showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}
                 showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew}
             ></ForgotPassword>

@@ -1,9 +1,10 @@
 'use client'
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
 import { hashPassword } from "@/components/Utils/Format";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 interface LoginProps {
     showLoginModal: boolean;
@@ -132,6 +133,59 @@ export default function Login(props: LoginProps) {
         };
     }, []);
 
+    useEffect(() => {
+        console.log("Client-side code running");
+    }, []);
+
+    const decodeJWT = (token: any) => {
+        try {
+            const base64Url = token.split(".")[1];
+            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split("")
+                    .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join("")
+            );
+            return JSON.parse(jsonPayload);
+        } catch (error) {
+            console.error("Failed to decode JWT:", error);
+            return null;
+        }
+    };
+
+    const handleLoginSuccess = async (response: any) => {
+        const token = response.credential;
+        console.log("Token received:", token);
+
+        const user = decodeJWT(token) as JwtGoogleAccount;
+        if (user) {
+            console.log("User Info:", user);
+            try {
+                const responseUser = await fetch(`http://localhost:8080/rest/user/${user.sub}`);
+                if (!responseUser.ok) {
+                    throw new Error('Error fetching data');
+                }
+                const dataUser = await responseUser.json() as User;
+
+                if (parseInt(dataUser.password) === 123) {
+
+                    const usernameLocal = dataUser.username.replace(/['"]+/g, '');
+                    localStorage.setItem('username', usernameLocal);
+                    // localStorage.setItem('username', dataUser.username);
+                    sessionStorage.setItem('user', JSON.stringify(dataUser));
+                    setRefreshKey(refreshKey + 1);
+                    toast.success("Đăng nhập thành công!");
+                    handleClose();
+                } else {
+                    toast.error("Đăng nhập không thành công!");
+                }
+            } catch (error: any) {
+                toast.error("Đăng nhập không thành công!");
+            }
+        }
+    };
+
     return (
         <>
             <Modal show={showLoginModal} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
@@ -143,9 +197,15 @@ export default function Login(props: LoginProps) {
                 <Modal.Body>
                     <Form>
                         <div className="text-center mb-3">
-                            <span className="btn btn-submit d-flex align-items-center justify-content-center text-center">
-                                Đăng nhập Google
-                            </span>
+                            {/* <a onClick={handleLoginClick} href="#" className="btn btn-submit d-flex align-items-center justify-content-center text-center">
+                                    Đăng nhập Google
+                                </a> */}
+                            <div className="d-flex align-items-center justify-content-center">
+                                <GoogleOAuthProvider clientId="291618476125-v61qth68ave5pfk18b2hg5qjtdbkjd94.apps.googleusercontent.com">
+                                    <GoogleLogin onSuccess={handleLoginSuccess} />
+                                </GoogleOAuthProvider>
+                            </div>
+
                         </div>
                         <div className="text-line-through mb-3 text-center d-flex align-items-center">
                             <hr className="flex-grow-1" />

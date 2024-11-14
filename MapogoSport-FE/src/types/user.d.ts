@@ -71,3 +71,20 @@ interface NotificationUser {
     booking: Booking
     order: Order
 }
+
+interface JwtGoogleAccount {
+    aud: string
+    azp: string
+    email: string
+    email_verified: boolean
+    exp: number
+    family_name: string
+    given_name: string
+    iat: number
+    iss: string
+    jti: number
+    name: string
+    nbf: number
+    picture: string
+    sub: number
+}

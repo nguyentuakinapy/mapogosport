@@ -459,16 +459,16 @@ const BookingModal = React.memo((props: BookingProps) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    username: userData?.username,
-                    fullName: userData?.fullname,
-                    phoneNumber: userData?.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
-                    totalAmount,
-                    prepayPrice: checkPrepayPrice ? prepayPrice : totalAmount,
-                    paymentMethodId: paymentMethod.paymentMethodId,
-                    ownerId: owner?.ownerId,
-                    status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
-                    voucher: null,
-                    checkOwner: "user"
+                   username: userData?.username,
+                fullName: userData?.fullname,
+                phoneNumber: userData?.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
+                totalAmount,
+                percentDeposit: sportDetail?.percentDeposit,
+                paymentMethodId: paymentMethod.paymentMethodId,
+                ownerId: owner?.ownerId,
+                status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
+                voucher: null,
+                checkOwner: "user"
                 })
             })
 
@@ -518,7 +518,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                 fullName: userData?.fullname,
                 phoneNumber: userData?.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
                 totalAmount,
-                prepayPrice: checkPrepayPrice ? totalAmount && totalAmount * ((sportDetail as SportFieldDetail).percentDeposit / 100) : totalAmount,
+                percentDeposit: sportDetail.percentDeposit,
                 paymentMethodId: paymentMethod.paymentMethodId,
                 ownerId: owner?.ownerId,
                 status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
