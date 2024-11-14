@@ -216,6 +216,33 @@ const SubcriptionPage = () => {
         }
     }
 
+    const [benefitData, setBenefitData] = useState<string>("");
+
+    const handleAddBenefit = async () => {
+        try {
+            const data = {
+                description: benefitData, // Use benefitData instead of dataBenefit
+            };
+            const response = await fetch('http://localhost:8080/rest/add-benefit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create benefit');
+            }
+
+            await mutateBenefit();
+            setBenefitData('');
+            toast.success("Lợi ích đã được tạo thành công!");
+        } catch (error) {
+            console.error('Error creating benefit:', error);
+            toast.error("Có lỗi xảy ra khi tạo lợi ích !");
+        }
+    };
 
 
 
@@ -350,19 +377,9 @@ const SubcriptionPage = () => {
     };
 
 
-    const [benefitData, setBenefitData] = useState('');
 
 
 
-    const handleOnchangeBenefit = (e) => {
-        const value = e.target.value;
-        setBenefitData(value);
-    };
-
-    const handleAddBenefit = () => {
-        console.log("check data value: ", benefitData);
-
-    };
 
 
     // Memoize the modal for creating new package
@@ -379,6 +396,7 @@ const SubcriptionPage = () => {
                     limitSportFields: '',
                     accountPackageBenefits: [{ benefit: { description: '' } }],
                 }); // Reset new package when modal is closed
+                setBenefitData('')
                 setBenefitSelections([{ benefitId: '', description: '' }]); // Reset benefit selections
             }}
             size="lg"
@@ -443,13 +461,12 @@ const SubcriptionPage = () => {
                             <Form.Control
                                 type="text"
                                 value={benefitData}
-                                onChange={handleOnchangeBenefit}
+                                onChange={(e) => setBenefitData(e.target.value)}
                             />
                         </Form.Group>
                         <Button onClick={handleAddBenefit} className="w-25 m-auto mb-3 ms-2">
                             Thêm
                         </Button>
-
                     </div>
 
                     {/* // UI cho phần chọn lợi ích */}
@@ -490,7 +507,7 @@ const SubcriptionPage = () => {
                 <Button onClick={handleCreateSave}>Lưu</Button>
             </Modal.Footer>
         </Modal>
-    ), [modalCreateShow, newPackage]);
+    ), [modalCreateShow, newPackage, , benefitData, benefitSelections, dataBenefit]);
 
     return (
         <>
