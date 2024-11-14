@@ -250,7 +250,10 @@ const Cart = () => {
                             />
                           </td>
                           <td>
-                            <p className="mb-0">{cart.productDetailSize.productDetail.product.name} <br /> ({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})</p>
+                            <Link style={{ textDecoration: 'none', color: '#333' }} href={`/product-detail/${cart.productDetailSize.productDetail.product.productId}`}>
+                              <p className="mb-0">{cart.productDetailSize.productDetail.product.name}
+                                <br /> ({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})</p>
+                            </Link>
                           </td>
                           <td>
                             <p className="mb-0">{formatPrice(cart.productDetailSize.price)}</p>
