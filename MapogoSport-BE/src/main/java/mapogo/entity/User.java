@@ -51,7 +51,7 @@ public class User implements Serializable {
 	@Column(name = "Avatar", nullable = true)
 	private String avatar = "avatar-init.gif";
 	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL) 
 	@JsonManagedReference
 	private List<Authority> authorities;
 

@@ -21,5 +21,4 @@ public class OrderDTO {
     private String paymentMethod;
     private Integer voucherId;
     private Double shipFee;
-    private int userVoucherId;
 }

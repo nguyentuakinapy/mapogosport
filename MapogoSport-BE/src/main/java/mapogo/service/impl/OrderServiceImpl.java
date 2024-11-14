@@ -117,7 +117,7 @@ public class OrderServiceImpl implements OrderService {
 		if (orderDTO.getVoucherId()!=null) {
 			Voucher voucher = voucherService.findById(orderDTO.getVoucherId());
 			order.setVoucher(voucher);
-			UserVoucher userVoucher = userVoucherService.findByUserVoucherId(orderDTO.getUserVoucherId());
+			UserVoucher userVoucher = userVoucherService.findByUser_UsernameAndVoucher_VoucherId(orderDTO.getUsername(), orderDTO.getVoucherId());
 			userVoucher.setStatus("Used");
 			userVoucherService.update(userVoucher);
 		}

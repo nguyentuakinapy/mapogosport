@@ -1,7 +1,7 @@
 'use client'
 import { formatPrice } from "@/components/Utils/Format";
 import { ReactNode, useEffect, useState } from "react";
-import { Button, Col, Form, Nav, Row } from "react-bootstrap";
+import { Button, Col, Form, Modal, Nav, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
 import { useData } from "../context/UserContext";
@@ -19,6 +19,10 @@ export default function Owner({ children }: { children: ReactNode }) {
     const [owner, setOwner] = useState<Owner>();
     const [dataSport, setDataSport] = useState<SportField[]>([]);
 
+    const [showModal, setShowModal] = useState(false);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
+    const [selectedAccountPackage, setSelectedAccountPackage] = useState<AccountPackage | null>(null);
+
     useEffect(() => {
         getOwner();
     }, [])
@@ -34,7 +38,7 @@ export default function Owner({ children }: { children: ReactNode }) {
             const dataOwner = await responseOwner.json() as Owner;
             setOwner(dataOwner);
         }
-    }
+    };
 
     const { data: dataS, error: errorS, isLoading: isLoadingS } = useSWR(owner && `http://localhost:8080/rest/sport_field_by_owner/${owner.ownerId}`, fetcher, {
         revalidateIfStale: false,
@@ -68,6 +72,20 @@ export default function Owner({ children }: { children: ReactNode }) {
     useEffect(() => {
         setUserSubscription(userSub);
     }, [userSub])
+
+    const handleOpenModal = (ap: AccountPackage) => {
+        setSelectedAccountPackage(ap);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedPaymentMethod('');
+    };
+
+    const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSelectedPaymentMethod(e.target.value);
+    };
 
     const handleUpdateSubscription = (ap: AccountPackage) => {
         fetch(`http://localhost:8080/rest/user/subscription/${userSubscription?.userSubscriptionId}`, {
@@ -150,32 +168,97 @@ export default function Owner({ children }: { children: ReactNode }) {
                             const isOwned = ap.accountPackageId ===
                                 userSubscription?.accountPackage?.accountPackageId;
                             return (
-                                <Col xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <div className="card packageUpdate">
-                                        <b className="ms-3 mt-3 fs-5">{ap.packageName}</b>
-                                        <div className="body-package my-3">
-                                            {ap.accountPackageBenefits.map(apb => (
-                                                <div key={apb.accountPackageBenefitId}>
-                                                    <i className="bi bi-check-circle me-2"></i>
-                                                    {apb.benefit.description}
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <b className="text-danger ms-3">{ap.price == 0 ? 'Miễn phí' : formatPrice(ap.price)}</b>
-                                        {/* <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={isOwned}>
+                                <>
+                                    <Col xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <div className="card packageUpdate">
+                                            <b className="ms-3 mt-3 fs-5">{ap.packageName}</b>
+                                            <div className="body-package my-3">
+                                                {ap.accountPackageBenefits.map(apb => (
+                                                    <div key={apb.accountPackageBenefitId}>
+                                                        <i className="bi bi-check-circle me-2"></i>
+                                                        {apb.benefit.description}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <b className="text-danger ms-3">{ap.price == 0 ? 'Miễn phí' : formatPrice(ap.price)}</b>
+                                            {/* <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={isOwned}>
                                             {isOwned ? "Đã sở hữu" : "Nâng cấp ngay"}
                                         </Button> */}
-                                        {userSubscription && ap.accountPackageId <= userSubscription?.accountPackage?.accountPackageId ? (
-                                            <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={true}>
-                                                Đã sở hữu
+                                            {userSubscription && ap.accountPackageId <= userSubscription?.accountPackage?.accountPackageId ? (
+                                                <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={true}>
+                                                    Đã sở hữu
+                                                </Button>
+                                            ) : (
+                                                <Button className='btn-sub' onClick={() => handleOpenModal(ap)} disabled={isOwned}>
+                                                    Nâng cấp ngay
+                                                </Button>
+                                            )}
+
+                                        </div>
+                                    </Col>
+                                    {/* Modal chọn phương thức thanh toán */}
+                                    <Modal show={showModal} onHide={handleCloseModal} centered>
+                                        <Modal.Header closeButton>
+                                            <Modal.Title>Chọn phương thức thanh toán</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body>
+                                            <div className="list-group">
+                                                <div className="card-body d-flex list-group-item align-items-center">
+                                                    <div className="form-check flex-grow-1">
+                                                        <input
+                                                            className="form-check-input"
+                                                            type="radio"
+                                                            name="paymentMethod"
+                                                            id="vnpay"
+                                                            value="VNPay"
+                                                            onChange={handlePaymentMethodChange}
+                                                        />
+                                                        <label className="form-check-label" htmlFor="vnpay">
+                                                            Thanh toán qua ví điện tử VNPay
+                                                        </label>
+                                                    </div>
+                                                    <img
+                                                        src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
+                                                        alt="VNPay"
+                                                        style={{ maxWidth: '50px' }}
+                                                    />
+                                                </div>
+                                                <div className="card-body d-flex list-group-item align-items-center">
+                                                    <div className="form-check flex-grow-1">
+                                                        <input
+                                                            className="form-check-input"
+                                                            type="radio"
+                                                            name="paymentMethod"
+                                                            id="momo"
+                                                            value="MoMo"
+                                                            onChange={handlePaymentMethodChange}
+                                                        />
+                                                        <label className="form-check-label" htmlFor="momo">
+                                                            Thanh toán qua ví điện tử MoMo
+                                                        </label>
+                                                    </div>
+                                                    <img
+                                                        src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png"
+                                                        alt="MoMo"
+                                                        style={{ maxWidth: '50px' }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </Modal.Body>
+                                        <Modal.Footer>
+                                            <Button variant="secondary" onClick={handleCloseModal}>
+                                                Hủy
                                             </Button>
-                                        ) : (
-                                            <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={isOwned}>
-                                                Nâng cấp ngay
+                                            <Button
+                                                variant="primary"
+                                                onClick={() => handleUpdateSubscription(ap)}
+                                                disabled={!selectedPaymentMethod}
+                                            >
+                                                Thanh toán
                                             </Button>
-                                        )}
-                                    </div>
-                                </Col>
+                                        </Modal.Footer>
+                                    </Modal>
+                                </>
                             )
                         })}
                     </Row >
@@ -224,12 +307,13 @@ export default function Owner({ children }: { children: ReactNode }) {
                         {renderContent()}
                     </div>
                 </div>
+
             </>
         )
     }
     return (
-
         <>{children}</>
     )
+
 
 }

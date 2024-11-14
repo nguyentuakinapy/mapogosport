@@ -119,6 +119,8 @@ public class UserRestController {
 	@PutMapping("/user/subscription/{userSubscriptionId}")
 	public void updateUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId,
 			@RequestBody Map<String, Object> requestBody) {
+		//thanh toán
+		
 		userService.updateUserSubscription(requestBody);
 	}
 

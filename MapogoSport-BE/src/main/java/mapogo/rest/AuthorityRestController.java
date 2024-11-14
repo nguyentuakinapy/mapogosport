@@ -1,10 +1,13 @@
 package mapogo.rest;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +17,11 @@ import mapogo.dao.AuthorityDAO;
 import mapogo.dao.ProductDAO;
 import mapogo.entity.Authority;
 import mapogo.entity.Product;
+import mapogo.entity.Role;
+import mapogo.entity.User;
 import mapogo.service.AuthorityService;
+import mapogo.service.RoleService;
+import mapogo.service.UserService;
 
 @CrossOrigin("*")
 @RestController
@@ -23,16 +30,49 @@ public class AuthorityRestController {
 
 	@Autowired
 	AuthorityService authorityService;
-	
 
 	@PostMapping("/authority")
 	public Authority saveAuthority(@RequestBody Authority auth) {
 		return authorityService.createAuthority(auth);
 	}
-	
+
 	@GetMapping("/authority")
-	public List<Authority> findAllAuthority(){
+	public List<Authority> findAllAuthority() {
 		return authorityService.findAll();
 	}
-	
+
+	// của Mỵ từ đây
+	@Autowired
+	UserService userService;
+
+	@Autowired
+	RoleService roleService;
+
+	@GetMapping("/list-users")
+	public List<User> findAll() {
+		return userService.findAll();
+	}
+
+	@PostMapping("/update-user-authority/{username}")
+	public String updateAuthority(@PathVariable String username, @RequestBody List<String> selectedRoles) {
+
+		User user = userService.findByUsername(username);
+
+		// Xóa các Authority hiện có của người dùng
+		authorityService.deleteByUser(user);
+
+		// Thêm các vai trò mới
+		for (String roleName : selectedRoles) {
+			Role role = roleService.findByName(roleName);
+
+			Authority authority = new Authority();
+			authority.setUser(user);
+			authority.setRole(role);
+			authorityService.createAuthority(authority);
+		}
+
+		return "";
+	}
+
+	// đến đây
 }

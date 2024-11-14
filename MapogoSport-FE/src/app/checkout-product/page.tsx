@@ -22,7 +22,8 @@ const CheckoutPage = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [user1, setUser1] = useState<User>();
 
-  // const products = localStorage.getItem('productIds');
+  const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
+
   useEffect(() => {
     const storedCartIds = localStorage.getItem('CartIds');
     if (storedCartIds) {
@@ -56,14 +57,6 @@ const CheckoutPage = () => {
     }
   }, [data]);
 
-  const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
-  const [addressUsers, setAddressUsers] = useState([]);
-  const [phoneNumbers, setPhoneNumbers] = useState([]);
-  const [phoneNumberSelected, setPhoneNumberSelected] = useState('');
-  const [vouchers, setVouchers] = useState([]);
-  const [voucherSelected, setVoucherSelected] = useState('');
-  const [fee, setFee] = useState();
-
   const fetcher = (url: string) => fetch(url).then(res => res.json());
   useEffect(() => {
     const username = localStorage.getItem('username');
@@ -77,6 +70,15 @@ const CheckoutPage = () => {
     revalidateOnFocus: false,
     revalidateOnReconnect: false
   });
+
+  const [addressUsers, setAddressUsers] = useState([]);
+  const [phoneNumbers, setPhoneNumbers] = useState([]);
+  const [phoneNumberSelected, setPhoneNumberSelected] = useState('');
+  const [vouchers, setVouchers] = useState([]);
+  const [voucherSelected, setVoucherSelected] = useState('');
+  const [fee, setFee] = useState();
+  const [discount, setDiscount] = useState(0);
+  const [newTotalPrice, setNewTotalPrice] = useState(0);
 
 
   useEffect(() => {
@@ -106,6 +108,15 @@ const CheckoutPage = () => {
     }
   }, [userData]);
 
+  useEffect(() => {
+    axios.get(`http://localhost:8080/rest/findVoucherByUsername/${user1?.username}`)
+      .then(response => {
+        setVouchers(response.data);
+      })
+      .catch(error => console.error('Error:', error));
+
+  }, [user1]);
+
   const { data: apiAddress } = useSWR("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
@@ -119,7 +130,7 @@ const CheckoutPage = () => {
   const [selectedWard, setSelectedWard] = useState<string>('');
   const [addressDetail, setAddressDetail] = useState<string>('');
   const [addressSelected, setAddressSelected] = useState([null]);
-
+  const [customPhoneNumber, setCustomPhoneNumber] = useState('');
   const [maQuan, setmaQuan] = useState();
 
   const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -208,7 +219,7 @@ const CheckoutPage = () => {
 
   const [urlPayment, setUrlPayment] = useState();
   const [order, setOrder] = useState();
-  const [orderStatus, setOrderStatus] = useState('');
+  const [orderStatus, setOrderStatus] = useState('Chờ xác nhận');
   const [paymentMethod, setPaymentMethod] = useState('COD');
 
   const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -221,31 +232,25 @@ const CheckoutPage = () => {
     setPaymentMethod(selectedMethod);
   };
 
-  const [voucher, setVoucher] = useState();
-  const [discount, setDiscount] = useState(0);
-  const [newTotalPrice, setNewTotalPrice] = useState(0);
+  const handleVoucherSelectedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedVoucher = vouchers.find(v => v.voucherId === Number(e.target.value));
+    setVoucherSelected(selectedVoucher || '');  // Cập nhật `voucherSelected`
+  };
 
-  useEffect(() => {
-    axios.get(`http://localhost:8080/rest/findVoucher/${voucherSelected}`)
-      .then(response => {
-        setVoucher(response.data)
-      })
-      .catch(error => console.error('Error:', error));
-
-  }, [voucherSelected]);
 
   const applyVoucher = async () => {
+
     if (!voucherSelected) {
       toast.error("Vui lòng chọn mã giảm giá");
       return;
     }
-    if (voucher?.discountPercent && totalPrice) {
-      const calculatedDiscount = (totalPrice * voucher.discountPercent) / 100;
-      setDiscount(calculatedDiscount);
 
-      const calculatedTotalPrice = totalPrice - calculatedDiscount;
-      setNewTotalPrice(calculatedTotalPrice);
-    }
+    const calculatedDiscount = (totalPrice * voucherSelected.discountPercent) / 100;
+    setDiscount(calculatedDiscount);
+
+    const calculatedTotalPrice = totalPrice - calculatedDiscount;
+    setNewTotalPrice(calculatedTotalPrice);
+
   };
 
   const checkForm = () => {
@@ -288,19 +293,21 @@ const CheckoutPage = () => {
 
     const addressParts = [selectedProvince, selectedDistrict, selectedWard, addressDetail];
     const address1 = addressParts.filter(part => part).join(', ');
+    const phoneNumber = phoneNumberSelected === 'other' ? customPhoneNumber : phoneNumberSelected;
+
     const orderData = {
       username: user1?.username,
       address: address1,
       // phoneNumber: addressSelected.phoneNumber,
-      phoneNumber: phoneNumberSelected,
+      phoneNumber: phoneNumber,
       date: new Date().toISOString(), // Chuyển đổi sang ISO string
       status: orderStatus,
       amount: newTotalPrice,
       paymentMethod: paymentMethod,
-      voucherId: voucher?.voucherId ?? '',
+      voucherId: voucherSelected.voucherId ?? '',
       shipFee: 0.0,// Hoặc giá trị phí vận chuyển
-      userVoucherId: voucherSelected
     };
+    console.log(orderData);
 
     try {
       const response = await axios.post('http://localhost:8080/rest/create_order', orderData, {
@@ -410,7 +417,7 @@ const CheckoutPage = () => {
                   className="form-control"
                   id="name"
                   placeholder="Họ và tên"
-                  defaultValue={user1?.fullname}
+                  defaultValue={user1?.fullname} readOnly
                 />
                 <label htmlFor="name" style={{ color: "gray" }}>Họ và tên</label>
               </div>
@@ -432,7 +439,20 @@ const CheckoutPage = () => {
                           {phoneNumber.phoneNumber.phoneNumber}
                         </option>
                       ))}
+                      <option value="other">Khác</option>
                     </select>
+                    {phoneNumberSelected === 'other' && (
+                      <div className="form-floating mt-2">
+                        <FloatingLabel controlId="city" label={<span>Nhập số điện thoại khác <b className="text-danger">*</b></span>}>
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="name" placeholder='Nhập số điện thoại khác'
+                            value={customPhoneNumber}
+                            onChange={(e) => setCustomPhoneNumber(e.target.value)} />
+                        </FloatingLabel>
+                      </div>
+                    )}
                     <label htmlFor="phone" style={{ color: "gray" }}>Số điện thoại</label>
                   </div>
                 </InputGroup>
@@ -622,16 +642,13 @@ const CheckoutPage = () => {
                   <select
                     className="form-select"
                     id="city"
-                    value={voucherSelected}
-                    onChange={(e) => setVoucherSelected(e.target.value)}
+                    value={voucherSelected?.voucherId || ""}
+                    onChange={handleVoucherSelectedChange}
                   >
                     <option value="">Chọn mã giảm giá</option>
-                    {vouchers.map(voucher => (
-                      <option
-                        key={voucher.userVoucherId}
-                        value={voucher.userVoucherId}
-                      >
-                        {voucher?.voucher?.name}
+                    {(vouchers && vouchers.length > 0 ? vouchers : []).map(voucher => (
+                      <option key={voucher.voucherId} value={voucher.voucherId}>
+                        {voucher.name}
                       </option>
                     ))}
                   </select>
