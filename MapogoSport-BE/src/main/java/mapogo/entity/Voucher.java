@@ -45,12 +45,12 @@ public class Voucher implements Serializable {
 	private Integer quantity;
 
 	@Column(name = "CreateDate", nullable = false)
-	private Date createDate;  // QA sửa 12/11
-//	private LocalDateTime createDate;
+//	private Date createDate;  // QA sửa 12/11
+	private LocalDateTime createDate;
 
 	@Column(name = "EndDate", nullable = false)
-	private Date endDate; // QA sửa 12/11
-//	private LocalDateTime endDate;
+//	private Date endDate; // QA sửa 12/11
+	private LocalDateTime endDate;
 
 	@Column(name = "Status", nullable = false)
 	private String status;
@@ -59,8 +59,8 @@ public class Voucher implements Serializable {
 	private String discountCode;
 
 	@Column(name = "ActiveDate", nullable = false)
-	private Date activeDate; // QA sửa 12/11
-//	private LocalDateTime activeDate;
+//	private Date activeDate; // QA sửa 12/11
+	private LocalDateTime activeDate;
 	
 	@Column(name = "CreatedBy", nullable = false)
 	private String createdBy;

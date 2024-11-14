@@ -228,57 +228,57 @@ const BookingModal = (props: OwnerProps) => {
 
 
         if (applyOne) {
-            if (dateBookingTemporary != dateBooking && idSportDetailTemporary != idSportDetail) {
-                if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
-                    for (const time of dataTimeOnStage) {
-                        const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
-                        // console.log(result);
+            // if (dateBookingTemporary != dateBooking && idSportDetailTemporary != idSportDetail) {
+            if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
+                for (const time of dataTimeOnStage) {
+                    const result = isTimeWithinRange(sport.opening, new Date().getHours() + "h" + new Date().getMinutes(), time);
+                    // console.log(result);
 
-                        if (result) {
-                            checkTime = true;
-                        }
+                    if (result) {
+                        checkTime = true;
                     }
                 }
+            }
 
-                if (checkTime) {
-                    toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
-                    return
-                }
-            } else {
-                try {
-                    const response = await fetch(
-                        `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${dateBooking}`
-                    );
+            if (checkTime) {
+                toast.warning("Thời gian ngày " + dateBooking + " đã có người đặt hoặc quá giờ rồi!")
+                return
+            }
+            // } else {
+            try {
+                const response = await fetch(
+                    `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${dateBooking}`
+                );
 
-                    if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
-                    const text = await response.text();
+                if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+                const text = await response.text();
 
-                    if (text) {
-                        const dataBooking = JSON.parse(text) as BookingDetail[];
-                        if (dataBooking && Object.keys(dataBooking).length > 0) {
-                            for (const item of dataBooking) {
-                                for (const time of dataTimeOnStage) {
-                                    const result = isTimeWithinRange(item.startTime, item.endTime, time);
-                                    if (!result) {
-                                        continue;
-                                    } else if (item.endTime == time) {
+                if (text) {
+                    const dataBooking = JSON.parse(text) as BookingDetail[];
+                    if (dataBooking && Object.keys(dataBooking).length > 0) {
+                        for (const item of dataBooking) {
+                            for (const time of dataTimeOnStage) {
+                                const result = isTimeWithinRange(item.startTime, item.endTime, time);
+                                if (!result) {
+                                    continue;
+                                } else if (item.endTime == time) {
+                                    continue;
+                                } else {
+                                    if (item.bookingDetailId == bookingDetailData?.bookingDetailId) {
                                         continue;
                                     } else {
-                                        if (item.bookingDetailId == bookingDetailData?.bookingDetailId) {
-                                            continue;
-                                        } else {
-                                            isAvailable = false;
-                                            break;
-                                        }
+                                        isAvailable = false;
+                                        break;
                                     }
                                 }
                             }
                         }
                     }
-                } catch (error) {
-                    console.error("API or JSON parsing error:", error);
                 }
+            } catch (error) {
+                console.error("API or JSON parsing error:", error);
             }
+            // }
 
         } else {
             if (bookingBySubscriptionKey && dateBooking) {
@@ -862,9 +862,9 @@ const BookingModal = (props: OwnerProps) => {
                                             (new Date().getHours() * 60) + new Date().getMinutes()
                                             < (parseInt(bookingDetailData.endTime.split('h')[0]) * 60) +
                                             parseInt(bookingDetailData.endTime.split('h')[1]) && (
-                                                <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
-                                                    <button disabled={(new Date().getHours() * 60) + new Date().getMinutes()
-                                                        >= (parseInt(bookingDetailData.endTime.split('h')[0])) * 60 + parseInt(bookingDetailData.endTime.split('h')[1])}
+                                                <OverlayTrigger overlay={<Tooltip>Thêm mới 1 </Tooltip>}>
+                                                    <button disabled={sport && parseInt(sport.closing.split('h')[0])
+                                                        === parseInt(bookingDetailData.endTime.split('h')[0])}
                                                         style={{ border: 'none', backgroundColor: 'white' }}>
                                                         <i onClick={() => handleAddBooking()} className="bi bi-plus-lg" style={{ cursor: 'pointer' }} />
                                                     </button>
@@ -1093,36 +1093,37 @@ const BookingModal = (props: OwnerProps) => {
                     <Row>
                         {!isAddBooking ?
                             bookingDetailData &&
-                            new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                new Date().getHours() <= parseInt(bookingDetailData.endTime.split('h')[0]) ? (
+                                new Date().setHours(0, 0, 0, 0) === new Date(bookingDetailData.date).setHours(0, 0, 0, 0) ? (
+                                new Date().getHours() <= parseInt(bookingDetailData.endTime.split('h')[0]) && (
                                     !editBooking ? (
                                         confirmData ? (
                                             <button onClick={() => handleUpdateBooking()} className="btn btn-danger m-auto" style={{ width: '97%' }}>Cập nhật</button>
                                         ) : (
                                             <button onClick={() => confirmDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm tra chỉnh sửa sân</button>
                                         )
-                                    ) :
+                                    ) : (
                                         <button className="btn btn-danger m-auto" onClick={() => handleCancelBookingDetail()} style={{ width: '97%' }}>Hủy đặt sân</button>
 
-                                ) : (
-                                    new Date().setHours(0, 0, 0, 0) <= new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
-                                        !editBooking ? (
-                                            confirmData ? (
-                                                <button onClick={() => handleUpdateBooking()} className="btn btn-danger m-auto" style={{ width: '97%' }}>Cập nhật</button>
-                                            ) : (
-                                                <button onClick={() => confirmDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm tra chỉnh sửa sân</button>
-                                            )
-                                        ) :
-                                            <button className="btn btn-danger m-auto" onClick={() => handleCancelBookingDetail()} style={{ width: '97%' }}>Hủy đặt sân</button>
                                     )
                                 )
-                            )
-                            :
-                            confirmNewData ?
-                                <button onClick={() => handleUpdateNewBooking()} className="btn btn-danger m-auto" style={{ width: '97%' }}>Thêm sân mới</button>
-                                :
-                                <button onClick={() => confirmNewDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm tra thêm mới sân</button>
-                        }
+                            ) : (
+                                bookingDetailData && new Date().setHours(0, 0, 0, 0) < new Date(bookingDetailData.date).setHours(0, 0, 0, 0) && (
+                                    !editBooking ? (
+                                        confirmData ? (
+                                            <button onClick={() => handleUpdateBooking()} className="btn btn-danger m-auto" style={{ width: '97%' }}>Cập nhật</button>
+                                        ) : (
+                                            <button onClick={() => confirmDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm tra chỉnh sửa sân</button>
+                                        )
+                                    ) : (
+                                        <button className="btn btn-danger m-auto" onClick={() => handleCancelBookingDetail()} style={{ width: '97%' }}>Hủy đặt sân</button>
+                                    )
+                                )
+                            ) : (
+                                confirmNewData ?
+                                    <button onClick={() => handleUpdateNewBooking()} className="btn btn-danger m-auto" style={{ width: '97%' }}>Thêm sân mới</button>
+                                    :
+                                    <button onClick={() => confirmNewDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm tra thêm mới sân</button>
+                            )}
                     </Row>
                 </Modal.Body>
                 <Modal.Footer>

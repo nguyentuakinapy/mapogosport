@@ -110,7 +110,7 @@ public class BookingServiceImpl implements BookingService {
 	        bookingMap.put("date", booking.getDate());
 	        bookingMap.put("totalAmount", booking.getTotalAmount());
 	        bookingMap.put("status", booking.getStatus());
-	        bookingMap.put("prepayPrice", booking.getPrepayPrice());
+	        bookingMap.put("percentDeposit", booking.getPercentDeposit());
 
 	        List<Map<String, Object>> bookingDetailsList = new ArrayList<>();
 	        for (BookingDetail bookingDetail : booking.getBookingDetails()) {
