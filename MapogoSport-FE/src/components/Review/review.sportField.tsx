@@ -12,30 +12,28 @@ interface ReviewProps {
 const ModalReviewSportField = (props: ReviewProps) => {
     const { showReviewModal, setShowReviewModal, fieldId } = props;
 
-    const StarRating = ({ setRating }: { setRating: any }) => {
-        const [rating, localSetRating] = useState(0); // Trạng thái cho rating hiện tại
-        const [hover, setHover] = useState(0); // Trạng thái cho sao đang được hover
+    const StarRating = ({ rating, setRating }: { rating: number; setRating: (rating: number) => void }) => {
+        const [hover, setHover] = useState(0);
 
-        const handleClick = (starValue: any) => {
-            localSetRating(starValue); // Cập nhật trạng thái nội bộ cho rating
-            setRating(starValue); // Gọi hàm từ props để cập nhật rating ở component cha
+        const handleClick = (starValue: number) => {
+            setRating(starValue); // Update parent component’s rating state directly
         };
 
         return (
             <div className="d-flex justify-content-between my-3" style={{ paddingLeft: '100px', paddingRight: '100px' }}>
-                {['', '', '', '', ''].map((label, index) => {
-                    const starValue = index + 1; // Tính giá trị sao
+                {['', '', '', '', ''].map((_, index) => {
+                    const starValue = index + 1;
                     return (
                         <div
                             key={index}
                             className="text-center"
-                            onMouseEnter={() => setHover(starValue)} // Khi di chuột qua
-                            onMouseLeave={() => setHover(0)} // Khi không còn di chuột qua
-                            onClick={() => handleClick(starValue)} // Gọi hàm handleClick khi nhấp
+                            onMouseEnter={() => setHover(starValue)}
+                            onMouseLeave={() => setHover(0)}
+                            onClick={() => handleClick(starValue)}
                         >
                             <i
                                 className={`bi bi-star-fill fs-4`}
-                                style={{ color: starValue <= (hover || rating) ? 'gold' : 'gray' }} // Thiết lập màu sắc của sao
+                                style={{ color: starValue <= (hover || rating) ? 'gold' : 'gray' }}
                             ></i>
                         </div>
                     );
@@ -43,6 +41,7 @@ const ModalReviewSportField = (props: ReviewProps) => {
             </div>
         );
     };
+
     const [rating, setRating] = useState(0); // Trạng thái cho rating
     const [comment, setComment] = useState(''); // Trạng thái cho bình luận
 
@@ -54,14 +53,6 @@ const ModalReviewSportField = (props: ReviewProps) => {
         }
 
         try {
-            // Check if the user already reviewed this field
-            const existingReviewResponse = await fetch(`http://localhost:8080/rest/fieldReview/${fieldId}/user/${username}`);
-            const existingReview = await existingReviewResponse.json();
-
-            if (existingReview) {
-                toast.warning("Bạn chỉ có thể đánh giá một lần!");
-                return;
-            }
 
             // Proceed with review submission
             const response = await fetch('http://localhost:8080/rest/fieldReview/save', {
@@ -92,6 +83,8 @@ const ModalReviewSportField = (props: ReviewProps) => {
 
     const handleClose = () => {
         setShowReviewModal(false);
+        setComment('');
+        setRating(0)
     }
 
     return (
@@ -112,7 +105,8 @@ const ModalReviewSportField = (props: ReviewProps) => {
                 </div>
 
                 {/* Đánh giá */}
-                <StarRating setRating={setRating} />
+                <StarRating rating={rating} setRating={setRating} />
+
                 <hr />
 
                 <span className='fs-5 ms-3'>Bình Luận</span><br />
