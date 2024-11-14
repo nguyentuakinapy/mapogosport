@@ -135,7 +135,6 @@ public class UserServiceImpl implements UserService {
 		AccountPackage ap = accountPackageDAO.findById(accountPackageId).get();
 		uS.setAccountPackage(ap);
 		System.out.println("đã cập nhật");
-		return userSubscriptionDAO.save(uS);
 		userSubscriptionDAO.save(uS);
 
 		Notification n = new Notification();
