@@ -5,7 +5,7 @@ const Popup = () => {
   const [timeDisplay, setTimeDisplay] = useState("");
 
   useEffect(() => {
-    
+
     const hasSeenPopupSession = sessionStorage.getItem('hasSeenPopup');
 
     if (!hasSeenPopupSession) {
@@ -21,12 +21,13 @@ const Popup = () => {
       midnight.setHours(24, 0, 0, 0); // Set to next midnight
 
       const timeDifference = midnight.getTime() - now.getTime();
-      const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-      const seconds = Math.floor((timeDifference / 1000) % 60)
+      const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+      const minutes = Math.floor((timeDifference / (1000 * 60)) % 60).toString().padStart(2, '0');
+      const seconds = Math.floor((timeDifference / 1000) % 60).toString().padStart(2, '0');
 
       return `${hours} : ${minutes} : ${seconds}`;
     };
+
 
     // Set initial time display
     setTimeDisplay(calculateTimeLeft());
@@ -57,7 +58,7 @@ const Popup = () => {
           </span>
           <h2>FLASH SALE</h2>
           <div className="percent">9X % OFF</div>
-          <p>Nhanh tay đặt sân và mua sắm ngay!</p>
+          <p>Giảm giá hôm nay, nhanh tay mua sắm ngay!</p>
           <button
             className="claim-btn"
             onClick={() => {

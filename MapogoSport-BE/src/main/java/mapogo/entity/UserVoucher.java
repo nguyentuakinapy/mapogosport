@@ -33,7 +33,8 @@ public class UserVoucher implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "VoucherId", nullable = false)
-    @JsonManagedReference  //Mỵ đổi ngày 9-11
+    @JsonManagedReference//Mỵ đổi ngày 9-11
+//    @JsonBackReference("voucher-reference")//HT 
     private Voucher voucher;
 
     @Column(name = "Status", nullable = false)

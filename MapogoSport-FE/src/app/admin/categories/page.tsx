@@ -333,7 +333,7 @@ const AdminProduct = () => {
                             valign: 'middle',
                         },
                         columnStyles: {
-                            0: { halign: 'left' },
+                            0: { halign: 'left', cellWidth: 30  },
                             1: { halign: 'left' },
                             2: { halign: 'center' },
                             3: { halign: 'right', cellWidth: 30 },
@@ -424,9 +424,10 @@ const AdminProduct = () => {
                                         <td className="text-center align-middle">
                                             <Link href="#">
                                                 <Image
-                                                    src={`http://localhost:8080/images/product-images/${category.image}`}
+                                                    src={`${category.image}`}
                                                     style={{ width: '150px', height: 'auto' }}
                                                     className="mx-2"
+                                                    alt={category.image}
                                                 />
                                             </Link>
                                         </td>
@@ -584,10 +585,10 @@ const AdminProduct = () => {
                                         <td className="text-center align-middle">
                                             <Link href="#">
                                                 <Image
-                                                    src={`http://localhost:8080/images/product-images/${category.image}`}
+                                                    src={`${category.image}`}
                                                     style={{ width: '150px', height: 'auto' }}
                                                     className="mx-2"
-                                                // alt={category.image}
+                                                alt={category.image}
                                                 />
                                             </Link>
                                         </td>
