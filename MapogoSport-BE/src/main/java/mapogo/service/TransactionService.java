@@ -1,5 +1,7 @@
 package mapogo.service;
 
+import java.util.List;
+
 import mapogo.entity.Transaction;
 
 public interface TransactionService {
@@ -7,4 +9,8 @@ public interface TransactionService {
 	Transaction create(Transaction transaction);
 	
 	//đến đây
+	
+	List<Transaction> findTransactionByWalletId(Integer walletId);
+
+	void createTransactionByBooking(Integer bookingId, double totalAmount);
 }

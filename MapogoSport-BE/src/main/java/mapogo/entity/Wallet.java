@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,15 +37,15 @@ public class Wallet {
 	@Column(name = "WalletId")
 	Integer walletId;
 	
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name="Username")
 	@JsonBackReference
 	User user;
-	
+		
 	@Column(name="Balance")
 	BigDecimal balance;
 	
 	@OneToMany(mappedBy = "wallet")
-	@JsonManagedReference 
+	@JsonIgnore
 	List<Transaction> transactions;
 }

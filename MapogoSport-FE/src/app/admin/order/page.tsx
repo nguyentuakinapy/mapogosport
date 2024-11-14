@@ -99,6 +99,8 @@ const AdminOrder = () => {
     };
 
     const renderTable = (filteredOrders: OrderMap[]) => {
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
         return (
             <div className="box-table-border mb-4">
                 <Table striped className="mb-0">
@@ -117,7 +119,7 @@ const AdminOrder = () => {
                         {filteredOrders.length > 0 ?
                             filteredOrders.map((order, index) => (
                                 <tr key={order.orderId}>
-                                    <td className="text-start">{`#${index + 1}`}</td>
+                                    <td className="text-start">{`#${indexOfFirstItem + index + 1}`}</td>
                                     <td className="text-start title">{order.fullname}</td>
                                     <td>{new Date(order.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${order.amount.toLocaleString()} ₫`}</td>

@@ -13,12 +13,15 @@ import ForgotPassword from "@/components/account/modal/forgotPassword.modal";
 import ChangePasswordNew from "@/components/account/modal/change-password-new.modal";
 import Popup from "@/components/User/modal/popup-voucher.modal";
 import { useData, UserProvider } from "./context/UserContext";
+import SockJS from "sockjs-client";
+import { Stomp } from "@stomp/stompjs";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
   const [sportFields, setSportFields] = useState<SportField[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
+  const [refreshKey, setRefreshKey] = useState<number>(999);
 
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
@@ -83,7 +86,6 @@ export default function Home() {
       setShowCreateOwnerModal(true);
     } else {
       toast.warning("Bạn chưa đăng nhập, vui lòng đăng nhập hoặc đăng ký tài khoản!")
-      setShowLoginModal(true);
     }
 
   }
@@ -102,15 +104,14 @@ export default function Home() {
     fetchData()
   }, [])
 
-  const userSession = sessionStorage.getItem('user');
-  const userData = userSession ? JSON.parse(userSession) as User : null;
-
-  const u = useData();
+  const [userData, setUserData] = useState<User>();
 
   useEffect(() => {
-    console.log('uádasdasds', u);
-
-  }, [u]);
+    const userSession = sessionStorage.getItem('user');
+    if (userSession) {
+      setUserData(JSON.parse(userSession) as User);
+    }
+  }, [])
 
   const [hasOwnerRole, setHasOwnerRole] = useState(false);
 
@@ -134,6 +135,26 @@ export default function Home() {
     }
     fetchData();
   }, [])
+
+  useEffect(() => {
+    const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+      stompClient.subscribe('/topic/login', (message) => {
+        const userSession = sessionStorage.getItem('user');
+        if (userSession && message.body == localStorage.getItem('username')) {
+          setUserData(JSON.parse(userSession) as User);
+        }
+      });
+    });
+
+    return () => {
+      stompClient.disconnect();
+    };
+  }, []);
+
+
   return (
     <HomeLayout>
       <div className="search-sport">
@@ -148,7 +169,7 @@ export default function Home() {
               <select defaultValue={0} className="form-control" style={{ borderWidth: '0 1px 0 0', borderStyle: 'solid', borderColor: 'black' }}>
                 <option value={'0'}>Lọc theo loại sân</option>
                 {categoryFields.map(item => (
-                  <option value={item.categoriesFieldId}>{item.name}</option>
+                  <option key={item.categoriesFieldId} value={item.categoriesFieldId}>{item.name}</option>
                 ))}
               </select>
               <input type="text" className="form-control" placeholder="Nhập tên sân hoặc địa chỉ" style={{ borderWidth: '0 1px 0 1px', borderStyle: 'solid', borderColor: 'black' }} />
@@ -439,16 +460,7 @@ export default function Home() {
         </div>
       </Container>
       <CreateOwnerModal showCreateOwnerModal={showCreateOwnerModal}
-        setShowCreateOwnerModal={setShowCreateOwnerModal} userData={userData} />
-      <LoginModal showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}
-        showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
-        showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}></LoginModal>
-      <RegisterModal showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></RegisterModal>
-      <ForgotPassword showForgotPassword={showForgotPassword} setShowForgotPassword={setShowForgotPassword}
-        showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew}
-      ></ForgotPassword>
-      <ChangePasswordNew showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></ChangePasswordNew>
-
+        setShowCreateOwnerModal={setShowCreateOwnerModal} userData={userData || undefined} />
     </HomeLayout>
   )
 }

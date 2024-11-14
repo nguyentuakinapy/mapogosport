@@ -8,6 +8,7 @@ import { formatDateVN } from '@/components/Utils/Format';
 import CheckoutModal from '@/components/Booking/booking.Checkout';
 import ModalReviewSportField from '@/components/Review/review.sportField';
 import '../[id]/BookingDetail.scss';
+import axios from 'axios';
 import SearchSportField from '@/components/Booking/booking.Search';
 
 type BookingsTypeOnWeek = {
@@ -40,6 +41,8 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [dataReview, setDataReview] = useState<Review[]>([]);
     const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
+
+    const [gallery, setGallery] = useState<GalleryField[]>([])
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -87,6 +90,24 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
             getTime()
         };
     }, [sportField]);
+
+
+      // handel Gallery sportField
+
+      useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/rest/sportfield/gallery/${params.id}`)
+                const data = await response.json()
+                setGallery(data)
+                console.log("data hht", data)
+            } catch (error) {
+                console.log("Lỗi khi fetch data Gallery", error)
+            }
+        }
+        fetchData()
+    }, [])
+
 
     useEffect(() => {
         if (dataTimeSport.length > 0 && sportField?.sportFielDetails) {
@@ -394,6 +415,117 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         }
     }
 
+    const [note, setNote] = useState<string>(''); // Ghi chú
+
+    const handleDateChange = (date: Date | null) => {
+        if (date) {
+            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            const formatted = localDate.toISOString().split('T')[0];
+            setSelectedDate(formatted);
+        } else {
+            setSelectedDate(null);
+        }
+    };
+
+    const [selectedSportType, setSelectedSportType] = useState<number | null>(null);
+
+    const handleIdBySize = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newSize = e.target.value;
+        if (sportField?.sportFielDetails) {
+            const filteredIds = sportField.sportFielDetails
+                .filter(detail => detail.size === newSize)
+                .map(detail => detail.sportFielDetailId);
+            const selectedDetail = sportField.sportFielDetails.find(detail => detail.size === newSize);
+            setSelectedSportType(selectedDetail ? selectedDetail.sportFielDetailId : null);
+        }
+    };
+
+    useEffect(() => {
+        if (sportField?.sportFielDetails) {
+            const initialSize = sportField.sportFielDetails[0].size;
+            handleIdBySize({ target: { value: initialSize } } as React.ChangeEvent<HTMLSelectElement>);
+        }
+    }, [sportField]);
+
+    const [validTimes, setValidTimes] = useState<string[]>([]);
+
+    const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setNote(e.target.value)
+    };
+
+    const handleFindField = async () => {
+        if (selectedDate && selectedTime) {
+            const response = await fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${selectedSportType}/${selectedDate}/${selectedDate}`);
+            const bookingsFromAPI: BookingDetail[] = await response.json();
+            let isBooked = false;
+            const selectedSportDetail = sportField?.sportFielDetails.find(detail => detail.sportFielDetailId === selectedSportType);
+            if (selectedSportDetail && selectedSportDetail.status === "Tạm đóng") {
+                toast.warning("Không tìm thấy sân phù hợp theo nhu cầu!");
+                return;
+            }
+            const currentDateTime = new Date();
+            const formattedTime = selectedTime.replace('h', ':').padStart(5, '0');
+            const selectedDateTime = new Date(`${selectedDate}T${formattedTime}`);
+            if (selectedDateTime < currentDateTime) {
+                toast.warning("Đã quá thời gian yêu cầu đặt sân!");
+                return;
+            }
+            if (Array.isArray(bookingsFromAPI) && bookingsFromAPI.length > 0) {
+                for (const booking of bookingsFromAPI) {
+                    const { startTime, endTime, sportFieldDetail } = booking;
+                    if ((startTime <= selectedTime && endTime > selectedTime) &&
+                        sportFieldDetail.sportFielDetailId === selectedSportType) {
+                        isBooked = true;
+                        break;
+                    }
+                }
+            }
+            if (isBooked) {
+                toast.warning("Đã có sân được đặt trùng với yêu cầu!");
+            } else {
+                toast.success("Đã tìm thấy sân theo yêu cầu!");
+                const sportDetail = selectedSportType;
+                const startTime = selectedTime;
+                const dayStartBooking = selectedDate;
+                const selectedSportDetail = sportField?.sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
+                if (sportDetail && startTime && dayStartBooking) {
+                    setSportDetail(selectedSportDetail);
+                    setStartTime(startTime);
+                    setDayStartBooking(dayStartBooking);
+                    setShowBookingModal(true);
+                    setStartTimeKey(!startTimeKey);
+                }
+            }
+        } else {
+            toast.warning("Vui lòng chọn ngày và giờ trước khi tìm kiếm.");
+        }
+    };
+    const [filteredData, setFilteredData] = useState(null); // State to store filtered reviews
+    const [rating, setRating] = useState(null);
+    const handleClick = (value) => {
+        setRating(value);
+
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/rest/find-fielreview-by-rating/${params.id}/${value}`);
+                if (response.data) {
+                    setFilteredData(response.data); // Update filtered data with reviews matching the rating
+                    // console.log("Filtered reviews by rating:", response.data);
+                } else {
+                    console.log("No reviews found for this rating.");
+
+                }
+            } catch (error) {
+                console.log("Error fetching rating data:", error);
+
+            }
+        };
+
+        fetchData();
+        // console.log(`Rating selected: ${value}`);
+    };
+
+  
     if (isLoading) return <HomeLayout><div>Đang tải...</div></HomeLayout>;
     if (error) return <HomeLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></HomeLayout>;
 
@@ -415,11 +547,43 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                 <div className="btn-option-icon">
                                     <i className="bi bi-heart-fill"></i>
                                 </div>
+                                <div className="btn-option-icon ">
+                                <i className="bi bi-chat-dots-fill text-primary"></i>
+                                </div>
                             </div>
                         </div>
                         <Row>
                             <Col lg={8}>
-                                <Image src="/img/demo-sport.jpg" width={850} height={450} rounded />
+                                {gallery.length > 0 ? (
+                                    <>
+                                        <div id="carouselExampleControls" className="carousel slide mt-3" data-bs-ride="carousel">
+                                            <div className="carousel-inner">
+                                                {gallery.map((galleryItem, index) => (
+                                                    <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
+                                                        <img
+                                                            src={`${galleryItem.image}`}
+                                                            className="d-block w-100 h-100"
+                                                            alt={`Gallery image ${index + 1}`}
+                                                            style={{ width: '100px', maxHeight: '450px', objectFit: 'cover', cursor: 'pointer' }} 
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                                                <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                <span className="visually-hidden">Previous</span>
+                                            </button>
+                                            <button className="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                                                <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                                                <span className="visually-hidden">Next</span>
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    sportField && <Image src={sportField.image} width={850} height={450} rounded />
+                                    
+                                )}
+                            
                             </Col>
                             <Col lg={4}>
                                 <div className="sportField-info-detail bg-white">
@@ -530,29 +694,44 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                     <Button variant="danger" onClick={() => setShowReviewModal(true)}>Đánh giá ngay</Button>
                 </div>
                 <h5 className='ms-3'>Bình luận</h5>
-                {dataReview.sort((a: any, b: any) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime()) // Sắp xếp theo ngày từ mới đến cũ
-                    .slice(0, visibleCount) // Hiển thị số bình luận theo visibleCount
-                    .map((review: any) => (
+                <div className="d-flex ms-4">
+                    {[5, 4, 3, 2, 1].map((value) => (
+                        <button
+                            key={value}
+                            type="button"
+                            className='btn btn-primary ms-2'
+                            onClick={() => handleClick(value)}
+                        >
+                            {value} ★
+                        </button>
+                    ))}
+                </div>
+
+
+                {/* // Rendering filtered reviews if available, otherwise full review data */}
+                {(filteredData || dataReview)
+                    .sort((a, b) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime())
+                    .slice(0, visibleCount)
+                    .map((review) => (
                         <Row className="mt-4 ms-5" key={review.fieldReviewId}>
                             <Col>
                                 <Image
                                     src="/img/avatar.jpg"
                                     alt="Hình ảnh thu nhỏ"
-                                    width={35} // Kích thước hình ảnh thu nhỏ
+                                    width={35}
                                     height={35}
-                                    className="rounded-circle" // Sử dụng lớp tiện ích Bootstrap để tạo hình tròn
+                                    className="rounded-circle"
                                 />
-                                <span className='me-4'>{review.user.fullname}</span> {/* Truy cập fullname từ user */}
+                                <span className='me-4'>{review.user.fullname}</span>
                                 <i className="bi bi-calendar me-2"></i>
                                 <span>{new Date(review.datedAt).toLocaleString('vi-VN')}</span>
 
                                 <div>
-                                    {/* Hiển thị đánh giá sao dựa trên giá trị rating */}
                                     <span className="text-warning ms-5 fs-3">
-                                        {'★'.repeat(review.rating)} {/* Hiển thị sao đầy */}
+                                        {'★'.repeat(review.rating)}
                                     </span>
                                     <br />
-                                    <span className='ms-5'>{review.comment}</span> {/* Hiển thị bình luận đánh giá */}
+                                    <span className='ms-5'>{review.comment}</span>
                                 </div>
                             </Col>
                         </Row>

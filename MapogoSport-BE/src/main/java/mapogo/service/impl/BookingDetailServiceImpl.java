@@ -41,7 +41,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Autowired
 	UserDAO userDAO;
-	
+
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
 
@@ -74,18 +74,18 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		}
 		return resultMaps;
 	}
-	
+
 	@Override
 	public BookingDetail updateStatusBookingDetail(Map<String, Object> bookingDetailData) {
 		Integer bookingDetailId = (Integer) bookingDetailData.get("bookingDetailId");
 		String newStatus = (String) bookingDetailData.get("status");
-		
+
 		Optional<BookingDetail> optionalBookingDetail = bookingDetailDAO.findById(bookingDetailId);
 		if (optionalBookingDetail.isPresent()) {
 			BookingDetail bookingDetail = optionalBookingDetail.get();
 			bookingDetail.setStatus(newStatus);
 			bookingDetailDAO.save(bookingDetail);
-			
+
 			Booking booking = bookingDetail.getBooking();
 			boolean allCancel = booking.getBookingDetails().stream()
 					.allMatch(detail -> "Đã hủy".equals(detail.getStatus()));
@@ -144,9 +144,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bookingDetail.setDate(LocalDate.parse((String) bd.get("date")));
 		bookingDetail.setBooking(b);
 		bookingDetail.setSubscriptionKey((String) bd.get("subscriptionKey"));
+
 		
-		messagingTemplate.convertAndSend("/topic/bookingDetail", b.getOwner().getOwnerId());
-		messagingTemplate.convertAndSend("/topic/username", b.getOwner().getUser().getUsername());
 
 		return bookingDetailDAO.save(bookingDetail);
 //		return null;
@@ -182,15 +181,23 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		Booking booking = bookingDAO.findById(bd.getBooking().getBookingId()).get();
 		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(booking.getBookingId());
 		int index = 0;
+		int totalAmount = 0;
 		for (BookingDetail b : bookingDetails) {
 			if (b.getStatus().equals("Đã hủy")) {
 				index++;
+			} else {
+				totalAmount += b.getPrice();
 			}
 		}
+		
 		if (index == bookingDetails.size()) {
 			booking.setStatus("Đã hủy");
 			bookingDAO.save(booking);
+		} else {
+			booking.setTotalAmount(totalAmount);
+			bookingDAO.save(booking);
 		}
+
 	}
 
 	@Override
@@ -221,7 +228,52 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bd.getBooking().getBookingId());
 		for (BookingDetail bookingDetail : bookingDetails) {
+			if (!bookingDetail.getStatus().equals("Đã hủy")) {
+				totalPriceTemporary = totalPriceTemporary + bookingDetail.getPrice();
+			}
+		}
+
+		Booking b = bd.getBooking();
+
+		b.setTotalAmount(totalPriceTemporary);
+		bookingDAO.save(b);
+	}
+
+	@Override
+	public void addNewBookingDetail(Map<String, Object> data) {
+		BookingDetail bd = bookingDetailDAO.findById((Integer) data.get("bookingDetailId")).get();
+		BookingDetail newBd = new BookingDetail();
+		SportFieldDetail spd = sportFieldDAO.findById((Integer) data.get("newIdSportBooking")).get();
+
+		Object priceObj = data.get("price");
+		Double price;
+
+		if (priceObj instanceof String) {
+			price = Double.valueOf((String) priceObj);
+		} else if (priceObj instanceof Number) {
+			price = ((Number) priceObj).doubleValue();
+		} else {
+			throw new IllegalArgumentException("totalAmount must be a String or Number");
+		}
+
+		newBd.setSportFieldDetail(spd);
+		newBd.setDate(LocalDate.parse((String) data.get("dateBooking")));
+		newBd.setStartTime((String) data.get("startTimeBooking"));
+		newBd.setEndTime((String) data.get("endTimeBooking"));
+		newBd.setPrice(price);
+		newBd.setBooking(bd.getBooking());
+		newBd.setSubscriptionKey("addNew" + bd.getBooking().getBookingId());
+
+//		System.err.println(data);
+		bookingDetailDAO.save(newBd);
+
+		Double totalPriceTemporary = 0.0;
+
+		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bd.getBooking().getBookingId());
+		for (BookingDetail bookingDetail : bookingDetails) {
 			totalPriceTemporary = totalPriceTemporary + bookingDetail.getPrice();
+			bookingDetail.setSubscriptionKey("addNew" + bd.getBooking().getBookingId());
+			bookingDetailDAO.save(bookingDetail);
 		}
 
 		Booking b = bd.getBooking();
@@ -250,7 +302,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		booking.setStatus("Đã hủy");
 		bookingDAO.save(booking);
 	}
-	
+
 	@Override
 	public void updateStatusChuaDaChangeToDaDa(Integer bookingDetailId) {
 		BookingDetail bookingDetail = bookingDetailDAO.findById(bookingDetailId).get();

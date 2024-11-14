@@ -4,8 +4,9 @@ import mapogo.entity.User;
 import mapogo.entity.Wallet;
 
 public interface WalletService {
-	//của Mỵ từ đây
+	// của Mỵ từ đây
 	Wallet findByUsername(User user);
+
 	Wallet update(Wallet wallet);
-	//đến đây
+	// đến đây
 }

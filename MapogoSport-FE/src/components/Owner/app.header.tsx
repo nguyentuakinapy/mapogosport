@@ -39,8 +39,8 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     const [hideNotification, setHideNotification] = useState<boolean>(false);
     const [notification, setNotification] = useState<NotificationUser[]>();
     const userData = useData();
-    const [checkBooking, setCheckBooking] = useState<number>();
-    const [checkNotification, setCheckNotification] = useState<number>();
+    const [checkBooking, setCheckBooking] = useState<number>(1);
+    const [checkNotification, setCheckNotification] = useState<number>(1);
     const path = usePathname();
 
     useEffect(() => {
@@ -51,15 +51,15 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
 
     const getNotification = async (username: string) => {
         const response = await fetch(`http://localhost:8080/rest/user/notification/${username}`);
-        if (!response.ok) throw new Error("Không tìm thấy sân sắp tới");
+        if (!response.ok) return
 
         const notification = await response.json() as NotificationUser[];
         // if (notification?.length >= 1) {
         setNotification(notification);
         // }
-        if (checkNotification) {
-            toast.success(notification[notification.length - 1].title);
-        }
+        // if (checkNotification && checkNotification != 1 || checkBooking && checkBooking != 1) {
+        //     toast.success("Bạn vừa có thông báo mới!");
+        // }
     }
 
     const translate = (word: string): string => {
@@ -99,11 +99,14 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
 
         stompClient.connect({}, () => {
             stompClient.subscribe('/topic/bookingDetail', (message) => {
-                setCheckBooking(Number(message.body))
+                setCheckNotification(prev => prev + 1);
             });
 
             stompClient.subscribe('/topic/notification', (message) => {
-                setCheckNotification(Number(message.body))
+                if (message.body === localStorage.getItem('username')) {
+                    toast.success("Bạn vừa có thông báo mới!");
+                    setCheckNotification(prev => prev + 1);
+                }
             });
 
             stompClient.subscribe('/topic/username', (message) => {

@@ -14,7 +14,7 @@ public class AccountPackageConverter {
         List<AccountPackageBenefitDTO> benefits = accountPackage.getAccountPackageBenefits().stream()
             .map(apb -> new AccountPackageBenefitDTO(
                 apb.getAccountPackageBenefitId(),
-                new BenefitDTO(
+                null, new BenefitDTO(
                     apb.getBenefit().getBenefitId(),
                     apb.getBenefit().getDescription()
                 )

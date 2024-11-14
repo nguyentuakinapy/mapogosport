@@ -56,7 +56,7 @@ const ModalTableDetail = ({ showModal, onClose, data }: ModalTableDetailProps) =
                                 <td>{booking.startTime}</td>
                                 <td>{booking.endTime}</td>
                                 <td>{formatPrice(booking.price)}</td>
-                                <td>{booking.date}</td>
+                                <td>{new Date(booking.date).toLocaleDateString()}</td>
                             </tr>
                         ))}
                     </tbody>
