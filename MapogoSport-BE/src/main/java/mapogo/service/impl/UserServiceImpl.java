@@ -3,7 +3,6 @@ package mapogo.service.impl;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +45,13 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User findByUsername(String username) {
-		return userDAO.findById(username).get();
+		try {
+			messagingTemplate.convertAndSend("/topic/login", userDAO.findById(username).get().getUsername());
+			return userDAO.findById(username).get();
+		} catch (Exception e) {
+			return null;
+		}
+
 	}
 
 	@Override
@@ -93,7 +98,18 @@ public class UserServiceImpl implements UserService {
 		}
 
 		uS.setStatus((String) data.get("status"));
-		return userSubscriptionDAO.save(uS);
+		userSubscriptionDAO.save(uS);
+		Notification n = new Notification();
+		n.setUser(u);
+		n.setTitle("Đăng ký gói tài khoản");
+		n.setMessage(ap.getPackageName() + " đã đăng ký thành công!");
+		n.setType("info");
+
+		notificationDAO.save(n);
+
+		messagingTemplate.convertAndSend("/topic/username", u.getUsername());
+
+		return uS;
 	}
 
 	@Override
@@ -108,6 +124,19 @@ public class UserServiceImpl implements UserService {
 		uS.setAccountPackage(ap);
 		System.out.println("đã cập nhật");
 		return userSubscriptionDAO.save(uS);
+		userSubscriptionDAO.save(uS);
+
+		Notification n = new Notification();
+		n.setUser(uS.getUser());
+		n.setTitle("Nâng cấp gói tài khoản");
+		n.setMessage(ap.getPackageName() + " đã nâng cấp thành công!");
+		n.setType("info");
+
+		notificationDAO.save(n);
+
+		messagingTemplate.convertAndSend("/topic/username", uS.getUser().getUsername());
+
+		return uS;
 	}
 
 	@Override
@@ -117,14 +146,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String uploadAvatar(String username, MultipartFile file) throws IOException {
-		Map<String, Object> uploadResult = cloudinaryUtils.uploadImage2(file);
-		String avtUrl = (String) uploadResult.get("secure_url");
+		String avtUrl = cloudinaryUtils.uploadImage(file);
 		User user = userDAO.findById(username).get();
 
 		if (user.getAvatar() != null) {
-			String oldPublicId = cloudinaryUtils.extractPublicIdFromUrl(user.getAvatar());
-			System.out.println(oldPublicId);
-			cloudinaryUtils.deleteImage(oldPublicId);
+			String oldAVT = user.getAvatar();
+			cloudinaryUtils.deleteImage(oldAVT);
 		}
 
 		user.setAvatar(avtUrl);
@@ -157,14 +184,14 @@ public class UserServiceImpl implements UserService {
 
 		messagingTemplate.convertAndSend("/topic/username", username);
 	}
-	
+
 	@Override
 	public void setIsReadNotification(Integer notificationId) {
 		Notification n = notificationDAO.findById(notificationId).get();
 		n.setIsRead(true);
-		
+
 		notificationDAO.save(n);
-		
+
 		messagingTemplate.convertAndSend("/topic/username", n.getUser().getUsername());
 	}
 }

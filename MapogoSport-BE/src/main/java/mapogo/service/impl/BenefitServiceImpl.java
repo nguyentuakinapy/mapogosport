@@ -20,4 +20,10 @@ public class BenefitServiceImpl implements BenefitService {
 		return benefitDao.findAll();
 	}
 
+	@Override
+	public Benefit addBeneFit(Benefit beneFit) {
+		
+		return benefitDao.save(beneFit);
+	}
+
 }

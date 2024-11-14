@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.entity.Booking;
@@ -24,6 +25,7 @@ import mapogo.entity.SportField;
 import mapogo.entity.SportFieldDetail;
 import mapogo.service.BookingDetailService;
 import mapogo.service.BookingService;
+import mapogo.service.TransactionService;
 
 @CrossOrigin("*")
 @RestController
@@ -34,22 +36,25 @@ public class BookingRestController {
 
 	@Autowired
 	BookingDetailService bookingDetailService;
+	
+	@Autowired
+	TransactionService transactionService;
 
 	@GetMapping("/booking")
 	public List<Booking> findAll() {
 		return bookingService.findAll();
 	}
-	
+
 	@GetMapping("/owner/booking/findAll/{ownerUsername}")
 	public List<Map<String, Object>> ownerFindAll(@PathVariable("ownerUsername") String ownerUsername) {
 		return bookingService.findAllBookingByOwner(ownerUsername);
 	}
-	
+
 	@PutMapping("/owner/booking/update")
 	public void updateBookingStatus(@RequestBody Map<String, Object> bookingData) {
 		bookingService.updateStatusBooking(bookingData);
 	}
-	
+
 	@PutMapping("/owner/bookingDetail/update")
 	public void updateBookingDetailStatus(@RequestBody Map<String, Object> bookingDetailData) {
 		bookingDetailService.updateStatusBookingDetail(bookingDetailData);
@@ -70,7 +75,7 @@ public class BookingRestController {
 			@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 		return bookingDetailService.findBySportFieldDetailAndDay(sportDetailId, date);
 	}
-	
+
 	@GetMapping("/user/booking/detail/getbyday/subscriptionkey/{subscriptionkey}")
 	public List<BookingDetail> findBookingDetailBySubscriptionKey(
 			@PathVariable("subscriptionkey") String subscriptionKey) {
@@ -101,16 +106,20 @@ public class BookingRestController {
 		return bookingService.findBookingAmountByOwnerAndStatus(ownerId, status);
 	}
 
-	@GetMapping("/bookingdetail/booking/bysportField/byowner/{sportFieldIds}/{ownerId}")
+	@GetMapping("/bookingdetail/booking/bysportField/byowner/{sportFieldIds}/{bookingId}/{status}")
 	public List<BookingDetail> findBookingDetailBySportFieldAndOwner(
-			@PathVariable("sportFieldIds") List<Integer> sportFieldIds, @PathVariable("ownerId") Integer ownerId) {
+			@PathVariable("sportFieldIds") List<Integer> sportFieldIds,
+			@PathVariable("bookingId") List<Integer> bookingId,
+			@PathVariable("status") List<String> status) {
 
-		return bookingService.findBookingDetailBySportFieldAndOwner(sportFieldIds, ownerId);
+		return bookingService.findBookingDetailBySportFieldAndOwner(sportFieldIds, bookingId, status);
 	}
 
-	@GetMapping("/bookingdetail/booking/bysportFieldDetail/{sportFieldIds}")
-	public List<Object[]> findRevenueBySportFieldDetailIds(@PathVariable("sportFieldIds") List<Integer> sportFieldIds) {
-		return bookingService.findRevenueBySportFieldDetailIds(sportFieldIds);
+	@GetMapping("/bookingdetail/booking/bysportFieldDetail/{sportFieldIds}/{bookingId}/{status}")
+	public List<Object[]> findRevenueBySportFieldDetailIds(@PathVariable("sportFieldIds") List<Integer> sportFieldIds,
+			@PathVariable("bookingId") List<Integer> bookingId,
+			@PathVariable("status") List<String> status) {
+		return bookingService.findRevenueBySportFieldDetailIds(sportFieldIds, bookingId, status);
 	}
 
 	@GetMapping("/booking/detail/findbystarttime/sportfielddetail/{startTime}/{sportFieldDetailId}/{date}")
@@ -121,11 +130,11 @@ public class BookingRestController {
 				date);
 	}
 
-	@GetMapping("/bookingdetail/bysportFieldDetail/{sportFieldIds}")
-	public List<BookingDetail> findBookingDetailBySportFieldId(@PathVariable("sportFieldIds") Integer sportFieldIds) {
-		return bookingService.findBookingDetailBySportFieldId(sportFieldIds);
+	@GetMapping("/bookingdetail/bysportFieldDetail/{sportFieldIds}/{bookingId}/{status}")
+	public List<BookingDetail> findBookingDetailBySportFieldId(@PathVariable("sportFieldIds") Integer sportFieldIds,
+			@PathVariable("bookingId") List<Integer> bookingId, @PathVariable("status") List<String> status) {
+		return bookingService.findBookingDetailBySportFieldId(sportFieldIds, bookingId, status);
 	}
-
 
 	// Get revenue by Date
 
@@ -137,64 +146,93 @@ public class BookingRestController {
 		return bookingService.findRevenueByDate(status, ownerId, startDate, endDate);
 	}
 
-	@GetMapping("/bookingDetail/byOwner/bySportField/byDate/{sportFieldIds}/{ownerId}/{startDate}/{endDate}")
+	@GetMapping("/bookingDetail/byOwner/bySportField/byDate/{sportFieldIds}/{bookingId}/{status}/{startDate}/{endDate}")
 	public List<BookingDetail> findBookingDetailByDate(@PathVariable("sportFieldIds") List<Integer> sportFieldIds,
-			@PathVariable("ownerId") Integer ownerId, @PathVariable("startDate") String startDate,
+			@PathVariable("bookingId") List<Integer> bookingId, @PathVariable("status") List<String> status,
+			@PathVariable("startDate") String startDate,
 			@PathVariable("endDate") String endDate) {
-		return bookingService.findBookingDetailByDate(sportFieldIds, ownerId, startDate, endDate);
+		return bookingService.findBookingDetailByDate(sportFieldIds, bookingId, status, startDate, endDate);
 	}
 
-	@GetMapping("/bookingDetail/bySportField/byDate/{sportFieldDetailIds}/{startDate}/{endDate}")
+	@GetMapping("/bookingDetail/bySportField/byDate/{sportFieldDetailIds}/{bookingId}/{status}/{startDate}/{endDate}")
 	public List<Object[]> findRevenueBySportFieldDetailIdsByDate(
 			@PathVariable("sportFieldDetailIds") List<Integer> sportFieldDetailIds,
+			@PathVariable("bookingId") List<Integer> bookingId, @PathVariable("status") List<String> status,
 			@PathVariable("startDate") String startDate, @PathVariable("endDate") String enDate) {
 
-		return bookingService.findRevenueBySportFieldDetailIdsByDate(sportFieldDetailIds, startDate, enDate);
+		return bookingService.findRevenueBySportFieldDetailIdsByDate(sportFieldDetailIds, bookingId, status, startDate, enDate);
 	}
-	
+
 	@GetMapping("/booking/byOwnerId/totalCustomer/{ownerId}")
 	public Integer totalCustomer(@PathVariable("ownerId") Integer ownerId) {
-		
+
 		return bookingService.totalCustomer(ownerId);
 	}
-	
+
 	@GetMapping("/booking/customerByMonth/byOwnerId/{year}/{ownerId}")
-	public Map<Integer,Integer> findCustomerCountsByMonth(@PathVariable("year") Integer year, @PathVariable("ownerId") Integer ownerId){
-		
-		return bookingService.findCustomerCountsByMonth(year, ownerId);	
+	public Map<Integer, Integer> findCustomerCountsByMonth(@PathVariable("year") Integer year,
+			@PathVariable("ownerId") Integer ownerId) {
+
+		return bookingService.findCustomerCountsByMonth(year, ownerId);
 	}
-	
-	@GetMapping("/booking/customer/byOwner/byUsername/{ownerId}")
-	public List<Object[]> findBookingByOwnerIdUsername(@PathVariable("ownerId") Integer ownerId){
-		
-		return bookingService.findBookingByOwnerIdUsername(ownerId);		
+
+	@GetMapping("/booking/customer/byOwner/byUsernameOffline/{ownerId}")
+	public List<Object[]> findBookingByOwnerIdUsername(@PathVariable("ownerId") Integer ownerId) {
+
+		return bookingService.findBookingByOwnerIdUsernameOffline(ownerId);
 	}
 
 	@PutMapping("/booking/update/status/{bookingDetailId}")
 	public void cancelBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId) {
-		 bookingDetailService.cancelBookingDetail(bookingDetailId);
+		bookingDetailService.cancelBookingDetail(bookingDetailId);
 	}
-	
+
 	@PutMapping("/booking/update/status/by/subcriptionKey/{bookingDetailId}/{subscriptionKey}")
 	public void cancelBookingDetailBySubscription(@PathVariable("bookingDetailId") Integer bookingDetailId,
 			@PathVariable("subscriptionKey") String subscriptionKey) {
-		 bookingDetailService.cancelBookingDetailBySubscription(bookingDetailId, subscriptionKey);
+		bookingDetailService.cancelBookingDetailBySubscription(bookingDetailId, subscriptionKey);
 	}
-	
+
 	@PutMapping("/booking/update/booking/detail/{bookingDetailId}")
 	public void updateBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId,
 			@RequestBody Map<String, Object> data) {
-		 bookingDetailService.updateBookingDetail(data);
+		bookingDetailService.updateBookingDetail(data);
 	}
-	
+
 	@PutMapping("/booking/detail/change/status/{bookingDetailId}")
 	public void updateStatusChuaDaChangeToDaDa(@PathVariable("bookingDetailId") Integer bookingDetailId) {
 		bookingDetailService.updateStatusChuaDaChangeToDaDa(bookingDetailId);
 	}
+
+	
+	@PostMapping("/booking/detail/add/new")
+	public void  addNewBookingDetail(@RequestBody Map<String, Object> data) {
+		bookingDetailService.addNewBookingDetail(data);
+	}
 	
 	@GetMapping("/booking/detail/find/date/and/time/{date}/{time}/{sportFieldId}")
-	public List<BookingDetail> findByDateAndTime(@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-				@PathVariable("time") String time, @PathVariable("sportFieldId") Integer sportFieldId){
+	public List<BookingDetail> findByDateAndTime(
+			@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+			@PathVariable("time") String time, @PathVariable("sportFieldId") Integer sportFieldId) {
 		return bookingDetailService.findByDateAndTime(date, time, sportFieldId);
+	}
+	
+	@PostMapping("/payment/process/{bookingId}")
+	public void processPayment(@PathVariable("bookingId") Integer bookingId, @RequestParam double totalAmount) {
+		transactionService.createTransactionByBooking(bookingId, totalAmount);
+}
+	@GetMapping("/booking/detail/tableCustomer/byFullname/{fullname}")
+	public List<Booking> findByFullName(@PathVariable("fullname") String fullname){
+		return bookingService.findByFullNameOffline(fullname);
+	}
+	
+	@GetMapping("/booking/rank/customer/online/byOwerId/{ownerId}")
+	public List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(@PathVariable("ownerId") Integer ownerId){
+		return bookingService.findBookingByOwnerIdExcludingUsernameOffline(ownerId);
+	}
+	
+	@GetMapping("/booking/rank/customer/online/{username}")
+	public List<Booking> findBookingByUsernameOnline(@PathVariable("username") String username){
+		return bookingService.findByUsername(username);
 	}
 }

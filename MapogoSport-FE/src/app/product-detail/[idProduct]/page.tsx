@@ -50,7 +50,7 @@ const StarRating = ({ setRating }) => {
 const ProductDetail = () => {
     const [quantity, setQuantity] = useState(1);
     const [open, setOpen] = useState(false);
-    const increaseQuantity = () => setQuantity(quantity + 1);
+
     const decreaseQuantity = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
     const [modalShow, setModalShow] = useState(false);
     const [selectedProductDetailSizeId, setSelectedProductDetailSizeId] = useState(null);
@@ -65,6 +65,16 @@ const ProductDetail = () => {
     const { idProduct } = useParams();
     const [visibleCount, setVisibleCount] = useState(5);
     const [user, setUser] = useState(null); // Trạng thái cho thông tin người dùng
+
+    const [selectedSizeQuantity, setSelectedSizeQuantity] = useState(0);
+    const increaseQuantity = () => {
+        if (quantity < selectedSizeQuantity) {
+            setQuantity(quantity + 1);
+        } else {
+            toast.info("Số lượng vượt quá giới hạn.");
+        }
+    };
+
     useEffect(() => {
         if (typeof window !== 'undefined') {
             // Kiểm tra nếu đang chạy trên client-side
@@ -103,71 +113,68 @@ const ProductDetail = () => {
     }, [idProduct])
 
     // product_review
-    const [data, setData] = useState<Review[]>([]); // Khai báo kiểu dữ liệu cho data
+    // const [data, setData] = useState<Review[]>([]); // Khai báo kiểu dữ liệu cho data
+    const fetchProductData = (url: string) => fetch(url).then((res) => res.json());
+    const { data } = useSWR(`http://localhost:8080/rest/${idProduct}`, fetchProductData, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
 
-    // Hàm fetchData để lấy dữ liệu đánh giá
-    const fetchData = async () => {
-        try {
-            const response = await axios.get(`http://localhost:8080/rest/${idProduct}`); // API route
-            setData(response.data); // Lưu đánh giá vào trạng thái
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    useEffect(() => {
-        fetchData(); // Gọi hàm fetchData khi component mount
-    }, []);
 
     const MyVerticallyCenteredModal = (props) => {
         const [rating, setRating] = useState(0); // Trạng thái cho rating
         const [comment, setComment] = useState(''); // Trạng thái cho bình luận
-
+        const hasReviewed = data?.some(review => review.user.username === user?.username);
         const handleRatingSubmit = async () => {
-
             if (!user || !user.username) {
-                toast.warning("Bạn chưa đăng nhập !")
+                toast.warning("Bạn chưa đăng nhập!");
                 return;
             }
             if (comment.length < 15) {
-                toast.warning("Cần phải nhập ít nhất 15 ký tự")
+                toast.warning("Cần phải nhập ít nhất 15 ký tự");
                 return;
             }
-            const ratingData = {
-                user: {
-                    username: user.username
-                },
-                product: {
-                    productId: idProduct
-                },
-                rating: rating,
-                comment: comment,
-                datedAt: new Date()
-            };
 
-            try {
-                const response = await fetch('http://localhost:8080/rest/save', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(ratingData)
-                });
-
-                if (!response.ok) {
-                    const errorMessage = await response.text(); // Nhận thông tin chi tiết từ lỗi
-                    throw new Error(`Có lỗi xảy ra khi gửi đánh giá: ${errorMessage}`);
-                }
-
-                const result = await response.json();
-                setData(data => [...data, result]);
-                console.log("Đánh giá đã được gửi thành công", result);
-                props.onHide(); // Đóng modal sau khi gửi thành công
-                toast.success("Gửi đánh giá thành công !")
-            } catch (error) {
-                console.error("Lỗi khi gửi đánh giá:", error);
-                alert("Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.");
+            if (hasReviewed) {
+                toast.warning("Bạn không thể đánh giá hai lần!");
+                return;
             }
+
+            if (user && user.username) {
+                // Prepare the rating data as per the expected DTO structure
+                const ratingData = {
+                    userName: user.username,
+                    productId: idProduct,
+                    rating: rating,
+                    comment: comment,
+                    datedAt: new Date()
+                };
+
+                try {
+                    const response = await fetch('http://localhost:8080/rest/save', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(ratingData)
+                    });
+
+                    if (!response.ok) {
+                        const errorMessage = await response.text(); // Capture detailed error message
+                        throw new Error(`Có lỗi xảy ra khi gửi đánh giá: ${errorMessage}`);
+                    }
+
+                    mutate(`http://localhost:8080/rest/${idProduct}`)
+                    console.log("Đánh giá đã được gửi thành công");
+                    props.onHide(); // Close modal after successful submission
+                    toast.success("Gửi đánh giá thành công!");
+                } catch (error) {
+                    console.error("Lỗi khi gửi đánh giá:", error);
+                    toast.error("Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.");
+                }
+            }
+
         };
 
         return (
@@ -255,6 +262,7 @@ const ProductDetail = () => {
                         setSelectedSize(data[0].size.sizeName);
                         setIdSize(data[0].size.sizeId);
                         setSelectedProductDetailSizeId(data[0].productDetailSizeId); // Sử dụng ID từ dữ liệu trả về
+                        setSelectedSizeQuantity(data[0].quantity)
                     }
                 } catch (error) {
                     console.log("error size", error);
@@ -314,10 +322,18 @@ const ProductDetail = () => {
         }
         return res.json();
     });
+
+
     const { data: cartCount, error } = useSWR(user ? `http://localhost:8080/rest/cart/count/${user.username}` : null, fetcher);
 
     const handleAddToCart = async () => {
+        console.log("số lượng size là ", selectedSizeQuantity)
+
         if (user && user.username) {
+            if (selectedSizeQuantity === 0) {
+                toast.info("Không thể thêm vào giỏ hàng vì size này đã hết. Vui lòng chọn 1 size khác")
+                return;
+            }
             const dataAddCart = {
                 username: user.username,
                 productDetailSizeId: selectedProductDetailSizeId,
@@ -355,6 +371,7 @@ const ProductDetail = () => {
         }
     };
     const [rating, setRating] = useState(null);
+    const [filteredData, setFilteredData] = useState(null); // State to store filtered reviews
 
     const handleClick = (value) => {
         setRating(value);
@@ -362,21 +379,22 @@ const ProductDetail = () => {
         const fetchData = async () => {
             try {
                 const response = await axios.get(`http://localhost:8080/rest/user/find-review-by-rating/${idProduct}/${value}`);
-                console.log("rating", response.data);
-                // If needed, you can update state with the fetched data here
-                setData(response.data);
+                if (response.data) {
+                    setFilteredData(response.data); // Update filtered data with reviews matching the rating
+                    console.log("Filtered reviews by rating:", response.data);
+                } else {
+                    console.log("No reviews found for this rating.");
+
+                }
             } catch (error) {
-                console.log("error rating", error);
+                console.log("Error fetching rating data:", error);
+
             }
         };
 
         fetchData();
         console.log(`Rating selected: ${value}`);
     };
-
-
-
-
 
     return (
         <>
@@ -389,26 +407,52 @@ const ProductDetail = () => {
                                 <>
                                     <img
                                         src={`${imageGallery[0][0].image}`}
-                                        className='w-75'
+                                        className='w-100'
                                         alt="Main product"
                                         id="main-product-image"
                                         title={imageGallery[0][0].image}
                                         style={{ width: '100%', height: '400px', objectFit: 'contain' }}
                                     />
-                                    <div className="d-flex mt-3">
-                                        {imageGallery[0][0].galleries.map((galleryItem, index) => (
-                                            <img
-                                                key={index}
-                                                src={`${galleryItem.name}`}
-                                                className='me-2'
-                                                alt={`Gallery image ${index + 1}`}
-                                                style={{ width: '80px', height: '80px', cursor: 'pointer', objectFit: 'cover' }}
-                                                onClick={() => {
-                                                    document.getElementById('main-product-image').src = `${galleryItem.name}`;
-                                                }}
-                                            />
-                                        ))}
+                                    <div id="imageGalleryCarousel" class="carousel slide mt-3" data-bs-ride="carousel">
+                                        <div className="carousel-inner">
+
+                                            {imageGallery[0][0].galleries.map((galleryItem, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={`carousel-item ${index === 0 ? 'active' : ''}`} // First item is active
+                                                >
+                                                    <div className="row justify-content-center">
+                                                        {imageGallery[0][0].galleries.slice(index, index + 3).map((item, subIndex) => (
+                                                            <div className="col-4 d-flex justify-content-center" key={subIndex}>
+                                                                <img
+                                                                    src={item.name}
+                                                                    className="img-fluid"
+                                                                    alt={`Gallery image ${index + subIndex + 1}`}
+                                                                    style={{ width: '90px', height: '90px', objectFit: 'cover', cursor: 'pointer' }}
+                                                                    onClick={() => {
+                                                                        document.getElementById('main-product-image').src = item.name;
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+
+                                        <button className="carousel-control-prev" type="button" data-bs-target="#imageGalleryCarousel" data-bs-slide="prev">
+                                            <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            <span className="visually-hidden">Previous</span>
+                                        </button>
+                                        <button className="carousel-control-next" type="button" data-bs-target="#imageGalleryCarousel" data-bs-slide="next">
+                                            <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                                            <span className="visually-hidden">Next</span>
+                                        </button>
                                     </div>
+
+
+
                                 </>
                             ) : (
                                 <p>No images available</p>
@@ -451,18 +495,22 @@ const ProductDetail = () => {
                                     <div className="d-flex flex-wrap">
                                         {size.map((item) => {
                                             return (
-                                                <Button
-                                                    key={item.size.sizeId}
-                                                    className="me-2 mb-2"
-                                                    variant={selectedSize === item.size.sizeName ? 'dark' : 'outline-secondary'}
-                                                    onClick={() => {
-                                                        setSelectedSize(item.size.sizeName);
-                                                        setSelectedProductDetailSizeId(item.productDetailSizeId);
-                                                        setIdSize(item.size.sizeId);
-                                                    }}
-                                                >
-                                                    {item.size.sizeName}
-                                                </Button>
+                                                <>
+                                                    <Button
+                                                        key={item.size.sizeId}
+                                                        className="me-2 mb-2"
+                                                        variant={selectedSize === item.size.sizeName ? 'dark' : 'outline-secondary'}
+                                                        disabled={item.quantity === 0}
+                                                        onClick={() => {
+                                                            setSelectedSize(item.size.sizeName);
+                                                            setSelectedProductDetailSizeId(item.productDetailSizeId);
+                                                            setIdSize(item.size.sizeId);
+                                                            setSelectedSizeQuantity(item.quantity)
+                                                        }}
+                                                    >
+                                                        {item.size.sizeName}
+                                                    </Button>
+                                                </>
                                             );
                                         })}
                                     </div>
@@ -471,7 +519,13 @@ const ProductDetail = () => {
 
 
                             <div className="mb-3">
-                                <span className="d-block fw-bold mb-2">Số lượng:</span>
+                                {selectedSizeQuantity === 0 ? (
+                                    <span className="text-danger">Sản phẩm này đã hết hàng</span>
+                                ) : (
+                                    <span className="text-success">Còn lại: {selectedSizeQuantity} sản phẩm</span>
+                                )}
+                                <span className="d-block fw-bold mb-2 mt-2">Số lượng:</span>
+
                                 <ButtonGroup>
                                     <Button variant="outline-secondary" onClick={decreaseQuantity}>-</Button>
                                     <Form.Control
@@ -540,35 +594,41 @@ const ProductDetail = () => {
                             </button>
                         ))}
                     </div>
-                    {data
-                        .sort((a, b) => new Date(b.datedAt) - new Date(a.datedAt)) // Sắp xếp theo ngày từ mới đến cũ
-                        .slice(0, visibleCount) // Hiển thị số bình luận theo visibleCount
-                        .map((review) => (
-                            <Row className="mt-5 ms-5" key={review.productReviewId}>
-                                <Col>
-                                    <Image
-                                        src="/img/avatar.jpg"
-                                        alt="Hình ảnh thu nhỏ"
-                                        width={35} // Kích thước hình ảnh thu nhỏ
-                                        height={35}
-                                        className="rounded-circle" // Sử dụng lớp tiện ích Bootstrap để tạo hình tròn
-                                    />
-                                    <span className='me-4'>{review.user.fullname}</span> {/* Truy cập fullname từ user */}
-                                    <i className="bi bi-calendar me-2"></i>
-                                    <span>{new Date(review.datedAt).toLocaleString('vi-VN')}</span>
 
-                                    <div>
-                                        {/* Hiển thị đánh giá sao dựa trên giá trị rating */}
-                                        <span className="text-warning ms-5 fs-3">
-                                            {'★'.repeat(review.rating)} {/* Hiển thị sao đầy */}
-                                        </span>
-                                        <br />
-                                        <span className='ms-5'>{review.comment}</span> {/* Hiển thị bình luận đánh giá */}
-                                    </div>
-                                </Col>
-                            </Row>
-                        ))}
-                    {visibleCount < data.length && ( // Kiểm tra nếu còn bình luận để tải thêm
+                    {
+                        (filteredData ? filteredData : data) && Array.isArray(filteredData ? filteredData : data) ? (
+                            (filteredData || data)
+                                .sort((a, b) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime())
+                                .slice(0, visibleCount)
+                                .map((review) => (
+                                    <Row className="mt-5 ms-5" key={review.productReviewId}>
+                                        <Col>
+                                            <Image
+                                                src="/img/avatar.jpg"
+                                                alt="Hình ảnh thu nhỏ"
+                                                width={35}
+                                                height={35}
+                                                className="rounded-circle"
+                                            />
+                                            <span className="me-4">{review.user.fullname}</span>
+                                            <i className="bi bi-calendar me-2"></i>
+                                            <span>{new Date(review.datedAt).toLocaleString('vi-VN')}</span>
+                                            <div>
+                                                <span className="text-warning ms-5 fs-3">
+                                                    {'★'.repeat(review.rating)}
+                                                </span>
+                                                <br />
+                                                <span className="ms-5">{review.comment}</span>
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                ))
+                        ) : (
+                            <p>Loading...</p> // Display a loading message while data is being fetched
+                        )
+                    }
+
+                    {data && visibleCount < data.length && (
                         <Row className="mt-4 text-center">
                             <Col>
                                 <Button variant="primary" onClick={loadMoreReviews}>

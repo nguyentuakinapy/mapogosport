@@ -2,11 +2,12 @@
 import UserLayout from "@/components/User/UserLayout";
 import Link from "next/link";
 import '../types/user.scss';
-import { Badge, Button, Col, Form, InputGroup, Pagination, Row, Table } from "react-bootstrap";
+import { Badge, Button, Col, Form, InputGroup, Nav, NavDropdown, Pagination, Row, Table } from "react-bootstrap";
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from "react-datepicker";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useSWR from "swr";
+import { useData } from "@/app/context/UserContext";
 
 const Bookings = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -17,11 +18,10 @@ const Bookings = () => {
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [nameFilter, setNameFilter] = useState<string>("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [itemsPerPage] = useState(8);
+    const userData = useData();
 
-    const username = localStorage.getItem('username');
-
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/booking/${username}`, fetcher, {
+    const { data, error, isLoading } = useSWR(userData && `http://localhost:8080/rest/user/booking/${userData.username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -35,14 +35,14 @@ const Bookings = () => {
         }
     }, [data]);
 
-    const getStatusVariant = (status: string) => {
+    const getStatusVariant = useCallback((status: string) => {
         switch (status) {
             case 'Đã thanh toán': return 'success';
             case 'Chờ thanh toán': return 'info';
             case 'Đã hủy': return 'danger';
             default: return 'secondary';
         }
-    };
+    }, []);
 
     const handlePreviousPage = () => {
         if (currentPage > 1) {
@@ -56,7 +56,7 @@ const Bookings = () => {
     };
 
     const renderPagination = () => {
-        if (filteredBookings.length === 0) return null;
+        if (filteredBookings.length <= 1) return null;
 
         const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
         const pages = [];
@@ -88,7 +88,10 @@ const Bookings = () => {
             filtered = filtered.filter(booking => booking.status === statusFilter);
         };
         if (nameFilter) {
-            filtered = filtered.filter(booking => booking.sportFieldName.toLowerCase().includes(nameFilter.toLowerCase()));
+            filtered = filtered.filter(booking => booking.sportFieldName &&
+                booking.sportFieldName.toLowerCase().includes(nameFilter.toLowerCase()) ||
+                booking.bookingId.toString().includes(nameFilter)
+            );
         };
 
         setFilteredBookings(filtered);
@@ -105,6 +108,7 @@ const Bookings = () => {
         setNameFilter("");
     };
 
+
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
@@ -118,7 +122,7 @@ const Bookings = () => {
             <div className="my-3">
                 <Row className="d-flex justify-content-between align-items-center">
                     <Col xs={12} md={4}>
-                        <Form.Control value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="input-search-user" type="text" placeholder="Tìm theo tên sân" />
+                        <Form.Control value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="input-search-user" type="text" placeholder="Tìm kiếm..." />
                     </Col>
                     <Col xs={12} md={4}>
                         <InputGroup className="search-date">
@@ -157,9 +161,10 @@ const Bookings = () => {
                     <thead>
                         <tr>
                             <th style={{ width: '120px' }}>Mã đặt sân</th>
-                            <th style={{ width: '240px' }}>Tên sân</th>
+                            <th style={{ width: '220px' }}>Tên sân</th>
                             <th style={{ width: '100px' }}>Ngày đặt</th>
-                            <th style={{ width: '240px' }}>Tổng tiền</th>
+                            <th style={{ width: '130px' }}>Tổng tiền</th>
+                            <th style={{ width: '130px' }}>Còn lại</th>
                             <th style={{ width: '120px' }}>Tình trạng</th>
                             <th style={{ width: '100px' }}>Thao tác</th>
                         </tr>
@@ -175,22 +180,40 @@ const Bookings = () => {
                                     </td>
                                     <td className="title text-start">{booking.sportFieldName}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
-                                    <td>{booking.totalAmount.toLocaleString()} đ</td>
+                                    <td>{booking.totalAmount.toLocaleString()} ₫</td>
+                                    <td>{booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0 đ'
+                                        : `${(booking.totalAmount - booking.prepayPrice).toLocaleString()} đ`}</td>
                                     <td>
                                         <Badge bg={getStatusVariant(booking.status)}>
                                             {booking.status}
                                         </Badge>
                                     </td>
                                     <td>
-                                        <Link href={`/user/bookings/detail/${booking.bookingId}`}>
-                                            Xem
-                                        </Link>
+                                        {booking.status != 'Đã hủy' ? (
+                                            <Nav>
+                                                <NavDropdown id="nav-dropdown-dark-example" title="Thao tác">
+                                                    <NavDropdown.Item>
+                                                        <Link href={`/user/bookings/detail/${booking.bookingId}`}>
+                                                            Xem
+                                                        </Link>
+                                                    </NavDropdown.Item>
+                                                    <NavDropdown.Item onClick={() => {
+                                                        console.log(booking.totalAmount);
+
+                                                    }}>Hủy sân</NavDropdown.Item>
+                                                </NavDropdown>
+                                            </Nav>
+                                        ) : (
+                                            <Link href={`/user/bookings/detail/${booking.bookingId}`}>
+                                                Xem
+                                            </Link>
+                                        )}
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={6} className="text-center">Không có đơn hàng nào.</td>
+                                <td colSpan={7} className="text-center">Không có đơn hàng nào.</td>
                             </tr>
                         )}
                     </tbody>

@@ -7,8 +7,10 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import mapogo.dao.AccountPackageBenefitDAO;
 import mapogo.dao.AccountPackageDAO;
+import mapogo.dao.BenefitDAO;
 import mapogo.dto.AccountPackageDTO;
 import mapogo.entity.AccountPackage;
 import mapogo.entity.AccountPackageBenefit;
@@ -22,6 +24,8 @@ public class AccountPackageServiceImpl implements AccountPackageService {
 	AccountPackageDAO accountPackageDAO;
 	@Autowired
 	AccountPackageBenefitDAO accountPackageBenefitDAO;
+	@Autowired
+	BenefitDAO benefitDao;
 
 	@Override
 	public List<AccountPackage> findAll() {
@@ -78,4 +82,53 @@ public class AccountPackageServiceImpl implements AccountPackageService {
 		return accountPackageDAO.findById(id).get();
 	}
 
+	public AccountPackage createAccountPackage(AccountPackageDTO accountPackageDTO) {
+		// Bước 1: Tạo entity AccountPackage từ DTO
+		AccountPackage accountPackage = new AccountPackage();
+		accountPackage.setPackageName(accountPackageDTO.getPackageName());
+		accountPackage.setPrice(accountPackageDTO.getPrice());
+		accountPackage.setDurationDays(accountPackageDTO.getDurationDays());
+		accountPackage.setLimitBookings(accountPackageDTO.getLimitBookings());
+		accountPackage.setLimitSportFields(accountPackageDTO.getLimitSportFields());
+
+		// Bước 2: Lưu AccountPackage vào cơ sở dữ liệu
+		AccountPackage savedAccountPackage = accountPackageDAO.save(accountPackage);
+
+		// Bước 3: Lấy và kết nối các benefits với AccountPackage
+		List<AccountPackageBenefit> accountPackageBenefits = accountPackageDTO.getAccountPackageBenefits().stream()
+				.map(accountPackageBenefitDTO -> {
+					// Bước 4: Lấy Benefit từ repository theo BenefitId trong DTO
+					Benefit benefit = benefitDao.findById(accountPackageBenefitDTO.getBenefit().getBenefitId())
+							.orElseThrow(() -> new RuntimeException("Benefit không tồn tại"));
+
+					// Bước 5: Tạo AccountPackageBenefit và kết nối với AccountPackage
+					AccountPackageBenefit accountPackageBenefit = new AccountPackageBenefit();
+					accountPackageBenefit.setBenefit(benefit);
+					accountPackageBenefit.setAccountPackage(savedAccountPackage);
+
+					return accountPackageBenefit;
+				}).collect(Collectors.toList());
+
+		// Bước 6: Gán danh sách AccountPackageBenefit vào AccountPackage
+		savedAccountPackage.setAccountPackageBenefits(accountPackageBenefits);
+
+		// Bước 7: Lưu AccountPackage đã cập nhật (bao gồm benefits)
+		accountPackageDAO.save(savedAccountPackage);
+
+		return savedAccountPackage;
+	}
+
+	@Override
+	public void deleteAccountPackage(Integer accountPackageId) {
+		 // Deleting the AccountPackage by its ID
+        Optional<AccountPackage> packageOptional = accountPackageDAO.findById(accountPackageId);
+        if (packageOptional.isPresent()) {
+        	accountPackageDAO.deleteById(accountPackageId);
+        } else {
+            throw new EntityNotFoundException("AccountPackage not found with id: " + accountPackageId);
+        }
+		
+	}
+	
+	
 }
