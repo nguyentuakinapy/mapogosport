@@ -60,21 +60,23 @@ const PageVoucher = () => {
 
 
         try {
-            const response = await fetch('http://localhost:8080/rest/userVoucher/create', {
+            const response = await fetch(`http://localhost:8080/rest/userVoucher/create/${UserVoucher.voucher.voucherId}/${localStorage.getItem("username")}`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(UserVoucher),
+                // body: JSON.stringify(UserVoucher),
             });
 
-            if (!response.ok) {
-                const errorMessage = await response.text();
-                throw new Error(`Có lỗi xảy ra khi nhận voucher: ${errorMessage}`);
-            }
+            // if (!response.ok) {
+            //     const errorMessage = await response.text();
+            //     throw new Error(`Có lỗi xảy ra khi nhận voucher: ${errorMessage}`);
+            // }
 
-            const result = await response.json();
+            // const result = await response.json();
             toast.success("Nhận Voucher giá thành công!");
+            
+            
         } catch (error) {
             console.error("Lỗi khi nhận Voucher:", error);
             alert("Có lỗi xảy ra khi nhận Voucher. Vui lòng thử lại sau.");
@@ -134,7 +136,8 @@ const PageVoucher = () => {
                                 </div>
                                 <div className="voucher-discount text-center col-6 ">
                                     <span className="discount">Giảm giá {voucher.discountPercent} %</span>
-                                    <span className="expiry">HSD: {new Date(voucher.endDate).toLocaleDateString()}</span>
+                                    <span className="expiry">HSD: {new Date(voucher.endDate).toLocaleDateString('en-GB')}</span> <br />
+                                    <em className='text-secondary' style={{fontSize:"12px"}}>Số lượng: {voucher.quantity}</em>
                                 </div>
                                 <div className="get col-2 text-center ">
                                     <button type="button" className="btn btn-dark text-center "

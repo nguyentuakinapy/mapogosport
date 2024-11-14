@@ -84,13 +84,10 @@ public class PaymentController {
 	@PostMapping("/create_payment")
 	public ResponseEntity<?> createPayment(HttpServletRequest req, @RequestParam("orderId") Integer orderId,
 			@RequestBody List<Map<String, Integer>> data) throws UnsupportedEncodingException {
-//		System.out.println("orderId: " + orderId);
 		Order order = orderService.findByOrderId(orderId);
 
 		String orderType = "other";
-//        String bankCode = req.getParameter("bankCode");
 		long amount = (long) (order.getAmount() * 100);
-//        String vnp_TxnRef = Config.getRandomNumber(8);
 		String vnp_TxnRef = orderId.toString();
 		String vnp_IpAddr = Config.getIpAddress(req);
 
@@ -232,7 +229,7 @@ public class PaymentController {
 			}
 
 			// URL chuyển hướng khi thành công
-			return new RedirectView("http://localhost:3000/checkout-product/success");
+			return new RedirectView("http://localhost:3000/checkout-product?status=success");
 
 		} else {
 			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
@@ -272,13 +269,13 @@ public class PaymentController {
 
 			orderDetailService.create(orderDetail);
 		}
-		return paymentService.createMoMoPayment(amount,orderId);
+		return paymentService.createMoMoPayment(amount,orderId,null,"http://localhost:8080/api/payment/momo");
 	}
 
 	// @GetMapping("/momo")
 	@GetMapping("/momo")
 	public RedirectView transaction_MoMo(@RequestParam(value = "resultCode") String resultCode,
-			@RequestParam(value = "orderId") String orderId) {
+			@RequestParam(value = "extraData") String orderId) {
 
 		OrderPayment orderPayment = new OrderPayment();
 		Order order = orderService.findByOrderId(Integer.parseInt(orderId));

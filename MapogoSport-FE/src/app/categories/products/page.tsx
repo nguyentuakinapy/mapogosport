@@ -13,6 +13,7 @@ const Categories = () => {
     const [categoriesProduct, setCategoriesProduct] = useState<CategoryProduct[]>([])
     const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+    const [ratingPreview, setRatingPreview] = useState<number>();
     // Pagination
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
@@ -45,6 +46,9 @@ const Categories = () => {
                 const data = await response.json();
                 console.log(data);
                 setProducts(data);
+                setRatingPreview(data.productReviews.rating)
+                console.log("data rating")
+                console.log("data Product: ",data)
                 setIcon(new Array(data.length).fill(false)); // Khởi tạo trạng thái icon
             } catch (error) {
                 console.log("Lỗi khi gọi API: ", error);

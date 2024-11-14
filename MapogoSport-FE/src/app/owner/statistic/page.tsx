@@ -624,6 +624,105 @@ export default function Home() {
 
   };
 
+  // File customer
+  const exportExcelCustomer = async () => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Loại sản phẩm');
+
+      worksheet.columns = [
+        { header: 'Số thứ tự', key: 'stt', width: 15 },
+        { header: 'Tháng', key: 'time', width: 25 },
+        { header: 'Số lượng khách hàng', key: 'customer', width: 15 },
+      ];
+
+      customerData.slice(1).forEach((field, index) => {
+        worksheet.addRow({
+          stt: `#${index + 1}`,
+          time: field[0],
+          customer: field[1],
+        });
+      });
+
+      worksheet.eachRow((row) => {
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, 'Thống kê khách.xlsx');
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+    }
+  };
+
+  const exportPDFCustomer = () => {
+    try {
+      const doc: any = new jsPDF();
+
+      doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
+      doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+      doc.setFont("Roboto");
+
+      doc.text("Danh Sách Customer", 14, 16);
+      const tableColumn = ["Số thứ tự", "Tháng", "Số lượng khách hàng"];
+      const tableRows: string[][] = [];
+
+      customerData.slice(1).forEach((field, index) => {
+        const revenueData = [
+          `#${index + 1}`,
+          field[0],
+          field[1],
+        ];
+        tableRows.push(revenueData);
+        doc.autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: 20,
+          theme: 'grid',
+          styles: {
+            font: 'Roboto',
+            fontSize: 10,
+            cellPadding: 2,
+            valign: 'middle',
+          },
+          columnStyles: {
+            0: { halign: 'left' },
+            1: { halign: 'left' },
+            2: { halign: 'center' },
+          },
+          didParseCell: (data: any) => {
+            if (data.cell.text.length > 0) {
+              data.cell.text[0] = data.cell.text[0];
+            }
+          }
+        });
+      });
+
+
+
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const day = today.getDate();
+      const formattedMonth = month < 10 ? `0${month}` : month;
+      const formattedDay = day < 10 ? `0${day}` : day;
+
+      doc.save(`Thống kê khách hàng-Mapogo(${formattedDay}/${formattedMonth}).pdf`);
+      toast.success("Đã xuất file PDF thành công!");
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi trong quá trình xuất file! Vui lòng thử lại sau!");
+      console.log(error)
+    }
+
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'all':
@@ -793,7 +892,25 @@ export default function Home() {
                     <h4 style={{ fontSize: '20px', marginTop: '5px' }}> <i className="bi bi-box"></i> Khách hàng </h4>
                   </div>
                   <div className="col-2">
-                    <Button variant="outline-dark" className='float-end' style={{ fontSize: '15px', cursor: 'pointer' }}>Export <FontAwesomeIcon icon={faFileExport} /></Button>
+                    <div className="col d-flex align-items-center float-end">
+                      <select
+                        className="form-select float-end"
+                        style={{ fontSize: '15px', cursor: 'pointer' }}
+                        aria-label="Export format"
+                        onChange={(e) => {
+                          if (e.target.value === 'excel') {
+                            exportExcelCustomer();
+                          } else if (e.target.value === 'pdf') {
+                            exportPDFCustomer();
+                          }
+                        }}
+                      >
+                        <option value="">Xuất file </option>
+                        <option value="pdf">PDF</option>
+                        <option value="excel">Excel</option>
+                      </select>
+                      {/* <Button variant="outline-dark">Export</Button> */}
+                    </div>
                   </div>
                 </div>
                 <div className="row">

@@ -70,6 +70,13 @@ public class VoucherServiceImpl implements VoucherService{
 	//đến đây
 
 	@Override
+	public void save(Voucher voucher) {
+		// TODO Auto-generated method stub
+		 dao.save(voucher);
+	}
+
+	
+	@Override
 	public Voucher createVoucher(Map<String, Object> bd) {
 		// TODO Auto-generated method stub
 		return null;
@@ -300,6 +307,7 @@ public class VoucherServiceImpl implements VoucherService{
 //	    
 //	    return dao.save(voucher);
 //	}
+
 
 
 

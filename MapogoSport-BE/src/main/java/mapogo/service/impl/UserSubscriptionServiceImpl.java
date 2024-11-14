@@ -1,17 +1,131 @@
 package mapogo.service.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
+import org.apache.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.view.RedirectView;
 
+import jakarta.servlet.http.HttpServletRequest;
+import mapogo.dao.UserSubscriptionDAO;
+import mapogo.dto.PaymentDTO;
+import mapogo.entity.AccountPackage;
+import mapogo.entity.Order;
+import mapogo.entity.OrderDetail;
+import mapogo.entity.ProductDetailSize;
+import mapogo.entity.UserSubscription;
+import mapogo.service.AccountPackageService;
 import mapogo.service.UserSubscriptionService;
+import mapogo.utils.Config;
+import mapogo.utils.MoMoService;
 
 @Service
-public class UserSubscriptionServiceImpl implements UserSubscriptionService{
+public class UserSubscriptionServiceImpl implements UserSubscriptionService {
+
+	@Autowired
+	AccountPackageService accountPackageService;
+
+	@Autowired
+	UserSubscriptionDAO userSubDao;
+
+	@Autowired
+	private MoMoService paymentService;
 
 	@Override
-	public void createSubscription(Map<String, Object> data) {
-		
+	public PaymentDTO createSubscriptionPayment(Map<String, Object> data, HttpServletRequest req)
+			throws UnsupportedEncodingException {
+		PaymentDTO paymentDTO = new PaymentDTO();
+		AccountPackage accountPackage = accountPackageService.findById((Integer) data.get("accountPackageId"));
+
+		// vnpay
+		if (data.get("paymentMethod").equals("VNPay")) {
+			String orderType = "other";
+			long amount = (long) (accountPackage.getPrice() * 100);
+			String vnp_TxnRef = LocalDateTime.now().toString();
+			String vnp_IpAddr = Config.getIpAddress(req);
+
+			String vnp_TmnCode = Config.vnp_TmnCode;
+
+			Map<String, String> vnp_Params = new HashMap<>();
+			vnp_Params.put("vnp_Version", Config.vnp_Version);
+			vnp_Params.put("vnp_Command", Config.vnp_Command);
+			vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+			vnp_Params.put("vnp_Amount", String.valueOf(amount));
+			vnp_Params.put("vnp_CurrCode", "VND");
+
+			vnp_Params.put("vnp_BankCode", "NCB");
+
+			vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+			vnp_Params.put("vnp_OrderInfo",
+					data.get("accountPackageId").toString() + "-" + data.get("userSubscriptionId").toString()); // nội
+																												// dung
+			vnp_Params.put("vnp_OrderType", orderType);
+
+			vnp_Params.put("vnp_Locale", "vn");
+			vnp_Params.put("vnp_ReturnUrl", "http://localhost:8080/rest/user/subscription/paymentInfo");
+			vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+
+			Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+			String vnp_CreateDate = formatter.format(cld.getTime());
+			vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+
+			cld.add(Calendar.MINUTE, 15);
+			String vnp_ExpireDate = formatter.format(cld.getTime());
+			vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+
+			List fieldNames = new ArrayList(vnp_Params.keySet());
+			Collections.sort(fieldNames);
+			StringBuilder hashData = new StringBuilder();
+			StringBuilder query = new StringBuilder();
+			Iterator itr = fieldNames.iterator();
+			while (itr.hasNext()) {
+				String fieldName = (String) itr.next();
+				String fieldValue = (String) vnp_Params.get(fieldName);
+				if ((fieldValue != null) && (fieldValue.length() > 0)) {
+					// Build hash data
+					hashData.append(fieldName);
+					hashData.append('=');
+					hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+					// Build query
+					query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+					query.append('=');
+					query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+					if (itr.hasNext()) {
+						query.append('&');
+						hashData.append('&');
+					}
+				}
+			}
+			String queryUrl = query.toString();
+			String vnp_SecureHash = Config.hmacSHA512(Config.secretKey, hashData.toString());
+			queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+			String paymentUrl = Config.vnp_PayUrl + "?" + queryUrl;
+
+			// thành công
+			paymentDTO.setStatus("ok");
+			paymentDTO.setMessage("successfully");
+			paymentDTO.setURL(paymentUrl);
+
+		} else if (data.get("paymentMethod").equals("MoMo")) {
+			paymentService.createMoMoPayment(String.valueOf(accountPackage.getPrice()), 0, data.get("accountPackageId")+"-"+data.get("userSubscriptionId"),"http://localhost:8080/rest/user/subscription/paymentInfo-momo");
+		}
+		return paymentDTO;
+
 	}
 
 }

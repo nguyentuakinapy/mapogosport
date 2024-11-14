@@ -78,6 +78,10 @@ public class AccountPackageServiceImpl implements AccountPackageService {
 	}
 
 	@Override
+	public AccountPackage findById(Integer id) {
+		return accountPackageDAO.findById(id).get();
+	}
+
 	public AccountPackage createAccountPackage(AccountPackageDTO accountPackageDTO) {
 		// Bước 1: Tạo entity AccountPackage từ DTO
 		AccountPackage accountPackage = new AccountPackage();

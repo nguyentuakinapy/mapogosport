@@ -18,16 +18,24 @@ public class MoMoService {
 	private final String accessKey = "F8BBA842ECF85";
 	private final String secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
 	private final String partnerCode = "MOMO";
-	private final String redirectUrl = "http://localhost:8080/api/payment/momo";
+//	private final String redirectUrl = "http://localhost:8080/api/payment/momo";
 	private final String ipnUrl = "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
 	private final String requestType = "payWithMethod";
 
-	public ResponseEntity<?> createMoMoPayment(String amount, long orderId) {
+	public ResponseEntity<?> createMoMoPayment(String amount, long order_Id, String info, String redirectUrl) {
 		try {
-//			long orderId = System.currentTimeMillis();
+
+			long orderId = System.currentTimeMillis();
+
 			long requestId = orderId;
 			String orderInfo = "Thanh Toán với MoMo";
 			String extraData = "";
+			if (info == null) {
+				extraData = String.valueOf(order_Id);
+			}else {
+				extraData= info;
+			}
+
 			String orderGroupId = "";
 			String lang = "vi";
 
@@ -67,7 +75,7 @@ public class MoMoService {
 
 			ResponseEntity<String> response = restTemplate.exchange(
 					"https://test-payment.momo.vn/v2/gateway/api/create", HttpMethod.POST, entity, String.class);
-//			System.out.println("Response from MoMo: " + response.getBody());
+			System.out.println("Response from MoMo: " + response.getBody());
 
 			return response;
 

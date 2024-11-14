@@ -94,16 +94,24 @@ export default function Owner({ children }: { children: ReactNode }) {
             },
             body: JSON.stringify({
                 userSubscriptionId: userSubscription?.userSubscriptionId,
-                accountPackageId: ap.accountPackageId
+                accountPackageId: ap.accountPackageId,
+                paymentMethod: selectedPaymentMethod
             }),
         }).then(async (res) => {
             if (!res.ok) {
                 const errorText = await res.text();
                 toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
-                return
+                return;
             }
-            mutate(`http://localhost:8080/rest/user/subscription/${userData?.username}`);
-            toast.success('Cập nhật thành công!');
+
+            const data = await res.json();
+            if (data.status === "ok" && data.url) {
+                window.location.href = data.url;
+            } else {
+                console.error();
+
+                toast.error("Có lỗi xảy ra trong quá trình tạo thanh toán.");
+            }
         }).catch((error) => {
             toast.error(`Đã xảy ra lỗi: ${error.message}`);
         });
@@ -178,7 +186,7 @@ export default function Owner({ children }: { children: ReactNode }) {
                                                     </div>
                                                 ))}
                                             </div>
-                                            <b className="text-danger ms-3">{ap.price == 0 ? 'Miễn phí' : formatPrice(ap.price)}</b>
+                                            <b className="text-danger ms-3">{ap.price == 0 ? 'Miễn phí' : formatPrice(ap.price)} / Tháng</b>
                                             {/* <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={isOwned}>
                                             {isOwned ? "Đã sở hữu" : "Nâng cấp ngay"}
                                         </Button> */}
