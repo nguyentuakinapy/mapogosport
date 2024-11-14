@@ -46,7 +46,13 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User findByUsername(String username) {
-		return userDAO.findById(username).get();
+		try {
+			messagingTemplate.convertAndSend("/topic/login", userDAO.findById(username).get().getUsername());
+			return userDAO.findById(username).get();
+		} catch (Exception e) {
+			return null;
+		}
+
 	}
 
 	@Override
@@ -93,7 +99,18 @@ public class UserServiceImpl implements UserService {
 		}
 
 		uS.setStatus((String) data.get("status"));
-		return userSubscriptionDAO.save(uS);
+		userSubscriptionDAO.save(uS);
+		Notification n = new Notification();
+		n.setUser(u);
+		n.setTitle("Đăng ký gói tài khoản");
+		n.setMessage(ap.getPackageName() + " đã đăng ký thành công!");
+		n.setType("info");
+
+		notificationDAO.save(n);
+
+		messagingTemplate.convertAndSend("/topic/username", u.getUsername());
+
+		return uS;
 	}
 
 	@Override
@@ -106,7 +123,19 @@ public class UserServiceImpl implements UserService {
 		UserSubscription uS = userSubscriptionDAO.findById((Integer) data.get("userSubscriptionId")).get();
 		AccountPackage ap = accountPackageDAO.findById((Integer) data.get("accountPackageId")).get();
 		uS.setAccountPackage(ap);
-		return userSubscriptionDAO.save(uS);
+		userSubscriptionDAO.save(uS);
+
+		Notification n = new Notification();
+		n.setUser(uS.getUser());
+		n.setTitle("Nâng cấp gói tài khoản");
+		n.setMessage(ap.getPackageName() + " đã nâng cấp thành công!");
+		n.setType("info");
+
+		notificationDAO.save(n);
+
+		messagingTemplate.convertAndSend("/topic/username", uS.getUser().getUsername());
+
+		return uS;
 	}
 
 	@Override

@@ -75,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
 			bookingMap.put("totalAmount", booking.getTotalAmount());
 			bookingMap.put("status", booking.getStatus());
 			bookingMap.put("bookingUserPhone", booking.getPhoneNumber());
-			bookingMap.put("prepayPrice", booking.getPrepayPrice());
+			bookingMap.put("percentDeposit", booking.getPercentDeposit());
 
 			for (BookingDetail bookingDetail : booking.getBookingDetails()) {
 				if (bookingDetail.getSportFieldDetail() != null) {
@@ -157,16 +157,12 @@ public class BookingServiceImpl implements BookingService {
 		}
 
 		Object totalAmountObj = b.get("totalAmount");
-		Object prepayPriceObj = b.get("prepayPrice");
 		Double totalAmount;
-		Double prepayPrice;
 
-		if (totalAmountObj instanceof String && prepayPriceObj instanceof String) {
+		if (totalAmountObj instanceof String) {
 			totalAmount = Double.valueOf((String) totalAmountObj);
-			prepayPrice = Double.valueOf((String) prepayPriceObj);
 		} else if (totalAmountObj instanceof Number) {
 			totalAmount = ((Number) totalAmountObj).doubleValue();
-			prepayPrice = ((Number) prepayPriceObj).doubleValue();
 		} else {
 			throw new IllegalArgumentException("totalAmount must be a String or Number");
 		}
@@ -180,7 +176,7 @@ public class BookingServiceImpl implements BookingService {
 		booking.setNote((String) b.get("note"));
 		booking.setFullName((String) b.get("fullName"));
 		booking.setPhoneNumber((String) b.get("phoneNumber"));
-		booking.setPrepayPrice(prepayPrice);
+		booking.setPercentDeposit(Integer.parseInt(String.valueOf(b.get("percentDeposit"))));
 		bookingDAO.save(booking);
 		
 		if (((String) b.get("checkOwner")).equals("user")) {

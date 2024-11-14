@@ -50,39 +50,42 @@ const BookingModal = (props: OwnerProps) => {
     }, [bookingDetailData])
 
     const handleCancelBookingDetail = () => {
-        if (applyOne) {
-            fetch(`http://localhost:8080/rest/booking/update/status/${bookingDetailData?.bookingDetailId}`, {
-                method: 'PUT',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json',
-                },
-            }).then(async (res) => {
-                if (!res.ok) {
-                    toast.error(`Hủy sân không thành công!`);
-                    return
-                }
-                setCheckDataStatus(!checkDataStatus);
-                handleClose();
-                toast.success('Hủy sân thành công!');
-            })
-        } else {
-            fetch(`http://localhost:8080/rest/booking/update/status/by/subcriptionKey/${bookingDetailData?.bookingDetailId}/${bookingDetailData?.subscriptionKey}`, {
-                method: 'PUT',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json',
-                },
-            }).then(async (res) => {
-                if (!res.ok) {
-                    toast.error(`Hủy sân không thành công!`);
-                    return
-                }
-                setCheckDataStatus(!checkDataStatus);
-                handleClose();
-                toast.success('Hủy sân thành công!');
-            })
+        if (confirm("Bạn có chắc chắn muốn hủy sân?")) {
+            if (applyOne) {
+                fetch(`http://localhost:8080/rest/booking/update/status/${bookingDetailData?.bookingDetailId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json',
+                    },
+                }).then(async (res) => {
+                    if (!res.ok) {
+                        toast.error(`Hủy sân không thành công!`);
+                        return
+                    }
+                    setCheckDataStatus(!checkDataStatus);
+                    handleClose();
+                    toast.success('Hủy sân thành công!');
+                })
+            } else {
+                fetch(`http://localhost:8080/rest/booking/update/status/by/subcriptionKey/${bookingDetailData?.bookingDetailId}/${bookingDetailData?.subscriptionKey}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json',
+                    },
+                }).then(async (res) => {
+                    if (!res.ok) {
+                        toast.error(`Hủy sân không thành công!`);
+                        return
+                    }
+                    setCheckDataStatus(!checkDataStatus);
+                    handleClose();
+                    toast.success('Hủy sân thành công!');
+                })
+            }
         }
+
     }
 
     const changeTime = (option: boolean, checkTime: boolean, time?: string, checkNewTime?: boolean) => {
