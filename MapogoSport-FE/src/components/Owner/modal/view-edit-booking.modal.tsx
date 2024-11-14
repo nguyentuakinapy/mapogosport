@@ -11,7 +11,7 @@ interface OwnerProps {
     owner?: Owner;
     checkDataStatus: boolean
     setCheckDataStatus: (v: boolean) => void;
-    startTimeKey: boolean;
+    startTimeKey: number;
     bookingDetailData?: BookingDetail;
     userData?: User;
     paymentMethod?: PaymentMethod
@@ -861,7 +861,8 @@ const BookingModal = (props: OwnerProps) => {
                                             parseInt(bookingDetailData.endTime.split('h')[1]) && (
                                                 <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
                                                     <button disabled={(new Date().getHours() * 60) + new Date().getMinutes()
-                                                        >= (parseInt(bookingDetailData.endTime.split('h')[0]))} style={{ border: 'none', backgroundColor: 'white' }}>
+                                                        >= (parseInt(bookingDetailData.endTime.split('h')[0])) * 60 + parseInt(bookingDetailData.endTime.split('h')[1])}
+                                                        style={{ border: 'none', backgroundColor: 'white' }}>
                                                         <i onClick={() => handleAddBooking()} className="bi bi-plus-lg" style={{ cursor: 'pointer' }} />
                                                     </button>
                                                 </OverlayTrigger>

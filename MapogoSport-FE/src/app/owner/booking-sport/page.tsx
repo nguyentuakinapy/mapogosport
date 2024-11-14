@@ -5,7 +5,7 @@ import BookingModal from "@/components/Owner/modal/booking.modal";
 import NotificationModal from "@/components/Owner/modal/notification.modal";
 import SearchBookingModal from "@/components/Owner/modal/search-booking.modal";
 import ViewEditBookingModal from "@/components/Owner/modal/view-edit-booking.modal";
-import { formatDateVN } from "@/components/Utils/Format";
+import { formatDateNotime, formatDateVN } from "@/components/Utils/Format";
 import { Stomp } from "@stomp/stompjs";
 import { useEffect, useRef, useState } from "react";
 import { Col, Row, Table } from "react-bootstrap";
@@ -903,7 +903,7 @@ export default function BookingSport() {
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
     const [startTime, setStartTime] = useState("");
     const [dayStartBooking, setDayStartBooking] = useState("");
-    const [startTimeKey, setStartTimeKey] = useState<boolean>(true);
+    const [startTimeKey, setStartTimeKey] = useState<number>(1);
     const [bookingDetailData, setBookingDetailData] = useState<BookingDetail>();
     const [bookingBySubscriptionKey, setDataBookingBySubscriptionKey] = useState<BookingDetail[]>();
     const [userData, setUserData] = useState<User>();
@@ -920,7 +920,7 @@ export default function BookingSport() {
             setSportDetail(selectedSportDetail);
             setStartTime(startTime);
             setDayStartBooking(dayStartBooking.toLocaleDateString('en-CA'));
-            setStartTimeKey(!startTimeKey);
+            setStartTimeKey(startTimeKey + 1);
             setShowBookingModal(true);
         }
         // toast.success(sportDetail + " - " + timeStart + " - " + dayStartBooking);
@@ -961,7 +961,7 @@ export default function BookingSport() {
             setSportDetail(selectedSportDetail);
             setStartTime(startTime);
             setDayStartBooking(dayStartBooking);
-            setStartTimeKey(!startTimeKey);
+            setStartTimeKey(startTimeKey + 1);
             setShowViewOrEditBookingModal(true);
         }
     };
@@ -980,7 +980,7 @@ export default function BookingSport() {
             setSportDetail(selectedSportDetail);
             setStartTime(startTime);
             setDayStartBooking(dayStartBooking);
-            setStartTimeKey(!startTimeKey);
+            setStartTimeKey(startTimeKey + 1);
             setShowBookingModal(true);
             // toast.success(sportDetail + " - " + timeStart + " - " + dayStartBooking);
         }
@@ -1022,7 +1022,7 @@ export default function BookingSport() {
             setSportDetail(selectedSportDetail);
             setStartTime(startTime);
             setDayStartBooking(dayStartBooking);
-            setStartTimeKey(!startTimeKey);
+            setStartTimeKey(startTimeKey + 1);
 
             const responseBookingSubscriptionKey = await fetch(
                 `http://localhost:8080/rest/user/booking/detail/getbyday/subscriptionkey/${bkDData.subscriptionKey}`
@@ -1079,6 +1079,15 @@ export default function BookingSport() {
 
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        if (startDate) {
+            const formattedDate = `${startDate?.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+            // toast.success(formattedDate);
+            setOnDay(formattedDate);
+            setStartWeek(formattedDate);
+        }
+    }, [startDate]);
 
     const handleButtonClick = () => {
         setIsOpen(!isOpen);
@@ -1146,6 +1155,14 @@ export default function BookingSport() {
                                         }}
                                         inline
                                     />
+                                    <button onClick={() => {
+                                        const today = new Date();
+                                        const todayFormat = new Intl.DateTimeFormat('en-CA').format(today);
+                                        setOnDay(todayFormat),
+                                            setStartWeek(todayFormat),
+                                            setIsOpen(false),
+                                            setStartDate(today)
+                                    }} className="btn btn-dark w-100">Hôm nay</button>
                                 </div>
                             )}
                             <i className="bi bi-arrow-right" onClick={() => setOnDayAndOnWeek('forward')}></i>
@@ -1164,6 +1181,14 @@ export default function BookingSport() {
                                         }}
                                         inline
                                     />
+                                    <button onClick={() => {
+                                        const today = new Date();
+                                        const todayFormat = new Intl.DateTimeFormat('en-CA').format(today);
+                                        setOnDay(todayFormat),
+                                            setStartWeek(todayFormat),
+                                            setIsOpen(false),
+                                            setStartDate(today)
+                                    }} className="btn btn-dark w-100">Hôm nay</button>
                                 </div>
                             )}
                             <i className="bi bi-arrow-right" onClick={() => setOnDayAndOnWeek('forward')}></i>
@@ -1220,12 +1245,12 @@ export default function BookingSport() {
             <BookingModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
                 sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
                 sport={dataSport && dataSport[selectSport]} owner={owner}
-                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey}>
+                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey + 1}>
             </BookingModal >
             <ViewEditBookingModal bookingBySubscriptionKey={bookingBySubscriptionKey && bookingBySubscriptionKey}
                 showViewOrEditBookingModal={showViewOrEditBookingModal} paymentMethod={paymentMethod}
                 setShowViewOrEditBookingModal={setShowViewOrEditBookingModal} owner={owner} sport={dataSport && dataSport[selectSport]}
-                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey}
+                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey + 1}
                 bookingDetailData={bookingDetailData} userData={userData}>
             </ViewEditBookingModal >
             <SearchBookingModal showSearchBookingModal={showSearchBookingModal} setSearchShowBookingModal={setSearchShowBookingModal}

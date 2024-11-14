@@ -620,15 +620,15 @@ const BookingModal = (props: BookingProps) => {
                                 <FloatingLabel controlId="floatingSelectTime" label="Thời gian đá" className="mb-2">
                                     <Form.Select value={selectTime} onChange={(e) => setSelectTime(e.target.value)}>
                                         <option value="Chọn thời gian">Chọn thời gian</option>
-                                        {/* {dataTimeTemporary && dataTimeTemporary.map((time, index) => (
+                                        {dataTimeTemporary && dataTimeTemporary.map((time, index) => (
                                             <option key={index} value={String(time)}>{time}</option>
-                                        ))} */}
-                                        <option value="Chọn thời gian">Chọn thời gian đá</option>
+                                        ))}
+                                        {/* <option value="Chọn thời gian">Chọn thời gian đá</option>
                                         <option value="1 giờ">1 giờ</option>
                                         <option value="1 giờ 30 phút">1 giờ 30 phút</option>
                                         <option value="2 giờ">2 giờ</option>
                                         <option value="2 giờ 30 phút">2 giờ 30 phút</option>
-                                        <option value="3 giờ">3 giờ</option>
+                                        <option value="3 giờ">3 giờ</option> */}
                                     </Form.Select>
                                 </FloatingLabel>
                                 <FloatingLabel controlId="floatingPaymentMethod" label={<span>Phương thức thanh toán <span className="text-danger">*</span></span>}>

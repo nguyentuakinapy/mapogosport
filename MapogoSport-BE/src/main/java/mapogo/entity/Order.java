@@ -59,7 +59,7 @@ public class Order implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "PaymentMethodId", nullable = false)
-	@JsonBackReference
+	@JsonManagedReference
 	private PaymentMethod paymentMethod;
 
 	@ManyToOne

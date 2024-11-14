@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -33,7 +34,7 @@ public class NotificationScheduledService {
 
 	@Autowired
 	NotificationDAO notificationDAO;
-	
+
 	@Autowired
 	UserSubscriptionDAO userSubscriptionDAO;
 
@@ -41,10 +42,8 @@ public class NotificationScheduledService {
 	@Scheduled(cron = "0 0,30 * * * *")
 	public void printMessage() {
 		LocalDateTime now = LocalDateTime.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 		List<SportField> sportFields = sportFieldDAO.findAll();
-		String formattedDate = now.format(formatter);
 
 		// Tính toán giờ hiện tại cộng thêm 30 phút
 		int currentHour = now.getHour();
@@ -57,12 +56,13 @@ public class NotificationScheduledService {
 						LocalDate.now(), "Đã hủy");
 				for (BookingDetail bookingDetail : bds1) {
 					int startTime = Integer.parseInt(bookingDetail.getStartTime().split("h")[0]);
-					int endTime = Integer.parseInt(bookingDetail.getEndTime().split("h")[0]);
+//					int endTime = Integer.parseInt(bookingDetail.getEndTime().split("h")[0]);
 					int startMinute = Integer.parseInt(bookingDetail.getStartTime().split("h")[1]);
-					int endMinute = Integer.parseInt(bookingDetail.getEndTime().split("h")[1]);
+//					int endMinute = Integer.parseInt(bookingDetail.getEndTime().split("h")[1]);
 					if ((startTime * 60 + startMinute) <= (now.getHour() * 60 + now.getMinute())) {
 						bookingDetail.setStatus("Đã hoàn thành");
 						bookingDetailDAO.save(bookingDetail);
+						messagingTemplate.convertAndSend("/topic/bookingDetail", spf.getOwner().getOwnerId());
 					}
 				}
 			});
@@ -104,24 +104,18 @@ public class NotificationScheduledService {
 					n.setBooking(bd.getBooking());
 					// Lưu và gửi thông báo
 					notificationDAO.save(n);
+
+					messagingTemplate.convertAndSend("/topic/notification", spf.getOwner().getOwnerId());
+
 				});
-//				messagingTemplate.convertAndSend("/topic/bookingDetail", spf.getOwner().getOwnerId());
-				messagingTemplate.convertAndSend("/topic/notification", spf.getOwner().getOwnerId());
 			}
 		});
-//		messagingTemplate.convertAndSend("/topic/notification", 1);
 	}
-//
-////	@Scheduled(cron = "0 0,30 * * * *")
-//	@Scheduled(fixedRate = 1000)
-//	public void printMessage1() {
-//		System.err.println("Tus askdjhaskjdaskdhask");
-//	}
-	
-	@Scheduled(cron = "0 0 0 * * *")  // Chạy vào lúc 0 giờ mỗi ngày
+
+	@Scheduled(cron = "0 0 0 * * *") // Chạy vào lúc 0 giờ mỗi ngày
 	public void checkUserSubscription() {
 		List<UserSubscription> subscriptions = userSubscriptionDAO.findAll();
-		
+
 	}
 
 }

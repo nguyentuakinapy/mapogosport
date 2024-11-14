@@ -21,9 +21,9 @@ public interface BookingDAO extends JpaRepository<Booking, Integer> {
 	@Query("SELECT o " + "FROM Booking o " + "WHERE o.owner.ownerId = :ownerId AND TRIM(o.status) = :status ")
 	List<Booking> findBookingByOwnerAndStatus(@Param("ownerId") Integer ownerId, @Param("status") String status);
 
-	@Query("SELECT o FROM BookingDetail o WHERE o.sportFieldDetail.sportFielDetailId IN :sportFieldDetailIds AND o.booking.bookingId IN :bookingId AND o.status IN :status ")
+	@Query("SELECT o FROM BookingDetail o WHERE o.sportFieldDetail.sportFielDetailId IN :sportFieldDetailIds AND o.booking.bookingId IN :bookingId AND o.status IN :status AND o.booking.status = :s ")
 	List<BookingDetail> findBookingDetailBySportFieldIdsAndOwner(
-			@Param("sportFieldDetailIds") List<Integer> sportFieldDetailIds, @Param("bookingId") List<Integer> bookingId, @Param("status") List<String> status);
+			@Param("sportFieldDetailIds") List<Integer> sportFieldDetailIds, @Param("bookingId") List<Integer> bookingId, @Param("status") List<String> status, @Param("s") String s);
 
 	@Query("SELECT o.sportFieldDetail.name, SUM(o.price) AS revenueField, Min(o.date) as StarDate, Max(o.date) as EndDate,o.sportFieldDetail.sportFielDetailId "
 			+ "FROM BookingDetail o " + "WHERE o.sportFieldDetail.sportFielDetailId IN :sportFieldDetailIds AND o.booking.bookingId IN :bookingId AND o.status IN :status "
