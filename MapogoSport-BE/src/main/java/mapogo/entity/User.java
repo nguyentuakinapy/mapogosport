@@ -104,16 +104,16 @@ public class User implements Serializable {
 	private List<Owner> owners;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	@JsonManagedReference
+	@JsonIgnore
 	private List<UserVoucher> userVouchers;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private List<PhoneNumberUser> phoneNumberUsers;
 	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonManagedReference
-	private List<Wallet> wallets;
+	private Wallet wallet;
 	
 	// QA 3/11
 	@OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
@@ -123,6 +123,10 @@ public class User implements Serializable {
 	@OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<Message> receivedMessages;
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Notification> notifications;
 
 }
 

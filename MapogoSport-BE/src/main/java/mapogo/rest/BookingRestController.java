@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.entity.Booking;
@@ -24,6 +25,7 @@ import mapogo.entity.SportField;
 import mapogo.entity.SportFieldDetail;
 import mapogo.service.BookingDetailService;
 import mapogo.service.BookingService;
+import mapogo.service.TransactionService;
 
 @CrossOrigin("*")
 @RestController
@@ -34,6 +36,9 @@ public class BookingRestController {
 
 	@Autowired
 	BookingDetailService bookingDetailService;
+	
+	@Autowired
+	TransactionService transactionService;
 
 	@GetMapping("/booking")
 	public List<Booking> findAll() {
@@ -199,6 +204,12 @@ public class BookingRestController {
 		bookingDetailService.updateStatusChuaDaChangeToDaDa(bookingDetailId);
 	}
 
+	
+	@PostMapping("/booking/detail/add/new")
+	public void  addNewBookingDetail(@RequestBody Map<String, Object> data) {
+		bookingDetailService.addNewBookingDetail(data);
+	}
+	
 	@GetMapping("/booking/detail/find/date/and/time/{date}/{time}/{sportFieldId}")
 	public List<BookingDetail> findByDateAndTime(
 			@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
@@ -206,6 +217,10 @@ public class BookingRestController {
 		return bookingDetailService.findByDateAndTime(date, time, sportFieldId);
 	}
 	
+	@PostMapping("/payment/process/{bookingId}")
+	public void processPayment(@PathVariable("bookingId") Integer bookingId, @RequestParam double totalAmount) {
+		transactionService.createTransactionByBooking(bookingId, totalAmount);
+}
 	@GetMapping("/booking/detail/tableCustomer/byFullname/{fullname}")
 	public List<Booking> findByFullName(@PathVariable("fullname") String fullname){
 		return bookingService.findByFullNameOffline(fullname);

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Nav from "./app.nav";
 import '../globals.css'
+import './admin.scss'
 import Header from "./app.header";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer } from 'react-toastify';

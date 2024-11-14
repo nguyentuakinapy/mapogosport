@@ -5,6 +5,7 @@ import { Form, Modal } from "react-bootstrap"
 import { toast } from "react-toastify";
 import "./account.scss"
 import { hashPassword } from "@/components/Utils/Format";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 
 interface RegisterProps {
@@ -12,11 +13,13 @@ interface RegisterProps {
     setShowRegisterModal: (v: boolean) => void;
     showLoginModal: boolean;
     setShowLoginModal: (v: boolean) => void;
+    refreshKey: number;
+    setRefreshKey: (v: number) => void;
 }
 
 export default function Register(props: RegisterProps) {
     const { showRegisterModal, setShowRegisterModal } = props;
-    const { showLoginModal, setShowLoginModal } = props;
+    const { showLoginModal, setShowLoginModal, setRefreshKey, refreshKey } = props;
 
     const [username, setUsername] = useState<string>("");
     const [email, setEmail] = useState<string>("");
@@ -89,19 +92,6 @@ export default function Register(props: RegisterProps) {
             }
             const resUser = await responseUser.json(); // Đọc responseUser ở đây
 
-            // // Get New Id Authority
-            // const response = await fetch(`http://localhost:8080/rest/authority`);
-            // if (!response.ok) {
-            //     throw new Error('Error fetching data');
-            // }
-            // const dataAuth = await response.json();
-            // if (!dataAuth.length) {
-            //     toast.error("No authority data available");
-            //     return;
-            // }
-            // const newAuthorityId = dataAuth[dataAuth.length - 1]?.authorityId + 1 || 1;
-
-            // Create Authority
             const responseAuth = await fetch('http://localhost:8080/rest/authority', {
                 method: 'POST',
                 headers: {
@@ -208,6 +198,114 @@ export default function Register(props: RegisterProps) {
         setOtpValue("");
     }
 
+    useEffect(() => {
+        console.log("Client-side code running");
+    }, []);
+
+    const decodeJWT = (token: any) => {
+        try {
+            const base64Url = token.split(".")[1];
+            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split("")
+                    .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join("")
+            );
+            return JSON.parse(jsonPayload);
+        } catch (error) {
+            console.error("Failed to decode JWT:", error);
+            return null;
+        }
+    };
+
+    const handleLoginSuccess = async (response: any) => {
+        const token = response.credential;
+        // console.log("Token received:", token);
+
+        const user = decodeJWT(token) as JwtGoogleAccount;
+        if (user) {
+            // console.log("User Info:", user);
+            try {
+                const responseUser = await fetch(`http://localhost:8080/rest/user/${user.sub}`);
+                if (!responseUser.ok) {
+                    throw new Error('Error fetching data');
+                }
+                const dataUser = await responseUser.json() as User;
+
+                if (parseInt(dataUser.password) === 123) {
+
+                    const usernameLocal = dataUser.username.replace(/['"]+/g, '');
+                    localStorage.setItem('username', usernameLocal);
+                    // localStorage.setItem('username', dataUser.username);
+                    sessionStorage.setItem('user', JSON.stringify(dataUser));
+                    setRefreshKey(refreshKey + 1);
+                    toast.success("Đăng nhập thành công!");
+                    handleClose();
+                } else {
+                    toast.error("Đăng nhập không thành công!");
+                }
+            } catch (error: any) {
+                try {
+                    // Create user
+                    const responseUser = await fetch('http://localhost:8080/rest/user', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: user.sub,
+                            fullname: user.name,
+                            password: 123,
+                            email: user.email
+                        })
+                    });
+                    if (!responseUser.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const resUser = await responseUser.json(); // Đọc responseUser ở đây
+
+                    const responseAuth = await fetch('http://localhost:8080/rest/authority', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            role: {
+                                roleId: authority // Role phải có ID
+                            },
+                            user: {
+                                username: user.sub // User phải có username
+                            }
+                        })
+                    });
+                    if (!responseAuth.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const resAuth = await responseAuth.json(); // Sửa lại dòng này
+
+                    if (resAuth && resUser) {
+                        toast.success("Đăng ký thành công!...");
+                        const usernameLocal = resUser.username.replace(/['"]+/g, '');
+                        localStorage.setItem('username', usernameLocal);
+                        sessionStorage.setItem('user', JSON.stringify(resUser));
+                        setRefreshKey(refreshKey + 1);
+                        handleClose();
+                    }
+
+                } catch (error) {
+                    console.error("Error during fetch:", error);
+                    toast.error("Create failed!");
+                }
+            }
+
+        }
+    };
+
+
     return (
         <>
             <Modal
@@ -227,7 +325,7 @@ export default function Register(props: RegisterProps) {
                             <div className="p-lg-4 p-4">
                                 <div className="row mx-n2">
                                     <div className="col-md-12 col-12 px-2">
-                                        <span
+                                        {/* <span
                                             className="btn btn-submit d-flex align-items-center justify-content-center text-center mb-3">
                                             <svg className="mr-3 me-2 icon-white" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
                                                 width="24" height="24" viewBox="0 0 50 50">
@@ -243,7 +341,12 @@ export default function Register(props: RegisterProps) {
                                                 </path>
                                             </svg>
                                             Đăng nhập Google
-                                        </span>
+                                        </span> */}
+                                        <div className="d-flex align-items-center justify-content-center">
+                                            <GoogleOAuthProvider clientId="291618476125-v61qth68ave5pfk18b2hg5qjtdbkjd94.apps.googleusercontent.com">
+                                                <GoogleLogin onSuccess={handleLoginSuccess} />
+                                            </GoogleOAuthProvider>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="text-line-through mb-3 text-center d-flex align-items-center">

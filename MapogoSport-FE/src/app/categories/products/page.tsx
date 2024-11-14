@@ -57,13 +57,13 @@ const Categories = () => {
         fetchData();
     }, []);
 
-    const onClickIcon = (index: number) => {
-        setIcon(prev => {
-            const newIcon = [...prev];
-            newIcon[index] = !newIcon[index];
-            return newIcon;
-        });
-    };
+    // const onClickIcon = (index: number) => {
+    //     setIcon(prev => {
+    //         const newIcon = [...prev];
+    //         newIcon[index] = !newIcon[index];
+    //         return newIcon;
+    //     });
+    // };
     const uniqueBrands = [...new Set(products.map(product => product.brand))];
 
     const handleCategoryChange = (categoryId: number) => {
@@ -145,22 +145,32 @@ const Categories = () => {
 
                             {/* Product Item */}
                             {currentItems.length === 0 ? (
-                                <div className='text-center' style={{marginTop:"15%"}}>
+                                <div className='text-center' style={{ marginTop: "15%" }}>
                                     <h1 className='text-center'><i className="bi bi-bag-x"></i></h1>
                                     <p>Không tìm thấy sản phẩm.</p>
                                 </div>
-                                
+
                             ) : null
                             }
-                            {currentItems.map((product, index) => (
-                                <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
-                                    <div nh-product={product.productId} className="product-item">
-                                        <div className="inner-image mb-3">
-                                            <div className="product-status">
-                                                <div className="onsale"></div>
-                                            </div>
-                                            <div className="img ratio-1-1">
-                                                <Link href="">
+                            {currentItems.map((product, index) => {
+                                const reviews = product.productReviews || [];
+                                const reviewCount = reviews.length; // Total number of reviews
+                                const averageRating = reviewCount > 0
+                                    ? (reviews.reduce((total, review) => total + review.rating, 0) / reviewCount).toFixed(1)
+                                    : "0.0"; // Calculate average rating to one decimal place or set to "0.0" if no reviews
+
+                                const fullStars = Math.floor(parseFloat(averageRating)); // Full stars based on integer part of averageRating
+                                const hasHalfStar = parseFloat(averageRating) - fullStars >= 0.5; // Determine if a half star is needed
+                                const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Remaining stars are empty stars
+
+                                return (
+                                    <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
+                                        <div nh-product={product.productId} className="product-item">
+                                            <div className="inner-image mb-3">
+                                                <div className="product-status">
+                                                    <div className="onsale"></div>
+                                                </div>
+                                                <div className="img ratio-1-1">
                                                     <Link href={`/product-detail/${product.productId}`}>
                                                         <img
                                                             className="w-100 h-100 img-fluid"
@@ -170,61 +180,47 @@ const Categories = () => {
                                                                 minHeight: "250px",
                                                                 objectFit: "cover"
                                                             }}
-                                                            nh-lazy="image"
                                                             alt={product.name}
                                                             src={`${typeof product.image === 'string' ? product.image : ''}`}
                                                         />
                                                     </Link>
-                                                </Link>
-                                            </div>
-
-                                            <div className="product-action-wishlist">
-                                                <Link href='' className="btn-product-action" title="Yêu thích">
-                                                    {icon[index] ? (
-                                                        <img
-                                                            onClick={() => onClickIcon(index)}
-                                                            src="/img/heart-svgrepo-com.svg"
-                                                            alt="Yêu thích"
-                                                            style={{ width: '25px', height: '25px' }} />
-                                                    ) : (
-                                                        <i
-                                                            onClick={() => onClickIcon(index)}
-                                                            className={`bi bi-heart ${icon[index] ? 'text-danger' : ''}`}
-                                                        ></i>
-                                                    )}
-                                                </Link>
-                                            </div>
-                                        </div>
-                                        <div className="inner-content">
-                                            <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
-                                                <Link href={`/product-detail/${product.productId}`}>{product.name}</Link>
-                                            </div>
-                                            <div className="product-category ms-1">
-                                                <Link href={`/product-detail/${product.productId}`}>{product.categoryProduct.name}</Link>
-                                            </div>
-                                            <div className="price">
-                                                <span className="price-amount ms-1"> {formatPrice(product.price)}</span>
-                                                {/* <span className="price-amount old-price me-1">{product.oldPrice}</span> */}
-                                            </div>
-
-                                            {/* <div className="d-flex mt-2" style={{ justifyContent: 'space-between', width: '100%' }}>
-                                                <Link href={`/product-detail/${product.productId}`} className='btn btn-danger ms-1' style={{ fontSize: '14px', flexGrow: 1 }}>Mua Ngay</Link>
-                                                <Link href='' className='btn btn-warning ms-2 me-1' style={{ fontSize: '14px', flexGrow: 1 }}>Thêm Giỏ Hàng</Link>
-                                            </div> */}
-                                            <div className="star-item star d-flex mt-1 ms-1">
-                                                <div className="icon text-warning mb-2">
-                                                    <i className="bi bi-star-fill"></i>
-                                                    <i className="bi bi-star-fill"></i>
-                                                    <i className="bi bi-star-fill"></i>
-                                                    <i className="bi bi-star-fill"></i>
-                                                    <i className="bi bi-star-fill"></i>
                                                 </div>
-                                                <div className="number">(1) reviews</div>
+                                            </div>
+
+                                            <div className="inner-content">
+                                                <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
+                                                    <Link href={`/product-detail/${product.productId}`}>{product.name}</Link>
+                                                </div>
+                                                <div className="product-category ms-1">
+                                                    <Link href={`/product-detail/${product.productId}`}>{product.categoryProduct.name}</Link>
+                                                </div>
+                                                <div className="price">
+                                                    <span className="price-amount ms-1">{formatPrice(product.price)}</span>
+                                                </div>
+
+                                                {/* Average rating stars */}
+                                                <div className="star-item star d-flex mt-1 ms-1">
+                                                    <div className="icon text-warning mb-2">
+                                                        {[...Array(fullStars)].map((_, i) => (
+                                                            <i key={`full-${i}`} className="bi bi-star-fill"></i>
+                                                        ))}
+                                                        {hasHalfStar && <i className="bi bi-star-half"></i>}
+                                                        {[...Array(emptyStars)].map((_, i) => (
+                                                            <i key={`empty-${i}`} className="bi bi-star"></i>
+                                                        ))}
+                                                    </div>
+                                                    {/* Display average rating and review count */}
+                                                    <div className="number ms-1">({averageRating} stars, {reviewCount} reviews)</div>
+                                                </div>
+
                                             </div>
                                         </div>
-                                    </div>
-                                </Col>
-                            ))}
+                                    </Col>
+                                );
+                            })}
+
+
+
                             <>
                                 {totalPages > 1 && (
                                     <nav aria-label="Page navigation example">

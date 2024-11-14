@@ -69,4 +69,9 @@ public class UserVoucherRestController {
 	public Boolean checkUserHasVoucher(@PathVariable String username, @PathVariable Integer voucherId) {
 		return userVoucherService.checkUserVoucher(username, voucherId);
 	}
+	
+	@GetMapping("/user/voucher/{username}")
+	public List<Map<String, Object>> findByUser(@PathVariable("username") String username) {
+		return userVoucherService.findByUser(username);
+	}
 }

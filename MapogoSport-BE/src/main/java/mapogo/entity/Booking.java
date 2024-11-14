@@ -75,8 +75,12 @@ public class Booking implements Serializable{
 	@Column(name="PhoneNumber")
 	private String phoneNumber = null;
 	
-	@Column(name="PrepayPrice")
-	private double prepayPrice;
+	@Column(name="PercentDeposit")
+	private int percentDeposit;
+	
+	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Notification> notifications;
 	
 	@Transient
     private Map<String, Object> sportFieldInfo;

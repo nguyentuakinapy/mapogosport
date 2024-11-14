@@ -65,6 +65,7 @@ const ProductDetail = () => {
     const { idProduct } = useParams();
     const [visibleCount, setVisibleCount] = useState(5);
     const [user, setUser] = useState(null); // Trạng thái cho thông tin người dùng
+
     const [selectedSizeQuantity, setSelectedSizeQuantity] = useState(0);
     const increaseQuantity = () => {
         if (quantity < selectedSizeQuantity) {
@@ -73,6 +74,7 @@ const ProductDetail = () => {
             toast.info("Số lượng vượt quá giới hạn.");
         }
     };
+
     useEffect(() => {
         if (typeof window !== 'undefined') {
             // Kiểm tra nếu đang chạy trên client-side
@@ -111,71 +113,68 @@ const ProductDetail = () => {
     }, [idProduct])
 
     // product_review
-    const [data, setData] = useState<Review[]>([]); // Khai báo kiểu dữ liệu cho data
+    // const [data, setData] = useState<Review[]>([]); // Khai báo kiểu dữ liệu cho data
+    const fetchProductData = (url: string) => fetch(url).then((res) => res.json());
+    const { data } = useSWR(`http://localhost:8080/rest/${idProduct}`, fetchProductData, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
 
-    // Hàm fetchData để lấy dữ liệu đánh giá
-    const fetchData = async () => {
-        try {
-            const response = await axios.get(`http://localhost:8080/rest/${idProduct}`); // API route
-            setData(response.data); // Lưu đánh giá vào trạng thái
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    useEffect(() => {
-        fetchData(); // Gọi hàm fetchData khi component mount
-    }, []);
 
     const MyVerticallyCenteredModal = (props) => {
         const [rating, setRating] = useState(0); // Trạng thái cho rating
         const [comment, setComment] = useState(''); // Trạng thái cho bình luận
-
+        const hasReviewed = data?.some(review => review.user.username === user?.username);
         const handleRatingSubmit = async () => {
-
             if (!user || !user.username) {
-                toast.warning("Bạn chưa đăng nhập !")
+                toast.warning("Bạn chưa đăng nhập!");
                 return;
             }
             if (comment.length < 15) {
-                toast.warning("Cần phải nhập ít nhất 15 ký tự")
+                toast.warning("Cần phải nhập ít nhất 15 ký tự");
                 return;
             }
-            const ratingData = {
-                user: {
-                    username: user.username
-                },
-                product: {
-                    productId: idProduct
-                },
-                rating: rating,
-                comment: comment,
-                datedAt: new Date()
-            };
 
-            try {
-                const response = await fetch('http://localhost:8080/rest/save', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(ratingData)
-                });
-
-                if (!response.ok) {
-                    const errorMessage = await response.text(); // Nhận thông tin chi tiết từ lỗi
-                    throw new Error(`Có lỗi xảy ra khi gửi đánh giá: ${errorMessage}`);
-                }
-
-                const result = await response.json();
-                setData(data => [...data, result]);
-                console.log("Đánh giá đã được gửi thành công", result);
-                props.onHide(); // Đóng modal sau khi gửi thành công
-                toast.success("Gửi đánh giá thành công !")
-            } catch (error) {
-                console.error("Lỗi khi gửi đánh giá:", error);
-                alert("Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.");
+            if (hasReviewed) {
+                toast.warning("Bạn không thể đánh giá hai lần!");
+                return;
             }
+
+            if (user && user.username) {
+                // Prepare the rating data as per the expected DTO structure
+                const ratingData = {
+                    userName: user.username,
+                    productId: idProduct,
+                    rating: rating,
+                    comment: comment,
+                    datedAt: new Date()
+                };
+
+                try {
+                    const response = await fetch('http://localhost:8080/rest/save', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(ratingData)
+                    });
+
+                    if (!response.ok) {
+                        const errorMessage = await response.text(); // Capture detailed error message
+                        throw new Error(`Có lỗi xảy ra khi gửi đánh giá: ${errorMessage}`);
+                    }
+
+                    mutate(`http://localhost:8080/rest/${idProduct}`)
+                    console.log("Đánh giá đã được gửi thành công");
+                    props.onHide(); // Close modal after successful submission
+                    toast.success("Gửi đánh giá thành công!");
+                } catch (error) {
+                    console.error("Lỗi khi gửi đánh giá:", error);
+                    toast.error("Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.");
+                }
+            }
+
         };
 
         return (
@@ -372,6 +371,7 @@ const ProductDetail = () => {
         }
     };
     const [rating, setRating] = useState(null);
+    const [filteredData, setFilteredData] = useState(null); // State to store filtered reviews
 
     const handleClick = (value) => {
         setRating(value);
@@ -379,19 +379,22 @@ const ProductDetail = () => {
         const fetchData = async () => {
             try {
                 const response = await axios.get(`http://localhost:8080/rest/user/find-review-by-rating/${idProduct}/${value}`);
-                console.log("rating", response.data);
-                // If needed, you can update state with the fetched data here
-                setData(response.data);
+                if (response.data) {
+                    setFilteredData(response.data); // Update filtered data with reviews matching the rating
+                    console.log("Filtered reviews by rating:", response.data);
+                } else {
+                    console.log("No reviews found for this rating.");
+
+                }
             } catch (error) {
-                console.log("error rating", error);
+                console.log("Error fetching rating data:", error);
+
             }
         };
 
         fetchData();
         console.log(`Rating selected: ${value}`);
     };
-
-
 
     return (
         <>
@@ -412,7 +415,7 @@ const ProductDetail = () => {
                                     />
                                     <div id="imageGalleryCarousel" class="carousel slide mt-3" data-bs-ride="carousel">
                                         <div className="carousel-inner">
-                           
+
                                             {imageGallery[0][0].galleries.map((galleryItem, index) => (
                                                 <div
                                                     key={index}
@@ -437,7 +440,7 @@ const ProductDetail = () => {
                                             ))}
                                         </div>
 
-                                      
+
                                         <button className="carousel-control-prev" type="button" data-bs-target="#imageGalleryCarousel" data-bs-slide="prev">
                                             <span className="carousel-control-prev-icon" aria-hidden="true"></span>
                                             <span className="visually-hidden">Previous</span>
@@ -591,35 +594,41 @@ const ProductDetail = () => {
                             </button>
                         ))}
                     </div>
-                    {data
-                        .sort((a, b) => new Date(b.datedAt) - new Date(a.datedAt)) // Sắp xếp theo ngày từ mới đến cũ
-                        .slice(0, visibleCount) // Hiển thị số bình luận theo visibleCount
-                        .map((review) => (
-                            <Row className="mt-5 ms-5" key={review.productReviewId}>
-                                <Col>
-                                    <Image
-                                        src="/img/avatar.jpg"
-                                        alt="Hình ảnh thu nhỏ"
-                                        width={35} // Kích thước hình ảnh thu nhỏ
-                                        height={35}
-                                        className="rounded-circle" // Sử dụng lớp tiện ích Bootstrap để tạo hình tròn
-                                    />
-                                    <span className='me-4'>{review.user.fullname}</span> {/* Truy cập fullname từ user */}
-                                    <i className="bi bi-calendar me-2"></i>
-                                    <span>{new Date(review.datedAt).toLocaleString('vi-VN')}</span>
 
-                                    <div>
-                                        {/* Hiển thị đánh giá sao dựa trên giá trị rating */}
-                                        <span className="text-warning ms-5 fs-3">
-                                            {'★'.repeat(review.rating)} {/* Hiển thị sao đầy */}
-                                        </span>
-                                        <br />
-                                        <span className='ms-5'>{review.comment}</span> {/* Hiển thị bình luận đánh giá */}
-                                    </div>
-                                </Col>
-                            </Row>
-                        ))}
-                    {visibleCount < data.length && ( // Kiểm tra nếu còn bình luận để tải thêm
+                    {
+                        (filteredData ? filteredData : data) && Array.isArray(filteredData ? filteredData : data) ? (
+                            (filteredData || data)
+                                .sort((a, b) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime())
+                                .slice(0, visibleCount)
+                                .map((review) => (
+                                    <Row className="mt-5 ms-5" key={review.productReviewId}>
+                                        <Col>
+                                            <Image
+                                                src="/img/avatar.jpg"
+                                                alt="Hình ảnh thu nhỏ"
+                                                width={35}
+                                                height={35}
+                                                className="rounded-circle"
+                                            />
+                                            <span className="me-4">{review.user.fullname}</span>
+                                            <i className="bi bi-calendar me-2"></i>
+                                            <span>{new Date(review.datedAt).toLocaleString('vi-VN')}</span>
+                                            <div>
+                                                <span className="text-warning ms-5 fs-3">
+                                                    {'★'.repeat(review.rating)}
+                                                </span>
+                                                <br />
+                                                <span className="ms-5">{review.comment}</span>
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                ))
+                        ) : (
+                            <p>Loading...</p> // Display a loading message while data is being fetched
+                        )
+                    }
+
+                    {data && visibleCount < data.length && (
                         <Row className="mt-4 text-center">
                             <Col>
                                 <Button variant="primary" onClick={loadMoreReviews}>
