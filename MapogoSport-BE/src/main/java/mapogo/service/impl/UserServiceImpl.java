@@ -1,6 +1,7 @@
 package mapogo.service.impl;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -15,12 +16,15 @@ import mapogo.dao.AccountPackageDAO;
 import mapogo.dao.NotificationDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.UserSubscriptionDAO;
+import mapogo.dao.WalletDAO;
 import mapogo.entity.AccountPackage;
 import mapogo.entity.Notification;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
 import mapogo.entity.UserVoucher;
+import mapogo.entity.Wallet;
 import mapogo.service.UserService;
+import mapogo.service.WalletService;
 import mapogo.utils.CloudinaryUtils;
 
 @Service
@@ -42,6 +46,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	SimpMessagingTemplate messagingTemplate;
+	
+	@Autowired
+	WalletDAO walletDAO;
 
 	@Override
 	public User findByUsername(String username) {
@@ -61,7 +68,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User createUser(User u) {
-		return userDAO.save(u);
+		User user = userDAO.save(u);
+		Wallet w = new Wallet();
+		w.setUser(u);
+		w.setBalance(BigDecimal.valueOf(0));	
+		walletDAO.save(w);
+		return user;
 	}
 
 	@Override

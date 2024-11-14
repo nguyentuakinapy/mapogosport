@@ -243,11 +243,13 @@ const BookingModal = (props: BookingProps) => {
     const handleSave = async () => {
         // const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
         // if (isOffline) {
+        const phoneRegex = /^0\d{9}$/;
+
         if (!fullName) {
             toast.error("Vui lòng nhập họ và tên!");
             return;
-        } else if (!phoneNumber) {
-            toast.error("Vui lòng nhập số điện thoại!");
+        } else if (phoneNumber.length !== 0 && !phoneRegex.test(phoneNumber)) {
+            toast.error("Số điện thoại phải là 10 số và bắt đầu từ 0!!");
             return;
         } else if (selectTime === "Chọn thời gian") {
             toast.error("Vui lòng chọn thời gian!");

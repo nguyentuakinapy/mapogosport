@@ -28,10 +28,8 @@ export default function Owner({ children }: { children: ReactNode }) {
     }, [])
 
     const getOwner = async () => {
-        const username = localStorage.getItem('username');
-
-        if (username) {
-            const responseOwner = await fetch(`http://localhost:8080/rest/owner/${username}`);
+        if (userData) {
+            const responseOwner = await fetch(`http://localhost:8080/rest/owner/${userData.username}`);
             if (!responseOwner.ok) {
                 throw new Error('Error fetching data');
             }
