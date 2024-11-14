@@ -41,4 +41,10 @@ public class VoucherServiceImpl implements VoucherService{
 		return dao.findById(id).get();
 	}
 	//đến đây
+
+	@Override
+	public void save(Voucher voucher) {
+		// TODO Auto-generated method stub
+		 dao.save(voucher);
+	}
 }

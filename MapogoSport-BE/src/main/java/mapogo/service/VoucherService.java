@@ -14,4 +14,5 @@ public interface VoucherService {
 	//của Mỵ từ đây
 	Voucher findById(int id);
 	//đến đây
+	void save(Voucher voucher);
 }

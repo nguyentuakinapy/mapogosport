@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -67,7 +68,8 @@ public class Voucher implements Serializable {
 	private List<Booking> bookings;
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JsonBackReference  //Mỵ đổi ngày 9-11
+	@JsonBackReference//Mỵ đổi ngày 9-11
+//	@JsonManagedReference("voucher-reference")//Ht đổi
 	private List<UserVoucher> userVouchers;
 
 }
