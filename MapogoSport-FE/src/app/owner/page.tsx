@@ -25,7 +25,7 @@ export default function Owner({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         getOwner();
-    }, [])
+    }, [userData])
 
     const getOwner = async () => {
         if (userData) {
@@ -35,19 +35,15 @@ export default function Owner({ children }: { children: ReactNode }) {
             }
             const dataOwner = await responseOwner.json() as Owner;
             setOwner(dataOwner);
+
+            const response = await fetch(`http://localhost:8080/rest/sport_field_by_owner/${dataOwner.ownerId}`);
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+            const dataS = await response.json() as SportField[];
+            setDataSport(dataS);
         }
     };
-
-    const { data: dataS, error: errorS, isLoading: isLoadingS } = useSWR(owner && `http://localhost:8080/rest/sport_field_by_owner/${owner.ownerId}`, fetcher, {
-        revalidateIfStale: false,
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-    });
-
-    useEffect(() => {
-        setDataSport(dataS);
-    }, [dataS])
-
 
     const { data: ap, error: erAp, isLoading: isLoadingAp } = useSWR(
         `http://localhost:8080/rest/accountpackage`, fetcher, {

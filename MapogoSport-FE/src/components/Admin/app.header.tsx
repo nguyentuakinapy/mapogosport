@@ -104,6 +104,9 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
             });
 
             stompClient.subscribe('/topic/username', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    toast.success("Bạn vừa có thông báo mơí!")
+                }
                 getNotification(message.body);
             });
         });
@@ -226,7 +229,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                                         <div className="d-flex justify-content-between align-items-center">
                                                             <Link
                                                                 onClick={() => handleIsReadNotification(item.notificationId)}
-                                                                href={`${path.includes("admin") && item.order ? `/admin/order/${item.order.orderId}` : item.booking ? `/owner/booking-bill/detail/${item.booking.bookingId}` : ''}`}
+                                                                href={`${path.includes("admin") && item.orderId ? `/admin/order/${item.orderId}` : item.bookingId ? `/owner/booking-bill/detail/${item.bookingId}` : ''}`}
                                                                 className="box-comment" style={{
                                                                     fontSize: '15px',
                                                                     color: item.isRead ? 'black' : undefined

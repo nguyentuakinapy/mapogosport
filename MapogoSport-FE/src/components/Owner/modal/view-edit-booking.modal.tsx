@@ -1,9 +1,8 @@
+import { createTimeStringH } from "@/components/Utils/booking-time";
 import { formatPrice } from "@/components/Utils/Format";
 import { use, useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { safeMultipleDatesFormat } from "react-datepicker/dist/date_utils";
 import { toast } from "react-toastify";
-import useSWR, { mutate } from "swr";
 
 interface OwnerProps {
     showViewOrEditBookingModal: boolean;
@@ -480,7 +479,6 @@ const BookingModal = (props: OwnerProps) => {
         }
         timeSlots.pop();
         setDataTimeOnStage(timeSlots);
-
     }
 
 
@@ -526,20 +524,37 @@ const BookingModal = (props: OwnerProps) => {
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == idSportDetail);
 
         if (startTimeBooking && endTimeBooking && sportDetail) {
-            const timeBooking = calculateTimeDifference(startTimeBooking, endTimeBooking) / 30;
+            const peakHourStart = sportDetail.peakHour.split('-')[0];
+            const peakHourEnd = sportDetail.peakHour.split('-')[1];
 
-            if (isEven(timeBooking)) {
-                setPrice(sportDetail.price * timeBooking / 2);
-                // toast.success(sportDetail.price * timeBooking / 2);
-            } else {
-                if (timeBooking == 1) {
-                    setPrice((sportDetail.price * timeBooking) / 2);
-                    // toast.success((sportDetail.price * timeBooking) / 2)
+            const timeSlots: string[] = createTimeStringH(startTimeBooking, endTimeBooking);
+
+            const price = sportDetail.price / 2;
+            const pricePeakHour = sportDetail.peakHourPrices / 2;
+
+            let totalAmount = 0;
+
+            for (const time of timeSlots) {
+                if (isTimeWithinRange(peakHourStart, peakHourEnd, time)) {
+                    totalAmount += pricePeakHour;
                 } else {
-                    setPrice((sportDetail.price * timeBooking / 2));
-                    // toast.success((sportDetail.price * timeBooking / 2))
+                    totalAmount += price;
                 }
             }
+
+            setPrice(totalAmount);
+            // if (isEven(timeBooking)) {
+            //     setPrice(sportDetail.price * timeBooking / 2);
+            //     // toast.success(sportDetail.price * timeBooking / 2);
+            // } else {
+            //     if (timeBooking == 1) {
+            //         setPrice((sportDetail.price * timeBooking) / 2);
+            //         // toast.success((sportDetail.price * timeBooking) / 2)
+            //     } else {
+            //         setPrice((sportDetail.price * timeBooking / 2));
+            //         // toast.success((sportDetail.price * timeBooking / 2))
+            //     }
+            // }
         }
     }
 
@@ -647,8 +662,8 @@ const BookingModal = (props: OwnerProps) => {
         setShowViewOrEditBookingModal(false);
     }
 
-
     const handleAddBooking = () => {
+        setApplyOne(true);
         const endTime = bookingDetailData?.endTime;
 
         const time = endTime && endTime.split("h");
@@ -671,26 +686,27 @@ const BookingModal = (props: OwnerProps) => {
     }, [newEndTimeBooking, newIdSportBooking])
 
     const getAddNewPriceByTimeBooking = () => {
-
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == newIdSportBooking);
 
         if (bookingDetailData && newEndTimeBooking && bookingDetailData.endTime && sportDetail) {
-            // toast.success("gias")
+            const peakHourStart = sportDetail.peakHour.split('-')[0];
+            const peakHourEnd = sportDetail.peakHour.split('-')[1];
 
-            const timeBooking = calculateTimeDifference(bookingDetailData.endTime, newEndTimeBooking) / 30;
+            const timeSlots: string[] = createTimeStringH(bookingDetailData.endTime, newEndTimeBooking);
 
-            if (isEven(timeBooking)) {
-                setNewPriceBooking(sportDetail.price * timeBooking / 2);
-                // toast.success(sportDetail.price * timeBooking / 2);
-            } else {
-                if (timeBooking == 1) {
-                    setNewPriceBooking((sportDetail.price * timeBooking) / 2);
-                    // toast.success((sportDetail.price * timeBooking) / 2)
+            const price = sportDetail.price / 2;
+            const pricePeakHour = sportDetail.peakHourPrices / 2;
+
+            let totalAmount = 0;
+
+            for (const time of timeSlots) {
+                if (isTimeWithinRange(peakHourStart, peakHourEnd, time)) {
+                    totalAmount += pricePeakHour;
                 } else {
-                    setNewPriceBooking((sportDetail.price * timeBooking / 2));
-                    // toast.success((sportDetail.price * timeBooking / 2))
+                    totalAmount += price;
                 }
             }
+            setNewPriceBooking(totalAmount);
         }
     }
 
@@ -817,7 +833,7 @@ const BookingModal = (props: OwnerProps) => {
 
     return (
         <>
-            <Modal show={showViewOrEditBookingModal} onHide={() => handleClose()} size="lg" aria-labelledby="contained-modal-title-vcenter"
+            <Modal show={showViewOrEditBookingModal} onHide={() => handleClose()} size="xl" aria-labelledby="contained-modal-title-vcenter"
                 centered backdrop="static" keyboard={false}>
                 <Modal.Header>
                     <Modal.Title className="text-uppercase text-danger fw-bold m-auto">XEM VÀ CHỈNH SỬA THÔNG TIN ĐẶT SÂN </Modal.Title>
@@ -836,7 +852,8 @@ const BookingModal = (props: OwnerProps) => {
                                                         className="bi bi-pencil-square ms-2 text-dark"
                                                         onClick={() => {
                                                             setEditBooking(!editBooking),
-                                                                setIsAddBooking(false)
+                                                                setIsAddBooking(false),
+                                                                setApplyOne(true);
                                                         }}
                                                         style={{ cursor: 'pointer' }}
                                                     />
@@ -849,7 +866,8 @@ const BookingModal = (props: OwnerProps) => {
                                                     className="bi bi-pencil-square ms-2 text-dark"
                                                     onClick={() => {
                                                         setEditBooking(!editBooking),
-                                                            setIsAddBooking(false)
+                                                            setIsAddBooking(false),
+                                                            setApplyOne(true);
                                                     }}
                                                     style={{ cursor: 'pointer' }}
                                                 />
@@ -865,7 +883,7 @@ const BookingModal = (props: OwnerProps) => {
                                             (new Date().getHours() * 60) + new Date().getMinutes()
                                             < (parseInt(bookingDetailData.endTime.split('h')[0]) * 60) +
                                             parseInt(bookingDetailData.endTime.split('h')[1]) && (
-                                                <OverlayTrigger overlay={<Tooltip>Thêm mới 1 </Tooltip>}>
+                                                <OverlayTrigger overlay={<Tooltip>Thêm mới</Tooltip>}>
                                                     <button disabled={sport && parseInt(sport.closing.split('h')[0])
                                                         === parseInt(bookingDetailData.endTime.split('h')[0])}
                                                         style={{ border: 'none', backgroundColor: 'white' }}>
@@ -1043,54 +1061,45 @@ const BookingModal = (props: OwnerProps) => {
                                     </FloatingLabel>
                                 </>
                             }
-
-                            {userData?.fullname == "Offline" && (
-                                <FloatingLabel controlId="floatingUsername" label="Phương thức thanh toán *" className="flex-grow-1 mb-2">
-                                    <Form.Control
-                                        value={paymentMethod?.name || ""}
-                                        type="text"
-                                        placeholder="Vui lòng nhập tên đăng nhập!"
-                                        disabled
-                                    />
-                                </FloatingLabel>
-                            )}
                         </Col>
-                        {userData?.fullname != "Offline" && (
-                            <Col>
-                                <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
-                                <FloatingLabel controlId="floatingUsername" label="Họ và tên *" className="flex-grow-1 mb-2">
-                                    <Form.Control
-                                        value={userData?.fullname || ""}
-                                        type="text"
-                                        placeholder="Vui lòng nhập tên đăng nhập!"
-                                        disabled
-                                    />
-                                </FloatingLabel>
-                                <FloatingLabel controlId="floatingUsername" label="Số điện thoại *" className="flex-grow-1 mb-2">
-                                    <Form.Control
-                                        type="text"
-                                        value={userData?.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber || ""}
-                                        placeholder="Vui lòng nhập tên đăng nhập!"
-                                        disabled
-                                    />
-                                </FloatingLabel> <FloatingLabel controlId="floatingUsername" label="Phương thức thanh toán *" className="flex-grow-1 mb-2">
-                                    <Form.Control
-                                        value={paymentMethod?.name || ""}
-                                        type="text"
-                                        placeholder="Vui lòng nhập tên đăng nhập!"
-                                        disabled
-                                    />
-                                </FloatingLabel>
-                            </Col>
-                        )}
+                        {/* {userData?.fullname != "Offline" && ( */}
+                        <Col>
+                            <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
+                            <FloatingLabel controlId="floatingUsername" label="Họ và tên *" className="flex-grow-1 mb-2">
+                                <Form.Control
+                                    value={userData?.fullname || ""}
+                                    type="text"
+                                    placeholder="Vui lòng nhập tên đăng nhập!"
+                                    disabled
+                                />
+                            </FloatingLabel>
+                            <FloatingLabel controlId="floatingUsername" label="Số điện thoại *" className="flex-grow-1 mb-2">
+                                <Form.Control
+                                    type="text"
+                                    value={userData?.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber || ""}
+                                    placeholder="Vui lòng nhập tên đăng nhập!"
+                                    disabled
+                                />
+                            </FloatingLabel> <FloatingLabel controlId="floatingUsername" label="Phương thức thanh toán *" className="flex-grow-1 mb-2">
+                                <Form.Control
+                                    value={paymentMethod?.name || ""}
+                                    type="text"
+                                    placeholder="Vui lòng nhập tên đăng nhập!"
+                                    disabled
+                                />
+                            </FloatingLabel>
+                        </Col>
+                        {/* )} */}
 
                     </Row>
                     <Row className="mx-1 mb-2">
                         {bookingDetailData?.subscriptionKey && bookingDetailData.subscriptionKey.includes('keybooking') && (
-                            <>
-                                <Col onClick={() => setApplyOne(true)} className={`col-day border p-2 text-white ${applyOne ? 'active' : ''}`}>Một ngày</Col>
-                                <Col onClick={() => setApplyOne(false)} className={`col-day border p-2 text-white ${!applyOne ? 'active' : ''}`}>Tất cả ngày trong chung lịch</Col>
-                            </>
+                            !isAddBooking && (
+                                <>
+                                    <Col onClick={() => setApplyOne(true)} className={`col-day border p-2 text-white ${applyOne ? 'active' : ''}`}>Một ngày</Col>
+                                    <Col onClick={() => setApplyOne(false)} className={`col-day border p-2 text-white ${!applyOne ? 'active' : ''}`}>Tất cả ngày trong chung lịch</Col>
+                                </>
+                            )
                         )}
                     </Row>
                     <Row>

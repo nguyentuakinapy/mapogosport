@@ -5,6 +5,7 @@ import BookingModal from "@/components/Owner/modal/booking.modal";
 import NotificationModal from "@/components/Owner/modal/notification.modal";
 import SearchBookingModal from "@/components/Owner/modal/search-booking.modal";
 import ViewEditBookingModal from "@/components/Owner/modal/view-edit-booking.modal";
+import { calculateTimeDifference } from "@/components/Utils/booking-time";
 import { formatDateNotime, formatDateVN } from "@/components/Utils/Format";
 import { Stomp } from "@stomp/stompjs";
 import { useEffect, useRef, useState } from "react";
@@ -51,6 +52,20 @@ export default function BookingSport() {
     const [opening, setOpening] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);
     const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
+
+    const [onDay, setOnDay] = useState<string>(() => {
+        const today = new Date();
+        return new Intl.DateTimeFormat('en-CA').format(today);
+    });
+
+    const [startWeek, setStartWeek] = useState<string>(() => {
+        const today = new Date();
+        return new Intl.DateTimeFormat('en-CA').format(today);
+    });
+
+    const initialEndWeek = new Date();
+    initialEndWeek.setDate(initialEndWeek.getDate() + 6);
+    const [endWeek, setEndWeek] = useState<string>(initialEndWeek.toISOString().split('T')[0]);
 
     useEffect(() => {
         const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
@@ -203,9 +218,7 @@ export default function BookingSport() {
         const today = new Date(startWeek);
         const days = [];
         const dayYears = [];
-        const weekdays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-
-        // console.log(`Start Week: ${today.toISOString().split('T')[0]}`);
+        const weekdays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
 
         for (let i = 0; i < 7; i++) {
             const nextDay = new Date(today);
@@ -231,20 +244,6 @@ export default function BookingSport() {
     useEffect(() => {
         setCheckDataBooking(prev => !prev);
     }, [checkDataBooking1]);
-
-    const [onDay, setOnDay] = useState<string>(() => {
-        const today = new Date();
-        return new Intl.DateTimeFormat('en-CA').format(today);
-    });
-
-    const [startWeek, setStartWeek] = useState<string>(() => {
-        const today = new Date();
-        return new Intl.DateTimeFormat('en-CA').format(today);
-    });
-
-    const initialEndWeek = new Date();
-    initialEndWeek.setDate(initialEndWeek.getDate() + 6);
-    const [endWeek, setEndWeek] = useState<string>(initialEndWeek.toISOString().split('T')[0]);
 
     const setOnDayAndOnWeek = (direction: 'forward' | 'backward') => {
         const currentDate = new Date(onDay);
@@ -479,18 +478,6 @@ export default function BookingSport() {
         }
     }
 
-    const convertToMinutes = (time: string) => {
-        const [hours, minutes] = time.split('h').map(Number);
-        return (hours * 60) + minutes;
-    };
-
-    const calculateTimeDifference = (start: string, end: string) => {
-        const startTotalMinutes = convertToMinutes(start);
-        const endTotalMinutes = convertToMinutes(end);
-
-        return endTotalMinutes - startTotalMinutes;
-    };
-
     const setStatusOnWeek = async () => {
 
         const currentDateTime = new Date();
@@ -640,8 +627,6 @@ export default function BookingSport() {
         setBookingsOnWeek(updatedBookingsOnWeek);
     };
 
-
-
     // LOAD TABLE
     const renderTableRows = () => {
 
@@ -726,7 +711,6 @@ export default function BookingSport() {
             </tr>
         ));
     };
-
 
     const renderTableRowsByWeek = () => {
         const bookingCounts: any = {};
@@ -887,7 +871,7 @@ export default function BookingSport() {
                 console.error("Selected sport data is invalid");
                 return;
             }
-            const getHetCuu = async () => {
+            const getFindBookingSport = async () => {
                 if (!hasExecuted && currentMinutes === 0) {
                     await fetchBookingNotification(dateNow, now.getHours().toString() + 'h30', selectedSportData.sportFieldId);
                 } else if (!hasExecuted && currentMinutes === 30) {
@@ -895,7 +879,7 @@ export default function BookingSport() {
                 }
             }
 
-            getHetCuu();
+            getFindBookingSport();
             refreshStatusBooking();
         }
     }, [selectDate, selectSport, dataSport, checkNotification, checkOwner]);
@@ -971,9 +955,6 @@ export default function BookingSport() {
         const startTime = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
 
-        // console.log(sportDetail);
-        // toast.success(startTime);
-        // toast.success(dayStartBooking);
         const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
 
         if (sportDetail && startTime && dayStartBooking) {
@@ -982,7 +963,6 @@ export default function BookingSport() {
             setDayStartBooking(dayStartBooking);
             setStartTimeKey(startTimeKey + 1);
             setShowBookingModal(true);
-            // toast.success(sportDetail + " - " + timeStart + " - " + dayStartBooking);
         }
     };
 
@@ -992,7 +972,7 @@ export default function BookingSport() {
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
 
         const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
-        // toast.success(selectedSportDetail?.sportFielDetailId)
+
         const responseBookingDetail = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${startTime}/${selectedSportDetail?.sportFielDetailId}/${dayStartBooking}`);
         if (!responseBookingDetail.ok) {
             throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
