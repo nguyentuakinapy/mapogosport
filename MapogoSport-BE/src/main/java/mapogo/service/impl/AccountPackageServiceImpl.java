@@ -73,4 +73,9 @@ public class AccountPackageServiceImpl implements AccountPackageService {
 		return accountPackageDAO.save(accountPackage);
 	}
 
+	@Override
+	public AccountPackage findById(Integer id) {
+		return accountPackageDAO.findById(id).get();
+	}
+
 }

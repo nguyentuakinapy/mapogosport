@@ -11,6 +11,8 @@ import Collapse from 'react-bootstrap/Collapse';
 import { useData } from '../context/UserContext';
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
+import ModalOrderSuccess from './success/page';
+import { usePathname, useSearchParams } from 'next/navigation';
 const CheckoutPage = () => {
   const [open, setOpen] = useState(false);
   const [open_1, setOpen_1] = useState(false);
@@ -21,6 +23,7 @@ const CheckoutPage = () => {
   const [cartIds, setCartIds] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [user1, setUser1] = useState<User>();
+  const [showOrderSuccessModal, setShowOrderSuccessModal] = useState(false);
 
   const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
 
@@ -325,6 +328,9 @@ const CheckoutPage = () => {
     }
   };
 
+  const searchParams = useSearchParams();
+  const status = searchParams.get('status');
+
   const handlePaymentWithOrder = async () => {
     if (!checkForm()) {
       setLoading(false);
@@ -345,8 +351,7 @@ const CheckoutPage = () => {
               params: { orderId: order.orderId }, // truyền orderId qua params
             }
           );
-
-          window.location.href = `/checkout-product/order`;
+          setShowOrderSuccessModal(true);
         } catch (error) {
           console.error('Error during payment:', error);
         }
@@ -369,7 +374,6 @@ const CheckoutPage = () => {
         const paymentUrl = paymentResponse.data.url;
         // chuyển hướng đến URL thanh toán
         window.location.href = paymentUrl;
-
       } catch (error) {
         console.error('Error during payment:', error);
       }
@@ -399,6 +403,12 @@ const CheckoutPage = () => {
     }
 
   };
+
+  useEffect(() => {
+    if (status === 'success') {
+      setShowOrderSuccessModal(true);
+    }
+  }, [status]);
 
   return (
     <HomeLayout>
@@ -692,6 +702,11 @@ const CheckoutPage = () => {
 
         </div>
       </div >
+      <ModalOrderSuccess
+        showOrderSuccessModal={showOrderSuccessModal}
+        setShowOrderSuccessModal={setShowOrderSuccessModal}
+        order={order}
+      />
     </HomeLayout >
   );
 };

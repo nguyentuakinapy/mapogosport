@@ -1,10 +1,13 @@
 package mapogo.rest;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +20,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
 
+import jakarta.servlet.http.HttpServletRequest;
 import mapogo.dao.ProductDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.UserVoucherDAO;
+import mapogo.dto.PaymentDTO;
 import mapogo.entity.Notification;
 import mapogo.entity.Owner;
 import mapogo.entity.Product;
@@ -30,6 +36,7 @@ import mapogo.entity.UserVoucher;
 import mapogo.service.EmailService;
 import mapogo.service.OwnerService;
 import mapogo.service.UserService;
+import mapogo.service.UserSubscriptionService;
 import mapogo.utils.RandomUtils;
 
 @CrossOrigin("*")
@@ -116,12 +123,42 @@ public class UserRestController {
 		return userService.saveUserSubcription(requestBody);
 	}
 
+//Mỵ sửa
+	@Autowired
+	UserSubscriptionService userSubService;
+	
 	@PutMapping("/user/subscription/{userSubscriptionId}")
-	public void updateUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId,
-			@RequestBody Map<String, Object> requestBody) {
-		//thanh toán
-		
-		userService.updateUserSubscription(requestBody);
+	public ResponseEntity<?> updateUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId,
+			@RequestBody Map<String, Object> requestBody,
+			HttpServletRequest req) throws UnsupportedEncodingException {
+		// thanh toán
+		PaymentDTO paymentDTO =  userSubService.createSubscriptionPayment(requestBody, req);
+		System.out.println(paymentDTO.getURL());
+		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
+	}
+	
+	@GetMapping("/user/subscription/paymentInfo")
+	public RedirectView updateUserSubscription2(
+			@RequestParam(value = "vnp_OrderInfo") String data) {
+		 String[] parts = data.split("-");
+		    int accountPackageId = Integer.parseInt(parts[0]);
+		    int userSubscriptionId = Integer.parseInt(parts[1]);
+		userService.updateUserSubscription(accountPackageId, userSubscriptionId);
+		return new RedirectView("http://localhost:3000/owner");
+	}
+	
+	@GetMapping("/user/subscription/paymentInfo-momo")
+	public RedirectView getPaymentInfo(
+			@RequestParam(value = "resultCode") String resultCode,
+			@RequestParam(value = "extraData") String data) {
+		if (resultCode.equals("0")) {
+			System.out.println("thành coong");
+		 String[] parts = data.split("-");
+		    int accountPackageId = Integer.parseInt(parts[0]);
+		    int userSubscriptionId = Integer.parseInt(parts[1]);
+		userService.updateUserSubscription(accountPackageId, userSubscriptionId);
+		}
+		return new RedirectView("http://localhost:3000/owner");
 	}
 
 	@GetMapping("/user/subscription/{id}")
@@ -143,7 +180,7 @@ public class UserRestController {
 	public void setViewNotification(@PathVariable("username") String username) {
 		userService.setViewNotification(username);
 	}
-	
+
 	@PutMapping("/user/notification/is/read/{notificationId}")
 	public void setIsReadNotification(@PathVariable("notificationId") Integer notificationId) {
 		userService.setIsReadNotification(notificationId);

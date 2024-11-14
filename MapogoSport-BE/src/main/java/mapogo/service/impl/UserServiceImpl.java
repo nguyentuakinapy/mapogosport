@@ -102,10 +102,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserSubscription updateUserSubscription(Map<String, Object> data) {
-		UserSubscription uS = userSubscriptionDAO.findById((Integer) data.get("userSubscriptionId")).get();
-		AccountPackage ap = accountPackageDAO.findById((Integer) data.get("accountPackageId")).get();
+	public UserSubscription updateUserSubscription(int accountPackageId, int userSubscriptionId) {
+		UserSubscription uS = userSubscriptionDAO.findById(userSubscriptionId).get();
+		AccountPackage ap = accountPackageDAO.findById(accountPackageId).get();
 		uS.setAccountPackage(ap);
+		System.out.println("đã cập nhật");
 		return userSubscriptionDAO.save(uS);
 	}
 
