@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	SimpMessagingTemplate messagingTemplate;
-	
+
 	@Autowired
 	WalletDAO walletDAO;
 
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
 		User user = userDAO.save(u);
 		Wallet w = new Wallet();
 		w.setUser(u);
-		w.setBalance(BigDecimal.valueOf(0));	
+		w.setBalance(BigDecimal.valueOf(0));
 		walletDAO.save(w);
 		return user;
 	}
@@ -175,6 +175,17 @@ public class UserServiceImpl implements UserService {
 	public List<Notification> findNotificationByUsername(String username) {
 		User u = userDAO.findById(username).get();
 		List<Notification> notifications = u.getNotifications();
+		notifications.forEach(item -> {
+			if (item.getBooking() != null) {
+				item.setBookingId(item.getBooking().getBookingId());
+			}
+			if (item.getOrder() != null) {
+				item.setOrderId(item.getOrder().getOrderId());
+			}
+			if (item.getUser() != null) {
+				item.setUsername(item.getUser().getUsername());
+			}
+		});
 		return notifications;
 	}
 

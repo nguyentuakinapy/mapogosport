@@ -59,17 +59,30 @@ interface SubscriptionPayments {
 
 }
 
+// interface NotificationUser {
+//     notificationId: number
+//     user: User
+//     title: string
+//     message: string
+//     type: string
+//     isRead: boolean
+//     createdAt: string
+//     updatedAt: string
+//     booking: Booking
+//     order: Order
+// }
+
 interface NotificationUser {
     notificationId: number
-    user: User
     title: string
     message: string
     type: string
     isRead: boolean
     createdAt: string
     updatedAt: string
-    booking: Booking
-    order: Order
+    bookingId: number
+    orderId: number
+    username: string
 }
 
 interface JwtGoogleAccount {

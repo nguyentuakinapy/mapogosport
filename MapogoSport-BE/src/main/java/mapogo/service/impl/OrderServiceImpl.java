@@ -11,15 +11,22 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import mapogo.dao.AuthorityDAO;
+import mapogo.dao.NotificationDAO;
 import mapogo.dao.OrderDAO;
+import mapogo.dao.RoleDAO;
 import mapogo.dto.OrderDTO;
+import mapogo.entity.Authority;
+import mapogo.entity.Notification;
 import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
 import mapogo.entity.PaymentMethod;
 import mapogo.entity.PhoneNumberUser;
 import mapogo.entity.ProductDetailSize;
+import mapogo.entity.Role;
 import mapogo.entity.User;
 import mapogo.entity.UserVoucher;
 import mapogo.entity.Voucher;
@@ -100,6 +107,15 @@ public class OrderServiceImpl implements OrderService {
 	VoucherService voucherService;
 	@Autowired
 	UserVoucherService userVoucherService;
+	@Autowired
+	AuthorityDAO authorityDAO;
+	@Autowired
+	RoleDAO roleDAO;
+	@Autowired
+	NotificationDAO notificationDAO;
+	@Autowired
+	SimpMessagingTemplate messagingTemplate;
+	
 	@Override
 	public Order createOrder(OrderDTO orderDTO) {
 		Order order = new Order();
@@ -123,8 +139,22 @@ public class OrderServiceImpl implements OrderService {
 		}
 		
 		order.setShipFee(orderDTO.getShipFee());
-
-		return orderDAO.save(order);
+		orderDAO.save(order);
+		
+		Role r = roleDAO.findById(2).get();
+		r.getAuthorities().forEach(item -> {
+			Notification n = new Notification();
+			n.setOrder(order);
+			n.setTitle("Bạn vừa có đơn hàng mới!");
+			n.setMessage(user.getFullname() + " đã mua sản phẩm mới giá: " + order.getAmount());
+			n.setType("info");
+			n.setUser(item.getUser());
+			notificationDAO.save(n);
+			
+			messagingTemplate.convertAndSend("/topic/username", item.getUser().getUsername());
+		});
+				
+		return order;
 	}
 
 	@Override

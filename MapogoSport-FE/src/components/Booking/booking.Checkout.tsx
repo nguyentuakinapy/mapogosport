@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
 import 'react-datepicker/dist/react-datepicker.css';
 import { useData } from "@/app/context/UserContext";
+import { createTimeStringH } from "../Utils/booking-time";
 
 interface BookingProps {
     showBookingModal: boolean;
@@ -198,11 +199,11 @@ const BookingModal = React.memo((props: BookingProps) => {
 
                 for (let i = 0; i < timeParts.length; i++) {
                     if (timeParts[i].includes('giờ')) {
-                        hoursToAdd += Number(timeParts[i - 1]);
+                        hoursToAdd += Number(timeParts[i - 1]); // Cộng dồn số giờ
                     }
 
                     if (timeParts[i].includes('phút')) {
-                        minutesToAdd += Number(timeParts[i - 1]);
+                        minutesToAdd += Number(timeParts[i - 1]); // Cộng dồn số phút
                     }
                 }
 
@@ -215,37 +216,28 @@ const BookingModal = React.memo((props: BookingProps) => {
                 }
 
                 setEndTime(`${endHour}h${endMinute > 0 ? endMinute : '00'}`);
-                const hetcuu = (`${endHour}h${endMinute > 0 ? endMinute : '00'}`);
-                const selectedPrice = calculateBookingPrice(sportDetail, startTime, hetcuu);
+
+                const peakHourStart = sportDetail.peakHour.split('-')[0];
+                const peakHourEnd = sportDetail.peakHour.split('-')[1];
+
+                const timeSlots: string[] = createTimeStringH(`${hours}h${minutes > 0 ? minutes : '00'}`, `${endHour}h${endMinute > 0 ? endMinute : '00'}`)
+                console.log(timeSlots);
+
+                const price = sportDetail.price / 2;
+                const pricePeakHour = sportDetail.peakHourPrices / 2;
+
                 let totalAmount = 0;
 
-                let totalTimeInHours: number = 0;
-                if (startTime.includes("h30")) {
-                    totalTimeInHours = Math.abs(endHour - hours) + (endMinute / 60) - 0.5;
-                    if (totalTimeInHours == 0.5) {
-                        totalAmount = selectedPrice / 2;
-                    } else if (String(totalTimeInHours).includes(".5")) {
-                        totalAmount = (selectedPrice * Math.abs(endHour - hours)) - selectedPrice / 2;
+                for (const time of timeSlots) {
+                    if (isTimeWithinRange(peakHourStart, peakHourEnd, time)) {
+                        totalAmount += pricePeakHour;
                     } else {
-                        totalAmount = selectedPrice * totalTimeInHours;
-                    }
-                } else {
-                    totalTimeInHours = (Math.abs(endHour - hours) + (endMinute / 60));
-                    if (totalTimeInHours == 0.5) {
-                        totalAmount = selectedPrice / 2;
-                    } else if (String(totalTimeInHours).includes(".5")) {
-                        if (String(totalTimeInHours).includes("1")) {
-                            totalAmount = (selectedPrice * Math.abs(endHour - hours)) + selectedPrice / 2;
-                        } else {
-                            totalAmount = (selectedPrice * Math.abs(endHour - hours)) + selectedPrice / 2;
-                        }
-                    } else {
-                        totalAmount = selectedPrice * totalTimeInHours;
+                        totalAmount += price;
                     }
                 }
                 setPrice(totalAmount);
                 setTotalAmount(totalAmount);
-                setPrepayPrice(totalAmount * (sportDetail?.percentDeposit / 100));
+                setPrepayPrice(totalAmount * (sportDetail?.percentDeposit / 100))
             }
         }
     }
@@ -690,7 +682,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                                 <span><b> Thời gian đá: </b>{startTime} - {endTime ? endTime : '???'}</span><br />
                             </Col>
                             <Col className="px-5 text-center">
-                                <span><b>Đơn giá: </b> <em className="text-danger">{endTime ? `${priceOfPeakHour?.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
+                                <span><b>Đơn giá: </b> <em className="text-danger">{endTime ? `${sportDetail?.price.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
                                 <span><b>Tổng tiền: </b><em className="text-danger">{price ? `${price?.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
                             </Col>
                         </Row>

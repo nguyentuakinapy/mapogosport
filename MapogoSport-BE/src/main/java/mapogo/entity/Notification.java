@@ -3,6 +3,7 @@ package mapogo.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -14,6 +15,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,6 +38,7 @@ public class Notification {
 
 	@ManyToOne
 	@JoinColumn(name = "Username", nullable = false)
+	@JsonBackReference
 	private User user;
 
 	@Column(name = "Title", nullable = false, length = 255)
@@ -57,12 +61,20 @@ public class Notification {
 
 	@ManyToOne
 	@JoinColumn(name = "Booking_Id", nullable = true)
-	@JsonManagedReference
+	@JsonBackReference
 	private Booking booking = null;
 
 	@ManyToOne
 	@JoinColumn(name = "Order_Id", nullable = true)
-	@JsonManagedReference
+	@JsonBackReference
 	private Order order = null;
 
+	@Transient
+	private Integer bookingId;
+	
+	@Transient
+	private Integer orderId;
+	
+	@Transient
+	private String username;
 }
