@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.BookingDAO;
@@ -52,6 +53,9 @@ public class BookingServiceImpl implements BookingService {
 	
 	@Autowired
 	NotificationDAO notificationDAO;
+	
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
 
 	@Override
 	public List<Booking> findAll() {
@@ -187,6 +191,10 @@ public class BookingServiceImpl implements BookingService {
 			n.setType("info");
 			n.setBooking(booking);
 			notificationDAO.save(n);
+			
+			messagingTemplate.convertAndSend("/topic/bookingDetail", booking.getOwner().getOwnerId());
+			messagingTemplate.convertAndSend("/topic/username", booking.getOwner().getUser().getUsername());
+			messagingTemplate.convertAndSend("/topic/notification", booking.getOwner().getUser().getUsername());
 		}
 	
 		return booking;
@@ -272,7 +280,7 @@ public class BookingServiceImpl implements BookingService {
 	public List<BookingDetail> findBookingDetailBySportFieldAndOwner(List<Integer> sportFielDetailIds, List<Integer> bookingId,
 			List<String> status) {
 		// TODO Auto-generated method stub
-		return bookingDAO.findBookingDetailBySportFieldIdsAndOwner(sportFielDetailIds, bookingId, status);
+		return bookingDAO.findBookingDetailBySportFieldIdsAndOwner(sportFielDetailIds, bookingId, status, "Đã thanh toán");
 	}
 
 	@Override

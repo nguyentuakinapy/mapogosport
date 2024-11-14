@@ -359,7 +359,9 @@
     position: relative;
 
     .date-picker-dropdown {
+        margin: 0;
         height: 100%;
+        padding: 0;
         position: absolute;
         top: 100%;
         left: 50%;

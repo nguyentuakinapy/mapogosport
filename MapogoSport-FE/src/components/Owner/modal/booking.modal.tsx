@@ -16,7 +16,7 @@ interface BookingProps {
     owner?: Owner;
     checkDataStatus: boolean
     setCheckDataStatus: (v: boolean) => void;
-    startTimeKey: boolean
+    startTimeKey: number
 }
 
 const BookingModal = (props: BookingProps) => {

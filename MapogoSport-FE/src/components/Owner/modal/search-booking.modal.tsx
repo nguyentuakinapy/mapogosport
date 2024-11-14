@@ -21,7 +21,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
     const [startTime, setStartTime] = useState("");
     const [dayStartBooking, setDayStartBooking] = useState("");
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
-    const [startTimeKey, setStartTimeKey] = useState<boolean>(true);
+    const [startTimeKey, setStartTimeKey] = useState<number>(1);
     const [validTimes, setValidTimes] = useState<string[]>([]);
     const [opening, setOpening] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);
@@ -143,6 +143,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
                 toast.success("Đã tìm thấy sân theo yêu cầu!");
                 const selectedSportDetail = sportField?.sportFielDetails.find(item => item.sportFielDetailId === selectedSportType);
                 if (selectedSportDetail) {
+                    setStartTimeKey(startTimeKey + 20);
                     setSportDetail(selectedSportDetail);
                     setStartTime(selectedTime);
                     setDayStartBooking(selectedDate);
@@ -203,7 +204,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
             <BookingModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
                 sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
                 sport={sportField} owner={sportField?.owner}
-                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey} />
+                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey + 1} />
         </>
     )
 }
