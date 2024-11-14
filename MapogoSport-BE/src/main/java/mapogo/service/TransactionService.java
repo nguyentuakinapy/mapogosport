@@ -11,4 +11,6 @@ public interface TransactionService {
 	//đến đây
 	
 	List<Transaction> findTransactionByWalletId(Integer walletId);
+
+	void createTransactionByBooking(Integer bookingId, double totalAmount);
 }

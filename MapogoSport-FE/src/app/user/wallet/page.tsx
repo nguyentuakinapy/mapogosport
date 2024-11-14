@@ -60,7 +60,7 @@ const WalletPage = () => {
                                     <div>Ngày giao dịch: {new Date(item.createdAt).toLocaleDateString('en-Gb')}</div>
                                 </div>
                                 <div className={`${item.transactionType.slice(0, 1) == "+" ? 'text-success' : 'text-danger'}`}>
-                                    <b>{item.transactionType}</b>
+                                    <b>{Number(item.transactionType).toLocaleString()} ₫</b>
                                 </div>
                             </div>
                         </div>
