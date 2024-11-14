@@ -102,10 +102,23 @@ interface AvailableBooking {
 
 interface BookingByUserMap {
     bookingId: number;
+    bookingDetails: [
+        {
+            startTime: string;
+            endTime: string;
+            bookingDetailDate: Date;
+            bookingDetailStatus: string;
+            peakHourPrice: number;
+            peakHour: string;
+            percentDeposit: number;
+            price: number;
+        }
+    ]
     sportFieldName: string;
     totalAmount: number;
     status: string;
     date: Date;
+    prepayPrice: number;
 }
 
 interface BookingFindAll {

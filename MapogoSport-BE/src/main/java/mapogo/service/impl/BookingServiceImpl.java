@@ -25,6 +25,7 @@ import mapogo.entity.Order;
 import mapogo.entity.Owner;
 import mapogo.entity.PaymentMethod;
 import mapogo.entity.SportField;
+import mapogo.entity.SportFieldDetail;
 import mapogo.entity.User;
 import mapogo.entity.Voucher;
 import mapogo.service.BookingService;
@@ -96,27 +97,47 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	public List<Map<String, Object>> findBookingByUsername(String username) {
-		List<Booking> bookings = bookingDAO.findByUser_Username(username);
-		List<Map<String, Object>> resultList = new ArrayList<>();
+	    List<Booking> bookings = bookingDAO.findByUser_Username(username);
+	    List<Map<String, Object>> resultList = new ArrayList<>();
 
-		for (Booking booking : bookings) {
-			Map<String, Object> bookingMap = new HashMap<>();
-			bookingMap.put("bookingId", booking.getBookingId());
-			bookingMap.put("date", booking.getDate());
-			bookingMap.put("totalAmount", booking.getTotalAmount());
-			bookingMap.put("status", booking.getStatus());
-			for (BookingDetail bookingDetail : booking.getBookingDetails()) {
-				if (bookingDetail.getSportFieldDetail() != null) {
-					SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
-					if (sportField != null) {
-						bookingMap.put("sportFieldName", sportField.getName());
-					}
-				}
-			}
-			resultList.add(bookingMap);
-		}
-		return resultList;
+	    for (Booking booking : bookings) {
+	        Map<String, Object> bookingMap = new HashMap<>();
+	        bookingMap.put("bookingId", booking.getBookingId());
+	        bookingMap.put("date", booking.getDate());
+	        bookingMap.put("totalAmount", booking.getTotalAmount());
+	        bookingMap.put("status", booking.getStatus());
+	        bookingMap.put("prepayPrice", booking.getPrepayPrice());
+
+	        List<Map<String, Object>> bookingDetailsList = new ArrayList<>();
+	        for (BookingDetail bookingDetail : booking.getBookingDetails()) {
+	            Map<String, Object> bookingDetailMap = new HashMap<>();
+	            bookingDetailMap.put("startTime", bookingDetail.getStartTime());
+	            bookingDetailMap.put("endTime", bookingDetail.getEndTime());
+	            bookingDetailMap.put("bookingDetailDate", bookingDetail.getDate());
+	            bookingDetailMap.put("bookingDetailStatus", bookingDetail.getStatus());
+
+	            SportFieldDetail sportFieldDetail = bookingDetail.getSportFieldDetail();
+	            if (sportFieldDetail != null) {
+	            	bookingDetailMap.put("peakHour", sportFieldDetail.getPeakHour());
+	            	bookingDetailMap.put("peakHourPrice", sportFieldDetail.getPeakHourPrices());
+	            	bookingDetailMap.put("percentDeposit", sportFieldDetail.getPercentDeposit());
+	            	bookingDetailMap.put("price", sportFieldDetail.getPrice());
+
+	                SportField sportField = sportFieldDetail.getSportField();
+	                if (sportField != null) {
+	                	bookingMap.put("sportFieldName", sportField.getName());
+	                }
+	            }
+
+	            bookingDetailsList.add(bookingDetailMap);
+	        }
+
+	        bookingMap.put("bookingDetails", bookingDetailsList);
+	        resultList.add(bookingMap);
+	    }
+	    return resultList;
 	}
+
 
 	@Override
 	public Booking updateStatusBooking(Map<String, Object> bookingData) {

@@ -3,7 +3,6 @@ package mapogo.service.impl;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -129,23 +128,6 @@ public class UserServiceImpl implements UserService {
 
 		return avtUrl;
 	}
-//  
-//  @Override
-//		Map<String, Object> uploadResult = cloudinaryUtils.uploadImage2(file);
-//		String avtUrl = (String) uploadResult.get("secure_url");
-//		User user = userDAO.findById(username).get();
-//
-//		if (user.getAvatar() != null) {
-//			String oldPublicId = cloudinaryUtils.extractPublicIdFromUrl(user.getAvatar());
-//			System.out.println(oldPublicId);
-//			cloudinaryUtils.deleteImage(oldPublicId);
-//		}
-//
-//		user.setAvatar(avtUrl);
-//		userDAO.save(user);
-//
-//		return avtUrl;
-//	}
 
 	@Override
 	public List<Notification> findNotificationByUsername(String username) {
