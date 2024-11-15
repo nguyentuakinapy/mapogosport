@@ -73,7 +73,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
                 accountPackageId: accountPackageTemporary?.accountPackageId,
                 username: userData?.username,
                 startDay: new Date().toLocaleDateString(),
-                endDay: new Date(new Date().setDate(new Date().getDate() + (accountPackageTemporary?.durationDays || 0))).toLocaleDateString(),
+                endDay: accountPackageTemporary?.price === 0 ? '9999-12-31' : new Date(new Date().setDate(new Date().getDate() + (accountPackageTemporary?.durationDays || 0))).toLocaleDateString(),
                 status: 'Đã thanh toán'
             })
         })
@@ -126,9 +126,26 @@ const CreateOwnerModal = (props: OwnerProps) => {
 
         const resAuth = await responseAuth.json(); // Sửa lại dòng này
 
+        const responseWallet = await fetch(`http://localhost:8080/rest/wallet/create/owner/${userData?.username}/${accountPackageTemporary?.price}`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (!responseWallet.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const resWallet = await responseWallet.json(); // Sửa lại dòng này
+
         if (resSubscription && resOwner && resAuth) {
             mutate(`http://localhost:8080/rest/user/${userData?.username}`);
-            toast.success('Cập nhật thành công! ');
+
+            toast.success('Đăng ký trở thành chủ sân thành công! ');
+            handleClose();
+            window.location.href = '/owner'
         } else {
             toast.success('Cập nhật thất bại! ');
         }
@@ -136,12 +153,13 @@ const CreateOwnerModal = (props: OwnerProps) => {
 
     const handleSubmit = async () => {
         if (checkPaymentMethod) {
-            toast.warning("Số dư của bạn không đủ");
-            // createOwnerAccount();
+            if (userData && accountPackageTemporary && userData.wallet.balance >= accountPackageTemporary.price) {
+                createOwnerAccount();
+            } else {
+                toast.warning("Số dư của bạn không đủ");
+            }
         } else {
-            toast.warning("Số dư của ádnjbhasdhjasdhiasod không đủ");
-
-            // createOwnerAccount();
+            createOwnerAccount();
         }
 
 
@@ -211,10 +229,12 @@ const CreateOwnerModal = (props: OwnerProps) => {
                             </div>
                             <div className="form-floating mb-3">
                                 <select className="form-select">
-                                    {userData && userData.addressUsers.length > 0 &&
+                                    {userData && userData.addressUsers.length > 0 ?
                                         userData.addressUsers.map((adU, index) => (
                                             <option selected={index === 0} key={adU.address.addressId} value={adU.address.addressId}>{adU.addressDetail}, {adU.address.ward}, {adU.address.district}, {adU.address.province}.</option>
                                         ))
+                                        :
+                                        <option value="">Bạn chưa thêm địa chỉ</option>
                                     }
                                 </select>
                                 <label>Sổ địa chỉ</label>
@@ -323,7 +343,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
                             {checkPaymentMethod ?
                                 <div className="form-floating mb-3">
                                     <input type="text" className="form-control"
-                                        value={(9999999999999999).toLocaleString() + ' đ'} disabled
+                                        value={userData?.wallet.balance.toLocaleString() + ' đ'} disabled
                                     />
                                     <label>Số dư ví của bạn<b className="text-danger">*</b></label>
                                 </div>
@@ -334,7 +354,11 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                         className="form-select" aria-label="Default select example">
                                         {dataPaymentMethod && (
                                             dataPaymentMethod.map((item) => {
-                                                if (item.paymentMethodId === 6) {
+                                                if (item.paymentMethodId === 6 ||
+                                                    item.paymentMethodId === 7 ||
+                                                    item.paymentMethodId === 3 ||
+                                                    item.paymentMethodId === 4 ||
+                                                    item.paymentMethodId === 8) {
                                                     return null;
                                                 } else {
                                                     return (

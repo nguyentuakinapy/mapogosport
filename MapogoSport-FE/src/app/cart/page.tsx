@@ -104,6 +104,29 @@ const Cart = () => {
 
   //của Mỵ 
   const saveCartIdsToLocalStorage = () => {
+    const unavailableItems: string[] = []; // Danh sách sản phẩm không đủ tồn kho
+
+    // Duyệt qua các sản phẩm đã chọn và kiểm tra tồn kho
+    const isAvailable = selectedProducts.every((isSelected, index) => {
+      if (isSelected) {
+        const cartItem = dataCart[index];
+        const availableQuantity = cartItem.productDetailSize.quantity;
+        const requestedQuantity = cartItem.quantity;
+
+        if (requestedQuantity > availableQuantity) {
+          // Nếu không đủ tồn kho, thêm vào danh sách không khả dụng và trả về false
+          unavailableItems.push(cartItem.productDetailSize.productDetail.product.name);
+          return false;
+        }
+      }
+      return true; // Sản phẩm đủ tồn kho
+    });
+
+    if (!isAvailable) {
+      toast.error(`Các sản phẩm sau không đủ tồn kho: ${unavailableItems.join(", ")}`);
+      return; // Ngừng xử lý nếu có sản phẩm không đủ tồn kho
+    }
+
     const cartIds = selectedProducts
       .map((isSelected, index) => (isSelected ? dataCart[index].cartId : null))
       .filter(id => id !== null);
@@ -185,7 +208,7 @@ const Cart = () => {
           const response = await axios.get(`http://localhost:8080/rest/cart/${user.username}`);
 
           setDataCart(response.data); // Lưu dữ liệu giỏ hàng vào state
-          // console.log(">>> check data Cart: ", response.data);
+          console.log(">>> check data Cart: ", response.data);
           // Trích xuất số lượng từ dữ liệu giỏ hàng
           const cartQuantities = response.data.map((item: any) => item.quantity);
           setQuantities(cartQuantities); // Đặt số lượng vào state
@@ -250,7 +273,10 @@ const Cart = () => {
                             />
                           </td>
                           <td>
-                            <p className="mb-0">{cart.productDetailSize.productDetail.product.name} <br /> ({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})</p>
+                            <Link style={{ textDecoration: 'none', color: '#333' }} href={`/product-detail/${cart.productDetailSize.productDetail.product.productId}`}>
+                              <p className="mb-0">{cart.productDetailSize.productDetail.product.name}
+                                <br /> ({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})</p>
+                            </Link>
                           </td>
                           <td>
                             <p className="mb-0">{formatPrice(cart.productDetailSize.price)}</p>

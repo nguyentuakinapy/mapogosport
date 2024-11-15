@@ -13,8 +13,8 @@ interface RegisterProps {
     setShowRegisterModal: (v: boolean) => void;
     showLoginModal: boolean;
     setShowLoginModal: (v: boolean) => void;
-    refreshKey?: number;
-    setRefreshKey?: (v: number) => void;
+    refreshKey: number;
+    setRefreshKey: (v: number) => void;
 }
 
 export default function Register(props: RegisterProps) {
@@ -233,7 +233,7 @@ export default function Register(props: RegisterProps) {
                 }
                 const dataUser = await responseUser.json() as User;
 
-                if (parseInt(dataUser.password) == 123) {
+                if (parseInt(dataUser.password) === 123) {
 
                     const usernameLocal = dataUser.username.replace(/['"]+/g, '');
                     localStorage.setItem('username', usernameLocal);
@@ -289,8 +289,11 @@ export default function Register(props: RegisterProps) {
 
                     if (resAuth && resUser) {
                         toast.success("Đăng ký thành công!...");
+                        const usernameLocal = resUser.username.replace(/['"]+/g, '');
+                        localStorage.setItem('username', usernameLocal);
+                        sessionStorage.setItem('user', JSON.stringify(resUser));
+                        setRefreshKey(refreshKey + 1);
                         handleClose();
-                        setShowLoginModal(true);
                     }
 
                 } catch (error) {

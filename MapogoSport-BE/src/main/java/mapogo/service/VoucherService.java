@@ -14,10 +14,16 @@ public interface VoucherService {
 
 	//của Mỵ từ đây
 	Voucher findById(int id);
+  
+	List<Voucher> findByUserName(String username);
 	
 	Voucher createVoucher(Map<String, Object> bd);
 	//đến đây
+
+	void save(Voucher voucher);
+
 	Voucher updateVoucher(Integer id, Map<String, Object> bd); // QA
 	
 	Voucher deleteVoucher (Integer id); 
+
 }

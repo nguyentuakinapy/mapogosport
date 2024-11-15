@@ -6,4 +6,6 @@ import mapogo.entity.Benefit;
 
 public interface BenefitService {
 	List<Benefit> findAll();
+	
+	Benefit addBeneFit(Benefit beneFit);
 }

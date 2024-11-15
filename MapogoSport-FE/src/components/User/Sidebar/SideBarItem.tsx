@@ -2,12 +2,10 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ListGroup } from "react-bootstrap";
-import { usePathname } from "next/navigation";
 import SidebarDropdown from "./SideBarDropdown";
 
-const SidebarItem = ({ item, pageName, setPageName }: any) => {
+const SidebarItem = ({ item, pageName, setPageName, username }: any) => {
     const [isClient, setIsClient] = useState(false);
-    const pathname = usePathname();
 
     useEffect(() => {
         setIsClient(true);
@@ -32,7 +30,7 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
                 )}
             </Link>
             {item.children && isClient && isActive && (
-                <SidebarDropdown item={item.children} />
+                <SidebarDropdown item={item.children} username={username} />
             )}
         </ListGroup.Item>
     );

@@ -13,8 +13,8 @@ interface LoginProps {
     setShowRegisterModal: (v: boolean) => void;
     showForgotPassword: boolean;
     setShowForgotPassword: (v: boolean) => void;
-    refreshKey?: number;
-    setRefreshKey?: (v: number) => void;
+    refreshKey: number;
+    setRefreshKey: (v: number) => void;
 }
 
 export default function Login(props: LoginProps) {
@@ -168,7 +168,7 @@ export default function Login(props: LoginProps) {
                 }
                 const dataUser = await responseUser.json() as User;
 
-                if (parseInt(dataUser.password) == 123) {
+                if (parseInt(dataUser.password) === 123) {
 
                     const usernameLocal = dataUser.username.replace(/['"]+/g, '');
                     localStorage.setItem('username', usernameLocal);
@@ -183,21 +183,6 @@ export default function Login(props: LoginProps) {
             } catch (error: any) {
                 toast.error("Đăng nhập không thành công!");
             }
-        }
-    };
-
-    const handleLoginFailure = (error: any) => {
-        console.error("Login failed:", error);
-    };
-
-    const googleLoginRef = useRef<any>(null);
-
-    const handleLoginClick = (e) => {
-        e.preventDefault();  // Ngừng hành động mặc định của thẻ <a>
-
-        // Tự động trigger sự kiện click cho GoogleLogin
-        if (googleLoginRef.current) {
-            googleLoginRef.current.click();
         }
     };
 
@@ -217,7 +202,7 @@ export default function Login(props: LoginProps) {
                                 </a> */}
                             <div className="d-flex align-items-center justify-content-center">
                                 <GoogleOAuthProvider clientId="291618476125-v61qth68ave5pfk18b2hg5qjtdbkjd94.apps.googleusercontent.com">
-                                    <GoogleLogin ref={googleLoginRef} onSuccess={handleLoginSuccess} onError={handleLoginFailure} />
+                                    <GoogleLogin onSuccess={handleLoginSuccess} />
                                 </GoogleOAuthProvider>
                             </div>
 

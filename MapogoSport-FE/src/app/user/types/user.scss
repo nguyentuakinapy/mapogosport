@@ -97,6 +97,18 @@
                     .badge {
                         width: 110px !important;
                     }
+                    .nav {
+                        .nav-item {
+                            .nav-link {
+                                display: inline !important;
+                            }
+                            .dropdown-menu {
+                                .dropdown-item {
+                                    font-size: 14px;
+                                }
+                            }
+                        }
+                    }
                 }
 
                 .title {
@@ -403,7 +415,7 @@
     border-radius: 8px;
 
     &:hover {
-        background-color: rgb(161, 161, 161);
+        background-color: rgb(232, 232, 232);
         border-radius: 8px;
     }
 

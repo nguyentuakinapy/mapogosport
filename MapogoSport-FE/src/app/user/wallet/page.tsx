@@ -28,7 +28,7 @@ const WalletPage = () => {
     useEffect(() => {
         if (data) {
             const sortedData = data.sort((a: Transaction, b: Transaction) =>
-                new Date(b.createdAt).getDate() - new Date(a.createdAt).getDate());
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
             setTransaction(sortedData);
         }
     }, [data]);
@@ -60,7 +60,8 @@ const WalletPage = () => {
                                     <div>Ngày giao dịch: {new Date(item.createdAt).toLocaleDateString('en-Gb')}</div>
                                 </div>
                                 <div className={`${item.transactionType.slice(0, 1) == "+" ? 'text-success' : 'text-danger'}`}>
-                                    <b>{item.transactionType}</b>
+                                    <b>{Number(item.transactionType) < 0 ? Number(item.transactionType).toLocaleString()
+                                        : `+${Number(item.transactionType).toLocaleString()}`} ₫</b>
                                 </div>
                             </div>
                         </div>

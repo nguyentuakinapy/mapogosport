@@ -91,10 +91,10 @@ const Orders = () => {
     };
 
     const renderPagination = () => {
-        if (filteredOrders.length === 0) return null;
-
         const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
         const pages = [];
+
+        if (totalPages <= 1) return null;
 
         for (let i = 1; i <= totalPages; i++) {
             pages.push(

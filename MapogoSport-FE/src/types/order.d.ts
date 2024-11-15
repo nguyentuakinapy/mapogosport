@@ -21,7 +21,7 @@ interface Order {
         status: status;
         discountCode: string;
         activeDate: string;
-    };
+    } | null;
     note: string | null;
     shipFee: number;
     orderDetails: OrderDetail[];

@@ -1,9 +1,9 @@
 package mapogo.service.impl;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -16,12 +16,15 @@ import mapogo.dao.AccountPackageDAO;
 import mapogo.dao.NotificationDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.UserSubscriptionDAO;
+import mapogo.dao.WalletDAO;
 import mapogo.entity.AccountPackage;
 import mapogo.entity.Notification;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
 import mapogo.entity.UserVoucher;
+import mapogo.entity.Wallet;
 import mapogo.service.UserService;
+import mapogo.service.WalletService;
 import mapogo.utils.CloudinaryUtils;
 
 @Service
@@ -44,9 +47,18 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	SimpMessagingTemplate messagingTemplate;
 
+	@Autowired
+	WalletDAO walletDAO;
+
 	@Override
 	public User findByUsername(String username) {
-		return userDAO.findById(username).get();
+		try {
+			messagingTemplate.convertAndSend("/topic/login", userDAO.findById(username).get().getUsername());
+			return userDAO.findById(username).get();
+		} catch (Exception e) {
+			return null;
+		}
+
 	}
 
 	@Override
@@ -56,7 +68,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User createUser(User u) {
-		return userDAO.save(u);
+		User user = userDAO.save(u);
+		Wallet w = new Wallet();
+		w.setUser(u);
+		w.setBalance(BigDecimal.valueOf(0));
+		walletDAO.save(w);
+		return user;
 	}
 
 	@Override
@@ -93,7 +110,18 @@ public class UserServiceImpl implements UserService {
 		}
 
 		uS.setStatus((String) data.get("status"));
-		return userSubscriptionDAO.save(uS);
+		userSubscriptionDAO.save(uS);
+		Notification n = new Notification();
+		n.setUser(u);
+		n.setTitle("Đăng ký gói tài khoản");
+		n.setMessage(ap.getPackageName() + " đã đăng ký thành công!");
+		n.setType("info");
+
+		notificationDAO.save(n);
+
+		messagingTemplate.convertAndSend("/topic/username", u.getUsername());
+
+		return uS;
 	}
 
 	@Override
@@ -102,11 +130,24 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserSubscription updateUserSubscription(Map<String, Object> data) {
-		UserSubscription uS = userSubscriptionDAO.findById((Integer) data.get("userSubscriptionId")).get();
-		AccountPackage ap = accountPackageDAO.findById((Integer) data.get("accountPackageId")).get();
+	public UserSubscription updateUserSubscription(int accountPackageId, int userSubscriptionId) {
+		UserSubscription uS = userSubscriptionDAO.findById(userSubscriptionId).get();
+		AccountPackage ap = accountPackageDAO.findById(accountPackageId).get();
 		uS.setAccountPackage(ap);
-		return userSubscriptionDAO.save(uS);
+		System.out.println("đã cập nhật");
+		userSubscriptionDAO.save(uS);
+
+		Notification n = new Notification();
+		n.setUser(uS.getUser());
+		n.setTitle("Nâng cấp gói tài khoản");
+		n.setMessage(ap.getPackageName() + " đã nâng cấp thành công!");
+		n.setType("info");
+
+		notificationDAO.save(n);
+
+		messagingTemplate.convertAndSend("/topic/username", uS.getUser().getUsername());
+
+		return uS;
 	}
 
 	@Override
@@ -129,28 +170,22 @@ public class UserServiceImpl implements UserService {
 
 		return avtUrl;
 	}
-//  
-//  @Override
-//		Map<String, Object> uploadResult = cloudinaryUtils.uploadImage2(file);
-//		String avtUrl = (String) uploadResult.get("secure_url");
-//		User user = userDAO.findById(username).get();
-//
-//		if (user.getAvatar() != null) {
-//			String oldPublicId = cloudinaryUtils.extractPublicIdFromUrl(user.getAvatar());
-//			System.out.println(oldPublicId);
-//			cloudinaryUtils.deleteImage(oldPublicId);
-//		}
-//
-//		user.setAvatar(avtUrl);
-//		userDAO.save(user);
-//
-//		return avtUrl;
-//	}
 
 	@Override
 	public List<Notification> findNotificationByUsername(String username) {
 		User u = userDAO.findById(username).get();
 		List<Notification> notifications = u.getNotifications();
+		notifications.forEach(item -> {
+			if (item.getBooking() != null) {
+				item.setBookingId(item.getBooking().getBookingId());
+			}
+			if (item.getOrder() != null) {
+				item.setOrderId(item.getOrder().getOrderId());
+			}
+			if (item.getUser() != null) {
+				item.setUsername(item.getUser().getUsername());
+			}
+		});
 		return notifications;
 	}
 

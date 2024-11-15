@@ -11,7 +11,6 @@ import ModalCreateSportField from '@/components/Owner/modal/owner.createSportFie
 
 const SportFieldList = () => {
     const [showSportFieldModal, setShowSportFieldModal] = useState<boolean>(false)
-    // const [sportFields, setSportFields] = useState([]);
     const userSession = sessionStorage.getItem('user');
     const user = userSession ? JSON.parse(userSession) : null;
     const [selectedSportField, setSelectedSportField] = useState(null); // State to hold the selected sport field data
