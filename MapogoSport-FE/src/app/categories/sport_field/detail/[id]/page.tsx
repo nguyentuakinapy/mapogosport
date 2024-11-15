@@ -10,6 +10,8 @@ import ModalReviewSportField from '@/components/Review/review.sportField';
 import '../[id]/BookingDetail.scss';
 import axios from 'axios';
 import SearchSportField from '@/components/Booking/booking.Search';
+import { useSearchParams } from 'next/navigation';
+import { useData } from '@/app/context/UserContext';
 
 type BookingsTypeOnWeek = {
     [time: string]: {
@@ -44,6 +46,22 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
 
     const [gallery, setGallery] = useState<GalleryField[]>([])
 
+    // const currentUser = useData();
+    const [currentUser, setCurrentUser] = useState<string>("");
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('username');
+        if(storedUser){
+            setCurrentUser(storedUser);
+        }
+    }, []);
+    
+    // useEffect(()=>{
+    //     toast.success("ddddddddddddddddddd 12"+ currentUser);
+        
+    // },[currentUser])
+    
+
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             setStatusOnWeek();
@@ -71,6 +89,40 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
+
+    
+    /* QA thêm useParam */
+    const path = useSearchParams();
+
+    useEffect(() => {
+        // console.log(path.get("status"));
+        // console.log("path hieenj taij ",path.toString());
+        const encodedStatus = path.get("status");
+
+        if (encodedStatus) {
+            try {
+                // Giải mã username từ Base64
+                const decodedUsername = atob(encodedStatus);
+                console.log("Username giải mã:", decodedUsername);
+            } catch (error) {
+                console.error("Lỗi khi giải mã username:", error);
+            }
+        }
+    }, [path])
+
+
+    const handleChatMess=()=>{
+       if(data?.owner?.user?.username) {
+            const ownerUsername = data.owner.user.username;
+            const encodedUsername = btoa(ownerUsername);                  
+            if(ownerUsername !== currentUser){
+                window.history.pushState({}, "", `?status=${encodedUsername}`);
+            }else{
+                toast.info('Bạn không thể nhắn với chính mình ')
+            }
+        }
+    }
+    /* QA thêm useParam */
 
     useEffect(() => {
         if (data && reviewData) {
@@ -544,12 +596,11 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                 <div className="star">
                                     Đánh giá: 4/5 <i className="bi bi-star-fill"></i> (1 Đánh giá)
                                 </div>
-                                <div className="btn-option-icon">
-                                    <i className="bi bi-heart-fill"></i>
-                                </div>
                                 <div className="btn-option-icon ">
-                                <i className="bi bi-chat-dots-fill text-primary"></i>
+                                <i className="bi bi-heart-fill"></i>
+                                <i  onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>              
                                 </div>
+                              
                             </div>
                         </div>
                         <Row>

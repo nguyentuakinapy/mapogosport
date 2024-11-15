@@ -2,6 +2,13 @@ body {
   background: #F6F6F6 !important
 }
 
+.title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  min-width: 150px;
+}
 
 .thumbnail-container {
   text-align: center;

@@ -338,7 +338,7 @@ const AdminProduct = () => {
                   </td>
                   <td className="text-start align-middle">
                     <div>
-                      <span>Tên sản phẩm:</span>{" "}
+                      <span>Tên sản phẩm: </span>{" "}
                       <strong className="text-dark">{product.name}</strong>
                     </div>
                     <div>
