@@ -1,4 +1,4 @@
-package mapogo.entity;
+	package mapogo.entity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

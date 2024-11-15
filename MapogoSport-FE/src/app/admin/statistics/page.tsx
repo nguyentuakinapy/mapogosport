@@ -215,83 +215,6 @@ const Admin = () => {
         );
     };
 
-    const PieChart = () => {
-        useEffect(() => {
-            // Load Google Charts
-            const loadGoogleCharts = () => {
-                const script = document.createElement('script');
-                script.src = 'https://www.gstatic.com/charts/loader.js';
-                script.async = true;
-
-                script.onload = () => {
-                    if (window.google) {
-                        window.google.charts.load('current', { packages: ['corechart'] });
-                        window.google.charts.setOnLoadCallback(drawChart);
-                    }
-                };
-
-                document.body.appendChild(script);
-            };
-
-            // Function to draw the chart
-            const drawChart = () => {
-                const data = window.google.visualization.arrayToDataTable([
-                    ['Task', 'Hours per Day'],
-                    ['Work', 10],
-                    ['Eat', 2],
-                    ['Commute', 2],
-                    ['Watch TV', 2],
-                    ['Sleep', 7],
-                ]);
-
-                const options = {
-                    title: 'My Daily Activities',
-                    width: 1000,  // Set chart width
-                    height: 500, // Set chart height
-                };
-
-                const chart = new window.google.visualization.PieChart(document.getElementById('piechart'));
-                chart.draw(data, options);
-            };
-
-            loadGoogleCharts();
-        }, []);
-
-        const renderTable = (title) => (
-            <div>
-                <h5>{title}</h5>
-                <Table striped="columns" responsive className='border'>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Username</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@mdo</td>
-                        </tr>
-                    </tbody>
-                </Table>
-            </div>
-        );
-
-        return (
-            <>
-                {/* Pie chart */}
-                <div id="piechart" className='justify-conten-center'></div>
-
-                {selectedOptionDay === "Hôm Nay" && renderTable("Tổng Doanh thu hôm nay")}
-                {selectedOptionDay === "Một Tuần" && renderTable("Tổng Doanh thu Một Tuần")}
-                {selectedOptionDay === "Một Tháng" && renderTable("Tổng Doanh thu Một Tháng")}
-            </>
-        );
-    };
 
 
 
@@ -737,9 +660,7 @@ const Admin = () => {
                 </div>
 
 
-                {selectedOption === "Tổng Doanh Thu" ? <PieChart /> : null}
-                {selectedOption === "Tài Khoảng Mới" ? <PieChart /> : null}
-                {selectedOption === "Tồn Kho" ? <ColumnChart /> : null}
+
                 {selectedOption === "Danh Sách Hóa Đơn" ? (
                     <>
                         <ColumnChart />
