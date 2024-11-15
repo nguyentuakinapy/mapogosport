@@ -151,7 +151,7 @@ public class OrderServiceImpl implements OrderService {
 			n.setUser(item.getUser());
 			notificationDAO.save(n);
 			
-			messagingTemplate.convertAndSend("/topic/username", item.getUser().getUsername());
+			messagingTemplate.convertAndSend("/topic/order", item.getUser().getUsername());
 		});
 				
 		return order;

@@ -244,9 +244,7 @@ public class BookingServiceImpl implements BookingService {
 			n.setBooking(booking);
 			notificationDAO.save(n);
 			
-			messagingTemplate.convertAndSend("/topic/bookingDetail", booking.getOwner().getOwnerId());
-			messagingTemplate.convertAndSend("/topic/username", booking.getOwner().getUser().getUsername());
-			messagingTemplate.convertAndSend("/topic/notification", booking.getOwner().getUser().getUsername());
+			messagingTemplate.convertAndSend("/topic/bookingDetail", booking.getOwner().getUser().getUsername());
 		}
 	
 		return booking;
