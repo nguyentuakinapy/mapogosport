@@ -9,7 +9,6 @@ import Navbar from 'react-bootstrap/Navbar';
 
 import LoginModal from './account/modal/login.modal';
 import RegisterModal from './account/modal/register.modal';
-import axios from 'axios';
 import useSWR from 'swr';
 
 import ForgotPassword from './account/modal/forgotPassword.modal';

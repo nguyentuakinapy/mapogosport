@@ -1,11 +1,9 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import Nav from "./app.nav";
-import '../globals.css'
 import './admin.scss'
 import Header from "./app.header";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ReactQueryProvider from "@/app/utils/UseQueryProviders/ReactQueryProvider";
 import { vi } from "date-fns/locale/vi";

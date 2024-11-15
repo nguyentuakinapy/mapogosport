@@ -233,6 +233,7 @@ public class BookingServiceImpl implements BookingService {
 		booking.setFullName((String) b.get("fullName"));
 		booking.setPhoneNumber((String) b.get("phoneNumber"));
 		booking.setPercentDeposit(Integer.parseInt(String.valueOf(b.get("percentDeposit"))));
+		booking.setOldTotamAmount(0);
 		bookingDAO.save(booking);
 		
 		if (((String) b.get("checkOwner")).equals("user")) {

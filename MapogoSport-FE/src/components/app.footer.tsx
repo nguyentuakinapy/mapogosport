@@ -1,7 +1,5 @@
 'use client'
 
-import { Button, Container, Form } from "react-bootstrap";
-
 const Footer = () => {
     return (
         <>

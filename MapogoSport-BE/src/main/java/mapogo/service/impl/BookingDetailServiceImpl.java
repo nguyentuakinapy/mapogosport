@@ -194,6 +194,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			booking.setStatus("Đã hủy");
 			bookingDAO.save(booking);
 		} else {
+			booking.setOldTotamAmount(booking.getTotalAmount());
 			booking.setTotalAmount(totalAmount);
 			bookingDAO.save(booking);
 		}
@@ -234,7 +235,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		}
 
 		Booking b = bd.getBooking();
-
+		
+		b.setOldTotamAmount(b.getTotalAmount());
 		b.setTotalAmount(totalPriceTemporary);
 		bookingDAO.save(b);
 	}
@@ -263,6 +265,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		newBd.setPrice(price);
 		newBd.setBooking(bd.getBooking());
 		newBd.setSubscriptionKey("addNew" + bd.getBooking().getBookingId());
+		
+		bookingDetailDAO.save(newBd);
 
 //		System.err.println(data);
 
@@ -270,19 +274,20 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bd.getBooking().getBookingId());
 		for (BookingDetail bookingDetail : bookingDetails) {
-			totalPriceTemporary = totalPriceTemporary + bookingDetail.getPrice();
-		    if (bookingDetail.getSubscriptionKey() != null && bookingDetail.getSubscriptionKey().contains("keybooking")) {
-				break;
-			} else {
-				bookingDetail.setSubscriptionKey("addNew" + bd.getBooking().getBookingId());
-				bookingDetailDAO.save(bookingDetail);
+			if (!bookingDetail.getStatus().equals("Đã hủy")) {
+				totalPriceTemporary = totalPriceTemporary + bookingDetail.getPrice();
+			    if (bookingDetail.getSubscriptionKey() != null && bookingDetail.getSubscriptionKey().contains("keybooking")) {
+					break;
+				} else {
+					bookingDetail.setSubscriptionKey("addNew" + bd.getBooking().getBookingId());
+					bookingDetailDAO.save(bookingDetail);
+				}
 			}
 		}
 		
-		bookingDetailDAO.save(newBd);
 
 		Booking b = bd.getBooking();
-
+		b.setOldTotamAmount(b.getTotalAmount());
 		b.setTotalAmount(totalPriceTemporary);
 		bookingDAO.save(b);
 	}
