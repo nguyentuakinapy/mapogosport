@@ -140,8 +140,8 @@ public class OrderRestController {
     }
 	
 	@GetMapping("/order/getByOrderId/{orderId}")
-	public Order getByOrderId(@PathVariable("orderId") Integer orderId) {
-		return orderService.findByOrderId(orderId);
+	public List<Map<String, Object>> getByOrderId(@PathVariable("orderId") Integer orderId) {
+		return orderService.findOrderById(orderId);
 	}
 	//đến đây
 
