@@ -69,7 +69,7 @@ interface BookingDetail {
     date: string;
     subscriptionKey: string;
     status: boolean;
-  
+
 }
 
 
@@ -108,21 +108,17 @@ interface BookingByUserMap {
     bookingId: number;
     bookingDetails: [
         {
-            startTime: string;
-            endTime: string;
-            bookingDetailDate: Date;
             bookingDetailStatus: string;
-            peakHourPrice: number;
-            peakHour: string;
-            percentDeposit: number;
             price: number;
+            bookingDetailDate: Date;
+            startTime: string;
         }
     ]
     sportFieldName: string;
     totalAmount: number;
     status: string;
     date: Date;
-    prepayPrice: number;
+    percentDeposit: number;
 }
 
 interface BookingFindAll {

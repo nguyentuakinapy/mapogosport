@@ -3,6 +3,7 @@ package mapogo.service;
 import java.util.List;
 
 import mapogo.entity.Transaction;
+import mapogo.entity.Wallet;
 
 public interface TransactionService {
 	//của Mỵ từ đây
@@ -12,5 +13,7 @@ public interface TransactionService {
 	
 	List<Transaction> findTransactionByWalletId(Integer walletId);
 
-	void createTransactionByBooking(Integer bookingId, double totalAmount);
+	void createTransactionByPaymentBooking(Integer bookingId, double totalAmount);
+	
+//	void updateWalletBalanceAndCreateTransaction(Wallet wallet, Integer amount, String description);
 }

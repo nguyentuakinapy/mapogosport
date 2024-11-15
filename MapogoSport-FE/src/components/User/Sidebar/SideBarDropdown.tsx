@@ -4,14 +4,12 @@ import { usePathname } from "next/navigation";
 import { ListGroup } from "react-bootstrap";
 import { mutate } from "swr";
 
-const SidebarDropdown = ({ item }: any) => {
+const SidebarDropdown = ({ item, username }: any) => {
     const pathname = usePathname();
 
     const handleClick = () => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            mutate(`http://localhost:8080/rest/user/${parsedUserData.username}`)
+        if (username) {
+            mutate(`http://localhost:8080/rest/user/${username}`)
         }
     }
 

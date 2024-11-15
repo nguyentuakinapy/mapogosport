@@ -1,19 +1,16 @@
 'use client';
 import UserLayout from "@/components/User/UserLayout";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Col, Row, Table } from "react-bootstrap";
 import '../../../types/user.scss';
 import useSWR from "swr";
-
-declare var H: any;
+import MapComponent from "../../../../utils/MapComponent";
+import { fetchCoordinates } from "../../../../utils/geocode";
 
 const BookingsDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [bookingDetail, setBookingDetail] = useState<BookingDetailMap[]>([]);
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
-    const mapRef = useRef<HTMLDivElement | null>(null);
-    const mapInstanceRef = useRef<any>(null);
-    const apiKey = '1L5jezTEO7ul4G9cekrrqiy14XhPi_yIOhSKnsrzkZQ';
 
     const { data, isLoading, error } = useSWR(`http://localhost:8080/rest/user/booking/detail/${params.id}`, fetcher, {
         revalidateIfStale: false,
@@ -23,90 +20,16 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
 
     useEffect(() => {
         if (data) {
-            setBookingDetail(data);
+            const sortedData = data.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            setBookingDetail(sortedData);
             const address = data[0].address;
             if (address) {
-                fetchCoordinates(address);
+                fetchCoordinates(address).then((coords) => {
+                    if (coords) setCoordinates(coords);
+                });
             }
         }
     }, [data]);
-
-    const fetchCoordinates = async (address: string) => {
-        const response = await fetch(`https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(address)}&apiKey=${apiKey}`);
-        const coordData = await response.json();
-        if (coordData.items && coordData.items.length > 0) {
-            const { lat, lng } = coordData.items[0].position;
-            setCoordinates({ lat, lon: lng });
-        }
-    };
-
-    // Load HERE Maps scripts
-    useEffect(() => {
-        if (!coordinates) return;
-        const loadScript = (src: string): Promise<void> => {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = src;
-                script.async = true;
-                script.onload = () => resolve();
-                script.onerror = () => reject(new Error(`Script load error: ${src}`));
-                document.head.appendChild(script);
-            });
-        };
-
-        const loadHereMapsScripts = async () => {
-            try {
-                await Promise.all([
-                    loadScript('https://js.api.here.com/v3/3.1/mapsjs-core.js'),
-                    loadScript('https://js.api.here.com/v3/3.1/mapsjs-service.js'),
-                    loadScript('https://js.api.here.com/v3/3.1/mapsjs-ui.js'),
-                    loadScript('https://js.api.here.com/v3/3.1/mapsjs-mapevents.js'),
-                ]);
-
-                if (coordinates && mapRef.current && !mapInstanceRef.current) {
-                    const platform = new H.service.Platform({ apikey: apiKey });
-                    const defaultLayers = platform.createDefaultLayers();
-                    const map = new H.Map(
-                        mapRef.current,
-                        defaultLayers.vector.normal.map,
-                        {
-                            zoom: 15,
-                            center: { lat: coordinates.lat, lng: coordinates.lon },
-                        }
-                    );
-
-                    const marker = new H.map.Marker({ lat: coordinates.lat, lng: coordinates.lon });
-                    map.addObject(marker);
-                    new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
-                    H.ui.UI.createDefault(map, defaultLayers);
-
-                    map.addEventListener('tap', () => {
-                        window.open(`https://www.google.com/maps?q=${coordinates.lat},${coordinates.lon}`, '_blank');
-                    });
-
-                    mapInstanceRef.current = map;
-                } else if (coordinates && mapInstanceRef.current) {
-                    mapInstanceRef.current.setCenter({ lat: coordinates.lat, lng: coordinates.lon });
-                    const marker = new H.map.Marker({ lat: coordinates.lat, lng: coordinates.lon });
-                    mapInstanceRef.current.addObject(marker);
-                }
-            } catch (error) {
-                console.error('Error loading HERE Maps scripts:', error);
-            }
-        };
-
-        loadHereMapsScripts();
-
-        return () => {
-            if (mapInstanceRef.current) {
-                mapInstanceRef.current.dispose();
-                mapInstanceRef.current = null;
-            }
-            if (mapRef.current) {
-                mapRef.current.innerHTML = '';
-            }
-        };
-    }, [coordinates]);
 
     if (isLoading) return <UserLayout><div>Đang tải...</div></UserLayout>;
     if (error) return <UserLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></UserLayout>;
@@ -161,7 +84,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                     <Col xs={5}>
                         <div className="map-container">
                             <div className="note-map">Nhấn vào bản đồ để xem đường đi đến sân</div>
-                            <div ref={mapRef} className="map-border"></div>
+                            {coordinates && <MapComponent coordinates={coordinates} />}
                         </div>
                     </Col>
                 </Row>

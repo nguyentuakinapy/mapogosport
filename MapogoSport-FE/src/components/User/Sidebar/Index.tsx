@@ -5,7 +5,6 @@ import useLocalStorage from "../useLocalStorage";
 import SidebarItem from "./SideBarItem";
 import { useEffect, useState } from 'react';
 import { useData } from '@/app/context/UserContext';
-import Image from 'react-bootstrap/Image';
 import { toast } from 'react-toastify';
 import { mutate } from 'swr';
 
@@ -31,10 +30,10 @@ const menuGroups = [
                 ],
             },
             {
-                label: "Ví và voucher",
+                label: "Ví và Phiếu giảm giá",
                 route: "#",
                 children: [
-                    { label: "Ví", route: "/user/wallet" },
+                    { label: "Ví của bạn", route: "/user/wallet" },
                     { label: "Phiếu giảm giá", route: "/user/coupon" }
                 ],
             }
@@ -107,11 +106,8 @@ const Sidebar = () => {
             {menuGroups.map((group, groupIndex) => (
                 <div key={groupIndex}>
                     {group.menuItems.map((menuItem, menuIndex) => (
-                        <SidebarItem
-                            key={menuIndex}
-                            item={menuItem}
-                            pageName={pageName}
-                            setPageName={setPageName}
+                        <SidebarItem key={menuIndex} item={menuItem} pageName={pageName}
+                            setPageName={setPageName} username={userData?.username}
                         />
                     ))}
                 </div>

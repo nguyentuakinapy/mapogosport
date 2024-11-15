@@ -55,6 +55,7 @@ public class OrderServiceImpl implements OrderService {
 				orderData.put("productName",
 						orderDetail.getProductDetailSize().getProductDetail().getProduct().getName());
 			}
+			orderData.put("address", order.getAddress());
 			orderData.put("date", order.getDate());
 			orderData.put("status", order.getStatus());
 			orderData.put("amount", order.getAmount());

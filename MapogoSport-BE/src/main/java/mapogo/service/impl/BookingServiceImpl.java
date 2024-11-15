@@ -1,6 +1,8 @@
 package mapogo.service.impl;
 
+import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -17,8 +19,10 @@ import mapogo.dao.BookingDetailDAO;
 import mapogo.dao.NotificationDAO;
 import mapogo.dao.OwnerDAO;
 import mapogo.dao.PaymentMethodDAO;
+import mapogo.dao.TransactionDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.VoucherDAO;
+import mapogo.dao.WalletDAO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
 import mapogo.entity.Notification;
@@ -27,8 +31,10 @@ import mapogo.entity.Owner;
 import mapogo.entity.PaymentMethod;
 import mapogo.entity.SportField;
 import mapogo.entity.SportFieldDetail;
+import mapogo.entity.Transaction;
 import mapogo.entity.User;
 import mapogo.entity.Voucher;
+import mapogo.entity.Wallet;
 import mapogo.service.BookingService;
 
 @Service
@@ -54,6 +60,12 @@ public class BookingServiceImpl implements BookingService {
 	
 	@Autowired
 	NotificationDAO notificationDAO;
+	
+	@Autowired
+	TransactionDAO transactionDAO;
+	
+	@Autowired
+	WalletDAO walletDAO;
 	
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
@@ -115,23 +127,15 @@ public class BookingServiceImpl implements BookingService {
 	        List<Map<String, Object>> bookingDetailsList = new ArrayList<>();
 	        for (BookingDetail bookingDetail : booking.getBookingDetails()) {
 	            Map<String, Object> bookingDetailMap = new HashMap<>();
-	            bookingDetailMap.put("startTime", bookingDetail.getStartTime());
-	            bookingDetailMap.put("endTime", bookingDetail.getEndTime());
-	            bookingDetailMap.put("bookingDetailDate", bookingDetail.getDate());
 	            bookingDetailMap.put("bookingDetailStatus", bookingDetail.getStatus());
+	            bookingDetailMap.put("price", bookingDetail.getPrice());
+	            bookingDetailMap.put("bookingDetailDate", bookingDetail.getDate());
+	            bookingDetailMap.put("startTime", bookingDetail.getStartTime());
 
-	            SportFieldDetail sportFieldDetail = bookingDetail.getSportFieldDetail();
-	            if (sportFieldDetail != null) {
-	            	bookingDetailMap.put("peakHour", sportFieldDetail.getPeakHour());
-	            	bookingDetailMap.put("peakHourPrice", sportFieldDetail.getPeakHourPrices());
-	            	bookingDetailMap.put("percentDeposit", sportFieldDetail.getPercentDeposit());
-	            	bookingDetailMap.put("price", sportFieldDetail.getPrice());
-
-	                SportField sportField = sportFieldDetail.getSportField();
-	                if (sportField != null) {
-	                	bookingMap.put("sportFieldName", sportField.getName());
-	                }
-	            }
+                SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
+                if (sportField != null) {
+                	bookingMap.put("sportFieldName", sportField.getName());
+                }
 
 	            bookingDetailsList.add(bookingDetailMap);
 	        }
@@ -147,6 +151,7 @@ public class BookingServiceImpl implements BookingService {
 	public Booking updateStatusBooking(Map<String, Object> bookingData) {
 		Integer bookingId = (Integer) bookingData.get("bookingId");
 		String newStatus = (String) bookingData.get("status");
+		Integer refundAmount = (Integer) bookingData.get("refundAmount");
 
 		Optional<Booking> optionalBooking = bookingDAO.findById(bookingId);
 		if (optionalBooking.isPresent()) {
@@ -154,9 +159,39 @@ public class BookingServiceImpl implements BookingService {
 			booking.setStatus(newStatus);
 			if (newStatus.equals("Đã hủy")) {
 				for (BookingDetail bookingDetail : booking.getBookingDetails()) {
-					bookingDetail.setStatus(newStatus);
-					bookingDetailDAO.save(bookingDetail);
+					if (bookingDetail.getStatus().equals("Chưa bắt đầu")) {
+						bookingDetail.setStatus(newStatus);
+						bookingDetailDAO.save(bookingDetail);
+					}
 				}
+				Wallet wallet = booking.getUser().getWallet();
+				wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(refundAmount)));
+				
+				Transaction transaction = new Transaction();
+				transaction.setAmount(BigDecimal.valueOf(refundAmount));
+				transaction.setCreatedAt(LocalDateTime.now());
+				transaction.setDescription("Hoàn tiền từ bookingId - " + bookingId);
+				transaction.setTransactionType("+" + refundAmount);
+				transaction.setWallet(wallet);
+				
+				transactionDAO.save(transaction);
+				walletDAO.save(wallet);
+				
+//				Owner owner = ownerDAO.findById(booking.getOwner().getOwnerId()).get();
+//				Wallet walletOwner = owner.getUser().getWallet();
+//				if (walletOwner != null) {
+//					walletOwner.setBalance(walletOwner.getBalance().add(BigDecimal.valueOf(refundAmount)));
+//					
+//					Transaction transaction = new Transaction();
+//					transaction.setAmount(BigDecimal.valueOf(refundAmount));
+//					transaction.setCreatedAt(LocalDateTime.now());
+//					transaction.setDescription("Hoàn tiền từ bookingId - " + bookingId);
+//					transaction.setTransactionType("+" + refundAmount);
+//					transaction.setWallet(walletUser);
+//					
+//					transactionDAO.save(transaction);
+//					walletDAO.save(walletUser);
+//				}
 			}
 			bookingDAO.save(booking);
 		}
