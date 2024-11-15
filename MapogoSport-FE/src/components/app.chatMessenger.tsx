@@ -2,14 +2,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Form, Button, ListGroup } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css"; // Đảm bảo đã cài đặt Bootstrap Icons
-import { QueryClient, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import useSWR from "swr";
 import "../app/globals.css";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useData } from "@/app/context/UserContext";
-import { toast } from "react-toastify";
 import { useSearchParams } from "next/navigation";
 
 export default function ChatBox() {
@@ -257,10 +255,9 @@ export default function ChatBox() {
       // toast.success('dang false')
       setShowChat(true);
       // setShowChat(false);
-    }else if(chatListCurrentUserByDMM.length === 0)
-    {
+    } else if (chatListCurrentUserByDMM.length === 0) {
       setShowChat(false)
-    }else {
+    } else {
       // toast.success('dang true')
 
       setShowChat(true);
@@ -393,15 +390,15 @@ export default function ChatBox() {
             // toast.info("User myntd có xuất hiện ở hội thoại");
             foundMyntd = true;
             setIsExitingMy(false);
-            
-          } else if(!tempAdminDefault){
+
+          } else if (!tempAdminDefault) {
             // toast.info("không có");
 
             tempAdminDefault = adminDefault
             // toast.info('s111111111111111111111' +tempAdminDefault)
             // toast.info('sasssssss'+ adminDefault);
             // console.log('dsddddddddddddd lúc này tooinf tại chưa  '+ adminDefault?.username);
-            
+
             // toast.info('sdsddd '+adminDefault )
 
           }
@@ -434,7 +431,7 @@ export default function ChatBox() {
       );
 
 
-   
+
 
       const groupedMessagesArray = Object.values(groupedMessages);
 
@@ -495,16 +492,16 @@ export default function ChatBox() {
 
     setShowChat(!showChat); //nếu true thì thực hiện mở form chat
 
-    if(adminDefault){
+    if (adminDefault) {
       handleSelectChat(adminDefault);
     }
   };
 
-  const handleToggle = () =>{
+  const handleToggle = () => {
     setShowChat(false);
   }
 
-  const handleChatAutoTrue= (chat: User) => {
+  const handleChatAutoTrue = (chat: User) => {
     setShowChat(true); //nếu true thì thực hiện mở form chat
     handleSelectChat(chat);
   };
@@ -549,7 +546,7 @@ export default function ChatBox() {
               }}
               // onClick={username != "" ? handleChatToggle : handleChatListToggle }
               onClick={handleChatListToggle}
-              // Khi click vào icon sẽ mở form chat nhấn vào sẽ thành TRUE
+            // Khi click vào icon sẽ mở form chat nhấn vào sẽ thành TRUE
             >
               <img
                 src="/images/mail_giphy.webp"
@@ -677,7 +674,7 @@ export default function ChatBox() {
                   )}
                   {/* sdsds */}
                   {isExitingMyIfAdminDefault && isExitingMy && adminDefault ? (
-                       <div className="text-center ">
+                    <div className="text-center ">
                       <ListGroup.Item
                         onClick={() => handleChatAutoTrue(adminDefault)}
                         className="d-flex flex-column rounded"
@@ -685,8 +682,8 @@ export default function ChatBox() {
                         <div className="d-flex align-items-center">
                           <img
                             src={
-                              adminDefault?.avatar ? adminDefault?.avatar :  
-                              "/chat_page/assets/images/users/user-5.png"
+                              adminDefault?.avatar ? adminDefault?.avatar :
+                                "/chat_page/assets/images/users/user-5.png"
                             }
                             alt={adminDefault?.username || "Không có tên"}
                             style={{
@@ -705,10 +702,10 @@ export default function ChatBox() {
                         </div>
                       </ListGroup.Item>
                     </div>
-                  ): null}
-               
+                  ) : null}
+
                 </ListGroup>
-                
+
               </div>
             </div>
           )}
@@ -741,9 +738,8 @@ export default function ChatBox() {
                     className="p-0"
                   >
                     <i
-                      className={`h6 bi ${
-                        isMinimized ? "bi-arrows-angle-expand" : "bi-dash-lg"
-                      }`}
+                      className={`h6 bi ${isMinimized ? "bi-arrows-angle-expand" : "bi-dash-lg"
+                        }`}
                     ></i>
                   </Button>
                   <Button
@@ -753,11 +749,10 @@ export default function ChatBox() {
                     className="p-0 mx-2"
                   >
                     <i
-                      className={`h6 bi ${
-                        isMaximized
+                      className={`h6 bi ${isMaximized
                           ? "bi-arrows-angle-contract"
                           : "bi-arrows-fullscreen"
-                      }`}
+                        }`}
                     ></i>
                   </Button>
                   <Button
@@ -781,20 +776,18 @@ export default function ChatBox() {
                     {chatListRealTime.map((msg, index) => (
                       <div
                         key={msg.messageId || index}
-                        className={`d-flex ${
-                          msg.sender.username === currentUser?.username ||
-                          msg.sender === currentUser?.username
+                        className={`d-flex ${msg.sender.username === currentUser?.username ||
+                            msg.sender === currentUser?.username
                             ? "justify-content-end"
                             : "justify-content-start"
-                        }`}
+                          }`}
                       >
                         <div
-                          className={`p-2 rounded mb-2 ${
-                            msg.sender.username === currentUser?.username ||
-                            msg.sender === currentUser?.username
+                          className={`p-2 rounded mb-2 ${msg.sender.username === currentUser?.username ||
+                              msg.sender === currentUser?.username
                               ? "bg-primary text-white"
                               : "bg-light text-dark"
-                          }`}
+                            }`}
                           style={{ maxWidth: "80%" }}
                         >
                           {msg.content}

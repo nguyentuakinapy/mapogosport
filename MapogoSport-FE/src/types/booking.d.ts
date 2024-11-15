@@ -40,6 +40,7 @@ interface Booking {
     fullName: string;
     phoneNumber: string;
     percentDeposit: number;
+    oldTotalAmount: number;
 }
 
 interface bookingPayment {
