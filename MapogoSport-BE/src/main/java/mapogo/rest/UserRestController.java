@@ -153,7 +153,7 @@ public class UserRestController {
 			@RequestParam(value = "extraData") String data) {
 		if (resultCode.equals("0")) {
 			System.out.println("thành coong");
-		 String[] parts = data.split("-");
+		 String[] parts = data.split("0");
 		    int accountPackageId = Integer.parseInt(parts[0]);
 		    int userSubscriptionId = Integer.parseInt(parts[1]);
 		userService.updateUserSubscription(accountPackageId, userSubscriptionId);

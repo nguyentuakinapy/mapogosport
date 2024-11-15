@@ -20,8 +20,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.servlet.http.HttpServletRequest;
 import mapogo.dao.UserSubscriptionDAO;
+import mapogo.dto.MoMoPaymentResponse;
 import mapogo.dto.PaymentDTO;
 import mapogo.entity.AccountPackage;
 import mapogo.entity.Order;
@@ -122,7 +126,24 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 			paymentDTO.setURL(paymentUrl);
 
 		} else if (data.get("paymentMethod").equals("MoMo")) {
-			paymentService.createMoMoPayment(String.valueOf(accountPackage.getPrice()), 0, data.get("accountPackageId")+"-"+data.get("userSubscriptionId"),"http://localhost:8080/rest/user/subscription/paymentInfo-momo");
+			String info = data.get("accountPackageId") + "0" + data.get("userSubscriptionId");
+			System.out.println(info);
+			long amountBeforeDecimal = (long) Math.floor(accountPackage.getPrice());
+
+			ResponseEntity<String> response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
+					info, "http://localhost:8080/rest/user/subscription/paymentInfo-momo");
+			ObjectMapper objectMapper = new ObjectMapper();
+			MoMoPaymentResponse momoResponse;
+			try {
+				momoResponse = objectMapper.readValue(response.getBody(), MoMoPaymentResponse.class);
+				String payUrl = momoResponse.getPayUrl();
+				paymentDTO.setURL(payUrl);
+				paymentDTO.setStatus("ok");
+				paymentDTO.setMessage("successfully");
+				return paymentDTO;
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
 		}
 		return paymentDTO;
 

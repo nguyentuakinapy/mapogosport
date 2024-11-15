@@ -139,7 +139,10 @@ public class OrderRestController {
         return ResponseEntity.ok(createdOrder);
     }
 	
-	
+	@GetMapping("/order/getByOrderId/{orderId}")
+	public Order getByOrderId(@PathVariable("orderId") Integer orderId) {
+		return orderService.findByOrderId(orderId);
+	}
 	//đến đây
 
 }

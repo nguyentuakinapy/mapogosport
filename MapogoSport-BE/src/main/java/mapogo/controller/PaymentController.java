@@ -229,7 +229,7 @@ public class PaymentController {
 			}
 
 			// URL chuyển hướng khi thành công
-			return new RedirectView("http://localhost:3000/checkout-product?status=success");
+			return new RedirectView("http://localhost:3000/checkout-product?status=success&orderId="+order.getOrderId());
 
 		} else {
 			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
@@ -287,8 +287,8 @@ public class PaymentController {
 		if (resultCode.equals("0")) {
 			// update +Balance
 			Wallet wallet = walletService.findByUsername(user);
-			wallet.setBalance(new BigDecimal(order.getAmount()));
-			walletService.update(wallet);
+//			wallet.setBalance(new BigDecimal(order.getAmount()));
+//			walletService.update(wallet);
 
 			// create transaction
 			Transaction transaction = new Transaction();
