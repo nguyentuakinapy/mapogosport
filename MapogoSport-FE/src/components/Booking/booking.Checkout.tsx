@@ -57,7 +57,7 @@ const BookingModal = React.memo((props: BookingProps) => {
             const response = await fetch(`http://localhost:8080/rest/paymentMethod`);
             const data = await response.json();
             if (Array.isArray(data)) {
-                setDataPaymentMethod(data.filter(item => item.paymentMethodId !== 6));
+                setDataPaymentMethod(data.filter(item => item.name != 'Thanh toán tại sân' && item.name != 'COD'));
             }
         }
         fetchPaymentMethods();
@@ -474,7 +474,7 @@ const BookingModal = React.memo((props: BookingProps) => {
 
             const resBooking = await responseBooking.json() as Booking;
 
-            if (paymentMethodId === 7) {
+            if (paymentMethod.name === 'Thanh toán ví') {
                 await fetch(`http://localhost:8080/rest/payment/process/${resBooking.bookingId}?totalAmount=${amountToPay}`, {
                     method: 'POST',
                     headers: {
@@ -507,6 +507,15 @@ const BookingModal = React.memo((props: BookingProps) => {
     }
 
     const createBookingByPeriod = async (paymentMethod: PaymentMethod) => {
+        if (totalAmount === undefined || totalAmount <= 0) {
+            toast.error("Số tiền thanh toán không hợp lệ!");
+            return;
+        }
+        const amountToPay = checkPrepayPrice && sportDetail ? (totalAmount * (sportDetail.percentDeposit / 100)) : totalAmount;
+        if (!userData?.wallet?.balance || userData.wallet.balance < amountToPay) {
+            toast.error("Số dư trong ví của bạn không đủ để đặt sân! Vui lòng nạp tiền vào ví!");
+            return;
+        }
         const responseBooking = await fetch('http://localhost:8080/rest/booking', {
             method: 'POST',
             headers: {
@@ -528,6 +537,16 @@ const BookingModal = React.memo((props: BookingProps) => {
         })
 
         const resBooking = await responseBooking.json() as Booking;
+
+        if (paymentMethod.name === 'Thanh toán ví') {
+            await fetch(`http://localhost:8080/rest/payment/process/${resBooking.bookingId}?totalAmount=${amountToPay}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+            })
+        }
 
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];

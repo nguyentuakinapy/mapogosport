@@ -37,7 +37,7 @@ public class TransactionServiceImpl implements TransactionService{
 	
 	@Transactional
 	@Override
-	public void createTransactionByBooking(Integer bookingId, double totalAmount) {
+	public void createTransactionByPaymentBooking(Integer bookingId, double totalAmount) {
 		Booking booking = bookingDAO.findById(bookingId).get();
 		
 		Wallet wallet = booking.getUser().getWallet();
@@ -46,10 +46,26 @@ public class TransactionServiceImpl implements TransactionService{
 		Transaction transaction = new Transaction();
 		transaction.setAmount(BigDecimal.valueOf(totalAmount));
 		transaction.setCreatedAt(LocalDateTime.now());
-		transaction.setDescription("Thanh toán cho bookingId: " + bookingId);
+		transaction.setDescription("Thanh toán cho bookingId - " + bookingId);
 		transaction.setTransactionType("-" + totalAmount);
 		transaction.setWallet(wallet);
 		transactionDAO.save(transaction);
 		walletDAO.save(wallet);
 	}
+	
+//	@Override
+//	public void updateWalletBalanceAndCreateTransaction(Wallet wallet, Integer amount, String description) {
+//		wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(amount)));
+//	    
+//	    Transaction transaction = new Transaction();
+//	    transaction.setAmount(BigDecimal.valueOf(amount));
+//	    transaction.setCreatedAt(LocalDateTime.now());
+//	    transaction.setDescription(description);
+//	    transaction.setTransactionType("+" + amount);
+//	    transaction.setWallet(wallet);
+//	    
+//	    transactionDAO.save(transaction);
+//	    walletDAO.save(wallet);
+//	}
+	
 }
