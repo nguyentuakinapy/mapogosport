@@ -41,7 +41,7 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	OrderDAO orderDAO;
 
-	List<String> statuses = Arrays.asList("Đã hoàn thành", "Đã Thanh Toán");
+	List<String> statuses = Arrays.asList("Đã hoàn thành", "Đã thanh toán");
 
 	@Override
 	public List<Map<String, Object>> findOrderByUsername(String username) {

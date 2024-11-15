@@ -1004,6 +1004,8 @@ const BookingModal = (props: OwnerProps) => {
                                                         editBooking ||
                                                         (() => {
                                                             if (!startTimeBooking) return true;
+                                                            if (bookingDetailData &&
+                                                                new Date(bookingDetailData.date).setHours(0, 0, 0, 0) > new Date().setHours(0, 0, 0, 0)) return false;
                                                             const [hours, minutes] = startTimeBooking.split('h').map(Number);
                                                             const bookingTime = new Date();
                                                             bookingTime.setHours(hours, minutes, 0, 0); // Đặt giờ và phút từ startTimeBooking
@@ -1021,6 +1023,8 @@ const BookingModal = (props: OwnerProps) => {
                                                         editBooking ||
                                                         (() => {
                                                             if (!startTimeBooking) return true;
+                                                            if (bookingDetailData &&
+                                                                new Date(bookingDetailData.date).setHours(0, 0, 0, 0) > new Date().setHours(0, 0, 0, 0)) return false;
                                                             const [hours, minutes] = startTimeBooking.split('h').map(Number);
                                                             const bookingTime = new Date();
                                                             bookingTime.setHours(hours, minutes, 0, 0); // Đặt giờ và phút từ startTimeBooking

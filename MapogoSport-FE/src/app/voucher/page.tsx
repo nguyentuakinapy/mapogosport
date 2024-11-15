@@ -2,6 +2,7 @@
 import HomeLayout from '@/components/HomeLayout';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { mutate } from 'swr';
 
 
 const PageVoucher = () => {
@@ -27,11 +28,11 @@ const PageVoucher = () => {
             window.removeEventListener('storage', getUserSession);
         };
     }, []);
-  
+
     const handelSubmitGetVoucher = async (voucherId: number) => {
-       
+
         getUserSession()
-        
+
         if (!user || !user.username) {
             toast.warning("Bạn chưa đăng nhập!");
             return;
@@ -74,9 +75,10 @@ const PageVoucher = () => {
             // }
 
             // const result = await response.json();
+            fetchDataVoucher();
             toast.success("Nhận Voucher giá thành công!");
-            
-            
+
+
         } catch (error) {
             console.error("Lỗi khi nhận Voucher:", error);
             alert("Có lỗi xảy ra khi nhận Voucher. Vui lòng thử lại sau.");
@@ -86,19 +88,20 @@ const PageVoucher = () => {
     //Fetch findAll voucher
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`http://localhost:8080/rest/voucher/findAll`);
-                const data = await response.json();
-                setVoucher(data);
-                console.log("Voucher", data)
-            } catch (error) {
-                console.log("Error fetch voucher data", error)
-            }
-        }
-        fetchData()
+
+        fetchDataVoucher()
     }, [])
 
+    const fetchDataVoucher = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/rest/voucher/findAll`);
+            const data = await response.json();
+            setVoucher(data);
+            console.log("Voucher", data)
+        } catch (error) {
+            console.log("Error fetch voucher data", error)
+        }
+    }
     //Handel select voucher khi active
     const filterVouchers = (vouchers: Voucher[]) => {
         const currentTime = new Date().getTime();
@@ -137,7 +140,7 @@ const PageVoucher = () => {
                                 <div className="voucher-discount text-center col-6 ">
                                     <span className="discount">Giảm giá {voucher.discountPercent} %</span>
                                     <span className="expiry">HSD: {new Date(voucher.endDate).toLocaleDateString('en-GB')}</span> <br />
-                                    <em className='text-secondary' style={{fontSize:"12px"}}>Số lượng: {voucher.quantity}</em>
+                                    <em className='text-secondary' style={{ fontSize: "12px" }}>Số lượng: {voucher.quantity}</em>
                                 </div>
                                 <div className="get col-2 text-center ">
                                     <button type="button" className="btn btn-dark text-center "

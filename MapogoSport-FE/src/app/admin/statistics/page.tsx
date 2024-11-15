@@ -181,7 +181,6 @@ const Admin = () => {
                 const script = document.createElement('script');
                 script.src = 'https://www.gstatic.com/charts/loader.js';
                 script.async = true;
-
                 script.onload = () => {
                     if (window.google) {
                         window.google.charts.load('current', { packages: ['corechart'] });
@@ -671,7 +670,6 @@ const Admin = () => {
                                     </Button>
                                 </>
                             )}
-
                             {selectedOptionDay === "Nhiều Ngày" && (
                                 <>
                                     <DatePicker
@@ -720,7 +718,6 @@ const Admin = () => {
                                     <option value="Nhiều Ngày"> Nhiều Ngày</option>
                                 </Form.Select>
                             </div>
-
                             <div className="select-option">
                                 <Form.Select
                                     aria-label=""

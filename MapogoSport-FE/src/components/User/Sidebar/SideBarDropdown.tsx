@@ -9,7 +9,8 @@ const SidebarDropdown = ({ item, username }: any) => {
 
     const handleClick = () => {
         if (username) {
-            mutate(`http://localhost:8080/rest/user/${username}`)
+            mutate(`http://localhost:8080/rest/user/${username}`);
+            mutate(`http://localhost:8080/rest/user/voucher/${username}`);
         }
     }
 

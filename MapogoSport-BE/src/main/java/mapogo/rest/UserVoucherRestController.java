@@ -55,7 +55,7 @@ public class UserVoucherRestController {
 		User u = userDAO.findById(username).get();
 		UserVoucher newUserVoucher = new UserVoucher();
 		newUserVoucher.setDate(LocalDateTime.now());
-		newUserVoucher.setStatus("Đang còn hạn");
+		newUserVoucher.setStatus("Unused");
 		newUserVoucher.setUser(u);
 		newUserVoucher.setVoucher(v);
 		if(v.getQuantity()>0) {

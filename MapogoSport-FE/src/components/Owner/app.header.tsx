@@ -134,6 +134,13 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                     getNotification(message.body);
                 }
             });
+
+            stompClient.subscribe('/topic/order', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    toast.success("Bạn vừa có đơn đặt hàng mơí!")
+                    getNotification(message.body);
+                }
+            });
         });
 
         return () => {
