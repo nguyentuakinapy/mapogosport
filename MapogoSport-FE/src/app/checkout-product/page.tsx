@@ -345,16 +345,15 @@ const CheckoutPage = () => {
 
   const searchParams = useSearchParams();
   const status = searchParams.get('status');
-  const [orderIdReturn, setOrderIdReturn] = useState(Number);
-
+  const orderId1: string | null = searchParams.get('orderId');
   useEffect(() => {
     if (status === 'success') {
-      setOrderIdReturn(Number(searchParams.get('orderId')));
-      console.log("id truyền:", Number(searchParams.get('orderId')));
-
-      setShowOrderSuccessModal(true);
+      if (orderId1 !== null) {
+        setOrderId(Number(orderId1)); // Chuyển sang number và gán vào setOrderId
+      } setShowOrderSuccessModal(true);
     }
-  }, [status]);
+  }, [status, orderId1]);
+  const [orderId, setOrderId] = useState<number | undefined>(undefined);
 
   const handlePaymentWithOrder = async () => {
     if (!checkForm()) {
@@ -376,7 +375,7 @@ const CheckoutPage = () => {
               params: { orderId: order.orderId }, // truyền orderId qua params
             }
           );
-
+          setOrderId(order.orderId);
           setShowOrderSuccessModal(true);
         } catch (error) {
           console.error('Error during payment:', error);
@@ -727,8 +726,7 @@ const CheckoutPage = () => {
       <ModalOrderSuccess
         showOrderSuccessModal={showOrderSuccessModal}
         setShowOrderSuccessModal={setShowOrderSuccessModal}
-        order1={order}
-        orderId={orderIdReturn}
+        orderId={orderId}
       />
     </HomeLayout >
   );

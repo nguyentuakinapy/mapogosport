@@ -327,8 +327,8 @@ public class PaymentController {
 				pdsDAO.save(pds);
 			}
 
-			// URL chuyển hướng khi thành công
-			return new RedirectView("http://localhost:3000/checkout-product/success");
+			// URL chuyển hướng khi thành công?status=
+			return new RedirectView("http://localhost:3000/checkout-product/success?status=success&orderId="+order.getOrderId());
 		} else {
 			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
 			for (OrderDetail orderDetail : orderDetails) {

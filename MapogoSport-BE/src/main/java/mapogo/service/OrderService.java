@@ -18,6 +18,8 @@ public interface OrderService {
 	Order createOrder(OrderDTO order);
 
 	Order findByOrderId(int orderId);
+	
+	List<Map<String, Object>> findOrderById(Integer orderId);
 
 	Order update(Order order);
 	

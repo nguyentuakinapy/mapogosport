@@ -260,5 +260,23 @@ public class OrderServiceImpl implements OrderService {
 		orderDAO.delete(order);
 	}
 
+	@Override
+	public List<Map<String, Object>> findOrderById(Integer orderId) {
+		Order list = orderDAO.findById(orderId).get();
+		
+		List<Map<String, Object>> resultList = new ArrayList<>();
+		
+		Map<String, Object> orderMap = new HashMap<>();
+		orderMap.put("orderId", list.getOrderId());
+		orderMap.put("fullname", list.getUser().getFullname());
+		orderMap.put("address", list.getAddress());
+		orderMap.put("phoneNumber", list.getPhoneNumber());
+		orderMap.put("date", list.getDate());
+		orderMap.put("amount", list.getAmount());
+		
+		resultList.add(orderMap);
+		return resultList;
+	}
+
 
 }
