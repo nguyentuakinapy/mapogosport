@@ -197,14 +197,14 @@ public class UserServiceImpl implements UserService {
 			notificationDAO.save(item);
 		});
 
-		messagingTemplate.convertAndSend("/topic/username", u.getUsername());
+		messagingTemplate.convertAndSend("/topic/notification/isReadAll/username", u.getUsername());
 	}
 
 	@Override
 	public void deleteNotification(String username) {
 		notificationDAO.deleteByUsername(username);
 
-		messagingTemplate.convertAndSend("/topic/username", username);
+		messagingTemplate.convertAndSend("/topic/notification/delete/username", username);
 	}
 
 	@Override
@@ -214,6 +214,6 @@ public class UserServiceImpl implements UserService {
 
 		notificationDAO.save(n);
 
-		messagingTemplate.convertAndSend("/topic/username", n.getUser().getUsername());
+		messagingTemplate.convertAndSend("/topic/notification/username", n.getUser().getUsername());
 	}
 }

@@ -49,6 +49,8 @@ public class NotificationScheduledService {
 		int currentHour = now.getHour();
 		int currentMinute = now.getMinute();
 
+		Integer check = 0;
+
 		sportFields.forEach(spf -> {
 
 			spf.getSportFielDetails().forEach(spdt -> {
@@ -104,10 +106,10 @@ public class NotificationScheduledService {
 					n.setBooking(bd.getBooking());
 					// Lưu và gửi thông báo
 					notificationDAO.save(n);
-
-					messagingTemplate.convertAndSend("/topic/notification", spf.getOwner().getOwnerId());
-
 				});
+				messagingTemplate.convertAndSend("/topic/bookingDetail/notification",
+						spf.getOwner().getUser().getUsername());
+
 			}
 		});
 	}

@@ -946,10 +946,10 @@ const BookingModal = (props: OwnerProps) => {
                                         </FloatingLabel>
                                         {isAddBooking && (
                                             <>
-                                                <Button disabled={!isAddBooking} onClick={() => changeTime(false, true, newEndTimeBooking, true)} variant="outline-secondary mb-2" id="button-addon1">
+                                                <Button onClick={() => changeTime(false, true, newEndTimeBooking, true)} variant="outline-secondary mb-2" id="button-addon1">
                                                     <i className="bi bi-chevron-up"></i>
                                                 </Button>
-                                                <Button disabled={!isAddBooking} onClick={() => changeTime(true, false, newEndTimeBooking, true)} variant="outline-secondary mb-2" id="button-addon1">
+                                                <Button onClick={() => changeTime(true, false, newEndTimeBooking, true)} variant="outline-secondary mb-2" id="button-addon1">
                                                     <i className="bi bi-chevron-down"></i>
                                                 </Button>
                                             </>

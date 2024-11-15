@@ -73,13 +73,17 @@ export default function BookingSport() {
 
         stompClient.connect({}, () => {
             stompClient.subscribe('/topic/bookingDetail', (message) => {
-                setCheckBooking(prev => prev + 1);
-                setCheckOwner(Number(message.body));
+                if (message.body === localStorage.getItem('username')) {
+                    // toast.success("Bạn vừa có sân đặt mơí!")
+                    setCheckNotification(prev => prev + 1);
+                    refreshStatusBooking();
+                }
             });
 
-            stompClient.subscribe('/topic/notification', (message) => {
-                setCheckNotification(prev => prev + 1);
-                setCheckOwner(Number(message.body));
+            stompClient.subscribe('/topic/bookingDetail/notification', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    setCheckNotification(prev => prev + 1);
+                }
             });
         });
 
@@ -626,6 +630,25 @@ export default function BookingSport() {
         }
         setBookingsOnWeek(updatedBookingsOnWeek);
     };
+
+    function getColorFromId(id: string) {
+        // Chuyển `id` thành chuỗi, lấy mã băm từ `id`
+        let hash = 0;
+        const strId = String(id);
+
+        for (let i = 0; i < strId.length; i++) {
+            hash = strId.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        // Chuyển đổi mã băm thành mã màu HEX
+        let color = '#';
+        for (let i = 0; i < 3; i++) {
+            const value = (hash >> (i * 8)) & 0xFF;
+            color += ('00' + value.toString(16)).slice(-2);
+        }
+
+        return color;
+    }
 
     // LOAD TABLE
     const renderTableRows = () => {
