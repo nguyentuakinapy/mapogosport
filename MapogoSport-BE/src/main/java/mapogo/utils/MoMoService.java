@@ -22,9 +22,8 @@ public class MoMoService {
 	private final String ipnUrl = "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
 	private final String requestType = "payWithMethod";
 
-	public ResponseEntity<?> createMoMoPayment(String amount, long order_Id, String info, String redirectUrl) {
+	public ResponseEntity<String> createMoMoPayment(String amount, long order_Id, String info, String redirectUrl) {
 		try {
-
 			long orderId = System.currentTimeMillis();
 
 			long requestId = orderId;
@@ -35,7 +34,6 @@ public class MoMoService {
 			}else {
 				extraData= info;
 			}
-
 			String orderGroupId = "";
 			String lang = "vi";
 

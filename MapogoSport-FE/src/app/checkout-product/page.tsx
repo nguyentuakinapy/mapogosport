@@ -111,6 +111,7 @@ const CheckoutPage = () => {
     }
   }, [userData]);
 
+  //get voucher của user
   useEffect(() => {
     axios.get(`http://localhost:8080/rest/findVoucherByUsername/${user1?.username}`)
       .then(response => {
@@ -264,6 +265,15 @@ const CheckoutPage = () => {
     if (!user1) {
       errors.push('Người dùng không tồn tại');
     }
+    if (!phoneNumberSelected) {
+      errors.push('Vui lòng chọn số điện thoại');
+    }
+    if (!customPhoneNumber && !phoneNumberSelected) {
+      errors.push('Vui lòng nhập số điện thoại');
+    }
+    if (!isValidPhoneNumber(customPhoneNumber) && customPhoneNumber) {
+      errors.push('Số điện thoại chưa đúng');
+    }
     if (!selectedProvince) {
       errors.push('Vui lòng chọn tỉnh/thành phố');
     }
@@ -291,10 +301,15 @@ const CheckoutPage = () => {
 
     return true; // Trả về true nếu tất cả các trường hợp đều hợp lệ
   };
+  //hàn kiểm tra sđt
+  function isValidPhoneNumber(phoneNumberSelected: string) {
+    const phoneRegex = /^(0|\+84)(3|5|7|8|9)\d{8}$/;
+    return phoneRegex.test(phoneNumberSelected);
+  }
 
   const handleCreateOrder = async () => {
 
-    const addressParts = [selectedProvince, selectedDistrict, selectedWard, addressDetail];
+    const addressParts = [addressDetail, selectedWard, selectedDistrict, selectedProvince];
     const address1 = addressParts.filter(part => part).join(', ');
     const phoneNumber = phoneNumberSelected === 'other' ? customPhoneNumber : phoneNumberSelected;
 
@@ -330,6 +345,16 @@ const CheckoutPage = () => {
 
   const searchParams = useSearchParams();
   const status = searchParams.get('status');
+  const [orderIdReturn, setOrderIdReturn] = useState(Number);
+
+  useEffect(() => {
+    if (status === 'success') {
+      setOrderIdReturn(Number(searchParams.get('orderId')));
+      console.log("id truyền:", Number(searchParams.get('orderId')));
+
+      setShowOrderSuccessModal(true);
+    }
+  }, [status]);
 
   const handlePaymentWithOrder = async () => {
     if (!checkForm()) {
@@ -351,6 +376,7 @@ const CheckoutPage = () => {
               params: { orderId: order.orderId }, // truyền orderId qua params
             }
           );
+
           setShowOrderSuccessModal(true);
         } catch (error) {
           console.error('Error during payment:', error);
@@ -404,11 +430,6 @@ const CheckoutPage = () => {
 
   };
 
-  useEffect(() => {
-    if (status === 'success') {
-      setShowOrderSuccessModal(true);
-    }
-  }, [status]);
 
   return (
     <HomeLayout>
@@ -441,6 +462,7 @@ const CheckoutPage = () => {
                       value={phoneNumberSelected ?? ''}
                       onChange={(e) => setPhoneNumberSelected(e.target.value)}
                     >
+                      <option value="">Chọn số điện thoại</option>
                       {phoneNumbers.map(phoneNumber => (
                         <option
                           key={phoneNumber.phoneNumberUserId}
@@ -705,7 +727,8 @@ const CheckoutPage = () => {
       <ModalOrderSuccess
         showOrderSuccessModal={showOrderSuccessModal}
         setShowOrderSuccessModal={setShowOrderSuccessModal}
-        order={order}
+        order1={order}
+        orderId={orderIdReturn}
       />
     </HomeLayout >
   );

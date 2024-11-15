@@ -170,34 +170,33 @@ export default function Owner({ children }: { children: ReactNode }) {
                             const isOwned = ap.accountPackageId ===
                                 userSubscription?.accountPackage?.accountPackageId;
                             return (
-                                <>
-                                    <Col xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <div className="card packageUpdate">
-                                            <b className="ms-3 mt-3 fs-5">{ap.packageName}</b>
-                                            <div className="body-package my-3">
-                                                {ap.accountPackageBenefits.map(apb => (
-                                                    <div key={apb.accountPackageBenefitId}>
-                                                        <i className="bi bi-check-circle me-2"></i>
-                                                        {apb.benefit.description}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <b className="text-danger ms-3">{ap.price == 0 ? 'Miễn phí' : formatPrice(ap.price)} / Tháng</b>
-                                            {/* <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={isOwned}>
+
+                                <Col xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <div className="card packageUpdate">
+                                        <b className="ms-3 mt-3 fs-5">{ap.packageName}</b>
+                                        <div className="body-package my-3">
+                                            {ap.accountPackageBenefits.map(apb => (
+                                                <div key={apb.accountPackageBenefitId}>
+                                                    <i className="bi bi-check-circle me-2"></i>
+                                                    {apb.benefit.description}
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <b className="text-danger ms-3">{ap.price == 0 ? 'Miễn phí' : formatPrice(ap.price)} / Tháng</b>
+                                        {/* <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={isOwned}>
                                             {isOwned ? "Đã sở hữu" : "Nâng cấp ngay"}
                                         </Button> */}
-                                            {userSubscription && ap.accountPackageId <= userSubscription?.accountPackage?.accountPackageId ? (
-                                                <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={true}>
-                                                    Đã sở hữu
-                                                </Button>
-                                            ) : (
-                                                <Button className='btn-sub' onClick={() => handleOpenModal(ap)} disabled={isOwned}>
-                                                    Nâng cấp ngay
-                                                </Button>
-                                            )}
+                                        {userSubscription && ap.accountPackageId <= userSubscription?.accountPackage?.accountPackageId ? (
+                                            <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={true}>
+                                                Đã sở hữu
+                                            </Button>
+                                        ) : (
+                                            <Button className='btn-sub' onClick={() => handleOpenModal(ap)} disabled={isOwned}>
+                                                Nâng cấp ngay
+                                            </Button>
+                                        )}
 
-                                        </div>
-                                    </Col>
+                                    </div>
                                     {/* Modal chọn phương thức thanh toán */}
                                     <Modal show={showModal} onHide={handleCloseModal} centered>
                                         <Modal.Header closeButton>
@@ -260,7 +259,9 @@ export default function Owner({ children }: { children: ReactNode }) {
                                             </Button>
                                         </Modal.Footer>
                                     </Modal>
-                                </>
+                                </Col>
+
+
                             )
                         })}
                     </Row >

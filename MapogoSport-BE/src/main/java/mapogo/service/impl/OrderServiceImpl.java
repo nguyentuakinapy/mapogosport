@@ -127,7 +127,6 @@ public class OrderServiceImpl implements OrderService {
 		order.setStatus(orderDTO.getStatus());
 		order.setAmount(orderDTO.getAmount());
 		PaymentMethod payment = paymentService.findByName(orderDTO.getPaymentMethod());
-//		System.out.println("paymentMethod:"+payment.getName());
 		order.setPaymentMethod(payment);
 		
 		if (orderDTO.getVoucherId()!=null) {
