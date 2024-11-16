@@ -169,8 +169,13 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	@Override
 	public BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId,
 			LocalDate date) {
-		return bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date,
+		BookingDetail b =  bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date,
 				"Đã hủy");
+		b.setFullName(b.getBooking().getFullName());
+		b.setPhoneNumber(b.getBooking().getPhoneNumber());
+		b.setCheckOffline(b.getBooking().getUser().getUsername().equals("sportoffline"));
+		b.setPaymentMethod(b.getBooking().getPaymentMethod());
+		return b;
 	}
 
 	@Override
