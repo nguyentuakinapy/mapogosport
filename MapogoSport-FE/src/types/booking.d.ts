@@ -92,7 +92,10 @@ interface BookingDetailFullName {
     date: string;
     status: string;
     fullName: string;
+    phoneNumber: string;
+    checkOffline: boolean;
     subscriptionKey: string;
+    paymentMethod: PaymentMethod;
 }
 
 interface AvailableBooking {

@@ -1102,7 +1102,7 @@ const BookingModal = (props: OwnerProps) => {
                             <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
                             <FloatingLabel controlId="floatingUsername" label="Họ và tên *" className="flex-grow-1 mb-2">
                                 <Form.Control
-                                    value={userData?.fullname === "Offline" ? bookingDetailData?.fullName : userData?.fullname}
+                                    value={bookingDetailData?.fullName}
                                     type="text"
                                     placeholder="Vui lòng nhập tên đăng nhập!"
                                     disabled
@@ -1111,13 +1111,21 @@ const BookingModal = (props: OwnerProps) => {
                             <FloatingLabel controlId="floatingUsername" label="Số điện thoại *" className="flex-grow-1 mb-2">
                                 <Form.Control
                                     type="text"
-                                    value={userData?.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber || ""}
+                                    value={bookingDetailData?.phoneNumber || "Người dùng không có số điện thoại!"}
                                     placeholder="Vui lòng nhập tên đăng nhập!"
                                     disabled
                                 />
                             </FloatingLabel> <FloatingLabel controlId="floatingUsername" label="Phương thức thanh toán *" className="flex-grow-1 mb-2">
                                 <Form.Control
-                                    value={paymentMethod?.name || ""}
+                                    value={bookingDetailData?.paymentMethod.name || ""}
+                                    type="text"
+                                    placeholder="Vui lòng nhập tên đăng nhập!"
+                                    disabled
+                                />
+                            </FloatingLabel>
+                            <FloatingLabel controlId="floatingUsernam1e" label="Hình thức đặt sân! *" className="flex-grow-1 mb-2">
+                                <Form.Control
+                                    value={bookingDetailData?.checkOffline ? "Đặt tại sân!" : "Đặt trên MapogoSport"}
                                     type="text"
                                     placeholder="Vui lòng nhập tên đăng nhập!"
                                     disabled
