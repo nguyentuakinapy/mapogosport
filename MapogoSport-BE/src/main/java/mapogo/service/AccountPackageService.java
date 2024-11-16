@@ -10,11 +10,12 @@ public interface AccountPackageService {
 	List<AccountPackage> findAll();
 
 	AccountPackage updateAccountPackage(Integer id, AccountPackageDTO dto);
-	//của Mỵ từ đây
+
+	// của Mỵ từ đây
 	AccountPackage findById(Integer id);
-	//đến đây
+	// đến đây
 
 	AccountPackage createAccountPackage(AccountPackageDTO accountPackageDTO);
-	
-	 void deleteAccountPackage(Integer accountPackageId);
+
+	void deleteAccountPackage(Integer accountPackageId);
 }

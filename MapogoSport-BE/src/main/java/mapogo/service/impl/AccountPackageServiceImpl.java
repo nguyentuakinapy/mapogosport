@@ -43,6 +43,7 @@ public class AccountPackageServiceImpl implements AccountPackageService {
 		accountPackage.setDurationDays(accountPackageDTO.getDurationDays());
 		accountPackage.setLimitBookings(accountPackageDTO.getLimitBookings());
 		accountPackage.setLimitSportFields(accountPackageDTO.getLimitSportFields());
+		accountPackage.setStatus(accountPackageDTO.getStatus());
 
 		// Cập nhật danh sách lợi ích
 		List<AccountPackageBenefit> updatedBenefits = accountPackageDTO.getAccountPackageBenefits().stream()
@@ -90,6 +91,7 @@ public class AccountPackageServiceImpl implements AccountPackageService {
 		accountPackage.setDurationDays(accountPackageDTO.getDurationDays());
 		accountPackage.setLimitBookings(accountPackageDTO.getLimitBookings());
 		accountPackage.setLimitSportFields(accountPackageDTO.getLimitSportFields());
+		accountPackage.setStatus("active");
 
 		// Bước 2: Lưu AccountPackage vào cơ sở dữ liệu
 		AccountPackage savedAccountPackage = accountPackageDAO.save(accountPackage);

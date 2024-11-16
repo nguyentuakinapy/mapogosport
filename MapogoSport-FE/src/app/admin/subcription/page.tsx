@@ -35,7 +35,13 @@ const SubcriptionPage = () => {
         durationDays: '',
         limitBookings: '',
         limitSportFields: '',
-        accountPackageBenefits: [{ benefit: { description: '' } }],
+        status: '',
+        accountPackageBenefits: [{
+            benefit: {
+                benefitId: '',
+                description: ''
+            }
+        }],
     });
 
 
@@ -45,51 +51,107 @@ const SubcriptionPage = () => {
         setModalShow(true);
     }
 
-    const handleDelete = async (pkg) => {
+    // const handleDelete = async (pkg) => {
+
+
+    //     try {
+    //         // Yêu cầu người dùng xác nhận trước khi xóa
+    //         const confirmed = window.confirm("Bạn có chắc chắn muốn vô  hiệu hóa này?");
+    //         if (!confirmed) return; // Thoát nếu người dùng hủy
+
+    //         // Xóa gói tài khoản (nếu cần thiết)
+    //         const packageDeleteResponse = await axios.delete(`http://localhost:8080/rest/delete/account-package/${pkg.accountPackageId}`);
+    //         if (packageDeleteResponse.status !== 200) throw new Error('Xóa gói tài khoản thất bại');
+
+    //         // Xóa từng lợi ích trong gói tài khoản
+    //         const benefitDeletionPromises = pkg.accountPackageBenefits.map(async (benefit) => {
+    //             const benefitId = benefit.accountPackageBenefitId;
+
+    //             // Gửi yêu cầu xóa lợi ích từ server
+    //             const response = await axios.delete(`http://localhost:8080/rest/delete-account-package-benefits/${benefitId}`);
+    //             if (response.status !== 200) {
+    //                 throw new Error(`Xóa lợi ích với ID: ${benefitId} thất bại`);
+    //             }
+
+    //             // Trả về ID lợi ích đã xóa để cập nhật lại giao diện
+    //             return benefit.accountPackageBenefitId;
+    //         });
+
+    //         // Chờ tất cả các lệnh xóa lợi ích hoàn thành
+    //         const deletedBenefitIds = await Promise.all(benefitDeletionPromises);
+
+    //         // Cập nhật lại danh sách lợi ích sau khi xóa
+    //         pkg.accountPackageBenefits = pkg.accountPackageBenefits.filter((benefit) =>
+    //             !deletedBenefitIds.includes(benefit.accountPackageBenefitId)
+    //         );
+
+    //         // Tải lại dữ liệu sau khi xóa thành công
+    //         await mutate();
+    //         toast.success("Xóa gói thành công!");
+    //     } catch (error) {
+    //         console.error('Lỗi khi xóa lợi ích:', error);
+    //         toast.error("Có lỗi xảy ra khi xóa lợi ích!");
+    //     }
+    // }
+
+
+    const handleUnActive = async (pkg) => {
+        const confirmed = window.confirm(
+            pkg?.status === "un active"
+                ? `Bạn có chắc chắc muốn khôi phục Gói ${pkg?.packageName}?`
+                : `Bạn có chắc chắn muốn vô hiệu Gói ${pkg?.packageName}?`
+        );
+        if (!confirmed) return; // Thoát nếu người dùng từ chối
+
         try {
-            // Yêu cầu người dùng xác nhận trước khi xóa
-            const confirmed = window.confirm("Bạn có chắc chắn muốn xóa gói này?");
-            if (!confirmed) return; // Thoát nếu người dùng hủy
+            // Xác định trạng thái mới dựa trên trạng thái hiện tại của gói
+            const newStatus = pkg.status === "un active" ? "active" : "un active";
 
-            // Xóa gói tài khoản (nếu cần thiết)
-            const packageDeleteResponse = await axios.delete(`http://localhost:8080/rest/delete/account-package/${pkg.accountPackageId}`);
-            if (packageDeleteResponse.status !== 200) throw new Error('Xóa gói tài khoản thất bại');
+            // Cập nhật dữ liệu gói
+            const data = {
+                ...pkg,
+                status: newStatus,
+                accountPackageBenefits: pkg?.accountPackageBenefits?.map((benefit) => ({
+                    accountPackageBenefitId: benefit.accountPackageBenefitId,
+                    benefit: {
+                        benefitId: benefit.benefit.benefitId,
+                        description: benefit.benefit.description,
+                    },
+                })) || [],
+            };
 
-            // Xóa từng lợi ích trong gói tài khoản
-            const benefitDeletionPromises = pkg.accountPackageBenefits.map(async (benefit) => {
-                const benefitId = benefit.accountPackageBenefitId;
-
-                // Gửi yêu cầu xóa lợi ích từ server
-                const response = await axios.delete(`http://localhost:8080/rest/delete-account-package-benefits/${benefitId}`);
-                if (response.status !== 200) {
-                    throw new Error(`Xóa lợi ích với ID: ${benefitId} thất bại`);
+            // Gửi yêu cầu cập nhật lên API
+            const response = await fetch(
+                `http://localhost:8080/rest/updateAccountPackage/${pkg.accountPackageId}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data),
                 }
-
-                // Trả về ID lợi ích đã xóa để cập nhật lại giao diện
-                return benefit.accountPackageBenefitId;
-            });
-
-            // Chờ tất cả các lệnh xóa lợi ích hoàn thành
-            const deletedBenefitIds = await Promise.all(benefitDeletionPromises);
-
-            // Cập nhật lại danh sách lợi ích sau khi xóa
-            pkg.accountPackageBenefits = pkg.accountPackageBenefits.filter((benefit) =>
-                !deletedBenefitIds.includes(benefit.accountPackageBenefitId)
             );
 
-            // Tải lại dữ liệu sau khi xóa thành công
-            await mutate();
-            toast.success("Xóa gói thành công!");
+            if (!response.ok) {
+                throw new Error("Failed to update package");
+            }
+
+            // Cập nhật UI và thông báo thành công
+            await mutate(); // Làm mới dữ liệu
+            setModalShow(false);
+            toast.success(
+                newStatus === "un active"
+                    ? `Bạn đã vô hiệu gói ${pkg?.packageName}`
+                    : `Bạn đã khôi phục gói ${pkg?.packageName}`
+            );
         } catch (error) {
-            console.error('Lỗi khi xóa lợi ích:', error);
-            toast.error("Có lỗi xảy ra khi xóa lợi ích!");
+            console.error("Error updating package:", error);
+            toast.error("Đã xảy ra lỗi khi vô hiệu hóa gói!");
         }
-    }
+    };
 
 
 
 
-    // Open modal for creating a new package
+
     const handleCreate = () => {
         setModalCreateShow(true);
     }
@@ -185,6 +247,7 @@ const SubcriptionPage = () => {
                 durationDays: newPackage.durationDays,
                 limitBookings: newPackage.limitBookings,
                 limitSportFields: newPackage.limitSportFields || 0, // Ensure it's not null
+                status: '',
                 accountPackageBenefits: uniqueBenefits.map((selection) => ({
                     benefit: {
                         benefitId: selection.benefitId
@@ -258,7 +321,10 @@ const SubcriptionPage = () => {
         setNewPackage((prev) => ({
             ...prev,
             accountPackageBenefits: updatedSelections.map((item) => ({
-                benefit: { description: item.description },
+                benefit: {
+                    benefitId: '',
+                    description: item.description
+                },
             })),
         }));
     }
@@ -278,14 +344,16 @@ const SubcriptionPage = () => {
         >
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    {editedPackage?.packageName || 'Chi tiết gói đăng ký'}
+                    Chi tiết gói đăng ký
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form>
+
                     <Form.Group className="mb-3">
                         <Form.Label>Tên gói</Form.Label>
                         <Form.Control
+                            disabled={editedPackage?.packageName === 'Gói miễn phí'}
                             type="text"
                             name="packageName"
                             value={editedPackage?.packageName || ''}
@@ -295,10 +363,12 @@ const SubcriptionPage = () => {
                     <Form.Group className="mb-3">
                         <Form.Label>Giá</Form.Label>
                         <Form.Control
+                            disabled={editedPackage?.packageName === 'Gói miễn phí'}
                             type="number"
                             name="price"
                             value={editedPackage?.price || 0}
                             onChange={handleChange}
+
                         />
                     </Form.Group>
                     <Form.Group className="mb-3">
@@ -313,6 +383,7 @@ const SubcriptionPage = () => {
                     <Form.Group className="mb-3">
                         <Form.Label>Lượt đặt sân tối đa</Form.Label>
                         <Form.Control
+                            disabled
                             type="number"
                             name="limitBookings"
                             value={editedPackage?.limitBookings || ''}
@@ -322,6 +393,7 @@ const SubcriptionPage = () => {
                     <Form.Group className="mb-3">
                         <Form.Label>Số sân tối đa</Form.Label>
                         <Form.Control
+                            disabled
                             type="number"
                             name="limitSportFields"
                             value={editedPackage?.limitSportFields || ''}
@@ -333,6 +405,7 @@ const SubcriptionPage = () => {
                         {editedPackage?.accountPackageBenefits?.map((benefitItem, idx) => (
                             <div key={idx}>
                                 <Form.Control
+                                    disabled
                                     type="text"
                                     value={benefitItem.benefit.description}
                                     className='mb-2'
@@ -371,7 +444,10 @@ const SubcriptionPage = () => {
             accountPackageBenefits: benefitSelections
                 .filter((_, i) => i !== index) // loại bỏ lợi ích đã xóa
                 .map((item) => ({
-                    benefit: { description: item.description },
+                    benefit: {
+                        benefitId: '',
+                        description: item.description
+                    },
                 })),
         }));
     };
@@ -394,7 +470,13 @@ const SubcriptionPage = () => {
                     durationDays: '',
                     limitBookings: '',
                     limitSportFields: '',
-                    accountPackageBenefits: [{ benefit: { description: '' } }],
+                    status: '',
+                    accountPackageBenefits: [{
+                        benefit: {
+                            benefitId: '',
+                            description: ''
+                        }
+                    }],
                 }); // Reset new package when modal is closed
                 setBenefitData('')
                 setBenefitSelections([{ benefitId: '', description: '' }]); // Reset benefit selections
@@ -534,8 +616,8 @@ const SubcriptionPage = () => {
                                 </div>
                                 <b className="text-danger ms-3">{formatPrice(pkg.price) || "Miễn phí"} VND</b>
                                 <div className="d-flex">
-                                    <Button className="btn-sub w-75" onClick={() => handleEdit(pkg)}>Sửa</Button>
-                                    <Button className="btn-sub w-25" onClick={() => handleDelete(pkg)}>Xóa</Button>
+                                    <Button disabled={pkg?.status === 'un active'} className="btn-sub w-75" onClick={() => handleEdit(pkg)}>Sửa</Button>
+                                    <Button className="btn-sub w-25" onClick={() => handleUnActive(pkg)}> {pkg?.status === 'un active' ? 'Đang vô hiệu' : 'Vô hiệu hóa'}</Button>
                                 </div>
 
                             </div>

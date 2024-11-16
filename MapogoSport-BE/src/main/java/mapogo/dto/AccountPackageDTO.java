@@ -20,5 +20,6 @@ public class AccountPackageDTO implements Serializable {
      Integer durationDays;
      Integer limitBookings;
      Integer limitSportFields;
+     String status;
      List<AccountPackageBenefitDTO> accountPackageBenefits; // Danh sách các lợi ích (là DTO)
 }

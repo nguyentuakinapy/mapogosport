@@ -40,7 +40,10 @@ public class AccountPackage implements Serializable {
     
     @Column(name = "LimitSportfields")
     private Integer limitSportFields;
-
+    
+    @Column(name = "status")
+    private String status;
+    
     @OneToMany(mappedBy = "accountPackage", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<AccountPackageBenefit> accountPackageBenefits;
