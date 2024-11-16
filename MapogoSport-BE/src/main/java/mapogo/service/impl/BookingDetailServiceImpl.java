@@ -174,7 +174,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	}
 
 	@Override
-	public void cancelBookingDetail(Integer bookingDetailId) {
+	public void cancelBookingDetail(Integer bookingDetailId, String note) {
 		BookingDetail bd = bookingDetailDAO.findById(bookingDetailId).get();
 		bd.setStatus("Đã hủy");
 		bookingDetailDAO.save(bd);
@@ -189,8 +189,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 				totalAmount += b.getPrice();
 			}
 		}
-		
 		if (index == bookingDetails.size()) {
+			booking.setNote(note);
 			booking.setStatus("Đã hủy");
 			bookingDAO.save(booking);
 		} else {
@@ -298,7 +298,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	}
 
 	@Override
-	public void cancelBookingDetailBySubscription(Integer bookingDetailId, String subscriptionKey) {
+	public void cancelBookingDetailBySubscription(Integer bookingDetailId, String subscriptionKey, String note) {
 		List<BookingDetail> bookingDetailsSub = bookingDetailDAO.findBySubscriptionKey(subscriptionKey);
 		BookingDetail bookingDetail = bookingDetailDAO.findById(bookingDetailId).get();
 
@@ -310,6 +310,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		});
 
 		booking.setStatus("Đã hủy");
+		booking.setNote(note);
 		bookingDAO.save(booking);
 	}
 

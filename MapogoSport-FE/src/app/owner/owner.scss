@@ -328,6 +328,17 @@
     }
 }
 
+.frame-edit-secondary {
+    background: #bcffee !important;
+    cursor: not-allowed !important;
+    outline: 2px solid transparent;
+
+    .status-label {
+        cursor: not-allowed !important;
+        color: rgb(181, 164, 164) !important;
+        font-weight: 700 !important;
+    }
+}
 .search-date {
     flex-wrap: nowrap;
     display: flex;

@@ -26,9 +26,9 @@ public interface BookingDetailService {
 	BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId,
 			LocalDate date);
 
-	void cancelBookingDetail(Integer bookingDetailId);
+	void cancelBookingDetail(Integer bookingDetailId, String note);
 	
-	void cancelBookingDetailBySubscription(Integer bookingDetailId, String subscriptionKey);
+	void cancelBookingDetailBySubscription(Integer bookingDetailId, String subscriptionKey, String note);
 
 	void updateBookingDetail(Map<String, Object> data);
 	
