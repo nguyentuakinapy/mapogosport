@@ -194,9 +194,8 @@ public class OrderServiceImpl implements OrderService {
 
 	@Override
 	public List<Object[]> getCategoryProductTotalsYesterday() {
-		LocalDateTime startDate = LocalDate.now().minusDays(1).atStartOfDay(); // Bắt đầu từ 00:00 của ngày hôm qua
-		LocalDateTime endDate = startDate.plusHours(23).plusMinutes(59).plusSeconds(59); // Kết thúc tại 23:59:59 của
-																							// ngày hôm qua
+		  LocalDateTime startDate = LocalDate.now().minusDays(1).atStartOfDay(); // Start of yesterday
+		    LocalDateTime endDate = startDate.plusDays(1); // Start of today (exclusive end)
 		return orderDAO.findCategoryProductTotalsYesterdayWithStatus(startDate, endDate, statuses);
 	}
 

@@ -416,12 +416,12 @@ const Admin = () => {
             },
             {
                 option: 'Một Tuần',
-                title: `Danh sách đơn hàng một tuần từ ngày ${formatDateNotime(today)} đến ${formatDateNotime(oneWeekAgo)}`,
+                title: `Danh sách đơn hàng một tuần từ ngày ${formatDateNotime(oneWeekAgo)} đến ${formatDateNotime(today)}`,
                 data: dataOrder7day, // Thay thế bằng dữ liệu thực tế cho một tuần
             },
             {
                 option: 'Một Tháng',
-                title: `Danh sách đơn hàng một tháng từ ngày ${formatDateNotime(today)} đến ${formatDateNotime(oneWeekAgo)}`,
+                title: `Danh sách đơn hàng một tháng từ ngày ${formatDateNotime(oneMonthAgo)} đến ${formatDateNotime(today)}`,
                 data: dataOrderOneMonth, // Thay thế bằng dữ liệu thực tế cho một tháng
             },
             {
