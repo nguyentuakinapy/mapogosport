@@ -1,6 +1,6 @@
 'use client'
 import { formatPrice } from "@/components/Utils/Format";
-import { ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Nav, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
@@ -8,6 +8,7 @@ import { useData } from "../context/UserContext";
 import ProfileContent from "@/components/User/modal/user.profile";
 import BlogManager from "@/components/blog/blog-manager";
 
+const BookingContext = createContext<AccountPackage | undefined>(undefined);
 
 export default function Owner({ children }: { children: ReactNode }) {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());

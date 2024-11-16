@@ -48,7 +48,7 @@ const Categories = () => {
                 setProducts(data);
                 setRatingPreview(data.productReviews.rating)
                 console.log("data rating")
-                console.log("data Product: ",data)
+                console.log("data Product: ", data)
                 setIcon(new Array(data.length).fill(false)); // Khởi tạo trạng thái icon
             } catch (error) {
                 console.log("Lỗi khi gọi API: ", error);
@@ -170,7 +170,7 @@ const Categories = () => {
                                                 <div className="product-status">
                                                     <div className="onsale"></div>
                                                 </div>
-                                                <div className="img ratio-1-1">
+                                                <div className=" ratio-1-1">
                                                     <Link href={`/product-detail/${product.productId}`}>
                                                         <img
                                                             className="w-100 h-100 img-fluid"

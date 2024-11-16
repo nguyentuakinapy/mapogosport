@@ -31,7 +31,8 @@ type BookingsTypeOnWeek = {
         [sport: string]: BookingDetails[];
     };
 };
-export default function BookingSport() {
+export default function BookingSport({ data }) {
+
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
     const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
     const [showViewOrEditBookingModal, setShowViewOrEditBookingModal] = useState<boolean>(false);
@@ -352,7 +353,7 @@ export default function BookingSport() {
             }
 
             const dataBooking = await response.json() as BookingDetailFullName[];
-            if (dataBooking.length === 0) {
+            if (sportDetails && dataBooking.length === 0) {
                 Object.entries(bookingsOnDay).forEach(([time, statuses]) => {
 
                     const [hour, minute] = time.split('h').map(Number);
@@ -378,7 +379,7 @@ export default function BookingSport() {
                         }
                     } else {
                         statuses[index] = {
-                            status: "Tạm đóng",
+                            status: sportDetails[index].status == "Tạm đóng" ? "Tạm đóng" : sportDetails[index].status,
                             bookingId: 0,
                             fullName: "",
                             statusDtb: "",
@@ -464,7 +465,7 @@ export default function BookingSport() {
                             }
                         } else {
                             statuses[index] = {
-                                status: "Tạm đóng",
+                                status: sportDetails[index].status == "Tạm đóng" ? "Tạm đóng" : sportDetails[index].status,
                                 bookingId: 0,
                                 fullName: "",
                                 statusDtb: "",
@@ -585,7 +586,7 @@ export default function BookingSport() {
                                         }
                                     } else {
                                         sportData[sport][dayIndex] = {
-                                            status: "Tạm đóng",
+                                            status: item.sportFieldDetail.status == "Tạm đóng" ? "Tạm đóng" : item.sportFieldDetail.status,
                                             bookingId: 0,
                                             fullName: "",
                                             statusDtb: "",
@@ -614,7 +615,8 @@ export default function BookingSport() {
                                     };
                                 } else {
                                     sportData[sport][dayIndex] = {
-                                        status: sportDetails[index].status === "Hoạt động" ? "Còn trống" : "Tạm đóng",
+                                        status: sportDetails[index].status === "Hoạt động" ? "Còn trống" :
+                                            sportDetails[index].status === "Tạm đóng" ? "Tạm đóng" : sportDetails[index].status,
                                         bookingId: 0,
                                         fullName: "",
                                         statusDtb: "",
@@ -911,7 +913,7 @@ export default function BookingSport() {
     const [startTime, setStartTime] = useState("");
     const [dayStartBooking, setDayStartBooking] = useState("");
     const [startTimeKey, setStartTimeKey] = useState<number>(1);
-    const [bookingDetailData, setBookingDetailData] = useState<BookingDetail>();
+    const [bookingDetailData, setBookingDetailData] = useState<BookingDetailFullName>();
     const [bookingBySubscriptionKey, setDataBookingBySubscriptionKey] = useState<BookingDetail[]>();
     const [userData, setUserData] = useState<User>();
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
@@ -945,7 +947,7 @@ export default function BookingSport() {
             throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
         }
 
-        const bkDData = await responseBookingDetail.json() as BookingDetail;
+        const bkDData = await responseBookingDetail.json() as BookingDetailFullName;
 
         const responsePaymentMethod = await fetch(`http://localhost:8080/rest/paymentMethod/by/bookingdetailid/${bkDData.bookingDetailId}`);
         if (!responsePaymentMethod.ok) {
@@ -1001,7 +1003,7 @@ export default function BookingSport() {
             throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
         }
 
-        const bkDData = await responseBookingDetail.json() as BookingDetail;
+        const bkDData = await responseBookingDetail.json() as BookingDetailFullName;
         console.log(bkDData);
 
         const responsePaymentMethod = await fetch(`http://localhost:8080/rest/paymentMethod/by/bookingdetailid/${bkDData.bookingDetailId}`);
@@ -1054,6 +1056,8 @@ export default function BookingSport() {
                 return "frame-overdue-secondary";
             case "Chưa đặt":
                 return "frame-overdue-secondary";
+            case "Sửa chữa":
+                return "frame-edit-secondary";
             default:
                 return "";
         }
