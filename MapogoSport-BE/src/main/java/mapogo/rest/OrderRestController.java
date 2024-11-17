@@ -1,5 +1,6 @@
 package mapogo.rest;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +21,14 @@ import org.springframework.web.server.ResponseStatusException;
 import mapogo.dto.OrderDTO;
 import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
+import mapogo.entity.Transaction;
+import mapogo.entity.User;
+import mapogo.entity.Wallet;
 import mapogo.service.OrderDetailService;
 import mapogo.service.OrderService;
+import mapogo.service.TransactionService;
+import mapogo.service.UserService;
+import mapogo.service.WalletService;
 import mapogo.service.impl.OrderServiceImpl;
 
 import org.springframework.web.bind.annotation.RequestParam;
@@ -133,9 +140,34 @@ public class OrderRestController {
 	
 
 	//của Mỵ từ đây
+	@Autowired
+	WalletService walletService;
+	
+	@Autowired
+	UserService userService;
+	
+	@Autowired
+	TransactionService transactionService;
+	
 	@PostMapping("/create_order")
     public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
         Order createdOrder = orderService.createOrder(orderDTO);
+		if (orderDTO.getPaymentMethod().equals("Thanh toán ví")) {
+			User user = userService.findByUsername(orderDTO.getUsername());
+			Wallet wallet = walletService.findByUsername(user);
+			wallet.setBalance(
+			        wallet.getBalance().subtract(BigDecimal.valueOf(orderDTO.getAmount()))
+			    );	
+			
+			Transaction transaction = new Transaction();
+			transaction.setWallet(wallet);
+			transaction.setAmount(new BigDecimal(orderDTO.getAmount()));
+			transaction.setCreatedAt(LocalDateTime.now());
+			transaction.setDescription("Thanh toán hóa đơn: " + createdOrder.getOrderId());
+			transaction.setTransactionType("-" + createdOrder.getAmount());
+			transactionService.create(transaction);
+			}
+		
         return ResponseEntity.ok(createdOrder);
     }
 	
