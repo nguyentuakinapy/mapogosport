@@ -51,7 +51,7 @@ const AdminProduct = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [categoryProducts]);
 
     const handleCreateClick = () => {
         setCurrentCategoryProduct(null);
@@ -150,7 +150,7 @@ const AdminProduct = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [categoryField]);
 
     const handleCreateClickField = () => {
         setCurrentCategoryField(null);
