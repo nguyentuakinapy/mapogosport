@@ -82,7 +82,7 @@ export default function Owner({ children }: { children: ReactNode }) {
         setSelectedPaymentMethod(e.target.value);
     };
 
-    const handleUpdateSubscription = (ap: AccountPackage) => {
+    const handleUpdateSubscription = (ap?: AccountPackage) => {
         fetch(`http://localhost:8080/rest/user/subscription/${userSubscription?.userSubscriptionId}`, {
             method: 'PUT',
             headers: {
@@ -91,7 +91,7 @@ export default function Owner({ children }: { children: ReactNode }) {
             },
             body: JSON.stringify({
                 userSubscriptionId: userSubscription?.userSubscriptionId,
-                accountPackageId: ap.accountPackageId,
+                accountPackageId: ap?.accountPackageId,
                 paymentMethod: selectedPaymentMethod
             }),
         }).then(async (res) => {
@@ -198,68 +198,6 @@ export default function Owner({ children }: { children: ReactNode }) {
                                         )}
 
                                     </div>
-                                    {/* Modal chọn phương thức thanh toán */}
-                                    <Modal show={showModal} onHide={handleCloseModal} centered>
-                                        <Modal.Header closeButton>
-                                            <Modal.Title>Chọn phương thức thanh toán</Modal.Title>
-                                        </Modal.Header>
-                                        <Modal.Body>
-                                            <div className="list-group">
-                                                <div className="card-body d-flex list-group-item align-items-center">
-                                                    <div className="form-check flex-grow-1">
-                                                        <input
-                                                            className="form-check-input"
-                                                            type="radio"
-                                                            name="paymentMethod"
-                                                            id="vnpay"
-                                                            value="VNPay"
-                                                            onChange={handlePaymentMethodChange}
-                                                        />
-                                                        <label className="form-check-label" htmlFor="vnpay">
-                                                            Thanh toán qua ví điện tử VNPay
-                                                        </label>
-                                                    </div>
-                                                    <img
-                                                        src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
-                                                        alt="VNPay"
-                                                        style={{ maxWidth: '50px' }}
-                                                    />
-                                                </div>
-                                                <div className="card-body d-flex list-group-item align-items-center">
-                                                    <div className="form-check flex-grow-1">
-                                                        <input
-                                                            className="form-check-input"
-                                                            type="radio"
-                                                            name="paymentMethod"
-                                                            id="momo"
-                                                            value="MoMo"
-                                                            onChange={handlePaymentMethodChange}
-                                                        />
-                                                        <label className="form-check-label" htmlFor="momo">
-                                                            Thanh toán qua ví điện tử MoMo
-                                                        </label>
-                                                    </div>
-                                                    <img
-                                                        src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png"
-                                                        alt="MoMo"
-                                                        style={{ maxWidth: '50px' }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </Modal.Body>
-                                        <Modal.Footer>
-                                            <Button variant="secondary" onClick={handleCloseModal}>
-                                                Hủy
-                                            </Button>
-                                            <Button
-                                                variant="primary"
-                                                onClick={() => handleUpdateSubscription(ap)}
-                                                disabled={!selectedPaymentMethod}
-                                            >
-                                                Thanh toán
-                                            </Button>
-                                        </Modal.Footer>
-                                    </Modal>
                                 </Col>
 
 
@@ -278,6 +216,68 @@ export default function Owner({ children }: { children: ReactNode }) {
     if (!children) {
         return (
             <>
+                {/* Modal chọn phương thức thanh toán */}
+                <Modal show={showModal} onHide={handleCloseModal} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Chọn phương thức thanh toán</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <div className="list-group">
+                            <div className="card-body d-flex list-group-item align-items-center">
+                                <div className="form-check flex-grow-1">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="paymentMethod"
+                                        id="vnpay"
+                                        value="VNPay"
+                                        onChange={handlePaymentMethodChange}
+                                    />
+                                    <label className="form-check-label" htmlFor="vnpay">
+                                        Thanh toán qua ví điện tử VNPay
+                                    </label>
+                                </div>
+                                <img
+                                    src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
+                                    alt="VNPay"
+                                    style={{ maxWidth: '50px' }}
+                                />
+                            </div>
+                            <div className="card-body d-flex list-group-item align-items-center">
+                                <div className="form-check flex-grow-1">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="paymentMethod"
+                                        id="momo"
+                                        value="MoMo"
+                                        onChange={handlePaymentMethodChange}
+                                    />
+                                    <label className="form-check-label" htmlFor="momo">
+                                        Thanh toán qua ví điện tử MoMo
+                                    </label>
+                                </div>
+                                <img
+                                    src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png"
+                                    alt="MoMo"
+                                    style={{ maxWidth: '50px' }}
+                                />
+                            </div>
+                        </div>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseModal}>
+                            Hủy
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={() => handleUpdateSubscription(selectedAccountPackage || undefined)}
+                            disabled={!selectedPaymentMethod}
+                        >
+                            Thanh toán
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
                 <div className="profile-header">
                     <div className="profile-info">
                         <h2>{userData?.fullname}</h2>
@@ -320,4 +320,6 @@ export default function Owner({ children }: { children: ReactNode }) {
     )
 
 
+
 }
+
