@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import jakarta.transaction.Transactional;
 import mapogo.entity.Notification;
+import mapogo.entity.Order;
 
 public interface NotificationDAO extends JpaRepository<Notification, Integer> {
 
@@ -14,5 +15,7 @@ public interface NotificationDAO extends JpaRepository<Notification, Integer> {
 	@Transactional
 	@Query("DELETE FROM Notification n WHERE n.user.username = :username")
 	void deleteByUsername(@Param("username") String username);
+	
+	Notification findByOrder(Order order);
 
 }

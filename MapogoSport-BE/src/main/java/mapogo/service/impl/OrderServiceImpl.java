@@ -257,6 +257,7 @@ public class OrderServiceImpl implements OrderService {
 
 	@Override
 	public void delete(Order order) {
+		notificationDAO.delete(notificationDAO.findByOrder(order));
 		orderDAO.delete(order);
 	}
 

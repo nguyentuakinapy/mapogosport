@@ -31,7 +31,7 @@ type BookingsTypeOnWeek = {
         [sport: string]: BookingDetails[];
     };
 };
-export default function BookingSport({ data }) {
+export default function BookingSport() {
 
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
     const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
@@ -43,9 +43,9 @@ export default function BookingSport({ data }) {
     const user = useData();
     const [owner, setOwner] = useState<Owner>();
     const [selectSport, setSelectSport] = useState<number>(0);
-    const [checkBooking, setCheckBooking] = useState<number>(1);
+    // const [checkBooking, setCheckBooking] = useState<number>(1);
     const [checkNotification, setCheckNotification] = useState<number>(1);
-    const [checkOwner, setCheckOwner] = useState<number>();
+    const [checkUsername, setCheckUsername] = useState<string>();
     const [selectDate, setSelectDate] = useState<number>(0);
     const [dataSport, setDataSport] = useState<SportField[]>([])
     const [days, setDays] = useState<string[]>();
@@ -73,17 +73,18 @@ export default function BookingSport({ data }) {
         const stompClient = Stomp.over(socket);
 
         stompClient.connect({}, () => {
-            stompClient.subscribe('/topic/bookingDetail', (message) => {
+            stompClient.subscribe('/topic/bookingDetail/reload', (message) => {
                 if (message.body === localStorage.getItem('username')) {
-                    // toast.success("Bạn vừa có sân đặt mơí!")
                     setCheckNotification(prev => prev + 1);
-                    refreshStatusBooking();
+                    setCheckUsername(message.body);
                 }
             });
 
-            stompClient.subscribe('/topic/bookingDetail/notification', (message) => {
+            stompClient.subscribe('/topic/bookingDetail/notification/reload', (message) => {
                 if (message.body === localStorage.getItem('username')) {
                     setCheckNotification(prev => prev + 1);
+                    setCheckUsername(message.body);
+                    // refreshStatusBooking();
                 }
             });
         });
@@ -326,16 +327,13 @@ export default function BookingSport({ data }) {
 
     }, [checkDataStatus]);
 
-    useEffect(() => {
-        if (owner && checkOwner === owner.ownerId && checkNotification == checkNotification) {
-            // toast.success("checkBooking" + checkBooking)
-            const timeoutId = setTimeout(() => {
-                refreshStatusBooking();
-            }, 500);
+    // useEffect(() => {
+    //     const timeoutId = setTimeout(() => {
+    //         refreshStatusBooking();
+    //     }, 500);
 
-            return () => clearTimeout(timeoutId);
-        }
-    }, [checkBooking]);
+    //     return () => clearTimeout(timeoutId);
+    // }, [checkBooking]);
 
     const setStatusOnDay = async () => {
 
@@ -883,7 +881,7 @@ export default function BookingSport({ data }) {
 
     // Notification
     useEffect(() => {
-        if (owner && checkOwner === owner.ownerId) {
+        if (owner && checkUsername === localStorage.getItem('username')) {
             const now = new Date();
             const currentMinutes = now.getMinutes();
             console.log(currentMinutes);
@@ -907,7 +905,7 @@ export default function BookingSport({ data }) {
             getFindBookingSport();
             refreshStatusBooking();
         }
-    }, [selectDate, selectSport, dataSport, checkNotification, checkOwner]);
+    }, [selectDate, selectSport, dataSport, checkNotification, checkUsername]);
 
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
     const [startTime, setStartTime] = useState("");

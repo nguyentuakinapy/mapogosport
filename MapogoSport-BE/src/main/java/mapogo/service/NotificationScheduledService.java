@@ -108,6 +108,8 @@ public class NotificationScheduledService {
 					}
 					messagingTemplate.convertAndSend("/topic/bookingDetail/notification",
 							spf.getOwner().getUser().getUsername());
+					messagingTemplate.convertAndSend("/topic/bookingDetail/notification/reload",
+							spf.getOwner().getUser().getUsername());
 				}
 			}
 		});

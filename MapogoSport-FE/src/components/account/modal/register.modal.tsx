@@ -50,11 +50,17 @@ export default function Register(props: RegisterProps) {
             toast.warning("Vui lòng nhập tên đăng nhập!")
             return;
         }
-        const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
-        if (responseUser.ok) {
+
+        try {
+            const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
+            const check = await responseUser.json() as User;
             toast.warning("Tên đăng nhập đã tồn tại!");
             return;
+        } catch (error) {
+
         }
+
+
         if (!fullName) {
             toast.warning("Vui lòng nhập họ và tên!")
             return;
