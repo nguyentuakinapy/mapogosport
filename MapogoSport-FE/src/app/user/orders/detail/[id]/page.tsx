@@ -1,10 +1,12 @@
 'use client'
 import UserLayout from "@/components/User/UserLayout";
 import Link from "next/link";
-import { Table, Image, Row, Col, Button } from "react-bootstrap";
+import { Table, Image, Row, Col, Button, Modal, Form } from "react-bootstrap";
 import '../../../types/user.scss';
 import { useEffect, useState } from "react";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
+import CancelOrderModal from "../../CancelOrderModal";
+import { toast } from "react-toastify";
 
 const OrdersDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -17,6 +19,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
 
     const [orderDetail, setOrderDetail] = useState<OrderDetail[]>([]);
     const [order, setOrder] = useState<OrderMap | null>(null);
+    const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
 
     useEffect(() => {
         if (data) {
@@ -38,6 +41,31 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
 
     if (isLoading) return <div>Đang tải...</div>;
     if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
+
+
+    const handleCancelOrder = (reason: string) => {
+        console.log("Lý do hủy:", reason);
+        fetch(`http://localhost:8080/rest/order/cancel`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ orderId: params.id, status: "Đã hủy", reason: reason }),
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Hủy đơn hàng không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            toast.success('Hủy đơn hàng thành công!');
+            if (order) {
+                setOrder({
+                    ...order,
+                    status: 'Đã hủy',
+                });
+            }
+        });
+    };
 
     return (
         <UserLayout>
@@ -95,7 +123,13 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                 <div className="btn-layout"><Button className="btn-buyAgain">Tiếp tục mua hàng</Button></div>
             ) : order?.status === 'Đã hủy' ? (
                 <div className="btn-layout"><Button className="btn-buyAgain">Mua lại</Button></div>
-            ) : <div className="btn-layout"><Button className="btn-cancel">Hủy hóa đơn</Button></div>}
+            ) : <div className="btn-layout"><Button className="btn-cancel" disabled={order?.status === "Đang vận chuyển"}
+                onClick={() => setShowCancelModal(true)} >Hủy đơn hàng</Button></div>}
+            <CancelOrderModal
+                show={showCancelModal}
+                onHide={() => setShowCancelModal(false)}
+                onConfirm={handleCancelOrder}
+            />
         </UserLayout>
     )
 }
