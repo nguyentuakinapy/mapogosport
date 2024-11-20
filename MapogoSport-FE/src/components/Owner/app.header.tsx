@@ -121,6 +121,13 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                 }
             });
 
+            stompClient.subscribe('/topic/notification/isRead', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    setCheckNotification(prev => prev + 1);
+                    getNotification(message.body);
+                }
+            });
+
             stompClient.subscribe('/topic/notification/isReadAll/username', (message) => {
                 if (message.body === localStorage.getItem('username')) {
                     setCheckNotification(prev => prev + 1);
@@ -135,7 +142,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                 }
             });
 
-            stompClient.subscribe('/topic/order', (message) => {
+            stompClient.subscribe('/topic/order/new', (message) => {
                 if (message.body === localStorage.getItem('username')) {
                     toast.success("Bạn vừa có đơn đặt hàng mơí!")
                     getNotification(message.body);

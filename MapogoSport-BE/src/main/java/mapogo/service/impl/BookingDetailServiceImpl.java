@@ -194,6 +194,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 				totalAmount += b.getPrice();
 			}
 		}
+		
 		if (index == bookingDetails.size()) {
 			booking.setNote(note);
 			booking.setStatus("Đã hủy");
@@ -203,7 +204,10 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			booking.setTotalAmount(totalAmount);
 			bookingDAO.save(booking);
 		}
-
+		
+		if (!bd.getBooking().getUser().getUsername().equals("sportoffline")) {
+			
+		}
 	}
 
 	@Override
