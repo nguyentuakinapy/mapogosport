@@ -892,7 +892,7 @@ export default function ChatBox() {
       if (messageListRef.current) {
         messageListRef.current.scrollTo({
           top: messageListRef.current.scrollHeight,
-          behavior: "smooth", // Thêm smooth scrolling
+          // behavior: "smooth", // Thêm smooth scrolling
         });
         mutate;
         mutateByReceiverUsernameOrCurrentUser;
@@ -1453,11 +1453,9 @@ export default function ChatBox() {
                                   dataMessageTemporary.username
                                 ? dataMessageTemporary.content
                                 : chatGroup.content}
-                              {/* {chatGroup.content || "Không có nội dung"} */}
-                               
-                            {/* <em> {formatTime(msg.createAt)}</em> */}
+                              {/* {chatGroup.content || "Không có nội dung"} */}                               
                             </p>
-                            <p className="col text-end"> {formatTime(chatGroup.timestamp)}</p>
+                            {/* <p className="col text-end"> {formatTime(chatGroup.timestamp)}</p> */}
                           </div>
                         </ListGroup.Item>
                       );
