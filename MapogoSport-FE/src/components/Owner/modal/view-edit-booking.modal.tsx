@@ -13,15 +13,13 @@ interface OwnerProps {
     setCheckDataStatus: (v: boolean) => void;
     startTimeKey: number;
     bookingDetailData?: BookingDetailFullName;
-    userData?: User;
-    paymentMethod?: PaymentMethod
     sport?: SportField;
     bookingBySubscriptionKey?: BookingDetail[];
 }
 
 const BookingModal = (props: OwnerProps) => {
-    const { showViewOrEditBookingModal, setShowViewOrEditBookingModal, paymentMethod, sport, bookingBySubscriptionKey
-        , owner, checkDataStatus, setCheckDataStatus, startTimeKey, bookingDetailData, userData } = props;
+    const { showViewOrEditBookingModal, setShowViewOrEditBookingModal, sport, bookingBySubscriptionKey
+        , owner, checkDataStatus, setCheckDataStatus, startTimeKey, bookingDetailData } = props;
 
     const [editBooking, setEditBooking] = useState<boolean>(true);
     const [dateBooking, setDateBooking] = useState<string>();
@@ -918,7 +916,6 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     const [note, setNote] = useState<string>();
-
     const testOnclick = () => {
         // toast.success("NGON TA: " + note);
         handleCancelBookingDetail()
@@ -1283,7 +1280,7 @@ const BookingModal = (props: OwnerProps) => {
                     </Button>
                 </Modal.Footer>
             </Modal >
-            <NotificationModal renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
+            <NotificationModal textHeadNotification={"Lý do hủy sân"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
             </NotificationModal>
         </>
     )

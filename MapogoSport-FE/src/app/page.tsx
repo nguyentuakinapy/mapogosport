@@ -1,5 +1,5 @@
 'use client'
-import { Container, Row, Col, Image, Form, Button } from "react-bootstrap";
+import { Container, Row, Col, Image, Form, Button, Carousel } from "react-bootstrap";
 import { useEffect, useState } from 'react';
 import HomeLayout from "@/components/HomeLayout";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import Popup from "@/components/User/modal/popup-voucher.modal";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
+import { formatPrice } from "@/components/Utils/Format";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
@@ -78,7 +79,6 @@ export default function Home() {
     } else {
       toast.warning("Bạn chưa đăng nhập, vui lòng đăng nhập hoặc đăng ký tài khoản!")
     }
-
   }
 
   useEffect(() => {
@@ -154,6 +154,36 @@ export default function Home() {
     window.location.href = "/categories/sport_field";
   };
 
+  // VOUCHER
+  const [voucher, setVoucher] = useState<Voucher[]>([])
+
+  useEffect(() => {
+
+    fetchDataVoucher()
+  }, [])
+
+  const fetchDataVoucher = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/rest/voucher/findAll`);
+      const data = await response.json();
+      setVoucher(data);
+      console.log("Voucher", data)
+    } catch (error) {
+      console.log("Error fetch voucher data", error)
+    }
+  }
+  //Handel select voucher khi active
+  const filterVouchers = (vouchers: Voucher[]) => {
+    const currentTime = new Date().getTime();
+    return vouchers.filter(voucher => {
+      const activeTime = new Date(voucher.activeDate).getTime();
+      const endTime = new Date(voucher.endDate).getTime();
+      return currentTime >= activeTime && currentTime <= endTime;
+    });
+  };
+
+  const filteredVouchers = filterVouchers(voucher);
+
   return (
     <HomeLayout>
       <div className="search-sport">
@@ -201,6 +231,169 @@ export default function Home() {
           </Col>
         </Row>
       </Container>
+      {/* GIỚI THIỆU VỀ CHỦ SÂN */}
+
+      {/* SÂN THỂ THAO MỚI  */}
+      <Container className="pt-5">
+        <div className="row a-more">
+          <h3 className="fw-bold col-10">SÂN THỂ THAO MỚI</h3>
+          <div className="col-2 text-end">
+            <a href="/categories/sport_field" className="see-more-link">Xem Thêm</a>
+          </div>
+        </div>
+        <div style={{ fontSize: '15px' }}>
+          <Row className="">
+            {sportFields.slice(0, 4).map((field: SportField) => (
+              <Col xs={3} key={field.sportFieldId}>
+                <div className="user-border">
+                  <div className="mb-3">
+                    <Link href={"#"}>
+                      <Image
+                        src={`${field.image}`}
+                        alt={field.name}
+                        style={{
+                          maxHeight: "200px",
+                          maxWidth: "450px",
+                          minHeight: "200px",
+                          objectFit: "cover"
+                        }}
+                      />
+                    </Link>
+                  </div>
+                  <div className="content">
+                    <div className="mb-1 title">
+                      <Link href={"#"}><b>{field.name}</b></Link>
+                    </div>
+                    <div className="address mb-1">
+                      <span className="me-2">Khu vực:</span>{field.address}
+                      <span className="mx-2">-</span>Hồ Chí Minh
+                    </div>
+                    <div className="d-flex align-items-center justify-content-between">
+                      <div>Số sân: {field.quantity}</div>
+                      <div className="star-item text-warning">
+                        {renderStars(rating)}
+                      </div>
+                    </div>
+                    <Link href={`/sport-detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
+                  </div>
+                </div>
+              </Col>
+            ))}
+          </Row>
+        </div>
+        {/* VOUCHER */}
+        <div className="row a-more mt-5">
+          <h3 className="fw-bold col-10">MÃ GIẢM GIÁ SẢN PHẨM</h3>
+          <div className="col-2 text-end">
+            <a href="/voucher" className="see-more-link">Xem Thêm</a>
+          </div>
+        </div>
+        <div style={{ fontSize: '15px' }}>
+          <div className="d-flex m-auto">
+            {filteredVouchers.slice(0, 3).map((voucher, index) => (
+              <div key={index} className="voucher-item p-2 mx-3">
+                <div className="voucher-info text-center col-4 border-end">
+                  <div className="circle">
+                    <span className="brand-name">Mapogo</span>
+                  </div>
+                </div>
+                <div className="voucher-discount text-center col-6 ">
+                  <span className="discount">Giảm giá {voucher.discountPercent} %</span>
+                  <span className="expiry">HSD: {new Date(voucher.endDate).toLocaleDateString('en-GB')}</span> <br />
+                  <em className='text-secondary' style={{ fontSize: "12px" }}>Số lượng: {voucher.quantity}</em>
+                </div>
+                <div className="get col-2 text-center ">
+                  <button type="button" className="btn btn-dark text-center "
+                    // onClick={() => handelSubmitGetVoucher(voucher.voucherId)}
+                    disabled={voucher.quantity === 0}
+                  >Nhận</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* SẢN PHẨM */}
+        <div className="row a-more mt-5">
+          <h3 className="fw-bold col-10">SẢN PHẨM MỚI</h3>
+          <div className="col-2 text-end">
+            <a href="/categories/products" className="see-more-link">Xem Thêm</a>
+          </div>
+        </div>
+        <Row>
+          {products.slice(0, 4).map((product, index) => {
+            const reviews = product.productReviews || [];
+            const reviewCount = reviews.length; // Total number of reviews
+            const averageRating = reviewCount > 0
+              ? (reviews.reduce((total, review) => total + review.rating, 0) / reviewCount).toFixed(1)
+              : "0.0"; // Calculate average rating to one decimal place or set to "0.0" if no reviews
+
+            const fullStars = Math.floor(parseFloat(averageRating)); // Full stars based on integer part of averageRating
+            const hasHalfStar = parseFloat(averageRating) - fullStars >= 0.5; // Determine if a half star is needed
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Remaining stars are empty stars
+
+            return (
+              <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
+                <div nh-product={product.productId} className="product-item card border">
+                  <div className="inner-image mb-3">
+                    <div className="product-status">
+                      <div className="onsale"></div>
+                    </div>
+                    <Link href={`/product-detail/${product.productId}`}>
+                      <img
+                        className="w-100 h-100 p-1"
+                        style={{
+                          aspectRatio: "1 / 0.8", // Tạo tỷ lệ vuông
+                          maxWidth: "350px",
+                          maxHeight: "250px",
+                          objectFit: "cover",
+                          borderRadius: '10px'
+                        }}
+                        alt={product.name}
+                        src={`${typeof product.image === 'string' ? product.image : ''}`}
+                      />
+
+                    </Link>
+                  </div>
+
+                  <div className="inner-content">
+                    <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
+                      <Link href={`/product-detail/${product.productId}`}>{product.name}</Link>
+                    </div>
+                    <div className="product-category ms-1">
+                      <Link href={`/product-detail/${product.productId}`}>{product.categoryProduct.name}</Link>
+                    </div>
+                    <div className="price">
+                      <span className="price-amount ms-1">{formatPrice(product.price)}</span>
+                    </div>
+
+                    {/* Average rating stars */}
+                    <div className="star-item star d-flex mt-1 ms-1">
+                      <div className="icon text-warning mb-2">
+                        {[...Array(fullStars)].map((_, i) => (
+                          <i key={`full-${i}`} className="bi bi-star-fill"></i>
+                        ))}
+                        {hasHalfStar && <i className="bi bi-star-half"></i>}
+                        {[...Array(emptyStars)].map((_, i) => (
+                          <i key={`empty-${i}`} className="bi bi-star"></i>
+                        ))}
+                      </div>
+                      {/* Display average rating and review count */}
+                      <div className="number ms-1">({averageRating} stars, {reviewCount} reviews)</div>
+                    </div>
+
+                  </div>
+                </div>
+              </Col>
+            );
+          })}
+        </Row>
+      </Container>
+
+
+
+
+
+
       <Container className="pt-3">
         <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">
           <div className="carousel-inner">
@@ -282,156 +475,6 @@ export default function Home() {
             <div className="col">
               <img src="https://img.thegioithethao.vn/media/icon/thi-cong-cai-tao.webp" className="w-100" alt="" />
             </div>
-          </div>
-        </div>
-        {/* Sale sốc */}
-        <div>
-          <h3 className="text-center fw-bold mt-5">SALE SỐC</h3>
-          <div style={{ fontSize: '15px' }}>
-            <Row className="my-3">
-              <Col xs={4}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Col>
-              <Col xs={4}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Col>
-              <Col xs={4}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image src={"/images/ck3.jpg"} alt="Tên sản phẩm" />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>Crusader King 3 - Royal Edition</b></Link>
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div><b className="text-danger">Giá:</b> <b>1.000.000 ₫</b></div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Col>
-            </Row>
-          </div>
-        </div>
-        {/* Sân thể thao mới */}
-
-        <div>
-          <div className="row a-more">
-            <h3 className="fw-bold col-10">SÂN THỂ THAO MỚI</h3>
-            <div className="col-2 text-end">
-              <a href="/categories/sport_field" className="see-more-link">Xem Thêm</a>
-            </div>
-          </div>
-          <div style={{ fontSize: '15px' }}>
-            <Row className="my-3">
-              {sportFields.slice(0, 8).map((field: SportField) => (
-                <Col xs={3} key={field.sportFieldId}>
-                  <div className="user-border">
-                    <div className="mb-3">
-                      <Link href={"#"}>
-                        <Image src={`${field.image}`} alt={field.name} />
-                      </Link>
-                    </div>
-                    <div className="content">
-                      <div className="mb-1 title">
-                        <Link href={"#"}><b>{field.name}</b></Link>
-                      </div>
-                      <div className="address mb-1">
-                        <span className="me-2">Khu vực:</span>{field.address}
-                        <span className="mx-2">-</span>Hồ Chí Minh
-                      </div>
-                      <div className="d-flex align-items-center justify-content-between">
-                        <div>Số sân: {field.quantity}</div>
-                        <div className="star-item text-warning">
-                          {renderStars(rating)}
-                        </div>
-                      </div>
-                      <Link href={`/sport-detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
-                    </div>
-                  </div>
-                </Col>
-              ))}
-            </Row>
-
-            {/* {sportFields.length > 8 && (
-              <div className="text-end">
-                <Link href="/more-sports" className="btn btn btn-dark">Xem thêm<i className="bi bi-chevron-compact-right"></i></Link>
-              </div>
-            )} */}
-          </div>
-        </div>
-        {/* Sản phẩm mới */}
-        <div>
-          <div className="row a-more">
-            <h3 className="fw-bold col-10">SẢN PHẨM MỚI</h3>
-            <div className="col-2 text-end">
-              <a href="/categories/products" className="see-more-link">Xem Thêm</a>
-            </div>
-          </div>
-          <div style={{ fontSize: '15px' }}>
-            <Row className="my-3">
-              {/* {products.slice(0, 8).map((product: Product) => (
-                <Col xs={3} key={product.productId}>
-                  <div className="user-border">
-                    <div className="mb-3">
-                      <Link href={"#"}>
-                        <Image src={"/images/ck3.jpg"} alt={product.name} />
-                      </Link>
-                    </div>
-                    <div className="content">
-                      <div className="mb-1 title">
-                        <Link href={"#"}><b>{product.name}</b></Link>
-                      </div>
-                      <div className="d-flex align-items-center justify-content-between">
-                        <div> <b>{formatPrice(product.price)}</b></div>
-                        <div className="star-item text-warning">
-                          {renderStars(rating)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Col>
-              ))} */}
-            </Row>
           </div>
         </div>
         {/* Thông tin nổi bật */}
