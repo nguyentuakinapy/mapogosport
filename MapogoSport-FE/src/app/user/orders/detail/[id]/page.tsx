@@ -1,10 +1,12 @@
 'use client'
 import UserLayout from "@/components/User/UserLayout";
 import Link from "next/link";
-import { Table, Image, Row, Col, Button } from "react-bootstrap";
+import { Table, Image, Row, Col, Button, Modal, Form } from "react-bootstrap";
 import '../../../types/user.scss';
 import { useEffect, useState } from "react";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
+import CancelOrderModal from "../../CancelOrderModal";
+import { toast } from "react-toastify";
 
 const OrdersDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -15,29 +17,70 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
         revalidateOnReconnect: false,
     });
 
-    const [orderDetail, setOrderDetail] = useState<OrderDetail[]>([]);
-    const [order, setOrder] = useState<OrderMap | null>(null);
+    const [orderDetail, setOrderDetail] = useState<OrderDetailMap[]>([]);
+    const [orderInfo, setOrderInfo] = useState<any>(null);
 
     useEffect(() => {
         if (data) {
-            setOrderDetail(data);
+            setOrderDetail(data.orderDetails);
+            setOrderInfo({
+                fullname: data.fullname,
+                phoneNumber: data.phoneNumber,
+                address: data.address,
+                status: data.status
+            });
         }
     }, [data]);
 
-    useEffect(() => {
-        const selectedOrder = sessionStorage.getItem('selectedOrder');
-        if (selectedOrder) {
-            const parsedOrder = JSON.parse(selectedOrder) as OrderMap;
-            setOrder(parsedOrder);
-        }
-    }, []);
+    const handleStatusChange = () => {
+        fetch(`http://localhost:8080/rest/admin/order/update`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ orderId: Number(params.id), status: "Đã hủy" }),
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            mutate(`http://localhost:8080/rest/user/orders/detail/${params.id}`);
+            toast.success('Cập nhật thành công!');
+        });
+    };
 
     const totalAmount = orderDetail.reduce((sum: number, order: any) => {
-        return sum + (order.productDetailSize.price * order.quantity);
+        return sum + (order.productPrice * order.quantity);
     }, 0);
 
     if (isLoading) return <div>Đang tải...</div>;
     if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
+
+
+    const handleCancelOrder = (reason: string) => {
+        console.log("Lý do hủy:", reason);
+        fetch(`http://localhost:8080/rest/order/cancel`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ orderId: params.id, status: "Đã hủy", reason: reason }),
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Hủy đơn hàng không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            toast.success('Hủy đơn hàng thành công!');
+            if (order) {
+                setOrder({
+                    ...order,
+                    status: 'Đã hủy',
+                });
+            }
+        });
+    };
 
     return (
         <UserLayout>
@@ -60,14 +103,14 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                                     <tr key={detail.orderDetailId}>
                                         <td className="text-start title">
                                             <Link href={"#"}>
-                                                <Image src={`${detail.productDetailSize.productDetail.product.image}`} width={"15%"} className="mx-2"></Image>
-                                                {detail.productDetailSize.productDetail.product.name}
+                                                <Image src={`${detail.productImage}`} width={"15%"} className="mx-2"></Image>
+                                                {detail.productName}
                                             </Link>
                                         </td>
-                                        <td>{detail.productDetailSize.productDetail.color}</td>
-                                        <td>{detail.productDetailSize.price.toLocaleString()} ₫</td>
+                                        <td>{detail.productColor}</td>
+                                        <td>{detail.productPrice.toLocaleString()} ₫</td>
                                         <td>{detail.quantity}</td>
-                                        <td>{(detail.productDetailSize.price * detail.quantity).toLocaleString()} ₫</td>
+                                        <td>{(detail.productPrice * detail.quantity).toLocaleString()} ₫</td>
                                     </tr>
                                 ))
                             )}
@@ -81,21 +124,21 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
             </div>
             <b className='text-danger' style={{ fontSize: '20px' }}>Địa chỉ nhận hàng</b>
             <div className='p-3' style={{ fontSize: '15px' }}>
-                <Row className='item-order'>
+                <Row className='item-address'>
                     <Col xs={12} md={5}>
-                        <p><i className="bi bi-person-vcard"></i> <b>Họ và tên: </b>{order?.fullname}</p>
-                        <p><i className="bi bi-telephone-fill"></i> <b>Số điện thoại:</b> {order?.phoneNumber}</p>
+                        <p><i className="bi bi-person-vcard"></i> <b>Họ và tên: </b>{orderInfo?.fullname}</p>
+                        <p><i className="bi bi-telephone-fill"></i> <b>Số điện thoại:</b> {orderInfo?.phoneNumber}</p>
                     </Col>
                     <Col xs={12} md={7}>
-                        <p><i className="bi bi-geo-alt-fill"></i> <b>Địa chỉ: </b>{order?.address || "Chưa cập nhật địa chỉ"}</p>
+                        <p><i className="bi bi-geo-alt-fill"></i> <b>Địa chỉ: </b>{orderInfo?.address || "Chưa cập nhật địa chỉ"}</p>
                     </Col>
                 </Row>
             </div>
-            {order?.status === 'Đã hoàn thành' ? (
+            {orderInfo?.status === 'Đã hoàn thành' ? (
                 <div className="btn-layout"><Button className="btn-buyAgain">Tiếp tục mua hàng</Button></div>
-            ) : order?.status === 'Đã hủy' ? (
+            ) : orderInfo?.status === 'Đã hủy' ? (
                 <div className="btn-layout"><Button className="btn-buyAgain">Mua lại</Button></div>
-            ) : <div className="btn-layout"><Button className="btn-cancel">Hủy hóa đơn</Button></div>}
+            ) : <div className="btn-layout"><Button className="btn-cancel" onClick={handleStatusChange}>Hủy hóa đơn</Button></div>}
         </UserLayout>
     )
 }

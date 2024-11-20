@@ -123,7 +123,7 @@ const PageVoucher = () => {
                             <img src="/images/bannervoucher.svg" alt="Voucher Banner" className="img-fluid" />
                         </div>
                         <div className="col-md-4 text-center">
-                            <img src="/images/qrcode.png" alt="QR Code" className="img-fluid" style={{ maxHeight: '250px' }} />
+                            <img src="/images/QRFB.png" alt="QR Code" className="img-fluid" style={{ maxHeight: '250px' }} />
                         </div>
                     </div>
                     <div>

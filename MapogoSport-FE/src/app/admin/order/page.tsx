@@ -99,14 +99,12 @@ const AdminOrder = () => {
     };
 
     const renderTable = (filteredOrders: OrderMap[]) => {
-        const indexOfLastItem = currentPage * itemsPerPage;
-        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
         return (
             <div className="box-table-border mb-4">
                 <Table striped className="mb-0">
                     <thead>
                         <tr>
-                            <th style={{ width: '120px' }}>STT</th>
+                            <th style={{ width: '120px' }}>Mã hóa đơn</th>
                             <th style={{ width: '250px' }}>Họ và tên</th>
                             <th>Ngày mua</th>
                             <th>Tổng tiền</th>
@@ -117,16 +115,18 @@ const AdminOrder = () => {
                     </thead>
                     <tbody>
                         {filteredOrders.length > 0 ?
-                            filteredOrders.map((order, index) => (
+                            filteredOrders.map(order => (
                                 <tr key={order.orderId}>
-                                    <td className="text-start">{`#${indexOfFirstItem + index + 1}`}</td>
+                                    <td className="text-start">
+                                        <Link href={`/admin/order/${order.orderId}`}>#{order.orderId}</Link>
+                                    </td>
                                     <td className="text-start title">{order.fullname}</td>
                                     <td>{new Date(order.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${order.amount.toLocaleString()} ₫`}</td>
                                     <td className="title-brand">{order.address}</td>
                                     <td>{renderStatusDropdown(order)}</td>
                                     <td>
-                                        <Link href={`/admin/order/${order.orderId}`} onClick={() => handleViewDetail(order)}>Xem</Link>
+                                        <Link href={`/admin/order/${order.orderId}`}>Xem</Link>
                                     </td>
                                 </tr>
                             )) :
@@ -142,7 +142,8 @@ const AdminOrder = () => {
     const filteredOrders = orderData.filter(order => {
         return (
             order.fullname.toLowerCase().includes(searchTerm) ||
-            order.address.toLowerCase().includes(searchTerm)
+            order.address.toLowerCase().includes(searchTerm) ||
+            order.orderId.toString().includes(searchTerm)
         )
     }).filter(order => {
         switch (activeTab) {

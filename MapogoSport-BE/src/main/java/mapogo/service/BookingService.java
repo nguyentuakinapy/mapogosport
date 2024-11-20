@@ -47,5 +47,5 @@ public interface BookingService {
 	
 	List<Booking> findByUsername(String username);
 	
-
+	Integer getCountBookingByOwnerId(Integer ownerId);
 }

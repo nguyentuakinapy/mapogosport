@@ -265,7 +265,7 @@ const CheckoutPage = () => {
     if (!user1) {
       errors.push('Người dùng không tồn tại');
     }
-    if (!phoneNumberSelected) {
+    if (!phoneNumberSelected || phoneNumberSelected !== 'other') {
       errors.push('Vui lòng chọn số điện thoại');
     }
     if (!customPhoneNumber && !phoneNumberSelected) {
@@ -301,6 +301,8 @@ const CheckoutPage = () => {
 
     return true; // Trả về true nếu tất cả các trường hợp đều hợp lệ
   };
+  console.log(phoneNumberSelected);
+
   //hàn kiểm tra sđt
   function isValidPhoneNumber(phoneNumberSelected: string) {
     const phoneRegex = /^(0|\+84)(3|5|7|8|9)\d{8}$/;
@@ -410,7 +412,6 @@ const CheckoutPage = () => {
       }));
       try {
         const order = await handleCreateOrder();
-
         const response = await axios.post(
           'http://localhost:8080/api/payment/create-momo-payment',
           listCartCheckout,
@@ -425,8 +426,38 @@ const CheckoutPage = () => {
         setLoading(false);
         console.error('Thanh toán thất bại', error);
       }
-    }
+    } else if (paymentMethod === "Thanh toán ví") {
+      setLoading(true);
+      console.log(paymentMethod);
+      console.log(user1);
 
+      if (user1?.wallet?.balance >= newTotalPrice) {
+        const order = await handleCreateOrder();
+        if (order) {
+          const listCartCheckout = data.map(item => ({
+            productDetailSizeId: item.productDetailSize.productDetailSizeId,
+            quantity: item.quantity
+          }));
+
+          try {
+            const orderDetailResponse = await axios.post(
+              `http://localhost:8080/rest/create_orderDetail`,
+              listCartCheckout,
+              {
+                params: { orderId: order.orderId }, // truyền orderId qua params
+              }
+            );
+            setOrderId(order.orderId);
+            setShowOrderSuccessModal(true);
+          } catch (error) {
+            console.error('Error during payment:', error);
+          }
+        }
+      } else {
+        toast.warn("Số dư của bạn không đủ để thanh toán vui lòng chọn phương thức thanh toán khác hoặc nạp thêm tiền vào ví!");
+      }
+
+    }
   };
 
 
@@ -589,6 +620,24 @@ const CheckoutPage = () => {
                   </label>
                 </div>
                 <i className="bi bi-cash" style={{ cursor: 'pointer' }} onClick={() => setOpen_1(!open_1)}></i>
+              </div>
+              {/* Ví */}
+              <div className="card-body d-flex list-group-item align-items-center">
+                <div className="form-check flex-grow-1">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="paymentMethod"
+                    id="cod"
+                    aria-expanded={open}
+                    value={"Thanh toán ví"}
+                    onChange={handlePaymentMethodChange}
+                  />
+                  <label className="form-check-label" htmlFor="cod">
+                    Thanh toán bằng ví của bạn
+                  </label>
+                </div>
+                <i className="bi bi-wallet" style={{ cursor: 'pointer' }} onClick={() => setOpen_1(!open_1)}></i>
               </div>
               {/* Collapse for bank transfer details */}
               <Collapse in={open_1}>

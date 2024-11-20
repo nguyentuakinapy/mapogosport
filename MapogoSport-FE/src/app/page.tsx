@@ -1,18 +1,12 @@
 'use client'
-import { Container, Carousel, Row, Col, Image, Button } from "react-bootstrap";
+import { Container, Row, Col, Image, Form, Button } from "react-bootstrap";
 import { useEffect, useState } from 'react';
 import HomeLayout from "@/components/HomeLayout";
 import Link from "next/link";
 import './user/types/user.scss'
-import { formatPrice } from "@/components/Utils/Format";
 import CreateOwnerModal from "@/components/Owner/modal/create-owner.modal";
-import LoginModal from "@/components/account/modal/login.modal";
 import { toast } from "react-toastify";
-import RegisterModal from "@/components/account/modal/register.modal";
-import ForgotPassword from "@/components/account/modal/forgotPassword.modal";
-import ChangePasswordNew from "@/components/account/modal/change-password-new.modal";
 import Popup from "@/components/User/modal/popup-voucher.modal";
-import { useData, UserProvider } from "./context/UserContext";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 
@@ -22,12 +16,9 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [refreshKey, setRefreshKey] = useState<number>(999);
-
-  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
-  const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
-  const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
-  const [showChangePasswordNew, setShowChangePasswordNew] = useState<boolean>(false);
   const [showCreateOwnerModal, setShowCreateOwnerModal] = useState<boolean>(false);
+  const [typeFilter, setTypeFilter] = useState<any>(null);
+  const [nameFilter, setNameFilter] = useState<any>(null);
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -154,6 +145,14 @@ export default function Home() {
     };
   }, []);
 
+  const handleSearch = () => {
+    const searchData = {
+      name: nameFilter,
+      type: typeFilter,
+    };
+    sessionStorage.setItem('searchFilters', JSON.stringify(searchData));
+    window.location.href = "/categories/sport_field";
+  };
 
   return (
     <HomeLayout>
@@ -166,18 +165,18 @@ export default function Home() {
           </div>
           <div className="d-flex justify-content-center mt-4">
             <div className="input-group" style={{ width: '70%', backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: '8px', padding: '10px' }}>
-              <select defaultValue={0} className="form-control" style={{ borderWidth: '0 1px 0 0', borderStyle: 'solid', borderColor: 'black' }}>
+              <Form.Select onChange={(e) => setTypeFilter(e.target.value)} style={{ borderWidth: '0 1px 0 0', borderStyle: 'solid', borderColor: 'black' }}>
                 <option value={'0'}>Lọc theo loại sân</option>
                 {categoryFields.map(item => (
                   <option key={item.categoriesFieldId} value={item.categoriesFieldId}>{item.name}</option>
                 ))}
-              </select>
-              <input type="text" className="form-control" placeholder="Nhập tên sân hoặc địa chỉ" style={{ borderWidth: '0 1px 0 1px', borderStyle: 'solid', borderColor: 'black' }} />
-              <input type="text" className="form-control" placeholder="Nhập khu vực" style={{ borderWidth: '0 0 0 1px', borderStyle: 'solid', borderColor: 'black' }} />
+              </Form.Select>
+              <Form.Control onChange={(e) => setNameFilter(e.target.value)} type="text" placeholder="Nhập tên sân hoặc địa chỉ"
+                style={{ borderWidth: '0 1px 0 1px', borderStyle: 'solid', borderColor: 'black' }} />
               <div className="input-group-append">
-                <button className="btn btn-warning" type="button" style={{ height: '50px', borderRadius: '4px', fontWeight: 'bold' }}>
+                <Button onClick={handleSearch} variant="warning" style={{ height: '50px', borderRadius: '4px', fontWeight: 'bold' }}>
                   Tìm kiếm <i className="bi bi-search fw-bold"></i>
-                </button>
+                </Button>
               </div>
             </div>
           </div>

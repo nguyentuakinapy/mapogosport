@@ -39,7 +39,6 @@
     }
 }
 
-
 .text-center {
     .avatar-upload {
         display: inline-block;
@@ -328,6 +327,18 @@
     }
 }
 
+.frame-edit-secondary {
+    background: #bcffee !important;
+    cursor: not-allowed !important;
+    outline: 2px solid transparent;
+
+    .status-label {
+        cursor: not-allowed !important;
+        color: rgb(181, 164, 164) !important;
+        font-weight: 700 !important;
+    }
+}
+
 .search-date {
     flex-wrap: nowrap;
     display: flex;
@@ -490,7 +501,7 @@
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
-                    max-width: 180px;
+                    max-width: 130px;
                 }
 
                 .title-brand {

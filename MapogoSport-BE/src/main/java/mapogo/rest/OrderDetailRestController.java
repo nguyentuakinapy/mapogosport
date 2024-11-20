@@ -81,4 +81,9 @@ public class OrderDetailRestController {
 		return orderDetailService.findOrderDetailByOrderId(orderId);
 	}
 	//đến đây
+	
+	@GetMapping("/user/orders/detail/{orderId}")
+	public Map<String, Object> getOrderDetails(@PathVariable("orderId") Integer orderId) {
+		return orderDetailService.findOrderDetailById(orderId);
+	}
 }

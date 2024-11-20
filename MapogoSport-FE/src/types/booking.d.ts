@@ -92,7 +92,10 @@ interface BookingDetailFullName {
     date: string;
     status: string;
     fullName: string;
+    phoneNumber: string;
+    checkOffline: boolean;
     subscriptionKey: string;
+    paymentMethod: PaymentMethod;
 }
 
 interface AvailableBooking {
@@ -117,6 +120,7 @@ interface BookingByUserMap {
     ]
     sportFieldName: string;
     totalAmount: number;
+    oldTotalAmount: number;
     status: string;
     date: Date;
     percentDeposit: number;
@@ -128,13 +132,22 @@ interface BookingFindAll {
     bookingUserFullname: string;
     bookingUserPhone: string;
     totalAmount: number;
+    oldTotalAmount: number;
     percentDeposit: number;
     status: string;
     date: Date;
     user: {
         username: string;
         fullname: string;
-    }
+    };
+    bookingDetails: [
+        {
+            bookingDetailStatus: string;
+            price: number;
+            bookingDetailDate: Date;
+            startTime: string;
+        }
+    ]
 }
 
 interface BookingDetailMap {
@@ -147,6 +160,8 @@ interface BookingDetailMap {
     status: string;
     address: string;
     ownerFullname: string;
-    ownerPhoneNumberUsers: string
+    ownerPhoneNumberUsers: string;
+    deposit: number;
+    statusBooking: string
 }
 
