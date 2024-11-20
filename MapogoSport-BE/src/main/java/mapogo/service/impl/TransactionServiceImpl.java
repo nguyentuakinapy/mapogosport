@@ -37,7 +37,7 @@ public class TransactionServiceImpl implements TransactionService{
 	
 	@Transactional
 	@Override
-	public void createTransactionByPaymentBooking(Integer bookingId, double totalAmount) {
+	public void createTransactionUserByPaymentBooking(Integer bookingId, double totalAmount) {
 		Booking booking = bookingDAO.findById(bookingId).get();
 		
 		Wallet wallet = booking.getUser().getWallet();
@@ -46,26 +46,58 @@ public class TransactionServiceImpl implements TransactionService{
 		Transaction transaction = new Transaction();
 		transaction.setAmount(BigDecimal.valueOf(totalAmount));
 		transaction.setCreatedAt(LocalDateTime.now());
-		transaction.setDescription("Thanh toán cho bookingId - " + bookingId);
+		transaction.setDescription("Thanh toán cho bookingId: " + bookingId);
 		transaction.setTransactionType("-" + totalAmount);
 		transaction.setWallet(wallet);
 		transactionDAO.save(transaction);
 		walletDAO.save(wallet);
 	}
 	
-//	@Override
-//	public void updateWalletBalanceAndCreateTransaction(Wallet wallet, Integer amount, String description) {
-//		wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(amount)));
-//	    
-//	    Transaction transaction = new Transaction();
-//	    transaction.setAmount(BigDecimal.valueOf(amount));
-//	    transaction.setCreatedAt(LocalDateTime.now());
-//	    transaction.setDescription(description);
-//	    transaction.setTransactionType("+" + amount);
-//	    transaction.setWallet(wallet);
-//	    
-//	    transactionDAO.save(transaction);
-//	    walletDAO.save(wallet);
-//	}
+	@Transactional
+	@Override
+	public void createTransactionOwnerByPaymentBooking(Integer bookingId, double totalAmount) {
+		Booking booking = bookingDAO.findById(bookingId).get();
+		
+		Wallet wallet = booking.getOwner().getUser().getWallet();
+		wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(totalAmount)));
+		
+		Transaction transaction = new Transaction();
+		transaction.setAmount(BigDecimal.valueOf(totalAmount));
+		transaction.setCreatedAt(LocalDateTime.now());
+		transaction.setDescription("Được thanh toán từ bookingId: " + bookingId);
+		transaction.setTransactionType("+" + totalAmount);
+		transaction.setWallet(wallet);
+		transactionDAO.save(transaction);
+		walletDAO.save(wallet);
+	}
 	
+	@Override
+	public void refundUserWalletBooking(Wallet wallet, Double amount, Integer bookingId) {
+		wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(amount)));
+	    
+	    Transaction transaction = new Transaction();
+	    transaction.setAmount(BigDecimal.valueOf(amount));
+	    transaction.setCreatedAt(LocalDateTime.now());
+	    transaction.setDescription("Hoàn tiền từ bookingId: " + bookingId);
+	    transaction.setTransactionType("+" + amount);
+	    transaction.setWallet(wallet);
+	    
+	    transactionDAO.save(transaction);
+	    walletDAO.save(wallet);
+	}
+	
+	@Override
+	public void refundOwnerWalletBooking(Wallet wallet, Double amount, Integer bookingId) {
+		wallet.setBalance(wallet.getBalance().subtract(BigDecimal.valueOf(amount)));
+	    
+	    Transaction transaction = new Transaction();
+	    transaction.setAmount(BigDecimal.valueOf(amount));
+	    transaction.setCreatedAt(LocalDateTime.now());
+	    transaction.setDescription("Hoàn tiền cho bookingId: " + bookingId);
+	    transaction.setTransactionType("-" + amount);
+	    transaction.setWallet(wallet);
+	    
+	    transactionDAO.save(transaction);
+	    walletDAO.save(wallet);
+	}
 }

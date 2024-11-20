@@ -5,6 +5,7 @@ body {
     background: #fff;
 }
 
+
 .topbar {
     height: 60px;
 
@@ -154,6 +155,7 @@ body {
         width: 110px;
     }
 }
+
 .custom-tabs {
     .nav-item {
         flex: 1;
@@ -191,6 +193,7 @@ body {
         }
     }
 }
+
 .dropdown {
     .dropdown-toggle {
         width: 110px !important;
@@ -198,32 +201,39 @@ body {
         text-align: center;
         font-weight: 700;
     }
+
     .dropdown-menu {
         font-size: 13px;
         background: #142239;
         transform: translate3d(-7.8px, 32px, 0px) !important;
+
         .dropdown-item {
             color: white;
+
             &:hover {
                 color: black;
             }
         }
     }
 }
+
 .pagination {
     display: flex;
     align-items: center;
     justify-content: center;
     margin-top: 1rem;
+
     .page-item.active {
         .page-link {
             background: #142239 !important;
         }
     }
 }
+
 .form-control {
     border: 1px solid !important;
 }
+
 /*======================================================Order CSS End======================================================*/
 /*======================================================Order Detail CSS Start======================================================*/
 .detail-order {
@@ -241,28 +251,34 @@ body {
         }
     }
 }
+
 .btn-layout {
     display: flex !important;
     justify-content: flex-end !important;
+
     .btn-buyAgain {
         background-color: #142239;
         font-size: 15px;
         border: 1px solid #142239;
+
         &:hover {
             color: black;
             background-color: white;
         }
     }
+
     .btn-cancel {
         background-color: #dc3545;
         font-size: 15px;
         border: 1px solid #dc3545;
+
         &:hover {
             color: black;
             background-color: white;
         }
     }
 }
+
 .item-address {
     background: #f8f8f8;
     border-radius: 8px;
@@ -278,11 +294,13 @@ body {
     .btn-address {
         cursor: pointer;
         font-size: 1.1rem !important;
+
         &:hover {
             text-shadow: 0 0 10px #142239;
         }
     }
 }
+
 /*======================================================Order Detail CSS End======================================================*/
 /*======================================================Subcription CSS Start======================================================*/
 .packageUpdate {
@@ -400,3 +418,4 @@ body {
         color: #333;
     }
 }
+

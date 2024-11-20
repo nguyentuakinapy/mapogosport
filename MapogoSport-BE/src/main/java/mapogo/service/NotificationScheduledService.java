@@ -93,23 +93,24 @@ public class NotificationScheduledService {
 				List<BookingDetail> bds = bookingDetailDAO.findByDateAndTime(LocalDate.now(), bookingTime,
 						spf.getSportFieldId());
 
-				bds.forEach(bd -> {
-					System.err.println(bd.getStartTime() + " - " + bd.getSportFieldDetail().getName());
-
-					// Tạo thông báo cho người dùng
-					Notification n = new Notification();
-					n.setUser(bd.getBooking().getOwner().getUser());
-					n.setTitle("Khu vực " + spf.getName());
-					n.setMessage(bd.getSportFieldDetail().getName() + " sẽ bắt đầu đá lúc " + bd.getStartTime()
-							+ " đến " + bd.getEndTime());
-					n.setType("info");
-					n.setBooking(bd.getBooking());
-					// Lưu và gửi thông báo
-					notificationDAO.save(n);
-				});
-				messagingTemplate.convertAndSend("/topic/bookingDetail/notification",
-						spf.getOwner().getUser().getUsername());
-
+				if (!bds.isEmpty()) {
+					for (BookingDetail bd : bds) {
+						// Tạo thông báo cho người dùng
+						Notification n = new Notification();
+						n.setUser(bd.getBooking().getOwner().getUser());
+						n.setTitle("Khu vực " + spf.getName());
+						n.setMessage(bd.getSportFieldDetail().getName() + " sẽ bắt đầu đá lúc " + bd.getStartTime()
+								+ " đến " + bd.getEndTime());
+						n.setType("info");
+						n.setBooking(bd.getBooking());
+						// Lưu và gửi thông báo
+						notificationDAO.save(n);
+					}
+					messagingTemplate.convertAndSend("/topic/bookingDetail/notification",
+							spf.getOwner().getUser().getUsername());
+					messagingTemplate.convertAndSend("/topic/bookingDetail/notification/reload",
+							spf.getOwner().getUser().getUsername());
+				}
 			}
 		});
 	}

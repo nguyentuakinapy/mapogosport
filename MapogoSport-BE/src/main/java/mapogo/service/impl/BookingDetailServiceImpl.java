@@ -17,15 +17,19 @@ import org.springframework.stereotype.Service;
 
 import mapogo.dao.BookingDAO;
 import mapogo.dao.BookingDetailDAO;
+import mapogo.dao.OwnerDAO;
 import mapogo.dao.SportFieldDAO;
 import mapogo.dao.SportFieldDetailDAO;
 import mapogo.dao.UserDAO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
+import mapogo.entity.Owner;
 import mapogo.entity.PhoneNumberUser;
 import mapogo.entity.SportFieldDetail;
 import mapogo.entity.User;
+import mapogo.entity.Wallet;
 import mapogo.service.BookingDetailService;
+import mapogo.service.TransactionService;
 
 @Service
 public class BookingDetailServiceImpl implements BookingDetailService {
@@ -41,6 +45,12 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Autowired
 	UserDAO userDAO;
+	
+	@Autowired
+	TransactionService transactionService;
+	
+	@Autowired
+	OwnerDAO ownerDAO;
 
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
@@ -69,6 +79,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 					bookingDetailData.put("ownerPhoneNumberUsers", user.getPhoneNumber().getPhoneNumber());
 				}
 			}
+			bookingDetailData.put("deposit", bookingDetail.getBooking().getPercentDeposit());
+			bookingDetailData.put("statusBooking", bookingDetail.getBooking().getStatus());
 
 			resultMaps.add(bookingDetailData);
 		}
@@ -79,20 +91,50 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	public BookingDetail updateStatusBookingDetail(Map<String, Object> bookingDetailData) {
 		Integer bookingDetailId = (Integer) bookingDetailData.get("bookingDetailId");
 		String newStatus = (String) bookingDetailData.get("status");
+		
+		Object refundObj = bookingDetailData.get("refundAmount");
+		double refundAmount;
 
-		Optional<BookingDetail> optionalBookingDetail = bookingDetailDAO.findById(bookingDetailId);
-		if (optionalBookingDetail.isPresent()) {
-			BookingDetail bookingDetail = optionalBookingDetail.get();
+		if (refundObj instanceof String) {
+			refundAmount = Double.valueOf((String) refundObj);
+		} else if (refundObj instanceof Number) {
+			refundAmount = ((Number) refundObj).doubleValue();
+		} else {
+			throw new IllegalArgumentException("totalAmount must be a String or Number");
+		}
+
+
+		BookingDetail bookingDetail = bookingDetailDAO.findById(bookingDetailId).get();
+		if (bookingDetail != null) {
 			bookingDetail.setStatus(newStatus);
 			bookingDetailDAO.save(bookingDetail);
+			
 
 			Booking booking = bookingDetail.getBooking();
+			if (newStatus.equals("Đã hủy")) {
+				if (!booking.getUser().getUsername().equals("sportoffline")) {
+					Wallet userWallet = booking.getUser().getWallet();
+					if (userWallet != null) {
+						transactionService.refundUserWalletBooking(userWallet, refundAmount, booking.getBookingId());
+					}
+					
+					Owner owner = ownerDAO.findById(booking.getOwner().getOwnerId()).get();
+					if (owner != null) {
+						Wallet ownerWallet = owner.getUser().getWallet();
+						if (ownerWallet != null) {
+							transactionService.refundOwnerWalletBooking(ownerWallet, refundAmount, booking.getBookingId());
+						}
+					}
+				}
+			}
+
 			boolean allCancel = booking.getBookingDetails().stream()
 					.allMatch(detail -> "Đã hủy".equals(detail.getStatus()));
 			if (allCancel) {
 				booking.setStatus("Đã hủy");
 				bookingDAO.save(booking);
 			}
+			
 		}
 		return null;
 	}
@@ -169,12 +211,17 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	@Override
 	public BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId,
 			LocalDate date) {
-		return bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date,
+		BookingDetail b =  bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date,
 				"Đã hủy");
+		b.setFullName(b.getBooking().getFullName());
+		b.setPhoneNumber(b.getBooking().getPhoneNumber());
+		b.setCheckOffline(b.getBooking().getUser().getUsername().equals("sportoffline"));
+		b.setPaymentMethod(b.getBooking().getPaymentMethod());
+		return b;
 	}
 
 	@Override
-	public void cancelBookingDetail(Integer bookingDetailId) {
+	public void cancelBookingDetail(Integer bookingDetailId, String note) {
 		BookingDetail bd = bookingDetailDAO.findById(bookingDetailId).get();
 		bd.setStatus("Đã hủy");
 		bookingDetailDAO.save(bd);
@@ -191,6 +238,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		}
 		
 		if (index == bookingDetails.size()) {
+			booking.setNote(note);
 			booking.setStatus("Đã hủy");
 			bookingDAO.save(booking);
 		} else {
@@ -198,7 +246,10 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			booking.setTotalAmount(totalAmount);
 			bookingDAO.save(booking);
 		}
-
+		
+		if (!bd.getBooking().getUser().getUsername().equals("sportoffline")) {
+			
+		}
 	}
 
 	@Override
@@ -298,7 +349,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	}
 
 	@Override
-	public void cancelBookingDetailBySubscription(Integer bookingDetailId, String subscriptionKey) {
+	public void cancelBookingDetailBySubscription(Integer bookingDetailId, String subscriptionKey, String note) {
 		List<BookingDetail> bookingDetailsSub = bookingDetailDAO.findBySubscriptionKey(subscriptionKey);
 		BookingDetail bookingDetail = bookingDetailDAO.findById(bookingDetailId).get();
 
@@ -310,6 +361,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		});
 
 		booking.setStatus("Đã hủy");
+		booking.setNote(note);
 		bookingDAO.save(booking);
 	}
 

@@ -1,5 +1,5 @@
 "use client";
-import { Container, Row, Col, Form, Image, FloatingLabel, Table, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Image, FloatingLabel, Table, Button, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import React, { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 import useSWR from 'swr';
@@ -473,26 +473,6 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         }
     }
 
-    const [selectedSportType, setSelectedSportType] = useState<number | null>(null);
-
-    const handleIdBySize = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newSize = e.target.value;
-        if (sportField?.sportFielDetails) {
-            const filteredIds = sportField.sportFielDetails
-                .filter(detail => detail.size === newSize)
-                .map(detail => detail.sportFielDetailId);
-            const selectedDetail = sportField.sportFielDetails.find(detail => detail.size === newSize);
-            setSelectedSportType(selectedDetail ? selectedDetail.sportFielDetailId : null);
-        }
-    };
-
-    useEffect(() => {
-        if (sportField?.sportFielDetails) {
-            const initialSize = sportField.sportFielDetails[0].size;
-            handleIdBySize({ target: { value: initialSize } } as React.ChangeEvent<HTMLSelectElement>);
-        }
-    }, [sportField]);
-
 
     const [filteredData, setFilteredData] = useState(null);
     const handleClick = (value: number) => {
@@ -527,8 +507,13 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                     Đánh giá: 4/5 <i className="bi bi-star-fill"></i> (1 Đánh giá)
                                 </div>
                                 <div className="btn-option-icon ">
-                                    <i className="bi bi-heart-fill"></i>
-                                    <i onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>
+
+
+                                <i className="bi bi-heart-fill"></i>
+                                <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>
+                                <i  onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>   
+                                 </OverlayTrigger>            
+
                                 </div>
 
                             </div>

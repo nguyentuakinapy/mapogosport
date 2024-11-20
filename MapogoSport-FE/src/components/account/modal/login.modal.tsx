@@ -116,22 +116,22 @@ export default function Login(props: LoginProps) {
         }
     }
 
-    useEffect(() => {
-        const handleKeyDown = (event: any) => {
-            if (event.key === 'Enter') {
-                handleSubmit();
-            }
-            if (event.key == "Escape") {
-                handleClose();
-            }
-        };
+    // useEffect(() => {
+    //     const handleKeyDown = (event: any) => {
+    //         // if (event.key === 'Enter') {
+    //         //     handleSubmit();
+    //         // }
+    //         if (event.key == "Escape") {
+    //             handleClose();
+    //         }
+    //     };
 
-        window.addEventListener('keydown', handleKeyDown);
+    //     window.addEventListener('keydown', handleKeyDown);
 
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, []);
+    //     return () => {
+    //         window.removeEventListener('keydown', handleKeyDown);
+    //     };
+    // }, []);
 
     useEffect(() => {
         console.log("Client-side code running");

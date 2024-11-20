@@ -6,6 +6,7 @@ import { Nav } from "react-bootstrap";
 import { useData } from "../context/UserContext";
 import AuthorityComponent from "./authority/page";
 import BlogManager from "@/components/blog/blog-manager";
+import Wallet from "@/components/User/modal/wallet";
 
 export default function Owner({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState<string>('all');
@@ -41,6 +42,12 @@ export default function Owner({ children }: { children: ReactNode }) {
                         <BlogManager></BlogManager>
                     </div>
                 );
+            case 'wallet':
+                return (
+                    <div className="font-14">
+                        <Wallet></Wallet>
+                    </div>
+                );
             default:
                 return (
                     <div className="font-14">
@@ -71,6 +78,9 @@ export default function Owner({ children }: { children: ReactNode }) {
                         </Nav.Item>
                         <Nav.Item>
                             <Nav.Link eventKey="deposit" className="tab-link">Bài viết</Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey="wallet" className="tab-link">Ví & Tài khoản ngân hàng</Nav.Link>
                         </Nav.Item>
                         {userData?.authorities.find(item => item.role.name === 'ROLE_ADMIN')?.role.name &&
                             <Nav.Item>
