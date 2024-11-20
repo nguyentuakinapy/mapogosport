@@ -171,9 +171,14 @@ public class OrderRestController {
         return ResponseEntity.ok(createdOrder);
     }
 	
-	@GetMapping("/order/getByOrderId/{orderId}")
-	public List<Map<String, Object>> getByOrderId(@PathVariable("orderId") Integer orderId) {
-		return orderService.findOrderById(orderId);
+//	@GetMapping("/order/getByOrderId/{orderId}")
+//	public List<Map<String, Object>> getByOrderId(@PathVariable("orderId") Integer orderId) {
+//		return orderService.findOrderById(orderId);
+//	}
+	
+	@PutMapping("/order/cancel")
+	public void cancelOrder(@RequestBody Map<String, Object> orderData) {
+	    orderService.cancelOrder(orderData);
 	}
 	//đến đây
 

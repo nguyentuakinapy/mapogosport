@@ -265,7 +265,7 @@ const CheckoutPage = () => {
     if (!user1) {
       errors.push('Người dùng không tồn tại');
     }
-    if (!phoneNumberSelected) {
+    if (!phoneNumberSelected || phoneNumberSelected === 'other') {
       errors.push('Vui lòng chọn số điện thoại');
     }
     if (!customPhoneNumber && !phoneNumberSelected) {
@@ -301,6 +301,8 @@ const CheckoutPage = () => {
 
     return true; // Trả về true nếu tất cả các trường hợp đều hợp lệ
   };
+  console.log(phoneNumberSelected);
+
   //hàn kiểm tra sđt
   function isValidPhoneNumber(phoneNumberSelected: string) {
     const phoneRegex = /^(0|\+84)(3|5|7|8|9)\d{8}$/;
