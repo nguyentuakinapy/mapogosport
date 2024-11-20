@@ -135,6 +135,27 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 				bookingDAO.save(booking);
 			}
 			
+			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(booking.getBookingId());
+			int index = 0;
+			int totalAmount = 0;
+			for (BookingDetail b : bookingDetails) {
+				if (b.getStatus().equals("Đã hủy")) {
+					index++;
+				} else {
+					totalAmount += b.getPrice();
+				}
+			}
+			
+			if (index == bookingDetails.size()) {
+//				booking.setNote(note);
+				booking.setStatus("Đã hủy");
+				bookingDAO.save(booking);
+			} else {
+				booking.setOldTotamAmount(booking.getTotalAmount());
+				booking.setTotalAmount(totalAmount);
+				bookingDAO.save(booking);
+			}
+			
 		}
 		return null;
 	}
@@ -217,7 +238,11 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		b.setPhoneNumber(b.getBooking().getPhoneNumber());
 		b.setCheckOffline(b.getBooking().getUser().getUsername().equals("sportoffline"));
 		b.setPaymentMethod(b.getBooking().getPaymentMethod());
-		return b;
+		b.setTotalAmount(b.getBooking().getTotalAmount());
+		b.setDeposit(b.getBooking().getPercentDeposit());
+		b.setStatusBooking(b.getBooking().getStatus());
+		b.setBookingId(b.getBooking().getBookingId());
+		return b;	
 	}
 
 	@Override
@@ -248,7 +273,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		}
 		
 		if (!bd.getBooking().getUser().getUsername().equals("sportoffline")) {
-			
+//			transactionService.createTransactionOwnerByPaymentBooking(bookingDetailId, totalAmount);
 		}
 	}
 

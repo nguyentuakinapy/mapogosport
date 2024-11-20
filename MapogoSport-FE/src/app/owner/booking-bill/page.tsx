@@ -73,26 +73,6 @@ const OwnerBookingBill = () => {
             return;
         }
 
-        if (newStatus !== "Đã hủy") {
-            fetch(`http://localhost:8080/rest/owner/booking/update`, {
-                method: 'PUT',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ bookingId, status: newStatus }),
-            }).then(async (res) => {
-                if (!res.ok) {
-                    toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                    return;
-                }
-                mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
-                mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
-                toast.success('Cập nhật thành công!');
-            });
-            return;
-        }
-
         const startedDetails = booking.bookingDetails.filter(detail => detail.bookingDetailStatus !== "Chưa bắt đầu");
         const notStartedDetails = booking.bookingDetails.filter(detail => detail.bookingDetailStatus === "Chưa bắt đầu");
 
@@ -120,6 +100,26 @@ const OwnerBookingBill = () => {
                 finalAmount = (booking.totalAmount - subtract) * 0.75;
             }
         }
+
+        // if (newStatus !== "Đã hủy") {
+        //     fetch(`http://localhost:8080/rest/owner/booking/update`, {
+        //         method: 'PUT',
+        //         headers: {
+        //             'Accept': 'application/json, text/plain, */*',
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify({ bookingId, status: newStatus }),
+        //     }).then(async (res) => {
+        //         if (!res.ok) {
+        //             toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+        //             return;
+        //         }
+        //         mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
+        //         mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
+        //         toast.success('Cập nhật thành công!');
+        //     });
+        //     return;
+        // }
 
         fetch(`http://localhost:8080/rest/owner/booking/update`, {
             method: 'PUT',
