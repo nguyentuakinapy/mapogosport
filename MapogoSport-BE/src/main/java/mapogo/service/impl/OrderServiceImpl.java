@@ -1,6 +1,7 @@
 package mapogo.service.impl;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -50,6 +52,9 @@ public class OrderServiceImpl implements OrderService {
 	OrderDAO orderDAO;
 
 	List<String> statuses = Arrays.asList("Đã hoàn thành", "Đã thanh toán");
+
+	Locale vietnam = new Locale("vi", "VN");
+	NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(vietnam);
 
 	@Override
 	public List<Map<String, Object>> findOrderByUsername(String username) {
@@ -127,7 +132,7 @@ public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	OrderDetailService orderDetailService;
-	
+
 	@Autowired
 	WalletService walletService;
 
@@ -161,12 +166,12 @@ public class OrderServiceImpl implements OrderService {
 			Notification n = new Notification();
 			n.setOrder(order);
 			n.setTitle("Bạn vừa có đơn hàng mới!");
-			n.setMessage(user.getFullname() + " đã mua sản phẩm mới giá: " + order.getAmount());
+			n.setMessage(user.getFullname() + " đã mua sản phẩm mới giá: " + currencyFormat.format(order.getAmount()));
 			n.setType("info");
 			n.setUser(item.getUser());
 			notificationDAO.save(n);
 
-			messagingTemplate.convertAndSend("/topic/order", item.getUser().getUsername());
+			messagingTemplate.convertAndSend("/topic/order/new", item.getUser().getUsername());
 		});
 
 		return order;
@@ -298,16 +303,16 @@ public class OrderServiceImpl implements OrderService {
 
 			// wallet
 			if (!order.getPaymentMethod().getName().equals("COD")) {
-				Wallet wallet= walletService.findByUsername(order.getUser());
+				Wallet wallet = walletService.findByUsername(order.getUser());
 				wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(order.getAmount())));
-				
+
 				Transaction transaction = new Transaction();
 				transaction.setWallet(wallet);
 				transaction.setAmount(new BigDecimal(order.getAmount()));
 				transaction.setCreatedAt(LocalDateTime.now());
-				transaction.setDescription("Hoàn trả từ hóa đơn: " + orderId );
+				transaction.setDescription("Hoàn trả từ hóa đơn: " + orderId);
 				transaction.setTransactionType("+" + order.getAmount());
-				transactionService.create(transaction);				
+				transactionService.create(transaction);
 			}
 
 		}
@@ -319,6 +324,20 @@ public class OrderServiceImpl implements OrderService {
 			productDetailSize.setQuantity(productDetailSize.getQuantity() + orderDetail.getQuantity());
 			productDetailSizeDAO.save(productDetailSize);
 		}
+
+		Role r = roleDAO.findById(2).get();
+		r.getAuthorities().forEach(item -> {
+			Notification n = new Notification();
+			n.setOrder(optionalOrder.get());
+			n.setTitle("Có đơn hàng vừa hủy!");
+			n.setMessage(optionalOrder.get().getUser().getFullname() + " đã hủy đơn hàng giá: "
+					+ currencyFormat.format(optionalOrder.get().getAmount()));
+			n.setType("info");
+			n.setUser(item.getUser());
+			notificationDAO.save(n);
+
+			messagingTemplate.convertAndSend("/topic/order/cancel", item.getUser().getUsername());
+		});
 
 		return null;
 	}
