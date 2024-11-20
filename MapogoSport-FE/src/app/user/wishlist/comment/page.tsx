@@ -49,49 +49,32 @@ const CommentPage = () => {
         setSelectedOption(event.target.value);
     };
 
-    const handleDeleteFieldReview = (fieldReviewId: number) => {
+    const handleDeleteReview = (id: number, isFieldReview: boolean) => {
         if (window.confirm('Bạn có chắc muốn xóa bình luận này?')) {
             const username = localStorage.getItem('username');
             if (username) {
-                fetch(`http://localhost:8080/rest/user/fieldReview/${fieldReviewId}`, {
+                const url = isFieldReview ? `http://localhost:8080/rest/user/fieldReview/${id}`
+                    : `http://localhost:8080/rest/user/productReview/${id}`;
+                fetch(url, {
                     method: 'DELETE',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',
                         'Content-Type': 'application/json',
-                    }
-                }).then(async (res) => {
+                    },
+                }).then((res) => {
                     if (!res.ok) {
-                        toast.error(`Xóa bình luận không thành công! Vui lòng thử lại sau!`);
-                        return
+                        toast.error('Xóa bình luận không thành công! Vui lòng thử lại sau!');
+                        return;
                     }
-                    mutate(`http://localhost:8080/rest/user/fieldReview/${username}`);
+                    setFilteredRiviews((prev) => prev.filter((review) => isFieldReview
+                        ? (review as FieldReview).fieldReviewId !== id
+                        : (review as ProductReview).productReviewId !== id
+                    ));
                     toast.success('Xóa bình luận thành công!');
-                })
+                });
             }
         }
-    }
-
-    const handleDeleteProductReview = (productReviewId: number) => {
-        if (window.confirm('Bạn có chắc muốn xóa bình luận này?')) {
-            const username = localStorage.getItem('username');
-            if (username) {
-                fetch(`http://localhost:8080/rest/user/productReview/${productReviewId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Accept': 'application/json, text/plain, */*',
-                        'Content-Type': 'application/json',
-                    }
-                }).then(async (res) => {
-                    if (!res.ok) {
-                        toast.error(`Xóa bình luận không thành công! Vui lòng thử lại sau!`);
-                        return
-                    }
-                    mutate(`http://localhost:8080/rest/user/productReview/${username}`);
-                    toast.success('Xóa bình luận thành công!');
-                })
-            }
-        }
-    }
+    };
 
     const handlePreviousPage = () => {
         if (currentPage > 1) {
@@ -194,7 +177,7 @@ const CommentPage = () => {
                                             <span>{new Date(fieldReview.datedAt).toLocaleDateString('en-GB')}</span>
                                         </div>
                                     </Link>
-                                    <div className="btn-cmt" onClick={() => handleDeleteFieldReview(fieldReview.fieldReviewId)}>
+                                    <div className="btn-cmt" onClick={() => handleDeleteReview(fieldReview.fieldReviewId, true)}>
                                         <i className="bi bi-trash3-fill fs-5"></i>
                                     </div>
                                 </div>
@@ -211,13 +194,13 @@ const CommentPage = () => {
                                 <div className="d-flex justify-content-between align-items-center">
                                     <Link href={`/product-detail/${productReview.product.productId}`}
                                         className="box-comment" style={{ fontSize: '15px' }}>
-                                        <b>{productReview.fullname}</b> đã đánh giá sản phẩm <b>{productReview.product.name}</b>.
+                                        <b>{productReview.fullname}</b> đã đánh giá sản phẩm <b>{productReview.product.productName}</b>.
                                         <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
                                             <div>{productReview.comment}</div>
                                             <span>{new Date(productReview.datedAt).toLocaleDateString('en-GB')}</span>
                                         </div>
                                     </Link>
-                                    <div className="btn-cmt" onClick={() => handleDeleteProductReview(productReview.productReviewId)}>
+                                    <div className="btn-cmt" onClick={() => handleDeleteReview(productReview.productReviewId, false)}>
                                         <i className="bi bi-trash3-fill fs-5"></i>
                                     </div>
                                 </div>

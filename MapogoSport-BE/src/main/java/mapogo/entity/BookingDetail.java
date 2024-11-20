@@ -66,6 +66,12 @@ public class BookingDetail implements Serializable{
     private String fullName;
     
     @Transient
+    private String phoneNumber;
+    
+    @Transient
+    private boolean checkOffline;
+    
+    @Transient
     private PaymentMethod paymentMethod;
     
     @Transient

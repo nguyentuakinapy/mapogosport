@@ -32,6 +32,7 @@ type BookingsTypeOnWeek = {
     };
 };
 export default function BookingSport() {
+
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
     const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
     const [showViewOrEditBookingModal, setShowViewOrEditBookingModal] = useState<boolean>(false);
@@ -42,9 +43,9 @@ export default function BookingSport() {
     const user = useData();
     const [owner, setOwner] = useState<Owner>();
     const [selectSport, setSelectSport] = useState<number>(0);
-    const [checkBooking, setCheckBooking] = useState<number>(1);
+    // const [checkBooking, setCheckBooking] = useState<number>(1);
     const [checkNotification, setCheckNotification] = useState<number>(1);
-    const [checkOwner, setCheckOwner] = useState<number>();
+    const [checkUsername, setCheckUsername] = useState<string>();
     const [selectDate, setSelectDate] = useState<number>(0);
     const [dataSport, setDataSport] = useState<SportField[]>([])
     const [days, setDays] = useState<string[]>();
@@ -72,14 +73,19 @@ export default function BookingSport() {
         const stompClient = Stomp.over(socket);
 
         stompClient.connect({}, () => {
-            stompClient.subscribe('/topic/bookingDetail', (message) => {
-                setCheckBooking(prev => prev + 1);
-                setCheckOwner(Number(message.body));
+            stompClient.subscribe('/topic/bookingDetail/reload', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    setCheckNotification(prev => prev + 1);
+                    setCheckUsername(message.body);
+                }
             });
 
-            stompClient.subscribe('/topic/notification', (message) => {
-                setCheckNotification(prev => prev + 1);
-                setCheckOwner(Number(message.body));
+            stompClient.subscribe('/topic/bookingDetail/notification/reload', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    setCheckNotification(prev => prev + 1);
+                    setCheckUsername(message.body);
+                    // refreshStatusBooking();
+                }
             });
         });
 
@@ -321,16 +327,13 @@ export default function BookingSport() {
 
     }, [checkDataStatus]);
 
-    useEffect(() => {
-        if (owner && checkOwner === owner.ownerId && checkNotification == checkNotification) {
-            // toast.success("checkBooking" + checkBooking)
-            const timeoutId = setTimeout(() => {
-                refreshStatusBooking();
-            }, 500);
+    // useEffect(() => {
+    //     const timeoutId = setTimeout(() => {
+    //         refreshStatusBooking();
+    //     }, 500);
 
-            return () => clearTimeout(timeoutId);
-        }
-    }, [checkBooking]);
+    //     return () => clearTimeout(timeoutId);
+    // }, [checkBooking]);
 
     const setStatusOnDay = async () => {
 
@@ -348,7 +351,7 @@ export default function BookingSport() {
             }
 
             const dataBooking = await response.json() as BookingDetailFullName[];
-            if (dataBooking.length === 0) {
+            if (sportDetails && dataBooking.length === 0) {
                 Object.entries(bookingsOnDay).forEach(([time, statuses]) => {
 
                     const [hour, minute] = time.split('h').map(Number);
@@ -374,7 +377,7 @@ export default function BookingSport() {
                         }
                     } else {
                         statuses[index] = {
-                            status: "Tạm đóng",
+                            status: sportDetails[index].status == "Tạm đóng" ? "Tạm đóng" : sportDetails[index].status,
                             bookingId: 0,
                             fullName: "",
                             statusDtb: "",
@@ -460,7 +463,7 @@ export default function BookingSport() {
                             }
                         } else {
                             statuses[index] = {
-                                status: "Tạm đóng",
+                                status: sportDetails[index].status == "Tạm đóng" ? "Tạm đóng" : sportDetails[index].status,
                                 bookingId: 0,
                                 fullName: "",
                                 statusDtb: "",
@@ -581,7 +584,7 @@ export default function BookingSport() {
                                         }
                                     } else {
                                         sportData[sport][dayIndex] = {
-                                            status: "Tạm đóng",
+                                            status: item.sportFieldDetail.status == "Tạm đóng" ? "Tạm đóng" : item.sportFieldDetail.status,
                                             bookingId: 0,
                                             fullName: "",
                                             statusDtb: "",
@@ -610,7 +613,8 @@ export default function BookingSport() {
                                     };
                                 } else {
                                     sportData[sport][dayIndex] = {
-                                        status: sportDetails[index].status === "Hoạt động" ? "Còn trống" : "Tạm đóng",
+                                        status: sportDetails[index].status === "Hoạt động" ? "Còn trống" :
+                                            sportDetails[index].status === "Tạm đóng" ? "Tạm đóng" : sportDetails[index].status,
                                         bookingId: 0,
                                         fullName: "",
                                         statusDtb: "",
@@ -626,6 +630,25 @@ export default function BookingSport() {
         }
         setBookingsOnWeek(updatedBookingsOnWeek);
     };
+
+    function getColorFromId(id: string) {
+        // Chuyển `id` thành chuỗi, lấy mã băm từ `id`
+        let hash = 0;
+        const strId = String(id);
+
+        for (let i = 0; i < strId.length; i++) {
+            hash = strId.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        // Chuyển đổi mã băm thành mã màu HEX
+        let color = '#';
+        for (let i = 0; i < 3; i++) {
+            const value = (hash >> (i * 8)) & 0xFF;
+            color += ('00' + value.toString(16)).slice(-2);
+        }
+
+        return color;
+    }
 
     // LOAD TABLE
     const renderTableRows = () => {
@@ -858,7 +881,7 @@ export default function BookingSport() {
 
     // Notification
     useEffect(() => {
-        if (owner && checkOwner === owner.ownerId) {
+        if (owner && checkUsername === localStorage.getItem('username')) {
             const now = new Date();
             const currentMinutes = now.getMinutes();
             console.log(currentMinutes);
@@ -882,13 +905,13 @@ export default function BookingSport() {
             getFindBookingSport();
             refreshStatusBooking();
         }
-    }, [selectDate, selectSport, dataSport, checkNotification, checkOwner]);
+    }, [selectDate, selectSport, dataSport, checkNotification, checkUsername]);
 
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
     const [startTime, setStartTime] = useState("");
     const [dayStartBooking, setDayStartBooking] = useState("");
     const [startTimeKey, setStartTimeKey] = useState<number>(1);
-    const [bookingDetailData, setBookingDetailData] = useState<BookingDetail>();
+    const [bookingDetailData, setBookingDetailData] = useState<BookingDetailFullName>();
     const [bookingBySubscriptionKey, setDataBookingBySubscriptionKey] = useState<BookingDetail[]>();
     const [userData, setUserData] = useState<User>();
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
@@ -922,7 +945,7 @@ export default function BookingSport() {
             throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
         }
 
-        const bkDData = await responseBookingDetail.json() as BookingDetail;
+        const bkDData = await responseBookingDetail.json() as BookingDetailFullName;
 
         const responsePaymentMethod = await fetch(`http://localhost:8080/rest/paymentMethod/by/bookingdetailid/${bkDData.bookingDetailId}`);
         if (!responsePaymentMethod.ok) {
@@ -978,7 +1001,7 @@ export default function BookingSport() {
             throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
         }
 
-        const bkDData = await responseBookingDetail.json() as BookingDetail;
+        const bkDData = await responseBookingDetail.json() as BookingDetailFullName;
         console.log(bkDData);
 
         const responsePaymentMethod = await fetch(`http://localhost:8080/rest/paymentMethod/by/bookingdetailid/${bkDData.bookingDetailId}`);
@@ -1031,6 +1054,8 @@ export default function BookingSport() {
                 return "frame-overdue-secondary";
             case "Chưa đặt":
                 return "frame-overdue-secondary";
+            case "Sửa chữa":
+                return "frame-edit-secondary";
             default:
                 return "";
         }

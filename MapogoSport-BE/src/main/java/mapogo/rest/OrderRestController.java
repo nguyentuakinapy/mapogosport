@@ -1,5 +1,6 @@
 package mapogo.rest;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +21,14 @@ import org.springframework.web.server.ResponseStatusException;
 import mapogo.dto.OrderDTO;
 import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
+import mapogo.entity.Transaction;
+import mapogo.entity.User;
+import mapogo.entity.Wallet;
 import mapogo.service.OrderDetailService;
 import mapogo.service.OrderService;
+import mapogo.service.TransactionService;
+import mapogo.service.UserService;
+import mapogo.service.WalletService;
 import mapogo.service.impl.OrderServiceImpl;
 
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,11 +55,6 @@ public class OrderRestController {
 	@PutMapping("/admin/order/update")
 	public void updateOrderStatus(@RequestBody Map<String, Object> orderData) {
 	    orderService.updateStatusOrder(orderData);
-	}
-
-	@GetMapping("/user/orders/detail/{orderId}")
-	public List<OrderDetail> getOrderDetails(@PathVariable("orderId") Integer orderId) {
-		return orderDetailService.findOrderDetailByOrderId(orderId);
 	}
 
 	@GetMapping("/admin/orderToDay")
@@ -133,15 +135,45 @@ public class OrderRestController {
 	
 
 	//của Mỵ từ đây
+	@Autowired
+	WalletService walletService;
+	
+	@Autowired
+	UserService userService;
+	
+	@Autowired
+	TransactionService transactionService;
+	
 	@PostMapping("/create_order")
     public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
         Order createdOrder = orderService.createOrder(orderDTO);
+		if (orderDTO.getPaymentMethod().equals("Thanh toán ví")) {
+			User user = userService.findByUsername(orderDTO.getUsername());
+			Wallet wallet = walletService.findByUsername(user);
+			wallet.setBalance(
+			        wallet.getBalance().subtract(BigDecimal.valueOf(orderDTO.getAmount()))
+			    );	
+			
+			Transaction transaction = new Transaction();
+			transaction.setWallet(wallet);
+			transaction.setAmount(new BigDecimal(orderDTO.getAmount()));
+			transaction.setCreatedAt(LocalDateTime.now());
+			transaction.setDescription("Thanh toán hóa đơn: " + createdOrder.getOrderId());
+			transaction.setTransactionType("-" + createdOrder.getAmount());
+			transactionService.create(transaction);
+			}
+		
         return ResponseEntity.ok(createdOrder);
     }
 	
-	@GetMapping("/order/getByOrderId/{orderId}")
-	public Order getByOrderId(@PathVariable("orderId") Integer orderId) {
-		return orderService.findByOrderId(orderId);
+//	@GetMapping("/order/getByOrderId/{orderId}")
+//	public List<Map<String, Object>> getByOrderId(@PathVariable("orderId") Integer orderId) {
+//		return orderService.findOrderById(orderId);
+//	}
+	
+	@PutMapping("/order/cancel")
+	public void cancelOrder(@RequestBody Map<String, Object> orderData) {
+	    orderService.cancelOrder(orderData);
 	}
 	//đến đây
 

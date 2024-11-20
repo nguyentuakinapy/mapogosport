@@ -330,7 +330,7 @@ const ProductDetail = () => {
         console.log("số lượng size là ", selectedSizeQuantity)
 
         if (user && user.username) {
-            if (selectedSizeQuantity === 0) {
+            if (selectedSizeQuantity <= 0) {
                 toast.info("Không thể thêm vào giỏ hàng vì size này đã hết. Vui lòng chọn 1 size khác")
                 return;
             }
@@ -526,7 +526,7 @@ const ProductDetail = () => {
                                                         key={item.size.sizeId}
                                                         className="me-2 mb-2"
                                                         variant={selectedSize === item.size.sizeName ? 'dark' : 'outline-secondary'}
-                                                        disabled={item.quantity === 0}
+                                                        disabled={item.quantity <= 0}
                                                         onClick={() => {
                                                             setSelectedSize(item.size.sizeName);
                                                             setSelectedProductDetailSizeId(item.productDetailSizeId);
@@ -545,7 +545,7 @@ const ProductDetail = () => {
 
 
                             <div className="mb-3">
-                                {selectedSizeQuantity === 0 ? (
+                                {selectedSizeQuantity <= 0 ? (
                                     <span className="text-danger">Sản phẩm này đã hết hàng</span>
                                 ) : (
                                     <span className="text-success">Còn lại: {selectedSizeQuantity} sản phẩm</span>

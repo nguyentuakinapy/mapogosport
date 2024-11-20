@@ -18,10 +18,15 @@ public interface OrderService {
 	Order createOrder(OrderDTO order);
 
 	Order findByOrderId(int orderId);
+	
+//	List<Map<String, Object>> findOrderById(Integer orderId);
 
 	Order update(Order order);
 	
 	void delete(Order order);
+	//hủy đơn hàng
+	Order cancelOrder(Map<String, Object> orderData);
+
 
 	// đến đây
 

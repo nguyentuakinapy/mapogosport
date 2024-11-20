@@ -80,6 +80,9 @@ public class PaymentController {
 	@Autowired
 	TransactionService transactionService;
 
+	@Autowired
+	ProductDetailSizeDAO productDetailSizeDAO;
+
 //	@PostMapping("/create_payment")
 	@PostMapping("/create_payment")
 	public ResponseEntity<?> createPayment(HttpServletRequest req, @RequestParam("orderId") Integer orderId,
@@ -234,13 +237,16 @@ public class PaymentController {
 		} else {
 			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
 			for (OrderDetail orderDetail : orderDetails) {
+				ProductDetailSize productDetailSize = orderDetail.getProductDetailSize();
+				productDetailSize.setQuantity(productDetailSize.getQuantity()+orderDetail.getQuantity());
+				productDetailSizeDAO.save(productDetailSize);
 				// delete orderDetail
 				orderDetailService.delete(orderDetail);
 			}
 			orderService.delete(order);
 
 			// URL chuyển hướng khi có lỗi
-			return new RedirectView("http://localhost:3000/checkout-product/fail");
+			return new RedirectView("http://localhost:3000/checkout-product");
 		}
 
 	}
@@ -327,8 +333,8 @@ public class PaymentController {
 				pdsDAO.save(pds);
 			}
 
-			// URL chuyển hướng khi thành công
-			return new RedirectView("http://localhost:3000/checkout-product/success");
+			// URL chuyển hướng khi thành công?status=
+			return new RedirectView("http://localhost:3000/checkout-product?status=success&orderId="+order.getOrderId());
 		} else {
 			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
 			for (OrderDetail orderDetail : orderDetails) {

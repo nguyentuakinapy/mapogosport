@@ -28,6 +28,7 @@ public class AccountPackageConverter {
             accountPackage.getDurationDays(),
             accountPackage.getLimitBookings(),
             accountPackage.getLimitSportFields(),
+            accountPackage.getStatus(),
             benefits
         );
     }

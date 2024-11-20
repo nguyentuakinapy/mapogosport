@@ -99,21 +99,54 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
 
         stompClient.connect({}, () => {
             stompClient.subscribe('/topic/bookingDetail', (message) => {
+                // toast.success(message.body)
                 if (message.body === localStorage.getItem('username')) {
-                    toast.success("Bạn vừa có thông báo mơí!")
-                }
-                setCheckNotification(prev => prev + 1);
-            });
-
-            stompClient.subscribe('/topic/notification', (message) => {
-                if (message.body === localStorage.getItem('username')) {
-                    toast.success("Bạn vừa có thông báo mới!");
+                    toast.success("Bạn vừa có sân đặt mơí!")
                     setCheckNotification(prev => prev + 1);
                 }
             });
 
-            stompClient.subscribe('/topic/username', (message) => {
-                getNotification(message.body);
+            stompClient.subscribe('/topic/bookingDetail/notification', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    toast.success("Có sân cần chuẩn bị!")
+                    setCheckNotification(prev => prev + 1);
+                }
+            });
+
+            stompClient.subscribe('/topic/notification/username', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    toast.success("Bạn vừa có thông báo mới!");
+                    setCheckNotification(prev => prev + 1);
+                    getNotification(message.body);
+                }
+            });
+
+            stompClient.subscribe('/topic/notification/isRead', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    setCheckNotification(prev => prev + 1);
+                    getNotification(message.body);
+                }
+            });
+
+            stompClient.subscribe('/topic/notification/isReadAll/username', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    setCheckNotification(prev => prev + 1);
+                    getNotification(message.body);
+                }
+            });
+
+            stompClient.subscribe('/topic/notification/delete/username', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    setCheckNotification(prev => prev + 1);
+                    getNotification(message.body);
+                }
+            });
+
+            stompClient.subscribe('/topic/order/new', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    toast.success("Bạn vừa có đơn đặt hàng mơí!")
+                    getNotification(message.body);
+                }
             });
         });
 

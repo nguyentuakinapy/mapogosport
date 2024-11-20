@@ -9,7 +9,6 @@ import Navbar from 'react-bootstrap/Navbar';
 
 import LoginModal from './account/modal/login.modal';
 import RegisterModal from './account/modal/register.modal';
-import axios from 'axios';
 import useSWR from 'swr';
 
 import ForgotPassword from './account/modal/forgotPassword.modal';
@@ -98,13 +97,13 @@ const Header = (props: HeaderProps) => {
                     <Navbar><Link href={'/'} ><img src="/images/logo-black.png" style={{ width: '80px' }} alt="" /></Link></Navbar>
                     <Navbar.Toggle aria-controls="navbarScroll" />
                     <Navbar.Collapse id="navbarScroll">
-                        <Form className="d-flex m-auto">
+                        {/* <Form className="d-flex m-auto">
                             <div className="input-group">
                                 <input type="search" className='form-control border border-white ' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
                                     style={{ width: '300px' }} />
                                 <Button variant="outline-light"><i className="bi bi-search"></i></Button>
                             </div>
-                        </Form>
+                        </Form> */}
                         <Nav
                             className="ms-auto my-2 my-lg-0 d-flex justify-content-center align-items-center nav-home"
                             style={{ maxHeight: '100px' }}

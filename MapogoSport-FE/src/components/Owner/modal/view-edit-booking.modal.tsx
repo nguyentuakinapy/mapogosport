@@ -3,6 +3,7 @@ import { formatPrice } from "@/components/Utils/Format";
 import { use, useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
+import NotificationModal from "./notification.modal";
 
 interface OwnerProps {
     showViewOrEditBookingModal: boolean;
@@ -11,7 +12,7 @@ interface OwnerProps {
     checkDataStatus: boolean
     setCheckDataStatus: (v: boolean) => void;
     startTimeKey: number;
-    bookingDetailData?: BookingDetail;
+    bookingDetailData?: BookingDetailFullName;
     userData?: User;
     paymentMethod?: PaymentMethod
     sport?: SportField;
@@ -37,7 +38,7 @@ const BookingModal = (props: OwnerProps) => {
     const [newIdSportBooking, setNewIdSportBooking] = useState<number>();
     const [newPriceBooking, setNewPriceBooking] = useState<number>();
     const [confirmNewData, setConfirmNewData] = useState<boolean>(false);
-
+    const [showNotificationModal, setNotificationModal] = useState<boolean>(false);
 
     useEffect(() => {
         setDateBooking(bookingDetailData?.date);
@@ -49,41 +50,47 @@ const BookingModal = (props: OwnerProps) => {
     }, [bookingDetailData])
 
     const handleCancelBookingDetail = () => {
-        if (confirm("Bạn có chắc chắn muốn hủy sân?")) {
-            if (applyOne) {
-                fetch(`http://localhost:8080/rest/booking/update/status/${bookingDetailData?.bookingDetailId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Accept': 'application/json, text/plain, */*',
-                        'Content-Type': 'application/json',
-                    },
-                }).then(async (res) => {
-                    if (!res.ok) {
-                        toast.error(`Hủy sân không thành công!`);
-                        return
-                    }
-                    setCheckDataStatus(!checkDataStatus);
-                    handleClose();
-                    toast.success('Hủy sân thành công!');
-                })
-            } else {
-                fetch(`http://localhost:8080/rest/booking/update/status/by/subcriptionKey/${bookingDetailData?.bookingDetailId}/${bookingDetailData?.subscriptionKey}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Accept': 'application/json, text/plain, */*',
-                        'Content-Type': 'application/json',
-                    },
-                }).then(async (res) => {
-                    if (!res.ok) {
-                        toast.error(`Hủy sân không thành công!`);
-                        return
-                    }
-                    setCheckDataStatus(!checkDataStatus);
-                    handleClose();
-                    toast.success('Hủy sân thành công!');
-                })
-            }
+        // if (confirm("Bạn có chắc chắn muốn hủy sân?")) {
+        if (applyOne) {
+            fetch(`http://localhost:8080/rest/booking/update/status/${bookingDetailData?.bookingDetailId}`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: note
+            }).then(async (res) => {
+                if (!res.ok) {
+                    toast.error(`Hủy sân không thành công!`);
+                    return
+                }
+                setCheckDataStatus(!checkDataStatus);
+                handleClose();
+                setNote("");
+                setNotificationModal(false);
+                toast.success('Hủy sân thành công!');
+            })
+        } else {
+            fetch(`http://localhost:8080/rest/booking/update/status/by/subcriptionKey/${bookingDetailData?.bookingDetailId}/${bookingDetailData?.subscriptionKey}`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: note
+            }).then(async (res) => {
+                if (!res.ok) {
+                    toast.error(`Hủy sân không thành công!`);
+                    return
+                }
+                setCheckDataStatus(!checkDataStatus);
+                handleClose();
+                setNote("");
+                setNotificationModal(false);
+                toast.success('Hủy sân thành công!');
+            })
         }
+        // }
 
     }
 
@@ -830,6 +837,30 @@ const BookingModal = (props: OwnerProps) => {
         })
     }
 
+    const [note, setNote] = useState<string>();
+
+    const testOnclick = () => {
+        // toast.success("NGON TA: " + note);
+        handleCancelBookingDetail()
+    }
+
+    const renderNotification = () => {
+        return (
+            <div className="text-center">
+                <FloatingLabel controlId="floatingTextarea2" label="Lý do hủy">
+                    <Form.Control
+                        as="textarea"
+                        placeholder="Leave a comment here"
+                        style={{ height: '100px' }}
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                    />
+                </FloatingLabel>
+                <button onClick={testOnclick} className="mt-2 w-100 btn btn-outline-danger">XÁC NHẬN HỦY</button>
+            </div>
+
+        )
+    }
 
     return (
         <>
@@ -946,10 +977,10 @@ const BookingModal = (props: OwnerProps) => {
                                         </FloatingLabel>
                                         {isAddBooking && (
                                             <>
-                                                <Button disabled={!isAddBooking} onClick={() => changeTime(false, true, newEndTimeBooking, true)} variant="outline-secondary mb-2" id="button-addon1">
+                                                <Button onClick={() => changeTime(false, true, newEndTimeBooking, true)} variant="outline-secondary mb-2" id="button-addon1">
                                                     <i className="bi bi-chevron-up"></i>
                                                 </Button>
-                                                <Button disabled={!isAddBooking} onClick={() => changeTime(true, false, newEndTimeBooking, true)} variant="outline-secondary mb-2" id="button-addon1">
+                                                <Button onClick={() => changeTime(true, false, newEndTimeBooking, true)} variant="outline-secondary mb-2" id="button-addon1">
                                                     <i className="bi bi-chevron-down"></i>
                                                 </Button>
                                             </>
@@ -1004,6 +1035,8 @@ const BookingModal = (props: OwnerProps) => {
                                                         editBooking ||
                                                         (() => {
                                                             if (!startTimeBooking) return true;
+                                                            if (bookingDetailData &&
+                                                                new Date(bookingDetailData.date).setHours(0, 0, 0, 0) > new Date().setHours(0, 0, 0, 0)) return false;
                                                             const [hours, minutes] = startTimeBooking.split('h').map(Number);
                                                             const bookingTime = new Date();
                                                             bookingTime.setHours(hours, minutes, 0, 0); // Đặt giờ và phút từ startTimeBooking
@@ -1021,6 +1054,8 @@ const BookingModal = (props: OwnerProps) => {
                                                         editBooking ||
                                                         (() => {
                                                             if (!startTimeBooking) return true;
+                                                            if (bookingDetailData &&
+                                                                new Date(bookingDetailData.date).setHours(0, 0, 0, 0) > new Date().setHours(0, 0, 0, 0)) return false;
                                                             const [hours, minutes] = startTimeBooking.split('h').map(Number);
                                                             const bookingTime = new Date();
                                                             bookingTime.setHours(hours, minutes, 0, 0); // Đặt giờ và phút từ startTimeBooking
@@ -1067,7 +1102,7 @@ const BookingModal = (props: OwnerProps) => {
                             <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
                             <FloatingLabel controlId="floatingUsername" label="Họ và tên *" className="flex-grow-1 mb-2">
                                 <Form.Control
-                                    value={userData?.fullname || ""}
+                                    value={bookingDetailData?.fullName}
                                     type="text"
                                     placeholder="Vui lòng nhập tên đăng nhập!"
                                     disabled
@@ -1076,13 +1111,21 @@ const BookingModal = (props: OwnerProps) => {
                             <FloatingLabel controlId="floatingUsername" label="Số điện thoại *" className="flex-grow-1 mb-2">
                                 <Form.Control
                                     type="text"
-                                    value={userData?.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber || ""}
+                                    value={bookingDetailData?.phoneNumber || "Người dùng không có số điện thoại!"}
                                     placeholder="Vui lòng nhập tên đăng nhập!"
                                     disabled
                                 />
                             </FloatingLabel> <FloatingLabel controlId="floatingUsername" label="Phương thức thanh toán *" className="flex-grow-1 mb-2">
                                 <Form.Control
-                                    value={paymentMethod?.name || ""}
+                                    value={bookingDetailData?.paymentMethod.name || ""}
+                                    type="text"
+                                    placeholder="Vui lòng nhập tên đăng nhập!"
+                                    disabled
+                                />
+                            </FloatingLabel>
+                            <FloatingLabel controlId="floatingUsernam1e" label="Hình thức đặt sân! *" className="flex-grow-1 mb-2">
+                                <Form.Control
+                                    value={bookingDetailData?.checkOffline ? "Đặt tại sân!" : "Đặt trên MapogoSport"}
                                     type="text"
                                     placeholder="Vui lòng nhập tên đăng nhập!"
                                     disabled
@@ -1114,7 +1157,10 @@ const BookingModal = (props: OwnerProps) => {
                                             <button onClick={() => confirmDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm tra chỉnh sửa sân</button>
                                         )
                                     ) : (
-                                        <button className="btn btn-danger m-auto" onClick={() => handleCancelBookingDetail()} style={{ width: '97%' }}>Hủy đặt sân</button>
+                                        <button className="btn btn-danger m-auto" onClick={() =>
+                                            // handleCancelBookingDetail()
+                                            setNotificationModal(true)
+                                        } style={{ width: '97%' }}>Hủy đặt sân</button>
                                     )
                                 )
                             ) : (
@@ -1126,7 +1172,10 @@ const BookingModal = (props: OwnerProps) => {
                                             <button onClick={() => confirmDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm tra chỉnh sửa sân</button>
                                         )
                                     ) : (
-                                        <button className="btn btn-danger m-auto" onClick={() => handleCancelBookingDetail()} style={{ width: '97%' }}>Hủy đặt sân</button>
+                                        <button className="btn btn-danger m-auto" onClick={() =>
+                                            // handleCancelBookingDetail() 
+                                            setNotificationModal(true)
+                                        } style={{ width: '97%' }}>Hủy đặt sân</button>
                                     )
                                 )
                             ) : (
@@ -1143,6 +1192,8 @@ const BookingModal = (props: OwnerProps) => {
                     </Button>
                 </Modal.Footer>
             </Modal >
+            <NotificationModal renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
+            </NotificationModal>
         </>
     )
 }

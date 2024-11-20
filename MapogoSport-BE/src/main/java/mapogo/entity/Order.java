@@ -1,4 +1,4 @@
-package mapogo.entity;
+	package mapogo.entity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -77,6 +77,7 @@ public class Order implements Serializable {
 	private List<OrderDetail> orderDetails;
 
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonIgnore
 	private List<OrderPayment> orderPayments;
 	
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

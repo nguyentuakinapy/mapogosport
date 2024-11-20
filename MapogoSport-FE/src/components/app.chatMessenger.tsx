@@ -578,14 +578,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Form, Button, ListGroup } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css"; // Đảm bảo đã cài đặt Bootstrap Icons
-import { QueryClient, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import useSWR from "swr";
 import "../app/globals.css";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useData } from "@/app/context/UserContext";
-import { toast } from "react-toastify";
 import { useSearchParams } from "next/navigation";
 import { Content } from "next/font/google";
 
@@ -813,6 +811,7 @@ export default function ChatBox() {
 
   const [topicCurrent, setTopicCurrent] = useState<string>("");
 
+
   //   useEffect(() => {
   //     if (!isLoadByReceiverUsernameOrCurrentUser) {
   //       if (
@@ -863,6 +862,7 @@ export default function ChatBox() {
       isLogin = true;
     } else {
       toast.warning("Vui lòng đăng nhập để chat với chủ sân");
+
     }
     return isLogin;
   };
@@ -1323,7 +1323,7 @@ export default function ChatBox() {
               }}
               // onClick={username != "" ? handleChatToggle : handleChatListToggle }
               onClick={handleChatListToggle}
-              // Khi click vào icon sẽ mở form chat nhấn vào sẽ thành TRUE
+            // Khi click vào icon sẽ mở form chat nhấn vào sẽ thành TRUE
             >
               <img
                 src="/images/mail_giphy.webp"
@@ -1510,6 +1510,7 @@ export default function ChatBox() {
                               adminDefault?.avatar
                                 ? adminDefault?.avatar
                                 : "/chat_page/assets/images/users/user-5.png"
+
                             }
                             alt={adminDefault?.username || "Không có tên"}
                             style={{
@@ -1562,9 +1563,8 @@ export default function ChatBox() {
                     className="p-0"
                   >
                     <i
-                      className={`h6 bi ${
-                        isMinimized ? "bi-arrows-angle-expand" : "bi-dash-lg"
-                      }`}
+                      className={`h6 bi ${isMinimized ? "bi-arrows-angle-expand" : "bi-dash-lg"
+                        }`}
                     ></i>
                   </Button>
                   <Button
@@ -1574,11 +1574,10 @@ export default function ChatBox() {
                     className="p-0 mx-2"
                   >
                     <i
-                      className={`h6 bi ${
-                        isMaximized
+                      className={`h6 bi ${isMaximized
                           ? "bi-arrows-angle-contract"
                           : "bi-arrows-fullscreen"
-                      }`}
+                        }`}
                     ></i>
                   </Button>
                   <Button
@@ -1672,6 +1671,7 @@ export default function ChatBox() {
                           </div>
                         );
                       })}
+
                   </div>
 
                   {/* Phần nhập liệu và nút gửi */}

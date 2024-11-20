@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link";
-import { Form, Button, Table, Nav, Pagination, Dropdown, InputGroup } from "react-bootstrap";
+import { Form, Button, Table, Nav, Pagination, Dropdown, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import '../owner.scss'
 import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
@@ -67,13 +67,67 @@ const OwnerBookingBill = () => {
     };
 
     const handleStatusChange = (bookingId: number, newStatus: string) => {
+        const booking = bookingData.find(item => item.bookingId === bookingId);
+        if (!booking) {
+            console.error("Không tìm thấy booking");
+            return;
+        }
+
+        if (newStatus !== "Đã hủy") {
+            fetch(`http://localhost:8080/rest/owner/booking/update`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ bookingId, status: newStatus }),
+            }).then(async (res) => {
+                if (!res.ok) {
+                    toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                    return;
+                }
+                mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
+                mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
+                toast.success('Cập nhật thành công!');
+            });
+            return;
+        }
+
+        const startedDetails = booking.bookingDetails.filter(detail => detail.bookingDetailStatus !== "Chưa bắt đầu");
+        const notStartedDetails = booking.bookingDetails.filter(detail => detail.bookingDetailStatus === "Chưa bắt đầu");
+
+        const subtract = startedDetails.reduce((total, detail) => total + Number(detail.price || 0), 0);
+
+        const currentDateTime = new Date();
+        const formattedTime = notStartedDetails[0]?.startTime.replace('h', ':').padStart(5, '0');
+        const bookingDateTime = new Date(`${notStartedDetails[0]?.bookingDetailDate}T${formattedTime}:00`);
+
+        const diffMinutes = (bookingDateTime.getTime() - currentDateTime.getTime()) / (1000 * 60);
+
+        const refundAmount = booking.totalAmount * (booking.percentDeposit / 100);
+
+        let finalAmount = 0;
+        if (diffMinutes >= 120) {
+            if (booking.status === "Chờ thanh toán") {
+                finalAmount = refundAmount - subtract * (booking.percentDeposit / 100);
+            } else {
+                finalAmount = booking.totalAmount - subtract;
+            }
+        } else {
+            if (booking.status === "Chờ thanh toán") {
+                finalAmount = (refundAmount - subtract * (booking.percentDeposit / 100)) * 0.75;
+            } else {
+                finalAmount = (booking.totalAmount - subtract) * 0.75;
+            }
+        }
+
         fetch(`http://localhost:8080/rest/owner/booking/update`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ bookingId, status: newStatus }),
+            body: JSON.stringify({ bookingId, status: newStatus, refundAmount: finalAmount }),
         }).then(async (res) => {
             if (!res.ok) {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
@@ -101,37 +155,41 @@ const OwnerBookingBill = () => {
     };
 
     const renderTable = (filteredBookings: BookingFindAll[]) => {
-        const indexOfLastItem = currentPage * itemsPerPage;
-        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
         return (
             <div className="box-table-border mb-4">
                 <Table striped className="mb-0">
                     <thead>
                         <tr>
-                            <th style={{ width: '110px' }}>STT</th>
+                            <th style={{ width: '100px' }}>Mã</th>
                             <th style={{ width: '180px' }}>Tên sân</th>
                             <th style={{ width: '200px' }}>Họ và tên</th>
-                            <th>Ngày đặt</th>
-                            <th>Tổng tiền</th>
-                            <th>Còn lại</th>
+                            <th style={{ width: '100px' }}>Ngày đặt</th>
+                            <th style={{ width: '130px' }}>Tổng tiền</th>
+                            <OverlayTrigger overlay={<Tooltip>Hoàn lại/Trả thêm</Tooltip>}>
+                                <th style={{ width: '130px' }}>Hoàn / Thêm</th>
+                            </OverlayTrigger>
                             <th style={{ width: '100px' }}>SĐT</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <th style={{ width: '110px' }}>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredBookings.length > 0 ?
-                            filteredBookings.map((booking, index) => (
+                            filteredBookings.map(booking => (
                                 <tr key={booking.bookingId}>
-                                    <td className="text-start title">{`#${indexOfFirstItem + index + 1}`}</td>
+                                    <td className="text-start title">
+                                        <Link href={`/owner/booking-bill/detail/${booking.bookingId}`}>#{booking.bookingId}</Link>
+                                    </td>
                                     <td className="text-start title">{booking.sportFieldName}</td>
                                     <td className="title">{booking.user.username == 'sportoffline' ?
                                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
-                                    <td>{booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0 đ'
-                                        : `${(booking.totalAmount - (booking.totalAmount * booking.percentDeposit)).toLocaleString()} đ`}</td>
+                                    <td className={booking.oldTotalAmount > 0 && (booking.oldTotalAmount - booking.totalAmount) <= 0 ? 'text-danger' : 'text-success'}>
+                                        {booking.oldTotalAmount !== 0 ? `${(booking.oldTotalAmount - booking.totalAmount).toLocaleString()} ₫`
+                                            : booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0'
+                                                : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} ₫`}
+                                    </td>
                                     <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
                                     <td>{renderStatusDropdown(booking)}</td>
                                     <td>
@@ -153,7 +211,8 @@ const OwnerBookingBill = () => {
         return (
             (fullName && fullName.toLowerCase().includes(searchTerm)) ||
             booking.sportFieldName.toLowerCase().includes(searchTerm) ||
-            booking.bookingUserPhone.includes(searchTerm)
+            (booking.bookingUserPhone && booking.bookingUserPhone.includes(searchTerm)) ||
+            booking.bookingId.toString().includes(searchTerm)
         );
     }).filter(booking => {
         switch (activeTab) {

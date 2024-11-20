@@ -56,14 +56,20 @@ public interface OrderDAO extends JpaRepository<Order, Integer> {
 			+ "GROUP BY cp.categoryProductId, cp.name, cp.image")
 	List<Object[]> findCategoryProductTotalsTodayWithStatus(@Param("statuses") List<String> statuses);
 
-	// total amout category yesterday
-	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " + "FROM CategoryProduct cp "
-			+ "JOIN cp.products p " + "JOIN p.productDetails pd " + "JOIN pd.productDetailSizes pds "
-			+ "JOIN pds.orderDetails od " + "JOIN od.order o "
-			+ "WHERE o.date >= :startDate AND o.date < :endDate AND o.status IN :statuses "
-			+ "GROUP BY cp.categoryProductId, cp.name, cp.image")
-	List<Object[]> findCategoryProductTotalsYesterdayWithStatus(@Param("startDate") LocalDateTime startDate,
-			@Param("endDate") LocalDateTime endDate, @Param("statuses") List<String> statuses);
+	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " +
+		       "FROM CategoryProduct cp " +
+		       "JOIN cp.products p " +
+		       "JOIN p.productDetails pd " +
+		       "JOIN pd.productDetailSizes pds " +
+		       "JOIN pds.orderDetails od " +
+		       "JOIN od.order o " +
+		       "WHERE o.date >= :startDate AND o.date < :endDate AND o.status IN :statuses " +
+		       "GROUP BY cp.categoryProductId, cp.name, cp.image")
+		List<Object[]> findCategoryProductTotalsYesterdayWithStatus(
+		    @Param("startDate") LocalDateTime startDate,
+		    @Param("endDate") LocalDateTime endDate,
+		    @Param("statuses") List<String> statuses);
+
 
 	// total amout category 7 day
 	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " + "FROM CategoryProduct cp "

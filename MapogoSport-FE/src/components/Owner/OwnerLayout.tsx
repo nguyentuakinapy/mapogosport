@@ -1,15 +1,12 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import Nav from "./app.nav";
-import '../globals.css'
 import Header from "./app.header";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { UserProvider } from "@/app/context/UserContext";
 import { vi } from "date-fns/locale/vi";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
-import { usePathname } from "next/navigation";
 import ChatMessenger from '@/components/app.chatMessenger';
-import { Button, Toast } from "react-bootstrap";
 
 registerLocale('vi', vi);
 setDefaultLocale('vi');
