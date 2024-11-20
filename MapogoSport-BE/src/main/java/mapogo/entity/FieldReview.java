@@ -35,7 +35,8 @@ public class FieldReview implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "SportFieldId", nullable = false)
-    @JsonManagedReference //phihung (27/10)
+//    @JsonManagedReference //phihung (27/10)
+    @JsonBackReference
     private SportField sportField;
 
     @ManyToOne

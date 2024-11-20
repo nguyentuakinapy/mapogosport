@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 import '@/app/user/types/user.scss';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 
 function Categories() {
 
@@ -17,11 +19,7 @@ function Categories() {
         setCurrentPage(pageNumber);
     };
 
-
-
-    const [rating, setRating] = useState<number>(1.5);
     const [sportFields, setSportFields] = useState<SportField[]>([]);
-    const [icon, setIcon] = useState<boolean[]>([]); // Để quản lý trạng thái của các biểu tượng
     const [categoriesField, setCategoriesField] = useState<CategoryField[]>([])
     const [selectedCategoryField, setSelectedCategoryField] = useState<number[]>([])
     const [searchTerm, setSearchTerm] = useState('');
@@ -60,30 +58,6 @@ function Categories() {
     }, []);
 
 
-    const renderStars = (rating: number) => {
-        const fullStars = Math.floor(rating);
-        const halfStar = rating - fullStars >= 0.5; // Kiểm tra nếu có nửa sao
-        const stars = [];
-        for (let i = 0; i < fullStars; i++) {
-            stars.push(<i key={i} className="bi bi-star-fill"></i>);
-        }
-        if (halfStar) {
-            stars.push(<i key={fullStars} className="bi bi-star-half"></i>);
-        }
-        // Thêm sao trống
-        for (let i = stars.length; i < 5; i++) {
-            stars.push(<i key={i} className="bi bi-star"></i>);
-        }
-        return stars;
-    };
-
-    const onClickIcon = (index: number) => {
-        setIcon(prev => {
-            const newIcon = [...prev];
-            newIcon[index] = !newIcon[index];
-            return newIcon;
-        });
-    };
 
     const handelCategories = (categoryFieldId: number) => {
         setSelectedCategoryField(prev =>
@@ -169,42 +143,70 @@ function Categories() {
 
                                         ) : null
                                         }
-                                        {currentItems.map((field: SportField) => (
-                                            <Col xs={3} key={field.sportFieldId}>
-                                                <div className="user-border">
-                                                    <div className="mb-3">
-                                                        <Link href={"#"}>
-                                                            <Image
-                                                                src={`${field.image}`}
-                                                                alt={field.name}
-                                                                style={{
-                                                                    maxHeight: "200px",
-                                                                    maxWidth: "250px",
-                                                                    minHeight: "200px",
-                                                                    objectFit: "cover"
-                                                                }}
-                                                            />
-                                                        </Link>
-                                                    </div>
-                                                    <div className="content">
-                                                        <div className="mb-1 title">
-                                                            <Link href={"#"}><b>{field.name}</b></Link>
+                                        {currentItems.map((field: SportField) => {
+                                            // Access the reviews for this sport field
+                                            const reviews = field.fieldReviews || []; // Assuming field has a 'reviews' property
+                                            const reviewCount = reviews.length; // Total number of reviews
+                                            const averageRating = reviewCount > 0
+                                                ? (reviews.reduce((total, review) => total + review.rating, 0) / reviewCount).toFixed(1)
+                                                : "0.0"; // Calculate average rating to one decimal place or set to "0.0" if no reviews
+
+                                            const fullStars = Math.floor(parseFloat(averageRating)); // Full stars based on integer part of averageRating
+                                            const hasHalfStar = parseFloat(averageRating) - fullStars >= 0.5; // Determine if a half star is needed
+                                            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Remaining stars are empty stars
+
+                                            // Render stars based on calculated values
+                                            const renderStars = () => (
+                                                <>
+                                                    {[...Array(fullStars)].map((_, index) => (
+                                                        <i key={`full-${index}`} className="fas fa-star"></i>
+                                                    ))}
+                                                    {hasHalfStar && <i className="fas fa-star-half-alt"></i>}
+                                                    {[...Array(emptyStars)].map((_, index) => (
+                                                        <i key={`empty-${index}`} className="far fa-star"></i>
+                                                    ))}
+                                                </>
+                                            );
+
+                                            return (
+                                                <Col xs={3} key={field.sportFieldId}>
+                                                    <div className="user-border">
+                                                        <div className="mb-3">
+                                                            <Link href={"#"}>
+                                                                <Image
+                                                                    src={`${field.image}`}
+                                                                    alt={field.name}
+                                                                    style={{
+                                                                        maxHeight: "200px",
+                                                                        maxWidth: "250px",
+                                                                        minHeight: "200px",
+                                                                        objectFit: "cover"
+                                                                    }}
+                                                                />
+                                                            </Link>
                                                         </div>
-                                                        <div className="address mb-1">
-                                                            <span className="me-2">Khu vực:</span>{field.address}
-                                                            <span className="mx-2">-</span>Hồ Chí Minh
-                                                        </div>
-                                                        <div className="d-flex align-items-center justify-content-between">
-                                                            <div>Số sân: {field.quantity}</div>
-                                                            <div className="star-item text-warning">
-                                                                {renderStars(rating)}
+                                                        <div className="content">
+                                                            <div className="mb-1 title">
+                                                                <Link href={"#"}><b>{field.name}</b></Link>
                                                             </div>
+                                                            <div className="address mb-1">
+                                                                <span className="me-2">Khu vực:</span>{field.address}
+                                                                <span className="mx-2">-</span>Hồ Chí Minh
+                                                            </div>
+                                                            <div className="d-flex align-items-center justify-content-between">
+                                                                <div>Số sân: {field.quantity}</div>
+                                                                <div className="star-item text-warning">
+                                                                    {renderStars()}
+                                                                </div>
+
+                                                            </div>
+                                                            <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
                                                         </div>
-                                                        <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
                                                     </div>
-                                                </div>
-                                            </Col>
-                                        ))}
+                                                </Col>
+                                            );
+                                        })}
+
                                     </Row>
                                 </div>
                             </div>
