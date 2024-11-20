@@ -18,8 +18,8 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     const { showSportFieldModal, setShowSportFieldModal, selectedSportField, setSelectedSportField } = props;
 
     const [fieldName, setFieldName] = useState("");
-    const [openTime, setOpenTime] = useState<number | null>(null);
-    const [closeTime, setCloseTime] = useState<number | null>(null);
+    const [openTime, setOpenTime] = useState<String | null>(null);
+    const [closeTime, setCloseTime] = useState<string | null>(null);
     const [selectedFieldType, setSelectedFieldType] = useState("");
     const [address, setAddress] = useState("");
     const [description, setDescription] = useState("");
@@ -31,6 +31,11 @@ const ModalCreateSportField = (props: SportFieldProps) => {
 
     const userSession = sessionStorage.getItem("user");
     const user = userSession ? JSON.parse(userSession) : null;
+
+    const [openHour, setOpenHour] = useState<number | null>(null);
+    const [openMinute, setOpenMinute] = useState<number | null>(null);
+    const [closeHour, setCloseHour] = useState<number | null>(null);
+    const [closeMinute, setCloseMinute] = useState<number | null>(null);
 
     useEffect(() => {
         if (showSportFieldModal) {
@@ -44,8 +49,16 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                 setStatus("");
             } else {
                 setFieldName(selectedSportField.name);
-                setOpenTime(selectedSportField.opening.replace('h', '')); // Chỉnh sửa nếu cần
-                setCloseTime(selectedSportField.closing.replace('h', ''));
+                setOpenTime(selectedSportField.opening);
+
+                const [hourStr, minuteStr] = selectedSportField.opening.split('h');
+                setOpenHour(parseInt(hourStr, 10));
+                setOpenMinute(parseInt(minuteStr, 10));
+                setCloseTime(selectedSportField.closing);
+                const [hourStr1, minuteStr1] = selectedSportField.closing.split('h');
+                setCloseHour(parseInt(hourStr1, 10));
+                setCloseMinute(parseInt(minuteStr1, 10));
+
                 setSelectedFieldType(selectedSportField.categoriesField.categoriesFieldId);
                 setAddress(selectedSportField.address);
                 setDescription(selectedSportField.decription);
@@ -110,6 +123,19 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         }
     };
 
+    useEffect(() => {
+        if (openHour !== null && openMinute !== null) {
+            setOpenTime(`${openHour}h${openMinute.toString().padStart(2, '0')}`);
+        }
+    }, [openHour, openMinute]);
+
+    // Cập nhật lại closeTime khi giờ/phút thay đổi
+    useEffect(() => {
+        if (closeHour !== null && closeMinute !== null) {
+            setCloseTime(`${closeHour}h${closeMinute.toString().padStart(2, '0')}`);
+        }
+    }, [closeHour, closeMinute]);
+
     const checkForm = () => {
         const errors = []; // Mảng lưu trữ các thông báo lỗi
 
@@ -146,8 +172,8 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         const sportFieldData = {
             sportFieldId: selectedSportField.sportFieldId,
             name: fieldName,
-            opening: `${openTime}h`,
-            closing: `${closeTime}h`,
+            opening: `${openTime}`,
+            closing: `${closeTime}`,
             categoriesField: selectedFieldType,
             address: address,
             decription: description,
@@ -193,8 +219,8 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         if (!checkForm()) return;
         const sportFieldData = {
             name: fieldName,
-            opening: `${openTime}h`,
-            closing: `${closeTime}h`,
+            opening: `${openTime}`,
+            closing: `${closeTime}`,
             categoriesField: selectedFieldType,
             address: address,
             decription: description,
@@ -278,48 +304,78 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                             />
                         </FloatingLabel>
                         <Row>
+                            {/*  */}
                             <Col className="col-6">
-                                <FloatingLabel controlId="floatingOpenTime" label="Giờ mở cửa (0-24h)" className="mb-3">
-                                    <Form.Control
-                                        type="number"
-                                        placeholder="Giờ mở cửa"
-                                        value={openTime ?? ''}
-                                        min={0} // Giới hạn giá trị tối thiểu
-                                        max={24} // Giới hạn giá trị tối đa
+                                <label className="">
+                                    Giờ mở cửa: {openHour !== null && openMinute !== null ? `${openHour}h${openMinute.toString().padStart(2, '0')}` : "Chưa chọn"}
+                                </label>
+                                <div className="d-flex">
+                                    <Form.Select
+                                        value={openHour ?? ''}
                                         onChange={(e) => {
-                                            const value = parseFloat(e.target.value);
-                                            setOpenTime(value);
+                                            setOpenHour(parseInt(e.target.value, 10));
                                         }}
-                                        onBlur={() => {
-                                            if (openTime < 0 || openTime > 24) {
-                                                alert("Giờ mở cửa phải nằm trong khoảng từ 0 đến 24!");
-                                                setOpenTime(null);
-                                            }
-                                        }}
-                                    />
-                                </FloatingLabel>
-                            </Col>
-                            <Col className="col-6">
-                                <FloatingLabel controlId="floatingCloseTime" label="Giờ đóng cửa (0-24h)" className="mb-3">
-                                    <Form.Control
-                                        type="number"
-                                        placeholder="Giờ đóng cửa"
-                                        value={closeTime ?? ''}
-                                        min={0} // Giới hạn giá trị tối thiểu
-                                        max={24} // Giới hạn giá trị tối đa
+                                        className="me-2"
+                                    >
+                                        <option value="">Chọn giờ</option>
+                                        {[...Array(24).keys()].map((hour) => (
+                                            <option key={hour} value={hour}>
+                                                {hour}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                    <Form.Select
+                                        value={openMinute ?? ''}
                                         onChange={(e) => {
-                                            const value = parseFloat(e.target.value);
-                                            setCloseTime(value);
-                                        }}
-                                        onBlur={() => {
-                                            if (closeTime < 0 || closeTime > 24) {
-                                                alert("Giờ đóng cửa phải nằm trong khoảng từ 0 đến 24!");
-                                                setCloseTime(null); // Hoặc có thể không làm gì nếu không muốn reset
-                                            }
-                                        }}
-                                    />
-                                </FloatingLabel>
+                                            setOpenMinute(parseInt(e.target.value, 10));
+                                        }}>
+                                        <option value="">Chọn phút</option>
+                                        {[0, 15, 30, 45].map((minute) => (
+                                            <option key={minute} value={minute}>
+                                                {minute}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                </div>
                             </Col>
+
+                            <Col className="col-6 mb-3">
+                                <label className="">
+                                    Giờ đóng cửa: {closeHour !== null && closeMinute !== null ? `${closeHour}h${closeMinute.toString().padStart(2, '0')}` : "Chưa chọn"}
+                                </label>                                <div className="d-flex">
+                                    <Form.Select
+                                        value={closeHour ?? ''}
+                                        onChange={(e) => {
+                                            setCloseHour(parseInt(e.target.value, 10));
+                                        }}
+                                        className="me-2"
+                                    >
+                                        <option value="">Chọn giờ</option>
+                                        {[...Array(24).keys()].filter((hour) => hour > (openHour ?? -1)).map((hour) => (
+                                            <option key={hour} value={hour}>
+                                                {hour}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                    <Form.Select
+                                        value={closeMinute ?? ''}
+                                        onChange={(e) => {
+                                            setCloseMinute(parseInt(e.target.value, 10));
+
+                                        }}
+                                    >
+                                        <option value="">Chọn phút</option>
+                                        {[0, 15, 30, 45].map((minute) => (
+                                            <option key={minute} value={minute}>
+                                                {minute}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                </div>
+
+                            </Col>
+
+                            {/*  */}
                         </Row>
                         <Row>
                             <Col className="col-6">
@@ -368,8 +424,10 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                         <FloatingLabel controlId="floatingDescription" label="Mô tả" className="mb-3">
                             <Form.Control
                                 as="textarea"
+                                rows={5}
                                 placeholder="Mô tả"
                                 value={description}
+                                style={{ resize: "none" }}
                                 onChange={(e) => setDescription(e.target.value)}
                             />
                         </FloatingLabel>
@@ -473,14 +531,14 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                         </Form.Group>
                     </Col>
                 </Row>
-            </Modal.Body>
+            </Modal.Body >
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>Hủy</Button>
                 <Button variant="success" onClick={selectedSportField ? handleUpdate : handleSave} disabled={loading}>
                     {selectedSportField ? 'Lưu Thay Đổi' : 'Thêm Khu Vực'}
                 </Button>
             </Modal.Footer>
-        </Modal>
+        </Modal >
     );
 };
 

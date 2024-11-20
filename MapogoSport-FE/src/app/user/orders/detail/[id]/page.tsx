@@ -1,10 +1,11 @@
 'use client'
 import UserLayout from "@/components/User/UserLayout";
 import Link from "next/link";
-import { Table, Image, Row, Col, Button } from "react-bootstrap";
+import { Table, Image, Row, Col, Button, Modal, Form } from "react-bootstrap";
 import '../../../types/user.scss';
 import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
+import CancelOrderModal from "../../CancelOrderModal";
 import { toast } from "react-toastify";
 
 const OrdersDetail = ({ params }: { params: { id: number } }) => {
@@ -55,6 +56,31 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
 
     if (isLoading) return <div>Đang tải...</div>;
     if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
+
+
+    const handleCancelOrder = (reason: string) => {
+        console.log("Lý do hủy:", reason);
+        fetch(`http://localhost:8080/rest/order/cancel`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ orderId: params.id, status: "Đã hủy", reason: reason }),
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Hủy đơn hàng không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            toast.success('Hủy đơn hàng thành công!');
+            if (order) {
+                setOrder({
+                    ...order,
+                    status: 'Đã hủy',
+                });
+            }
+        });
+    };
 
     return (
         <UserLayout>

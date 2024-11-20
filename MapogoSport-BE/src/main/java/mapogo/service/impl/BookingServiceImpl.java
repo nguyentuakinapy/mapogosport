@@ -243,6 +243,7 @@ public class BookingServiceImpl implements BookingService {
 			notificationDAO.save(n);
 			
 			messagingTemplate.convertAndSend("/topic/bookingDetail", booking.getOwner().getUser().getUsername());
+			messagingTemplate.convertAndSend("/topic/bookingDetail/reload", booking.getOwner().getUser().getUsername());
 		}
 	
 		return booking;
@@ -347,6 +348,12 @@ public class BookingServiceImpl implements BookingService {
 	public List<Booking> findByUsername(String username) {
 		// TODO Auto-generated method stub
 		return bookingDAO.findByUser_Username(username);
+	}
+
+	@Override
+	public Integer getCountBookingByOwnerId(Integer ownerId) {
+		Owner o = ownerDAO.findById(ownerId).get();
+		return o.getBookings().size();
 	}
 
 }

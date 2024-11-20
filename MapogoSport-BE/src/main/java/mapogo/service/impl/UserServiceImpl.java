@@ -214,6 +214,6 @@ public class UserServiceImpl implements UserService {
 
 		notificationDAO.save(n);
 
-		messagingTemplate.convertAndSend("/topic/notification/username", n.getUser().getUsername());
+		messagingTemplate.convertAndSend("/topic/notification/isRead", n.getUser().getUsername());
 	}
 }

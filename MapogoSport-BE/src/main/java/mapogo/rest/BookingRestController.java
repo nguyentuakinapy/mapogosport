@@ -183,14 +183,14 @@ public class BookingRestController {
 	}
 
 	@PutMapping("/booking/update/status/{bookingDetailId}")
-	public void cancelBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId) {
-		bookingDetailService.cancelBookingDetail(bookingDetailId);
+	public void cancelBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId, @RequestBody String note) {
+		bookingDetailService.cancelBookingDetail(bookingDetailId, note);
 	}
 
 	@PutMapping("/booking/update/status/by/subcriptionKey/{bookingDetailId}/{subscriptionKey}")
 	public void cancelBookingDetailBySubscription(@PathVariable("bookingDetailId") Integer bookingDetailId,
-			@PathVariable("subscriptionKey") String subscriptionKey) {
-		bookingDetailService.cancelBookingDetailBySubscription(bookingDetailId, subscriptionKey);
+			@PathVariable("subscriptionKey") String subscriptionKey, @RequestBody String note) {
+		bookingDetailService.cancelBookingDetailBySubscription(bookingDetailId, subscriptionKey, note);
 	}
 
 	@PutMapping("/booking/update/booking/detail/{bookingDetailId}")
@@ -235,5 +235,10 @@ public class BookingRestController {
 	@GetMapping("/booking/rank/customer/online/{username}")
 	public List<Booking> findBookingByUsernameOnline(@PathVariable("username") String username){
 		return bookingService.findByUsername(username);
+	}
+	
+	@GetMapping("/count/booking/{ownerId}")
+	public Integer getCountBookingByOwnerId(@PathVariable("ownerId") Integer ownerId) {
+		return bookingService.getCountBookingByOwnerId(ownerId);
 	}
 }

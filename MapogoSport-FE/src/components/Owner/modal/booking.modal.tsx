@@ -264,6 +264,26 @@ const BookingModal = (props: BookingProps) => {
         //     }
         // }
         // if (isOffline) {
+        const resUserSubscription = await fetch(`http://localhost:8080/rest/user/subscription/${localStorage.getItem("username")}`);
+        if (!resUserSubscription.ok) {
+            throw new Error('Error fetching data');
+        }
+
+        const userSubscription = await resUserSubscription.json() as UserSubscription;
+
+        const resCountBooking = await fetch(`http://localhost:8080/rest/count/booking/${owner?.ownerId}`);
+        if (!resCountBooking.ok) {
+            throw new Error('Error fetching data');
+        }
+
+        const countBooking = await resCountBooking.json();
+
+        // toast.success(userSubscription.accountPackage.limitBookings + 'countBooking' + countBooking);
+
+        if (countBooking >= userSubscription.accountPackage.limitBookings) {
+            toast.success("Bạn đã quá số lần đặt sân cho gói miễn phí!"); return
+        }
+
         const responseUser = await fetch(`http://localhost:8080/rest/user/sportoffline`);
         if (!responseUser.ok) {
             throw new Error('Error fetching data');
@@ -501,6 +521,26 @@ const BookingModal = (props: BookingProps) => {
         //         return;
         //     }
         // }
+
+        const resUserSubscription = await fetch(`http://localhost:8080/rest/user/subscription/${localStorage.getItem("username")}`);
+        if (!resUserSubscription.ok) {
+            throw new Error('Error fetching data');
+        }
+
+        const userSubscription = await resUserSubscription.json() as UserSubscription;
+
+        const resCountBooking = await fetch(`http://localhost:8080/rest/count/booking/${owner?.ownerId}`);
+        if (!resCountBooking.ok) {
+            throw new Error('Error fetching data');
+        }
+
+        const countBooking = await resCountBooking.json();
+
+        // toast.success(userSubscription.accountPackage.limitBookings + 'countBooking' + countBooking);
+
+        if (countBooking >= userSubscription.accountPackage.limitBookings) {
+            toast.success("Bạn đã quá số lần đặt sân cho gói miễn phí!"); return
+        }
 
         // if (isOffline) {
         const responseUser = await fetch(`http://localhost:8080/rest/user/sportoffline`);

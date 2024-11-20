@@ -9,6 +9,8 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @SuppressWarnings("serial")
 @Getter
@@ -25,10 +27,12 @@ public class SubscriptionPayment implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "Username", nullable = false)
+	@JsonIgnore
 	private User user;
 
 	@ManyToOne
 	@JoinColumn(name = "UserSubscriptionId", nullable = false)
+	@JsonIgnore
 	private UserSubscription userSubscription;
 
 	@ManyToOne
