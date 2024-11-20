@@ -57,11 +57,6 @@ public class OrderRestController {
 	    orderService.updateStatusOrder(orderData);
 	}
 
-	@GetMapping("/user/orders/detail/{orderId}")
-	public List<OrderDetail> getOrderDetails(@PathVariable("orderId") Integer orderId) {
-		return orderDetailService.findOrderDetailByOrderId(orderId);
-	}
-
 	@GetMapping("/admin/orderToDay")
 	public List<Order> getOrderToDay() {
 		return orderService.getOrdersToday();

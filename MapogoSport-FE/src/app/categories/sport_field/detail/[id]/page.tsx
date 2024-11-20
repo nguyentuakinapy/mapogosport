@@ -52,16 +52,16 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
 
     useEffect(() => {
         const storedUser = localStorage.getItem('username');
-        if(storedUser){
+        if (storedUser) {
             setCurrentUser(storedUser);
         }
     }, []);
-    
+
     // useEffect(()=>{
     //     toast.success("ddddddddddddddddddd 12"+ currentUser);
-        
+
     // },[currentUser])
-    
+
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -91,7 +91,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         revalidateOnReconnect: false,
     });
 
-    
+
     /* QA thêm useParam */
     const path = useSearchParams();
 
@@ -112,13 +112,13 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     }, [path])
 
 
-    const handleChatMess=()=>{
-       if(data?.owner?.user?.username) {
+    const handleChatMess = () => {
+        if (data?.owner?.user?.username) {
             const ownerUsername = data.owner.user.username;
-            const encodedUsername = btoa(ownerUsername);                  
-            if(ownerUsername !== currentUser){
+            const encodedUsername = btoa(ownerUsername);
+            if (ownerUsername !== currentUser) {
                 window.history.pushState({}, "", `?status=${encodedUsername}`);
-            }else{
+            } else {
                 toast.info('Bạn không thể nhắn với chính mình ')
             }
         }
@@ -473,26 +473,6 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         }
     }
 
-    const [selectedSportType, setSelectedSportType] = useState<number | null>(null);
-
-    const handleIdBySize = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newSize = e.target.value;
-        if (sportField?.sportFielDetails) {
-            const filteredIds = sportField.sportFielDetails
-                .filter(detail => detail.size === newSize)
-                .map(detail => detail.sportFielDetailId);
-            const selectedDetail = sportField.sportFielDetails.find(detail => detail.size === newSize);
-            setSelectedSportType(selectedDetail ? selectedDetail.sportFielDetailId : null);
-        }
-    };
-
-    useEffect(() => {
-        if (sportField?.sportFielDetails) {
-            const initialSize = sportField.sportFielDetails[0].size;
-            handleIdBySize({ target: { value: initialSize } } as React.ChangeEvent<HTMLSelectElement>);
-        }
-    }, [sportField]);
-
 
     const [filteredData, setFilteredData] = useState(null);
     const handleClick = (value: number) => {
@@ -527,10 +507,10 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                     Đánh giá: 4/5 <i className="bi bi-star-fill"></i> (1 Đánh giá)
                                 </div>
                                 <div className="btn-option-icon ">
-                                <i className="bi bi-heart-fill"></i>
-                                <i  onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>              
+                                    <i className="bi bi-heart-fill"></i>
+                                    <i onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>
                                 </div>
-                              
+
                             </div>
                         </div>
                         <Row>

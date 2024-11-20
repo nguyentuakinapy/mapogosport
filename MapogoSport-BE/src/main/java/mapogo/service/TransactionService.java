@@ -13,7 +13,11 @@ public interface TransactionService {
 	
 	List<Transaction> findTransactionByWalletId(Integer walletId);
 
-	void createTransactionByPaymentBooking(Integer bookingId, double totalAmount);
+	void createTransactionUserByPaymentBooking(Integer bookingId, double totalAmount);
 	
-//	void updateWalletBalanceAndCreateTransaction(Wallet wallet, Integer amount, String description);
+	void createTransactionOwnerByPaymentBooking(Integer bookingId, double totalAmount);
+
+	void refundUserWalletBooking(Wallet wallet, Integer amount, Integer bookingId);
+
+	void refundOwnerWalletBooking(Wallet wallet, Integer amount, Integer bookingId);
 }

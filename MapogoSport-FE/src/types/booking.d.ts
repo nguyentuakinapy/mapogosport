@@ -120,6 +120,7 @@ interface BookingByUserMap {
     ]
     sportFieldName: string;
     totalAmount: number;
+    oldTotalAmount: number;
     status: string;
     date: Date;
     percentDeposit: number;
@@ -131,13 +132,22 @@ interface BookingFindAll {
     bookingUserFullname: string;
     bookingUserPhone: string;
     totalAmount: number;
+    oldTotalAmount: number;
     percentDeposit: number;
     status: string;
     date: Date;
     user: {
         username: string;
         fullname: string;
-    }
+    };
+    bookingDetails: [
+        {
+            bookingDetailStatus: string;
+            price: number;
+            bookingDetailDate: Date;
+            startTime: string;
+        }
+    ]
 }
 
 interface BookingDetailMap {

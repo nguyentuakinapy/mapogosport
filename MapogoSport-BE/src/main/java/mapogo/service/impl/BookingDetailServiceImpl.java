@@ -17,15 +17,19 @@ import org.springframework.stereotype.Service;
 
 import mapogo.dao.BookingDAO;
 import mapogo.dao.BookingDetailDAO;
+import mapogo.dao.OwnerDAO;
 import mapogo.dao.SportFieldDAO;
 import mapogo.dao.SportFieldDetailDAO;
 import mapogo.dao.UserDAO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
+import mapogo.entity.Owner;
 import mapogo.entity.PhoneNumberUser;
 import mapogo.entity.SportFieldDetail;
 import mapogo.entity.User;
+import mapogo.entity.Wallet;
 import mapogo.service.BookingDetailService;
+import mapogo.service.TransactionService;
 
 @Service
 public class BookingDetailServiceImpl implements BookingDetailService {
@@ -41,6 +45,12 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Autowired
 	UserDAO userDAO;
+	
+	@Autowired
+	TransactionService transactionService;
+	
+	@Autowired
+	OwnerDAO ownerDAO;
 
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
@@ -79,20 +89,39 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	public BookingDetail updateStatusBookingDetail(Map<String, Object> bookingDetailData) {
 		Integer bookingDetailId = (Integer) bookingDetailData.get("bookingDetailId");
 		String newStatus = (String) bookingDetailData.get("status");
+		Integer refundAmount = (Integer) bookingDetailData.get("refundAmount");
 
-		Optional<BookingDetail> optionalBookingDetail = bookingDetailDAO.findById(bookingDetailId);
-		if (optionalBookingDetail.isPresent()) {
-			BookingDetail bookingDetail = optionalBookingDetail.get();
+		BookingDetail bookingDetail = bookingDetailDAO.findById(bookingDetailId).get();
+		if (bookingDetail != null) {
 			bookingDetail.setStatus(newStatus);
 			bookingDetailDAO.save(bookingDetail);
+			
 
 			Booking booking = bookingDetail.getBooking();
+			if (newStatus.equals("Đã hủy")) {
+				if (!booking.getUser().getUsername().equals("sportoffline")) {
+					Wallet userWallet = booking.getUser().getWallet();
+					if (userWallet != null) {
+						transactionService.refundUserWalletBooking(userWallet, refundAmount, booking.getBookingId());
+					}
+					
+					Owner owner = ownerDAO.findById(booking.getOwner().getOwnerId()).get();
+					if (owner != null) {
+						Wallet ownerWallet = owner.getUser().getWallet();
+						if (ownerWallet != null) {
+							transactionService.refundOwnerWalletBooking(ownerWallet, refundAmount, booking.getBookingId());
+						}
+					}
+				}
+			}
+
 			boolean allCancel = booking.getBookingDetails().stream()
 					.allMatch(detail -> "Đã hủy".equals(detail.getStatus()));
 			if (allCancel) {
 				booking.setStatus("Đã hủy");
 				bookingDAO.save(booking);
 			}
+			
 		}
 		return null;
 	}

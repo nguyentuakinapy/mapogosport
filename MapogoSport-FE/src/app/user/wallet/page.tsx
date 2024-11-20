@@ -12,7 +12,6 @@ import { toast } from "react-toastify";
 import Wallet from "@/components/User/modal/wallet";
 
 const WalletPage = () => {
-
     return (
         <UserLayout>
             <Wallet></Wallet>
