@@ -72,7 +72,7 @@ public class TransactionServiceImpl implements TransactionService{
 	}
 	
 	@Override
-	public void refundUserWalletBooking(Wallet wallet, Integer amount, Integer bookingId) {
+	public void refundUserWalletBooking(Wallet wallet, Double amount, Integer bookingId) {
 		wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(amount)));
 	    
 	    Transaction transaction = new Transaction();
@@ -87,7 +87,7 @@ public class TransactionServiceImpl implements TransactionService{
 	}
 	
 	@Override
-	public void refundOwnerWalletBooking(Wallet wallet, Integer amount, Integer bookingId) {
+	public void refundOwnerWalletBooking(Wallet wallet, Double amount, Integer bookingId) {
 		wallet.setBalance(wallet.getBalance().subtract(BigDecimal.valueOf(amount)));
 	    
 	    Transaction transaction = new Transaction();

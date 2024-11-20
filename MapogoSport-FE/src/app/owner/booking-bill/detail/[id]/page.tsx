@@ -54,14 +54,14 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
         return false;
     };
 
-    const handleStatusChange = async (bookingDetailId: number, newStatus: string) => {
+    const handleStatusChange = async (bookingDetailId: number, newStatus: string, totalAmount: number) => {
         await fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ bookingDetailId, status: newStatus }),
+            body: JSON.stringify({ bookingDetailId, status: newStatus, refundAmount: totalAmount }),
         }).then((res) => {
             if (!res.ok) {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
@@ -101,7 +101,25 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                     <td>
                                         <Dropdown onSelect={(newStatus) => {
                                             if (canChangeStatus(booking.date, booking.startTime, booking.status, newStatus || booking.status)) {
-                                                handleStatusChange(booking.bookingDetailId, newStatus || booking.status);
+                                                const currentDateTime = new Date();
+                                                const formattedTime = booking.startTime.replace('h', ':').padStart(5, '0');
+                                                const bookingDateTime = new Date(`${booking.date}T${formattedTime}:00`);
+                                                const diffMinutes = (bookingDateTime.getTime() - currentDateTime.getTime()) / (1000 * 60);
+                                                const refundAmount = (booking.price * (booking.deposit / 100));
+                                                // toast.success(diffMinutes)
+                                                if (diffMinutes >= 120) {
+                                                    if (booking.statusBooking === "Chờ thanh toán") {
+                                                        handleStatusChange(booking.bookingDetailId, newStatus || booking.status, refundAmount);
+                                                    } else {
+                                                        handleStatusChange(booking.bookingDetailId, newStatus || booking.status, refundAmount);
+                                                    }
+                                                } else {
+                                                    if (booking.statusBooking === "Chờ thanh toán") {
+                                                        handleStatusChange(booking.bookingDetailId, newStatus || booking.status, refundAmount * 0.75);
+                                                    } else {
+                                                        handleStatusChange(booking.bookingDetailId, newStatus || booking.status, refundAmount * 0.75);
+                                                    }
+                                                }
                                             }
                                         }}>
                                             <Dropdown.Toggle disabled={isDropdownDisabled} variant={getStatusVariant(booking.status)}>

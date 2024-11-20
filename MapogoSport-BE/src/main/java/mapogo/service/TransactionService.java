@@ -17,7 +17,7 @@ public interface TransactionService {
 	
 	void createTransactionOwnerByPaymentBooking(Integer bookingId, double totalAmount);
 
-	void refundUserWalletBooking(Wallet wallet, Integer amount, Integer bookingId);
+	void refundUserWalletBooking(Wallet wallet, Double amount, Integer bookingId);
 
-	void refundOwnerWalletBooking(Wallet wallet, Integer amount, Integer bookingId);
+	void refundOwnerWalletBooking(Wallet wallet, Double amount, Integer bookingId);
 }

@@ -79,6 +79,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 					bookingDetailData.put("ownerPhoneNumberUsers", user.getPhoneNumber().getPhoneNumber());
 				}
 			}
+			bookingDetailData.put("deposit", bookingDetail.getBooking().getPercentDeposit());
+			bookingDetailData.put("statusBooking", bookingDetail.getBooking().getStatus());
 
 			resultMaps.add(bookingDetailData);
 		}
@@ -89,7 +91,18 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	public BookingDetail updateStatusBookingDetail(Map<String, Object> bookingDetailData) {
 		Integer bookingDetailId = (Integer) bookingDetailData.get("bookingDetailId");
 		String newStatus = (String) bookingDetailData.get("status");
-		Integer refundAmount = (Integer) bookingDetailData.get("refundAmount");
+		
+		Object refundObj = bookingDetailData.get("refundAmount");
+		double refundAmount;
+
+		if (refundObj instanceof String) {
+			refundAmount = Double.valueOf((String) refundObj);
+		} else if (refundObj instanceof Number) {
+			refundAmount = ((Number) refundObj).doubleValue();
+		} else {
+			throw new IllegalArgumentException("totalAmount must be a String or Number");
+		}
+
 
 		BookingDetail bookingDetail = bookingDetailDAO.findById(bookingDetailId).get();
 		if (bookingDetail != null) {

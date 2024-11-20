@@ -49,9 +49,43 @@ const BookingModal = (props: OwnerProps) => {
         setIdSportDetailTemporary(bookingDetailData?.sportFieldDetail.sportFielDetailId);
     }, [bookingDetailData])
 
+    const handleStatusBookingChange = (bookingId: number, refundAmount: number) => {
+        fetch(`http://localhost:8080/rest/owner/booking/update`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingId, status: "Đã hủy", refundAmount: refundAmount }),
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            toast.success('Cập nhật thành công!');
+        });
+    };
+
+    const handleStatusChange = async (bookingDetailId: number, newStatus: string, totalAmount: number) => {
+        await fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingDetailId, status: newStatus, refundAmount: totalAmount }),
+        }).then((res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            toast.success('Cập nhật thành công!');
+        });
+    };
+
     const handleCancelBookingDetail = () => {
-        // if (confirm("Bạn có chắc chắn muốn hủy sân?")) {
         if (applyOne) {
+            // handleStatusChange(bookingDetailData?.bookingDetailId, "Đã hủy",)
             fetch(`http://localhost:8080/rest/booking/update/status/${bookingDetailData?.bookingDetailId}`, {
                 method: 'PUT',
                 headers: {

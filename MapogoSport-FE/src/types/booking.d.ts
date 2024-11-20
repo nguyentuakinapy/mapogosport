@@ -160,6 +160,8 @@ interface BookingDetailMap {
     status: string;
     address: string;
     ownerFullname: string;
-    ownerPhoneNumberUsers: string
+    ownerPhoneNumberUsers: string;
+    deposit: number;
+    statusBooking: string
 }
 
