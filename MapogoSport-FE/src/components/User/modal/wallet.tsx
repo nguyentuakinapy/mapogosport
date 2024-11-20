@@ -8,6 +8,7 @@ import jsPDF from "jspdf";
 import 'jspdf-autotable';
 import { RobotoBase64 } from "../../../../public/font/Roboto-Regular";
 import { toast } from "react-toastify";
+import '../types/wallet.scss';
 
 const WalletPage = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());

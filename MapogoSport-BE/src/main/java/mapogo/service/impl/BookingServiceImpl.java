@@ -162,7 +162,17 @@ public class BookingServiceImpl implements BookingService {
 	public Booking updateStatusBooking(Map<String, Object> bookingData) {
 		Integer bookingId = (Integer) bookingData.get("bookingId");
 		String newStatus = (String) bookingData.get("status");
-		Integer refundAmount = (Integer) bookingData.get("refundAmount");
+		
+		Object refundObj = bookingData.get("refundAmount");
+		double refundAmount;
+
+		if (refundObj instanceof String) {
+			refundAmount = Double.valueOf((String) refundObj);
+		} else if (refundObj instanceof Number) {
+			refundAmount = ((Number) refundObj).doubleValue();
+		} else {
+			throw new IllegalArgumentException("totalAmount must be a String or Number");
+		}
 
 		Booking booking = bookingDAO.findById(bookingId).get();
 		if (booking != null) {
