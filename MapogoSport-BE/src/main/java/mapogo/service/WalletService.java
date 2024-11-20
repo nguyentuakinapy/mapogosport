@@ -14,4 +14,5 @@ public interface WalletService {
 
 	Wallet updateWalletAndCreateTransaction(String username, Double price);
 
+	void addMoney(String username, Double money);
 }

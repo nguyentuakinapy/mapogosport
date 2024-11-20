@@ -3,7 +3,7 @@ import UserLayout from "@/components/User/UserLayout";
 import { FloatingLabel, Form, Nav, Pagination } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { useData } from "@/app/context/UserContext";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import jsPDF from "jspdf";
 import 'jspdf-autotable';
 import { RobotoBase64 } from "../../../../public/font/Roboto-Regular";
@@ -176,6 +176,24 @@ const WalletPage = () => {
 
     const [money, setMoney] = useState<number>();
 
+    const addMoneyToWallet = () => {
+        fetch(`http://localhost:8080/rest/wallet/${userData?.username}/${money}`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            mutate(`http://localhost:8080/rest/wallet/transaction/${userData?.wallet.walletId}`);
+            setNotificationModal(false);
+            toast.success('Nạp tiền thành công!');
+        });
+    }
+
     const renderNotification = () => {
         return (
             <div className="text-center">
@@ -186,7 +204,7 @@ const WalletPage = () => {
                         onChange={(e) => setMoney(Number(e.target.value))}
                     />
                 </FloatingLabel>
-                <button className="mt-2 w-100 btn btn-danger">Nạp tiền</button>
+                <button onClick={addMoneyToWallet} className="mt-2 w-100 btn btn-danger">Nạp tiền</button>
             </div>
 
         )

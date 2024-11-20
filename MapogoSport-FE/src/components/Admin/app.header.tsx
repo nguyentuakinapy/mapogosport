@@ -92,8 +92,6 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
         return () => clearInterval(intervalId);
     }, []);
 
-
-
     useEffect(() => {
         const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
         const stompClient = Stomp.over(socket);
