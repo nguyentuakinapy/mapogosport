@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Row, Col, Button, ButtonGroup, Form } from 'react-bootstrap';
+import { Container, Row, Col, Button, ButtonGroup, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 // import '../globals.css';
 import Image from 'next/image';
@@ -395,6 +395,19 @@ const ProductDetail = () => {
         fetchData();
         console.log(`Rating selected: ${value}`);
     };
+    
+    const handleChatMess=()=>{
+        if(user) {           
+             if(user?.username !== "myntd"){
+                 window.history.pushState({}, "", `?status=default`);
+             }else{
+                 toast.info('Bạn không thể nhắn với chính mình ')
+             }
+         }else{
+            toast.warning('Vui lòng đăng nhập để chat với chủ shop')
+         }
+     }
+     /* QA thêm useParam */
 
     return (
         <>
@@ -463,6 +476,19 @@ const ProductDetail = () => {
                         {/* Thông tin sản phẩm */}
                         <Col className='ms-5' style={{ marginLeft: '100px' }}>
                             <h4>{findByIdProduct.name}</h4>
+                            <div className='star-comment '>
+                                <div className="star d-flex">
+                                    Đánh giá: 4/5 <i className="text-warning mx-2 bi bi-star-fill"></i> (1 Đánh giá)
+                                <div className="btn-option-icon">
+                                <i className="text-danger bi bi-heart-fill mx-2"></i>
+                                <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>
+                                <i onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>              
+                                </OverlayTrigger>  
+                                </div>
+                                </div>
+                              
+                              
+                            </div>
                             <h5 className="text-danger mt-3">
                                 {price ? formatPrice(price) : formatPrice(findByIdProduct.price)}
                             </h5>

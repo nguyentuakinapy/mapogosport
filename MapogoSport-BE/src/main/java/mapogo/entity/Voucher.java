@@ -15,6 +15,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -62,8 +64,13 @@ public class Voucher implements Serializable {
 //	private Date activeDate; // QA sửa 12/11
 	private LocalDateTime activeDate;
 	
-	@Column(name = "CreatedBy", nullable = false)
-	private String createdBy;
+//	@Column(name = "CreatedBy", nullable = false)
+//	private String createdBy;
+	
+	@ManyToOne()
+	@JoinColumn(name = "CreatedBy", nullable = false) // Khóa ngoại đến Users
+	private User createdBy;
+
 
 	@OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JsonIgnore

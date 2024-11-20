@@ -11,8 +11,8 @@ const Categories = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [icon, setIcon] = useState<boolean[]>([]); // Để quản lý trạng thái của các biểu tượng
     const [categoriesProduct, setCategoriesProduct] = useState<CategoryProduct[]>([])
-    const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-    const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+    const [selectedCategories, setSelectedCategories] = useState<number[]>([]); // tìm kiếm theo Id
+    const [selectedBrands, setSelectedBrands] = useState<string[]>([]); // tìm kiếm theo tên loại
     // Pagination
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);

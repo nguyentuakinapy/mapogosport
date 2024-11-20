@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.VoucherDAO;
+import mapogo.entity.User;
 import mapogo.entity.Voucher;
 import mapogo.service.VoucherService;
 
@@ -142,8 +143,11 @@ public class VoucherServiceImpl implements VoucherService{
 	    if (voucher.getActiveDate().isEqual(voucher.getCreateDate())) {
 	        voucher.setStatus("active");
 	    }
-
-	    voucher.setCreatedBy((String) bd.get("createdBy"));
+	    User u = new User()	;
+	    u.setUsername((String) bd.get("createdBy"));
+	    
+	    System.err.println("create By "+ u.getUsername());
+	    voucher.setCreatedBy(u);
 
 	    return dao.save(voucher);
 	}
@@ -244,10 +248,16 @@ public class VoucherServiceImpl implements VoucherService{
 	    }
 
 	    if (bd.containsKey("createdBy")) {
-	        voucher.setCreatedBy((String) bd.get("createdBy"));
+	    	  User u = new User()	;
+	  	    u.setUsername((String) bd.get("createdBy"));	  	    
+	  	    System.err.println("create By Update"+ u.getUsername());
+	  	    
+	  	    voucher.setCreatedBy(u);
+//	        voucher.setCreatedBy();
 	    }
 
 	    return dao.save(voucher);
+//	    return null;
 	}
 
 
@@ -259,12 +269,12 @@ public class VoucherServiceImpl implements VoucherService{
 	    // Kiểm tra và cập nhật trạng thái voucher
 	    if (voucher.getStatus().equalsIgnoreCase("active")) {
 	        voucher.setStatus("inactive");
-	        LocalDateTime now = LocalDateTime.now();
-	        
-	        // Chỉ cập nhật endDate thành ngày hiện tại nếu voucher chưa hết hạn
-	        if (voucher.getEndDate().isAfter(now)) {
-	            voucher.setEndDate(now);
-	        }
+//	        LocalDateTime now = LocalDateTime.now();
+//	        
+//	        // Chỉ cập nhật endDate thành ngày hiện tại nếu voucher chưa hết hạn
+//	        if (voucher.getEndDate().isAfter(now)) {
+//	            voucher.setEndDate(now);
+//	        }
 	    }
 	    
 	    return dao.save(voucher);

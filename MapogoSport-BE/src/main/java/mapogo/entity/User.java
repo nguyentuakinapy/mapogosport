@@ -127,6 +127,13 @@ public class User implements Serializable {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<Notification> notifications;
+	
+	// QA thêm 18/11
+	@OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Voucher> createdVouchers;
+
+	//
 
 }
 
