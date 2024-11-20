@@ -4,6 +4,7 @@ import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, Nav } from "r
 import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
 import 'react-datepicker/dist/react-datepicker.css';
+import { createTimeStringH } from "@/components/Utils/booking-time";
 
 
 interface BookingProps {
@@ -36,7 +37,7 @@ const BookingModal = (props: BookingProps) => {
     const [phoneNumber, setPhoneNumber] = useState<string>("");
 
 
-    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    // const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
     // const { data } = useSWR(`http://localhost:8080/rest/paymentMethod`, fetcher, {
     //     revalidateIfStale: false,
@@ -151,6 +152,7 @@ const BookingModal = (props: BookingProps) => {
             newData.push(timeIntervals[index].label);
         }
         if (activeTab === 'all') {
+            newData.shift()
             setDataTimeTemporary(newData);
         }
     }
@@ -162,6 +164,10 @@ const BookingModal = (props: BookingProps) => {
     useEffect(() => {
         getPriceByTimeBooking(selectTimeOnStage);
     }, [selectTimeOnStage]);
+
+    // const isEven = (number: number): boolean => {
+    //     return number % 3 === 0;
+    // }
 
     const getPriceByTimeBooking = (slTime: string) => {
         if (slTime == 'Chọn thời gian') {
@@ -203,32 +209,23 @@ const BookingModal = (props: BookingProps) => {
                 }
 
                 setEndTime(`${endHour}h${endMinute > 0 ? endMinute : '00'}`);
-                const hetcuu = (`${endHour}h${endMinute > 0 ? endMinute : '00'}`);
-                const selectedPrice = calculateBookingPrice(sportDetail, startTime, hetcuu);
+
+                const peakHourStart = sportDetail.peakHour.split('-')[0];
+                const peakHourEnd = sportDetail.peakHour.split('-')[1];
+
+                const timeSlots: string[] = createTimeStringH(`${hours}h${minutes > 0 ? minutes : '00'}`, `${endHour}h${endMinute > 0 ? endMinute : '00'}`)
+                console.log(timeSlots);
+
+                const price = sportDetail.price / 2;
+                const pricePeakHour = sportDetail.peakHourPrices / 2;
+
                 let totalAmount = 0;
 
-                let totalTimeInHours: number = 0;
-                if (startTime.includes("h30")) {
-                    totalTimeInHours = Math.abs(endHour - hours) + (endMinute / 60) - 0.5; // Thời gian từ giờ bắt đầu đến giờ kết thúc
-                    if (totalTimeInHours == 0.5) {
-                        totalAmount = selectedPrice / 2;
-                    } else if (String(totalTimeInHours).includes(".5")) {
-                        totalAmount = (selectedPrice * Math.abs(endHour - hours)) - selectedPrice / 2;
+                for (const time of timeSlots) {
+                    if (isTimeWithinRange(peakHourStart, peakHourEnd, time)) {
+                        totalAmount += pricePeakHour;
                     } else {
-                        totalAmount = selectedPrice * totalTimeInHours;
-                    }
-                } else {
-                    totalTimeInHours = (Math.abs(endHour - hours) + (endMinute / 60)); // Thời gian từ giờ bắt đầu đến giờ kết thúc
-                    if (totalTimeInHours == 0.5) {
-                        totalAmount = selectedPrice / 2;
-                    } else if (String(totalTimeInHours).includes(".5")) {
-                        if (String(totalTimeInHours).includes("1")) {
-                            totalAmount = (selectedPrice * Math.abs(endHour - hours)) + selectedPrice / 2;
-                        } else {
-                            totalAmount = (selectedPrice * Math.abs(endHour - hours)) + selectedPrice / 2;
-                        }
-                    } else {
-                        totalAmount = selectedPrice * totalTimeInHours;
+                        totalAmount += price;
                     }
                 }
                 setPrice(totalAmount);
@@ -238,16 +235,16 @@ const BookingModal = (props: BookingProps) => {
         }
     }
 
-
-
     const handleSave = async () => {
         // const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
         // if (isOffline) {
+        const phoneRegex = /^0\d{9}$/;
+
         if (!fullName) {
             toast.error("Vui lòng nhập họ và tên!");
             return;
-        } else if (!phoneNumber) {
-            toast.error("Vui lòng nhập số điện thoại!");
+        } else if (phoneNumber.length !== 0 && !phoneRegex.test(phoneNumber)) {
+            toast.error("Số điện thoại phải là 10 số và bắt đầu từ 0!!");
             return;
         } else if (selectTime === "Chọn thời gian") {
             toast.error("Vui lòng chọn thời gian!");
@@ -548,7 +545,7 @@ const BookingModal = (props: BookingProps) => {
                 phoneNumber: phoneNumber,
                 // isOffline ? phoneNumber : dataUser.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
                 totalAmount,
-                prepayPrice: checkPrepayPrice ? prepayPrice : totalAmount,
+                percentDeposit: sportDetail.percentDeposit,
                 paymentMethodId: paymentMethod,
                 ownerId: owner.ownerId,
                 status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
@@ -600,7 +597,7 @@ const BookingModal = (props: BookingProps) => {
                 fullName: fullName,
                 phoneNumber: phoneNumber,
                 totalAmount,
-                prepayPrice: checkPrepayPrice ? totalAmount && totalAmount * (sportDetail.percentDeposit / 100) : totalAmount,
+                percentDeposit: sportDetail.percentDeposit,
                 paymentMethodId: paymentMethod,
                 ownerId: owner.ownerId,
                 status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
@@ -979,7 +976,7 @@ const BookingModal = (props: BookingProps) => {
                                 <Form.Select style={{ border: '1px solid' }} value={selectTimeOnStage} className="me-3"
                                     onChange={(e) => setSelectTimeOnStage(e.target.value)} aria-label="Default select example">
                                     <option value="Chọn thời gian">Chọn thời gian</option>
-                                    <option value="30 phút">30 phút</option>
+                                    {/* <option value="30 phút">30 phút</option> */}
                                     <option value="1 giờ">1 giờ</option>
                                     <option value="1 giờ 30 phút">1 giờ 30 phút</option>
                                     <option value="2 giờ">2 giờ</option>

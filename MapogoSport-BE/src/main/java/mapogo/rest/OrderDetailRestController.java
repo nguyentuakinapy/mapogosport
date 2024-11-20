@@ -71,11 +71,14 @@ public class OrderDetailRestController {
 			ProductDetailSize pds = pdsDAO.findByProductDetailSizeId(orderDetail.getProductDetailSize().getProductDetailSizeId());
 			int kho= pds.getQuantity();
 			pds.setQuantity(kho-orderDetail.getQuantity());
-//			System.out.println("conf: "+pds.getQuantity());
 			pdsDAO.save(pds);
 		}
-		return ResponseEntity.status(HttpStatus.SC_OK).body("ok");
+		return ResponseEntity.status(HttpStatus.SC_OK).body(orderDetails);
 	}
 	
+	@GetMapping("/order-detail-by-order/{orderId}")
+	public List<OrderDetail> getOrderdetailByOrderId(@PathVariable("orderId") Integer orderId) {
+		return orderDetailService.findOrderDetailByOrderId(orderId);
+	}
 	//đến đây
 }

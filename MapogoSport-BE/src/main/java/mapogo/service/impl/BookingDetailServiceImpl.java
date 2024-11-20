@@ -265,16 +265,21 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		newBd.setSubscriptionKey("addNew" + bd.getBooking().getBookingId());
 
 //		System.err.println(data);
-		bookingDetailDAO.save(newBd);
 
 		Double totalPriceTemporary = 0.0;
 
 		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bd.getBooking().getBookingId());
 		for (BookingDetail bookingDetail : bookingDetails) {
 			totalPriceTemporary = totalPriceTemporary + bookingDetail.getPrice();
-			bookingDetail.setSubscriptionKey("addNew" + bd.getBooking().getBookingId());
-			bookingDetailDAO.save(bookingDetail);
+		    if (bookingDetail.getSubscriptionKey() != null && bookingDetail.getSubscriptionKey().contains("keybooking")) {
+				break;
+			} else {
+				bookingDetail.setSubscriptionKey("addNew" + bd.getBooking().getBookingId());
+				bookingDetailDAO.save(bookingDetail);
+			}
 		}
+		
+		bookingDetailDAO.save(newBd);
 
 		Booking b = bd.getBooking();
 

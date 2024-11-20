@@ -2,7 +2,7 @@ interface Booking {
     bookingId: number;
     date: Date;
     totalAmount: float;
-    prepayPrice: float;
+    percentDeposit: float;
     status: string;
     paymentMethod: {
         paymentMethodId: number;
@@ -39,7 +39,7 @@ interface Booking {
     };
     fullName: string;
     phoneNumber: string;
-    prepayPrice: number;
+    percentDeposit: number;
 }
 
 interface bookingPayment {
@@ -69,7 +69,7 @@ interface BookingDetail {
     date: string;
     subscriptionKey: string;
     status: boolean;
-  
+
 }
 
 
@@ -106,10 +106,19 @@ interface AvailableBooking {
 
 interface BookingByUserMap {
     bookingId: number;
+    bookingDetails: [
+        {
+            bookingDetailStatus: string;
+            price: number;
+            bookingDetailDate: Date;
+            startTime: string;
+        }
+    ]
     sportFieldName: string;
     totalAmount: number;
     status: string;
     date: Date;
+    percentDeposit: number;
 }
 
 interface BookingFindAll {
@@ -118,7 +127,7 @@ interface BookingFindAll {
     bookingUserFullname: string;
     bookingUserPhone: string;
     totalAmount: number;
-    prepayPrice: number;
+    percentDeposit: number;
     status: string;
     date: Date;
     user: {

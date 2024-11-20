@@ -22,7 +22,7 @@ public class Authority implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "AuthorityId")
-	private long authorityId;
+	private Integer authorityId;
 
 	@ManyToOne
 	@JoinColumn(name = "Username")

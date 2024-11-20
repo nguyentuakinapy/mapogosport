@@ -84,13 +84,10 @@ public class PaymentController {
 	@PostMapping("/create_payment")
 	public ResponseEntity<?> createPayment(HttpServletRequest req, @RequestParam("orderId") Integer orderId,
 			@RequestBody List<Map<String, Integer>> data) throws UnsupportedEncodingException {
-//		System.out.println("orderId: " + orderId);
 		Order order = orderService.findByOrderId(orderId);
 
 		String orderType = "other";
-//        String bankCode = req.getParameter("bankCode");
 		long amount = (long) (order.getAmount() * 100);
-//        String vnp_TxnRef = Config.getRandomNumber(8);
 		String vnp_TxnRef = orderId.toString();
 		String vnp_IpAddr = Config.getIpAddress(req);
 
@@ -190,8 +187,8 @@ public class PaymentController {
 		if (responseCode.equals("00")) {
 			// update +Balance
 			Wallet wallet = walletService.findByUsername(user);
-			wallet.setBalance(new BigDecimal(trimmedAmount.trim()));
-			walletService.update(wallet);
+//			wallet.setBalance(new BigDecimal(trimmedAmount.trim()));
+//			walletService.update(wallet);
 
 			// create transaction
 			Transaction transaction = new Transaction();
@@ -212,6 +209,7 @@ public class PaymentController {
 			orderPaymentSevice.create(orderPayment);
 
 			// -balance -> create transaction
+			
 			Transaction transaction1 = new Transaction();
 			transaction1.setWallet(wallet);
 			transaction1.setAmount(new BigDecimal(trimmedAmount.trim()));
@@ -231,7 +229,7 @@ public class PaymentController {
 			}
 
 			// URL chuyển hướng khi thành công
-			return new RedirectView("http://localhost:3000/checkout-product/success");
+			return new RedirectView("http://localhost:3000/checkout-product?status=success&orderId="+order.getOrderId());
 
 		} else {
 			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
@@ -271,13 +269,13 @@ public class PaymentController {
 
 			orderDetailService.create(orderDetail);
 		}
-		return paymentService.createMoMoPayment(amount,orderId);
+		return paymentService.createMoMoPayment(amount,orderId,null,"http://localhost:8080/api/payment/momo");
 	}
 
 	// @GetMapping("/momo")
 	@GetMapping("/momo")
 	public RedirectView transaction_MoMo(@RequestParam(value = "resultCode") String resultCode,
-			@RequestParam(value = "orderId") String orderId) {
+			@RequestParam(value = "extraData") String orderId) {
 
 		OrderPayment orderPayment = new OrderPayment();
 		Order order = orderService.findByOrderId(Integer.parseInt(orderId));
@@ -289,8 +287,8 @@ public class PaymentController {
 		if (resultCode.equals("0")) {
 			// update +Balance
 			Wallet wallet = walletService.findByUsername(user);
-			wallet.setBalance(new BigDecimal(order.getAmount()));
-			walletService.update(wallet);
+//			wallet.setBalance(new BigDecimal(order.getAmount()));
+//			walletService.update(wallet);
 
 			// create transaction
 			Transaction transaction = new Transaction();

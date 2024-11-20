@@ -29,7 +29,7 @@ public interface UserService {
 	
 	UserSubscription findUserSubscriptionByUser(String username);
 	
-	UserSubscription updateUserSubscription(Map<String, Object> data);
+	UserSubscription updateUserSubscription(int accountPackageId, int userSubscriptionId);
 	
 	User findUserByBookingDetailId(Integer bookingDetailId);
 	

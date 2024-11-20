@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 import mapogo.dao.AuthorityDAO;
 import mapogo.dao.RoleDAO;
-
+import mapogo.entity.Role;
 import mapogo.service.RoleService;
 
 @Service
@@ -16,6 +16,11 @@ public class RoleServiceImpl implements RoleService {
 
 	@Autowired
 	AuthorityDAO authorityDAO;
+
+	@Override
+	public Role findByName(String roleName) {
+		return roleDao.findByName(roleName);
+	}
 
 
 }

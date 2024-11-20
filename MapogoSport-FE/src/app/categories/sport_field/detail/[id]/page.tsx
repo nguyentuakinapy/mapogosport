@@ -8,7 +8,8 @@ import { formatDateVN } from '@/components/Utils/Format';
 import CheckoutModal from '@/components/Booking/booking.Checkout';
 import ModalReviewSportField from '@/components/Review/review.sportField';
 import '../[id]/BookingDetail.scss';
-import axios from 'axios';
+import MapComponent from "../../../../utils/MapComponent";
+import { fetchCoordinates } from "../../../../utils/geocode";
 import SearchSportField from '@/components/Booking/booking.Search';
 import { useSearchParams } from 'next/navigation';
 import { useData } from '@/app/context/UserContext';
@@ -41,10 +42,10 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
     const [startTimeKey, setStartTimeKey] = useState<boolean>(true);
     const [showReviewModal, setShowReviewModal] = useState(false);
-    const [dataReview, setDataReview] = useState<Review[]>([]);
+    const [dataReview, setDataReview] = useState<FieldReview[]>([]);
     const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
-
-    const [gallery, setGallery] = useState<GalleryField[]>([])
+    const [gallery, setGallery] = useState<GalleryField[]>([]);
+    const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
 
     // const currentUser = useData();
     const [currentUser, setCurrentUser] = useState<string>("");
@@ -128,6 +129,9 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         if (data && reviewData) {
             setSportField(data);
             setDataReview(reviewData);
+            fetchCoordinates(data.address).then((coords) => {
+                if (coords) setCoordinates(coords);
+            });
             if (data.sportFielDetails?.length > 0) {
                 const firstDetail = data.sportFielDetails[0];
                 setSportFieldDetailId(firstDetail.sportFielDetailId);
@@ -143,10 +147,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         };
     }, [sportField]);
 
-
-      // handel Gallery sportField
-
-      useEffect(() => {
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await fetch(`http://localhost:8080/rest/sportfield/gallery/${params.id}`)
@@ -454,6 +455,11 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     };
 
     const handleBooking = (event: React.MouseEvent<HTMLTableCellElement>) => {
+        const username = localStorage.getItem('username');
+        if (!username) {
+            toast.error("Vui lòng đăng nhập để thực hiện chức năng!");
+            return;
+        }
         const sportDetail = event.currentTarget.getAttribute("sport-detail");
         const startTime = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
@@ -466,18 +472,6 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
             setStartTimeKey(!startTimeKey);
         }
     }
-
-    const [note, setNote] = useState<string>(''); // Ghi chú
-
-    const handleDateChange = (date: Date | null) => {
-        if (date) {
-            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-            const formatted = localDate.toISOString().split('T')[0];
-            setSelectedDate(formatted);
-        } else {
-            setSelectedDate(null);
-        }
-    };
 
     const [selectedSportType, setSelectedSportType] = useState<number | null>(null);
 
@@ -499,85 +493,21 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         }
     }, [sportField]);
 
-    const [validTimes, setValidTimes] = useState<string[]>([]);
 
-    const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setNote(e.target.value)
-    };
-
-    const handleFindField = async () => {
-        if (selectedDate && selectedTime) {
-            const response = await fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${selectedSportType}/${selectedDate}/${selectedDate}`);
-            const bookingsFromAPI: BookingDetail[] = await response.json();
-            let isBooked = false;
-            const selectedSportDetail = sportField?.sportFielDetails.find(detail => detail.sportFielDetailId === selectedSportType);
-            if (selectedSportDetail && selectedSportDetail.status === "Tạm đóng") {
-                toast.warning("Không tìm thấy sân phù hợp theo nhu cầu!");
-                return;
-            }
-            const currentDateTime = new Date();
-            const formattedTime = selectedTime.replace('h', ':').padStart(5, '0');
-            const selectedDateTime = new Date(`${selectedDate}T${formattedTime}`);
-            if (selectedDateTime < currentDateTime) {
-                toast.warning("Đã quá thời gian yêu cầu đặt sân!");
-                return;
-            }
-            if (Array.isArray(bookingsFromAPI) && bookingsFromAPI.length > 0) {
-                for (const booking of bookingsFromAPI) {
-                    const { startTime, endTime, sportFieldDetail } = booking;
-                    if ((startTime <= selectedTime && endTime > selectedTime) &&
-                        sportFieldDetail.sportFielDetailId === selectedSportType) {
-                        isBooked = true;
-                        break;
-                    }
-                }
-            }
-            if (isBooked) {
-                toast.warning("Đã có sân được đặt trùng với yêu cầu!");
-            } else {
-                toast.success("Đã tìm thấy sân theo yêu cầu!");
-                const sportDetail = selectedSportType;
-                const startTime = selectedTime;
-                const dayStartBooking = selectedDate;
-                const selectedSportDetail = sportField?.sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
-                if (sportDetail && startTime && dayStartBooking) {
-                    setSportDetail(selectedSportDetail);
-                    setStartTime(startTime);
-                    setDayStartBooking(dayStartBooking);
-                    setShowBookingModal(true);
-                    setStartTimeKey(!startTimeKey);
-                }
-            }
-        } else {
-            toast.warning("Vui lòng chọn ngày và giờ trước khi tìm kiếm.");
-        }
-    };
-    const [filteredData, setFilteredData] = useState(null); // State to store filtered reviews
-    const [rating, setRating] = useState(null);
-    const handleClick = (value) => {
-        setRating(value);
+    const [filteredData, setFilteredData] = useState(null);
+    const handleClick = (value: number) => {
 
         const fetchData = async () => {
-            try {
-                const response = await axios.get(`http://localhost:8080/rest/find-fielreview-by-rating/${params.id}/${value}`);
-                if (response.data) {
-                    setFilteredData(response.data); // Update filtered data with reviews matching the rating
-                    // console.log("Filtered reviews by rating:", response.data);
-                } else {
-                    console.log("No reviews found for this rating.");
-
-                }
-            } catch (error) {
-                console.log("Error fetching rating data:", error);
-
-            }
+            const response = await fetch(`http://localhost:8080/rest/find-fielreview-by-rating/${params.id}/${value}`);
+            const data = await response.json();
+            setFilteredData(data);
         };
 
         fetchData();
-        // console.log(`Rating selected: ${value}`);
     };
 
-  
+
+
     if (isLoading) return <HomeLayout><div>Đang tải...</div></HomeLayout>;
     if (error) return <HomeLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></HomeLayout>;
 
@@ -618,7 +548,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                                             src={`${galleryItem.image}`}
                                                             className="d-block w-100 h-100"
                                                             alt={`Gallery image ${index + 1}`}
-                                                            style={{ width: '100px', maxHeight: '450px', objectFit: 'cover', cursor: 'pointer' }} 
+                                                            style={{ width: '100px', maxHeight: '450px', objectFit: 'cover', cursor: 'pointer' }}
                                                         />
                                                     </div>
                                                 ))}
@@ -635,9 +565,9 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                     </>
                                 ) : (
                                     sportField && <Image src={sportField.image} width={850} height={450} rounded />
-                                    
+
                                 )}
-                            
+
                             </Col>
                             <Col lg={4}>
                                 <div className="sportField-info-detail bg-white">
@@ -743,62 +673,66 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                         </div>
                     </div>
                 </div>
-                <div className="my-3 text-center">
-                    <p>Bạn đánh giá sao về sân thể thao này?</p>
-                    <Button variant="danger" onClick={() => setShowReviewModal(true)}>Đánh giá ngay</Button>
-                </div>
-                <h5 className='ms-3'>Bình luận</h5>
-                <div className="d-flex ms-4">
-                    {[5, 4, 3, 2, 1].map((value) => (
-                        <button
-                            key={value}
-                            type="button"
-                            className='btn btn-primary ms-2'
-                            onClick={() => handleClick(value)}
-                        >
-                            {value} ★
-                        </button>
-                    ))}
-                </div>
+                <Row className='mt-3'>
+                    <Col>
+                        <div className="mb-2 text-center">
+                            <p>Bạn đánh giá sao về sân thể thao này?</p>
+                            <Button variant="danger" onClick={() => setShowReviewModal(true)}>Đánh giá ngay</Button>
+                        </div>
+                        <h5 className='ms-3'>Bình luận</h5>
+                        <div className="d-flex ms-4">
+                            {[5, 4, 3, 2, 1].map((value) => (
+                                <button key={value} type="button" className='btn ms-2' style={{ background: '#142239', color: 'white' }}
+                                    onClick={() => handleClick(value)}>
+                                    {value} ★
+                                </button>
+                            ))}
+                        </div>
 
+                        {(filteredData || dataReview)
+                            .sort((a, b) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime())
+                            .slice(0, visibleCount)
+                            .map((review) => (
+                                <Row className="mt-4 ms-5" key={review.fieldReviewId}>
+                                    <Col>
+                                        <Image
+                                            src={`${review.user.avatar ? review.user.avatar : "/img/avatar.jpg"}`}
+                                            alt="Hình ảnh thu nhỏ"
+                                            width={35}
+                                            height={35}
+                                            className="rounded-circle"
+                                        />
+                                        <span className='me-4'>{review.user.fullname}</span>
+                                        <i className="bi bi-calendar me-2"></i>
+                                        <span>{new Date(review.datedAt).toLocaleDateString('vi-VN')}</span>
 
-                {/* // Rendering filtered reviews if available, otherwise full review data */}
-                {(filteredData || dataReview)
-                    .sort((a, b) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime())
-                    .slice(0, visibleCount)
-                    .map((review) => (
-                        <Row className="mt-4 ms-5" key={review.fieldReviewId}>
-                            <Col>
-                                <Image
-                                    src="/img/avatar.jpg"
-                                    alt="Hình ảnh thu nhỏ"
-                                    width={35}
-                                    height={35}
-                                    className="rounded-circle"
-                                />
-                                <span className='me-4'>{review.user.fullname}</span>
-                                <i className="bi bi-calendar me-2"></i>
-                                <span>{new Date(review.datedAt).toLocaleString('vi-VN')}</span>
-
-                                <div>
-                                    <span className="text-warning ms-5 fs-3">
-                                        {'★'.repeat(review.rating)}
-                                    </span>
-                                    <br />
-                                    <span className='ms-5'>{review.comment}</span>
-                                </div>
-                            </Col>
-                        </Row>
-                    ))}
-                {visibleCount < dataReview.length ? ( // Kiểm tra nếu còn bình luận để tải thêm
-                    <div className="mt-3 text-center">
-                        <Button variant="danger" onClick={loadMoreReviews}>Tải thêm bình luận</Button>
-                    </div>
-                ) : (
-                    <div className="mt-3 text-center">
-                        <Button variant="danger" onClick={hideReviews}>Ẩn bớt bình luận</Button>
-                    </div>
-                )}
+                                        <div>
+                                            <span className="text-warning ms-5 fs-3">
+                                                {'★'.repeat(review.rating)}
+                                            </span>
+                                            <br />
+                                            <span className='ms-5'>{review.comment}</span>
+                                        </div>
+                                    </Col>
+                                </Row>
+                            ))}
+                        {visibleCount < dataReview.length ? ( // Kiểm tra nếu còn bình luận để tải thêm
+                            <div className="mt-3 text-center">
+                                <Button variant="danger" onClick={loadMoreReviews}>Tải thêm bình luận</Button>
+                            </div>
+                        ) : (
+                            <div className="mt-3 text-center">
+                                <Button variant="danger" onClick={hideReviews}>Ẩn bớt bình luận</Button>
+                            </div>
+                        )}
+                    </Col>
+                    <Col>
+                        <div className="map-container">
+                            <div className="note-map">Nhấn vào bản đồ để xem đường đi đến sân</div>
+                            {coordinates && <MapComponent coordinates={coordinates} />}
+                        </div>
+                    </Col>
+                </Row>
                 <CheckoutModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
                     sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
                     sport={sportField} owner={sportField?.owner}

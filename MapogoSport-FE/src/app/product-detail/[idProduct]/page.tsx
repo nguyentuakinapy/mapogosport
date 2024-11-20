@@ -65,7 +65,7 @@ const ProductDetail = () => {
     const { idProduct } = useParams();
     const [visibleCount, setVisibleCount] = useState(5);
     const [user, setUser] = useState(null); // Trạng thái cho thông tin người dùng
-  
+
     const [selectedSizeQuantity, setSelectedSizeQuantity] = useState(0);
     const increaseQuantity = () => {
         if (quantity < selectedSizeQuantity) {
@@ -428,7 +428,7 @@ const ProductDetail = () => {
                                     />
                                     <div id="imageGalleryCarousel" class="carousel slide mt-3" data-bs-ride="carousel">
                                         <div className="carousel-inner">
-                           
+
                                             {imageGallery[0][0].galleries.map((galleryItem, index) => (
                                                 <div
                                                     key={index}
@@ -453,7 +453,7 @@ const ProductDetail = () => {
                                             ))}
                                         </div>
 
-                                      
+
                                         <button className="carousel-control-prev" type="button" data-bs-target="#imageGalleryCarousel" data-bs-slide="prev">
                                             <span className="carousel-control-prev-icon" aria-hidden="true"></span>
                                             <span className="visually-hidden">Previous</span>

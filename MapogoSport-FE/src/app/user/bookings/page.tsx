@@ -2,11 +2,13 @@
 import UserLayout from "@/components/User/UserLayout";
 import Link from "next/link";
 import '../types/user.scss';
-import { Badge, Button, Col, Form, InputGroup, Pagination, Row, Table } from "react-bootstrap";
+import { Badge, Button, Col, Form, InputGroup, Nav, NavDropdown, Pagination, Row, Table } from "react-bootstrap";
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from "react-datepicker";
-import { useEffect, useState } from "react";
-import useSWR from "swr";
+import { useCallback, useEffect, useState } from "react";
+import useSWR, { mutate } from "swr";
+import { useData } from "@/app/context/UserContext";
+import { toast } from "react-toastify";
 
 const Bookings = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -17,11 +19,10 @@ const Bookings = () => {
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [nameFilter, setNameFilter] = useState<string>("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [itemsPerPage] = useState(8);
+    const userData = useData();
 
-    const username = localStorage.getItem('username');
-
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/booking/${username}`, fetcher, {
+    const { data, error, isLoading } = useSWR(userData && `http://localhost:8080/rest/user/booking/${userData.username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -35,14 +36,14 @@ const Bookings = () => {
         }
     }, [data]);
 
-    const getStatusVariant = (status: string) => {
+    const getStatusVariant = useCallback((status: string) => {
         switch (status) {
             case 'Đã thanh toán': return 'success';
             case 'Chờ thanh toán': return 'info';
             case 'Đã hủy': return 'danger';
             default: return 'secondary';
         }
-    };
+    }, []);
 
     const handlePreviousPage = () => {
         if (currentPage > 1) {
@@ -56,10 +57,10 @@ const Bookings = () => {
     };
 
     const renderPagination = () => {
-        if (filteredBookings.length === 0) return null;
-
         const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
         const pages = [];
+
+        if (totalPages <= 1) return null;
 
         for (let i = 1; i <= totalPages; i++) {
             pages.push(
@@ -77,18 +78,21 @@ const Bookings = () => {
     };
 
     const handleFilter = () => {
-        let filtered = bookingUser;
+        let filtered = [...bookingUser];
         if (startDate) {
             filtered = filtered.filter(booking => new Date(booking.date) >= startDate);
         };
         if (endDate) {
             filtered = filtered.filter(booking => new Date(booking.date) <= endDate);
         };
-        if (statusFilter && statusFilter !== "") {
+        if (statusFilter) {
             filtered = filtered.filter(booking => booking.status === statusFilter);
         };
         if (nameFilter) {
-            filtered = filtered.filter(booking => booking.sportFieldName.toLowerCase().includes(nameFilter.toLowerCase()));
+            filtered = filtered.filter(booking =>
+                booking.sportFieldName.toLowerCase().includes(nameFilter.toLowerCase()) ||
+                booking.bookingId.toString().includes(nameFilter)
+            );
         };
 
         setFilteredBookings(filtered);
@@ -109,6 +113,25 @@ const Bookings = () => {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
 
+    const handleStatusChange = (bookingId: number, refundAmount: number) => {
+        fetch(`http://localhost:8080/rest/owner/booking/update`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingId, status: "Đã hủy", refundAmount: refundAmount }),
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            mutate(`http://localhost:8080/rest/user/booking/${userData?.username}`);
+            mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
+            toast.success('Cập nhật thành công!');
+        });
+    };
+
     if (isLoading) return <UserLayout><div>Đang tải...</div></UserLayout>;
     if (error) return <UserLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></UserLayout>;
 
@@ -118,7 +141,7 @@ const Bookings = () => {
             <div className="my-3">
                 <Row className="d-flex justify-content-between align-items-center">
                     <Col xs={12} md={4}>
-                        <Form.Control value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="input-search-user" type="text" placeholder="Tìm theo tên sân" />
+                        <Form.Control value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="input-search-user" type="text" placeholder="Tìm kiếm..." />
                     </Col>
                     <Col xs={12} md={4}>
                         <InputGroup className="search-date">
@@ -157,9 +180,10 @@ const Bookings = () => {
                     <thead>
                         <tr>
                             <th style={{ width: '120px' }}>Mã đặt sân</th>
-                            <th style={{ width: '240px' }}>Tên sân</th>
+                            <th style={{ width: '220px' }}>Tên sân</th>
                             <th style={{ width: '100px' }}>Ngày đặt</th>
-                            <th style={{ width: '240px' }}>Tổng tiền</th>
+                            <th style={{ width: '130px' }}>Tổng tiền</th>
+                            <th style={{ width: '130px' }}>Còn lại</th>
                             <th style={{ width: '120px' }}>Tình trạng</th>
                             <th style={{ width: '100px' }}>Thao tác</th>
                         </tr>
@@ -175,22 +199,58 @@ const Bookings = () => {
                                     </td>
                                     <td className="title text-start">{booking.sportFieldName}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
-                                    <td>{booking.totalAmount.toLocaleString()} đ</td>
+                                    <td>{booking.totalAmount.toLocaleString()} ₫</td>
+                                    <td>{booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0 đ'
+                                        : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} đ`}</td>
                                     <td>
                                         <Badge bg={getStatusVariant(booking.status)}>
                                             {booking.status}
                                         </Badge>
                                     </td>
                                     <td>
-                                        <Link href={`/user/bookings/detail/${booking.bookingId}`}>
-                                            Xem
-                                        </Link>
+                                        {booking.status != 'Đã hủy' && booking.bookingDetails.filter(item => item.bookingDetailStatus === "Chưa bắt đầu") ? (
+                                            <Nav>
+                                                <NavDropdown id="nav-dropdown-dark-example" title="Thao tác">
+                                                    <Link href={`/user/bookings/detail/${booking.bookingId}`} className="dropdown-item">
+                                                        Xem
+                                                    </Link>
+                                                    <NavDropdown.Item onClick={() => {
+                                                        const a = booking.bookingDetails.filter(item => item.bookingDetailStatus != "Chưa bắt đầu");
+                                                        const b = booking.bookingDetails.filter(item => item.bookingDetailStatus === "Chưa bắt đầu");
+                                                        const subtract = a.reduce((total, item) => total + item.price, 0);
+                                                        const currentDateTime = new Date();
+                                                        const formattedTime = b[0].startTime.replace('h', ':').padStart(5, '0');
+                                                        const bookingDateTime = new Date(`${b[0].bookingDetailDate}T${formattedTime}:00`);
+                                                        const diffMinutes = (bookingDateTime.getTime() - currentDateTime.getTime()) / (1000 * 60);
+                                                        if (diffMinutes >= 120) {
+                                                            if (booking.status === "Chờ thanh toán") {
+                                                                const refundAmount = (booking.totalAmount * (booking.percentDeposit / 100));
+                                                                handleStatusChange(booking.bookingId, refundAmount - (subtract * (booking.percentDeposit / 100)));
+                                                            } else {
+                                                                handleStatusChange(booking.bookingId, booking.totalAmount - subtract);
+                                                            }
+                                                        } else {
+                                                            if (booking.status === "Chờ thanh toán") {
+                                                                const refundAmount = (booking.totalAmount * (booking.percentDeposit / 100));
+                                                                handleStatusChange(booking.bookingId, (refundAmount - (subtract * (booking.percentDeposit / 100))) * 0.75);
+                                                            } else {
+                                                                handleStatusChange(booking.bookingId, (booking.totalAmount - subtract) * 0.75);
+                                                            }
+                                                        }
+                                                    }}>Hủy sân</NavDropdown.Item>
+                                                </NavDropdown>
+                                            </Nav>
+                                        ) : (
+                                            <Link href={`/user/bookings/detail/${booking.bookingId}`}>
+                                                Xem
+                                            </Link>
+                                        )}
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={6} className="text-center">Không có đơn hàng nào.</td>
+                                <td colSpan={7} className="text-center">Không có đơn hàng nào.</td>
                             </tr>
                         )}
                     </tbody>

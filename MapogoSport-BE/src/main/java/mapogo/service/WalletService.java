@@ -9,4 +9,9 @@ public interface WalletService {
 
 	Wallet update(Wallet wallet);
 	// đến đây
+
+	Wallet create(String username);
+
+	Wallet updateWalletAndCreateTransaction(String username, Double price);
+
 }

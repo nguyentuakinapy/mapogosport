@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import mapogo.entity.User;
 import mapogo.dao.VoucherDAO;
 import mapogo.entity.UserVoucher;
 import mapogo.entity.Voucher;
@@ -43,6 +44,14 @@ public class VoucherRestController {
 		return voucherService.finAll();
 	}
 
+	// của Mỵ từ đây
+
+	@GetMapping("/findVoucherByUsername/{username}")
+	public List<Voucher> getfindVoucher(@PathVariable("username") String username) {
+		return voucherService.findByUserName(username);
+	}
+	// đến đây
+
 	  @PostMapping("/create/voucher")
 	    public ResponseEntity<Voucher> createVoucher(@RequestBody Map<String, Object> bd) {
 	        Voucher createdVoucher = voucherService.createVoucher(bd);
@@ -60,15 +69,15 @@ public class VoucherRestController {
 		  return new ResponseEntity<>(deleteVoucher, HttpStatus.CREATED);
 	  }
 	  
-	// của Mỵ từ đây
-	@Autowired
-	UserVoucherService userVoucherService;
-
-	@GetMapping("/findVoucher/{userVoucherId}")
-	public Voucher getfindVoucher(@PathVariable("userVoucherId") int userVoucherId) {
-		UserVoucher userVoucher = userVoucherService.findByUserVoucherId(userVoucherId);
-		Voucher voucher = userVoucher.getVoucher();
-		return voucher;
-	}
+//	// của Mỵ từ đây
+//	@Autowired
+//	UserVoucherService userVoucherService;
+//
+//	@GetMapping("/findVoucher/{userVoucherId}")
+//	public Voucher getfindVoucher(@PathVariable("userVoucherId") int userVoucherId) {
+//		UserVoucher userVoucher = userVoucherService.findByUserVoucherId(userVoucherId);
+//		Voucher voucher = userVoucher.getVoucher();
+//		return voucher;
+//	}
 	// đến đây
 }
