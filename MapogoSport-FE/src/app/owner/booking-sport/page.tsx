@@ -797,7 +797,7 @@ export default function BookingSport() {
                                                 } else {
                                                     displayedBookingIds.add(bookingId);
                                                     return (
-                                                        <td id={'ngon'}
+                                                        <td id={`${bookingId}`}
                                                             key={`${time}-${item.sportFielDetailId}-${dayIndex}`}
                                                             rowSpan={bookingCounts[bookingId]} // Gán rowSpan cho ô đầu tiên
                                                             sport-detail={dataSport &&
@@ -913,8 +913,6 @@ export default function BookingSport() {
     const [startTimeKey, setStartTimeKey] = useState<number>(1);
     const [bookingDetailData, setBookingDetailData] = useState<BookingDetailFullName>();
     const [bookingBySubscriptionKey, setDataBookingBySubscriptionKey] = useState<BookingDetail[]>();
-    const [userData, setUserData] = useState<User>();
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
 
     const handleGetDataBookingOnDay = (event: React.MouseEvent<HTMLTableCellElement>) => {
         const sportDetail = event.currentTarget.getAttribute("sport-detail");
@@ -947,24 +945,8 @@ export default function BookingSport() {
 
         const bkDData = await responseBookingDetail.json() as BookingDetailFullName;
 
-        const responsePaymentMethod = await fetch(`http://localhost:8080/rest/paymentMethod/by/bookingdetailid/${bkDData.bookingDetailId}`);
-        if (!responsePaymentMethod.ok) {
-            throw new Error(`Error fetching data: ${responsePaymentMethod.statusText}`);
-        }
-
-        const resPaymentMethod = await responsePaymentMethod.json() as PaymentMethod;
-
-        const responseUser = await fetch(`http://localhost:8080/rest/user/getbysportdetailid/${bkDData.bookingDetailId}`);
-        if (!responseUser.ok) {
-            throw new Error(`Error fetching data: ${responseUser.statusText}`);
-        }
-
-        const userData = await responseUser.json() as User;
-
         if (sportDetail && startTime && dayStartBooking && bkDData) {
             setBookingDetailData(bkDData);
-            setUserData(userData);
-            setPaymentMethod(resPaymentMethod);
             setSportDetail(selectedSportDetail);
             setStartTime(startTime);
             setDayStartBooking(dayStartBooking);
@@ -1002,26 +984,9 @@ export default function BookingSport() {
         }
 
         const bkDData = await responseBookingDetail.json() as BookingDetailFullName;
-        console.log(bkDData);
-
-        const responsePaymentMethod = await fetch(`http://localhost:8080/rest/paymentMethod/by/bookingdetailid/${bkDData.bookingDetailId}`);
-        if (!responsePaymentMethod.ok) {
-            throw new Error(`Error fetching data: ${responsePaymentMethod.statusText}`);
-        }
-
-        const resPaymentMethod = await responsePaymentMethod.json() as PaymentMethod;
-
-        const responseUser = await fetch(`http://localhost:8080/rest/user/getbysportdetailid/${bkDData.bookingDetailId}`);
-        if (!responseUser.ok) {
-            throw new Error(`Error fetching data: ${responseUser.statusText}`);
-        }
-
-        const userData = await responseUser.json() as User;
 
         if (sportDetail && startTime && dayStartBooking && bkDData) {
             setBookingDetailData(bkDData);
-            setUserData(userData);
-            setPaymentMethod(resPaymentMethod);
             setSportDetail(selectedSportDetail);
             setStartTime(startTime);
             setDayStartBooking(dayStartBooking);
@@ -1127,7 +1092,7 @@ export default function BookingSport() {
             <div className="d-flex align-items-center justify-content-between">
                 <i onClick={toggleFullScreen} className="bi bi-fullscreen fs-5"></i>
                 <h3 className="text-danger fw-bold" style={{ fontSize: '20px' }}> LỊCH ĐẶT SÂN</h3>
-                <a href="#ngon">
+                <a href="#701">
                     <i className="bi bi-question-circle fs-5"></i>
                 </a>
             </div>
@@ -1253,10 +1218,10 @@ export default function BookingSport() {
                 checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey + 1}>
             </BookingModal >
             <ViewEditBookingModal bookingBySubscriptionKey={bookingBySubscriptionKey && bookingBySubscriptionKey}
-                showViewOrEditBookingModal={showViewOrEditBookingModal} paymentMethod={paymentMethod}
+                showViewOrEditBookingModal={showViewOrEditBookingModal}
                 setShowViewOrEditBookingModal={setShowViewOrEditBookingModal} owner={owner} sport={dataSport && dataSport[selectSport]}
                 checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey + 1}
-                bookingDetailData={bookingDetailData} userData={userData}>
+                bookingDetailData={bookingDetailData}>
             </ViewEditBookingModal >
             <SearchBookingModal showSearchBookingModal={showSearchBookingModal} setSearchShowBookingModal={setSearchShowBookingModal}
                 dataTimeSport={dataTimeSport.filter(time => time !== "undefinedh00" && time !== null)}
