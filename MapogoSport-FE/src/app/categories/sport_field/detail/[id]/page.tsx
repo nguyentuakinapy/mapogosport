@@ -508,10 +508,10 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                 </div>
                                 <div className="btn-option-icon ">
 
-                                <i className="bi bi-heart-fill"></i>
-                                <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>
-                                <i  onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>   
-                                 </OverlayTrigger>            
+                                    <i className="bi bi-heart-fill"></i>
+                                    <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>
+                                        <i onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>
+                                    </OverlayTrigger>
 
                                 </div>
 
@@ -720,7 +720,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                     checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus}
                     startTimeKey={startTimeKey}
                 />
-                <ModalReviewSportField showReviewModal={showReviewModal} setShowReviewModal={setShowReviewModal} fieldId={params.id} />
+                <ModalReviewSportField showReviewModal={showReviewModal} setShowReviewModal={setShowReviewModal} fieldId={params.id} dataReview={reviewData} />
                 <SearchSportField showSearchBookingModal={showSearchBookingModal} setSearchShowBookingModal={setSearchShowBookingModal}
                     dataTimeSport={dataTimeSport.filter(time => time !== "undefinedh00" && time !== null)} sportField={sportField} />
             </Container>
