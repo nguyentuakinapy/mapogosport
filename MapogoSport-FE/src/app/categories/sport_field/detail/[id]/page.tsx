@@ -1,5 +1,5 @@
 "use client";
-import { Container, Row, Col, Form, Image, FloatingLabel, Table, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Image, FloatingLabel, Table, Button, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import React, { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 import useSWR from 'swr';
@@ -507,8 +507,12 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                     Đánh giá: 4/5 <i className="bi bi-star-fill"></i> (1 Đánh giá)
                                 </div>
                                 <div className="btn-option-icon ">
-                                    <i className="bi bi-heart-fill"></i>
-                                    <i onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>
+
+                                <i className="bi bi-heart-fill"></i>
+                                <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>
+                                <i  onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>   
+                                 </OverlayTrigger>            
+
                                 </div>
 
                             </div>

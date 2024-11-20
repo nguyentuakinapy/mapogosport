@@ -384,7 +384,8 @@ const AdminProduct = () => {
                   <td className="text-center align-middle">
                     <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                       <Button
-                        variant="warning"
+                      style={{'backgroundColor': '#132239'}}
+                        // variant="warning"
                         className="m-1"
                         onClick={() => handleEditClick(product)}
                       >
@@ -393,7 +394,8 @@ const AdminProduct = () => {
                     </OverlayTrigger>
                     <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
                       <Button
-                        variant="danger"
+                        // variant="danger"
+                        style={{'backgroundColor': '#132239'}}
                         className="m-1"
                         // onClick={() => handleDelete(product.productId)}
                         disabled={ product.status === "Hết hàng" }
@@ -421,7 +423,7 @@ const AdminProduct = () => {
     <div style={{ fontSize: "14px" }}>
       <div className="box-ultil">
         <b className="text-danger" style={{ fontSize: "20px" }}>
-          Quản Lý Sản Phẩm
+          Quản Lý Sản Phẩm/ Tổng: {products?.length || 0} sản phẩm
         </b>
         <input
         type="text"

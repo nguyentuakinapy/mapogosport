@@ -18,6 +18,19 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const VoucherPage = () => {
+  interface Voucher {
+    voucherId?: number
+    name: string
+    discountPercent: number
+    quantity: number
+    createDate: Date
+    endDate: Date
+    status: string
+    discountCode: string
+    activeDate: Date
+    createdBy: User;
+}
+
   const [activeTab, setActiveTab] = useState<string>("all");
   const [showAddVoucher, setShowAddVoucher] = useState<boolean>(false);
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
@@ -36,6 +49,8 @@ const VoucherPage = () => {
   const currentUser = useData();
 
   const handleEdit = (voucher: Voucher) => {
+    console.log('dddddđ '+ voucher?.name);
+    
     setEditingVoucher(voucher);
     setShowAddVoucher(true);
   };
@@ -43,6 +58,92 @@ const VoucherPage = () => {
   const isConfirmed = () => {
     return window.confirm("Bạn có chắc chắn muốn xóa voucher này?");
   };
+
+  // tìm kiếm
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleStartDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setStartDate(event.target.value);
+  };
+
+  const handleEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEndDate(event.target.value);
+  };
+
+
+ // Lọc voucher theo tìm kiếm và ngày
+ const filteredVouchers = vouchers.filter((voucher) => {
+  const lowerCaseSearchTerm = searchTerm.toLowerCase();
+  const isMatchingSearch =
+    voucher.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+    voucher.discountCode.toLowerCase().includes(lowerCaseSearchTerm) ||
+    (voucher.createdBy?.username?.toLowerCase() || "").includes(lowerCaseSearchTerm);
+
+  const isWithinDateRange =
+    (startDate ? new Date(voucher.activeDate) >= new Date(startDate) : true) &&
+    (endDate ? new Date(voucher.endDate) <= new Date(endDate) : true);
+
+      // Lọc theo trạng thái tab
+  const isTabMatch = (activeTab: string) => {
+    switch (activeTab) {
+      case 'all': // Toàn bộ
+        return true;
+      case 'activited': // Đang hoạt động
+        return voucher.status === 'active' && new Date(voucher.activeDate) <= new Date();
+      case 'expired': // Đã hết hạn
+        return new Date(voucher.endDate) < new Date();
+      case 'valid': // Còn hiệu lực
+        return voucher.status === 'active' && new Date(voucher.activeDate) <= new Date() && new Date(voucher.endDate) > new Date();
+      case 'inactive': // Hết hiệu lực
+        return voucher.status === 'inactive' || new Date(voucher.endDate) < new Date();
+      default:
+        return true;
+    }
+  };
+
+  return isMatchingSearch && isWithinDateRange && isTabMatch(activeTab);
+  // return isMatchingSearch && isWithinDateRange;
+});
+  // tìm kiếm
+
+  // phân trang 
+  const [currentPage, setCurrentPage] = useState<number>(1);
+const itemsPerPage = 5; // Số lượng voucher mỗi trang
+const indexOfLastItem = currentPage * itemsPerPage;
+const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+const currentVouchers = filteredVouchers.slice(indexOfFirstItem, indexOfLastItem);
+const totalPages = Math.ceil(filteredVouchers.length / itemsPerPage);
+
+const handlePageChange = (pageNumber: number) => {
+  setCurrentPage(pageNumber);
+};
+const handleNextPage = () => {
+  if (currentPage < totalPages) {
+    setCurrentPage(currentPage + 1);
+  }
+};
+
+const handlePreviousPage = () => {
+  if (currentPage > 1) {
+    setCurrentPage(currentPage - 1);
+  }
+};
+
+const handleFirstPage = () => {
+  setCurrentPage(1);
+};
+
+const handleLastPage = () => {
+  setCurrentPage(totalPages);
+};
+
+  //
 
   const handleDelete = async (voucherId: number) => {
     if (!isConfirmed()) {
@@ -66,6 +167,7 @@ const VoucherPage = () => {
   const renderContent = () => {
     return (
       <div className="box-table-border mb-4">
+          
         <Table striped className="mb-0">
           <thead>
             <tr>
@@ -83,7 +185,7 @@ const VoucherPage = () => {
             </tr>
           </thead>
           <tbody>
-            {vouchers.map((voucher) => (
+            {currentVouchers.map((voucher) => (
               <tr key={voucher.voucherId}>
                 <td>{voucher.voucherId}</td>
                 <td className="text-start title">{voucher.discountCode}</td>
@@ -97,10 +199,10 @@ const VoucherPage = () => {
                   <Badge
                     bg={voucher.status === "active" ? "success" : "danger"}
                   >
-                    {voucher.status === "active" ? "Đang hoạt động" : "Hết hạn"}
+                    {voucher.status === "active" ? "Có hiệu lực" : "Không có hiệu lực"}
                   </Badge>
                 </td>
-                <td>{voucher.createdBy}</td>
+                <td>{voucher.createdBy?.username ? voucher.createdBy?.fullname : "chưa có"}</td>
                 <td>
                   <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                     <Button
@@ -126,6 +228,56 @@ const VoucherPage = () => {
             ))}
           </tbody>
         </Table>
+        <div className="d-flex justify-content-center ">
+            <nav>
+              <ul className="pagination">
+                {/* Nút tới đầu trang */}
+                <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                  <button className="page-link" onClick={handleFirstPage}>
+                    {"<<"} Đầu
+                  </button>
+                </li>
+
+                {/* Nút lùi */}
+                <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                  <button className="page-link" onClick={handlePreviousPage}>
+                    {"<"} Lùi
+                  </button>
+                </li>
+
+                {/* Nút chọn trang */}
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <li
+                    key={index + 1}
+                    className={`page-item ${currentPage === index + 1 ? "active" : ""}`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => handlePageChange(index + 1)}
+                    >
+                      {index + 1}
+                    </button>
+                  </li>
+                ))}
+
+                {/* Nút tới */}
+                <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                  <button className="page-link" onClick={handleNextPage}>
+                    Tới {">"}
+                  </button>
+                </li>
+
+                {/* Nút tới cuối trang */}
+                <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                  <button className="page-link" onClick={handleLastPage}>
+                    Cuối {">>"}
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+
+
       </div>
     );
   };
@@ -137,6 +289,53 @@ const VoucherPage = () => {
         <b className="text-danger" style={{ fontSize: "20px" }}>
           Quản lý voucher/ Tổng: {vouchers?.length || 0} voucher
         </b>
+        <div className="row ">
+            {/* Ngày bắt đầu */}
+            <div className="col-md-6">
+              <div className="form-group">
+                <label htmlFor="startDate" className="form-label">
+                  Ngày bắt đầu:
+                </label>
+                <input
+                  type="date"
+                  id="startDate"
+                  value={startDate}
+                  onChange={handleStartDateChange}
+                  className="form-control"
+                />
+              </div>
+            </div>
+
+            {/* Ngày kết thúc */}
+            <div className="col-md-6">
+              <div className="form-group">
+                <label htmlFor="endDate" className="form-label">
+                  Ngày kết thúc:
+                </label>
+                <input
+                  type="date"
+                  id="endDate"
+                  value={endDate}
+                  onChange={handleEndDateChange}
+                  className="form-control"
+                />
+              </div>
+            </div>
+          </div>
+
+        <input
+        type="text"
+        placeholder="Tìm kiếm sản phẩm..."
+        value={searchTerm}
+        onChange={handleSearchChange}
+        style={{
+          padding: "5px 10px",
+          fontSize: "14px",
+          borderRadius: "5px",
+          border: "1px solid #ddd",
+          width: "200px"
+        }}
+      />
         <Button
           className="btn-sd-admin"
           style={{ fontSize: "15px" }}
@@ -167,6 +366,16 @@ const VoucherPage = () => {
         <Nav.Item>
           <Nav.Link eventKey="expired" className="tab-link">
             Đã hết hạn
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link eventKey="valid" className="tab-link">
+            Còn hiệu lực
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link eventKey="inactive" className="tab-link">
+            Hết hiệu lực
           </Nav.Link>
         </Nav.Item>
       </Nav>
