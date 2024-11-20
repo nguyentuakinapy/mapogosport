@@ -26,39 +26,31 @@ function Categories() {
     const [selectedCategoryField, setSelectedCategoryField] = useState<number[]>([])
     const [searchTerm, setSearchTerm] = useState('');
 
-
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/rest/category_field`)
-                const data = await response.json();
-                setCategoriesField(data)
-                console.log(data)
+                const categoryResp = await fetch(`http://localhost:8080/rest/category_field`)
+                const categories = await categoryResp.json();
+                setCategoriesField(categories);
+
+                const fieldResp = await fetch('http://localhost:8080/rest/sport_field');
+                const fields = await fieldResp.json();
+                setSportFields(fields);
             } catch (error) {
                 console.log("Error fetch categories", error)
             }
         }
         fetchData()
-    }, [])
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch('http://localhost:8080/rest/sport_field');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log(data);
-                setSportFields(data);
-            } catch (error) {
-                console.error("Fetch error: ", error);
-            }
-        };
-
-        fetchData();
     }, []);
 
+    useEffect(() => {
+        const storedFilters = sessionStorage.getItem('searchFilters');
+        if (storedFilters) {
+            const { name, type, area } = JSON.parse(storedFilters);
+            if (name) setSearchTerm(name);
+            if (type) setSelectedCategoryField(type);
+        }
+    }, []);
 
     const renderStars = (rating: number) => {
         const fullStars = Math.floor(rating);
@@ -96,11 +88,10 @@ function Categories() {
     };
 
     // Filter logic
-    const filteredSportFields = sportFields
-        .filter(field =>
-            (selectedCategoryField.length === 0 || selectedCategoryField.includes(field.categoriesField.categoriesFieldId)) &&
-            (field.name.toLowerCase().includes(searchTerm.toLowerCase()) || field.address.toLowerCase().includes(searchTerm.toLowerCase()))
-        )
+    const filteredSportFields = sportFields.filter(field =>
+        (selectedCategoryField.length === 0 || selectedCategoryField.includes(field.categoriesField.categoriesFieldId)) &&
+        (field.name.toLowerCase().includes(searchTerm.toLowerCase()) || field.address.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
     // Update pagination based on filtered results
     const currentItems = filteredSportFields.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(filteredSportFields.length / itemsPerPage);

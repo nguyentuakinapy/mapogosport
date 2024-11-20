@@ -702,7 +702,10 @@ const BookingModal = React.memo((props: BookingProps) => {
                             </Col>
                             <Col className="px-5 text-center">
                                 <span><b>Đơn giá: </b> <em className="text-danger">{endTime ? `${sportDetail?.price.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
-                                <span><b>Tổng tiền: </b><em className="text-danger">{price ? `${price?.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <span><b>Trả trước: </b><em className="text-danger">{sportDetail && price ? (price * (sportDetail?.percentDeposit / 100)).toLocaleString() : '???'} ₫</em>. </span>
+                                    <span><b>Tổng tiền: </b><em className="text-danger">{price ? `${price?.toLocaleString()} đ` : '???'}</em>. </span>
+                                </div>
                             </Col>
                         </Row>
                     </>

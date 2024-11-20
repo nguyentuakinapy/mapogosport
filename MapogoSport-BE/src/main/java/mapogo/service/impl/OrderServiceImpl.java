@@ -276,6 +276,4 @@ public class OrderServiceImpl implements OrderService {
 		resultList.add(orderMap);
 		return resultList;
 	}
-
-
 }

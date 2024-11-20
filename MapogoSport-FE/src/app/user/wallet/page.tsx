@@ -15,21 +15,22 @@ const WalletPage = () => {
     const [activeTab, setActiveTab] = useState<string>('all');
     const [transaction, setTransaction] = useState<Transaction[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(8);
+    const [itemsPerPage] = useState(5);
     const userData = useData();
 
-    const { data, error, isLoading } = useSWR(userData &&
-        `http://localhost:8080/rest/wallet/transaction/${userData?.wallet.walletId}`, fetcher, {
+    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/wallet/transaction/${userData?.wallet.walletId}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
 
     useEffect(() => {
-        if (data) {
+        if (data && Array.isArray(data)) {
             const sortedData = data.sort((a: Transaction, b: Transaction) =>
                 new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
             setTransaction(sortedData);
+        } else {
+            console.error("Data is not valid or not an array:", data);
         }
     }, [data]);
 

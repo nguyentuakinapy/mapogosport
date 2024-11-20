@@ -219,7 +219,8 @@ public class BookingRestController {
 	
 	@PostMapping("/payment/process/{bookingId}")
 	public void processPayment(@PathVariable("bookingId") Integer bookingId, @RequestParam double totalAmount) {
-		transactionService.createTransactionByPaymentBooking(bookingId, totalAmount);
+		transactionService.createTransactionUserByPaymentBooking(bookingId, totalAmount);
+		transactionService.createTransactionOwnerByPaymentBooking(bookingId, totalAmount);
 }
 	@GetMapping("/booking/detail/tableCustomer/byFullname/{fullname}")
 	public List<Booking> findByFullName(@PathVariable("fullname") String fullname){
