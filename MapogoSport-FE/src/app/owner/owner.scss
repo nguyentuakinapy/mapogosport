@@ -198,7 +198,6 @@
                 color: white;
                 font-weight: normal;
             }
-
         }
 
         tbody {
@@ -231,6 +230,15 @@
                 }
             }
         }
+
+    }
+
+    th:first-child,
+    td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 1; // Đảm bảo hiển thị phía trên các cột khác
+        background-color: #f2f2f2; // Màu nền của cột đầu tiên
     }
 }
 

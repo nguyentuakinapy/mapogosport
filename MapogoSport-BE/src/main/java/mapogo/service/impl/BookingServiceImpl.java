@@ -87,7 +87,7 @@ public class BookingServiceImpl implements BookingService {
 			bookingMap.put("bookingUserFullname", booking.getFullName());
 			bookingMap.put("date", booking.getDate());
 			bookingMap.put("totalAmount", booking.getTotalAmount());
-			bookingMap.put("oldTotalAmount", booking.getOldTotamAmount());
+			bookingMap.put("oldTotalAmount", booking.getOldTotalAmount());
 			bookingMap.put("status", booking.getStatus());
 			bookingMap.put("bookingUserPhone", booking.getPhoneNumber());
 			bookingMap.put("percentDeposit", booking.getPercentDeposit());
@@ -131,7 +131,7 @@ public class BookingServiceImpl implements BookingService {
 	        bookingMap.put("bookingId", booking.getBookingId());
 	        bookingMap.put("date", booking.getDate());
 	        bookingMap.put("totalAmount", booking.getTotalAmount());
-	        bookingMap.put("oldTotalAmount", booking.getOldTotamAmount());
+	        bookingMap.put("oldTotalAmount", booking.getOldTotalAmount());
 	        bookingMap.put("status", booking.getStatus());
 	        bookingMap.put("percentDeposit", booking.getPercentDeposit());
 
@@ -240,7 +240,7 @@ public class BookingServiceImpl implements BookingService {
 		booking.setFullName((String) b.get("fullName"));
 		booking.setPhoneNumber((String) b.get("phoneNumber"));
 		booking.setPercentDeposit(Integer.parseInt(String.valueOf(b.get("percentDeposit"))));
-		booking.setOldTotamAmount(0);
+		booking.setOldTotalAmount(0);
 		bookingDAO.save(booking);
 		
 		if (((String) b.get("checkOwner")).equals("user")) {

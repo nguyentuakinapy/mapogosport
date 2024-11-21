@@ -185,10 +185,19 @@ const OwnerBookingBill = () => {
                                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
-                                    <td className={booking.oldTotalAmount > 0 && (booking.oldTotalAmount - booking.totalAmount) <= 0 ? 'text-danger' : 'text-success'}>
+                                    <td className={booking.status === 'Đã thanh toán'
+                                        && booking.oldTotalAmount !== 0 && booking.oldTotalAmount - booking.totalAmount
+                                        <= 0 ? 'text-danger' : 'text-success'}>
+
+                                        {booking.status === 'Đã thanh toán' ?
+                                            booking.oldTotalAmount !== 0 ? (booking.oldTotalAmount - booking.totalAmount).toLocaleString() + ' đ' : 0 :
+                                            booking.status === 'Đã hủy' ? 0 : (booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString() + ' đ'
+                                        }
+
+                                        {/*                                             
                                         {booking.oldTotalAmount !== 0 ? `${(booking.oldTotalAmount - booking.totalAmount).toLocaleString()} ₫`
                                             : booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0'
-                                                : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} ₫`}
+                                                : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} ₫`} */}
                                     </td>
                                     <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
                                     <td>{renderStatusDropdown(booking)}</td>

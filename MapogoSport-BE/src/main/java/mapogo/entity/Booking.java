@@ -76,7 +76,7 @@ public class Booking implements Serializable{
 	private String phoneNumber = null;
 	
 	@Column(name="OldTotalAmount")
-	private double oldTotamAmount = 0;
+	private double oldTotalAmount = 0;
 	
 	@Column(name="PercentDeposit")
 	private int percentDeposit;
