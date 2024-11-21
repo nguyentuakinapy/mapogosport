@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,7 +53,7 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	OrderDAO orderDAO;
 
-	List<String> statuses = Arrays.asList("Đã hoàn thành", "Đã thanh toán");
+	List<String> statuses = Arrays.asList("Đã hoàn thành");
 
 	Locale vietnam = new Locale("vi", "VN");
 	NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(vietnam);
@@ -187,8 +189,20 @@ public class OrderServiceImpl implements OrderService {
 		return orderDAO.save(order);
 	}
 
+	@Override
 	public List<Order> getOrdersToday() {
-		return orderDAO.findOrdersToday();
+		LocalDateTime startOfToday = LocalDateTime.now().toLocalDate().atStartOfDay();
+
+		// Get the end of today (23:59:59.999999999)
+		LocalDateTime endOfToday = LocalDateTime.now().toLocalDate().atTime(LocalTime.MAX);
+		return orderDAO.findOrdersToday(startOfToday, endOfToday, statuses);
+	}
+
+	@Override
+	public List<Order> getOrdersYesterday() {
+		LocalDateTime startOfYesterday = LocalDateTime.now().minusDays(1).toLocalDate().atStartOfDay();
+		LocalDateTime endOfYesterday = startOfYesterday.plusDays(1).minusNanos(1);
+		return orderDAO.findByDateBetweenAndStatus(startOfYesterday, endOfYesterday, statuses);
 	}
 
 	@Override
@@ -209,34 +223,60 @@ public class OrderServiceImpl implements OrderService {
 //	}
 	@Override
 	public List<Object[]> getCategoryProductTotalsToDay() {
-		return orderDAO.findCategoryProductTotalsTodayWithStatus(statuses);
+		// Get the start of today (00:00:00.000)
+		LocalDateTime startOfToday = LocalDateTime.now().toLocalDate().atStartOfDay();
+
+		// Get the end of today (23:59:59.999999999)
+		LocalDateTime endOfToday = LocalDateTime.now().toLocalDate().atTime(LocalTime.MAX);
+//		System.err.println(startOfToday);
+		return orderDAO.findCategoryProductTotalsTodayWithStatus(startOfToday, endOfToday, statuses);
 	}
 
 	@Override
 	public List<Object[]> getCategoryProductTotalsYesterday() {
-		LocalDateTime startDate = LocalDate.now().minusDays(1).atStartOfDay(); // Start of yesterday
-		LocalDateTime endDate = startDate.plusDays(1); // Start of today (exclusive end)
-		return orderDAO.findCategoryProductTotalsYesterdayWithStatus(startDate, endDate, statuses);
+	    // Add a log to confirm the method is being executed
+	    System.err.println("Executing getCategoryProductTotalsYesterday()");
+
+	    // Calculate the start and end of yesterday
+	    LocalDateTime startOfYesterday = LocalDateTime.now().minusDays(1).toLocalDate().atStartOfDay();
+	    LocalDateTime endOfYesterday = LocalDateTime.now().minusDays(1).toLocalDate().atTime(LocalTime.MAX);
+
+	    // Log for debugging
+	    System.err.println("Start of Yesterday: " + startOfYesterday);
+	    System.err.println("End of Yesterday: " + endOfYesterday);
+
+	    // Call the DAO method
+	    return orderDAO.findCategoryProductTotalsYesterdayWithStatus(startOfYesterday, endOfYesterday, statuses);
 	}
 
-	@Override
-	public List<Order> getOrdersYesterday() {
-		LocalDateTime startOfYesterday = LocalDateTime.now().minusDays(1).toLocalDate().atStartOfDay();
-		LocalDateTime endOfYesterday = startOfYesterday.plusDays(1).minusNanos(1);
-		// Truyền thêm tham số `statuses` vào phương thức `findByDateBetweenAndStatus`
-		return orderDAO.findByDateBetweenAndStatus(startOfYesterday, endOfYesterday, statuses);
-	}
+
 
 	@Override
 	public List<Object[]> getCategoryProductTotals7Day() {
-		LocalDateTime startDate = LocalDateTime.now().minusDays(7);
-		return orderDAO.findCategoryProductTotalsLast7DaysWithStatus(startDate, statuses);
+	    // Lấy thời điểm hiện tại
+		LocalDateTime endDate = LocalDateTime.now(); // Current date and time
+		LocalDateTime startDate = endDate.minus(6, ChronoUnit.DAYS); 
+
+	    if (statuses == null || statuses.isEmpty()) {
+	        statuses = Arrays.asList("Đã hoàn thành");
+	    }
+	    System.err.println("Start Date: " + startDate);
+	    System.err.println("End Date: " + endDate);
+	    List<Object[]> results = orderDAO.findCategoryProductTotalsLast7DaysWithStatus(startDate, endDate, statuses);
+	    results.forEach(record -> System.err.println(Arrays.toString(record)));
+	    return orderDAO.findCategoryProductTotalsLast7DaysWithStatus(startDate, endDate, statuses);
 	}
+
+
 
 	@Override
 	public List<Object[]> getCategoryProductTotalsOneMonth() {
-		LocalDateTime startDate = LocalDateTime.now().minusDays(30);
-		return orderDAO.findCategoryProductTotalsLast7DaysWithStatus(startDate, statuses);
+		// Get the current date and the date 1 month ago
+		LocalDateTime endDate = LocalDateTime.now(); // Current date and time
+		LocalDateTime startDate = endDate.minus(1, ChronoUnit.MONTHS); // 1 month ago
+
+		// Fetch the data
+		return orderDAO.findCategoryProductTotalsLast7DaysWithStatus(startDate, endDate, statuses);
 	}
 
 	public Order createOrder(Order order) {
@@ -262,18 +302,27 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
-	public List<Object> findCategoryProductTotalsByDateAndStatus(LocalDateTime date) {
+	public List<Object[]> findCategoryProductTotalsByDateAndStatus(LocalDateTime date) {
 		LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
 		LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
 		return orderDAO.findCategoryProductTotalsByDateAndStatus(startOfDay, endOfDay, statuses);
 	}
 
 	@Override
-	public List<Object> findCategoryProductTotalsByBetweenDateAndStatus(LocalDateTime startDate,
-			LocalDateTime endDate) {
-		LocalDateTime adjustedEndDay = endDate.withHour(23).withMinute(59).withSecond(59);
-		return orderDAO.findCategoryProductTotalsByBetweenAndStatus(startDate, adjustedEndDay, statuses);
+	public List<Object[]> findCategoryProductTotalsByBetweenDateAndStatus(LocalDateTime startDate,
+	        LocalDateTime endDate) {
+	    // Điều chỉnh startDate để bắt đầu từ 00:00:00
+	    LocalDateTime adjustedStartDay = startDate.withHour(0).withMinute(0).withSecond(0);
+
+	    // Điều chỉnh endDate để kết thúc ở 23:59:59
+	    LocalDateTime adjustedEndDay = endDate.withHour(23).withMinute(59).withSecond(59);
+
+	    // Gọi DAO với khoảng thời gian chính xác
+	    return orderDAO.findCategoryProductTotalsByBetweenAndStatus(adjustedStartDay, adjustedEndDay, statuses);
 	}
+
+
+
 
 	@Override
 	public void delete(Order order) {

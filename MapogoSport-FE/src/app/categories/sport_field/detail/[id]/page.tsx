@@ -82,6 +82,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         setVisibleCount(visibleCount + 5);
     };
     const hideReviews = () => {
+
         setVisibleCount(visibleCount - 5);
     }
 
@@ -474,9 +475,16 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     }
 
 
-    const [filteredData, setFilteredData] = useState(null);
+    const [filteredData, setFilteredData] = useState<FieldReview[] | null>(null);
+    const [selectedRatingFilter, setSelectedRatingFilter] = useState<number | null>(null);
     const handleClick = (value: number) => {
 
+        if (selectedRatingFilter === value) {
+            setSelectedRatingFilter(null);
+            setFilteredData(dataReview);
+            return;
+        }
+        setSelectedRatingFilter(value);
         const fetchData = async () => {
             const response = await fetch(`http://localhost:8080/rest/find-fielreview-by-rating/${params.id}/${value}`);
             const data = await response.json();
@@ -697,15 +705,20 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                     </Col>
                                 </Row>
                             ))}
-                        {visibleCount < dataReview.length ? ( // Kiểm tra nếu còn bình luận để tải thêm
+                        {visibleCount < dataReview.length ? (
+                            // Hiển thị nút "Tải thêm bình luận" nếu còn bình luận để tải thêm
                             <div className="mt-3 text-center">
                                 <Button variant="danger" onClick={loadMoreReviews}>Tải thêm bình luận</Button>
                             </div>
                         ) : (
-                            <div className="mt-3 text-center">
-                                <Button variant="danger" onClick={hideReviews}>Ẩn bớt bình luận</Button>
-                            </div>
+                            // Hiển thị nút "Ẩn bớt bình luận" chỉ khi visibleCount > 5
+                            visibleCount > 5 && (
+                                <div className="mt-3 text-center">
+                                    <Button variant="danger" onClick={hideReviews}>Ẩn bớt bình luận</Button>
+                                </div>
+                            )
                         )}
+
                     </Col>
                     <Col>
                         <div className="map-container">
