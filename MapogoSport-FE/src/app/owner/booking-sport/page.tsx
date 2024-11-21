@@ -756,7 +756,7 @@ export default function BookingSport() {
             <Table>
                 <thead className="tb-head">
                     <tr>
-                        <th rowSpan={2}>Giờ </th>
+                        <th style={{ zIndex: '1002' }} rowSpan={2}>Giờ </th>
                         {days?.map((day, index) => (
                             <th colSpan={dataSport[selectSport]?.sportFielDetails?.length || 1} key={index}>{day}</th>
                         ))}
@@ -776,7 +776,7 @@ export default function BookingSport() {
                             const sportFielDetails = dataSport[selectSport].sportFielDetails;
                             return (
                                 <tr key={time}>
-                                    <td className="title fw-bold" style={{ textAlign: 'center' }}>{time}</td>
+                                    <td className="title fw-bold" style={{ textAlign: 'center', position: 'sticky' }}>{time}</td>
                                     {days?.map((_, dayIndex) => (
                                         sportFielDetails.map((item, i) => {
                                             const bookingData = sportData[item.name] || [];
