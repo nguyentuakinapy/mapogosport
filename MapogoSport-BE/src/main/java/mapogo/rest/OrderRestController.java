@@ -46,15 +46,15 @@ public class OrderRestController {
 	public List<Map<String, Object>> getUserAll(@PathVariable("username") String username) {
 		return orderService.findOrderByUsername(username);
 	}
-	
+
 	@GetMapping("/admin/order/findAll")
 	public List<Map<String, Object>> getAdminAll() {
 		return orderService.findAllOrder();
 	}
-	
+
 	@PutMapping("/admin/order/update")
 	public void updateOrderStatus(@RequestBody Map<String, Object> orderData) {
-	    orderService.updateStatusOrder(orderData);
+		orderService.updateStatusOrder(orderData);
 	}
 
 	@GetMapping("/admin/orderToDay")
@@ -71,6 +71,7 @@ public class OrderRestController {
 	public List<Object[]> getCategoryProductTotalsToDay() {
 		return orderService.getCategoryProductTotalsToDay();
 	}
+
 	@GetMapping("/admin/category-product-totals-yesterday")
 	public List<Object[]> getCategoryProductTotalsYesterday() {
 		return orderService.getCategoryProductTotalsToDay();
@@ -97,63 +98,57 @@ public class OrderRestController {
 	}
 
 	@GetMapping("/admin/order-between")
-	public List<Order> getOrdersBetween(
-	        @RequestParam(value = "date", required = false) LocalDateTime date,
-	        @RequestParam(value = "startDay", required = false) LocalDateTime startDay,
-	        @RequestParam(value = "endDay", required = false) LocalDateTime endDay) {
-	    
-	    // Log the received parameters for debugging
-	    System.out.println("Received date: " + date);
-	    System.out.println("Received startDay: " + startDay);
-	    System.out.println("Received endDay: " + endDay);
+	public List<Order> getOrdersBetween(@RequestParam(value = "date", required = false) LocalDateTime date,
+			@RequestParam(value = "startDay", required = false) LocalDateTime startDay,
+			@RequestParam(value = "endDay", required = false) LocalDateTime endDay) {
 
-	    if (date != null) {
-	        return orderService.getOrdersForSingleDate(date);
-	    } else if (startDay != null && endDay != null) {
-	        return orderService.getOrdersBetweenDates(startDay, endDay);
-	    } else {
-	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date parameters");
-	    }
+		// Log the received parameters for debugging
+		System.out.println("Received date: " + date);
+		System.out.println("Received startDay: " + startDay);
+		System.out.println("Received endDay: " + endDay);
+
+		if (date != null && startDay == null && endDay == null) {
+			return orderService.getOrdersForSingleDate(date);
+		} else if (startDay != null && endDay != null && date == null) {
+			return orderService.getOrdersBetweenDates(startDay, endDay);
+		} else {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date parameters");
+		}
 	}
-	
 
 	@GetMapping("/admin/category-product-total-between")
-	public List<Object> getCategoryProductTotalBetween(
-	    @RequestParam(value = "date", required = false) LocalDateTime date,
-	    @RequestParam(value = "startDay", required = false) LocalDateTime startDay,
-	    @RequestParam(value = "endDay", required = false) LocalDateTime endDay
-	) {
-	    if (date != null) {
-	        return orderService.findCategoryProductTotalsByDateAndStatus(date);
-	    } else if (startDay != null && endDay != null) {
-	        return orderService.findCategoryProductTotalsByBetweenDateAndStatus(startDay, endDay);
-	    } else {
-	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date parameters");
-	    }
+	public List<Object[]> getCategoryProductTotalBetween(
+			@RequestParam(value = "date", required = false) LocalDateTime date,
+			@RequestParam(value = "startDay", required = false) LocalDateTime startDay,
+			@RequestParam(value = "endDay", required = false) LocalDateTime endDay) {
+		if (date != null && startDay == null && endDay == null) {
+			return orderService.findCategoryProductTotalsByDateAndStatus(date);
+		} else if (startDay != null && endDay != null && date == null) {
+			return orderService.findCategoryProductTotalsByBetweenDateAndStatus(startDay, endDay);
+		} else {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date parameters");
+		}
 	}
-
 	
 
-	//của Mỵ từ đây
+	// của Mỵ từ đây
 	@Autowired
 	WalletService walletService;
-	
+
 	@Autowired
 	UserService userService;
-	
+
 	@Autowired
 	TransactionService transactionService;
-	
+
 	@PostMapping("/create_order")
-    public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
-        Order createdOrder = orderService.createOrder(orderDTO);
+	public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
+		Order createdOrder = orderService.createOrder(orderDTO);
 		if (orderDTO.getPaymentMethod().equals("Thanh toán ví")) {
 			User user = userService.findByUsername(orderDTO.getUsername());
 			Wallet wallet = walletService.findByUsername(user);
-			wallet.setBalance(
-			        wallet.getBalance().subtract(BigDecimal.valueOf(orderDTO.getAmount()))
-			    );	
-			
+			wallet.setBalance(wallet.getBalance().subtract(BigDecimal.valueOf(orderDTO.getAmount())));
+
 			Transaction transaction = new Transaction();
 			transaction.setWallet(wallet);
 			transaction.setAmount(new BigDecimal(orderDTO.getAmount()));
@@ -161,20 +156,20 @@ public class OrderRestController {
 			transaction.setDescription("Thanh toán hóa đơn: " + createdOrder.getOrderId());
 			transaction.setTransactionType("-" + createdOrder.getAmount());
 			transactionService.create(transaction);
-			}
-		
-        return ResponseEntity.ok(createdOrder);
-    }
-	
+		}
+
+		return ResponseEntity.ok(createdOrder);
+	}
+
 //	@GetMapping("/order/getByOrderId/{orderId}")
 //	public List<Map<String, Object>> getByOrderId(@PathVariable("orderId") Integer orderId) {
 //		return orderService.findOrderById(orderId);
 //	}
-	
+
 	@PutMapping("/order/cancel")
 	public void cancelOrder(@RequestBody Map<String, Object> orderData) {
-	    orderService.cancelOrder(orderData);
+		orderService.cancelOrder(orderData);
 	}
-	//đến đây
+	// đến đây
 
 }

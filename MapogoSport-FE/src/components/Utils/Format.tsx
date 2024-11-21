@@ -27,11 +27,16 @@ const formatDateNotime = (dateString) => {
 //   return utcDate.toISOString().split('T')[0];
 // };
 const formatDateForApi = (date: Date | null) => {
-  if (!date) return ''; // Đảm bảo rằng nếu date là null thì trả về chuỗi rỗng
+  if (!date) return ''; // Nếu date là null, trả về chuỗi rỗng
 
-  // Chuyển đổi thành ISO string và loại bỏ phần '.000Z'
-  return date.toISOString().replace('.000Z', '');
+  // Lấy múi giờ hiện tại của hệ thống
+  const offsetMs = date.getTimezoneOffset() * 60 * 1000; // Đổi phút sang milliseconds
+  const localDate = new Date(date.getTime() - offsetMs); // Điều chỉnh múi giờ
+
+  // Chuyển thành chuỗi định dạng yyyy-MM-dd'T'HH:mm:ss
+  return localDate.toISOString().split('.')[0]; // Bỏ phần '.000Z'
 };
+
 
 
 
