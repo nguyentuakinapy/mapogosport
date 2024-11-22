@@ -106,9 +106,7 @@ const Sidebar = () => {
             {menuGroups.map((group, groupIndex) => (
                 <div key={groupIndex}>
                     {group.menuItems.map((menuItem, menuIndex) => (
-                        <SidebarItem key={menuIndex} item={menuItem} pageName={pageName}
-                            setPageName={setPageName} username={userData?.username}
-                        />
+                        <SidebarItem key={menuIndex} item={menuItem} pageName={pageName} setPageName={setPageName} />
                     ))}
                 </div>
             ))}

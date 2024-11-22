@@ -1,6 +1,6 @@
 'use client'
 import UserLayout from "@/components/User/UserLayout"
-import { Col, Row, Image, Button } from "react-bootstrap";
+import { Col, Row, Image } from "react-bootstrap";
 import '../types/user.scss'
 import useSWR from "swr";
 import { useEffect, useState } from "react";
@@ -37,20 +37,21 @@ const CouponPage = () => {
             <div style={{ fontSize: '15px' }}>
                 <Row>
                     {voucherData.length > 0 ?
-                        voucherData.map((item) => (
-                            <Col xs={4} className="mt-4" key={item.userVoucherId}>
-                                <div className="box-coupon py-2">
-                                    <div className="me-2">
-                                        <Image src={"/images/logo.png"} width={100} alt="LogoShop" />
+                        voucherData.filter(item => item.status === "Unused" && item.voucher.status === "active")
+                            .map((item) => (
+                                <Col xs={4} className="mt-4" key={item.userVoucherId}>
+                                    <div className="box-coupon py-2">
+                                        <div className="me-2">
+                                            <Image src={"/images/logo.png"} width={100} alt="LogoShop" />
+                                        </div>
+                                        <div className="box-coupon-content">
+                                            <b>{item.voucher.name}</b>
+                                            <div className="text-muted">Hết hạn: {new Date(item.voucher.endDate).toLocaleDateString('en-GB')}</div>
+                                            <Link href={"/categories/products"}><div className="btn-voucher">Dùng ngay</div></Link>
+                                        </div>
                                     </div>
-                                    <div className="box-coupon-content">
-                                        <b>{item.voucher.name}</b>
-                                        <div className="text-muted">Hết hạn: {new Date(item.voucher.endDate).toLocaleDateString('en-GB')}</div>
-                                        <Link href={"/categories/products"}><div className="btn-voucher">Dùng ngay</div></Link>
-                                    </div>
-                                </div>
-                            </Col>
-                        ))
+                                </Col>
+                            ))
                         :
                         <div>Chưa có mã giảm giá nào trong kho!</div>
                     }

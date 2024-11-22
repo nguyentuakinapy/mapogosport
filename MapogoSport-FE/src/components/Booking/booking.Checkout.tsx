@@ -165,6 +165,8 @@ const BookingModal = React.memo((props: BookingProps) => {
         }
         if (activeTab === 'byDay') {
             setDataTimeTemporary(newData.slice(1));
+            console.log(newData.slice(1));
+
         }
     }
 

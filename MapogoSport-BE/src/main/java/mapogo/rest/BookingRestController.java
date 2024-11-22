@@ -1,10 +1,7 @@
 package mapogo.rest;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
-import mapogo.entity.SportField;
-import mapogo.entity.SportFieldDetail;
 import mapogo.service.BookingDetailService;
 import mapogo.service.BookingService;
 import mapogo.service.TransactionService;

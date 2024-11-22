@@ -1,0 +1,97 @@
+import { useData } from "@/app/context/UserContext";
+import React, { useEffect, useState } from "react";
+import { Modal, Button, Form } from "react-bootstrap";
+import { toast } from "react-toastify";
+import { mutate } from "swr";
+
+interface CancelBookingDetail {
+    showCancelBooking: boolean;
+    setShowCancelBooking: (v: boolean) => void;
+    aBookingDetail: BookingDetailMap | null;
+}
+
+const CancelBookingDetailModal = (props: CancelBookingDetail) => {
+    const { showCancelBooking, setShowCancelBooking, aBookingDetail } = props;
+    const [reason, setReason] = useState<string>("");
+
+    const handleClose = () => {
+        setShowCancelBooking(false);
+    };
+
+    const handleSave = async () => {
+        if (!aBookingDetail) {
+            console.log("Lỗi");
+            return;
+        }
+        const currentDateTime = new Date();
+        const formattedTime = aBookingDetail.startTime.replace('h', ':').padStart(5, '0');
+        const bookingDateTime = new Date(`${aBookingDetail.date}T${formattedTime}:00`);
+        const diffMinutes = (bookingDateTime.getTime() - currentDateTime.getTime()) / (1000 * 60);
+        const refundAmount = (aBookingDetail.price * (aBookingDetail.deposit / 100));
+        let finalAmount = 0;
+        if (reason === "Hủy bởi yêu cầu của khách hàng") {
+            if (diffMinutes >= 120) {
+                if (aBookingDetail.statusBooking === "Chờ thanh toán") {
+                    finalAmount = refundAmount;
+                } else {
+                    finalAmount = aBookingDetail.price;
+                }
+            } else {
+                if (aBookingDetail.statusBooking === "Chờ thanh toán") {
+                    finalAmount = refundAmount * 0.75;
+                } else {
+                    finalAmount = aBookingDetail.price * 0.75;
+                }
+            }
+        } else {
+            if (aBookingDetail.statusBooking === "Chờ thanh toán") {
+                finalAmount = refundAmount;
+            } else {
+                finalAmount = aBookingDetail.price;
+            }
+        }
+
+        await fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingDetailId: aBookingDetail?.bookingDetailId, status: "Đã hủy", refundAmount: finalAmount }),
+        }).then((res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            mutate(`http://localhost:8080/rest/user/booking/detail/${aBookingDetail?.bookingDetailId}`);
+            toast.success('Cập nhật thành công!');
+            handleClose();
+        });
+    };
+
+    return (
+        <Modal show={showCancelBooking} onHide={() => handleClose()} centered backdrop="static" keyboard={false}>
+            <Modal.Header>
+                <Modal.Title className="m-auto text-danger text-uppercase"><b>Lý do hủy sân</b></Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form>
+                    <Form.Group>
+                        <div>
+                            {["Hủy bởi yêu cầu của khách hàng", "Hủy bởi chủ sân"].map((option, index) => (
+                                <Form.Check key={index} type="radio" className="mb-3" id={`reason-${index}`}
+                                    label={option} value={option} onChange={(e) => setReason(e.target.value)} checked={reason === option} />
+                            ))}
+                        </div>
+                    </Form.Group>
+                </Form>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => handleClose()}>Đóng</Button>
+                <Button variant="danger" disabled={!reason} onClick={handleSave}>Xác nhận</Button>
+            </Modal.Footer>
+        </Modal>
+    );
+};
+
+export default CancelBookingDetailModal;

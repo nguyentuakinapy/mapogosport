@@ -5,7 +5,6 @@ import java.util.Map;
 
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
-import mapogo.entity.Order;
 
 public interface BookingService {
 	
