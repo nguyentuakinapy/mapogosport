@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 import '@/app/user/types/user.scss';
+import { fetchCoordinates } from "../../../app/utils/geocode";
 
 function Categories() {
-
 
     // Pagination
     const itemsPerPage = 8;
@@ -17,14 +17,15 @@ function Categories() {
         setCurrentPage(pageNumber);
     };
 
-
-
     const [rating, setRating] = useState<number>(1.5);
     const [sportFields, setSportFields] = useState<SportField[]>([]);
-    const [icon, setIcon] = useState<boolean[]>([]); // Để quản lý trạng thái của các biểu tượng
-    const [categoriesField, setCategoriesField] = useState<CategoryField[]>([])
-    const [selectedCategoryField, setSelectedCategoryField] = useState<number[]>([])
+    const [icon, setIcon] = useState<boolean[]>([]);
+    const [categoriesField, setCategoriesField] = useState<CategoryField[]>([]);
+    const [selectedCategoryField, setSelectedCategoryField] = useState<number[]>([]);
+    const [updatedSportFields, setUpdatedSportFields] = useState<SportField[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentLocation, setCurrentLocation] = useState<{ lat: number, lng: number } | null>(null);
+    const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -43,6 +44,62 @@ function Categories() {
         fetchData()
     }, []);
 
+    const getCurrentLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setCurrentLocation({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    console.error("Error getting location: ", error);
+                }
+            );
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+        }
+    };
+
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+        const toRad = (value: number) => (value * Math.PI) / 180;
+        const R = 6371; // Radius of the Earth in kilometers
+        const dLat = toRad(lat2 - lat1);
+        const dLon = toRad(lon2 - lon1);
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distance in kilometers
+    };
+
+    useEffect(() => {
+        if (sportFields.length > 0 && currentLocation) {
+            const fetchCoordinatesForFields = async () => {
+                try {
+                    const updatedCategoriesField = await Promise.all(
+                        sportFields.map(async (sport_field) => {
+                            const coords = await fetchCoordinates(sport_field.address);
+                            const distance = coords ? calculateDistance(currentLocation.lat, currentLocation.lng, coords.lat, coords.lon) : 0;
+                            return { ...sport_field, coordinates: coords, distance: distance };
+                        })
+                    );
+                    setUpdatedSportFields(updatedCategoriesField);
+                } catch (error) {
+                    console.error("Error fetching coordinates: ", error);
+                }
+            };
+
+            fetchCoordinatesForFields();
+        }
+    }, [sportFields, currentLocation]);
+
+    useEffect(() => {
+        getCurrentLocation();
+    }, []);
+
     useEffect(() => {
         const storedFilters = sessionStorage.getItem('searchFilters');
         if (storedFilters) {
@@ -54,7 +111,7 @@ function Categories() {
 
     const renderStars = (rating: number) => {
         const fullStars = Math.floor(rating);
-        const halfStar = rating - fullStars >= 0.5; // Kiểm tra nếu có nửa sao
+        const halfStar = rating - fullStars >= 0.5;
         const stars = [];
         for (let i = 0; i < fullStars; i++) {
             stars.push(<i key={i} className="bi bi-star-fill"></i>);
@@ -62,7 +119,6 @@ function Categories() {
         if (halfStar) {
             stars.push(<i key={fullStars} className="bi bi-star-half"></i>);
         }
-        // Thêm sao trống
         for (let i = stars.length; i < 5; i++) {
             stars.push(<i key={i} className="bi bi-star"></i>);
         }
@@ -87,12 +143,14 @@ function Categories() {
         setSearchTerm(event.target.value);
     };
 
-    // Filter logic
-    const filteredSportFields = sportFields.filter(field =>
+    const filteredSportFields = updatedSportFields.length > 0 ? (updatedSportFields.filter(field =>
         (selectedCategoryField.length === 0 || selectedCategoryField.includes(field.categoriesField.categoriesFieldId)) &&
         (field.name.toLowerCase().includes(searchTerm.toLowerCase()) || field.address.toLowerCase().includes(searchTerm.toLowerCase()))
-    )
-    // Update pagination based on filtered results
+    ).sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))) : sportFields.filter(field =>
+        (selectedCategoryField.length === 0 || selectedCategoryField.includes(field.categoriesField.categoriesFieldId)) &&
+        (field.name.toLowerCase().includes(searchTerm.toLowerCase()) || field.address.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
     const currentItems = filteredSportFields.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(filteredSportFields.length / itemsPerPage);
 
@@ -100,7 +158,6 @@ function Categories() {
         <HomeLayout>
             <Container className='pt-5'>
                 <Row>
-                    {/* Sidebar responsive: hidden on small screens, show on larger */}
                     <Col lg={2} md={3} sm={12} className="mb-3">
                         <div className="d-flex mb-3">
                             <div className="fw-bold text-uppercase filter-panel">
@@ -136,7 +193,6 @@ function Categories() {
 
                     </Col>
 
-                    {/* Product list */}
                     <Col lg={10} md={9} sm={12}>
                         <Row>
                             <h3 className="title-section mb-4">
@@ -147,9 +203,7 @@ function Categories() {
                                 Danh sách sân
                             </h3>
 
-                            {/* Product Item */}
                             <div>
-                                {/* <h3 className="fw-bold mt-5">SÂN THỂ THAO MỚI</h3> */}
                                 <div style={{ fontSize: '15px' }}>
                                     <Row className="my-3">
                                         {currentItems.length === 0 ? (
@@ -157,7 +211,6 @@ function Categories() {
                                                 <h1 className='text-center'><i className="bi bi-bag-x"></i></h1>
                                                 <p>Không tìm thấy sản phẩm.</p>
                                             </div>
-
                                         ) : null
                                         }
                                         {currentItems.map((field: SportField) => (
@@ -187,6 +240,7 @@ function Categories() {
                                                         </div>
                                                         <div className="d-flex align-items-center justify-content-between">
                                                             <div>Số sân: {field.quantity}</div>
+                                                            {/* <p>Khoảng cách: {field.distance ? `${field.distance.toFixed(2)} km` : "Không xác định"}</p> */}
                                                             <div className="star-item text-warning">
                                                                 {renderStars(rating)}
                                                             </div>
@@ -203,7 +257,6 @@ function Categories() {
                                 {totalPages > 1 && (
                                     <nav aria-label="Page navigation example">
                                         <ul className="pagination justify-content-center">
-                                            {/* Nút về trang đầu tiên */}
                                             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                                                 <a
                                                     className="page-link"
@@ -215,29 +268,21 @@ function Categories() {
                                                     <span aria-hidden="true">&laquo;</span>
                                                 </a>
                                             </li>
-
-                                            {/* Hiển thị 5 trang tùy theo currentPage */}
                                             {Array.from({ length: totalPages }, (_, index) => {
                                                 let startPage = 1;
                                                 let endPage = 5;
-
-                                                // Nếu tổng số trang lớn hơn 5
                                                 if (totalPages > 5) {
-                                                    // Điều chỉnh để luôn hiển thị 5 trang
                                                     if (currentPage > 3) {
                                                         startPage = currentPage - 2;
                                                         endPage = currentPage + 2;
                                                         if (endPage > totalPages) {
                                                             endPage = totalPages;
-                                                            startPage = totalPages - 4; // Đảm bảo vẫn hiển thị đủ 5 trang
+                                                            startPage = totalPages - 4;
                                                         }
                                                     }
                                                 } else {
-                                                    // Nếu tổng số trang ít hơn hoặc bằng 5, hiển thị tất cả
                                                     endPage = totalPages;
                                                 }
-
-                                                // Hiển thị các trang từ startPage đến endPage
                                                 if (index + 1 >= startPage && index + 1 <= endPage) {
                                                     return (
                                                         <li
@@ -255,7 +300,6 @@ function Categories() {
                                                         </li>
                                                     );
                                                 }
-
                                                 return null;
                                             })}
                                             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
@@ -272,12 +316,17 @@ function Categories() {
                                         </ul>
                                     </nav>
                                 )}
+                                {/* <div>
+                                    {currentLocation && (
+                                        <div>
+                                            Current Location: Latitude {currentLocation.lat}, Longitude {currentLocation.lng}
+                                        </div>
+                                    )}
+                                </div> */}
                             </>
                         </Row>
-
                     </Col>
                 </Row>
-
             </Container>
         </HomeLayout>
     );
