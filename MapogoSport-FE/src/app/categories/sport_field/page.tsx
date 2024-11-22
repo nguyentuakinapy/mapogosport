@@ -26,10 +26,6 @@ function Categories() {
     const [selectedCategoryField, setSelectedCategoryField] = useState<number[]>([]);
     const [updatedSportFields, setUpdatedSportFields] = useState<SportField[]>([]);
 
-    const [sportFields, setSportFields] = useState<SportField[]>([]);
-    const [categoriesField, setCategoriesField] = useState<CategoryField[]>([])
-    const [selectedCategoryField, setSelectedCategoryField] = useState<number[]>([])
-
     const [searchTerm, setSearchTerm] = useState('');
     const [currentLocation, setCurrentLocation] = useState<{ lat: number, lng: number } | null>(null);
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
@@ -218,8 +214,7 @@ function Categories() {
                                                 <h1 className='text-center'><i className="bi bi-bag-x"></i></h1>
                                                 <p>Không tìm thấy sản phẩm.</p>
                                             </div>
-                                        ) : null
-                                        }
+                                        ) : null}
                                         {currentItems.map((field: SportField) => {
                                             // Access the reviews for this sport field
                                             const reviews = field.fieldReviews || []; // Assuming field has a 'reviews' property
@@ -249,7 +244,7 @@ function Categories() {
                                                 <Col xs={3} key={field.sportFieldId}>
                                                     <div className="user-border">
                                                         <div className="mb-3">
-                                                            <Link href={"#"}>
+                                                            <Link href={`/categories/sport_field/detail/${field.sportFieldId}`}>
                                                                 <Image
                                                                     src={`${field.image}`}
                                                                     alt={field.name}
@@ -262,14 +257,11 @@ function Categories() {
                                                                 />
                                                             </Link>
                                                         </div>
-                                                        <div className="d-flex align-items-center justify-content-between">
-                                                            <div>Số sân: {field.quantity}</div>
-                                                            {/* <p>Khoảng cách: {field.distance ? `${field.distance.toFixed(2)} km` : "Không xác định"}</p> */}
-                                                            <div className="star-item text-warning">
-                                                                {renderStars(rating)}
                                                         <div className="content">
                                                             <div className="mb-1 title">
-                                                                <Link href={"#"}><b>{field.name}</b></Link>
+                                                                <Link href="#">
+                                                                    <b>{field.name}</b>
+                                                                </Link>
                                                             </div>
                                                             <div className="address mb-1">
                                                                 <span className="me-2">Khu vực:</span>{field.address}
@@ -280,7 +272,6 @@ function Categories() {
                                                                 <div className="star-item text-warning">
                                                                     {renderStars()}
                                                                 </div>
-
                                                             </div>
                                                             <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
                                                         </div>
@@ -288,7 +279,6 @@ function Categories() {
                                                 </Col>
                                             );
                                         })}
-
                                     </Row>
                                 </div>
                             </div>
