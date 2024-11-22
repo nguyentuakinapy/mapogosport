@@ -73,26 +73,6 @@ const OwnerBookingBill = () => {
             return;
         }
 
-        if (newStatus !== "Đã hủy") {
-            fetch(`http://localhost:8080/rest/owner/booking/update`, {
-                method: 'PUT',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ bookingId, status: newStatus }),
-            }).then(async (res) => {
-                if (!res.ok) {
-                    toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                    return;
-                }
-                mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
-                mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
-                toast.success('Cập nhật thành công!');
-            });
-            return;
-        }
-
         const startedDetails = booking.bookingDetails.filter(detail => detail.bookingDetailStatus !== "Chưa bắt đầu");
         const notStartedDetails = booking.bookingDetails.filter(detail => detail.bookingDetailStatus === "Chưa bắt đầu");
 
@@ -120,6 +100,26 @@ const OwnerBookingBill = () => {
                 finalAmount = (booking.totalAmount - subtract) * 0.75;
             }
         }
+
+        // if (newStatus !== "Đã hủy") {
+        //     fetch(`http://localhost:8080/rest/owner/booking/update`, {
+        //         method: 'PUT',
+        //         headers: {
+        //             'Accept': 'application/json, text/plain, */*',
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify({ bookingId, status: newStatus }),
+        //     }).then(async (res) => {
+        //         if (!res.ok) {
+        //             toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+        //             return;
+        //         }
+        //         mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
+        //         mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
+        //         toast.success('Cập nhật thành công!');
+        //     });
+        //     return;
+        // }
 
         fetch(`http://localhost:8080/rest/owner/booking/update`, {
             method: 'PUT',
@@ -185,10 +185,19 @@ const OwnerBookingBill = () => {
                                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
-                                    <td className={booking.oldTotalAmount > 0 && (booking.oldTotalAmount - booking.totalAmount) <= 0 ? 'text-danger' : 'text-success'}>
+                                    <td className={booking.status === 'Đã thanh toán'
+                                        && booking.oldTotalAmount !== 0 && booking.oldTotalAmount - booking.totalAmount
+                                        <= 0 ? 'text-danger' : 'text-success'}>
+
+                                        {booking.status === 'Đã thanh toán' ?
+                                            booking.oldTotalAmount !== 0 ? (booking.oldTotalAmount - booking.totalAmount).toLocaleString() + ' đ' : 0 :
+                                            booking.status === 'Đã hủy' ? 0 : (booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString() + ' đ'
+                                        }
+
+                                        {/*                                             
                                         {booking.oldTotalAmount !== 0 ? `${(booking.oldTotalAmount - booking.totalAmount).toLocaleString()} ₫`
                                             : booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0'
-                                                : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} ₫`}
+                                                : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} ₫`} */}
                                     </td>
                                     <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
                                     <td>{renderStatusDropdown(booking)}</td>

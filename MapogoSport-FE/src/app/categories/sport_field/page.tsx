@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 import '@/app/user/types/user.scss';
 import { fetchCoordinates } from "../../../app/utils/geocode";
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 
 function Categories() {
 
@@ -23,6 +25,11 @@ function Categories() {
     const [categoriesField, setCategoriesField] = useState<CategoryField[]>([]);
     const [selectedCategoryField, setSelectedCategoryField] = useState<number[]>([]);
     const [updatedSportFields, setUpdatedSportFields] = useState<SportField[]>([]);
+
+    const [sportFields, setSportFields] = useState<SportField[]>([]);
+    const [categoriesField, setCategoriesField] = useState<CategoryField[]>([])
+    const [selectedCategoryField, setSelectedCategoryField] = useState<number[]>([])
+
     const [searchTerm, setSearchTerm] = useState('');
     const [currentLocation, setCurrentLocation] = useState<{ lat: number, lng: number } | null>(null);
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
@@ -213,43 +220,75 @@ function Categories() {
                                             </div>
                                         ) : null
                                         }
-                                        {currentItems.map((field: SportField) => (
-                                            <Col xs={3} key={field.sportFieldId}>
-                                                <div className="user-border">
-                                                    <div className="mb-3">
-                                                        <Link href={"#"}>
-                                                            <Image
-                                                                src={`${field.image}`}
-                                                                alt={field.name}
-                                                                style={{
-                                                                    maxHeight: "200px",
-                                                                    maxWidth: "250px",
-                                                                    minHeight: "200px",
-                                                                    objectFit: "cover"
-                                                                }}
-                                                            />
-                                                        </Link>
-                                                    </div>
-                                                    <div className="content">
-                                                        <div className="mb-1 title">
-                                                            <Link href={"#"}><b>{field.name}</b></Link>
-                                                        </div>
-                                                        <div className="address mb-1">
-                                                            <span className="me-2">Khu vực:</span>{field.address}
-                                                            <span className="mx-2">-</span>Hồ Chí Minh
+                                        {currentItems.map((field: SportField) => {
+                                            // Access the reviews for this sport field
+                                            const reviews = field.fieldReviews || []; // Assuming field has a 'reviews' property
+                                            const reviewCount = reviews.length; // Total number of reviews
+                                            const averageRating = reviewCount > 0
+                                                ? (reviews.reduce((total, review) => total + review.rating, 0) / reviewCount).toFixed(1)
+                                                : "0.0"; // Calculate average rating to one decimal place or set to "0.0" if no reviews
+
+                                            const fullStars = Math.floor(parseFloat(averageRating)); // Full stars based on integer part of averageRating
+                                            const hasHalfStar = parseFloat(averageRating) - fullStars >= 0.5; // Determine if a half star is needed
+                                            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Remaining stars are empty stars
+
+                                            // Render stars based on calculated values
+                                            const renderStars = () => (
+                                                <>
+                                                    {[...Array(fullStars)].map((_, index) => (
+                                                        <i key={`full-${index}`} className="fas fa-star"></i>
+                                                    ))}
+                                                    {hasHalfStar && <i className="fas fa-star-half-alt"></i>}
+                                                    {[...Array(emptyStars)].map((_, index) => (
+                                                        <i key={`empty-${index}`} className="far fa-star"></i>
+                                                    ))}
+                                                </>
+                                            );
+
+                                            return (
+                                                <Col xs={3} key={field.sportFieldId}>
+                                                    <div className="user-border">
+                                                        <div className="mb-3">
+                                                            <Link href={"#"}>
+                                                                <Image
+                                                                    src={`${field.image}`}
+                                                                    alt={field.name}
+                                                                    style={{
+                                                                        maxHeight: "200px",
+                                                                        maxWidth: "250px",
+                                                                        minHeight: "200px",
+                                                                        objectFit: "cover"
+                                                                    }}
+                                                                />
+                                                            </Link>
                                                         </div>
                                                         <div className="d-flex align-items-center justify-content-between">
                                                             <div>Số sân: {field.quantity}</div>
                                                             {/* <p>Khoảng cách: {field.distance ? `${field.distance.toFixed(2)} km` : "Không xác định"}</p> */}
                                                             <div className="star-item text-warning">
                                                                 {renderStars(rating)}
+                                                        <div className="content">
+                                                            <div className="mb-1 title">
+                                                                <Link href={"#"}><b>{field.name}</b></Link>
                                                             </div>
+                                                            <div className="address mb-1">
+                                                                <span className="me-2">Khu vực:</span>{field.address}
+                                                                <span className="mx-2">-</span>Hồ Chí Minh
+                                                            </div>
+                                                            <div className="d-flex align-items-center justify-content-between">
+                                                                <div>Số sân: {field.quantity}</div>
+                                                                <div className="star-item text-warning">
+                                                                    {renderStars()}
+                                                                </div>
+
+                                                            </div>
+                                                            <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
                                                         </div>
-                                                        <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
                                                     </div>
-                                                </div>
-                                            </Col>
-                                        ))}
+                                                </Col>
+                                            );
+                                        })}
+
                                     </Row>
                                 </div>
                             </div>

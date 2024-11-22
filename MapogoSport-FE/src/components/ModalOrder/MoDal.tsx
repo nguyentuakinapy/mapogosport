@@ -17,7 +17,7 @@ const MyVerticallyCenteredModal = ({ showModal, setShowModal, orderId, onHide }:
         const fetchData = async () => {
             if (orderId) { // Call API only when orderId is not null
                 try {
-                    const response = await axios.get(`http://localhost:8080/rest/user/orders/detail/${orderId}`);
+                    const response = await axios.get(`http://localhost:8080/rest/order-detail-by-order/${orderId}`);
                     setDataOrderDetail(response.data);
                 } catch (error) {
                     console.error('Error fetching order details:', error);

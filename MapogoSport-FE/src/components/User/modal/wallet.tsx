@@ -1,14 +1,15 @@
 'use client'
 import UserLayout from "@/components/User/UserLayout";
-import { Nav, Pagination } from "react-bootstrap";
+import { FloatingLabel, Form, Nav, Pagination } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { useData } from "@/app/context/UserContext";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import jsPDF from "jspdf";
 import 'jspdf-autotable';
 import { RobotoBase64 } from "../../../../public/font/Roboto-Regular";
 import { toast } from "react-toastify";
 import '../types/wallet.scss';
+import NotificationModal from "@/components/Owner/modal/notification.modal";
 
 const WalletPage = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -17,6 +18,7 @@ const WalletPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8);
     const userData = useData();
+    const [showNotificationModal, setNotificationModal] = useState<boolean>(false);
 
     const { data, error, isLoading } = useSWR(userData &&
         `http://localhost:8080/rest/wallet/transaction/${userData?.wallet.walletId}`, fetcher, {
@@ -172,6 +174,42 @@ const WalletPage = () => {
 
     };
 
+    const [money, setMoney] = useState<number>();
+
+    const addMoneyToWallet = () => {
+        fetch(`http://localhost:8080/rest/wallet/${userData?.username}/${money}`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            mutate(`http://localhost:8080/rest/wallet/transaction/${userData?.wallet.walletId}`);
+            setNotificationModal(false);
+            toast.success('Nạp tiền thành công!');
+        });
+    }
+
+    const renderNotification = () => {
+        return (
+            <div className="text-center">
+                <FloatingLabel controlId="floatingTextarea2" label="Số tiền cần nạp!">
+                    <Form.Control
+                        placeholder="Leave a comment here"
+                        value={money}
+                        onChange={(e) => setMoney(Number(e.target.value))}
+                    />
+                </FloatingLabel>
+                <button onClick={addMoneyToWallet} className="mt-2 w-100 btn btn-danger">Nạp tiền</button>
+            </div>
+
+        )
+    }
+
     if (isLoading) return <UserLayout>Đang tải...</UserLayout>;
     if (error) return <UserLayout>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</UserLayout>;
 
@@ -182,7 +220,7 @@ const WalletPage = () => {
                 <div className="box-ultil">
                     <div><b>Số dư:</b> {userData?.wallet.balance.toLocaleString()} ₫</div>
                     <div className="d-flex justify-content-between align-items-center">
-                        <div className="btn-wallet">Nạp tiền</div>
+                        <div className="btn-wallet" onClick={() => setNotificationModal(true)}>Nạp tiền</div>
                         <div className="btn-wallet" onClick={exportPDF}>Xuất file PDF</div>
                     </div>
                 </div>
@@ -201,6 +239,8 @@ const WalletPage = () => {
                 {renderContent()}
                 {renderPagination()}
             </div>
+            <NotificationModal textHeadNotification={"Nạp tiền vào tài khoản"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
+            </NotificationModal>
         </>
     )
 }

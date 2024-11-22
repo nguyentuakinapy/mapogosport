@@ -111,13 +111,13 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                                     if (booking.statusBooking === "Chờ thanh toán") {
                                                         handleStatusChange(booking.bookingDetailId, newStatus || booking.status, refundAmount);
                                                     } else {
-                                                        handleStatusChange(booking.bookingDetailId, newStatus || booking.status, refundAmount);
+                                                        handleStatusChange(booking.bookingDetailId, newStatus || booking.status, booking.price);
                                                     }
                                                 } else {
                                                     if (booking.statusBooking === "Chờ thanh toán") {
                                                         handleStatusChange(booking.bookingDetailId, newStatus || booking.status, refundAmount * 0.75);
                                                     } else {
-                                                        handleStatusChange(booking.bookingDetailId, newStatus || booking.status, refundAmount * 0.75);
+                                                        handleStatusChange(booking.bookingDetailId, newStatus || booking.status, booking.price * 0.75);
                                                     }
                                                 }
                                             }

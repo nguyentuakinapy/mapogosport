@@ -96,6 +96,10 @@ interface BookingDetailFullName {
     checkOffline: boolean;
     subscriptionKey: string;
     paymentMethod: PaymentMethod;
+    totalAmount: number;
+    deposit: number;
+    statusBooking: string;
+    bookingId: number;
 }
 
 interface AvailableBooking {

@@ -109,8 +109,9 @@ const Header = (props: HeaderProps) => {
                             style={{ maxHeight: '100px' }}
                             navbarScroll
                         >
+                            <Link href="/blog" className='head-hv-nav text-decoration-none'><i className="bi bi-book-fill me-2"></i>Bài viết</Link>
                             <Link href="/categories/products" className='head-hv-nav text-decoration-none'><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
-                            <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy me-2"></i>Sân thể thao</Link>
+                            <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy-fill me-2"></i>Sân thể thao</Link>
                             <div className="dropdown">
                                 <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
                                     <i className="bi bi-person-fill me-2"></i>{userData ? userData?.fullname : 'Tài khoản'}
