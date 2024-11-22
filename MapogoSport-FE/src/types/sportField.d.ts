@@ -15,9 +15,11 @@ interface SportField {
     owner: Owner;
     decription: string;
     sportFielDetails: SportFieldDetail[];
-    latitude: number; 
-    longitude: number; 
-    distance:number;
+    latitude: number;
+    longitude: number;
+    distance: number;
+    fieldReviews: ProductReview[];
+
 }
 
 interface SportFieldDetail {

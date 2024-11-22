@@ -844,7 +844,10 @@ export default function BookingSport() {
                                                         style={{ textAlign: 'center' }}
                                                     >
                                                         <div className={`badge`} style={{ position: 'relative' }}>
-                                                            <span className="status-label">{statusItem}</span><br />
+                                                            <span className="status-label">
+                                                                {/* {statusItem === "Còn trống" ? '' : statusItem} */}
+                                                                {statusItem}
+                                                                </span><br />
                                                             <b className="text-success">{bookingId == 0 ? "" : fullName}</b>
                                                         </div>
                                                     </td>
