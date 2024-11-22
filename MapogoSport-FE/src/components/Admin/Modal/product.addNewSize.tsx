@@ -313,10 +313,11 @@ const ModalProductAddNewSize = ({
 
   return (
     <div>
-      <Modal
+      <Modal 
         show={isShowAddNewSize}
         onHide={handleCloseModal}
-        className="modal-dialog-centered"
+        className="modal-dialog-centered modal-add-color"
+        style={{}}
       >
         <Modal.Header closeButton>
           <Modal.Title>
