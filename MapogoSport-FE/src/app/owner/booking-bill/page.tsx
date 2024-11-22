@@ -13,6 +13,7 @@ import { saveAs } from 'file-saver';
 import { debounce } from "lodash";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
+import CancelBookingModal from "@/components/Owner/modal/CancelBooking";
 
 const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -24,6 +25,8 @@ const OwnerBookingBill = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8);
+    const [showCancelBooking, setShowCancelBooking] = useState(false);
+    const [booking, setBooking] = useState<BookingFindAll | null>(null);
 
     const bookingStatuses = [
         'Chờ thanh toán',
@@ -72,71 +75,27 @@ const OwnerBookingBill = () => {
             console.error("Không tìm thấy booking");
             return;
         }
-
-        const startedDetails = booking.bookingDetails.filter(detail => detail.bookingDetailStatus !== "Chưa bắt đầu");
-        const notStartedDetails = booking.bookingDetails.filter(detail => detail.bookingDetailStatus === "Chưa bắt đầu");
-
-        const subtract = startedDetails.reduce((total, detail) => total + Number(detail.price || 0), 0);
-
-        const currentDateTime = new Date();
-        const formattedTime = notStartedDetails[0]?.startTime.replace('h', ':').padStart(5, '0');
-        const bookingDateTime = new Date(`${notStartedDetails[0]?.bookingDetailDate}T${formattedTime}:00`);
-
-        const diffMinutes = (bookingDateTime.getTime() - currentDateTime.getTime()) / (1000 * 60);
-
-        const refundAmount = booking.totalAmount * (booking.percentDeposit / 100);
-
-        let finalAmount = 0;
-        if (diffMinutes >= 120) {
-            if (booking.status === "Chờ thanh toán") {
-                finalAmount = refundAmount - subtract * (booking.percentDeposit / 100);
-            } else {
-                finalAmount = booking.totalAmount - subtract;
-            }
+        if (newStatus === "Đã hủy") {
+            setShowCancelBooking(true);
+            setBooking(booking);
         } else {
-            if (booking.status === "Chờ thanh toán") {
-                finalAmount = (refundAmount - subtract * (booking.percentDeposit / 100)) * 0.75;
-            } else {
-                finalAmount = (booking.totalAmount - subtract) * 0.75;
-            }
+            fetch(`http://localhost:8080/rest/owner/booking/update`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ bookingId, status: newStatus, refundAmount: 0 }),
+            }).then((res) => {
+                if (!res.ok) {
+                    toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                    return;
+                }
+                mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
+                mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
+                toast.success('Cập nhật thành công!');
+            });
         }
-
-        // if (newStatus !== "Đã hủy") {
-        //     fetch(`http://localhost:8080/rest/owner/booking/update`, {
-        //         method: 'PUT',
-        //         headers: {
-        //             'Accept': 'application/json, text/plain, */*',
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({ bookingId, status: newStatus }),
-        //     }).then(async (res) => {
-        //         if (!res.ok) {
-        //             toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-        //             return;
-        //         }
-        //         mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
-        //         mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
-        //         toast.success('Cập nhật thành công!');
-        //     });
-        //     return;
-        // }
-
-        fetch(`http://localhost:8080/rest/owner/booking/update`, {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ bookingId, status: newStatus, refundAmount: finalAmount }),
-        }).then(async (res) => {
-            if (!res.ok) {
-                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                return;
-            }
-            mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
-            mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
-            toast.success('Cập nhật thành công!');
-        });
     };
 
     const renderStatusDropdown = (booking: BookingFindAll) => {
@@ -185,25 +144,15 @@ const OwnerBookingBill = () => {
                                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
-                                    <td className={booking.status === 'Đã thanh toán'
-                                        && booking.oldTotalAmount !== 0 && booking.oldTotalAmount - booking.totalAmount
-                                        <= 0 ? 'text-danger' : 'text-success'}>
-
-                                        {booking.status === 'Đã thanh toán' ?
-                                            booking.oldTotalAmount !== 0 ? (booking.oldTotalAmount - booking.totalAmount).toLocaleString() + ' đ' : 0 :
-                                            booking.status === 'Đã hủy' ? 0 : (booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString() + ' đ'
-                                        }
-
-                                        {/*                                             
-                                        {booking.oldTotalAmount !== 0 ? `${(booking.oldTotalAmount - booking.totalAmount).toLocaleString()} ₫`
-                                            : booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0'
-                                                : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} ₫`} */}
+                                    <td className={booking.status === 'Đã thanh toán' && booking.oldTotalAmount !== 0
+                                        && booking.oldTotalAmount - booking.totalAmount <= 0 ? 'text-danger' : 'text-success'}>
+                                        {booking.status === 'Đã thanh toán' ? booking.oldTotalAmount !== 0 ?
+                                            (booking.oldTotalAmount - booking.totalAmount).toLocaleString() + ' đ' : 0 :
+                                            booking.status === 'Đã hủy' ? 0 : (booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString() + ' đ'}
                                     </td>
                                     <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
                                     <td>{renderStatusDropdown(booking)}</td>
-                                    <td>
-                                        <Link href={`/owner/booking-bill/detail/${booking.bookingId}`}>Xem</Link>
-                                    </td>
+                                    <td><Link href={`/owner/booking-bill/detail/${booking.bookingId}`}>Xem</Link></td>
                                 </tr>
                             )) :
                             <tr>
@@ -397,7 +346,6 @@ const OwnerBookingBill = () => {
         }
     };
 
-
     if (isLoading) return <div>Đang tải...</div>;
     if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
@@ -443,6 +391,7 @@ const OwnerBookingBill = () => {
             </Nav>
             {renderContent()}
             {renderPagination()}
+            <CancelBookingModal showCancelBooking={showCancelBooking} setShowCancelBooking={setShowCancelBooking} booking={booking} />
         </div>
     );
 };

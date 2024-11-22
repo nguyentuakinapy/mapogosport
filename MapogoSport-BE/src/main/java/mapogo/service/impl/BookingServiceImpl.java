@@ -1,14 +1,11 @@
 package mapogo.service.impl;
 
-import java.math.BigDecimal;
 import java.sql.Date;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -19,19 +16,15 @@ import mapogo.dao.BookingDetailDAO;
 import mapogo.dao.NotificationDAO;
 import mapogo.dao.OwnerDAO;
 import mapogo.dao.PaymentMethodDAO;
-import mapogo.dao.TransactionDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.VoucherDAO;
 import mapogo.dao.WalletDAO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
 import mapogo.entity.Notification;
-import mapogo.entity.Order;
 import mapogo.entity.Owner;
 import mapogo.entity.PaymentMethod;
 import mapogo.entity.SportField;
-import mapogo.entity.SportFieldDetail;
-import mapogo.entity.Transaction;
 import mapogo.entity.User;
 import mapogo.entity.Voucher;
 import mapogo.entity.Wallet;
@@ -162,6 +155,7 @@ public class BookingServiceImpl implements BookingService {
 	public Booking updateStatusBooking(Map<String, Object> bookingData) {
 		Integer bookingId = (Integer) bookingData.get("bookingId");
 		String newStatus = (String) bookingData.get("status");
+		String note = (String) bookingData.get("note");
 		
 		Object refundObj = bookingData.get("refundAmount");
 		double refundAmount;
@@ -177,6 +171,7 @@ public class BookingServiceImpl implements BookingService {
 		Booking booking = bookingDAO.findById(bookingId).get();
 		if (booking != null) {
 			booking.setStatus(newStatus);
+			booking.setNote(note);
 			if (newStatus.equals("Đã hủy")) {
 				for (BookingDetail bookingDetail : booking.getBookingDetails()) {
 					if (bookingDetail.getStatus().equals("Chưa bắt đầu")) {

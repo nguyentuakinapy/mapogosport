@@ -72,17 +72,17 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 	        userVoucherData.put("userVoucherId", userVoucher.getUserVoucherId());
 	        userVoucherData.put("status", userVoucher.getStatus());
 	        userVoucherData.put("date", userVoucher.getDate());
-
-	        Map<String, Object> voucherData = new HashMap<>();
-	        voucherData.put("voucherId", voucher.getVoucherId());
-	        voucherData.put("name", voucher.getName());
-	        voucherData.put("endDate", voucher.getEndDate());
-
-	        userVoucherData.put("voucher", voucherData);
-	        resultList.add(userVoucherData);
-	    }
-
-	    return resultList;
+	        
+			Map<String, Object> voucherData = new HashMap<>();
+			voucherData.put("voucherId", userVoucher.getVoucher().getVoucherId());
+			voucherData.put("name", userVoucher.getVoucher().getName());
+			voucherData.put("endDate", userVoucher.getVoucher().getEndDate());
+			voucherData.put("status", userVoucher.getVoucher().getStatus());
+			
+			userVoucherData.put("voucher", voucherData);
+			resultList.add(userVoucherData);
+		}
+		return resultList;
 	}
 
 	

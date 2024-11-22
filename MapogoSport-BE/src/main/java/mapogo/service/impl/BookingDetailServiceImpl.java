@@ -1,15 +1,14 @@
 package mapogo.service.impl;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import mapogo.dao.BookingDAO;
 import mapogo.dao.BookingDetailDAO;
 import mapogo.dao.OwnerDAO;
-import mapogo.dao.SportFieldDAO;
 import mapogo.dao.SportFieldDetailDAO;
 import mapogo.dao.UserDAO;
 import mapogo.entity.Booking;
@@ -110,28 +108,21 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 			Booking booking = bookingDetail.getBooking();
 			if (newStatus.equals("Đã hủy")) {
-				if (!booking.getUser().getUsername().equals("sportoffline")) {
-					Wallet userWallet = booking.getUser().getWallet();
-					if (userWallet != null) {
-						transactionService.refundUserWalletBooking(userWallet, refundAmount, booking.getBookingId());
-					}
+				Date currentTime = new Date();
+				Date startTime = new Date(bookingDetail.getStartTime());
+				long diffMinutes = (currentTime.getTime() - startTime.getTime()) / (1000 * 60);
 
-					Owner owner = ownerDAO.findById(booking.getOwner().getOwnerId()).get();
-					if (owner != null) {
-						Wallet ownerWallet = owner.getUser().getWallet();
-						if (ownerWallet != null) {
-							transactionService.refundOwnerWalletBooking(ownerWallet, refundAmount,
-									booking.getBookingId());
+				if (diffMinutes > 15) {
+					refundFunction(booking, refundAmount);
+				} else {
+					long delayTime = (15 - diffMinutes) * 60 *1000;
+					ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(5);
+					scheduler.schedule(() -> {
+						if (booking.getStatus().equals("Đã hủy")) {
+							refundFunction(booking, refundAmount);
 						}
-					}
+					}, delayTime, TimeUnit.MILLISECONDS);
 				}
-			}
-
-			boolean allCancel = booking.getBookingDetails().stream()
-					.allMatch(detail -> "Đã hủy".equals(detail.getStatus()));
-			if (allCancel) {
-				booking.setStatus("Đã hủy");
-				bookingDAO.save(booking);
 			}
 
 			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(booking.getBookingId());
@@ -146,7 +137,6 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			}
 
 			if (index == bookingDetails.size()) {
-//				booking.setNote(note);
 				booking.setStatus("Đã hủy");
 				bookingDAO.save(booking);
 			} else {
@@ -159,10 +149,23 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		return null;
 	}
 
-//	@Override
-//	public List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId) {
-//		return bookingDetailDAO.findBySportFieldDetailAndToday(sportDetailId);
-//	}
+	private void refundFunction(Booking booking, double refundAmount) {
+		if (!booking.getUser().getUsername().equals("sportoffline")) {
+			Wallet userWallet = booking.getUser().getWallet();
+			if (userWallet != null) {
+				transactionService.refundUserWalletBooking(userWallet, refundAmount, booking.getBookingId());
+			}
+
+			Owner owner = ownerDAO.findById(booking.getOwner().getOwnerId()).get();
+			if (owner != null) {
+				Wallet ownerWallet = owner.getUser().getWallet();
+				if (ownerWallet != null) {
+					transactionService.refundOwnerWalletBooking(ownerWallet, refundAmount,
+							booking.getBookingId());
+				}
+			}
+		}
+	}
 
 	public List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportFieldDetailId, LocalDate today,
 			LocalDate endDate) {
