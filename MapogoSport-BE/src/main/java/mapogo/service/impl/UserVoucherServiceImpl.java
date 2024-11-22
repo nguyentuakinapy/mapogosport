@@ -1,7 +1,9 @@
 package mapogo.service.impl;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import mapogo.dao.UserVoucherDAO;
 import mapogo.entity.UserVoucher;
+import mapogo.entity.Voucher;
 import mapogo.service.UserVoucherService;
 
 @Service
@@ -19,7 +22,7 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 	UserVoucherDAO userVoucherDao;
 	
 	@Override
-	public List<Map<String, Object>> findByUser(String username) {
+	public List<Map<String, Object>> findByUserMap(String username) {
 		List<UserVoucher> userVouchers = userVoucherDao.findByUser_Username(username);
 		List<Map<String, Object>> resultList = new ArrayList<>();
 		
@@ -40,6 +43,54 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 		}
 		return resultList;
 	}
+	
+//	@Override
+//	public List<Map<String, Object>> findByUser(String username) {
+//	    List<UserVoucher> userVouchers = userVoucherDao.findByUser_Username(username);
+//	    List<Map<String, Object>> resultList = new ArrayList<>();
+//	    LocalDate today = LocalDate.now();
+//
+//	    for (Iterator<UserVoucher> iterator = userVouchers.iterator(); iterator.hasNext();) {
+//	        UserVoucher userVoucher = iterator.next();
+//	        Voucher voucher = userVoucher.getVoucher();
+//
+//	        if (voucher.getEndDate().toLocalDate().isBefore(today)) {
+//	        	
+//	            userVoucherDao.delete(userVoucher);
+//	            // Loại bỏ voucher hết hạn khỏi danh sách để không trả về trong kết quả
+//	            iterator.remove();
+//	            continue;  // Bỏ qua voucher này và tiếp tục vòng lặp
+//	        }
+//
+//	        //  dữ liệu cho voucher gọi qpi
+//	        Map<String, Object> userVoucherData = new HashMap<>();
+//	        userVoucherData.put("userVoucherId", userVoucher.getUserVoucherId());
+//	        userVoucherData.put("status", userVoucher.getStatus());
+//	        userVoucherData.put("date", userVoucher.getDate());
+//	        
+//			Map<String, Object> voucherData = new HashMap<>();
+//			voucherData.put("voucherId", userVoucher.getVoucher().getVoucherId());
+//			voucherData.put("name", userVoucher.getVoucher().getName());
+//			voucherData.put("endDate", userVoucher.getVoucher().getEndDate());
+//			voucherData.put("status", userVoucher.getVoucher().getStatus());
+//			
+//			userVoucherData.put("voucher", voucherData);
+//			resultList.add(userVoucherData);
+//		}
+//		return resultList;
+//
+//	        Map<String, Object> voucherData = new HashMap<>();
+//	        voucherData.put("voucherId", voucher.getVoucherId());
+//	        voucherData.put("name", voucher.getName());
+//	        voucherData.put("endDate", voucher.getEndDate());
+//
+//	        userVoucherData.put("voucher", voucherData);
+//	        resultList.add(userVoucherData);
+//	    }
+//
+//	    return resultList;
+//	}
+
 	
 	@Override
 	public UserVoucher createUserVoucher(UserVoucher userVoucher) {

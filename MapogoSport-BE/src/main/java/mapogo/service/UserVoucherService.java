@@ -3,10 +3,13 @@ package mapogo.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.jpa.repository.Query;
+
 import mapogo.entity.UserVoucher;
+import mapogo.entity.Voucher;
 
 public interface UserVoucherService {
-	List<Map<String, Object>> findByUser(String username);
+//	List<Map<String, Object>> findByUser(String username);
 	UserVoucher createUserVoucher(UserVoucher userVoucher);
 	List<UserVoucher> findUserVoucher();
 	public boolean checkUserVoucher(String username, Integer voucherId);
@@ -18,4 +21,7 @@ public interface UserVoucherService {
 	
 	List<UserVoucher> findByUsername(String username);
 	//đến đây
+	List<Map<String, Object>> findByUserMap(String username);
+
+
 }

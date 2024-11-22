@@ -10,9 +10,10 @@ import {
   OverlayTrigger,
   Tooltip,
   Nav,
+  Form,
 } from "react-bootstrap";
 import "../product/adminStyleProduct.scss";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, SelectHTMLAttributes } from "react";
 import ProductAddNew from "@/components/Admin/Modal/product.addNew";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -184,6 +185,12 @@ const AdminProduct = () => {
 
   // Tìm kiếm
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<number>(); // Giá trị mặc định là rỗng
+
+  const handleSelectedCategory =(event: React.ChangeEvent<HTMLSelectElement>)=>{
+    const selectedId = event.target.value;
+    setSelectedType(Number(selectedId));
+  }
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -218,6 +225,14 @@ const AdminProduct = () => {
           filtered = filtered.filter((product) =>
             removeVietnameseTones(product.name).toLowerCase().includes(normalizedSearchTerm)
           );
+        }
+        if(selectedType){
+          console.log("selectedType  "+selectedType);
+          
+          filtered = filtered.filter((product) => product.categoryProduct.categoryProductId === selectedType)
+          
+          console.log("ssssssssssss "+products[0].categoryProduct.categoryProductId);
+          
         }
 
         return filtered;
@@ -319,8 +334,7 @@ const AdminProduct = () => {
             </tr>
           </thead>
           <tbody>
-            {currentItems &&
-              currentItems.length > 0 &&
+            {currentItems && currentItems.length > 0 ?
               currentItems.map((product, index) => (
                 <tr key={product.productId} id={product.productId.toString()}>
                   <td className="text-center align-middle">{index + 1}</td>
@@ -333,6 +347,9 @@ const AdminProduct = () => {
                         style={{ width: "150px", height: "auto" }}
                         className="mx-2"
                         alt={`product.image`}
+                        onError={(e) => {
+                          e.currentTarget.src = "/images/logo.png"; // Ảnh mặc định
+                        }}
                       />
                     </Link>
                   </td>
@@ -406,7 +423,13 @@ const AdminProduct = () => {
                     </OverlayTrigger>
                   </td>
                 </tr>
-              ))}
+              )): (
+                <tr >
+                <td colSpan={11} className="text-center h6 ">
+                <p >Không có dữ liệu </p>
+                </td>
+              </tr>
+              )}
           </tbody>
         </Table>
       </div>
@@ -421,31 +444,57 @@ const AdminProduct = () => {
 
   return (
     <div style={{ fontSize: "14px" }}>
-      <div className="box-ultil">
-        <b className="text-danger" style={{ fontSize: "20px" }}>
-          Quản Lý Sản Phẩm/ Tổng: {products?.length || 0} sản phẩm
+      <div className="box-ultil d-flex flex-wrap align-items-center justify-content-between gap-3">
+        {/* Tổng số sản phẩm */}
+        <b className="text-danger flex-grow-1" style={{ fontSize: "20px" }}>
+          Quản lý sản phẩm/ Tổng: {products?.length || 0} sản phẩm
         </b>
+
+        {/* Dropdown chọn loại sản phẩm */}
+        <div className="d-flex align-items-center" style={{ gap: "10px" }}>
+          <i className="bi bi-funnel fs-4"></i>
+          <Form.Control
+            as="select"
+            name="categoryProduct"
+            value={selectedType}
+            onChange={handleSelectedCategory}
+            style={{ minWidth: "200px" }}
+          >
+            <option value="">Tất cả loại sản phẩm</option>
+            {categoryProducts.map((category) => (
+              <option key={category.categoryProductId} value={category.categoryProductId}>
+                {category.name}
+              </option>
+            ))}
+          </Form.Control>
+        </div>
+
+        {/* Input tìm kiếm sản phẩm */}
         <input
-        type="text"
-        placeholder="Tìm kiếm sản phẩm..."
-        value={searchTerm}
-        onChange={handleSearchChange}
-        style={{
-          padding: "5px 10px",
-          fontSize: "14px",
-          borderRadius: "5px",
-          border: "1px solid #ddd",
-          width: "200px"
-        }}
-      />
+          type="text"
+          placeholder="Tìm kiếm sản phẩm..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          style={{
+            padding: "5px 10px",
+            fontSize: "14px",
+            borderRadius: "5px",
+            border: "1px solid #ddd",
+            width: "200px",
+            flexShrink: 0,
+          }}
+        />
+
+        {/* Nút thêm sản phẩm */}
         <Button
           className="btn-sd-admin"
-          style={{ fontSize: "15px" }}
+          style={{ fontSize: "15px", whiteSpace: "nowrap" }}
           onClick={handleCreateClick}
         >
           <i className="bi bi-plus-circle me-2"></i>Thêm Sản Phẩm
         </Button>
-      </div>
+          </div>
+
       <Nav
         variant="pills"
         activeKey={activeTab}
@@ -473,57 +522,68 @@ const AdminProduct = () => {
       <div className="mt-3">
         {renderContent(currentItems)}
 
-        <div className="pagination ">
-          <div className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-            <div
-              className="page-link"
-              aria-label="First"
-              onClick={() => handlePageChange(1)}
-              title="Go to first page"
-            >
-              <span aria-hidden="true">&laquo;</span>
-            </div>
-          </div>
-          {/* Nút "Lùi" */}
-          <button
-            className="btn btn-primary mx-1 active"
-            onClick={handlePrevPage}
-            disabled={currentPage === 1}
-          >
-            {/* Lùi */} &lt;
-          </button>
-          {Array.from({ length: totalPages }, (_, index) => (
+        {currentItems.length > 0 ? (
+          <div className="pagination">
+            {/* Nút "Đầu tiên" 
+            <div className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+              <div
+                className="page-link text-light"
+                style={{ backgroundColor: "#132239" }}
+                aria-label="First"
+                onClick={() => handlePageChange(1)}
+                title="Go to first page"
+              >
+                <span aria-hidden="true">&laquo;</span>
+              </div>
+            </div>*/}
+            {/* Nút "Lùi" */}
             <button
-              // className="btn btn-primary mx-1 active"
-              className={`btn mx-1 ${
-                currentPage === index + 1
-                  ? "btn-primary active"
-                  : "btn-secondary"
-              }`}
-              key={index + 1}
-              onClick={() => handlePageChange(index + 1)}
-              disabled={currentPage === index + 1}
+              className="btn mx-1 text-light"
+              style={{ backgroundColor: "#132239" }}
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
             >
-              {index + 1}
+              &lt;
             </button>
-          ))}
-          {/* Nút "Tới" */}
-          <button
-            className="btn btn-primary mx-1 active"
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-          >
-            {/* Tới */} &gt;
-          </button>
-          {/* Nút "Tới trang cuối" */}
-          <button
-            className="btn btn-primary mx-1"
-            onClick={handleLastPage}
-            disabled={currentPage === totalPages}
-          >
-            &raquo;
-          </button>
-        </div>
+            {/* Các nút số trang */}
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                className={`btn mx-1 text-light ${
+                  currentPage === index + 1 ? "active" : ""
+                }`}
+                style={{
+                  backgroundColor: currentPage === index + 1 ? "grey" : "#132239",
+                  border: currentPage === index + 1 ? "2px solid white" : "none",
+                }}
+                key={index + 1}
+                onClick={() => handlePageChange(index + 1)}
+                disabled={currentPage === index + 1}
+              >
+                {index + 1}
+              </button>
+            ))}
+            {/* Nút "Tới" */}
+            <button
+              className="btn mx-1 text-light"
+              style={{ backgroundColor: "#132239" }}
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+            >
+              &gt;
+            </button>
+            {/* Nút "Trang cuối" 
+            <button
+              className="btn mx-1 text-light"
+              style={{ backgroundColor: "#132239" }}
+              onClick={handleLastPage}
+              disabled={currentPage === totalPages}
+            >
+              &raquo;
+            </button>*/}
+          </div>
+        ) : null}
+
+        
       </div>
 
       <ProductAddNew

@@ -340,3 +340,11 @@ textarea.is-invalid {
 }
 
 /*======================================================Modal Product CSS End======================================================*/
+
+.modal-add-color {
+  .modal-content {
+    /* background-color: #132239;  Uncomment if you want a dark blue background */
+    // border: 2px solid #0f1c2b; /* Darker blue border for clearer edges */
+    box-shadow: 4px 2px 10px rgba(20, 49, 93, 0.8); /* Dark blue shadow with more spread */
+  }
+}

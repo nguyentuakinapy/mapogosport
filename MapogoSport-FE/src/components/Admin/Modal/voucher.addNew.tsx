@@ -236,7 +236,7 @@ const handleUpdateVoucher = async () => {
 
     // Kiểm tra ngày hết hạn không trước ngày hiện tại
     if (new Date(formValue.endDate) < new Date()) {
-        toast.warning("Ngày hết hạn không thể là quá khứ");
+        toast.warning("Ngày hết hạn không thể là quá khứ trong is validate");
         return false;
     }
 
@@ -279,7 +279,7 @@ const handleUpdateVoucher = async () => {
       currentDate.setHours(0, 0, 0, 0);
   
       if (endDate < currentDate) {
-          toast.warning("Ngày hết hạn không thể là quá khứ");
+          toast.warning("Ngày hết hạn không thể là quá khứ trong handle save");
           return false;
       }
         console.log("form value", formValue);
@@ -315,7 +315,11 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
         toast.warning('Ngày hoạt động không thể là quá khứ')
         return
       }else if(name === "endDate" && selectedDate < today){
-        toast.warning('Ngày hết hạn không thể là quá khứ')
+
+        toast.warning('Ngày hết hạn không thể là quá khứ trong handle Change')
+        console.log('selectedDate '+selectedDate)
+        console.log('today '+today)
+        
         return
       }else if(selectedDate > fiveYearsLater){
         toast.warning('Voucher chỉ khởi tạo trong 5 năm')
@@ -365,7 +369,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     >
       <Modal.Header closeButton>
         <Modal.Title className="text-uppercase text-danger">
-          {voucher ? "Chỉnh Sửa Voucher" : "Tạo Voucher"}
+          {voucher ? "Chỉnh Sửa mã giảm giá" : "Tạo mã giảm giá"}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -462,7 +466,8 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
                         : ""
                     }
                     onChange={handleChange}
-                    min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate() + 1)).toISOString().split("T")[0]}                   />
+                    // min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate() + 1)).toISOString().split("T")[0]}                   />
+                    min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate() )).toISOString().split("T")[0]}                   />
                   <Form.Label>
                     Ngày hết hạn <b className="text-danger">*</b>
                   </Form.Label>
@@ -481,7 +486,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
                     }
                     onChange={handleChange}
                     min={new Date().toISOString().split("T")[0]}
-                    max={new Date(formValue?.endDate).toISOString().split("T")[0]}
+                    // max={new Date(formValue?.endDate).toISOString().split("T")[0]}
                     disabled={
                       formValue.activeDate &&
                       new Date(formValue.activeDate).getTime() < new Date().setHours(0, 0, 0, 0)
