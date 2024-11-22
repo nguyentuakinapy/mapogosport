@@ -47,15 +47,23 @@ public class VoucherServiceImpl implements VoucherService{
 //		return dao.findAll(); của Mỵ
 //		QA 14/10
 		 // Lấy tất cả voucher từ cơ sở dữ liệu
-	    List<Voucher> vouchers = dao.findAll();
+	    List<Voucher> vouchers = dao.findLatestVoucher();
 	    LocalDate today = LocalDate.now();
+        System.err.println("todayi" + today);
+
 
 	    // Kiểm tra và cập nhật trạng thái hết hạn
 	    for (Voucher voucher : vouchers) {
-	        if (voucher.getEndDate() != null && voucher.getEndDate().toLocalDate().isEqual(today)) {
+//	    	System.err.println("voucher end date "+ voucher.getEndDate());
+	        if (voucher.getEndDate() != null && voucher.getEndDate().toLocalDate().isBefore(today)) {
 	            voucher.setStatus("inactive");
+//	            System.err.println("Trag thái mưới" + voucher.getStatus());
 	            dao.save(voucher); // Lưu lại trạng thái mới
 	        }
+//	        else if(voucher.getActiveDate().toLocalDate().isEqual(today)) {
+//	        	System.err.println("ngày bằng nhau có id là "+ voucher.getVoucherId());
+//	        	System.err.println("ngày bằng nhau có id là "+ voucher.getVoucherId());
+//	        }
 	    }
 
 	    return vouchers;
@@ -247,6 +255,7 @@ public class VoucherServiceImpl implements VoucherService{
 
 	    if (bd.containsKey("status")) {
 	        voucher.setStatus((String) bd.get("status"));
+	        System.err.println("voucher.get Status "+ voucher.getStatus());
 	    }
 
 	    if (bd.containsKey("discountCode")) {
@@ -269,7 +278,7 @@ public class VoucherServiceImpl implements VoucherService{
 	        }
 	        voucher.setActiveDate(activeDate);
 
-	        if (voucher.getActiveDate().isEqual(voucher.getCreateDate())) {
+	        if (voucher.getActiveDate().isEqual(voucher.getEndDate())) {
 	            voucher.setStatus("active");
 	        }
 	    }
@@ -282,6 +291,7 @@ public class VoucherServiceImpl implements VoucherService{
 	  	    voucher.setCreatedBy(u);
 //	        voucher.setCreatedBy();
 	    }
+	    System.err.println("voucher cuoisi "+ voucher.getStatus());
 
 	    return dao.save(voucher);
 //	    return null;
