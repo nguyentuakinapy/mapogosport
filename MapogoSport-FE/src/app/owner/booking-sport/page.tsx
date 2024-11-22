@@ -807,7 +807,9 @@ export default function BookingSport() {
                                                                 dataSport[selectSport].sportFielDetails[i].sportFielDetailId : 'N/A'}
                                                             time-data={time}
                                                             day-data={dayYears && dayYears[dayIndex]}
-                                                            onClick={checkNoFunc ? undefined : isAvailable ? handleGetDataBookingOnWeek : handleViewDataOnWeek}
+                                                            onClick={checkNoFunc ? undefined : isAvailable ?
+                                                                handleGetDataBookingOnWeek :
+                                                                handleViewDataOnWeek}
                                                             className={`w-10 ${getBadgeClass(statusItem)}`}
                                                             style={{
                                                                 textAlign: 'center',
@@ -847,7 +849,7 @@ export default function BookingSport() {
                                                             <span className="status-label">
                                                                 {/* {statusItem === "Còn trống" ? '' : statusItem} */}
                                                                 {statusItem}
-                                                                </span><br />
+                                                            </span><br />
                                                             <b className="text-success">{bookingId == 0 ? "" : fullName}</b>
                                                         </div>
                                                     </td>
@@ -918,15 +920,15 @@ export default function BookingSport() {
     const [bookingBySubscriptionKey, setDataBookingBySubscriptionKey] = useState<BookingDetail[]>();
 
     const handleGetDataBookingOnDay = (event: React.MouseEvent<HTMLTableCellElement>) => {
-        const sportDetail = event.currentTarget.getAttribute("sport-detail");
-        const startTime = event.currentTarget.getAttribute("time-data");
+        const sportDetailId = event.currentTarget.getAttribute("sport-detail");
+        const timeData = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = new Date(onDay);
 
-        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
+        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
 
-        if (sportDetail && startTime && dayStartBooking) {
+        if (sportDetailId && timeData && dayStartBooking) {
             setSportDetail(selectedSportDetail);
-            setStartTime(startTime);
+            setStartTime(timeData);
             setDayStartBooking(dayStartBooking.toLocaleDateString('en-CA'));
             setStartTimeKey(startTimeKey + 1);
             setShowBookingModal(true);
@@ -935,23 +937,26 @@ export default function BookingSport() {
     }
 
     const handleViewDataOnDay = async (event: React.MouseEvent<HTMLTableCellElement>) => {
-        const sportDetail = event.currentTarget.getAttribute("sport-detail");
-        const startTime = event.currentTarget.getAttribute("time-data");
+        const sportDetailId = event.currentTarget.getAttribute("sport-detail");
+        const timeData = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = new Date(onDay).toLocaleDateString('en-CA');
 
-        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
+        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
 
-        const responseBookingDetail = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${startTime}/${selectedSportDetail?.sportFielDetailId}/${dayStartBooking}`);
-        if (!responseBookingDetail.ok) {
-            throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
-        }
 
-        const bkDData = await responseBookingDetail.json() as BookingDetailFullName;
 
-        if (sportDetail && startTime && dayStartBooking && bkDData) {
+        if (sportDetailId && timeData && dayStartBooking && selectedSportDetail) {
+
+            const responseBookingDetail = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${timeData}/${selectedSportDetail?.sportFielDetailId}/${dayStartBooking}`);
+            if (!responseBookingDetail.ok) {
+                throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
+            }
+
+            const bkDData = await responseBookingDetail.json() as BookingDetailFullName;
+
             setBookingDetailData(bkDData);
             setSportDetail(selectedSportDetail);
-            setStartTime(startTime);
+            setStartTime(timeData);
             setDayStartBooking(dayStartBooking);
             setStartTimeKey(startTimeKey + 1);
             setShowViewOrEditBookingModal(true);
@@ -959,15 +964,15 @@ export default function BookingSport() {
     };
 
     const handleGetDataBookingOnWeek = (event: React.MouseEvent<HTMLTableCellElement>) => {
-        const sportDetail = event.currentTarget.getAttribute("sport-detail");
-        const startTime = event.currentTarget.getAttribute("time-data");
+        const sportDetailId = event.currentTarget.getAttribute("sport-detail");
+        const timeData = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
 
-        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
+        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
 
-        if (sportDetail && startTime && dayStartBooking) {
+        if (sportDetailId && timeData && dayStartBooking) {
             setSportDetail(selectedSportDetail);
-            setStartTime(startTime);
+            setStartTime(timeData);
             setDayStartBooking(dayStartBooking);
             setStartTimeKey(startTimeKey + 1);
             setShowBookingModal(true);
@@ -975,23 +980,24 @@ export default function BookingSport() {
     };
 
     const handleViewDataOnWeek = async (event: React.MouseEvent<HTMLTableCellElement>) => {
-        const sportDetail = event.currentTarget.getAttribute("sport-detail");
-        const startTime = event.currentTarget.getAttribute("time-data");
+        const sportDetailId = event.currentTarget.getAttribute("sport-detail");
+        const timeData = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
 
-        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
 
-        const responseBookingDetail = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${startTime}/${selectedSportDetail?.sportFielDetailId}/${dayStartBooking}`);
-        if (!responseBookingDetail.ok) {
-            throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
-        }
+        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
 
-        const bkDData = await responseBookingDetail.json() as BookingDetailFullName;
+        if (sportDetailId && timeData && dayStartBooking && selectedSportDetail) {
+            const responseBookingDetail = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${timeData}/${selectedSportDetail.sportFielDetailId}/${dayStartBooking}`);
+            if (!responseBookingDetail.ok) {
+                throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
+            }
 
-        if (sportDetail && startTime && dayStartBooking && bkDData) {
+            const bkDData = await responseBookingDetail.json() as BookingDetailFullName;
+
             setBookingDetailData(bkDData);
             setSportDetail(selectedSportDetail);
-            setStartTime(startTime);
+            setStartTime(timeData);
             setDayStartBooking(dayStartBooking);
             setStartTimeKey(startTimeKey + 1);
 
@@ -1230,7 +1236,7 @@ export default function BookingSport() {
                 dataTimeSport={dataTimeSport.filter(time => time !== "undefinedh00" && time !== null)}
                 sportField={dataSport && dataSport[selectSport]}>
             </SearchBookingModal>
-            <NotificationModal renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
+            <NotificationModal textHeadNotification={"Thông báo"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
             </NotificationModal>
         </>
     );

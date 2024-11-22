@@ -462,12 +462,12 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
             return;
         }
         const sportDetail = event.currentTarget.getAttribute("sport-detail");
-        const startTime = event.currentTarget.getAttribute("time-data");
+        const timeData = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
         const selectedSportDetail = sportField?.sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
-        if (sportDetail && startTime && dayStartBooking) {
+        if (sportDetail && timeData && dayStartBooking) {
             setSportDetail(selectedSportDetail);
-            setStartTime(startTime);
+            setStartTime(timeData);
             setDayStartBooking(dayStartBooking);
             setShowBookingModal(true);
             setStartTimeKey(!startTimeKey);
