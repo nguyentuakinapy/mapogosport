@@ -1426,20 +1426,24 @@ export default function ChatBox() {
                           className="d-flex flex-column"
                         >
                           <div className="d-flex align-items-center ">
-                            <img
-                              src={
-                                chatUser?.avatar
-                                  ? chatUser?.avatar
-                                  : "/chat_page/assets/images/users/user-5.png"
-                              }
-                              alt={chatUser?.username || "Không có tên"}
-                              style={{
-                                width: "40px",
-                                height: "40px",
-                                borderRadius: "50%",
-                                marginRight: "10px",
-                              }}
-                            />
+                          <img
+                            src={
+                              chatUser?.avatar
+                                ? chatUser.avatar
+                                : "/chat_page/assets/images/users/user-5.png"
+                            }
+                            alt={chatUser?.username || "Không có tên"}
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                              borderRadius: "50%",
+                              marginRight: "10px",
+                            }}
+                            onError={(e) => {
+                              e.currentTarget.src = "/chat_page/assets/images/users/user-8.png"; // Ảnh mặc định
+                            }}
+                          />
+
                             <strong>
                               {index + 1} -{" "}
                               {chatUser?.fullname || "Không có tên"}
@@ -1453,7 +1457,8 @@ export default function ChatBox() {
                                   dataMessageTemporary.username
                                 ? dataMessageTemporary.content
                                 : chatGroup.content}
-                              {/* {chatGroup.content || "Không có nội dung"} */}                               
+                              {/* {chatGroup.content || "Không có nội dung"} */}
+                               
                             </p>
                             {/* <p className="col text-end"> {formatTime(chatGroup.timestamp)}</p> */}
                           </div>
