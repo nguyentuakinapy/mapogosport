@@ -229,16 +229,21 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	@Override
 	public BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId,
 			LocalDate date) {
+//		System.err.println(startTime + "-" + sportFieldDetailId + "-" + date);
 		BookingDetail b = bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId,
 				date, "Đã hủy");
-		b.setFullName(b.getBooking().getFullName());
-		b.setPhoneNumber(b.getBooking().getPhoneNumber());
-		b.setCheckOffline(b.getBooking().getUser().getUsername().equals("sportoffline"));
-		b.setPaymentMethod(b.getBooking().getPaymentMethod());
-		b.setTotalAmount(b.getBooking().getTotalAmount());
-		b.setDeposit(b.getBooking().getPercentDeposit());
-		b.setStatusBooking(b.getBooking().getStatus());
-		b.setBookingId(b.getBooking().getBookingId());
+
+		if (b != null && b.getBooking() != null) {
+			b.setFullName(b.getBooking().getFullName());
+			b.setPhoneNumber(b.getBooking().getPhoneNumber());
+			b.setCheckOffline(b.getBooking().getUser().getUsername().equals("sportoffline"));
+			b.setPaymentMethod(b.getBooking().getPaymentMethod());
+			b.setTotalAmount(b.getBooking().getTotalAmount());
+			b.setDeposit(b.getBooking().getPercentDeposit());
+			b.setStatusBooking(b.getBooking().getStatus());
+			b.setBookingId(b.getBooking().getBookingId());
+		}
+
 		return b;
 	}
 
