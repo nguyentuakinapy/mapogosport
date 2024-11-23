@@ -1,8 +1,11 @@
 package mapogo.service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletRequest;
+import mapogo.dto.PaymentDTO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
 
@@ -47,4 +50,11 @@ public interface BookingService {
 	List<Booking> findByUsername(String username);
 	
 	Integer getCountBookingByOwnerId(Integer ownerId);
+	
+	//của Mỵ từ đây
+	PaymentDTO createPaymentVNPay(Map<String, Object> data, HttpServletRequest req) throws UnsupportedEncodingException;
+	
+	
+	
+	//đến đây
 }
