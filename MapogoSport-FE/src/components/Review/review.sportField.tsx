@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal, Image, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
-import useSWR, { mutate } from "swr";
+import { mutate } from "swr";
 
 interface ReviewProps {
     showReviewModal: boolean;

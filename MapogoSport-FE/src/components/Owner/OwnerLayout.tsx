@@ -81,7 +81,7 @@ export default function OwnerLayout({
         sessionStorage.setItem("isAniActive", JSON.stringify(!isAniActive));
     }
 
-    const [refreshKey, setRefreshKey] = useState<number>(0);
+    const refreshKey: number = 0;
 
 
     useEffect(() => {
@@ -90,11 +90,6 @@ export default function OwnerLayout({
             setIsAniActive(JSON.parse(isAniActive));
         }
     }, []);
-    const [showA, setShowA] = useState(true);
-    const [showB, setShowB] = useState(true);
-
-    const toggleShowA = () => setShowA(!showA);
-    const toggleShowB = () => setShowB(!showB);
 
     return (
         <UserProvider refreshKey={refreshKey}>

@@ -773,7 +773,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                                     placeholderText="Đến ngày" className="form-control end" dateFormat="dd/MM/yyyy" />
                             </InputGroup>
                             <InputGroup className="search-date mb-2">
-                                <Form.Control value={startTime} onChange={(e) => undefined} placeholder="Thời gian bắt đầu" />
+                                <Form.Control value={startTime} placeholder="Thời gian bắt đầu" />
                                 <Form.Select style={{ border: '1px solid' }} value={selectTimeOnStage} className="me-3"
                                     onChange={(e) => setSelectTimeOnStage(e.target.value)}>
                                     <option value="Chọn thời gian">Chọn thời gian đá</option>

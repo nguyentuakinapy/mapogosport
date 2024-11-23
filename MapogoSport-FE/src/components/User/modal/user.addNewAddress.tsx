@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';

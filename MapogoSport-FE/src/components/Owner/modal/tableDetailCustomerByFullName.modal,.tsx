@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
-import { Modal, Image, Button, Table } from "react-bootstrap";
-import { toast } from "react-toastify";
-import useSWR, { mutate } from "swr";
+import { useState } from "react";
+import { Modal, Table } from "react-bootstrap";
 import { formatPrice } from "@/components/Utils/Format"
 
 interface ModalTableDetailCustomerByFullNameProps {
@@ -49,7 +47,7 @@ const ModalTableDetailCustomerByFullName = ({ showModal, onClose, data }: ModalT
                     <tbody>
                         {currentItems.map((booking, index) => (
                             <tr key={index}>
-                                <td>{indexOfFirstItem+index + 1}</td>
+                                <td>{indexOfFirstItem + index + 1}</td>
                                 <td>{booking.fullName}</td>
                                 <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                 <td>{formatPrice(booking.totalAmount)}</td>
