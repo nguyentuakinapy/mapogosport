@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Row, Col, Button, ButtonGroup, Form } from 'react-bootstrap';
+import { Container, Row, Col, Button, ButtonGroup, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 // import '../globals.css';
 import Image from 'next/image';
@@ -87,6 +87,11 @@ const ProductDetail = () => {
     const loadMoreReviews = () => {
         setVisibleCount(visibleCount + 5); // Tăng số bình luận hiển thị thêm 5
     };
+    const hideReviews = () => {
+
+        setVisibleCount(visibleCount - 5);
+    }
+
     // Example options
     const handleClickBtn = () => {
         setOpen(true);
@@ -373,28 +378,51 @@ const ProductDetail = () => {
     const [rating, setRating] = useState(null);
     const [filteredData, setFilteredData] = useState(null); // State to store filtered reviews
 
+    const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // `null` để hiển thị tất cả mặc định
+
     const handleClick = (value) => {
-        setRating(value);
+        if (selectedRatingFilter === value) {
+            // Nếu đã chọn số sao này rồi, nhấn lại sẽ xóa bộ lọc
+            setSelectedRatingFilter(null);
+            setFilteredData(data); // Hiển thị lại tất cả bình luận
+            console.log("All reviews are displayed");
+            return;
+        }
+
+        // Nếu chọn số sao mới
+        setSelectedRatingFilter(value);
 
         const fetchData = async () => {
             try {
                 const response = await axios.get(`http://localhost:8080/rest/user/find-review-by-rating/${idProduct}/${value}`);
                 if (response.data) {
-                    setFilteredData(response.data); // Update filtered data with reviews matching the rating
+                    setFilteredData(response.data); // Cập nhật bình luận theo số sao
                     console.log("Filtered reviews by rating:", response.data);
                 } else {
                     console.log("No reviews found for this rating.");
-
+                    setFilteredData(null); // Không có bình luận nào
                 }
             } catch (error) {
                 console.log("Error fetching rating data:", error);
-
             }
         };
 
         fetchData();
         console.log(`Rating selected: ${value}`);
     };
+
+    const handleChatMess = () => {
+        if (user) {
+            if (user?.username !== "myntd") {
+                window.history.pushState({}, "", `?status=default`);
+            } else {
+                toast.info('Bạn không thể nhắn với chính mình ')
+            }
+        } else {
+            toast.warning('Vui lòng đăng nhập để chat với chủ shop')
+        }
+    }
+    /* QA thêm useParam */
 
     return (
         <>
@@ -463,6 +491,19 @@ const ProductDetail = () => {
                         {/* Thông tin sản phẩm */}
                         <Col className='ms-5' style={{ marginLeft: '100px' }}>
                             <h4>{findByIdProduct.name}</h4>
+                            <div className='star-comment '>
+                                <div className="star d-flex">
+                                    Đánh giá: 4/5 <i className="text-warning mx-2 bi bi-star-fill"></i> (1 Đánh giá)
+                                    <div className="btn-option-icon">
+                                        <i className="text-danger bi bi-heart-fill mx-2"></i>
+                                        <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>
+                                            <i onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>
+                                        </OverlayTrigger>
+                                    </div>
+                                </div>
+
+
+                            </div>
                             <h5 className="text-danger mt-3">
                                 {price ? formatPrice(price) : formatPrice(findByIdProduct.price)}
                             </h5>
@@ -584,12 +625,11 @@ const ProductDetail = () => {
                     <h5 className='ms-3'>Bình luận</h5>
                     <div className="d-flex ms-4">
                         {[5, 4, 3, 2, 1].map((value) => (
-                            <button
-                                key={value}
+                            <button key={value}
                                 type="button"
-                                className='btn btn-primary ms-2'
-                                onClick={() => handleClick(value)}
-                            >
+                                className='btn ms-2'
+                                style={selectedRatingFilter === value ? { background: '#142239', color: 'red' } : { background: '#142239', color: 'white' }}
+                                onClick={() => handleClick(value)}>
                                 {value} ★
                             </button>
                         ))}
@@ -628,14 +668,18 @@ const ProductDetail = () => {
                         )
                     }
 
-                    {data && visibleCount < data.length && (
-                        <Row className="mt-4 text-center">
-                            <Col>
-                                <Button variant="primary" onClick={loadMoreReviews}>
-                                    Tải thêm bình luận
-                                </Button>
-                            </Col>
-                        </Row>
+                    {data && visibleCount < data.length ? (
+                        // Hiển thị nút "Tải thêm bình luận" nếu còn bình luận để tải thêm
+                        <div className="mt-3 text-center">
+                            <Button variant="danger" onClick={loadMoreReviews}>Tải thêm bình luận</Button>
+                        </div>
+                    ) : (
+                        // Hiển thị nút "Ẩn bớt bình luận" chỉ khi visibleCount > 5
+                        visibleCount > 5 && (
+                            <div className="mt-3 text-center">
+                                <Button variant="danger" onClick={hideReviews}>Ẩn bớt bình luận</Button>
+                            </div>
+                        )
                     )}
                 </Container>
             </HomeLayout>

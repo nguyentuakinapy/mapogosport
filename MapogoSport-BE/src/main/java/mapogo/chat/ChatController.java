@@ -16,6 +16,8 @@ import org.springframework.stereotype.Controller;
 import mapogo.dao.MessageDAO;
 import mapogo.entity.Message;
 import mapogo.entity.User;
+import mapogo.service.EmailService;
+import mapogo.service.UserService;
 import mapogo.utils.ParseSenderAndReceiver;
 
 
@@ -23,25 +25,87 @@ import mapogo.utils.ParseSenderAndReceiver;
 public class ChatController {
 	@Autowired
 	MessageDAO messageDAO;
+	@Autowired
+	EmailService emailService;
+	@Autowired
+	UserService userService;
+	
+	public String bodyEmail(String sender, String tempStr) {
+		
+		  String body = String.format("""
+			        <!DOCTYPE html>
+			        <html lang="en">
+			        <head>
+			            <meta charset="UTF-8">
+			            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+			            <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+			            <title>Email Template</title>
+			            <style>
+			            body{
+			                    background-color: #fefefe;
+			            }
+			            
+			                .email-container {
+			                    max-width: 600px;
+			                    margin: auto;
+			                    padding: 20px;
+			                    border: 1px solid #ddd;
+			                    border-radius: 5px;
+			                    font-family: Arial, sans-serif;
+			                    background-color: #fff;
+			                }
+			                .email-header {
+			                    text-align: center;
+			                    padding-bottom: 5px;
+			                }
+			                .email-header img {
+			                    max-width: 300px;
+			                }
+			                .email-content {
+			                    text-align: left;
+			                }
+			                .email-content h2 {
+			                    color: #333;
+			                }
+			                .email-footer {
+			                    text-align: center;
+			                    padding-top: 20px;
+			                    font-size: 12px;
+			                    color: #777;
+			                }
+			            </style>
+			        </head>
+			        <body>
+			            <div class="email-container">
+			                <div class="email-header">
+			                    <img src="https://res.cloudinary.com/disnzpdvj/image/upload/v1732072868/logo_ixjedz.png" alt="Logo">
+			                    <h2>MAPOGO SPORT</h2>
+			                </div>
+			                <div class="email-content">
+			                    <p>Tin nhắn mới từ <strong>%s</strong></p>
+			                    <p>Đây là tin mới nhất...</p>
+			                    <ul>
+			                        <li>Tung ra những voucher hời cho bạn!</li>
+			                        <li>Thường xuyên cập nhật sân mới nhất</li>
+			                        <li>Cá nhân hóa trải nghiệm</li>
+			                    </ul>
+			                    <p>Nội dung mới nhất là: <strong>%s</strong></p>
+			                    <p>Best regards,<br>The Mapogo Sport Team</p>
+			                </div>
+			                <div class="email-footer">
+			                    <p>123 Tân Chánh Hiệp, Thành phố Hồ Chí Minh, 7000</p>
+			                    <p>&copy; 2024 Mapogo Sport. All rights reserved.</p>
+			                </div>
+			            </div>
+			        </body>
+			        </html>
+	""", sender, tempStr);
+		return body;
+	}
+	 
+	
 
-//    @MessageMapping("/chat.sendMessage")
-//    @SendTo("/topic/public/myntd-tanthanh")
-//    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-//    	System.err.println("chatMessage :"+chatMessage.getContent());
-//    	
-//    	String strTemp = chatMessage.getContent();
-////    	aaa/tanthanh/thanhtan/ksdjlfjsdjfl/klsdjflkjsdlkfjlsf
-//    	String noidung = "aaa";
-//    	ChatMessage temp = chatMessage;
-//    	temp.setContent(noidung);
-//    	
-//    	System.err.println("chatMessage :"+chatMessage.getSender());
-//        return temp;
-////        return chatMessage;
-//    }
-	  // Thêm {sender}-{receiver} vào đường dẫn @MessageMapping
     @MessageMapping("/chat.sendMessage/{userSort_1}-{userSort_2}")
-//    @SendTo("/topic/public/myntd-tanthanh")
     @SendTo("/topic/public/{userSort_1}-{userSort_2}")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage,
                                    @DestinationVariable("userSort_1") String userSort_1,
@@ -86,20 +150,20 @@ public class ChatController {
         System.err.println("message: "+message.getIsDeleted());
         System.err.println("message: "+message.getCreatedAt());
         
+//        String emailByReceiver = userService.findByUsername(receiver).getEmail();
+//        System.err.println("emailByReceiver "+ emailByReceiver);
+//        if(emailByReceiver != "" && !emailByReceiver.isEmpty()) {
+//        	String emailSubject = String.format("%s đã gửi tin nhắn cho bạn",sender);
+//        	System.err.println("emailSubject " +emailSubject);
+//        	String emailContent = bodyEmail(sender, originalMessage);
+//          emailService.sendEmailOfQuocAnh(emailByReceiver, emailSubject, emailContent);
+//        }else {
+//        	System.err.println("không cần gửi mail");
+//        }
+        
         messageDAO.save(message);
-        
-        
-        
         return tempStr;
     }
 
-//    @MessageMapping("/chat.addUser")
-//    @SendTo("/topic/public/myntd-tanthanh")
-//    public ChatMessage addUser(@Payload ChatMessage chatMessage,
-//                               SimpMessageHeaderAccessor headerAccessor) {
-//        // Add username in web socket session
-//        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-//        return chatMessage;
-//    }
 
 }

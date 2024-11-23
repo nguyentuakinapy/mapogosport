@@ -13,15 +13,13 @@ interface OwnerProps {
     setCheckDataStatus: (v: boolean) => void;
     startTimeKey: number;
     bookingDetailData?: BookingDetailFullName;
-    userData?: User;
-    paymentMethod?: PaymentMethod
     sport?: SportField;
     bookingBySubscriptionKey?: BookingDetail[];
 }
 
 const BookingModal = (props: OwnerProps) => {
-    const { showViewOrEditBookingModal, setShowViewOrEditBookingModal, paymentMethod, sport, bookingBySubscriptionKey
-        , owner, checkDataStatus, setCheckDataStatus, startTimeKey, bookingDetailData, userData } = props;
+    const { showViewOrEditBookingModal, setShowViewOrEditBookingModal, sport, bookingBySubscriptionKey
+        , owner, checkDataStatus, setCheckDataStatus, startTimeKey, bookingDetailData } = props;
 
     const [editBooking, setEditBooking] = useState<boolean>(true);
     const [dateBooking, setDateBooking] = useState<string>();
@@ -49,47 +47,127 @@ const BookingModal = (props: OwnerProps) => {
         setIdSportDetailTemporary(bookingDetailData?.sportFieldDetail.sportFielDetailId);
     }, [bookingDetailData])
 
+    const handleStatusBookingChange = (bookingId: number, refundAmount: number) => {
+        fetch(`http://localhost:8080/rest/owner/booking/update`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingId, status: "Đã hủy", refundAmount: refundAmount }),
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            toast.success('Hủy sân thành công!');
+        });
+    };
+
+    const handleStatusChange = async (bookingDetailId: number, newStatus: string, totalAmount: number) => {
+        await fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingDetailId, status: newStatus, refundAmount: totalAmount }),
+        }).then((res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+            toast.success('Hủy sân thành công!');
+        });
+    };
+
     const handleCancelBookingDetail = () => {
-        // if (confirm("Bạn có chắc chắn muốn hủy sân?")) {
-        if (applyOne) {
-            fetch(`http://localhost:8080/rest/booking/update/status/${bookingDetailData?.bookingDetailId}`, {
-                method: 'PUT',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json',
-                },
-                body: note
-            }).then(async (res) => {
-                if (!res.ok) {
-                    toast.error(`Hủy sân không thành công!`);
-                    return
+        if (bookingDetailData) {
+            const currentDateTime = new Date();
+            const formattedTime = bookingDetailData.startTime.replace('h', ':').padStart(5, '0');
+            const bookingDateTime = new Date(`${bookingDetailData.date}T${formattedTime}:00`);
+            const diffMinutes = (bookingDateTime.getTime() - currentDateTime.getTime()) / (1000 * 60);
+            const refundAmount = (bookingDetailData.price * (bookingDetailData.deposit / 100));
+            const refundAmountAll = (bookingDetailData.totalAmount * (bookingDetailData.deposit / 100))
+            // toast.success(diffMinutes)
+            if (applyOne) {
+                if (diffMinutes >= 120) {
+                    if (bookingDetailData.statusBooking === "Chờ thanh toán") {
+                        handleStatusChange(bookingDetailData.bookingDetailId, "Đã hủy", refundAmount);
+                    } else {
+                        handleStatusChange(bookingDetailData.bookingDetailId, "Đã hủy", bookingDetailData.price);
+                    }
+                } else {
+                    if (bookingDetailData.statusBooking === "Chờ thanh toán") {
+                        handleStatusChange(bookingDetailData.bookingDetailId, "Đã hủy", refundAmount * 0.75);
+                    } else {
+                        handleStatusChange(bookingDetailData.bookingDetailId, "Đã hủy", bookingDetailData.price * 0.75);
+                    }
                 }
                 setCheckDataStatus(!checkDataStatus);
                 handleClose();
                 setNote("");
                 setNotificationModal(false);
-                toast.success('Hủy sân thành công!');
-            })
-        } else {
-            fetch(`http://localhost:8080/rest/booking/update/status/by/subcriptionKey/${bookingDetailData?.bookingDetailId}/${bookingDetailData?.subscriptionKey}`, {
-                method: 'PUT',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json',
-                },
-                body: note
-            }).then(async (res) => {
-                if (!res.ok) {
-                    toast.error(`Hủy sân không thành công!`);
-                    return
+                // // handleStatusChange(bookingDetailData?.bookingDetailId, "Đã hủy",)
+                // fetch(`http://localhost:8080/rest/booking/update/status/${bookingDetailData?.bookingDetailId}`, {
+                //     method: 'PUT',
+                //     headers: {
+                //         'Accept': 'application/json, text/plain, */*',
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: note
+                // }).then(async (res) => {
+                //     if (!res.ok) {
+                //         toast.error(`Hủy sân không thành công!`);
+                //         return
+                //     }
+                //     setCheckDataStatus(!checkDataStatus);
+                //     handleClose();
+                //     setNote("");
+                //     setNotificationModal(false);
+                //     toast.success('Hủy sân thành công!');
+                // })
+            } else {
+                if (diffMinutes >= 120) {
+                    if (bookingDetailData.statusBooking === "Chờ thanh toán") {
+                        handleStatusBookingChange(bookingDetailData.bookingId, refundAmountAll);
+                    } else {
+                        handleStatusBookingChange(bookingDetailData.bookingId, bookingDetailData.totalAmount);
+                    }
+                } else {
+                    if (bookingDetailData.statusBooking === "Chờ thanh toán") {
+                        handleStatusBookingChange(bookingDetailData.bookingId, refundAmountAll * 0.75);
+                    } else {
+                        handleStatusBookingChange(bookingDetailData.bookingId, bookingDetailData.totalAmount * 0.75);
+                    }
                 }
+
                 setCheckDataStatus(!checkDataStatus);
                 handleClose();
                 setNote("");
                 setNotificationModal(false);
-                toast.success('Hủy sân thành công!');
-            })
+
+                // fetch(`http://localhost:8080/rest/booking/update/status/by/subcriptionKey/${bookingDetailData?.bookingDetailId}/${bookingDetailData?.subscriptionKey}`, {
+                //     method: 'PUT',
+                //     headers: {
+                //         'Accept': 'application/json, text/plain, */*',
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: note
+                // }).then(async (res) => {
+                //     if (!res.ok) {
+                //         toast.error(`Hủy sân không thành công!`);
+                //         return
+                //     }
+                //     setCheckDataStatus(!checkDataStatus);
+                //     handleClose();
+                //     setNote("");
+                //     setNotificationModal(false);
+                //     toast.success('Hủy sân thành công!');
+                // })
+            }
         }
+
         // }
 
     }
@@ -838,7 +916,6 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     const [note, setNote] = useState<string>();
-
     const testOnclick = () => {
         // toast.success("NGON TA: " + note);
         handleCancelBookingDetail()
@@ -1135,7 +1212,18 @@ const BookingModal = (props: OwnerProps) => {
                         {/* )} */}
 
                     </Row>
+                    <Row>
+                        <FloatingLabel controlId="floatingUsernam1e" label="Hình thức đặt sân! *" className="flex-grow-1 mb-2">
+                            <Form.Control
+                                value={formatPrice(bookingDetailData?.totalAmount)}
+                                type="text"
+                                placeholder="Vui lòng nhập tên đăng nhập!"
+                                disabled
+                            />
+                        </FloatingLabel>
+                    </Row>
                     <Row className="mx-1 mb-2">
+
                         {bookingDetailData?.subscriptionKey && bookingDetailData.subscriptionKey.includes('keybooking') && (
                             !isAddBooking && (
                                 <>
@@ -1192,7 +1280,7 @@ const BookingModal = (props: OwnerProps) => {
                     </Button>
                 </Modal.Footer>
             </Modal >
-            <NotificationModal renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
+            <NotificationModal textHeadNotification={"Lý do hủy sân"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
             </NotificationModal>
         </>
     )

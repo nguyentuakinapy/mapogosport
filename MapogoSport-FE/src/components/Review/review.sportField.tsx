@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Modal, Image, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
@@ -7,65 +7,56 @@ interface ReviewProps {
     showReviewModal: boolean;
     setShowReviewModal: (v: boolean) => void;
     fieldId: number;
+    dataReview: any[];
 }
 
 const ModalReviewSportField = (props: ReviewProps) => {
-    const { showReviewModal, setShowReviewModal, fieldId } = props;
-
-    const StarRating = ({ rating, setRating }: { rating: number; setRating: (rating: number) => void }) => {
-        const [hover, setHover] = useState(0);
-
-        const handleClick = (starValue: number) => {
-            setRating(starValue); // Update parent component’s rating state directly
-        };
-
-        return (
-            <div className="d-flex justify-content-between my-3" style={{ paddingLeft: '100px', paddingRight: '100px' }}>
-                {['', '', '', '', ''].map((_, index) => {
-                    const starValue = index + 1;
-                    return (
-                        <div
-                            key={index}
-                            className="text-center"
-                            onMouseEnter={() => setHover(starValue)}
-                            onMouseLeave={() => setHover(0)}
-                            onClick={() => handleClick(starValue)}
-                        >
-                            <i
-                                className={`bi bi-star-fill fs-4`}
-                                style={{ color: starValue <= (hover || rating) ? 'gold' : 'gray' }}
-                            ></i>
-                        </div>
-                    );
-                })}
-            </div>
-        );
-    };
+    const { showReviewModal, setShowReviewModal, fieldId, dataReview } = props;
 
     const [rating, setRating] = useState(0); // Trạng thái cho rating
-    const [comment, setComment] = useState(''); // Trạng thái cho bình luận
+    const [comment, setComment] = useState(""); // Trạng thái cho bình luận
+    const username = localStorage.getItem("username");
+
+    // Kiểm tra nếu người dùng đã đánh giá
+    const hasReviewed = dataReview?.some(
+        (review: any) => review.user.username === username
+    );
+
+    const handleClose = () => {
+        setShowReviewModal(false);
+        setComment("");
+        setRating(0);
+    };
 
     const handleRatingSubmit = async () => {
-        const username = localStorage.getItem('username');
+        if (hasReviewed) {
+            toast.warning("Bạn đã gửi đánh giá cho sân này rồi.");
+            return;
+        }
         if (!username) {
             toast.warning("Vui lòng đăng nhập để thực hiện chức năng này!");
             return;
         }
+        if (rating === 0 || comment.trim().length < 15) {
+            toast.warning("Vui lòng nhập đánh giá và bình luận (ít nhất 15 ký tự).");
+            return;
+        }
 
         try {
-
-            // Proceed with review submission
-            const response = await fetch('http://localhost:8080/rest/fieldReview/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    sportFieldId: fieldId,
-                    username: username,
-                    rating: rating,
-                    comment: comment,
-                    datedAt: new Date(),
-                })
-            });
+            const response = await fetch(
+                "http://localhost:8080/rest/fieldReview/save",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        sportFieldId: fieldId,
+                        username: username,
+                        rating: rating,
+                        comment: comment,
+                        datedAt: new Date(),
+                    }),
+                }
+            );
 
             if (response.ok) {
                 toast.success("Gửi đánh giá thành công!");
@@ -80,28 +71,68 @@ const ModalReviewSportField = (props: ReviewProps) => {
         }
     };
 
+    const StarRating = ({ rating, setRating }: { rating: number; setRating: (rating: number) => void }) => {
+        const [hover, setHover] = useState(0);
 
-    const handleClose = () => {
-        setShowReviewModal(false);
-        setComment('');
-        setRating(0)
-    }
+        const handleClick = (starValue: number) => {
+            setRating(starValue); // Không cho chỉnh sửa nếu đã đánh giá
+        };
+
+        return (
+            <div
+                className="d-flex justify-content-between my-3"
+                style={{ paddingLeft: "100px", paddingRight: "100px" }}
+            >
+                {["", "", "", "", ""].map((_, index) => {
+                    const starValue = index + 1;
+                    return (
+                        <div
+                            key={index}
+                            className="text-center"
+                            onMouseEnter={() => setHover(starValue)}
+                            onMouseLeave={() => setHover(0)}
+                            onClick={() => handleClick(starValue)}
+                        >
+                            <i
+                                className={`bi bi-star-fill fs-4`}
+                                style={{
+                                    color: starValue <= (hover || rating) ? "gold" : "gray",
+                                }}
+                            ></i>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
 
     return (
-        <Modal show={showReviewModal} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter" size="lg"
-            centered backdrop="static" keyboard={false}>
+        <Modal
+            show={showReviewModal}
+            onHide={handleClose}
+            aria-labelledby="contained-modal-title-vcenter"
+            size="lg"
+            centered
+            backdrop="static"
+            keyboard={false}
+        >
             <Modal.Header closeButton>
-                <Modal.Title id="contained-modal-title-vcenter" className='ms-3'>
+                <Modal.Title id="contained-modal-title-vcenter" className="ms-3">
                     Đánh giá & nhận xét
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Image src="/img/cps-ant.webp" alt="Hình ảnh thu nhỏ"
-                    width={100} height={100} className="rounded-circle" />
-                <span className='fs-4'>Hãy gửi đánh giá của bạn về chúng tôi</span>
+                <Image
+                    src="/img/cps-ant.webp"
+                    alt="Hình ảnh thu nhỏ"
+                    width={100}
+                    height={100}
+                    className="rounded-circle"
+                />
+                <span className="fs-4">Hãy gửi đánh giá của bạn về chúng tôi</span>
 
-                <div className='mt-3 ms-3'>
-                    <span className='fs-5'>Đánh giá chung</span>
+                <div className="mt-3 ms-3">
+                    <span className="fs-5">Đánh giá chung</span>
                 </div>
 
                 {/* Đánh giá */}
@@ -109,20 +140,28 @@ const ModalReviewSportField = (props: ReviewProps) => {
 
                 <hr />
 
-                <span className='fs-5 ms-3'>Bình Luận</span><br />
+                <span className="fs-5 ms-3">Bình Luận</span>
+                <br />
                 <div className="mb-3 mt-3 ms-5 me-5">
                     <textarea
                         className="form-control"
                         placeholder="Xin mời chia sẻ một số cảm nhận về sản phẩm (nhập tối thiểu 15 ký tự)"
                         rows={4}
                         cols={40}
-                        style={{ borderRadius: '8px' }}
-                        onChange={(e) => setComment(e.target.value)} // Cập nhật bình luận
+                        style={{ borderRadius: "8px" }}
+                        onChange={(e) => setComment(e.target.value)}
+                        value={comment}
+
                     ></textarea>
                 </div>
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={handleRatingSubmit} className='m-auto btn btn-danger'>Gửi đánh giá</Button>
+                <Button
+                    onClick={handleRatingSubmit}
+                    className="m-auto btn btn-danger"
+                >
+                    {hasReviewed ? "Bạn đã đánh giá" : "Gửi đánh giá"}
+                </Button>
             </Modal.Footer>
         </Modal>
     );

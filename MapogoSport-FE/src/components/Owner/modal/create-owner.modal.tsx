@@ -285,46 +285,6 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                     <label className="ms-3">Số điện thoại</label>
                                 </div>
                             </Row>
-                            {/* <h6 style={{ textTransform: 'uppercase' }} className="text-danger text-center fw-bold">Thông tin chủ sân</h6>
-                                 <div className="form-floating mb-3">
-                                <input
-                                    value={bankAccount}
-                                    onChange={(e) => setBankAccount(e.target.value)}
-                                    type="text"
-                                    className="form-control"
-                                    id="bankAccount"
-                                    name="bankAccount"
-                                    placeholder="Enter your Bank Account"
-                                    required
-                                />
-                                <label htmlFor="bankAccount">Bank Account <b className="text-danger">*</b></label>
-                            </div>
-                            <div className="form-floating mb-3">
-                                <input
-                                    value={momoAccount}
-                                    onChange={(e) => setMomoAccount(e.target.value)}
-                                    type="text"
-                                    className="form-control"
-                                    id="momoAccount"
-                                    name="momoAccount"
-                                    placeholder="Enter your Momo Account"
-                                    required
-                                />
-                                <label htmlFor="momoAccount">Momo Account <b className="text-danger">*</b></label>
-                            </div>
-                            <div className="form-floating mb-3">
-                                <input
-                                    value={vnpayAccount}
-                                    onChange={(e) => setVnpayAccount(e.target.value)}
-                                    type="text"
-                                    className="form-control"
-                                    id="vnpayAccount"
-                                    name="vnpayAccount"
-                                    placeholder="Enter your VNPAY Account"
-                                    required
-                                />
-                                <label htmlFor="vnpayAccount">VNPAY Account <b className="text-danger">*</b></label>
-                            </div> */}
                         </Col>
                         <Col>
                             <h6 style={{ textTransform: 'uppercase' }} className="text-danger text-center fw-bold">

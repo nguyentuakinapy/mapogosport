@@ -76,4 +76,16 @@ public class BookingDetail implements Serializable{
     
     @Transient
     private User user;
+    
+    @Transient
+    private Double totalAmount;
+    
+    @Transient
+    private Integer deposit;
+    
+    @Transient
+    private String statusBooking;
+    
+    @Transient
+    private Integer bookingId;
 }

@@ -59,3 +59,19 @@ interface OrderMap {
     phoneNumber: string;
     productName: string;
 }
+
+interface OrderDetailMap {
+    productImage: string;
+    quantity: number;
+    productColor: string;
+    orderDetailId: number;
+    productName: string;
+    productPrice: number;
+}
+
+interface OrderInfo {
+    address: string;
+    phoneNumber: string;
+    fullname: string;
+    status: string;
+}

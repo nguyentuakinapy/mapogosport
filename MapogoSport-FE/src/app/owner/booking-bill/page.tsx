@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link";
-import { Form, Button, Table, Nav, Pagination, Dropdown, InputGroup } from "react-bootstrap";
+import { Form, Button, Table, Nav, Pagination, Dropdown, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import '../owner.scss'
 import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
@@ -13,6 +13,7 @@ import { saveAs } from 'file-saver';
 import { debounce } from "lodash";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
+import CancelBookingModal from "@/components/Owner/modal/CancelBooking";
 
 const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -24,6 +25,8 @@ const OwnerBookingBill = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8);
+    const [showCancelBooking, setShowCancelBooking] = useState(false);
+    const [booking, setBooking] = useState<BookingFindAll | null>(null);
 
     const bookingStatuses = [
         'Chờ thanh toán',
@@ -67,22 +70,32 @@ const OwnerBookingBill = () => {
     };
 
     const handleStatusChange = (bookingId: number, newStatus: string) => {
-        fetch(`http://localhost:8080/rest/owner/booking/update`, {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ bookingId, status: newStatus }),
-        }).then(async (res) => {
-            if (!res.ok) {
-                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                return;
-            }
-            mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
-            mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
-            toast.success('Cập nhật thành công!');
-        });
+        const booking = bookingData.find(item => item.bookingId === bookingId);
+        if (!booking) {
+            console.error("Không tìm thấy booking");
+            return;
+        }
+        if (newStatus === "Đã hủy") {
+            setShowCancelBooking(true);
+            setBooking(booking);
+        } else {
+            fetch(`http://localhost:8080/rest/owner/booking/update`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ bookingId, status: newStatus, refundAmount: 0 }),
+            }).then((res) => {
+                if (!res.ok) {
+                    toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                    return;
+                }
+                mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
+                mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
+                toast.success('Cập nhật thành công!');
+            });
+        }
     };
 
     const renderStatusDropdown = (booking: BookingFindAll) => {
@@ -101,42 +114,45 @@ const OwnerBookingBill = () => {
     };
 
     const renderTable = (filteredBookings: BookingFindAll[]) => {
-        const indexOfLastItem = currentPage * itemsPerPage;
-        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
         return (
             <div className="box-table-border mb-4">
                 <Table striped className="mb-0">
                     <thead>
                         <tr>
-                            <th style={{ width: '110px' }}>STT</th>
+                            <th style={{ width: '100px' }}>Mã</th>
                             <th style={{ width: '180px' }}>Tên sân</th>
                             <th style={{ width: '200px' }}>Họ và tên</th>
-                            <th>Ngày đặt</th>
-                            <th>Tổng tiền</th>
-                            <th>Còn lại</th>
+                            <th style={{ width: '100px' }}>Ngày đặt</th>
+                            <th style={{ width: '130px' }}>Tổng tiền</th>
+                            <OverlayTrigger overlay={<Tooltip>Hoàn lại/Trả thêm</Tooltip>}>
+                                <th style={{ width: '130px' }}>Hoàn / Thêm</th>
+                            </OverlayTrigger>
                             <th style={{ width: '100px' }}>SĐT</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <th style={{ width: '110px' }}>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredBookings.length > 0 ?
-                            filteredBookings.map((booking, index) => (
+                            filteredBookings.map(booking => (
                                 <tr key={booking.bookingId}>
-                                    <td className="text-start title">{`#${indexOfFirstItem + index + 1}`}</td>
+                                    <td className="text-start title">
+                                        <Link href={`/owner/booking-bill/detail/${booking.bookingId}`}>#{booking.bookingId}</Link>
+                                    </td>
                                     <td className="text-start title">{booking.sportFieldName}</td>
                                     <td className="title">{booking.user.username == 'sportoffline' ?
                                         (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{`${booking.totalAmount.toLocaleString()} ₫`}</td>
-                                    <td>{booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0 đ'
-                                        : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} đ`}</td>
+                                    <td className={booking.status === 'Đã thanh toán' && booking.oldTotalAmount !== 0
+                                        && booking.oldTotalAmount - booking.totalAmount <= 0 ? 'text-danger' : 'text-success'}>
+                                        {booking.status === 'Đã thanh toán' ? booking.oldTotalAmount !== 0 ?
+                                            (booking.oldTotalAmount - booking.totalAmount).toLocaleString() + ' đ' : 0 :
+                                            booking.status === 'Đã hủy' ? 0 : (booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString() + ' đ'}
+                                    </td>
                                     <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
                                     <td>{renderStatusDropdown(booking)}</td>
-                                    <td>
-                                        <Link href={`/owner/booking-bill/detail/${booking.bookingId}`}>Xem</Link>
-                                    </td>
+                                    <td><Link href={`/owner/booking-bill/detail/${booking.bookingId}`}>Xem</Link></td>
                                 </tr>
                             )) :
                             <tr>
@@ -153,7 +169,8 @@ const OwnerBookingBill = () => {
         return (
             (fullName && fullName.toLowerCase().includes(searchTerm)) ||
             booking.sportFieldName.toLowerCase().includes(searchTerm) ||
-            booking.bookingUserPhone.includes(searchTerm)
+            (booking.bookingUserPhone && booking.bookingUserPhone.includes(searchTerm)) ||
+            booking.bookingId.toString().includes(searchTerm)
         );
     }).filter(booking => {
         switch (activeTab) {
@@ -329,7 +346,6 @@ const OwnerBookingBill = () => {
         }
     };
 
-
     if (isLoading) return <div>Đang tải...</div>;
     if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
@@ -375,6 +391,7 @@ const OwnerBookingBill = () => {
             </Nav>
             {renderContent()}
             {renderPagination()}
+            <CancelBookingModal showCancelBooking={showCancelBooking} setShowCancelBooking={setShowCancelBooking} booking={booking} />
         </div>
     );
 };

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import mapogo.dao.TransactionDAO;
@@ -24,6 +25,9 @@ public class WalletServiceImpl implements WalletService {
 	@Autowired
 	TransactionDAO transactionDAO;
 
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
+	
 	@Override
 	public Wallet findByUsername(User user) {
 		return walletDAO.findByUser(user);
@@ -59,6 +63,24 @@ public class WalletServiceImpl implements WalletService {
 		transactionDAO.save(transaction);
 		walletDAO.save(w);
 		return w;
+	}
+
+	@Override
+	public void addMoney(String username, Double money) {
+		User u = userDAO.findById(username).get();
+		Wallet w = u.getWallet();
+		w.setBalance(w.getBalance().add(BigDecimal.valueOf(money)));
+		
+		Transaction transaction = new Transaction();
+		transaction.setAmount(BigDecimal.valueOf(money));
+		transaction.setCreatedAt(LocalDateTime.now());
+		transaction.setDescription("Bạn vừa nạp tiền vào ví tài khoản!");
+		transaction.setTransactionType("+" + money);
+		transaction.setWallet(w);
+		transactionDAO.save(transaction);
+		
+		messagingTemplate.convertAndSend("/topic/wallet/username", u.getUsername());
+		
 	}
 	
 }

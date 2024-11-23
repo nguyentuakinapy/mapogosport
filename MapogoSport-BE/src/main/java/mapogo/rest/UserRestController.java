@@ -32,6 +32,7 @@ import mapogo.dao.SubsciptionPaymentDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.UserSubscriptionDAO;
 import mapogo.dao.UserVoucherDAO;
+import mapogo.dao.WalletDAO;
 import mapogo.dto.PaymentDTO;
 import mapogo.entity.AccountPackage;
 import mapogo.entity.Authority;
@@ -53,6 +54,7 @@ import mapogo.service.OwnerService;
 import mapogo.service.PaymentMethodService;
 import mapogo.service.UserService;
 import mapogo.service.UserSubscriptionService;
+import mapogo.service.WalletService;
 import mapogo.utils.RandomUtils;
 
 @CrossOrigin("*")
@@ -299,5 +301,14 @@ public class UserRestController {
 	@DeleteMapping("/user/notification/{username}")
 	public void deleteNotification(@PathVariable("username") String username) {
 		userService.deleteNotification(username);
+	}
+
+	@Autowired
+	WalletService walletService;
+
+	@PutMapping("/wallet/{username}/{money}")
+	public void addMoney(@PathVariable("username") String username,
+			@PathVariable("money") Double money) {
+		walletService.addMoney(username, money);
 	}
 }

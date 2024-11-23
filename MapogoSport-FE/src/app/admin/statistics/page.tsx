@@ -42,10 +42,24 @@ const Admin = () => {
         setSelectedOption(value);
     };
 
-    const handleSelectDay = (e) => {
-        const value = e.target.value;
-        setSelectedOptionDay(value);
+    const handleSelectDay = (event) => {
+        const selectedOption = event.target.value;
+        console.log("Selected Option: ", selectedOption);
+        setSelectedOptionDay(selectedOption);
     };
+
+
+    useEffect(() => {
+        if (selectedOptionDay !== 'Một Ngày' && selectedOptionDay !== 'Nhiều Ngày') {
+            setSelectedDate(null);
+            setSelectedDate1(null);
+            setDataListOther([]);
+            setDataColumnnChartOther([]);
+            console.log("States reset for non-date options");
+        }
+    }, [selectedOptionDay]);
+
+
 
 
     const handleFindDate = async () => {
@@ -63,6 +77,7 @@ const Admin = () => {
             } else if (selectedOptionDay === "Nhiều Ngày") {
                 const startDay = formatDateForApi(selectedDate);
                 const endDay = formatDateForApi(selectedDate1);
+                console.log("s day: ", startDay);
                 console.log("end day: ", endDay);
                 const response = await axios.get(`http://localhost:8080/rest/admin/order-between?startDay=${startDay}&endDay=${endDay}`);
                 const response1 = await axios.get(`http://localhost:8080/rest/admin/category-product-total-between?startDay=${startDay}&endDay=${endDay}`)
@@ -74,6 +89,7 @@ const Admin = () => {
             // Optional: Show error message to the user
         }
     };
+
 
     const ColumnChart = () => {
         useEffect(() => {
@@ -214,9 +230,6 @@ const Admin = () => {
             <div id="columnChart" className='justify-content-center'></div>
         );
     };
-
-
-
 
     useEffect(() => {
         const fetchDataOrderToDay = async () => {
@@ -634,7 +647,7 @@ const Admin = () => {
                                     onChange={handleSelectDay}
                                 >
                                     <option value="Hôm Nay">Hôm Nay</option>
-                                    <option value="Hôm Qua">Hôm Qua</option>
+                                    {/* <option value="Hôm Qua">Hôm Qua</option> */}
                                     <option value="Một Tuần">Một Tuần</option>
                                     <option value="Một Tháng">Một Tháng</option>
                                     <option value="Một Ngày"> Một Ngày</option>

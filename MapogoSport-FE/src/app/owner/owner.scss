@@ -39,7 +39,6 @@
     }
 }
 
-
 .text-center {
     .avatar-upload {
         display: inline-block;
@@ -199,7 +198,6 @@
                 color: white;
                 font-weight: normal;
             }
-
         }
 
         tbody {
@@ -232,6 +230,15 @@
                 }
             }
         }
+
+    }
+
+    th:first-child,
+    td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 1; // Đảm bảo hiển thị phía trên các cột khác
+        background-color: #f2f2f2; // Màu nền của cột đầu tiên
     }
 }
 
@@ -339,6 +346,7 @@
         font-weight: 700 !important;
     }
 }
+
 .search-date {
     flex-wrap: nowrap;
     display: flex;
@@ -501,7 +509,7 @@
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
-                    max-width: 180px;
+                    max-width: 130px;
                 }
 
                 .title-brand {

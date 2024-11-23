@@ -13,25 +13,23 @@ const OrderDetail = ({ params }: { params: { id: number } }) => {
         revalidateOnReconnect: false,
     });
 
-    const [orderDetail, setOrderDetail] = useState<OrderDetail[]>([]);
-    const [order, setOrder] = useState<OrderMap | null>(null);
+    const [orderDetail, setOrderDetail] = useState<OrderDetailMap[]>([]);
+    const [orderInfo, setOrderInfo] = useState<any>(null);
 
     useEffect(() => {
         if (data) {
-            setOrderDetail(data);
+            setOrderDetail(data.orderDetails);
+            setOrderInfo({
+                fullname: data.fullname,
+                phoneNumber: data.phoneNumber,
+                address: data.address,
+                status: data.status
+            });
         }
     }, [data]);
 
-    useEffect(() => {
-        const selectedOrder = sessionStorage.getItem('selectedOrder');
-        if (selectedOrder) {
-            const parsedOrder = JSON.parse(selectedOrder) as OrderMap;
-            setOrder(parsedOrder);
-        }
-    }, []);
-
     const totalAmount = orderDetail.reduce((sum: number, order: any) => {
-        return sum + (order.productDetailSize.price * order.quantity);
+        return sum + (order.productPrice * order.quantity);
     }, 0);
 
     if (isLoading) return <div>Đang tải...</div>;
@@ -57,15 +55,15 @@ const OrderDetail = ({ params }: { params: { id: number } }) => {
                                 orderDetail.map((detail) => (
                                     <tr key={detail.orderDetailId}>
                                         <td className="text-start title">
-                                            <Link href={`/product-detail/${detail.productDetailSize.productDetail.product.productId}`}>
-                                                <Image src={`${detail.productDetailSize.productDetail.product.image}`} width={"15%"} className="mx-2"></Image>
-                                                {detail.productDetailSize.productDetail.product.name}
+                                            <Link href={"#"}>
+                                                <Image src={`${detail.productImage}`} width={"15%"} className="mx-2"></Image>
+                                                {detail.productName}
                                             </Link>
                                         </td>
-                                        <td>{detail.productDetailSize.productDetail.color}</td>
-                                        <td>{detail.productDetailSize.price.toLocaleString()} ₫</td>
+                                        <td>{detail.productColor}</td>
+                                        <td>{detail.productPrice.toLocaleString()} ₫</td>
                                         <td>{detail.quantity}</td>
-                                        <td>{(detail.productDetailSize.price * detail.quantity).toLocaleString()} ₫</td>
+                                        <td>{(detail.productPrice * detail.quantity).toLocaleString()} ₫</td>
                                     </tr>
                                 ))
                             )}
@@ -81,11 +79,11 @@ const OrderDetail = ({ params }: { params: { id: number } }) => {
             <div className='p-3' style={{ fontSize: '15px' }}>
                 <Row className='item-address'>
                     <Col xs={12} md={5}>
-                        <p><i className="bi bi-person-vcard"></i> <b>Họ và tên: </b>{order?.fullname}</p>
-                        <p><i className="bi bi-telephone-fill"></i> <b>Số điện thoại:</b> {order?.phoneNumber}</p>
+                        <p><i className="bi bi-person-vcard"></i> <b>Họ và tên: </b>{orderInfo?.fullname}</p>
+                        <p><i className="bi bi-telephone-fill"></i> <b>Số điện thoại:</b> {orderInfo?.phoneNumber}</p>
                     </Col>
                     <Col xs={12} md={7}>
-                        <p><i className="bi bi-geo-alt-fill"></i> <b>Địa chỉ: </b>{order?.address}</p>
+                        <p><i className="bi bi-geo-alt-fill"></i> <b>Địa chỉ: </b>{orderInfo?.address || "Chưa cập nhật địa chỉ"}</p>
                     </Col>
                 </Row>
             </div>

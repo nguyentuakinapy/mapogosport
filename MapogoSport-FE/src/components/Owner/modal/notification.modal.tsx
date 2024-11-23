@@ -5,10 +5,11 @@ interface OwnerProps {
     showNotificationModal: boolean;
     setNotificationModal: (v: boolean) => void;
     renderNotification: () => ReactNode;
+    textHeadNotification: string;
 }
 
 const NotificationModal = (props: OwnerProps) => {
-    const { showNotificationModal, setNotificationModal, renderNotification } = props;
+    const { showNotificationModal, setNotificationModal, renderNotification, textHeadNotification } = props;
 
 
     const handleClose = () => {
@@ -20,7 +21,7 @@ const NotificationModal = (props: OwnerProps) => {
             <Modal show={showNotificationModal} onHide={() => handleClose()} size="lg" aria-labelledby="contained-modal-title-vcenter"
                 centered backdrop="static" keyboard={false}>
                 <Modal.Header>
-                    <Modal.Title className="text-uppercase text-danger fw-bold m-auto">Thông báo</Modal.Title>
+                    <Modal.Title className="text-uppercase text-danger fw-bold m-auto">{textHeadNotification}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {renderNotification()}

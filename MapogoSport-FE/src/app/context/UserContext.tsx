@@ -1,5 +1,7 @@
+import { Stomp } from '@stomp/stompjs';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import useSWR from 'swr';
+import SockJS from 'sockjs-client';
+import useSWR, { mutate } from 'swr';
 
 interface UserProviderProps {
     children: ReactNode;
@@ -16,9 +18,25 @@ export function UserProvider({ children, refreshKey }: UserProviderProps) {
     const [username, setUsername] = useState<string>("");
 
     useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            stompClient.subscribe('/topic/wallet/username', (message) => {
+                mutate(`http://localhost:8080/rest/user/${message.body}`)
+            });
+        });
+
+        return () => {
+            stompClient.disconnect();
+        };
+    }, []);
+
+    useEffect(() => {
         const storedUsername = localStorage.getItem('username');
         if (storedUsername) {
             setUsername(storedUsername);
+            mutate(`http://localhost:8080/rest/user/${storedUsername}`)
         }
     }, [refreshKey]);
 

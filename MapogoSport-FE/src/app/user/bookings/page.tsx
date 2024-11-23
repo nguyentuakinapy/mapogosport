@@ -2,7 +2,7 @@
 import UserLayout from "@/components/User/UserLayout";
 import Link from "next/link";
 import '../types/user.scss';
-import { Badge, Button, Col, Form, InputGroup, Nav, NavDropdown, Pagination, Row, Table } from "react-bootstrap";
+import { Badge, Button, Col, Form, InputGroup, Nav, NavDropdown, OverlayTrigger, Pagination, Row, Table, Tooltip } from "react-bootstrap";
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from "react-datepicker";
 import { useCallback, useEffect, useState } from "react";
@@ -176,14 +176,16 @@ const Bookings = () => {
                 </Row>
             </div>
             <div className="box-table-border mb-4">
-                <Table striped className="mb-0">
+                <Table striped className="mb-0" style={{ fontSize: '15px' }}>
                     <thead>
                         <tr>
-                            <th style={{ width: '120px' }}>Mã đặt sân</th>
+                            <th style={{ width: '100px' }}>Mã</th>
                             <th style={{ width: '220px' }}>Tên sân</th>
                             <th style={{ width: '100px' }}>Ngày đặt</th>
                             <th style={{ width: '130px' }}>Tổng tiền</th>
-                            <th style={{ width: '130px' }}>Còn lại</th>
+                            <OverlayTrigger overlay={<Tooltip>Hoàn lại/Trả thêm</Tooltip>}>
+                                <th style={{ width: '130px' }}>Hoàn / Thêm</th>
+                            </OverlayTrigger>
                             <th style={{ width: '120px' }}>Tình trạng</th>
                             <th style={{ width: '100px' }}>Thao tác</th>
                         </tr>
@@ -200,8 +202,11 @@ const Bookings = () => {
                                     <td className="title text-start">{booking.sportFieldName}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{booking.totalAmount.toLocaleString()} ₫</td>
-                                    <td>{booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0 đ'
-                                        : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} đ`}</td>
+                                    <td className={booking.oldTotalAmount > 0 && (booking.oldTotalAmount - booking.totalAmount) <= 0 ? 'text-danger' : 'text-success'}>
+                                        {booking.oldTotalAmount !== 0 ? `${(booking.oldTotalAmount - booking.totalAmount).toLocaleString()} ₫`
+                                            : booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0'
+                                                : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} ₫`}
+                                    </td>
                                     <td>
                                         <Badge bg={getStatusVariant(booking.status)}>
                                             {booking.status}
@@ -222,16 +227,15 @@ const Bookings = () => {
                                                         const formattedTime = b[0].startTime.replace('h', ':').padStart(5, '0');
                                                         const bookingDateTime = new Date(`${b[0].bookingDetailDate}T${formattedTime}:00`);
                                                         const diffMinutes = (bookingDateTime.getTime() - currentDateTime.getTime()) / (1000 * 60);
+                                                        const refundAmount = (booking.totalAmount * (booking.percentDeposit / 100));
                                                         if (diffMinutes >= 120) {
                                                             if (booking.status === "Chờ thanh toán") {
-                                                                const refundAmount = (booking.totalAmount * (booking.percentDeposit / 100));
                                                                 handleStatusChange(booking.bookingId, refundAmount - (subtract * (booking.percentDeposit / 100)));
                                                             } else {
                                                                 handleStatusChange(booking.bookingId, booking.totalAmount - subtract);
                                                             }
                                                         } else {
                                                             if (booking.status === "Chờ thanh toán") {
-                                                                const refundAmount = (booking.totalAmount * (booking.percentDeposit / 100));
                                                                 handleStatusChange(booking.bookingId, (refundAmount - (subtract * (booking.percentDeposit / 100))) * 0.75);
                                                             } else {
                                                                 handleStatusChange(booking.bookingId, (booking.totalAmount - subtract) * 0.75);

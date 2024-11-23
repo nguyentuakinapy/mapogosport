@@ -92,15 +92,21 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
         return () => clearInterval(intervalId);
     }, []);
 
-
-
     useEffect(() => {
         const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
         const stompClient = Stomp.over(socket);
 
         stompClient.connect({}, () => {
             stompClient.subscribe('/topic/notification/username', (message) => {
+                toast.success("Bạn vừa có thông báo mơí!")
                 setCheckNotification(prev => prev + 1);
+            });
+
+            stompClient.subscribe('/topic/notification/isRead', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    setCheckNotification(prev => prev + 1);
+                    getNotification(message.body);
+                }
             });
 
             stompClient.subscribe('/topic/username', (message) => {
@@ -110,9 +116,16 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                 getNotification(message.body);
             });
 
-            stompClient.subscribe('/topic/order', (message) => {
+            stompClient.subscribe('/topic/order/new', (message) => {
                 if (message.body === localStorage.getItem('username')) {
                     toast.success("Bạn vừa có đơn đặt hàng mơí!")
+                    getNotification(message.body);
+                }
+            });
+
+            stompClient.subscribe('/topic/order/cancel', (message) => {
+                if (message.body === localStorage.getItem('username')) {
+                    toast.success("Có đơn hàng vừa hủy!")
                     getNotification(message.body);
                 }
             });
