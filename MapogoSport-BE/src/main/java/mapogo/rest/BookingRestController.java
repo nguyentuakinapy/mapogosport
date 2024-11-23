@@ -129,9 +129,34 @@ public class BookingRestController {
 
 	@Autowired
 	BookingDetailDAO bookingDetailDAO;
-	
+
 	@Autowired
 	WalletService walletService;
+
+	private void createTransaction(User user, String trimmedAmount, Integer bookingId, String paymentMethod) {
+		// update +Balance
+		Wallet wallet = walletService.findByUsername(user);
+
+		// create transaction
+		Transaction transaction = new Transaction();
+		transaction.setWallet(wallet);
+		transaction.setAmount(new BigDecimal(trimmedAmount));
+		transaction.setCreatedAt(LocalDateTime.now());
+		transaction.setDescription("Nạp từ hóa đơn đặt sân: " + bookingId + " ("+paymentMethod+")");
+		transaction.setTransactionType("+" + trimmedAmount);
+		transactionService.create(transaction);
+
+		// create bookingPayment
+
+		// -balance -> create transaction
+		Transaction transaction1 = new Transaction();
+		transaction1.setWallet(wallet);
+		transaction1.setAmount(new BigDecimal(trimmedAmount));
+		transaction1.setCreatedAt(LocalDateTime.now());
+		transaction1.setDescription("Thanh toán hóa đơn đặt sân: " + bookingId);
+		transaction1.setTransactionType("-" + trimmedAmount);
+		transactionService.create(transaction1);
+	}
 
 	@GetMapping("/booking/paymentInfo")
 	public RedirectView updateUserSubscription2(@RequestParam(value = "vnp_ResponseCode") String responseCode,
@@ -143,33 +168,35 @@ public class BookingRestController {
 		String trimmedAmount = amount.substring(0, amount.length() - 2);
 
 		if (responseCode.equals("00")) {
-			// update +Balance
-			Wallet wallet = walletService.findByUsername(user);
-
-			// create transaction
-			Transaction transaction = new Transaction();
-			transaction.setWallet(wallet);
-			transaction.setAmount(new BigDecimal(trimmedAmount));
-			transaction.setCreatedAt(LocalDateTime.now());
-			transaction.setDescription("Nạp từ hóa đơn đặt sân: " + bookingId + " (VNPay)");
-			transaction.setTransactionType("+" + trimmedAmount);
-			transactionService.create(transaction);
-
-			// create bookingPayment
-
-			// -balance -> create transaction
-			Transaction transaction1 = new Transaction();
-			transaction1.setWallet(wallet);
-			transaction1.setAmount(new BigDecimal(trimmedAmount));
-			transaction1.setCreatedAt(LocalDateTime.now());
-			transaction1.setDescription("Thanh toán hóa đơn đặt sân: " + bookingId);
-			transaction1.setTransactionType("-" + trimmedAmount);
-			transactionService.create(transaction1);
-			
+			createTransaction(user, trimmedAmount, bookingId, "VNPay");
 			return new RedirectView(
 					"http://localhost:3000/categories/sport_field/detail/" + sportFieldDetailId + "?status=success");
 		} else {
 			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId);
+			for (BookingDetail bookingDetail : bookingDetails) {
+				bookingDetailDAO.delete(bookingDetail);
+			}
+			bookingDao.delete(booking);
+			return new RedirectView(
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldDetailId + "?status=fail");
+		}
+	}
+
+	@GetMapping("/booking/paymentInfo-momo")
+	public RedirectView paymentInfoMomo(@RequestParam(value = "resultCode") String resultCode,
+			@RequestParam(value = "extraData") String bookingId, @RequestParam(value = "amount") String amount) {
+		int bookingId1 = Integer.parseInt(bookingId);
+		Booking booking = bookingDao.findById(bookingId1).get();
+		Integer sportFieldDetailId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportFielDetailId();
+		User user = booking.getUser();
+
+		if (resultCode.equals("0")) {
+			createTransaction(user, amount, bookingId1, "MoMo");
+			return new RedirectView(
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldDetailId + "?status=success");
+
+		} else {
+			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId1);
 			for (BookingDetail bookingDetail : bookingDetails) {
 				bookingDetailDAO.delete(bookingDetail);
 			}

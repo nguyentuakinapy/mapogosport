@@ -446,22 +446,6 @@ const BookingModal = React.memo((props: BookingProps) => {
                 return;
             }
 
-            // if (paymentMethod.name==="VNPay"|| paymentMethod.name==="MoMo") {
-            //     const responsePayment = await fetch('http://localhost:8080/rest/booking/payment', {
-            //         method: 'POST',
-            //         headers: {
-            //             'Accept': 'application/json, text/plain, */*',
-            //             'Content-Type': 'application/json'
-            //         },
-            //         body: JSON.stringify({
-            //             totalAmount,
-            //             percentDeposit: sportDetail?.percentDeposit,
-            //             paymentMethodId: paymentMethod.paymentMethodId,
-            //             status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
-            //         })
-            //     })
-            // }
-
             const responseBooking = await fetch('http://localhost:8080/rest/booking', {
                 method: 'POST',
                 headers: {

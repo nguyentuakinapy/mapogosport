@@ -56,6 +56,7 @@ import mapogo.entity.Wallet;
 import mapogo.service.BookingService;
 import mapogo.service.PaymentMethodService;
 import mapogo.utils.Config;
+import mapogo.utils.MoMoService;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -384,6 +385,9 @@ public class BookingServiceImpl implements BookingService {
 	// của Mỵ từ đây
 	@Autowired
 	PaymentMethodService payService;
+	
+	@Autowired
+	private MoMoService paymentService;
 	@Override
 	public PaymentDTO createPaymentVNPay(Map<String, Object> data, HttpServletRequest req)
 			throws UnsupportedEncodingException {
@@ -483,25 +487,25 @@ public class BookingServiceImpl implements BookingService {
 			paymentDTO.setMessage("successfully");
 			paymentDTO.setURL(paymentUrl);
 
-		} else if (data.get("paymentMethod").equals("MoMo")) {
-//			String info = data.get("accountPackageId") + "0" + data.get("userSubscriptionId");
-//			System.out.println(info);
-//			long amountBeforeDecimal = (long) Math.floor(accountPackage.getPrice());
-//
-//			ResponseEntity<String> response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
-//					info, "http://localhost:8080/rest/user/subscription/paymentInfo-momo");
-//			ObjectMapper objectMapper = new ObjectMapper();
-//			MoMoPaymentResponse momoResponse;
-//			try {
-//				momoResponse = objectMapper.readValue(response.getBody(), MoMoPaymentResponse.class);
-//				String payUrl = momoResponse.getPayUrl();
-//				paymentDTO.setURL(payUrl);
-//				paymentDTO.setStatus("ok");
-//				paymentDTO.setMessage("successfully");
-//				return paymentDTO;
-//			} catch (JsonProcessingException e) {
-//				e.printStackTrace();
-//			}
+		} else if (data.get("paymentMethodName").equals("MoMo")){
+			String info = String.valueOf(data.get("bookingId"))	;
+			long amountBeforeDecimal = (long) Math.floor(Amount);
+
+			ResponseEntity<String> response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
+					info, "http://localhost:8080/rest/booking/paymentInfo-momo");
+			ObjectMapper objectMapper = new ObjectMapper();
+			MoMoPaymentResponse momoResponse;
+			try {
+				momoResponse = objectMapper.readValue(response.getBody(), MoMoPaymentResponse.class);
+				String payUrl = momoResponse.getPayUrl();
+				System.out.println(payUrl);
+				paymentDTO.setURL(payUrl);
+				paymentDTO.setStatus("ok");
+				paymentDTO.setMessage("successfully");
+				return paymentDTO;
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
 		}
 		return paymentDTO;
 	}
