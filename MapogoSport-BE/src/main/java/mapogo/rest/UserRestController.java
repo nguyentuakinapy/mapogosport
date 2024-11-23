@@ -2,6 +2,7 @@ package mapogo.rest;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 
 import jakarta.servlet.http.HttpServletRequest;
+import mapogo.dao.AuthorityDAO;
+import mapogo.dao.OwnerDAO;
 import mapogo.dao.ProductDAO;
 import mapogo.dao.SubsciptionPaymentDAO;
 import mapogo.dao.UserDAO;
@@ -31,14 +34,19 @@ import mapogo.dao.UserSubscriptionDAO;
 import mapogo.dao.UserVoucherDAO;
 import mapogo.dto.PaymentDTO;
 import mapogo.entity.AccountPackage;
+import mapogo.entity.Authority;
+import mapogo.entity.Booking;
+import mapogo.entity.BookingDetail;
 import mapogo.entity.Notification;
 import mapogo.entity.Owner;
 import mapogo.entity.PaymentMethod;
 import mapogo.entity.Product;
 import mapogo.entity.SubscriptionPayment;
+import mapogo.entity.Transaction;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
 import mapogo.entity.UserVoucher;
+import mapogo.entity.Wallet;
 import mapogo.service.AccountPackageService;
 import mapogo.service.EmailService;
 import mapogo.service.OwnerService;
@@ -137,34 +145,38 @@ public class UserRestController {
 
 	@Autowired
 	AccountPackageService accountPackageService;
-	
+
 	@Autowired
 	PaymentMethodService paymentMethodService;
-	
+
 	@Autowired
 	UserSubscriptionDAO userSubscriptionDAO;
-	
+
 	@Autowired
 	SubsciptionPaymentDAO subsciptionPaymentDAO;
 
+	@Autowired
+	OwnerDAO ownerDAO;
+
+	@Autowired
+	AuthorityDAO authorityDAO;
+
+	// Gia hạn
 	@PutMapping("/user/subscription/{userSubscriptionId}")
 	public ResponseEntity<?> updateUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId,
 			@RequestBody Map<String, Object> requestBody, HttpServletRequest req) throws UnsupportedEncodingException {
-		// thanh toán
 		PaymentDTO paymentDTO = userSubService.createSubscriptionPayment(requestBody, req);
-//		System.out.println(paymentDTO.getURL());
 		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
 
 	@GetMapping("/user/subscription/paymentInfo")
-	public RedirectView updateUserSubscription2(
-			@RequestParam(value = "vnp_OrderInfo") String data) {
-		 String[] parts = data.split("-");
-		    int accountPackageId = Integer.parseInt(parts[0]);
-		    int userSubscriptionId = Integer.parseInt(parts[1]);
-		    
-		    //SubscriptionPayment
-		    createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
+	public RedirectView updateUserSubscription2(@RequestParam(value = "vnp_OrderInfo") String data) {
+		String[] parts = data.split("-");
+		int accountPackageId = Integer.parseInt(parts[0]);
+		int userSubscriptionId = Integer.parseInt(parts[1]);
+
+		// SubscriptionPayment
+		createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
 		userService.updateUserSubscription(accountPackageId, userSubscriptionId);
 		return new RedirectView("http://localhost:3000/owner");
 	}
@@ -176,7 +188,7 @@ public class UserRestController {
 			String[] parts = data.split("0");
 			int accountPackageId = Integer.parseInt(parts[0]);
 			int userSubscriptionId = Integer.parseInt(parts[1]);
-			//SubscriptionPayment
+			// SubscriptionPayment
 			createSubcriptionPayment(accountPackageId, userSubscriptionId, "MoMo");
 			userService.updateUserSubscription(accountPackageId, userSubscriptionId);
 		}
@@ -184,20 +196,81 @@ public class UserRestController {
 	}
 
 	private void createSubcriptionPayment(int accountPackageId, int userSubscriptionId, String paymentMethod) {
-		//SubscriptionPayment
+		// SubscriptionPayment
 		AccountPackage accountPackage = accountPackageService.findById(accountPackageId);
 		UserSubscription uS = userSubscriptionDAO.findById(userSubscriptionId).get();
 
-	    SubscriptionPayment subPayment = new SubscriptionPayment();
-	    subPayment.setAmount(accountPackage.getPrice());
-	    subPayment.setPaymentDate(LocalDateTime.now());
-	    subPayment.setPaymentMethod(paymentMethodService.findByName(paymentMethod));
-	    subPayment.setStatus("Đã thanh toán");
-	    subPayment.setUser(uS.getUser());
-	    subPayment.setUserSubscription(uS);
-	    subsciptionPaymentDAO.save(subPayment);
+		SubscriptionPayment subPayment = new SubscriptionPayment();
+		subPayment.setAmount(accountPackage.getPrice());
+		subPayment.setPaymentDate(LocalDateTime.now());
+		subPayment.setPaymentMethod(paymentMethodService.findByName(paymentMethod));
+		subPayment.setStatus("Đã thanh toán");
+		subPayment.setUser(uS.getUser());
+		subPayment.setUserSubscription(uS);
+		subsciptionPaymentDAO.save(subPayment);
+	}
+
+	// đăng ký
+	@PostMapping("/subscription/payment")
+	public ResponseEntity<?> userSubscriptionPayment(@RequestBody Map<String, Object> requestBody,
+			HttpServletRequest req) throws UnsupportedEncodingException {
+		PaymentDTO paymentDTO = userSubService.createOwnerPayment(requestBody, req);
+		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
+	}
+
+	@GetMapping("/subscription/paymentInfo-Vnpay")
+	public RedirectView paymentInfoVnpay(@RequestParam(value = "vnp_ResponseCode") String responseCode,
+			@RequestParam(value = "vnp_OrderInfo") String data) {
+		String[] parts = data.split("-");
+		int userSubscriptionId = Integer.parseInt(parts[0]);
+		int ownerId = Integer.parseInt(parts[1]);
+		int authorityId = Integer.parseInt(parts[2]);
+		UserSubscription userSubscription = userSubscriptionDAO.findById(userSubscriptionId).get();
+
+		if (responseCode.equals("00")) {
+			int accountPackageId = userSubscription.getAccountPackage().getAccountPackageId();
+			// SubscriptionPayment
+			createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
+			return new RedirectView("http://localhost:3000/owner");
+
+		} else {
+			userSubscriptionDAO.delete(userSubscription);
+			Owner owner = ownerDAO.findById(ownerId).get();
+			ownerDAO.delete(owner);
+			Authority auth = authorityDAO.findById(authorityId).get();
+			authorityDAO.delete(auth);
+		}
+
+		return new RedirectView("http://localhost:3000");
+	}
+
+	@GetMapping("/subscription/paymentInfo-momo")
+	public RedirectView paymentInfoMomo(@RequestParam(value = "resultCode") String resultCode,
+			@RequestParam(value = "extraData") String data) {
+		
+		String[] parts = data.split("-");
+		int userSubscriptionId = Integer.parseInt(parts[0]);
+		int ownerId = Integer.parseInt(parts[1]);
+		int authorityId = Integer.parseInt(parts[2]);
+		UserSubscription userSubscription = userSubscriptionDAO.findById(userSubscriptionId).get();
+		if (resultCode.equals("0")) {
+			int accountPackageId = userSubscription.getAccountPackage().getAccountPackageId();
+			// SubscriptionPayment
+			createSubcriptionPayment(accountPackageId, userSubscriptionId, "MoMo");
+			return new RedirectView("http://localhost:3000/owner");
+
+		} else {
+			userSubscriptionDAO.delete(userSubscription);
+			Owner owner = ownerDAO.findById(ownerId).get();
+			ownerDAO.delete(owner);
+			Authority auth = authorityDAO.findById(authorityId).get();
+			authorityDAO.delete(auth);
+		}
+
+		return new RedirectView("http://localhost:3000");
 	}
 	
+
 	@GetMapping("/user/subscription/{id}")
 	public UserSubscription findUserSubscriptionByUser(@PathVariable("id") String username) {
 		return userService.findUserSubscriptionByUser(username);

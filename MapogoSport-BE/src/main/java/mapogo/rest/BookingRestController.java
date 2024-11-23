@@ -119,7 +119,6 @@ public class BookingRestController {
 	public ResponseEntity<?> createPayment(@RequestBody Map<String, Object> data, HttpServletRequest req)
 			throws UnsupportedEncodingException {
 		PaymentDTO paymentDTO = bookingService.createPaymentVNPay(data, req);
-		System.out.println(paymentDTO.getURL());
 		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 
 	}
@@ -163,14 +162,14 @@ public class BookingRestController {
 			@RequestParam(value = "vnp_OrderInfo") Integer bookingId,
 			@RequestParam(value = "vnp_Amount") String amount) {
 		Booking booking = bookingDao.findById(bookingId).get();
-		Integer sportFieldDetailId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportFielDetailId();
+		Integer sportFieldId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportField().getSportFieldId();
 		User user = booking.getUser();
 		String trimmedAmount = amount.substring(0, amount.length() - 2);
 
 		if (responseCode.equals("00")) {
 			createTransaction(user, trimmedAmount, bookingId, "VNPay");
 			return new RedirectView(
-					"http://localhost:3000/categories/sport_field/detail/" + sportFieldDetailId + "?status=success");
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=success");
 		} else {
 			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId);
 			for (BookingDetail bookingDetail : bookingDetails) {
@@ -178,7 +177,7 @@ public class BookingRestController {
 			}
 			bookingDao.delete(booking);
 			return new RedirectView(
-					"http://localhost:3000/categories/sport_field/detail/" + sportFieldDetailId + "?status=fail");
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=fail");
 		}
 	}
 
@@ -187,13 +186,13 @@ public class BookingRestController {
 			@RequestParam(value = "extraData") String bookingId, @RequestParam(value = "amount") String amount) {
 		int bookingId1 = Integer.parseInt(bookingId);
 		Booking booking = bookingDao.findById(bookingId1).get();
-		Integer sportFieldDetailId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportFielDetailId();
+		Integer sportFieldId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportField().getSportFieldId();
 		User user = booking.getUser();
 
 		if (resultCode.equals("0")) {
 			createTransaction(user, amount, bookingId1, "MoMo");
 			return new RedirectView(
-					"http://localhost:3000/categories/sport_field/detail/" + sportFieldDetailId + "?status=success");
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=success");
 
 		} else {
 			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId1);
@@ -202,7 +201,7 @@ public class BookingRestController {
 			}
 			bookingDao.delete(booking);
 			return new RedirectView(
-					"http://localhost:3000/categories/sport_field/detail/" + sportFieldDetailId + "?status=fail");
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=fail");
 		}
 	}
 

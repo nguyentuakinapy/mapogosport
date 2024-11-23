@@ -62,6 +62,8 @@ const CreateOwnerModal = (props: OwnerProps) => {
         setPage(false);
     }
 
+    //Myj
+
     const createOwnerAccount = async () => {
         const responseUserSubscription = await fetch('http://localhost:8080/rest/user/subscription', {
             method: 'POST',
@@ -82,7 +84,9 @@ const CreateOwnerModal = (props: OwnerProps) => {
             throw new Error('Network response was not ok');
         }
 
-        const resSubscription = await responseUserSubscription.json() as Booking;
+        const resSubscription = await responseUserSubscription.json() as UserSubscription;
+        const userSubscriptionId = resSubscription.userSubscriptionId;
+        console.log(">>>>resSubscription: ", resSubscription);
 
         const responseOwner = await fetch('http://localhost:8080/rest/owner', {
             method: 'POST',
@@ -103,6 +107,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
         }
 
         const resOwner = await responseOwner.json() as Owner;
+        const ownerId = resOwner.ownerId;
 
         const responseAuth = await fetch('http://localhost:8080/rest/authority', {
             method: 'POST',
@@ -125,41 +130,67 @@ const CreateOwnerModal = (props: OwnerProps) => {
         }
 
         const resAuth = await responseAuth.json(); // Sửa lại dòng này
-
-        const responseWallet = await fetch(`http://localhost:8080/rest/wallet/create/owner/${userData?.username}/${accountPackageTemporary?.price}`, {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json'
-            },
-        });
-
-        if (!responseWallet.ok) {
-            throw new Error('Network response was not ok');
-        }
-
-        const resWallet = await responseWallet.json(); // Sửa lại dòng này
+        const authorityId = resAuth.authorityId;
 
         if (resSubscription && resOwner && resAuth) {
             mutate(`http://localhost:8080/rest/user/${userData?.username}`);
 
-            toast.success('Đăng ký trở thành chủ sân thành công! ');
+            // toast.success('Đăng ký trở thành chủ sân thành công! ');
             handleClose();
-            window.location.href = '/owner'
+
         } else {
             toast.success('Cập nhật thất bại! ');
         }
+
+        return { userSubscriptionId, ownerId, authorityId };
+
     }
+
 
     const handleSubmit = async () => {
         if (checkPaymentMethod) {
             if (userData && accountPackageTemporary && userData.wallet.balance >= accountPackageTemporary.price) {
                 createOwnerAccount();
+                const responseWallet = await fetch(`http://localhost:8080/rest/wallet/create/owner/${userData?.username}/${accountPackageTemporary?.price}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json'
+                    },
+                });
+
+                if (!responseWallet.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const resWallet = await responseWallet.json(); // Sửa lại dòng này
+                window.location.href = '/owner'
             } else {
                 toast.warning("Số dư của bạn không đủ");
             }
         } else {
-            createOwnerAccount();
+            const accountData = await createOwnerAccount();
+            try {
+                const responsePayment = await fetch('http://localhost:8080/rest/subscription/payment', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userSubscriptionId: accountData.userSubscriptionId,
+                        ownerId: accountData.ownerId,
+                        authorityId: accountData.authorityId,
+                        paymentMethodId: paymentMethodId,
+                    })
+                });
+                const responseData = await responsePayment.json();
+                const paymentUrl = responseData.url;
+                // chuyển hướng đến URL thanh toán
+                window.location.href = paymentUrl;
+            } catch (error) {
+                console.error('Error during payment:', error);
+            }
         }
 
 
@@ -243,9 +274,9 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                 <div className="form-floating mb-3">
                                     <select className="form-select">
 
-                                        {userData && userData.addressUsers.length > 0 ?
+                                        {userData && userData.phoneNumberUsers.length > 0 ?
                                             userData.phoneNumberUsers.map((pNu, index) => (
-                                                <option selected={index === 0} key={pNu.phoneNumberUserId} value={pNu.phoneNumber.phoneNumber}>{pNu.phoneNumber.phoneNumber}.</option>
+                                                <option selected={index === 0} key={pNu.phoneNumberUserId} value={pNu.phoneNumber.phoneNumber}>{pNu.phoneNumber.phoneNumber}</option>
                                             ))
                                             :
                                             <option value="">Bạn chưa thêm số điện thoại</option>
@@ -350,8 +381,13 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                 :
                                 <div className="form-floating mb-3">
                                     <select value={paymentMethodId}
-                                        onChange={(e) => setPaymentMethodId(Number(e.target.value))}
+                                        onChange={(e) => {
+                                            const value = Number(e.target.value);
+                                            console.log("Selected value:", value);
+                                            setPaymentMethodId(value);
+                                        }}
                                         className="form-select" aria-label="Default select example">
+                                        <option value="0">Chọn phương thức thanh toán</option>
                                         {dataPaymentMethod && (
                                             dataPaymentMethod.map((item) => {
                                                 if (item.paymentMethodId === 6 ||
