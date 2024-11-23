@@ -680,7 +680,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                         <Form.Control type="text" value={userData?.fullname} readOnly />
                     </FloatingLabel>
                 </InputGroup>
-                <FloatingLabel controlId="floatingPaymentMethod" label={<span>Phương thức thanh toán <span className="text-danger">*</span></span>}>
+                <FloatingLabel className="mb-2" controlId="floatingPaymentMethod" label={<span>Phương thức thanh toán <span className="text-danger">*</span></span>}>
                     <Form.Select value={paymentMethodId} onChange={(e) => setPaymentMethodId(Number(e.target.value))}>
                         <option value="0">Chọn phương thức thanh toán</option>
                         {memoizedData && memoizedData.map((item) => (
@@ -690,6 +690,12 @@ const BookingModal = React.memo((props: BookingProps) => {
                         ))}
                     </Form.Select>
                 </FloatingLabel>
+                {paymentMethodId === 7 && (
+                    <FloatingLabel controlId="floatingPaymentMethod" label={<span>Số dư ví của bạn</span>}>
+                        <Form.Control type="text" value={userData?.wallet.balance.toLocaleString() + ' đ'} disabled
+                        />
+                    </FloatingLabel>
+                )}
             </>
         )
     };

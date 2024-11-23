@@ -1,6 +1,5 @@
 'use client';
-import CancelBookingModal from "@/components/Owner/modal/CancelBooking";
-import CancelBookingDetailModal from "@/components/Owner/modal/CancelBookingDetail";
+import CancelBookingDetailModal from "@/components/Owner/modal/cancelBookingDetail";
 import { useEffect, useState } from "react";
 import { Dropdown, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -9,10 +8,9 @@ import useSWR, { mutate } from "swr";
 const BookingsDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [bookingDetail, setBookingDetail] = useState<BookingDetailMap[]>([]);
-    const [showCancelBooking, setShowCancelBooking] = useState(true);
-    const [bookingDetailId, setBookingDetailId] = useState<number>(0);
-    const [finalAmount, setFinalAmount] = useState<number>(0);
+    const [showCancelBooking, setShowCancelBooking] = useState(false);
     const [aBookingDetail, setABookingDetail] = useState<BookingDetailMap | null>(null);
+    const [bookingId, setBookingId] = useState<number>();
 
     const { data, isLoading, error } = useSWR(`http://localhost:8080/rest/user/booking/detail/${params.id}`, fetcher, {
         revalidateIfStale: false,
@@ -23,7 +21,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
     useEffect(() => {
         if (data) {
             const sortedData = data.sort((a: BookingDetailMap, b: BookingDetailMap) =>
-                new Date(a.date).getDate() - new Date(b.date).getDate());
+                new Date(a.date).getTime() - new Date(b.date).getTime());
             setBookingDetail(sortedData);
         }
     }, [data]);
@@ -38,38 +36,32 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
     };
 
     const bookingStatuses = [
-        'Đã hoàn thành',
         'Đã hủy'
     ];
 
-    const canChangeStatus = (date: string, startTime: string, currentStatus: string, targetStatus: string) => {
+    const canChangeStatus = (date: string, startTime: string, currentStatus: string, targetStatus: string, statusBooking: string) => {
         const currentDateTime = new Date();
         const formattedTime = startTime.replace('h', ':').padStart(5, '0');
         const bookingDateTime = new Date(`${date}T${formattedTime}:00`);
         const diffMinutes = (currentDateTime.getTime() - bookingDateTime.getTime()) / (1000 * 60);
 
-        if (currentStatus === "Chưa bắt đầu" && targetStatus === "Đã hủy") { // Chỉ cho đổi "Chưa đá" sang "Đã hủy"
+        if (diffMinutes < 0 && currentStatus === "Chưa bắt đầu") {
             return true;
         }
-        // Trong vòng 15 phút, cho đổi qua lại giữa "Đã đá" và "Đã hủy"
-        if ((currentStatus === "Đã hoàn thành" || currentStatus === "Đã hủy") &&
-            (targetStatus === "Đã hoàn thành" || targetStatus === "Đã hủy")) {
-            return diffMinutes >= 0 && diffMinutes <= 15;
+
+        if (diffMinutes >= 0 && targetStatus === "Đã hủy" && statusBooking === "Chờ thanh toán") {
+            return true;
         }
 
         return false;
     };
 
-    const handleStatusChange = async (bookingDetailId: number, newStatus: string, totalAmount: number) => {
-
-        if (newStatus === "Đã hủy") {
+    const handleStatusChange = async (bookingDetailId: number, newStatus: string) => {
+        const detail = bookingDetail.find(item => item.bookingDetailId === bookingDetailId)
+        if (detail && newStatus === "Đã hủy") {
+            setABookingDetail(detail);
             setShowCancelBooking(true);
-            setBookingDetailId(bookingDetailId);
-            setFinalAmount(totalAmount);
-            const foundData = bookingDetail.find(item => item.bookingDetailId === bookingDetailId);
-            if (foundData) {
-                setABookingDetail(foundData);
-            }
+            setBookingId(params.id);
         } else {
             await fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
                 method: 'PUT',
@@ -77,7 +69,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                     'Accept': 'application/json, text/plain, */*',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ bookingDetailId, status: newStatus, refundAmount: totalAmount }),
+                body: JSON.stringify({ bookingDetailId, status: newStatus, refundAmount: 0 }),
             }).then((res) => {
                 if (!res.ok) {
                     toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
@@ -108,7 +100,8 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                     </thead>
                     <tbody>
                         {bookingDetail.map((booking) => {
-                            const isDropdownDisabled = !bookingStatuses.some(status => canChangeStatus(booking.date, booking.startTime, booking.status, status));
+                            const isDropdownDisabled = !bookingStatuses.some(status => canChangeStatus(booking.date, booking.startTime,
+                                booking.status, status, booking.statusBooking));
                             return (
                                 <tr key={booking?.bookingDetailId}>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
@@ -117,20 +110,17 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                     <td>{booking.price.toLocaleString()} ₫</td>
                                     <td>
                                         <Dropdown onSelect={(newStatus) => {
-                                            if (canChangeStatus(booking.date, booking.startTime, booking.status, newStatus || booking.status)) {
-                                                const refundAmount = (booking.price * (booking.deposit / 100));
-                                                if (booking.statusBooking === "Chờ thanh toán") {
-                                                    handleStatusChange(booking.bookingDetailId, newStatus || booking.status, refundAmount);
-                                                } else {
-                                                    handleStatusChange(booking.bookingDetailId, newStatus || booking.status, booking.price);
-                                                }
+                                            if (canChangeStatus(booking.date, booking.startTime, booking.status,
+                                                newStatus || booking.status, booking.statusBooking)) {
+                                                handleStatusChange(booking.bookingDetailId, newStatus || booking.status);
                                             }
                                         }}>
                                             <Dropdown.Toggle disabled={isDropdownDisabled} variant={getStatusVariant(booking.status)}>
                                                 {booking.status}
                                             </Dropdown.Toggle>
                                             <Dropdown.Menu>
-                                                {bookingStatuses.filter((status) => canChangeStatus(booking.date, booking.startTime, booking.status, status))
+                                                {bookingStatuses.filter((status) => canChangeStatus(booking.date, booking.startTime,
+                                                    booking.status, status, booking.statusBooking))
                                                     .map((status) => (
                                                         <Dropdown.Item key={status} eventKey={status}>{status}</Dropdown.Item>
                                                     ))}
@@ -162,7 +152,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                 </div>
             </div>
             <CancelBookingDetailModal showCancelBooking={showCancelBooking} setShowCancelBooking={setShowCancelBooking}
-                aBookingDetail={aBookingDetail} />
+                aBookingDetail={aBookingDetail} bookingId={bookingId} />
         </>
     );
 };

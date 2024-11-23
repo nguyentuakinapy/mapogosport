@@ -21,54 +21,13 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 	@Autowired 
 	UserVoucherDAO userVoucherDao;
 	
-	// Của Hùng
-//	@Override
-//	public List<Map<String, Object>> findByUser(String username) {
-//		List<UserVoucher> userVouchers = userVoucherDao.findByUser_Username(username);
-//		List<Map<String, Object>> resultList = new ArrayList<>();
-//	    LocalDate today = LocalDate.now();
-//
-//		for (UserVoucher userVoucher: userVouchers) {
-//			if(userVoucher.getVoucher().getEndDate().toLocalDate().isEqual(today)) {
-//				userVoucherDao.deleteById(userVoucher.getUserVoucherId());
-//			}
-//			Map<String, Object> userVoucherData = new HashMap<>();
-//	        userVoucherData.put("userVoucherId", userVoucher.getUserVoucherId());
-//	        userVoucherData.put("status", userVoucher.getStatus());
-//	        userVoucherData.put("date", userVoucher.getDate());
-//	        
-//			Map<String, Object> voucherData = new HashMap<>();
-//			voucherData.put("voucherId", userVoucher.getVoucher().getVoucherId());
-//			voucherData.put("name", userVoucher.getVoucher().getName());
-//			voucherData.put("endDate", userVoucher.getVoucher().getEndDate());
-//			
-//			userVoucherData.put("voucher", voucherData);
-//			resultList.add(userVoucherData);
-//		}
-//		return resultList;
-//	}
-	
-	// Của Quốc Anh
 	@Override
-	public List<Map<String, Object>> findByUser(String username) {
-	    List<UserVoucher> userVouchers = userVoucherDao.findByUser_Username(username);
-	    List<Map<String, Object>> resultList = new ArrayList<>();
-	    LocalDate today = LocalDate.now();
-
-	    for (Iterator<UserVoucher> iterator = userVouchers.iterator(); iterator.hasNext();) {
-	        UserVoucher userVoucher = iterator.next();
-	        Voucher voucher = userVoucher.getVoucher();
-
-	        if (voucher.getEndDate().toLocalDate().isBefore(today)) {
-	        	
-	            userVoucherDao.delete(userVoucher);
-	            // Loại bỏ voucher hết hạn khỏi danh sách để không trả về trong kết quả
-	            iterator.remove();
-	            continue;  // Bỏ qua voucher này và tiếp tục vòng lặp
-	        }
-
-	        //  dữ liệu cho voucher gọi qpi
-	        Map<String, Object> userVoucherData = new HashMap<>();
+	public List<Map<String, Object>> findByUserMap(String username) {
+		List<UserVoucher> userVouchers = userVoucherDao.findByUser_Username(username);
+		List<Map<String, Object>> resultList = new ArrayList<>();
+		
+		for (UserVoucher userVoucher: userVouchers) {
+			Map<String, Object> userVoucherData = new HashMap<>();
 	        userVoucherData.put("userVoucherId", userVoucher.getUserVoucherId());
 	        userVoucherData.put("status", userVoucher.getStatus());
 	        userVoucherData.put("date", userVoucher.getDate());
@@ -84,6 +43,53 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 		}
 		return resultList;
 	}
+	
+//	@Override
+//	public List<Map<String, Object>> findByUser(String username) {
+//	    List<UserVoucher> userVouchers = userVoucherDao.findByUser_Username(username);
+//	    List<Map<String, Object>> resultList = new ArrayList<>();
+//	    LocalDate today = LocalDate.now();
+//
+//	    for (Iterator<UserVoucher> iterator = userVouchers.iterator(); iterator.hasNext();) {
+//	        UserVoucher userVoucher = iterator.next();
+//	        Voucher voucher = userVoucher.getVoucher();
+//
+//	        if (voucher.getEndDate().toLocalDate().isBefore(today)) {
+//	        	
+//	            userVoucherDao.delete(userVoucher);
+//	            // Loại bỏ voucher hết hạn khỏi danh sách để không trả về trong kết quả
+//	            iterator.remove();
+//	            continue;  // Bỏ qua voucher này và tiếp tục vòng lặp
+//	        }
+//
+//	        //  dữ liệu cho voucher gọi qpi
+//	        Map<String, Object> userVoucherData = new HashMap<>();
+//	        userVoucherData.put("userVoucherId", userVoucher.getUserVoucherId());
+//	        userVoucherData.put("status", userVoucher.getStatus());
+//	        userVoucherData.put("date", userVoucher.getDate());
+//	        
+//			Map<String, Object> voucherData = new HashMap<>();
+//			voucherData.put("voucherId", userVoucher.getVoucher().getVoucherId());
+//			voucherData.put("name", userVoucher.getVoucher().getName());
+//			voucherData.put("endDate", userVoucher.getVoucher().getEndDate());
+//			voucherData.put("status", userVoucher.getVoucher().getStatus());
+//			
+//			userVoucherData.put("voucher", voucherData);
+//			resultList.add(userVoucherData);
+//		}
+//		return resultList;
+//
+//	        Map<String, Object> voucherData = new HashMap<>();
+//	        voucherData.put("voucherId", voucher.getVoucherId());
+//	        voucherData.put("name", voucher.getName());
+//	        voucherData.put("endDate", voucher.getEndDate());
+//
+//	        userVoucherData.put("voucher", voucherData);
+//	        resultList.add(userVoucherData);
+//	    }
+//
+//	    return resultList;
+//	}
 
 	
 	@Override

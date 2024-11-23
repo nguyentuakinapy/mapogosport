@@ -13,7 +13,7 @@ import { saveAs } from 'file-saver';
 import { debounce } from "lodash";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
-import CancelBookingModal from "@/components/Owner/modal/CancelBooking";
+import CancelBookingModal from "@/components/Owner/modal/cancelBooking";
 
 const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
