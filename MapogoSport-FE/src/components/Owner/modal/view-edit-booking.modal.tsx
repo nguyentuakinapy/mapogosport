@@ -955,7 +955,7 @@ const BookingModal = (props: OwnerProps) => {
                                         {/* Kiểm tra ngày hiện tại và ngày đặt */}
                                         {new Date().setHours(0, 0, 0, 0) === new Date(bookingDetailData.date).setHours(0, 0, 0, 0) ?
                                             (new Date().getHours() * 60) + new Date().getMinutes() < (parseInt(bookingDetailData.endTime.split('h')[0]) * 60) + parseInt(bookingDetailData.endTime.split('h')[1]) && (
-                                                <OverlayTrigger overlay={<Tooltip>Sửa {new Date().setHours(0, 0, 0, 0)} - {new Date(bookingDetailData.date).setHours(0, 0, 0, 0)}</Tooltip>}>
+                                                <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                                                     <i
                                                         className="bi bi-pencil-square ms-2 text-dark"
                                                         onClick={() => {
@@ -982,7 +982,7 @@ const BookingModal = (props: OwnerProps) => {
                                             </OverlayTrigger>
                                         }
 
-                                        <h6 className="text-uppercase text-danger m-auto fw-bold text-center">
+                                        <h6 className="text-uppercase text-danger m-auto fw-bold text-center mb-2">
                                             Thông tin đặt - {bookingDetailData?.sportFieldDetail.name}
                                         </h6>
 
@@ -1063,14 +1063,25 @@ const BookingModal = (props: OwnerProps) => {
                                             </>
                                         )}
                                     </InputGroup>
-                                    <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Giờ kết thúc!"
-                                            value={formatPrice(newPriceBooking) || ""}
-                                            disabled={isAddBooking}
-                                        />
-                                    </FloatingLabel>
+
+                                    <InputGroup>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(newPriceBooking) || ""}
+                                                disabled={isAddBooking}
+                                            />
+                                        </FloatingLabel>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng đơn!" className="ms-2 flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(bookingDetailData?.totalAmount) || ""}
+                                                disabled={editBooking}
+                                            />
+                                        </FloatingLabel>
+                                    </InputGroup>
                                 </>
                                 :
                                 <>
@@ -1163,14 +1174,24 @@ const BookingModal = (props: OwnerProps) => {
                                             </>
                                         )}
                                     </InputGroup>
-                                    <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Giờ kết thúc!"
-                                            value={formatPrice(price) || ""}
-                                            disabled={editBooking}
-                                        />
-                                    </FloatingLabel>
+                                    <InputGroup>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(price) || ""}
+                                                disabled={editBooking}
+                                            />
+                                        </FloatingLabel>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng đơn!" className="ms-2 flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(bookingDetailData?.totalAmount) || ""}
+                                                disabled={editBooking}
+                                            />
+                                        </FloatingLabel>
+                                    </InputGroup>
                                 </>
                             }
                         </Col>
@@ -1212,16 +1233,7 @@ const BookingModal = (props: OwnerProps) => {
                         {/* )} */}
 
                     </Row>
-                    <Row>
-                        <FloatingLabel controlId="floatingUsernam1e" label="Hình thức đặt sân! *" className="flex-grow-1 mb-2">
-                            <Form.Control
-                                value={formatPrice(bookingDetailData?.totalAmount)}
-                                type="text"
-                                placeholder="Vui lòng nhập tên đăng nhập!"
-                                disabled
-                            />
-                        </FloatingLabel>
-                    </Row>
+
                     <Row className="mx-1 mb-2">
 
                         {bookingDetailData?.subscriptionKey && bookingDetailData.subscriptionKey.includes('keybooking') && (
@@ -1245,10 +1257,39 @@ const BookingModal = (props: OwnerProps) => {
                                             <button onClick={() => confirmDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm tra chỉnh sửa sân</button>
                                         )
                                     ) : (
-                                        <button className="btn btn-danger m-auto" onClick={() =>
-                                            // handleCancelBookingDetail()
-                                            setNotificationModal(true)
-                                        } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                        <>
+                                            {bookingDetailData.statusBooking !== "Đã thanh toán" ? (
+                                                // bookingDetailData.status !== "Đã hoàn thành" ? (
+                                                // <>ok</>
+
+                                                // ) : (
+                                                parseInt(bookingDetailData.endTime.split('h')[0]) * 60 +
+                                                parseInt(bookingDetailData.endTime.split('h')[1]) >
+                                                new Date().getHours() * 60 + new Date().getMinutes() && (
+                                                    <button className="btn btn-danger m-auto" onClick={() =>
+                                                        // handleCancelBookingDetail()
+                                                        setNotificationModal(true)
+                                                    } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                                )
+                                                // )
+
+                                            ) : (
+                                                bookingDetailData.subscriptionKey && bookingDetailData.subscriptionKey.includes("addNew") ? (
+                                                    <button className="btn btn-danger m-auto" onClick={() =>
+                                                        // handleCancelBookingDetail()
+                                                        setNotificationModal(true)
+                                                    } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                                ) : (
+                                                    parseInt(bookingDetailData.endTime.split('h')[0]) * 60 +
+                                                    parseInt(bookingDetailData.endTime.split('h')[1]) >
+                                                    new Date().getHours() * 60 + new Date().getMinutes() && (
+                                                        <button className="btn btn-danger m-auto" onClick={() =>
+                                                            // handleCancelBookingDetail()
+                                                            setNotificationModal(true)
+                                                        } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                                    ))
+                                            )}
+                                        </>
                                     )
                                 )
                             ) : (
