@@ -7,6 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+
+import java.sql.Date;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -14,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import java.util.Optional;
 import java.util.TimeZone;
 
@@ -32,7 +36,6 @@ import mapogo.dao.BookingDetailDAO;
 import mapogo.dao.NotificationDAO;
 import mapogo.dao.OwnerDAO;
 import mapogo.dao.PaymentMethodDAO;
-import mapogo.dao.TransactionDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.VoucherDAO;
 import mapogo.dao.WalletDAO;
@@ -44,12 +47,11 @@ import mapogo.entity.BookingDetail;
 import mapogo.entity.Notification;
 import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
+
 import mapogo.entity.Owner;
 import mapogo.entity.PaymentMethod;
 import mapogo.entity.ProductDetailSize;
 import mapogo.entity.SportField;
-import mapogo.entity.SportFieldDetail;
-import mapogo.entity.Transaction;
 import mapogo.entity.User;
 import mapogo.entity.Voucher;
 import mapogo.entity.Wallet;
@@ -57,6 +59,7 @@ import mapogo.service.BookingService;
 import mapogo.service.PaymentMethodService;
 import mapogo.utils.Config;
 import mapogo.utils.MoMoService;
+import mapogo.service.TransactionService;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -87,7 +90,10 @@ public class BookingServiceImpl implements BookingService {
 
 	@Autowired
 	WalletDAO walletDAO;
-
+	
+	@Autowired
+	TransactionService transactionService;
+	
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
 
@@ -107,18 +113,26 @@ public class BookingServiceImpl implements BookingService {
 			bookingMap.put("bookingUserFullname", booking.getFullName());
 			bookingMap.put("date", booking.getDate());
 			bookingMap.put("totalAmount", booking.getTotalAmount());
+			bookingMap.put("oldTotalAmount", booking.getOldTotalAmount());
 			bookingMap.put("status", booking.getStatus());
 			bookingMap.put("bookingUserPhone", booking.getPhoneNumber());
 			bookingMap.put("percentDeposit", booking.getPercentDeposit());
 
-			for (BookingDetail bookingDetail : booking.getBookingDetails()) {
-				if (bookingDetail.getSportFieldDetail() != null) {
-					SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
-					if (sportField != null) {
-						bookingMap.put("sportFieldName", sportField.getName());
-					}
-				}
-			}
+			List<Map<String, Object>> bookingDetailsList = new ArrayList<>();
+	        for (BookingDetail bookingDetail : booking.getBookingDetails()) {
+	            Map<String, Object> bookingDetailMap = new HashMap<>();
+	            bookingDetailMap.put("bookingDetailStatus", bookingDetail.getStatus());
+	            bookingDetailMap.put("price", bookingDetail.getPrice());
+	            bookingDetailMap.put("bookingDetailDate", bookingDetail.getDate());
+	            bookingDetailMap.put("startTime", bookingDetail.getStartTime());
+
+                SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
+                if (sportField != null) {
+                	bookingMap.put("sportFieldName", sportField.getName());
+                }
+
+	            bookingDetailsList.add(bookingDetailMap);
+	        }
 
 			Map<String, Object> userMap = new HashMap<>();
 			if (booking.getUser() != null) {
@@ -127,6 +141,7 @@ public class BookingServiceImpl implements BookingService {
 			}
 
 			bookingMap.put("user", userMap);
+			bookingMap.put("bookingDetails", bookingDetailsList);
 			resultList.add(bookingMap);
 		}
 		return resultList;
@@ -137,6 +152,39 @@ public class BookingServiceImpl implements BookingService {
 		List<Booking> bookings = bookingDAO.findByUser_Username(username);
 		List<Map<String, Object>> resultList = new ArrayList<>();
 
+// 	    List<Booking> bookings = bookingDAO.findByUser_Username(username);
+// 	    List<Map<String, Object>> resultList = new ArrayList<>();
+
+// 	    for (Booking booking : bookings) {
+// 	        Map<String, Object> bookingMap = new HashMap<>();
+// 	        bookingMap.put("bookingId", booking.getBookingId());
+// 	        bookingMap.put("date", booking.getDate());
+// 	        bookingMap.put("totalAmount", booking.getTotalAmount());
+// 	        bookingMap.put("oldTotalAmount", booking.getOldTotalAmount());
+// 	        bookingMap.put("status", booking.getStatus());
+// 	        bookingMap.put("percentDeposit", booking.getPercentDeposit());
+
+// 	        List<Map<String, Object>> bookingDetailsList = new ArrayList<>();
+// 	        for (BookingDetail bookingDetail : booking.getBookingDetails()) {
+// 	            Map<String, Object> bookingDetailMap = new HashMap<>();
+// 	            bookingDetailMap.put("bookingDetailStatus", bookingDetail.getStatus());
+// 	            bookingDetailMap.put("price", bookingDetail.getPrice());
+// 	            bookingDetailMap.put("bookingDetailDate", bookingDetail.getDate());
+// 	            bookingDetailMap.put("startTime", bookingDetail.getStartTime());
+
+//                 SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
+//                 if (sportField != null) {
+//                 	bookingMap.put("sportFieldName", sportField.getName());
+//                 }
+
+// 	            bookingDetailsList.add(bookingDetailMap);
+// 	        }
+
+// 	        bookingMap.put("bookingDetails", bookingDetailsList);
+// 	        resultList.add(bookingMap);
+// 	    }
+// 	    return resultList;
+// 	}
 		for (Booking booking : bookings) {
 			Map<String, Object> bookingMap = new HashMap<>();
 			bookingMap.put("bookingId", booking.getBookingId());
@@ -171,12 +219,23 @@ public class BookingServiceImpl implements BookingService {
 	public Booking updateStatusBooking(Map<String, Object> bookingData) {
 		Integer bookingId = (Integer) bookingData.get("bookingId");
 		String newStatus = (String) bookingData.get("status");
-		Integer refundAmount = (Integer) bookingData.get("refundAmount");
+		String note = (String) bookingData.get("note");
+		
+		Object refundObj = bookingData.get("refundAmount");
+		double refundAmount;
 
-		Optional<Booking> optionalBooking = bookingDAO.findById(bookingId);
-		if (optionalBooking.isPresent()) {
-			Booking booking = optionalBooking.get();
+		if (refundObj instanceof String) {
+			refundAmount = Double.valueOf((String) refundObj);
+		} else if (refundObj instanceof Number) {
+			refundAmount = ((Number) refundObj).doubleValue();
+		} else {
+			throw new IllegalArgumentException("totalAmount must be a String or Number");
+		}
+
+		Booking booking = bookingDAO.findById(bookingId).get();
+		if (booking != null) {
 			booking.setStatus(newStatus);
+			booking.setNote(note);
 			if (newStatus.equals("Đã hủy")) {
 				for (BookingDetail bookingDetail : booking.getBookingDetails()) {
 					if (bookingDetail.getStatus().equals("Chưa bắt đầu")) {
@@ -184,18 +243,18 @@ public class BookingServiceImpl implements BookingService {
 						bookingDetailDAO.save(bookingDetail);
 					}
 				}
-				Wallet wallet = booking.getUser().getWallet();
-				wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(refundAmount)));
+// 				Wallet wallet = booking.getUser().getWallet();
+// 				wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(refundAmount)));
 
-				Transaction transaction = new Transaction();
-				transaction.setAmount(BigDecimal.valueOf(refundAmount));
-				transaction.setCreatedAt(LocalDateTime.now());
-				transaction.setDescription("Hoàn tiền từ bookingId - " + bookingId);
-				transaction.setTransactionType("+" + refundAmount);
-				transaction.setWallet(wallet);
+// 				Transaction transaction = new Transaction();
+// 				transaction.setAmount(BigDecimal.valueOf(refundAmount));
+// 				transaction.setCreatedAt(LocalDateTime.now());
+// 				transaction.setDescription("Hoàn tiền từ bookingId - " + bookingId);
+// 				transaction.setTransactionType("+" + refundAmount);
+// 				transaction.setWallet(wallet);
 
-				transactionDAO.save(transaction);
-				walletDAO.save(wallet);
+// 				transactionDAO.save(transaction);
+// 				walletDAO.save(wallet);
 
 //				Owner owner = ownerDAO.findById(booking.getOwner().getOwnerId()).get();
 //				Wallet walletOwner = owner.getUser().getWallet();
@@ -212,8 +271,23 @@ public class BookingServiceImpl implements BookingService {
 //					transactionDAO.save(transaction);
 //					walletDAO.save(walletUser);
 //				}
+				if (!booking.getUser().getUsername().equals("sportoffline")) {
+					Wallet userWallet = booking.getUser().getWallet();
+					if (userWallet != null) {
+						transactionService.refundUserWalletBooking(userWallet, refundAmount, bookingId);
+					}
+					
+					Owner owner = ownerDAO.findById(booking.getOwner().getOwnerId()).get();
+					if (owner != null) {
+						Wallet ownerWallet = owner.getUser().getWallet();
+						if (ownerWallet != null) {
+							transactionService.refundOwnerWalletBooking(ownerWallet, refundAmount, bookingId);
+						}
+					}
+				}
 			}
 			bookingDAO.save(booking);
+			return booking;
 		}
 		return null;
 	}
@@ -253,7 +327,7 @@ public class BookingServiceImpl implements BookingService {
 		booking.setFullName((String) b.get("fullName"));
 		booking.setPhoneNumber((String) b.get("phoneNumber"));
 		booking.setPercentDeposit(Integer.parseInt(String.valueOf(b.get("percentDeposit"))));
-		booking.setOldTotamAmount(0);
+		booking.setOldTotalAmount(0);
 		bookingDAO.save(booking);
 
 		if (((String) b.get("checkOwner")).equals("user")) {

@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import mapogo.dto.PaymentDTO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
-import mapogo.entity.Order;
 
 public interface BookingService {
 	

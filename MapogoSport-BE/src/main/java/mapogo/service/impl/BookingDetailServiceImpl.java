@@ -1,15 +1,14 @@
 package mapogo.service.impl;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -17,15 +16,18 @@ import org.springframework.stereotype.Service;
 
 import mapogo.dao.BookingDAO;
 import mapogo.dao.BookingDetailDAO;
-import mapogo.dao.SportFieldDAO;
+import mapogo.dao.OwnerDAO;
 import mapogo.dao.SportFieldDetailDAO;
 import mapogo.dao.UserDAO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
+import mapogo.entity.Owner;
 import mapogo.entity.PhoneNumberUser;
 import mapogo.entity.SportFieldDetail;
 import mapogo.entity.User;
+import mapogo.entity.Wallet;
 import mapogo.service.BookingDetailService;
+import mapogo.service.TransactionService;
 
 @Service
 public class BookingDetailServiceImpl implements BookingDetailService {
@@ -41,6 +43,12 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 	@Autowired
 	UserDAO userDAO;
+
+	@Autowired
+	TransactionService transactionService;
+
+	@Autowired
+	OwnerDAO ownerDAO;
 
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
@@ -69,6 +77,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 					bookingDetailData.put("ownerPhoneNumberUsers", user.getPhoneNumber().getPhoneNumber());
 				}
 			}
+			bookingDetailData.put("deposit", bookingDetail.getBooking().getPercentDeposit());
+			bookingDetailData.put("statusBooking", bookingDetail.getBooking().getStatus());
 
 			resultMaps.add(bookingDetailData);
 		}
@@ -80,27 +90,82 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		Integer bookingDetailId = (Integer) bookingDetailData.get("bookingDetailId");
 		String newStatus = (String) bookingDetailData.get("status");
 
-		Optional<BookingDetail> optionalBookingDetail = bookingDetailDAO.findById(bookingDetailId);
-		if (optionalBookingDetail.isPresent()) {
-			BookingDetail bookingDetail = optionalBookingDetail.get();
+		Object refundObj = bookingDetailData.get("refundAmount");
+		double refundAmount;
+
+		if (refundObj instanceof String) {
+			refundAmount = Double.valueOf((String) refundObj);
+		} else if (refundObj instanceof Number) {
+			refundAmount = ((Number) refundObj).doubleValue();
+		} else {
+			throw new IllegalArgumentException("totalAmount must be a String or Number");
+		}
+
+		BookingDetail bookingDetail = bookingDetailDAO.findById(bookingDetailId).get();
+		if (bookingDetail != null) {
 			bookingDetail.setStatus(newStatus);
 			bookingDetailDAO.save(bookingDetail);
 
 			Booking booking = bookingDetail.getBooking();
-			boolean allCancel = booking.getBookingDetails().stream()
-					.allMatch(detail -> "Đã hủy".equals(detail.getStatus()));
-			if (allCancel) {
+			if (newStatus.equals("Đã hủy")) {
+				Date currentTime = new Date();
+				Date startTime = new Date(bookingDetail.getStartTime());
+				long diffMinutes = (currentTime.getTime() - startTime.getTime()) / (1000 * 60);
+
+				if (diffMinutes > 15) {
+					refundFunction(booking, refundAmount);
+				} else {
+					long delayTime = (15 - diffMinutes) * 60 *1000;
+					ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(5);
+					scheduler.schedule(() -> {
+						if (booking.getStatus().equals("Đã hủy")) {
+							refundFunction(booking, refundAmount);
+						}
+					}, delayTime, TimeUnit.MILLISECONDS);
+				}
+			}
+
+			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(booking.getBookingId());
+			int index = 0;
+			int totalAmount = 0;
+			for (BookingDetail b : bookingDetails) {
+				if (b.getStatus().equals("Đã hủy")) {
+					index++;
+				} else {
+					totalAmount += b.getPrice();
+				}
+			}
+
+			if (index == bookingDetails.size()) {
 				booking.setStatus("Đã hủy");
 				bookingDAO.save(booking);
+			} else {
+				booking.setOldTotalAmount(booking.getTotalAmount());
+				booking.setTotalAmount(totalAmount);
+				bookingDAO.save(booking);
 			}
+
 		}
 		return null;
 	}
 
-//	@Override
-//	public List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId) {
-//		return bookingDetailDAO.findBySportFieldDetailAndToday(sportDetailId);
-//	}
+	private void refundFunction(Booking booking, double refundAmount) {
+		if (!booking.getUser().getUsername().equals("sportoffline")) {
+			Wallet userWallet = booking.getUser().getWallet();
+			if (userWallet != null) {
+				transactionService.refundUserWalletBooking(userWallet, refundAmount, booking.getBookingId());
+			}
+
+			Owner owner = ownerDAO.findById(booking.getOwner().getOwnerId()).get();
+			if (owner != null) {
+				Wallet ownerWallet = owner.getUser().getWallet();
+				if (ownerWallet != null) {
+					transactionService.refundOwnerWalletBooking(ownerWallet, refundAmount,
+							booking.getBookingId());
+				}
+			}
+		}
+	}
 
 	public List<BookingDetail> findBySportFieldDetailAndNextWeek(Integer sportFieldDetailId, LocalDate today,
 			LocalDate endDate) {
@@ -145,8 +210,6 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bookingDetail.setBooking(b);
 		bookingDetail.setSubscriptionKey((String) bd.get("subscriptionKey"));
 
-		
-
 		return bookingDetailDAO.save(bookingDetail);
 //		return null;
 	}
@@ -169,12 +232,21 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	@Override
 	public BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId,
 			LocalDate date) {
-		BookingDetail b =  bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId, date,
-				"Đã hủy");
-		b.setFullName(b.getBooking().getFullName());
-		b.setPhoneNumber(b.getBooking().getPhoneNumber());
-		b.setCheckOffline(b.getBooking().getUser().getUsername().equals("sportoffline"));
-		b.setPaymentMethod(b.getBooking().getPaymentMethod());
+//		System.err.println(startTime + "-" + sportFieldDetailId + "-" + date);
+		BookingDetail b = bookingDetailDAO.findBookingDetailByStartTimeAndSportDetailId(startTime, sportFieldDetailId,
+				date, "Đã hủy");
+
+		if (b != null && b.getBooking() != null) {
+			b.setFullName(b.getBooking().getFullName());
+			b.setPhoneNumber(b.getBooking().getPhoneNumber());
+			b.setCheckOffline(b.getBooking().getUser().getUsername().equals("sportoffline"));
+			b.setPaymentMethod(b.getBooking().getPaymentMethod());
+			b.setTotalAmount(b.getBooking().getTotalAmount());
+			b.setDeposit(b.getBooking().getPercentDeposit());
+			b.setStatusBooking(b.getBooking().getStatus());
+			b.setBookingId(b.getBooking().getBookingId());
+		}
+
 		return b;
 	}
 
@@ -194,16 +266,20 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 				totalAmount += b.getPrice();
 			}
 		}
+
 		if (index == bookingDetails.size()) {
 			booking.setNote(note);
 			booking.setStatus("Đã hủy");
 			bookingDAO.save(booking);
 		} else {
-			booking.setOldTotamAmount(booking.getTotalAmount());
+			booking.setOldTotalAmount(booking.getTotalAmount());
 			booking.setTotalAmount(totalAmount);
 			bookingDAO.save(booking);
 		}
 
+		if (!bd.getBooking().getUser().getUsername().equals("sportoffline")) {
+//			transactionService.createTransactionOwnerByPaymentBooking(bookingDetailId, totalAmount);
+		}
 	}
 
 	@Override
@@ -240,8 +316,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		}
 
 		Booking b = bd.getBooking();
-		
-		b.setOldTotamAmount(b.getTotalAmount());
+
+		b.setOldTotalAmount(b.getTotalAmount());
 		b.setTotalAmount(totalPriceTemporary);
 		bookingDAO.save(b);
 	}
@@ -270,10 +346,8 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		newBd.setPrice(price);
 		newBd.setBooking(bd.getBooking());
 		newBd.setSubscriptionKey("addNew" + bd.getBooking().getBookingId());
-		
-		bookingDetailDAO.save(newBd);
 
-//		System.err.println(data);
+		bookingDetailDAO.save(newBd);
 
 		Double totalPriceTemporary = 0.0;
 
@@ -281,18 +355,12 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		for (BookingDetail bookingDetail : bookingDetails) {
 			if (!bookingDetail.getStatus().equals("Đã hủy")) {
 				totalPriceTemporary = totalPriceTemporary + bookingDetail.getPrice();
-			    if (bookingDetail.getSubscriptionKey() != null && bookingDetail.getSubscriptionKey().contains("keybooking")) {
-					break;
-				} else {
-					bookingDetail.setSubscriptionKey("addNew" + bd.getBooking().getBookingId());
-					bookingDetailDAO.save(bookingDetail);
-				}
 			}
 		}
-		
 
 		Booking b = bd.getBooking();
-		b.setOldTotamAmount(b.getTotalAmount());
+
+		b.setOldTotalAmount(b.getTotalAmount());
 		b.setTotalAmount(totalPriceTemporary);
 		bookingDAO.save(b);
 	}

@@ -1,6 +1,7 @@
 package mapogo.service;
 
 import java.util.List;
+import java.util.Map;
 
 import mapogo.entity.OrderDetail;
 
@@ -11,4 +12,6 @@ public interface OrderDetailService {
 	OrderDetail create(OrderDetail orderDetail);
 	void delete(OrderDetail orderDetail);
 	//đến đây
+	
+	Map<String, Object> findOrderDetailById(Integer orderId);
 }

@@ -14,9 +14,9 @@ import mapogo.entity.Order;
 public interface OrderDAO extends JpaRepository<Order, Integer> {
 	List<Order> findByUser_Username(String username);
 
-	// 1. Lọc theo ngày hôm nay
-	@Query("SELECT o FROM Order o WHERE o.date = CURRENT_DATE")
-	List<Order> findOrdersToday();
+	@Query("SELECT o FROM Order o WHERE o.date BETWEEN :startOfToday AND :endOfToday AND o.status IN :statuses")
+	List<Order> findOrdersToday(@Param("startOfToday") LocalDateTime startOfToday,
+			@Param("endOfToday") LocalDateTime endOfToday, @Param("statuses") List<String> statuses);
 
 	// list order hom qua
 	@Query("SELECT o FROM Order o WHERE o.date BETWEEN :startOfYesterday AND :endOfYesterday "
@@ -49,68 +49,93 @@ public interface OrderDAO extends JpaRepository<Order, Integer> {
 			@Param("endDate") LocalDateTime endDate, @Param("statuses") List<String> statuses);
 
 	// total amout category to day
-	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " + "FROM CategoryProduct cp "
-			+ "JOIN cp.products p " + "JOIN p.productDetails pd " + "JOIN pd.productDetailSizes pds "
-			+ "JOIN pds.orderDetails od " + "JOIN od.order o "
-			+ "WHERE o.date = CURRENT_DATE AND o.status IN :statuses "
-			+ "GROUP BY cp.categoryProductId, cp.name, cp.image")
-	List<Object[]> findCategoryProductTotalsTodayWithStatus(@Param("statuses") List<String> statuses);
+	@Query("WITH CleanedOrders AS (" +
+		       "SELECT DISTINCT o.orderId AS orderId, cp.categoryProductId AS categoryProductId, " +
+		       "cp.name AS name, cp.image AS image, o.amount AS amount " +
+		       "FROM Order o " +
+		       "JOIN o.orderDetails od " +
+		       "JOIN od.productDetailSize pds " +
+		       "JOIN pds.productDetail pd " +
+		       "JOIN pd.product p " +
+		       "JOIN p.categoryProduct cp " +
+		       " WHERE o.date >= :startDate AND o.date < :endDate AND o.status IN :statuses" +
+		       ") " +
+		       "SELECT co.categoryProductId, co.name, co.image, SUM(co.amount) AS totalAmount " +
+		       "FROM CleanedOrders co " +
+		       "GROUP BY co.categoryProductId, co.name, co.image")
+		List<Object[]> findCategoryProductTotalsTodayWithStatus(
+		    @Param("startDate") LocalDateTime startDate,
+		    @Param("endDate") LocalDateTime endDate,
+		    @Param("statuses") List<String> statuses
+		);
 
-	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " +
-		       "FROM CategoryProduct cp " +
-		       "JOIN cp.products p " +
-		       "JOIN p.productDetails pd " +
-		       "JOIN pd.productDetailSizes pds " +
-		       "JOIN pds.orderDetails od " +
-		       "JOIN od.order o " +
-		       "WHERE o.date >= :startDate AND o.date < :endDate AND o.status IN :statuses " +
-		       "GROUP BY cp.categoryProductId, cp.name, cp.image")
+
+	@Query("WITH CleanedOrders AS (" +
+		       "SELECT DISTINCT o.orderId AS orderId, cp.categoryProductId AS categoryProductId, " +
+		       "cp.name AS name, cp.image AS image, o.amount AS amount " +
+		       "FROM Order o " +
+		       "JOIN o.orderDetails od " +
+		       "JOIN od.productDetailSize pds " +
+		       "JOIN pds.productDetail pd " +
+		       "JOIN pd.product p " +
+		       "JOIN p.categoryProduct cp " +
+		       " WHERE o.date >= :startDate AND o.date < :endDate AND o.status IN :statuses" +
+		       ") " +
+		       "SELECT co.categoryProductId, co.name, co.image, SUM(co.amount) AS totalAmount " +
+		       "FROM CleanedOrders co " +
+		       "GROUP BY co.categoryProductId, co.name, co.image")
 		List<Object[]> findCategoryProductTotalsYesterdayWithStatus(
 		    @Param("startDate") LocalDateTime startDate,
 		    @Param("endDate") LocalDateTime endDate,
-		    @Param("statuses") List<String> statuses);
+		    @Param("statuses") List<String> statuses
+		);
 
 
 	// total amout category 7 day
-	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " + "FROM CategoryProduct cp "
-			+ "JOIN cp.products p " + "JOIN p.productDetails pd " + "JOIN pd.productDetailSizes pds "
-			+ "JOIN pds.orderDetails od " + "JOIN od.order o "
-			+ "WHERE o.date BETWEEN :startDate AND CURRENT_DATE AND o.status IN :statuses "
-			+ "GROUP BY cp.categoryProductId, cp.name, cp.image")
+	@Query("WITH CleanedOrders AS ("
+			+ "SELECT DISTINCT o.orderId AS orderId, cp.categoryProductId AS categoryProductId, "
+			+ "cp.name AS name, cp.image AS image, o.amount AS amount " + "    FROM Order o "
+			+ "JOIN o.orderDetails od " 
+			+ "JOIN od.productDetailSize pds "
+			+ "JOIN pds.productDetail pd "
+			+ "JOIN pd.product p "
+			+ "JOIN p.categoryProduct cp "
+			+ "WHERE o.date BETWEEN :startDate AND :endDate AND o.status IN :statuses" + ") "
+			+ "SELECT co.categoryProductId, co.name, co.image, SUM(co.amount) AS totalAmount "
+			+ "FROM CleanedOrders co "
+			+ "GROUP BY co.categoryProductId, co.name, co.image")
 	List<Object[]> findCategoryProductTotalsLast7DaysWithStatus(@Param("startDate") LocalDateTime startDate,
-			@Param("statuses") List<String> statuses);
+			@Param("endDate") LocalDateTime endDate, @Param("statuses") List<String> statuses);
 
 	// total amount category for a specific day
-	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " +
-	       "FROM CategoryProduct cp " +
-	       "JOIN cp.products p " +
-	       "JOIN p.productDetails pd " +
-	       "JOIN pd.productDetailSizes pds " +
-	       "JOIN pds.orderDetails od " +
-	       "JOIN od.order o " +
-	       "WHERE o.date BETWEEN :startOfDay AND :endOfDay AND o.status IN :statuses " +
-	       "GROUP BY cp.categoryProductId, cp.name, cp.image")
-	List<Object> findCategoryProductTotalsByDateAndStatus(
-	    @Param("startOfDay") LocalDateTime startOfDay,
-	    @Param("endOfDay") LocalDateTime endOfDay,
-	    @Param("statuses") List<String> statuses
-	);
+	@Query("WITH CleanedOrders AS ("
+			+ "SELECT DISTINCT o.orderId AS orderId, cp.categoryProductId AS categoryProductId, "
+			+ "cp.name AS name, cp.image AS image, o.amount AS amount "
+			+ "FROM Order o "
+			+ "JOIN o.orderDetails od "
+			+ "JOIN od.productDetailSize pds " + "JOIN pds.productDetail pd "
+			+ "JOIN pd.product p "
+			+ "JOIN p.categoryProduct cp "
+			+ "WHERE o.date BETWEEN :startOfDay AND :endOfDay AND o.status IN :statuses" + ") "
+			+ "SELECT co.categoryProductId, co.name, co.image, SUM(co.amount) AS totalAmount "
+			+ "FROM CleanedOrders co " + "GROUP BY co.categoryProductId, co.name, co.image")
+	List<Object[]> findCategoryProductTotalsByDateAndStatus(@Param("startOfDay") LocalDateTime startOfDay,
+			@Param("endOfDay") LocalDateTime endOfDay, @Param("statuses") List<String> statuses);
 
-	// total amount category between two dates
-	@Query("SELECT cp.categoryProductId, cp.name, cp.image, SUM(o.amount) " +
-	       "FROM CategoryProduct cp " +
-	       "JOIN cp.products p " +
-	       "JOIN p.productDetails pd " +
-	       "JOIN pd.productDetailSizes pds " +
-	       "JOIN pds.orderDetails od " +
-	       "JOIN od.order o " +
-	       "WHERE o.date BETWEEN :startDate AND :endDate AND o.status IN :statuses " +
-	       "GROUP BY cp.categoryProductId, cp.name, cp.image")
-	List<Object> findCategoryProductTotalsByBetweenAndStatus(
-	    @Param("startDate") LocalDateTime startDate,
-	    @Param("endDate") LocalDateTime endDate,
-	    @Param("statuses") List<String> statuses
-	);
-
+	// Total amount category between two dates with cleaned data
+	@Query("WITH CleanedOrders AS ("
+			+ "SELECT DISTINCT o.orderId AS orderId, cp.categoryProductId AS categoryProductId, "
+			+ "cp.name AS name, cp.image AS image, o.amount AS amount " 
+			+ "FROM Order o "
+			+ "JOIN o.orderDetails od "
+			+ "JOIN od.productDetailSize pds " 
+			+ "JOIN pds.productDetail pd "
+			+ "JOIN pd.product p " 
+			+ "JOIN p.categoryProduct cp "
+			+ "WHERE o.date BETWEEN :startDate AND :endDate AND o.status IN :statuses" + ") "
+			+ "SELECT co.categoryProductId, co.name, co.image, SUM(co.amount) AS totalAmount "
+			+ "FROM CleanedOrders co " + "GROUP BY co.categoryProductId, co.name, co.image")
+	List<Object[]> findCategoryProductTotalsByBetweenAndStatus(@Param("startDate") LocalDateTime startDate,
+			@Param("endDate") LocalDateTime endDate, @Param("statuses") List<String> statuses);
 
 }

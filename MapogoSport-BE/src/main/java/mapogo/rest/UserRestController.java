@@ -29,6 +29,7 @@ import mapogo.dao.SubsciptionPaymentDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.UserSubscriptionDAO;
 import mapogo.dao.UserVoucherDAO;
+import mapogo.dao.WalletDAO;
 import mapogo.dto.PaymentDTO;
 import mapogo.entity.AccountPackage;
 import mapogo.entity.Notification;
@@ -45,6 +46,7 @@ import mapogo.service.OwnerService;
 import mapogo.service.PaymentMethodService;
 import mapogo.service.UserService;
 import mapogo.service.UserSubscriptionService;
+import mapogo.service.WalletService;
 import mapogo.utils.RandomUtils;
 
 @CrossOrigin("*")
@@ -137,13 +139,13 @@ public class UserRestController {
 
 	@Autowired
 	AccountPackageService accountPackageService;
-	
+
 	@Autowired
 	PaymentMethodService paymentMethodService;
-	
+
 	@Autowired
 	UserSubscriptionDAO userSubscriptionDAO;
-	
+
 	@Autowired
 	SubsciptionPaymentDAO subsciptionPaymentDAO;
 
@@ -157,14 +159,13 @@ public class UserRestController {
 	}
 
 	@GetMapping("/user/subscription/paymentInfo")
-	public RedirectView updateUserSubscription2(
-			@RequestParam(value = "vnp_OrderInfo") String data) {
-		 String[] parts = data.split("-");
-		    int accountPackageId = Integer.parseInt(parts[0]);
-		    int userSubscriptionId = Integer.parseInt(parts[1]);
-		    
-		    //SubscriptionPayment
-		    createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
+	public RedirectView updateUserSubscription2(@RequestParam(value = "vnp_OrderInfo") String data) {
+		String[] parts = data.split("-");
+		int accountPackageId = Integer.parseInt(parts[0]);
+		int userSubscriptionId = Integer.parseInt(parts[1]);
+
+		// SubscriptionPayment
+		createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
 		userService.updateUserSubscription(accountPackageId, userSubscriptionId);
 		return new RedirectView("http://localhost:3000/owner");
 	}
@@ -176,7 +177,7 @@ public class UserRestController {
 			String[] parts = data.split("0");
 			int accountPackageId = Integer.parseInt(parts[0]);
 			int userSubscriptionId = Integer.parseInt(parts[1]);
-			//SubscriptionPayment
+			// SubscriptionPayment
 			createSubcriptionPayment(accountPackageId, userSubscriptionId, "MoMo");
 			userService.updateUserSubscription(accountPackageId, userSubscriptionId);
 		}
@@ -184,20 +185,20 @@ public class UserRestController {
 	}
 
 	private void createSubcriptionPayment(int accountPackageId, int userSubscriptionId, String paymentMethod) {
-		//SubscriptionPayment
+		// SubscriptionPayment
 		AccountPackage accountPackage = accountPackageService.findById(accountPackageId);
 		UserSubscription uS = userSubscriptionDAO.findById(userSubscriptionId).get();
 
-	    SubscriptionPayment subPayment = new SubscriptionPayment();
-	    subPayment.setAmount(accountPackage.getPrice());
-	    subPayment.setPaymentDate(LocalDateTime.now());
-	    subPayment.setPaymentMethod(paymentMethodService.findByName(paymentMethod));
-	    subPayment.setStatus("Đã thanh toán");
-	    subPayment.setUser(uS.getUser());
-	    subPayment.setUserSubscription(uS);
-	    subsciptionPaymentDAO.save(subPayment);
+		SubscriptionPayment subPayment = new SubscriptionPayment();
+		subPayment.setAmount(accountPackage.getPrice());
+		subPayment.setPaymentDate(LocalDateTime.now());
+		subPayment.setPaymentMethod(paymentMethodService.findByName(paymentMethod));
+		subPayment.setStatus("Đã thanh toán");
+		subPayment.setUser(uS.getUser());
+		subPayment.setUserSubscription(uS);
+		subsciptionPaymentDAO.save(subPayment);
 	}
-	
+
 	@GetMapping("/user/subscription/{id}")
 	public UserSubscription findUserSubscriptionByUser(@PathVariable("id") String username) {
 		return userService.findUserSubscriptionByUser(username);
@@ -226,5 +227,14 @@ public class UserRestController {
 	@DeleteMapping("/user/notification/{username}")
 	public void deleteNotification(@PathVariable("username") String username) {
 		userService.deleteNotification(username);
+	}
+
+	@Autowired
+	WalletService walletService;
+
+	@PutMapping("/wallet/{username}/{money}")
+	public void addMoney(@PathVariable("username") String username,
+			@PathVariable("money") Double money) {
+		walletService.addMoney(username, money);
 	}
 }

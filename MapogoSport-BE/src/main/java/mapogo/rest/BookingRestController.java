@@ -3,11 +3,12 @@ package mapogo.rest;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.http.HttpStatus;
@@ -31,11 +32,13 @@ import mapogo.dao.BookingDetailDAO;
 import mapogo.dto.PaymentDTO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
+
 import mapogo.entity.SportField;
 import mapogo.entity.SportFieldDetail;
 import mapogo.entity.Transaction;
 import mapogo.entity.User;
 import mapogo.entity.Wallet;
+
 import mapogo.service.BookingDetailService;
 import mapogo.service.BookingService;
 import mapogo.service.TransactionService;
@@ -324,8 +327,10 @@ public class BookingRestController {
 	@PostMapping("/payment/process/{bookingId}")
 	public void processPayment(@PathVariable("bookingId") Integer bookingId, @RequestParam double totalAmount) {
 		transactionService.createTransactionByPaymentBooking(bookingId, totalAmount);
-	}
-
+		transactionService.createTransactionUserByPaymentBooking(bookingId, totalAmount);
+		transactionService.createTransactionOwnerByPaymentBooking(bookingId, totalAmount);
+}
+  
 	@GetMapping("/booking/detail/tableCustomer/byFullname/{fullname}")
 	public List<Booking> findByFullName(@PathVariable("fullname") String fullname) {
 		return bookingService.findByFullNameOffline(fullname);

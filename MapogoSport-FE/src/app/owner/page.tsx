@@ -7,6 +7,7 @@ import useSWR, { mutate } from "swr";
 import { useData } from "../context/UserContext";
 import ProfileContent from "@/components/User/modal/user.profile";
 import BlogManager from "@/components/blog/blog-manager";
+import Wallet from "@/components/User/modal/wallet";
 
 const BookingContext = createContext<AccountPackage | undefined>(undefined);
 
@@ -136,7 +137,7 @@ export default function Owner({ children }: { children: ReactNode }) {
             case 'bank':
                 return (
                     <div className="font-14">
-                        <Form.Group className="mb-3">
+                        {/* <Form.Group className="mb-3">
                             <Form.Floating className="mb-3">
                                 <Form.Control size="sm" type="text" placeholder="Ngày sinh"
                                 />
@@ -161,7 +162,8 @@ export default function Owner({ children }: { children: ReactNode }) {
                             <Button className='btn btn-profile'>
                                 <i className="bi bi-floppy2"></i> Lưu
                             </Button>
-                        </div>
+                        </div> */}
+                        <Wallet></Wallet>
                     </div>
                 )
             case 'package':
@@ -301,7 +303,7 @@ export default function Owner({ children }: { children: ReactNode }) {
                             <Nav.Link eventKey="post" className="tab-link">Bài viết</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link eventKey="bank" className="tab-link">Tài khoản ngân hàng</Nav.Link>
+                            <Nav.Link eventKey="bank" className="tab-link">Ví & Tài khoản ngân hàng</Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
                             <Nav.Link eventKey="package" className="tab-link">Gói nâng cấp</Nav.Link>

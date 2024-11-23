@@ -1,4 +1,6 @@
 'use client';
+import CancelBookingModal from "@/components/Owner/modal/CancelBooking";
+import CancelBookingDetailModal from "@/components/Owner/modal/CancelBookingDetail";
 import { useEffect, useState } from "react";
 import { Dropdown, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -7,6 +9,10 @@ import useSWR, { mutate } from "swr";
 const BookingsDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [bookingDetail, setBookingDetail] = useState<BookingDetailMap[]>([]);
+    const [showCancelBooking, setShowCancelBooking] = useState(true);
+    const [bookingDetailId, setBookingDetailId] = useState<number>(0);
+    const [finalAmount, setFinalAmount] = useState<number>(0);
+    const [aBookingDetail, setABookingDetail] = useState<BookingDetailMap | null>(null);
 
     const { data, isLoading, error } = useSWR(`http://localhost:8080/rest/user/booking/detail/${params.id}`, fetcher, {
         revalidateIfStale: false,
@@ -54,22 +60,33 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
         return false;
     };
 
-    const handleStatusChange = async (bookingDetailId: number, newStatus: string) => {
-        await fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ bookingDetailId, status: newStatus }),
-        }).then((res) => {
-            if (!res.ok) {
-                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                return;
+    const handleStatusChange = async (bookingDetailId: number, newStatus: string, totalAmount: number) => {
+
+        if (newStatus === "Đã hủy") {
+            setShowCancelBooking(true);
+            setBookingDetailId(bookingDetailId);
+            setFinalAmount(totalAmount);
+            const foundData = bookingDetail.find(item => item.bookingDetailId === bookingDetailId);
+            if (foundData) {
+                setABookingDetail(foundData);
             }
-            mutate(`http://localhost:8080/rest/user/booking/detail/${params.id}`);
-            toast.success('Cập nhật thành công!');
-        });
+        } else {
+            await fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ bookingDetailId, status: newStatus, refundAmount: totalAmount }),
+            }).then((res) => {
+                if (!res.ok) {
+                    toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                    return;
+                }
+                mutate(`http://localhost:8080/rest/user/booking/detail/${params.id}`);
+                toast.success('Cập nhật thành công!');
+            });
+        }
     };
 
     if (isLoading) return <div>Đang tải...</div>;
@@ -101,7 +118,12 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                     <td>
                                         <Dropdown onSelect={(newStatus) => {
                                             if (canChangeStatus(booking.date, booking.startTime, booking.status, newStatus || booking.status)) {
-                                                handleStatusChange(booking.bookingDetailId, newStatus || booking.status);
+                                                const refundAmount = (booking.price * (booking.deposit / 100));
+                                                if (booking.statusBooking === "Chờ thanh toán") {
+                                                    handleStatusChange(booking.bookingDetailId, newStatus || booking.status, refundAmount);
+                                                } else {
+                                                    handleStatusChange(booking.bookingDetailId, newStatus || booking.status, booking.price);
+                                                }
                                             }
                                         }}>
                                             <Dropdown.Toggle disabled={isDropdownDisabled} variant={getStatusVariant(booking.status)}>
@@ -139,6 +161,8 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                     </Table>
                 </div>
             </div>
+            <CancelBookingDetailModal showCancelBooking={showCancelBooking} setShowCancelBooking={setShowCancelBooking}
+                aBookingDetail={aBookingDetail} />
         </>
     );
 };

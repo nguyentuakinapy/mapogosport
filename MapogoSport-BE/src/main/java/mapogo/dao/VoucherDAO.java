@@ -15,4 +15,7 @@ public interface VoucherDAO extends JpaRepository<Voucher, Integer> {
 	@Query("SELECT v " + "FROM Voucher v " + "WHERE CAST(v.activeDate AS DATE) = CAST(GETDATE() AS DATE)")
 	List<Voucher> selectVoucherActive();
 
+	@Query("SELECT v FROM Voucher v ORDER BY v.id DESC")
+	List<Voucher>  findLatestVoucher();
+	
 }

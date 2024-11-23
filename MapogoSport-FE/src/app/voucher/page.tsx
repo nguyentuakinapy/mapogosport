@@ -2,36 +2,15 @@
 import HomeLayout from '@/components/HomeLayout';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { mutate } from 'swr';
 
 
 const PageVoucher = () => {
     const [voucher, setVoucher] = useState<Voucher[]>([])
-    const [user, setUser] = useState<any>(null);
-
-
-    const getUserSession = () => {
-        const userSession = sessionStorage.getItem('user');
-        setUser(userSession ? JSON.parse(userSession) : null);
-    };
-
-    useEffect(() => {
-        // get user whenever user login
-        getUserSession();
-
-        // add  event listener to update user session whenever it changes
-        const handleStorageChange = () => getUserSession();
-        window.addEventListener('storage', handleStorageChange);
-
-        // remove event listener on unmount
-        return () => {
-            window.removeEventListener('storage', getUserSession);
-        };
-    }, []);
 
     const handelSubmitGetVoucher = async (voucherId: number) => {
 
-        getUserSession()
+        const userSession = sessionStorage.getItem('user');
+        const user = userSession && JSON.parse(userSession) as User;
 
         if (!user || !user.username) {
             toast.warning("Bạn chưa đăng nhập!");

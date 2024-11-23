@@ -1,5 +1,5 @@
 "use client";
-import { Container, Row, Col, Form, Image, FloatingLabel, Table, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Image, FloatingLabel, Table, Button, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import React, { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 import useSWR from 'swr';
@@ -52,16 +52,16 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
 
     useEffect(() => {
         const storedUser = localStorage.getItem('username');
-        if(storedUser){
+        if (storedUser) {
             setCurrentUser(storedUser);
         }
     }, []);
-    
+
     // useEffect(()=>{
     //     toast.success("ddddddddddddddddddd 12"+ currentUser);
-        
+
     // },[currentUser])
-    
+
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -82,6 +82,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         setVisibleCount(visibleCount + 5);
     };
     const hideReviews = () => {
+
         setVisibleCount(visibleCount - 5);
     }
 
@@ -91,7 +92,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         revalidateOnReconnect: false,
     });
 
-    
+
     /* QA thêm useParam */
     const path = useSearchParams();
 
@@ -112,13 +113,13 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     }, [path])
 
 
-    const handleChatMess=()=>{
-       if(data?.owner?.user?.username) {
+    const handleChatMess = () => {
+        if (data?.owner?.user?.username) {
             const ownerUsername = data.owner.user.username;
-            const encodedUsername = btoa(ownerUsername);                  
-            if(ownerUsername !== currentUser){
+            const encodedUsername = btoa(ownerUsername);
+            if (ownerUsername !== currentUser) {
                 window.history.pushState({}, "", `?status=${encodedUsername}`);
-            }else{
+            } else {
                 toast.info('Bạn không thể nhắn với chính mình ')
             }
         }
@@ -461,42 +462,29 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
             return;
         }
         const sportDetail = event.currentTarget.getAttribute("sport-detail");
-        const startTime = event.currentTarget.getAttribute("time-data");
+        const timeData = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
         const selectedSportDetail = sportField?.sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetail));
-        if (sportDetail && startTime && dayStartBooking) {
+        if (sportDetail && timeData && dayStartBooking) {
             setSportDetail(selectedSportDetail);
-            setStartTime(startTime);
+            setStartTime(timeData);
             setDayStartBooking(dayStartBooking);
             setShowBookingModal(true);
             setStartTimeKey(!startTimeKey);
         }
     }
 
-    const [selectedSportType, setSelectedSportType] = useState<number | null>(null);
 
-    const handleIdBySize = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newSize = e.target.value;
-        if (sportField?.sportFielDetails) {
-            const filteredIds = sportField.sportFielDetails
-                .filter(detail => detail.size === newSize)
-                .map(detail => detail.sportFielDetailId);
-            const selectedDetail = sportField.sportFielDetails.find(detail => detail.size === newSize);
-            setSelectedSportType(selectedDetail ? selectedDetail.sportFielDetailId : null);
-        }
-    };
-
-    useEffect(() => {
-        if (sportField?.sportFielDetails) {
-            const initialSize = sportField.sportFielDetails[0].size;
-            handleIdBySize({ target: { value: initialSize } } as React.ChangeEvent<HTMLSelectElement>);
-        }
-    }, [sportField]);
-
-
-    const [filteredData, setFilteredData] = useState(null);
+    const [filteredData, setFilteredData] = useState<FieldReview[] | null>(null);
+    const [selectedRatingFilter, setSelectedRatingFilter] = useState<number | null>(null);
     const handleClick = (value: number) => {
 
+        if (selectedRatingFilter === value) {
+            setSelectedRatingFilter(null);
+            setFilteredData(dataReview);
+            return;
+        }
+        setSelectedRatingFilter(value);
         const fetchData = async () => {
             const response = await fetch(`http://localhost:8080/rest/find-fielreview-by-rating/${params.id}/${value}`);
             const data = await response.json();
@@ -527,10 +515,14 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                     Đánh giá: 4/5 <i className="bi bi-star-fill"></i> (1 Đánh giá)
                                 </div>
                                 <div className="btn-option-icon ">
-                                <i className="bi bi-heart-fill"></i>
-                                <i  onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>              
+
+                                    <i className="bi bi-heart-fill"></i>
+                                    <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>
+                                        <i onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>
+                                    </OverlayTrigger>
+
                                 </div>
-                              
+
                             </div>
                         </div>
                         <Row>
@@ -679,8 +671,11 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                         <h5 className='ms-3'>Bình luận</h5>
                         <div className="d-flex ms-4">
                             {[5, 4, 3, 2, 1].map((value) => (
-                                <button key={value} type="button" className='btn ms-2' style={{ background: '#142239', color: 'white' }}
+                                <button key={value} type="button"
+                                    className='btn ms-2'
+                                    style={selectedRatingFilter === value ? { background: '#142239', color: 'red' } : { background: '#142239', color: 'white' }}
                                     onClick={() => handleClick(value)}>
+
                                     {value} ★
                                 </button>
                             ))}
@@ -713,15 +708,20 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                     </Col>
                                 </Row>
                             ))}
-                        {visibleCount < dataReview.length ? ( // Kiểm tra nếu còn bình luận để tải thêm
+                        {visibleCount < dataReview.length ? (
+                            // Hiển thị nút "Tải thêm bình luận" nếu còn bình luận để tải thêm
                             <div className="mt-3 text-center">
                                 <Button variant="danger" onClick={loadMoreReviews}>Tải thêm bình luận</Button>
                             </div>
                         ) : (
-                            <div className="mt-3 text-center">
-                                <Button variant="danger" onClick={hideReviews}>Ẩn bớt bình luận</Button>
-                            </div>
+                            // Hiển thị nút "Ẩn bớt bình luận" chỉ khi visibleCount > 5
+                            visibleCount > 5 && (
+                                <div className="mt-3 text-center">
+                                    <Button variant="danger" onClick={hideReviews}>Ẩn bớt bình luận</Button>
+                                </div>
+                            )
                         )}
+
                     </Col>
                     <Col>
                         <div className="map-container">
@@ -736,7 +736,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                     checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus}
                     startTimeKey={startTimeKey}
                 />
-                <ModalReviewSportField showReviewModal={showReviewModal} setShowReviewModal={setShowReviewModal} fieldId={params.id} />
+                <ModalReviewSportField showReviewModal={showReviewModal} setShowReviewModal={setShowReviewModal} fieldId={params.id} dataReview={reviewData} />
                 <SearchSportField showSearchBookingModal={showSearchBookingModal} setSearchShowBookingModal={setSearchShowBookingModal}
                     dataTimeSport={dataTimeSport.filter(time => time !== "undefinedh00" && time !== null)} sportField={sportField} />
             </Container>

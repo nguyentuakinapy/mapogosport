@@ -3,14 +3,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ListGroup } from "react-bootstrap";
 import { mutate } from "swr";
+import { useData } from "@/app/context/UserContext";
 
-const SidebarDropdown = ({ item, username }: any) => {
+const SidebarDropdown = ({ item, user }: any) => {
     const pathname = usePathname();
+    const userData = useData();
 
     const handleClick = () => {
-        if (username) {
-            mutate(`http://localhost:8080/rest/user/${username}`);
-            mutate(`http://localhost:8080/rest/user/voucher/${username}`);
+        if (userData) {
+            mutate(`http://localhost:8080/rest/user/${userData.username}`);
+            mutate(`http://localhost:8080/rest/user/voucher/${userData.username}`);
+            mutate(`http://localhost:8080/rest/wallet/transaction/${userData.wallet.walletId}`)
         }
     }
 

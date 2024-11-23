@@ -6,7 +6,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from "react-datepicker";
 import { useEffect, useState } from "react";
 import '../types/user.scss';
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
+import { useData } from "@/app/context/UserContext";
 
 const Orders = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -19,9 +20,9 @@ const Orders = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8);
 
-    const username = localStorage.getItem("username");
+    const user = useData();
 
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/order/${username}`, fetcher, {
+    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/order/${user?.username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -45,10 +46,6 @@ const Orders = () => {
         }
     };
 
-    const handleViewDetail = (order: OrderMap) => {
-        sessionStorage.setItem('selectedOrder', JSON.stringify(order));
-    };
-
     const handleFilter = () => {
         let filtered = orderUsers;
         if (startDate) {
@@ -57,11 +54,13 @@ const Orders = () => {
         if (endDate) {
             filtered = filtered.filter(order => new Date(order.date) <= endDate);
         }
-        if (statusFilter && statusFilter !== "") {
+        if (statusFilter) {
             filtered = filtered.filter(order => order.status === statusFilter);
         }
         if (nameFilter) {
-            filtered = filtered.filter(order => order.productName.toLowerCase().includes(nameFilter.toLowerCase()));
+            filtered = filtered.filter(order => order.productName.toLowerCase().includes(nameFilter.toLowerCase()) ||
+                order.orderId.toString().includes(nameFilter)
+            );
         }
 
         setFilteredOrders(filtered);
@@ -163,7 +162,7 @@ const Orders = () => {
                 <Table striped className="mb-0">
                     <thead>
                         <tr>
-                            <th style={{ width: '140px' }}>STT</th>
+                            <th style={{ width: '140px' }}>Mã hóa đơn</th>
                             <th style={{ width: '300px' }}>Tên sản phẩm</th>
                             <th>Ngày</th>
                             <th>Tình trạng</th>
@@ -176,7 +175,7 @@ const Orders = () => {
                             currentItems.map((order) => (
                                 <tr key={order.orderId}>
                                     <td className="ps-3 text-start">
-                                        <Link href={`/user/orders/detail/${order.orderId}`} onClick={() => handleViewDetail(order)}>#{order.orderId}</Link>
+                                        <Link href={`/user/orders/detail/${order.orderId}`}>#{order.orderId}</Link>
                                     </td>
                                     <td className="title text-start">{order.productName}</td>
                                     <td>{new Date(order.date).toLocaleDateString('en-GB')}</td>
@@ -185,9 +184,7 @@ const Orders = () => {
                                     </td>
                                     <td>{order.amount.toLocaleString()} ₫</td>
                                     <td>
-                                        <Link href={`/user/orders/detail/${order.orderId}`} onClick={() => handleViewDetail(order)}>
-                                            Xem
-                                        </Link>
+                                        <Link href={`/user/orders/detail/${order.orderId}`}>Xem</Link>
                                     </td>
                                 </tr>
                             ))
