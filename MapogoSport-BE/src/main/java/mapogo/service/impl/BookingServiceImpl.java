@@ -36,6 +36,7 @@ import mapogo.dao.BookingDetailDAO;
 import mapogo.dao.NotificationDAO;
 import mapogo.dao.OwnerDAO;
 import mapogo.dao.PaymentMethodDAO;
+import mapogo.dao.TransactionDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.VoucherDAO;
 import mapogo.dao.WalletDAO;

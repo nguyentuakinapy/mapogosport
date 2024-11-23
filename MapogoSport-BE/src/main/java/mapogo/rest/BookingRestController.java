@@ -144,7 +144,7 @@ public class BookingRestController {
 		transaction.setWallet(wallet);
 		transaction.setAmount(new BigDecimal(trimmedAmount));
 		transaction.setCreatedAt(LocalDateTime.now());
-		transaction.setDescription("Nạp từ hóa đơn đặt sân: " + bookingId + " ("+paymentMethod+")");
+		transaction.setDescription("Nạp từ hóa đơn đặt sân: " + bookingId + " (" + paymentMethod + ")");
 		transaction.setTransactionType("+" + trimmedAmount);
 		transactionService.create(transaction);
 
@@ -325,11 +325,11 @@ public class BookingRestController {
 
 	@PostMapping("/payment/process/{bookingId}")
 	public void processPayment(@PathVariable("bookingId") Integer bookingId, @RequestParam double totalAmount) {
-		transactionService.createTransactionByPaymentBooking(bookingId, totalAmount);
+//		transactionService.createTransactionByPaymentBooking(bookingId, totalAmount);
 		transactionService.createTransactionUserByPaymentBooking(bookingId, totalAmount);
 		transactionService.createTransactionOwnerByPaymentBooking(bookingId, totalAmount);
-}
-  
+	}
+
 	@GetMapping("/booking/detail/tableCustomer/byFullname/{fullname}")
 	public List<Booking> findByFullName(@PathVariable("fullname") String fullname) {
 		return bookingService.findByFullNameOffline(fullname);

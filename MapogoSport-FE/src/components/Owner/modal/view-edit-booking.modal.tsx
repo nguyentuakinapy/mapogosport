@@ -916,15 +916,29 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     const [note, setNote] = useState<string>();
+
     const testOnclick = () => {
         // toast.success("NGON TA: " + note);
         handleCancelBookingDetail()
+        setNote("");
     }
 
     const renderNotification = () => {
         return (
-            <div className="text-center">
-                <FloatingLabel controlId="floatingTextarea2" label="Lý do hủy">
+            <div >
+                <Form>
+                    <Form.Group>
+                        <div>
+                            {["Hủy bởi yêu cầu của khách hàng", "Hủy bởi chủ sân"].map((option, index) => (
+                                <Form.Check key={index} type="radio" className="mb-3" id={`reason-${index}`}
+                                    label={option} value={option} onChange={(e) => setNote(e.target.value)}
+                                    checked={note === option}
+                                />
+                            ))}
+                        </div>
+                    </Form.Group>
+                </Form>
+                {/* <FloatingLabel controlId="floatingTextarea2" label="Lý do hủy">
                     <Form.Control
                         as="textarea"
                         placeholder="Leave a comment here"
@@ -932,8 +946,8 @@ const BookingModal = (props: OwnerProps) => {
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                     />
-                </FloatingLabel>
-                <button onClick={testOnclick} className="mt-2 w-100 btn btn-outline-danger">XÁC NHẬN HỦY</button>
+                </FloatingLabel> */}
+                <button onClick={testOnclick} className="mt-2 w-100 btn btn-danger">XÁC NHẬN HỦY</button>
             </div>
 
         )
@@ -955,7 +969,7 @@ const BookingModal = (props: OwnerProps) => {
                                         {/* Kiểm tra ngày hiện tại và ngày đặt */}
                                         {new Date().setHours(0, 0, 0, 0) === new Date(bookingDetailData.date).setHours(0, 0, 0, 0) ?
                                             (new Date().getHours() * 60) + new Date().getMinutes() < (parseInt(bookingDetailData.endTime.split('h')[0]) * 60) + parseInt(bookingDetailData.endTime.split('h')[1]) && (
-                                                <OverlayTrigger overlay={<Tooltip>Sửa {new Date().setHours(0, 0, 0, 0)} - {new Date(bookingDetailData.date).setHours(0, 0, 0, 0)}</Tooltip>}>
+                                                <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                                                     <i
                                                         className="bi bi-pencil-square ms-2 text-dark"
                                                         onClick={() => {
@@ -982,7 +996,7 @@ const BookingModal = (props: OwnerProps) => {
                                             </OverlayTrigger>
                                         }
 
-                                        <h6 className="text-uppercase text-danger m-auto fw-bold text-center">
+                                        <h6 className="text-uppercase text-danger m-auto fw-bold text-center mb-2">
                                             Thông tin đặt - {bookingDetailData?.sportFieldDetail.name}
                                         </h6>
 
@@ -1063,14 +1077,25 @@ const BookingModal = (props: OwnerProps) => {
                                             </>
                                         )}
                                     </InputGroup>
-                                    <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Giờ kết thúc!"
-                                            value={formatPrice(newPriceBooking) || ""}
-                                            disabled={isAddBooking}
-                                        />
-                                    </FloatingLabel>
+
+                                    <InputGroup>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(newPriceBooking) || ""}
+                                                disabled={isAddBooking}
+                                            />
+                                        </FloatingLabel>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng đơn!" className="ms-2 flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(bookingDetailData?.totalAmount) || ""}
+                                                disabled={editBooking}
+                                            />
+                                        </FloatingLabel>
+                                    </InputGroup>
                                 </>
                                 :
                                 <>
@@ -1163,14 +1188,24 @@ const BookingModal = (props: OwnerProps) => {
                                             </>
                                         )}
                                     </InputGroup>
-                                    <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Giờ kết thúc!"
-                                            value={formatPrice(price) || ""}
-                                            disabled={editBooking}
-                                        />
-                                    </FloatingLabel>
+                                    <InputGroup>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(price) || ""}
+                                                disabled={editBooking}
+                                            />
+                                        </FloatingLabel>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng đơn!" className="ms-2 flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(bookingDetailData?.totalAmount) || ""}
+                                                disabled={editBooking}
+                                            />
+                                        </FloatingLabel>
+                                    </InputGroup>
                                 </>
                             }
                         </Col>
@@ -1212,16 +1247,7 @@ const BookingModal = (props: OwnerProps) => {
                         {/* )} */}
 
                     </Row>
-                    <Row>
-                        <FloatingLabel controlId="floatingUsernam1e" label="Hình thức đặt sân! *" className="flex-grow-1 mb-2">
-                            <Form.Control
-                                value={formatPrice(bookingDetailData?.totalAmount)}
-                                type="text"
-                                placeholder="Vui lòng nhập tên đăng nhập!"
-                                disabled
-                            />
-                        </FloatingLabel>
-                    </Row>
+
                     <Row className="mx-1 mb-2">
 
                         {bookingDetailData?.subscriptionKey && bookingDetailData.subscriptionKey.includes('keybooking') && (
@@ -1245,10 +1271,39 @@ const BookingModal = (props: OwnerProps) => {
                                             <button onClick={() => confirmDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm tra chỉnh sửa sân</button>
                                         )
                                     ) : (
-                                        <button className="btn btn-danger m-auto" onClick={() =>
-                                            // handleCancelBookingDetail()
-                                            setNotificationModal(true)
-                                        } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                        <>
+                                            {bookingDetailData.statusBooking !== "Đã thanh toán" ? (
+                                                // bookingDetailData.status !== "Đã hoàn thành" ? (
+                                                // <>ok</>
+
+                                                // ) : (
+                                                parseInt(bookingDetailData.endTime.split('h')[0]) * 60 +
+                                                parseInt(bookingDetailData.endTime.split('h')[1]) >
+                                                new Date().getHours() * 60 + new Date().getMinutes() && (
+                                                    <button className="btn btn-danger m-auto" onClick={() =>
+                                                        // handleCancelBookingDetail()
+                                                        setNotificationModal(true)
+                                                    } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                                )
+                                                // )
+
+                                            ) : (
+                                                bookingDetailData.subscriptionKey && bookingDetailData.subscriptionKey.includes("addNew") ? (
+                                                    <button className="btn btn-danger m-auto" onClick={() =>
+                                                        // handleCancelBookingDetail()
+                                                        setNotificationModal(true)
+                                                    } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                                ) : (
+                                                    parseInt(bookingDetailData.endTime.split('h')[0]) * 60 +
+                                                    parseInt(bookingDetailData.endTime.split('h')[1]) >
+                                                    new Date().getHours() * 60 + new Date().getMinutes() && (
+                                                        <button className="btn btn-danger m-auto" onClick={() =>
+                                                            // handleCancelBookingDetail()
+                                                            setNotificationModal(true)
+                                                        } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                                    ))
+                                            )}
+                                        </>
                                     )
                                 )
                             ) : (
@@ -1280,7 +1335,7 @@ const BookingModal = (props: OwnerProps) => {
                     </Button>
                 </Modal.Footer>
             </Modal >
-            <NotificationModal textHeadNotification={"Lý do hủy sân"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
+            <NotificationModal size={undefined} textHeadNotification={"Lý do hủy sân"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
             </NotificationModal>
         </>
     )
