@@ -1,14 +1,14 @@
 'use client'
 import ProfileContent from "@/components/User/modal/user.profile";
 import { useSearchParams } from "next/navigation";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { useData } from "../context/UserContext";
 import AuthorityComponent from "./authority/page";
 import BlogManager from "@/components/blog/blog-manager";
 import Wallet from "@/components/User/modal/wallet";
 
-export default function Owner({ children }: { children: ReactNode }) {
+export default function Owner() {
     const [activeTab, setActiveTab] = useState<string>('all');
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
     const searchParams = useSearchParams();
@@ -57,50 +57,42 @@ export default function Owner({ children }: { children: ReactNode }) {
                 );
         }
     };
-    if (!children) {
-        return (
-            <>
-                <div className="profile-header">
-                    <div className="profile-info">
-                        <h2>{userData?.fullname}</h2>
-                        <p>Thằng nào có tiền thì nạp vào DONATE cho tao</p>
-                        <div className="stats">
-                            <span>0 Bài Viết</span>
-                            <span>0 Sân</span>
-                            <span>0 Được thích</span>
-                            <span>{userData?.authorities.find(item => item.role.name === 'ROLE_ADMIN')?.role.name ? "Quản trị viên" : 'Nhân viên'}</span>
-                        </div>
+    return (
+        <>
+            <div className="profile-header">
+                <div className="profile-info">
+                    <h2>{userData?.fullname}</h2>
+                    <p>Thằng nào có tiền thì nạp vào DONATE cho tao</p>
+                    <div className="stats">
+                        <span>0 Bài Viết</span>
+                        <span>0 Sân</span>
+                        <span>0 Được thích</span>
+                        <span>{userData?.authorities.find(item => item.role.name === 'ROLE_ADMIN')?.role.name ? "Quản trị viên" : 'Nhân viên'}</span>
                     </div>
                 </div>
-                <div className="font-14">
-                    <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
+            </div>
+            <div className="font-14">
+                <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
+                    <Nav.Item>
+                        <Nav.Link eventKey="all" className="tab-link">Thông tin cá nhân</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link eventKey="deposit" className="tab-link">Bài viết</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link eventKey="wallet" className="tab-link">Ví & Tài khoản ngân hàng</Nav.Link>
+                    </Nav.Item>
+                    {userData?.authorities.find(item => item.role.name === 'ROLE_ADMIN')?.role.name &&
                         <Nav.Item>
-                            <Nav.Link eventKey="all" className="tab-link">Thông tin cá nhân</Nav.Link>
+                            <Nav.Link eventKey="withdraw" className="tab-link">Phân quyền</Nav.Link>
                         </Nav.Item>
-                        <Nav.Item>
-                            <Nav.Link eventKey="deposit" className="tab-link">Bài viết</Nav.Link>
-                        </Nav.Item>
-                        <Nav.Item>
-                            <Nav.Link eventKey="wallet" className="tab-link">Ví & Tài khoản ngân hàng</Nav.Link>
-                        </Nav.Item>
-                        {userData?.authorities.find(item => item.role.name === 'ROLE_ADMIN')?.role.name &&
-                            <Nav.Item>
-                                <Nav.Link eventKey="withdraw" className="tab-link">Phân quyền</Nav.Link>
-                            </Nav.Item>
-                        }
+                    }
 
-                    </Nav>
-                    <div className="mt-3">
-                        {renderContent()}
-                    </div>
+                </Nav>
+                <div className="mt-3">
+                    {renderContent()}
                 </div>
-            </>
-        )
-    } else {
-        return (
-            <>{children}</>
-        )
-    }
-
-
+            </div>
+        </>
+    )
 }
