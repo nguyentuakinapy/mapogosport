@@ -147,8 +147,8 @@ const OwnerBookingBill = () => {
                                     <td className={booking.status === 'Đã thanh toán' && booking.oldTotalAmount !== 0
                                         && booking.oldTotalAmount - booking.totalAmount <= 0 ? 'text-danger' : 'text-success'}>
                                         {booking.status === 'Đã thanh toán' ? booking.oldTotalAmount !== 0 ?
-                                            (booking.oldTotalAmount - booking.totalAmount).toLocaleString() + ' đ' : 0 :
-                                            booking.status === 'Đã hủy' ? 0 : (booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString() + ' đ'}
+                                            (booking.oldTotalAmount - booking.totalAmount).toLocaleString() + ' đ' : '0 đ' :
+                                            booking.status === 'Đã hủy' ? '0 đ' : (booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString() + ' đ'}
                                     </td>
                                     <td className="title">{booking.bookingUserPhone || 'Chưa cập nhật số điện thoại'}</td>
                                     <td>{renderStatusDropdown(booking)}</td>

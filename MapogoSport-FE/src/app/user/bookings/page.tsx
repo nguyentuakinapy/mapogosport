@@ -202,10 +202,17 @@ const Bookings = () => {
                                     <td className="title text-start">{booking.sportFieldName}</td>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
                                     <td>{booking.totalAmount.toLocaleString()} ₫</td>
-                                    <td className={booking.oldTotalAmount > 0 && (booking.oldTotalAmount - booking.totalAmount) <= 0 ? 'text-danger' : 'text-success'}>
+                                    {/* <td className={booking.oldTotalAmount > 0 && (booking.oldTotalAmount - booking.totalAmount) <= 0 ? 'text-danger' : 'text-success'}>
                                         {booking.oldTotalAmount !== 0 ? `${(booking.oldTotalAmount - booking.totalAmount).toLocaleString()} ₫`
                                             : booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0'
                                                 : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} ₫`}
+                                    </td> */}
+                                    <td className={booking.status === 'Đã thanh toán' && booking.oldTotalAmount !== 0
+                                        && booking.oldTotalAmount - booking.totalAmount <= 0 ? 'text-danger' : 'text-success'}>
+                                        {booking.status === 'Đã thanh toán' ?
+                                            booking.oldTotalAmount !== undefined && booking.oldTotalAmount !== 0 ? (booking.oldTotalAmount - booking.totalAmount).toLocaleString() + ' đ' : "0 đ" :
+                                            booking.status === 'Đã hủy' ? 0 :
+                                                (booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString() + ' đ'}
                                     </td>
                                     <td>
                                         <Badge bg={getStatusVariant(booking.status)}>
