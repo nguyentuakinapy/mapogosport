@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 
 interface OwnerProps {
     showNotificationModal: boolean;
@@ -10,7 +10,7 @@ interface OwnerProps {
 }
 
 const NotificationModal = (props: OwnerProps) => {
-    const { showNotificationModal, setNotificationModal, renderNotification, textHeadNotification, size } = props;
+    const { showNotificationModal, setNotificationModal, renderNotification, textHeadNotification } = props;
 
 
     const handleClose = () => {

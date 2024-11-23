@@ -2,7 +2,6 @@
 
 import useSWR from "swr";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   Badge,
   Button,
@@ -67,16 +66,6 @@ const VoucherPage = () => {
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
-  };
-
-  const handleStartDateChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setStartDate(event.target.value);
-  };
-
-  const handleEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEndDate(event.target.value);
   };
 
   // Lọc voucher theo tìm kiếm và ngày
@@ -294,16 +283,16 @@ const VoucherPage = () => {
             ) : (
               <tr >
                 <td colSpan={11} className="text-center h6 ">
-                <p >Không có dữ liệu cho trạng thái này</p>
+                  <p >Không có dữ liệu cho trạng thái này</p>
                 </td>
               </tr>
             )}
           </Table>
           {currentVouchers.length > 0 && (
-          <div className="d-flex justify-content-center ">
-            <nav>
-              <ul className="pagination">
-                {/* Nút tới đầu trang 
+            <div className="d-flex justify-content-center ">
+              <nav>
+                <ul className="pagination">
+                  {/* Nút tới đầu trang 
                 <li
                   className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
                 >
@@ -312,44 +301,42 @@ const VoucherPage = () => {
                   </button>
                 </li>*/}
 
-                {/* Nút lùi */}
-                <li
-                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
-                >
-                  <button className="page-link" onClick={handlePreviousPage}>
-                    {"<"} Lùi
-                  </button>
-                </li>
-
-                {/* Nút chọn trang */}
-                {Array.from({ length: totalPages }, (_, index) => (
+                  {/* Nút lùi */}
                   <li
-                    key={index + 1}
-                    className={`page-item ${
-                      currentPage === index + 1 ? "active" : ""
-                    }`}
+                    className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
                   >
-                    <button
-                      className="page-link"
-                      onClick={() => handlePageChange(index + 1)}
-                    >
-                      {index + 1}
+                    <button className="page-link" onClick={handlePreviousPage}>
+                      {"<"} Lùi
                     </button>
                   </li>
-                ))}
 
-                {/* Nút tới */}
-                <li
-                  className={`page-item ${
-                    currentPage === totalPages ? "disabled" : ""
-                  }`}
-                >
-                  <button className="page-link" onClick={handleNextPage}>
-                    Tới {">"}
-                  </button>
-                </li>
+                  {/* Nút chọn trang */}
+                  {Array.from({ length: totalPages }, (_, index) => (
+                    <li
+                      key={index + 1}
+                      className={`page-item ${currentPage === index + 1 ? "active" : ""
+                        }`}
+                    >
+                      <button
+                        className="page-link"
+                        onClick={() => handlePageChange(index + 1)}
+                      >
+                        {index + 1}
+                      </button>
+                    </li>
+                  ))}
 
-                {/* Nút tới cuối trang 
+                  {/* Nút tới */}
+                  <li
+                    className={`page-item ${currentPage === totalPages ? "disabled" : ""
+                      }`}
+                  >
+                    <button className="page-link" onClick={handleNextPage}>
+                      Tới {">"}
+                    </button>
+                  </li>
+
+                  {/* Nút tới cuối trang 
                 <li
                   className={`page-item ${
                     currentPage === totalPages ? "disabled" : ""
@@ -359,9 +346,9 @@ const VoucherPage = () => {
                     Cuối {">>"}
                   </button>
                 </li>*/}
-              </ul>
-            </nav>
-          </div>
+                </ul>
+              </nav>
+            </div>
           )}
         </div>
       </>
@@ -376,7 +363,7 @@ const VoucherPage = () => {
           Quản lý mã giảm giá/ Tổng: {vouchers?.length || 0} mã giảm giá
         </b>
         {/* <div className="row "> */}
-          {/* Ngày bắt đầu 
+        {/* Ngày bắt đầu 
           <div className="col-md-6">
             <div className="form-group">
               <label htmlFor="startDate" className="form-label">
@@ -392,7 +379,7 @@ const VoucherPage = () => {
             </div>
           </div>*/}
 
-          {/* Ngày kết thúc 
+        {/* Ngày kết thúc 
           <div className="col-md-6">
             <div className="form-group">
               <label htmlFor="endDate" className="form-label">

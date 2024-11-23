@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { Row, Col, Form, FormCheck, Button, Table, Image, Nav } from "react-bootstrap";
+import { Form, Button, Table, Image, Nav } from "react-bootstrap";
 import '../adminStyle.scss';
 import { useState, useEffect } from "react";
 import CategoryAddNew from "@/components/Admin/Modal/categoryProduct.addNew";
@@ -151,12 +151,6 @@ const AdminProduct = () => {
         };
         fetchData();
     }, [categoryField]);
-
-    const handleCreateClickField = () => {
-        setCurrentCategoryField(null);
-        setModalType('add');
-        setShowModal(true);
-    };
 
     const handleCloseModalField = () => {
         setShowModal(false);
@@ -333,7 +327,7 @@ const AdminProduct = () => {
                             valign: 'middle',
                         },
                         columnStyles: {
-                            0: { halign: 'left', cellWidth: 30  },
+                            0: { halign: 'left', cellWidth: 30 },
                             1: { halign: 'left' },
                             2: { halign: 'center' },
                             3: { halign: 'right', cellWidth: 30 },
@@ -344,8 +338,8 @@ const AdminProduct = () => {
                                 data.cell.text[0] = data.cell.text[0];
                             }
                         }
-                    });
-                });
+                    })
+                })
             } else {
                 const tableColumn = ["Số thứ tự", "Tên hình ảnh", "ID loại sản phẩm", "Tên loại sản phẩm"];
                 const tableRows: string[][] = [];
@@ -384,8 +378,6 @@ const AdminProduct = () => {
                     }
                 });
             }
-
-
             const today = new Date();
             const month = today.getMonth() + 1;
             const day = today.getDate();
@@ -398,7 +390,6 @@ const AdminProduct = () => {
             toast.error("Đã xảy ra lỗi trong quá trình xuất file! Vui lòng thử lại sau!");
             console.log(error)
         }
-
     };
 
 
@@ -581,14 +572,14 @@ const AdminProduct = () => {
                                                 }}
                                             />
                                         </td> */}
-                                        <td className="text-center align-middle">{indexOfFirstItem +index + 1}</td>
+                                        <td className="text-center align-middle">{indexOfFirstItem + index + 1}</td>
                                         <td className="text-center align-middle">
                                             <Link href="#">
                                                 <Image
                                                     src={`${category.image}`}
                                                     style={{ width: '150px', height: 'auto' }}
                                                     className="mx-2"
-                                                alt={category.image}
+                                                    alt={category.image}
                                                 />
                                             </Link>
                                         </td>
@@ -693,7 +684,7 @@ const AdminProduct = () => {
                             setShowAddCategory={handleCloseModalField}
                             currentCategory={currentCategoryField}
                             modalType={modalType}
-                            onSave={()=>handleAddNewCategoryField}
+                            onSave={() => handleAddNewCategoryField}
                         />
                     </div>
                 );
@@ -725,7 +716,7 @@ const AdminProduct = () => {
                             <i className="bi bi-plus-square-fill"><span className='mx-1'>Tạo mới</span></i>
                         </Button>
                         <Button className="btn-sd-admin mb-4 me-3" style={{ background: '#142239', border: 'none' }} onClick={exportPDF}>
-                        <i className="bi bi-file-earmark-pdf"></i><span className='mx-1'>Export PDF</span>
+                            <i className="bi bi-file-earmark-pdf"></i><span className='mx-1'>Export PDF</span>
 
                         </Button>
                         <Button className="btn-sd-admin mb-4" style={{ background: '#142239', border: 'none' }} onClick={exportExcel}>

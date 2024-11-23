@@ -5,7 +5,7 @@ import { ListGroup } from "react-bootstrap";
 import { mutate } from "swr";
 import { useData } from "@/app/context/UserContext";
 
-const SidebarDropdown = ({ item, user }: any) => {
+const SidebarDropdown = ({ item }: any) => {
     const pathname = usePathname();
     const userData = useData();
 

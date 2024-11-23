@@ -15,7 +15,6 @@ const SearchBookingModal = (props: SearchBookingProps) => {
     const { showSearchBookingModal, setSearchShowBookingModal, sportField } = props;
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
-    const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
     const [selectedSportType, setSelectedSportType] = useState<number | null>(null);
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
     const [startTime, setStartTime] = useState("");
@@ -100,7 +99,6 @@ const SearchBookingModal = (props: SearchBookingProps) => {
         if (index !== -1) {
             newData.splice(0, index);
         }
-        setDataTimeSport((prevData) => [...prevData, ...newData]);
         const modifiedValidTimes = newData.slice(0, -2);
         setValidTimes(modifiedValidTimes);
     }, [operatingTime, opening]);

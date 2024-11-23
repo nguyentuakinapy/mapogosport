@@ -1,6 +1,6 @@
 import { formatPrice } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
-import { Button, Col, Form, Modal, Row, FloatingLabel } from "react-bootstrap";
+import { Button, Col, Modal, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
 
@@ -13,7 +13,7 @@ interface OwnerProps {
 const CreateOwnerModal = (props: OwnerProps) => {
     const { showCreateOwnerModal, setShowCreateOwnerModal, userData } = props;
 
-    const [authority, setAuthority] = useState<number>(3);
+    const authority: number = 3;
     const [checkPaymentMethod, setCheckPaymentMethod] = useState<boolean>(true);
 
     const [accountPackage, setAccountPackage] = useState<AccountPackage[]>();
@@ -23,14 +23,14 @@ const CreateOwnerModal = (props: OwnerProps) => {
     const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
     const [page, setPage] = useState<boolean>(true);
 
-    const [bankAccount, setBankAccount] = useState<string>("");
-    const [momoAccount, setMomoAccount] = useState<string>("");
-    const [vnpayAccount, setVnpayAccount] = useState<string>("");
+    // const [bankAccount, setBankAccount] = useState<string>("");
+    // const [momoAccount, setMomoAccount] = useState<string>("");
+    // const [vnpayAccount, setVnpayAccount] = useState<string>("");
 
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-    const { data: ap, error: erAp, isLoading: isLoadingAp } = useSWR(
+    const { data: ap } = useSWR(
         `http://localhost:8080/rest/accountpackage`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
@@ -41,7 +41,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
         setAccountPackage(ap);
     }, [ap])
 
-    const { data: dataPM, error: errorPM, isLoading: isLoadingPM } = useSWR(
+    const { data: dataPM } = useSWR(
         `http://localhost:8080/rest/paymentMethod`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
@@ -61,6 +61,8 @@ const CreateOwnerModal = (props: OwnerProps) => {
         setAccountPackageTemporary(ap);
         setPage(false);
     }
+
+    //Myj
 
     const createOwnerAccount = async () => {
         const responseUserSubscription = await fetch('http://localhost:8080/rest/user/subscription', {
@@ -82,7 +84,9 @@ const CreateOwnerModal = (props: OwnerProps) => {
             throw new Error('Network response was not ok');
         }
 
-        const resSubscription = await responseUserSubscription.json() as Booking;
+        const resSubscription = await responseUserSubscription.json() as UserSubscription;
+        const userSubscriptionId = resSubscription.userSubscriptionId;
+        console.log(">>>>resSubscription: ", resSubscription);
 
         const responseOwner = await fetch('http://localhost:8080/rest/owner', {
             method: 'POST',
@@ -103,6 +107,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
         }
 
         const resOwner = await responseOwner.json() as Owner;
+        const ownerId = resOwner.ownerId;
 
         const responseAuth = await fetch('http://localhost:8080/rest/authority', {
             method: 'POST',
@@ -125,41 +130,66 @@ const CreateOwnerModal = (props: OwnerProps) => {
         }
 
         const resAuth = await responseAuth.json(); // Sửa lại dòng này
-
-        const responseWallet = await fetch(`http://localhost:8080/rest/wallet/create/owner/${userData?.username}/${accountPackageTemporary?.price}`, {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json'
-            },
-        });
-
-        if (!responseWallet.ok) {
-            throw new Error('Network response was not ok');
-        }
-
-        const resWallet = await responseWallet.json(); // Sửa lại dòng này
+        const authorityId = resAuth.authorityId;
 
         if (resSubscription && resOwner && resAuth) {
             mutate(`http://localhost:8080/rest/user/${userData?.username}`);
 
-            toast.success('Đăng ký trở thành chủ sân thành công! ');
+            // toast.success('Đăng ký trở thành chủ sân thành công! ');
             handleClose();
-            window.location.href = '/owner'
+
         } else {
             toast.success('Cập nhật thất bại! ');
         }
+
+        return { userSubscriptionId, ownerId, authorityId };
+
     }
+
 
     const handleSubmit = async () => {
         if (checkPaymentMethod) {
             if (userData && accountPackageTemporary && userData.wallet.balance >= accountPackageTemporary.price) {
                 createOwnerAccount();
+                const responseWallet = await fetch(`http://localhost:8080/rest/wallet/create/owner/${userData?.username}/${accountPackageTemporary?.price}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json'
+                    },
+                });
+
+                if (!responseWallet.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                window.location.href = '/owner'
             } else {
                 toast.warning("Số dư của bạn không đủ");
             }
         } else {
-            createOwnerAccount();
+            const accountData = await createOwnerAccount();
+            try {
+                const responsePayment = await fetch('http://localhost:8080/rest/subscription/payment', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userSubscriptionId: accountData.userSubscriptionId,
+                        ownerId: accountData.ownerId,
+                        authorityId: accountData.authorityId,
+                        paymentMethodId: paymentMethodId,
+                    })
+                });
+                const responseData = await responsePayment.json();
+                const paymentUrl = responseData.url;
+                // chuyển hướng đến URL thanh toán
+                window.location.href = paymentUrl;
+            } catch (error) {
+                console.error('Error during payment:', error);
+            }
         }
 
 
@@ -243,9 +273,9 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                 <div className="form-floating mb-3">
                                     <select className="form-select">
 
-                                        {userData && userData.addressUsers.length > 0 ?
+                                        {userData && userData.phoneNumberUsers.length > 0 ?
                                             userData.phoneNumberUsers.map((pNu, index) => (
-                                                <option selected={index === 0} key={pNu.phoneNumberUserId} value={pNu.phoneNumber.phoneNumber}>{pNu.phoneNumber.phoneNumber}.</option>
+                                                <option selected={index === 0} key={pNu.phoneNumberUserId} value={pNu.phoneNumber.phoneNumber}>{pNu.phoneNumber.phoneNumber}</option>
                                             ))
                                             :
                                             <option value="">Bạn chưa thêm số điện thoại</option>
@@ -262,8 +292,8 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                 <div className=" my-3">
                                     {accountPackageTemporary?.accountPackageBenefits.map(apb => {
                                         return (
-                                            <div>
-                                                <i key={apb.accountPackageBenefitId} className="bi bi-check-circle me-2"></i>
+                                            <div key={apb.accountPackageBenefitId}>
+                                                <i className="bi bi-check-circle me-2"></i>
                                                 {apb.benefit.description}
                                             </div>
                                         )
@@ -310,8 +340,13 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                 :
                                 <div className="form-floating mb-3">
                                     <select value={paymentMethodId}
-                                        onChange={(e) => setPaymentMethodId(Number(e.target.value))}
+                                        onChange={(e) => {
+                                            const value = Number(e.target.value);
+                                            console.log("Selected value:", value);
+                                            setPaymentMethodId(value);
+                                        }}
                                         className="form-select" aria-label="Default select example">
+                                        <option value="0">Chọn phương thức thanh toán</option>
                                         {dataPaymentMethod && (
                                             dataPaymentMethod.map((item) => {
                                                 if (item.paymentMethodId === 6 ||

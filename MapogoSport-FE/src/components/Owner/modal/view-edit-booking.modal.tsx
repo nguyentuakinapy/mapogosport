@@ -1,6 +1,6 @@
 import { createTimeStringH } from "@/components/Utils/booking-time";
 import { formatPrice } from "@/components/Utils/Format";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
 import NotificationModal from "./notification.modal";
@@ -19,7 +19,7 @@ interface OwnerProps {
 
 const BookingModal = (props: OwnerProps) => {
     const { showViewOrEditBookingModal, setShowViewOrEditBookingModal, sport, bookingBySubscriptionKey
-        , owner, checkDataStatus, setCheckDataStatus, startTimeKey, bookingDetailData } = props;
+        , checkDataStatus, setCheckDataStatus, bookingDetailData } = props;
 
     const [editBooking, setEditBooking] = useState<boolean>(true);
     const [dateBooking, setDateBooking] = useState<string>();
@@ -186,11 +186,9 @@ const BookingModal = (props: OwnerProps) => {
         }
 
         const timeOpen = sport && sport.opening.match(/(\d+)h(\d+)/);
-        const hourOpen = timeOpen ? Number(timeOpen[1]) : 0;
         const minuteOpen = timeOpen ? Number(timeOpen[2]) : 0;
 
         const timeClose = sport && sport.closing.match(/(\d+)h(\d+)/);
-        const hourClose = timeClose ? Number(timeClose[1]) : 0;
         const minuteClose = timeClose ? Number(timeClose[2]) : 0;
 
         const checkDay = dateBooking && new Date().setHours(0, 0, 0, 0) === new Date(dateBooking).setHours(0, 0, 0, 0);
@@ -536,8 +534,8 @@ const BookingModal = (props: OwnerProps) => {
         setDataTimeOnStageAll(timeSlots);
     }
 
-
     useEffect(() => {
+        getPriceByTimeBooking();
         createTimeByTimeOnStage();
     }, [startTimeBooking, endTimeBooking])
 
@@ -581,9 +579,7 @@ const BookingModal = (props: OwnerProps) => {
         return checkDate >= startDate && checkDate <= endDate;
     }
 
-    useEffect(() => {
-        getPriceByTimeBooking();
-    }, [startTimeBooking, endTimeBooking])
+
 
 
     const convertToMinutes = (time: string) => {
@@ -597,10 +593,6 @@ const BookingModal = (props: OwnerProps) => {
 
         return endTotalMinutes - startTotalMinutes;
     };
-
-    const isEven = (number: number): boolean => {
-        return number % 2 === 0;
-    }
 
     const [price, setPrice] = useState<number>();
 

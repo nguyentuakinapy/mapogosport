@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Chart } from "react-google-charts";
 
 export const options = {
@@ -10,11 +10,11 @@ export const options = {
   },
 };
 
-interface CustomerLineChart{
+interface CustomerLineChart {
   data: any[]
 }
 
-export default function CustomerLineChart({data}:CustomerLineChart) {
+export default function CustomerLineChart({ data }: CustomerLineChart) {
   return (
     <Chart
       chartType="LineChart"
