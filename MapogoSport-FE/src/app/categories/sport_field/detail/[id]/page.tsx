@@ -671,8 +671,11 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                         <h5 className='ms-3'>Bình luận</h5>
                         <div className="d-flex ms-4">
                             {[5, 4, 3, 2, 1].map((value) => (
-                                <button key={value} type="button" className='btn ms-2' style={{ background: '#142239', color: 'white' }}
+                                <button key={value} type="button"
+                                    className='btn ms-2'
+                                    style={selectedRatingFilter === value ? { background: '#142239', color: 'red' } : { background: '#142239', color: 'white' }}
                                     onClick={() => handleClick(value)}>
+
                                     {value} ★
                                 </button>
                             ))}

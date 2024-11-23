@@ -42,10 +42,24 @@ const Admin = () => {
         setSelectedOption(value);
     };
 
-    const handleSelectDay = (e) => {
-        const value = e.target.value;
-        setSelectedOptionDay(value);
+    const handleSelectDay = (event) => {
+        const selectedOption = event.target.value;
+        console.log("Selected Option: ", selectedOption);
+        setSelectedOptionDay(selectedOption);
     };
+
+
+    useEffect(() => {
+        if (selectedOptionDay !== 'Một Ngày' && selectedOptionDay !== 'Nhiều Ngày') {
+            setSelectedDate(null);
+            setSelectedDate1(null);
+            setDataListOther([]);
+            setDataColumnnChartOther([]);
+            console.log("States reset for non-date options");
+        }
+    }, [selectedOptionDay]);
+
+
 
 
     const handleFindDate = async () => {
@@ -75,6 +89,7 @@ const Admin = () => {
             // Optional: Show error message to the user
         }
     };
+
 
     const ColumnChart = () => {
         useEffect(() => {
