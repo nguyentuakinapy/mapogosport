@@ -528,16 +528,7 @@ const BookingModal = React.memo((props: BookingProps) => {
             console.log(error);
         }
     }
-    //Toast sau khi đặt
-    const searchParams = useSearchParams();
-    const status = searchParams.get('status');
-    useEffect(() => {
-        if (status === 'success') {
-            toast.success("Đặt sân thành công!");
-        } else if (status === 'fail') {
-            toast.warn("Đã xảy ra lỗi trong quá trình đặt sân, vui lòng thử lại sau!");
-        }
-    }, [status]);
+
     //
     const createBookingByPeriod = async (paymentMethod: PaymentMethod) => {
         if (totalAmount === undefined || totalAmount <= 0) {
