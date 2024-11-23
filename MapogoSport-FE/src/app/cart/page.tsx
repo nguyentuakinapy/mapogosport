@@ -232,107 +232,133 @@ const Cart = () => {
       <h1 className="text-center pt-4 mb-">Giỏ hàng</h1>
       <div className="container" >
         <div className="d-flex">
-          <Col className={`col-md-8 p-3 mb-5 rounded ${user ? 'shadow bg-body' : ' '}`}>
+          <Col className={`${dataCart && dataCart.length > 0 ? 'col-md-8' : 'col-md-12'}   p-3 mb-5 rounded ${user ? 'shadow bg-body' : ' '}`}>
             {user && (
               <>
                 <div className="table-responsive">
-                  <table className="table table-hover">
-                    <thead>
-                      <tr>
-                        <th scope="col" style={{ width: '5%' }}>
-                          <input
-                            className="me-2"
-                            type="checkbox"
-                            checked={selectAll}
-                            onChange={handleSelectAll}
-                          />
-                        </th>
-                        <th scope="col" className="col-2"></th>
-                        <th scope="col">Thông tin</th>
-                        <th scope="col">Đơn Giá</th>
-                        <th scope="col">Số lượng</th>
-                        <th scope="col" style={{ width: '10%' }}>Xóa</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dataCart && dataCart.map((cart, index: number) => (
-                        <tr key={index}>
-                          <td>
+                  {dataCart && dataCart.length > 0 ? (
+                    <table className="table table-hover">
+                      <thead>
+                        <tr>
+                          <th scope="col" style={{ width: '5%' }}>
                             <input
+                              className="me-2"
                               type="checkbox"
-                              checked={selectedProducts[index]}
-                              onChange={() => handleProductSelect(index)}
+                              checked={selectAll}
+                              onChange={handleSelectAll}
                             />
-                          </td>
-                          <td>
-                            <img
-                              src={`${cart.productDetailSize.productDetail.image}`}
-                              className="img-fluid me-5 rounded-circle"
-                              style={{ width: '80px', height: '80px' }}
-                              alt=""
-                            />
-                          </td>
-                          <td>
-                            <Link style={{ textDecoration: 'none', color: '#333' }} href={`/product-detail/${cart.productDetailSize.productDetail.product.productId}`}>
-                              <p className="mb-0">{cart.productDetailSize.productDetail.product.name}
-                                <br /> ({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})</p>
-                            </Link>
-                          </td>
-                          <td>
-                            <p className="mb-0">{formatPrice(cart.productDetailSize.price)}</p>
-                          </td>
-                          <td>
-                            <div className="d-flex mb-0">
-                              <ButtonGroup className="ms-3">
-                                <Button variant="outline-secondary" onClick={() => decreaseQuantity(index)}>-</Button>
-                                <Form.Control
-                                  type="text"
-                                  value={quantities[index]} // Hiển thị số lượng
-                                  readOnly
-                                  className="text-center"
-                                  style={{ maxWidth: '50px' }}
-                                />
-                                <Button variant="outline-secondary" onClick={() => increaseQuantity(index)}>+</Button>
-                              </ButtonGroup>
-                            </div>
-                          </td>
-                          <td>
-                            <button className="btn btn-md rounded-circle bg-light border" style={{ width: '35px', height: '35px', padding: 0 }}
-                              onClick={() => handleDeleCartItem(index)}
-                            >
-                              <i className="text-danger bi bi-x"></i>
-                            </button>
-                          </td>
+                          </th>
+                          <th scope="col" className="col-2"></th>
+                          <th scope="col">Thông tin</th>
+                          <th scope="col">Đơn Giá</th>
+                          <th scope="col">Số lượng</th>
+                          <th scope="col" style={{ width: '10%' }}>Xóa</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {dataCart.map((cart, index: number) => (
+                          <tr key={index}>
+                            <td>
+                              <input
+                                type="checkbox"
+                                checked={selectedProducts[index]}
+                                onChange={() => handleProductSelect(index)}
+                              />
+                            </td>
+                            <td>
+                              <img
+                                src={`${cart.productDetailSize.productDetail.image}`}
+                                className="img-fluid me-5 rounded-circle"
+                                style={{ width: '80px', height: '80px' }}
+                                alt=""
+                              />
+                            </td>
+                            <td>
+                              <Link
+                                style={{ textDecoration: 'none', color: '#333' }}
+                                href={`/product-detail/${cart.productDetailSize.productDetail.product.productId}`}
+                              >
+                                <p className="mb-0">
+                                  {cart.productDetailSize.productDetail.product.name}
+                                  <br />({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})
+                                </p>
+                              </Link>
+                            </td>
+                            <td>
+                              <p className="mb-0">{formatPrice(cart.productDetailSize.price)}</p>
+                            </td>
+                            <td>
+                              <div className="d-flex mb-0">
+                                <ButtonGroup className="ms-3">
+                                  <Button variant="outline-secondary" onClick={() => decreaseQuantity(index)}>-</Button>
+                                  <Form.Control
+                                    type="text"
+                                    value={quantities[index]} // Hiển thị số lượng
+                                    readOnly
+                                    className="text-center"
+                                    style={{ maxWidth: '50px' }}
+                                  />
+                                  <Button variant="outline-secondary" onClick={() => increaseQuantity(index)}>+</Button>
+                                </ButtonGroup>
+                              </div>
+                            </td>
+                            <td>
+                              <button
+                                className="btn btn-md rounded-circle bg-light border"
+                                style={{ width: '35px', height: '35px', padding: 0 }}
+                                onClick={() => handleDeleCartItem(index)}
+                              >
+                                <i className="text-danger bi bi-x"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="text-center">
+                      <i className="bi bi-bag-plus-fill" style={{ fontSize: '100px' }}></i>
+                      <p className="text-muted fs-5">Bạn cần thêm một sản phẩm vào giỏ hàng của mình
+                        <br /> Vui lòng quay lại <strong>"Trang sản phẩm"</strong> và tìm sản phẩm của bạn  </p>
+                      <Link className='btn btn-dark text-white mb-5'
+                        style={{ textDecoration: 'none', color: '#333' }}
+                        href="/categories/products"
+                      > Trang Sản Phẩm</Link>
+                    </div>
+                  )}
                 </div>
+
               </>
             )}
           </Col>
-          <Col className="col-md-4 ms-3 shadow bg-body p-3 mb-5 rounded">
-            <div className="rounded">
-              <div className="p-4">
-                <h1 className="display-6 mb-4">Tổng tiền</h1>
-              </div>
-              <div className="py-4 mb-4 border-top border-bottom border-dark d-flex justify-content-between">
-                <h5 className="mb-0 mx-4">Tổng cộng</h5>
-                <p className="mb-0 mx-4 text-danger fw-bold">{formatPrice(totalPrice)}</p> {/* Hiển thị tổng tiền */}
-              </div>
+          {dataCart && dataCart.length > 0 ? (
+            <Col className="col-md-4 ms-3 shadow bg-body p-3 mb-5 rounded" >
+              <div className="rounded">
+                <div className="p-4">
+                  <h1 className="display-6 mb-4">Tổng tiền</h1>
+                </div>
+                <div className="py-4 mb-4 border-top border-bottom border-dark d-flex justify-content-between">
+                  <h5 className="mb-0 mx-4">Tổng cộng</h5>
+                  <p className="mb-0 mx-4 text-danger fw-bold">{formatPrice(totalPrice)}</p> {/* Hiển thị tổng tiền */}
+                </div>
 
-              <div className="text-center d-flex ms-4">
-                <button className="btn btn-outline-secondary px-3 me-3 py-3 text-dark mb-4" type="button">
-                  Tiếp Tục Mua hàng
-                </button>
-                <Button
-                  className="btn btn-dark px-3 me-3 py-3 text-light mb-4"
-                  type="button"
-                  onClick={() => saveCartIdsToLocalStorage()}
-                > Thanh Toán Ngay</Button>
+                <div className="text-center d-flex ms-4">
+                  <button className="btn btn-outline-secondary px-3 me-3 py-3 text-dark mb-4" type="button">
+                    Tiếp Tục Mua hàng
+                  </button>
+                  <Button
+                    className="btn btn-dark px-3 me-3 py-3 text-light mb-4"
+                    type="button"
+                    onClick={() => saveCartIdsToLocalStorage()}
+                  > Thanh Toán Ngay</Button>
+                </div>
               </div>
-            </div>
-          </Col>
+            </Col>
+          ) : (
+            <></>
+          )
+          }
+
         </div>
       </div >
     </HomeLayout >
