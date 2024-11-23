@@ -145,7 +145,7 @@ public class BookingRestController {
 		transaction.setWallet(wallet);
 		transaction.setAmount(new BigDecimal(trimmedAmount));
 		transaction.setCreatedAt(LocalDateTime.now());
-		transaction.setDescription("Nạp từ hóa đơn đặt sân: " + bookingId + " ("+paymentMethod+")");
+		transaction.setDescription("Nạp từ hóa đơn đặt sân: " + bookingId + " (" + paymentMethod + ")");
 		transaction.setTransactionType("+" + trimmedAmount);
 		transactionService.create(transaction);
 
@@ -166,22 +166,24 @@ public class BookingRestController {
 			@RequestParam(value = "vnp_OrderInfo") Integer bookingId,
 			@RequestParam(value = "vnp_Amount") String amount) {
 		Booking booking = bookingDao.findById(bookingId).get();
-		Integer sportFieldDetailId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportFielDetailId();
+//		Integer sportFieldDetailId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportFielDetailId();
 		User user = booking.getUser();
 		String trimmedAmount = amount.substring(0, amount.length() - 2);
 
 		if (responseCode.equals("00")) {
 			createTransaction(user, trimmedAmount, bookingId, "VNPay");
-			return new RedirectView(
-					"http://localhost:3000/categories/sport_field/detail/" + sportFieldDetailId + "?status=success");
+			return new RedirectView("http://localhost:3000/categories/sport_field/detail/"
+					+ booking.getBookingDetails().get(0).getSportFieldDetail().getSportField().getSportFieldId()
+					+ "?status=success");
 		} else {
 			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId);
 			for (BookingDetail bookingDetail : bookingDetails) {
 				bookingDetailDAO.delete(bookingDetail);
 			}
 			bookingDao.delete(booking);
-			return new RedirectView(
-					"http://localhost:3000/categories/sport_field/detail/" + sportFieldDetailId + "?status=fail");
+			return new RedirectView("http://localhost:3000/categories/sport_field/detail/"
+					+ booking.getBookingDetails().get(0).getSportFieldDetail().getSportField().getSportFieldId()
+					+ "?status=fail");
 		}
 	}
 
@@ -326,11 +328,11 @@ public class BookingRestController {
 
 	@PostMapping("/payment/process/{bookingId}")
 	public void processPayment(@PathVariable("bookingId") Integer bookingId, @RequestParam double totalAmount) {
-		transactionService.createTransactionByPaymentBooking(bookingId, totalAmount);
+//		transactionService.createTransactionByPaymentBooking(bookingId, totalAmount);
 		transactionService.createTransactionUserByPaymentBooking(bookingId, totalAmount);
 		transactionService.createTransactionOwnerByPaymentBooking(bookingId, totalAmount);
-}
-  
+	}
+
 	@GetMapping("/booking/detail/tableCustomer/byFullname/{fullname}")
 	public List<Booking> findByFullName(@PathVariable("fullname") String fullname) {
 		return bookingService.findByFullNameOffline(fullname);

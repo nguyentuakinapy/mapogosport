@@ -62,6 +62,16 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
 
     // },[currentUser])
 
+    //Toast sau khi đặt
+    const searchParams = useSearchParams();
+    const status = searchParams.get('status');
+    useEffect(() => {
+        if (status === 'success') {
+            toast.success("Đặt sân thành công!");
+        } else if (status === 'fail') {
+            toast.warn("Đã xảy ra lỗi trong quá trình đặt sân, vui lòng thử lại sau!");
+        }
+    }, [status]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
