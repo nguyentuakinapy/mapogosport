@@ -1,14 +1,19 @@
 package mapogo.rest;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,16 +23,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
+import jakarta.servlet.http.HttpServletRequest;
+import mapogo.dao.BookingDAO;
+import mapogo.dao.BookingDetailDAO;
+import mapogo.dto.PaymentDTO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
 import mapogo.entity.SportField;
 import mapogo.entity.SportFieldDetail;
+import mapogo.entity.Transaction;
+import mapogo.entity.User;
+import mapogo.entity.Wallet;
 import mapogo.service.BookingDetailService;
 import mapogo.service.BookingService;
 import mapogo.service.TransactionService;
+import mapogo.service.UserSubscriptionService;
+import mapogo.service.WalletService;
 
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/rest")
 public class BookingRestController {
@@ -36,7 +51,7 @@ public class BookingRestController {
 
 	@Autowired
 	BookingDetailService bookingDetailService;
-	
+
 	@Autowired
 	TransactionService transactionService;
 
@@ -100,6 +115,70 @@ public class BookingRestController {
 		return bookingDetailService.createBookingDetail(bd);
 	}
 
+	@PostMapping("/booking/payment")
+	public ResponseEntity<?> createPayment(@RequestBody Map<String, Object> data, HttpServletRequest req)
+			throws UnsupportedEncodingException {
+		PaymentDTO paymentDTO = bookingService.createPaymentVNPay(data, req);
+		System.out.println(paymentDTO.getURL());
+		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
+
+	}
+
+	@Autowired
+	BookingDAO bookingDao;
+
+	@Autowired
+	BookingDetailDAO bookingDetailDAO;
+	
+	@Autowired
+	WalletService walletService;
+
+	@GetMapping("/booking/paymentInfo")
+	public RedirectView updateUserSubscription2(@RequestParam(value = "vnp_ResponseCode") String responseCode,
+			@RequestParam(value = "vnp_OrderInfo") Integer bookingId,
+			@RequestParam(value = "vnp_Amount") String amount) {
+		Booking booking = bookingDao.findById(bookingId).get();
+		Integer sportFieldDetailId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportFielDetailId();
+		User user = booking.getUser();
+		String trimmedAmount = amount.substring(0, amount.length() - 2);
+
+		if (responseCode.equals("00")) {
+			// update +Balance
+			Wallet wallet = walletService.findByUsername(user);
+
+			// create transaction
+			Transaction transaction = new Transaction();
+			transaction.setWallet(wallet);
+			transaction.setAmount(new BigDecimal(trimmedAmount));
+			transaction.setCreatedAt(LocalDateTime.now());
+			transaction.setDescription("Nạp từ hóa đơn đặt sân: " + bookingId + " (VNPay)");
+			transaction.setTransactionType("+" + trimmedAmount);
+			transactionService.create(transaction);
+
+			// create bookingPayment
+
+			// -balance -> create transaction
+			Transaction transaction1 = new Transaction();
+			transaction1.setWallet(wallet);
+			transaction1.setAmount(new BigDecimal(trimmedAmount));
+			transaction1.setCreatedAt(LocalDateTime.now());
+			transaction1.setDescription("Thanh toán hóa đơn đặt sân: " + bookingId);
+			transaction1.setTransactionType("-" + trimmedAmount);
+			transactionService.create(transaction1);
+			
+			return new RedirectView(
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldDetailId + "?status=success");
+		} else {
+			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId);
+			for (BookingDetail bookingDetail : bookingDetails) {
+				bookingDetailDAO.delete(bookingDetail);
+			}
+			bookingDao.delete(booking);
+			return new RedirectView(
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldDetailId + "?status=fail");
+		}
+	}
+
 	@GetMapping("/booking/successful/revenue/{status}/{ownerId}")
 	public List<Booking> findBookingAmountByOwnerAndStatus(@PathVariable("ownerId") Integer ownerId,
 			@PathVariable("status") String status) {
@@ -109,16 +188,14 @@ public class BookingRestController {
 	@GetMapping("/bookingdetail/booking/bysportField/byowner/{sportFieldIds}/{bookingId}/{status}")
 	public List<BookingDetail> findBookingDetailBySportFieldAndOwner(
 			@PathVariable("sportFieldIds") List<Integer> sportFieldIds,
-			@PathVariable("bookingId") List<Integer> bookingId,
-			@PathVariable("status") List<String> status) {
+			@PathVariable("bookingId") List<Integer> bookingId, @PathVariable("status") List<String> status) {
 
 		return bookingService.findBookingDetailBySportFieldAndOwner(sportFieldIds, bookingId, status);
 	}
 
 	@GetMapping("/bookingdetail/booking/bysportFieldDetail/{sportFieldIds}/{bookingId}/{status}")
 	public List<Object[]> findRevenueBySportFieldDetailIds(@PathVariable("sportFieldIds") List<Integer> sportFieldIds,
-			@PathVariable("bookingId") List<Integer> bookingId,
-			@PathVariable("status") List<String> status) {
+			@PathVariable("bookingId") List<Integer> bookingId, @PathVariable("status") List<String> status) {
 		return bookingService.findRevenueBySportFieldDetailIds(sportFieldIds, bookingId, status);
 	}
 
@@ -149,8 +226,7 @@ public class BookingRestController {
 	@GetMapping("/bookingDetail/byOwner/bySportField/byDate/{sportFieldIds}/{bookingId}/{status}/{startDate}/{endDate}")
 	public List<BookingDetail> findBookingDetailByDate(@PathVariable("sportFieldIds") List<Integer> sportFieldIds,
 			@PathVariable("bookingId") List<Integer> bookingId, @PathVariable("status") List<String> status,
-			@PathVariable("startDate") String startDate,
-			@PathVariable("endDate") String endDate) {
+			@PathVariable("startDate") String startDate, @PathVariable("endDate") String endDate) {
 		return bookingService.findBookingDetailByDate(sportFieldIds, bookingId, status, startDate, endDate);
 	}
 
@@ -160,7 +236,8 @@ public class BookingRestController {
 			@PathVariable("bookingId") List<Integer> bookingId, @PathVariable("status") List<String> status,
 			@PathVariable("startDate") String startDate, @PathVariable("endDate") String enDate) {
 
-		return bookingService.findRevenueBySportFieldDetailIdsByDate(sportFieldDetailIds, bookingId, status, startDate, enDate);
+		return bookingService.findRevenueBySportFieldDetailIdsByDate(sportFieldDetailIds, bookingId, status, startDate,
+				enDate);
 	}
 
 	@GetMapping("/booking/byOwnerId/totalCustomer/{ownerId}")
@@ -183,7 +260,8 @@ public class BookingRestController {
 	}
 
 	@PutMapping("/booking/update/status/{bookingDetailId}")
-	public void cancelBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId, @RequestBody String note) {
+	public void cancelBookingDetail(@PathVariable("bookingDetailId") Integer bookingDetailId,
+			@RequestBody String note) {
 		bookingDetailService.cancelBookingDetail(bookingDetailId, note);
 	}
 
@@ -204,38 +282,38 @@ public class BookingRestController {
 		bookingDetailService.updateStatusChuaDaChangeToDaDa(bookingDetailId);
 	}
 
-	
 	@PostMapping("/booking/detail/add/new")
-	public void  addNewBookingDetail(@RequestBody Map<String, Object> data) {
+	public void addNewBookingDetail(@RequestBody Map<String, Object> data) {
 		bookingDetailService.addNewBookingDetail(data);
 	}
-	
+
 	@GetMapping("/booking/detail/find/date/and/time/{date}/{time}/{sportFieldId}")
 	public List<BookingDetail> findByDateAndTime(
 			@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
 			@PathVariable("time") String time, @PathVariable("sportFieldId") Integer sportFieldId) {
 		return bookingDetailService.findByDateAndTime(date, time, sportFieldId);
 	}
-	
+
 	@PostMapping("/payment/process/{bookingId}")
 	public void processPayment(@PathVariable("bookingId") Integer bookingId, @RequestParam double totalAmount) {
 		transactionService.createTransactionByPaymentBooking(bookingId, totalAmount);
-}
+	}
+
 	@GetMapping("/booking/detail/tableCustomer/byFullname/{fullname}")
-	public List<Booking> findByFullName(@PathVariable("fullname") String fullname){
+	public List<Booking> findByFullName(@PathVariable("fullname") String fullname) {
 		return bookingService.findByFullNameOffline(fullname);
 	}
-	
+
 	@GetMapping("/booking/rank/customer/online/byOwerId/{ownerId}")
-	public List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(@PathVariable("ownerId") Integer ownerId){
+	public List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(@PathVariable("ownerId") Integer ownerId) {
 		return bookingService.findBookingByOwnerIdExcludingUsernameOffline(ownerId);
 	}
-	
+
 	@GetMapping("/booking/rank/customer/online/{username}")
-	public List<Booking> findBookingByUsernameOnline(@PathVariable("username") String username){
+	public List<Booking> findBookingByUsernameOnline(@PathVariable("username") String username) {
 		return bookingService.findByUsername(username);
 	}
-	
+
 	@GetMapping("/count/booking/{ownerId}")
 	public Integer getCountBookingByOwnerId(@PathVariable("ownerId") Integer ownerId) {
 		return bookingService.getCountBookingByOwnerId(ownerId);

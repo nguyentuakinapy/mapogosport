@@ -152,7 +152,7 @@ public class UserRestController {
 			@RequestBody Map<String, Object> requestBody, HttpServletRequest req) throws UnsupportedEncodingException {
 		// thanh toán
 		PaymentDTO paymentDTO = userSubService.createSubscriptionPayment(requestBody, req);
-		System.out.println(paymentDTO.getURL());
+//		System.out.println(paymentDTO.getURL());
 		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
 
