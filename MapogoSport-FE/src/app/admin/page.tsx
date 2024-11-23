@@ -1,7 +1,7 @@
 'use client'
 import ProfileContent from "@/components/User/modal/user.profile";
 import { useSearchParams } from "next/navigation";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { useData } from "../context/UserContext";
 import AuthorityComponent from "./authority/page";
