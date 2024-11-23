@@ -916,15 +916,29 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     const [note, setNote] = useState<string>();
+
     const testOnclick = () => {
         // toast.success("NGON TA: " + note);
         handleCancelBookingDetail()
+        setNote("");
     }
 
     const renderNotification = () => {
         return (
-            <div className="text-center">
-                <FloatingLabel controlId="floatingTextarea2" label="Lý do hủy">
+            <div >
+                <Form>
+                    <Form.Group>
+                        <div>
+                            {["Hủy bởi yêu cầu của khách hàng", "Hủy bởi chủ sân"].map((option, index) => (
+                                <Form.Check key={index} type="radio" className="mb-3" id={`reason-${index}`}
+                                    label={option} value={option} onChange={(e) => setNote(e.target.value)}
+                                    checked={note === option}
+                                />
+                            ))}
+                        </div>
+                    </Form.Group>
+                </Form>
+                {/* <FloatingLabel controlId="floatingTextarea2" label="Lý do hủy">
                     <Form.Control
                         as="textarea"
                         placeholder="Leave a comment here"
@@ -932,8 +946,8 @@ const BookingModal = (props: OwnerProps) => {
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                     />
-                </FloatingLabel>
-                <button onClick={testOnclick} className="mt-2 w-100 btn btn-outline-danger">XÁC NHẬN HỦY</button>
+                </FloatingLabel> */}
+                <button onClick={testOnclick} className="mt-2 w-100 btn btn-danger">XÁC NHẬN HỦY</button>
             </div>
 
         )
@@ -1321,7 +1335,7 @@ const BookingModal = (props: OwnerProps) => {
                     </Button>
                 </Modal.Footer>
             </Modal >
-            <NotificationModal textHeadNotification={"Lý do hủy sân"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
+            <NotificationModal size={undefined} textHeadNotification={"Lý do hủy sân"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
             </NotificationModal>
         </>
     )

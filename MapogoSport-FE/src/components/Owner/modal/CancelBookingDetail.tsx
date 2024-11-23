@@ -68,6 +68,7 @@ const CancelBookingDetailModal = (props: CancelBookingDetail) => {
                 return;
             }
             mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
+            mutate(`http://localhost:8080/rest/user/booking/${bookingId}`);
             toast.success('Cập nhật thành công!');
             handleClose();
         });
