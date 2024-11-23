@@ -16,7 +16,8 @@ interface ProfileContentProps {
     usernameFetchApi: string;
 }
 
-const ProfileContent: React.FC<ProfileContentProps> = React.memo(({ usernameFetchApi }) => {
+const ProfileContent = (props: ProfileContentProps) => {
+    const { usernameFetchApi } = props;
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [userData, setUserData] = useState<User | null>(null);
     const [fullName, setFullName] = useState<string>('');
@@ -152,6 +153,6 @@ const ProfileContent: React.FC<ProfileContentProps> = React.memo(({ usernameFetc
             <ModalUpdatePhone showUpdatePhone={showUpdatePhone} setShowUpdatePhone={setShowUpdatePhone} userData={userData} />
         </>
     );
-})
+}
 
 export default ProfileContent;
