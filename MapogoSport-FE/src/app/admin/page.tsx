@@ -27,7 +27,7 @@ export default function Owner({ children }: { children: ReactNode }) {
             setUsernameFetchApi(`http://localhost:8080/rest/user/${username}`);
         }
     }, []);
-    
+
 
     const renderContent = () => {
         switch (activeTab) {
@@ -96,9 +96,11 @@ export default function Owner({ children }: { children: ReactNode }) {
                 </div>
             </>
         )
+    } else {
+        return (
+            <>{children}</>
+        )
     }
-    return (
-        <>{children}</>
-    )
+
 
 }

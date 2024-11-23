@@ -1,6 +1,6 @@
 import { formatPrice } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
-import { Button, Col, Form, Modal, Row, FloatingLabel } from "react-bootstrap";
+import { Button, Col, Modal, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
 
@@ -13,7 +13,7 @@ interface OwnerProps {
 const CreateOwnerModal = (props: OwnerProps) => {
     const { showCreateOwnerModal, setShowCreateOwnerModal, userData } = props;
 
-    const [authority, setAuthority] = useState<number>(3);
+    const authority: number = 3;
     const [checkPaymentMethod, setCheckPaymentMethod] = useState<boolean>(true);
 
     const [accountPackage, setAccountPackage] = useState<AccountPackage[]>();
@@ -23,14 +23,14 @@ const CreateOwnerModal = (props: OwnerProps) => {
     const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
     const [page, setPage] = useState<boolean>(true);
 
-    const [bankAccount, setBankAccount] = useState<string>("");
-    const [momoAccount, setMomoAccount] = useState<string>("");
-    const [vnpayAccount, setVnpayAccount] = useState<string>("");
+    // const [bankAccount, setBankAccount] = useState<string>("");
+    // const [momoAccount, setMomoAccount] = useState<string>("");
+    // const [vnpayAccount, setVnpayAccount] = useState<string>("");
 
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-    const { data: ap, error: erAp, isLoading: isLoadingAp } = useSWR(
+    const { data: ap } = useSWR(
         `http://localhost:8080/rest/accountpackage`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
@@ -41,7 +41,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
         setAccountPackage(ap);
     }, [ap])
 
-    const { data: dataPM, error: errorPM, isLoading: isLoadingPM } = useSWR(
+    const { data: dataPM } = useSWR(
         `http://localhost:8080/rest/paymentMethod`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
@@ -163,7 +163,6 @@ const CreateOwnerModal = (props: OwnerProps) => {
                     throw new Error('Network response was not ok');
                 }
 
-                const resWallet = await responseWallet.json(); // Sửa lại dòng này
                 window.location.href = '/owner'
             } else {
                 toast.warning("Số dư của bạn không đủ");
@@ -293,8 +292,8 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                 <div className=" my-3">
                                     {accountPackageTemporary?.accountPackageBenefits.map(apb => {
                                         return (
-                                            <div>
-                                                <i key={apb.accountPackageBenefitId} className="bi bi-check-circle me-2"></i>
+                                            <div key={apb.accountPackageBenefitId}>
+                                                <i className="bi bi-check-circle me-2"></i>
                                                 {apb.benefit.description}
                                             </div>
                                         )

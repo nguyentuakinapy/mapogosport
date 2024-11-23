@@ -6,7 +6,6 @@ import { Chart } from "react-google-charts";
 import { faFileExport } from '@fortawesome/free-solid-svg-icons';
 
 export default function BookingChart() {
-  const [activeTab, setActiveTab] = useState<string>('all');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   // Dữ liệu cho biểu đồ tỷ lệ đặt sân
@@ -116,37 +115,37 @@ export default function BookingChart() {
             </div>
           </div>
           <div>
-              <Table striped bordered hover>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Thời gian</th>
-                    <th>Loại sân</th>
-                    <th>Tổng lượt đặt</th>
-                    <th>Lượt đặt</th>
-                    <th>Tỉ lệ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                    <td>@mdo</td>
-                    <td>@mdo</td>
-                  </tr>
-                  <tr>
-                    <td>1</td>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                    <td>@mdo</td>
-                    <td>@mdo</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </div>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Thời gian</th>
+                  <th>Loại sân</th>
+                  <th>Tổng lượt đặt</th>
+                  <th>Lượt đặt</th>
+                  <th>Tỉ lệ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>Mark</td>
+                  <td>Otto</td>
+                  <td>@mdo</td>
+                  <td>@mdo</td>
+                  <td>@mdo</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>Mark</td>
+                  <td>Otto</td>
+                  <td>@mdo</td>
+                  <td>@mdo</td>
+                  <td>@mdo</td>
+                </tr>
+              </tbody>
+            </Table>
+          </div>
         </div>
       </div>
     </div>

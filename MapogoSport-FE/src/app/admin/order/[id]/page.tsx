@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link";
-import { Table, Image, Row, Col, Button } from "react-bootstrap";
+import { Table, Image, Row, Col } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 
@@ -56,7 +56,7 @@ const OrderDetail = ({ params }: { params: { id: number } }) => {
                                     <tr key={detail.orderDetailId}>
                                         <td className="text-start title">
                                             <Link href={"#"}>
-                                                <Image src={`${detail.productImage}`} width={"15%"} className="mx-2"></Image>
+                                                <Image src={`${detail.productImage}`} width={"15%"} className="mx-2" />
                                                 {detail.productName}
                                             </Link>
                                         </td>

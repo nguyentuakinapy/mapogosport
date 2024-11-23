@@ -25,13 +25,10 @@ const BookingModal = (props: BookingProps) => {
         dayStartBooking, sport, owner, checkDataStatus, setCheckDataStatus, startTimeKey } = props;
     const [selectTime, setSelectTime] = useState<string>('Chọn thời gian');
     const [selectTimeOnStage, setSelectTimeOnStage] = useState<string>('Chọn thời gian');
-    const [isOffline, setIsOffline] = useState(false);
     const [activeTab, setActiveTab] = useState<string>('all');
     // const [dataPaymentMethod, setDataPaymentMethod] = useState<PaymentMethod[]>();
     const [checkPrepayPrice, setCheckPrepayPrice] = useState<boolean>(true);
-    const [username, setUsername] = useState<string>("");
     const [totalAmount, setTotalAmount] = useState<number>();
-    const [prepayPrice, setPrepayPrice] = useState<number>();
     // const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
     const [fullName, setFullName] = useState<string>("");
     const [phoneNumber, setPhoneNumber] = useState<string>("");
@@ -56,61 +53,58 @@ const BookingModal = (props: BookingProps) => {
 
     const [operatingTime, setOperatingTime] = useState<number>(0);
     const [operatingTimeFetchData, setOperatingTimeFetchData] = useState<number>(0);
-    const [dataTime, setDataTime] = useState<String[]>();
-    const [dataTimeTemporary, setDataTimeTemporary] = useState<String[]>();
+    const [dataTime, setDataTime] = useState<string[]>();
+    const [dataTimeTemporary, setDataTimeTemporary] = useState<string[]>();
 
     useEffect(() => {
+        const checkTimeBooking = async () => {
+            if (!startTime || !dayStartBooking) return;
+
+            const newData = [startTime];
+            for (let i = 0; i < operatingTime * 2; i++) {
+                const getTime = newData[i].match(/\d+/);
+                if (getTime) {
+                    const hour = Number(getTime[0]);
+                    newData.push(newData[i].includes("h30") ? `${hour + 1}h00` : `${hour}h30`);
+                }
+            }
+
+            let count = 0;
+            for (const time of newData) {
+                if (count >= 6) {
+                    setOperatingTimeFetchData(6);
+                    break;
+                }
+
+                try {
+                    const response = await fetch(
+                        `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
+                    );
+
+                    if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+                    const text = await response.text();
+
+                    if (text) {
+                        const dataBooking = JSON.parse(text);
+                        if (dataBooking && Object.keys(dataBooking).length > 0) {
+                            setOperatingTimeFetchData(count);
+                            break;
+                        }
+                    } else {
+                        setOperatingTimeFetchData(count);
+                    }
+                } catch (error) {
+                    console.error("API or JSON parsing error:", error);
+                }
+                count++;
+            }
+        }
+
         checkTimeBooking();
+
     }, [operatingTime]);
 
-    const checkTimeBooking = async () => {
-        if (!startTime || !dayStartBooking) return;
-
-        const newData = [startTime];
-        for (let i = 0; i < operatingTime * 2; i++) {
-            const getTime = newData[i].match(/\d+/);
-            if (getTime) {
-                const hour = Number(getTime[0]);
-                newData.push(newData[i].includes("h30") ? `${hour + 1}h00` : `${hour}h30`);
-            }
-        }
-
-        let count = 0;
-        for (const time of newData) {
-            if (count >= 6) {
-                setOperatingTimeFetchData(6);
-                break;
-            }
-
-            try {
-                const response = await fetch(
-                    `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
-                );
-
-                if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
-                const text = await response.text();
-
-                if (text) {
-                    const dataBooking = JSON.parse(text);
-                    if (dataBooking && Object.keys(dataBooking).length > 0) {
-                        setOperatingTimeFetchData(count);
-                        break;
-                    }
-                } else {
-                    setOperatingTimeFetchData(count);
-                }
-            } catch (error) {
-                console.error("API or JSON parsing error:", error);
-            }
-            count++;
-        }
-    };
-
     useEffect(() => {
-        getTime();
-    }, [startTimeKey, startTime]);
-
-    const getTime = () => {
         if (startTime && sport?.closing) {
             const [openHour, openMinute] = startTime.split("h").map(Number);
             const [closeHour, closeMinute] = sport.closing.split("h").map(Number);
@@ -118,44 +112,44 @@ const BookingModal = (props: BookingProps) => {
             const totalCloseMinutes = closeHour * 60 + closeMinute;
             setOperatingTime((totalCloseMinutes - totalOpenMinutes) / 60);
         }
-    };
-
+    }, [startTimeKey, startTime]);
 
     useEffect(() => {
+        const createDataTime = () => {
+            const newData: string[] = [];
+
+            const timeIntervals = [];
+
+            for (let hours = 0; hours <= 24; hours++) {
+                for (let minutes = 0; minutes <= 30; minutes += 30) {
+                    if (hours === 0 && minutes === 0) continue; // Bỏ qua 0 giờ 0 phút
+
+                    let label: string;
+
+                    if (hours === 0 && minutes > 0) {
+                        label = `${minutes} phút`;
+                    } else if (minutes === 0) {
+                        label = `${hours} giờ`;
+                    } else {
+                        label = `${hours} giờ ${minutes} phút`;
+                    }
+
+                    timeIntervals.push({ label, value: hours + minutes / 60 });
+                }
+            }
+            for (let index = 0; index < operatingTimeFetchData; index++) {
+                newData.push(timeIntervals[index].label);
+            }
+            if (activeTab === 'all') {
+                newData.shift()
+                setDataTimeTemporary(newData);
+            }
+        }
+
         createDataTime();
     }, [operatingTimeFetchData])
 
 
-    const createDataTime = () => {
-        const newData: string[] = [];
-
-        const timeIntervals = [];
-
-        for (let hours = 0; hours <= 24; hours++) {
-            for (let minutes = 0; minutes <= 30; minutes += 30) {
-                if (hours === 0 && minutes === 0) continue; // Bỏ qua 0 giờ 0 phút
-
-                let label: string;
-
-                if (hours === 0 && minutes > 0) {
-                    label = `${minutes} phút`;
-                } else if (minutes === 0) {
-                    label = `${hours} giờ`;
-                } else {
-                    label = `${hours} giờ ${minutes} phút`;
-                }
-
-                timeIntervals.push({ label, value: hours + minutes / 60 });
-            }
-        }
-        for (let index = 0; index < operatingTimeFetchData; index++) {
-            newData.push(timeIntervals[index].label);
-        }
-        if (activeTab === 'all') {
-            newData.shift()
-            setDataTimeTemporary(newData);
-        }
-    }
 
     useEffect(() => {
         getPriceByTimeBooking(selectTime);
@@ -164,10 +158,6 @@ const BookingModal = (props: BookingProps) => {
     useEffect(() => {
         getPriceByTimeBooking(selectTimeOnStage);
     }, [selectTimeOnStage]);
-
-    // const isEven = (number: number): boolean => {
-    //     return number % 3 === 0;
-    // }
 
     const getPriceByTimeBooking = (slTime: string) => {
         if (slTime == 'Chọn thời gian') {
@@ -230,7 +220,6 @@ const BookingModal = (props: BookingProps) => {
                 }
                 setPrice(totalAmount);
                 setTotalAmount(totalAmount);
-                setPrepayPrice(totalAmount * (sportDetail?.percentDeposit / 100))
             }
         }
     }
@@ -384,7 +373,7 @@ const BookingModal = (props: BookingProps) => {
         const getMinute = Number(timeParts[2]) | 0;
         const numberOfSlots = (getHour * 60 + getMinute);
 
-        const timeSlots = [];
+        const timeSlots: string[] = [];
 
         let currentHours = startHours;
         let currentMinutes = startMinutes;
@@ -422,6 +411,7 @@ const BookingModal = (props: BookingProps) => {
             for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
                 bookings.map(b => {
                     index = index + 1;
+
                 })
             }
         }
@@ -441,7 +431,7 @@ const BookingModal = (props: BookingProps) => {
                             `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${booking.date}`
                         );
 
-                        if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+                        if (!response.ok) throw new Error(`Error fetching data: ${response.statusText} ${weekIndex} `);
                         const text = await response.text();
 
                         if (text) {
@@ -665,7 +655,8 @@ const BookingModal = (props: BookingProps) => {
                             price,
                             date: b.date,
                             booking: resBooking.bookingId,
-                            subscriptionKey: activeTab !== 'all' ? `keybooking${resBooking.bookingId}` : ""
+                            subscriptionKey: activeTab !== 'all' ? `keybooking${resBooking.bookingId}` : "",
+                            weekIndex
                         })
                     });
                 })
@@ -676,7 +667,6 @@ const BookingModal = (props: BookingProps) => {
 
     const handleClose = () => {
         setShowBookingModal(false);
-        setUsername("");
         setOperatingTime(0);
         setOperatingTimeFetchData(0);
         setTotalAmount(0);
@@ -686,14 +676,12 @@ const BookingModal = (props: BookingProps) => {
         setActiveTab("all");
         setSportFieldDuplicate({});
         setSelectTime("Chọn thời gian");
-        setIsOffline(false);
         setFullName("");
         setPhoneNumber("");
         setSelectTimeOnStage("Chọn thời gian")
     }
 
     useEffect(() => {
-        setUsername("");
         setOperatingTime(0);
         setOperatingTimeFetchData(0);
         setTotalAmount(0);
@@ -702,7 +690,6 @@ const BookingModal = (props: BookingProps) => {
         setSelectedWeek([]);
         setSportFieldDuplicate({});
         setSelectTime("Chọn thời gian");
-        setIsOffline(false);
         setFullName("");
         setPhoneNumber("");
     }, [activeTab])
@@ -766,7 +753,7 @@ const BookingModal = (props: BookingProps) => {
         setCheckPrepayPrice(event.target.value === 'prepay');
     };
 
-    const calculateBookingPrice = (sportDetail: any, startTime: any, endTime: any) => {
+    const calculateBookingPrice = (sportDetail: SportFieldDetail, startTime: string, endTime: string | undefined) => {
         const { peakHour, peakHourPrices, price } = sportDetail;
 
         const [peakStart, peakEnd] = peakHour.split('-');
@@ -1008,7 +995,6 @@ const BookingModal = (props: BookingProps) => {
                             <InputGroup className="search-date mb-2">
                                 <Form.Control
                                     value={startTime}
-                                    onChange={(e) => undefined}
                                     placeholder="Thời gian bắt đầu"
                                     aria-label="Username"
                                     aria-describedby="basic-addon1"
@@ -1045,7 +1031,7 @@ const BookingModal = (props: BookingProps) => {
                         {Object.entries(sportFieldDuplicate).map(([week, bookings]) => (
                             <div key={week} className="bg-dark p-2 text-center mx-4 mt-2 text-light">
                                 <b className="text-uppercase">Đã có sân đặt vào {week}</b><br />
-                                {bookings.map((booking, index) => (
+                                {bookings.map((booking) => (
                                     <div key={booking.bookingDetailId}>
                                         Ngày: {formatDateNotime(booking.date)}  Giờ: {booking.startTime} - {booking.endTime}  {/* Có thể hiển thị thêm thông tin khác ở đây */}
                                     </div>

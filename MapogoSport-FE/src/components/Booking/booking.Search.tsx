@@ -21,7 +21,7 @@ const SearchSportField = (props: SearchBookingProps) => {
     const [startTime, setStartTime] = useState("");
     const [dayStartBooking, setDayStartBooking] = useState("");
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
-    const [startTimeKey, setStartTimeKey] = useState<boolean>(true);
+    const startTimeKey: boolean = true;
     const [validTimes, setValidTimes] = useState<string[]>([]);
     const [opening, setOpening] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);

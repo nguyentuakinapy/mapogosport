@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ListGroup } from "react-bootstrap";
 import SidebarDropdown from "./SideBarDropdown";
 
-const SidebarItem = ({ item, pageName, setPageName, userData }: any) => {
+const SidebarItem = ({ item, pageName, setPageName }: any) => {
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {

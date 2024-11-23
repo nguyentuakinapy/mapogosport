@@ -61,10 +61,6 @@ const AdminOrder = () => {
         }
     };
 
-    const handleViewDetail = (order: OrderMap) => {
-        sessionStorage.setItem('selectedOrder', JSON.stringify(order));
-    };
-
     const handleStatusChange = (orderId: number, newStatus: string) => {
         fetch(`http://localhost:8080/rest/admin/order/update`, {
             method: 'PUT',
