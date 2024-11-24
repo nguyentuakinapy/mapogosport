@@ -249,7 +249,7 @@ public class UserRestController {
 	@GetMapping("/subscription/paymentInfo-momo")
 	public RedirectView paymentInfoMomo(@RequestParam(value = "resultCode") String resultCode,
 			@RequestParam(value = "extraData") String data) {
-		
+
 		String[] parts = data.split("-");
 		int userSubscriptionId = Integer.parseInt(parts[0]);
 		int ownerId = Integer.parseInt(parts[1]);
@@ -271,7 +271,6 @@ public class UserRestController {
 
 		return new RedirectView("http://localhost:3000");
 	}
-	
 
 	@GetMapping("/user/subscription/{id}")
 	public UserSubscription findUserSubscriptionByUser(@PathVariable("id") String username) {
@@ -306,9 +305,55 @@ public class UserRestController {
 	@Autowired
 	WalletService walletService;
 
-	@PutMapping("/wallet/{username}/{money}")
-	public void addMoney(@PathVariable("username") String username,
-			@PathVariable("money") Double money) {
-		walletService.addMoney(username, money);
+//	@PutMapping("/wallet/{username}/{money}")
+//	public void addMoney(@PathVariable("username") String username,
+//			@PathVariable("money") Double money) {
+//		walletService.addMoney(username, money);
+//	}
+
+	// của Mỵ từ đây
+	@PostMapping("/wallet/createpaymentrecharge")
+	public ResponseEntity<?> createPaymentRecharge(@RequestBody Map<String, Object> requestBody,
+			HttpServletRequest req) throws UnsupportedEncodingException {
+		PaymentDTO paymentDTO = userSubService.createPaymentRecharge(requestBody, req);
+		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
+
+	@GetMapping("/wallet/createpaymentrecharge/infoVnpay")
+	public RedirectView getInfoVnpay(@RequestParam(value = "vnp_ResponseCode") String responseCode,
+			@RequestParam(value = "vnp_OrderInfo") String data) {
+		String[] parts = data.split("-");
+		String username = (parts[0]);
+		Double money = Double.parseDouble(parts[1]);
+
+		if (responseCode.equals("00")) {
+			walletService.addMoney(username, money);
+			return new RedirectView("http://localhost:3000/user/wallet");
+
+		} else {
+			return new RedirectView("http://localhost:3000/user/wallet");
+
+		}
+
+	}
+	
+	@GetMapping("/wallet/createpaymentrecharge/infoMomo")
+	public RedirectView getInfoMomo(@RequestParam(value = "resultCode") String responseCode,
+			@RequestParam(value = "extraData") String data) {
+		String[] parts = data.split("-");
+		String username = (parts[0]);
+		Double money = Double.parseDouble(parts[1]);
+
+		if (responseCode.equals("0")) {
+			walletService.addMoney(username, money);
+			return new RedirectView("http://localhost:3000/user/wallet");
+
+		} else {
+//			return new RedirectView("http://localhost:3000/user/wallet");
+			return null;
+		}
+
+	}
+
+	// đến đây
 }
