@@ -100,7 +100,7 @@ const AdminProduct = () => {
         setIsNeedScroll(false);
       }
     }
-  }, [products]);
+  }, [isNeedScroll, products]);
 
   // load lại data
   useEffect(() => {
@@ -110,10 +110,10 @@ const AdminProduct = () => {
     }
   }, [data]);
 
-  // Hàm thêm sản phẩm mới vào danh sách
-  const handleAddProduct = (newProduct: Product) => {
-    setProducts((prevProducts) => [...prevProducts, newProduct]);
-  };
+  // // Hàm thêm sản phẩm mới vào danh sách
+  // const handleAddProduct = (newProduct: Product) => {
+  //   setProducts((prevProducts) => [...prevProducts, newProduct]);
+  // };
 
   const handleEditClick = (product: Product) => {
     console.log("product ht ", product);

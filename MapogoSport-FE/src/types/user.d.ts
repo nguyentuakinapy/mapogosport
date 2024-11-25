@@ -9,32 +9,33 @@ interface User {
     email: string;
     avatar: string | null;
     authorities: Authorities[];
-    addressUsers: [
-        {
-            addressUserId: number;
-            address: {
-                addressId: number;
-                province: string;
-                district: string;
-                ward: string;
-            },
-            addressDetail: string;
-        }
-    ];
-    phoneNumberUsers: [
-        {
-            phoneNumberUserId: number;
-            phoneNumber: {
-                phoneNumberId: number;
-                phoneNumber: string;
-            },
-            active: boolean;
-        }
-    ],
+    addressUsers: AddressUsers[];
+    phoneNumberUsers: PhoneNumberUsers[],
     wallet: {
         walletId: number;
         balance: number;
     }
+}
+
+interface AddressUsers {
+    addressUserId: number;
+    address: {
+        addressId: number;
+        province: string;
+        district: string;
+        ward: string;
+    },
+    addressDetail: string;
+    active: boolean;
+}
+
+interface PhoneNumberUsers {
+    phoneNumberUserId: number;
+    phoneNumber: {
+        phoneNumberId: number;
+        phoneNumber: string;
+    },
+    active: boolean;
 }
 
 interface Authorities {
@@ -54,23 +55,6 @@ interface UserSubscription {
     status: string
     subscriptionPayments: SubscriptionPayments[]
 }
-
-interface SubscriptionPayments {
-
-}
-
-// interface NotificationUser {
-//     notificationId: number
-//     user: User
-//     title: string
-//     message: string
-//     type: string
-//     isRead: boolean
-//     createdAt: string
-//     updatedAt: string
-//     booking: Booking
-//     order: Order
-// }
 
 interface NotificationUser {
     notificationId: number

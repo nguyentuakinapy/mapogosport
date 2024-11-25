@@ -14,7 +14,7 @@ const OrderDetail = ({ params }: { params: { id: number } }) => {
     });
 
     const [orderDetail, setOrderDetail] = useState<OrderDetailMap[]>([]);
-    const [orderInfo, setOrderInfo] = useState<any>(null);
+    const [orderInfo, setOrderInfo] = useState<OrderInfo>();
 
     useEffect(() => {
         if (data) {
@@ -28,7 +28,7 @@ const OrderDetail = ({ params }: { params: { id: number } }) => {
         }
     }, [data]);
 
-    const totalAmount = orderDetail.reduce((sum: number, order: any) => {
+    const totalAmount = orderDetail.reduce((sum: number, order: OrderDetailMap) => {
         return sum + (order.productPrice * order.quantity);
     }, 0);
 
@@ -56,7 +56,7 @@ const OrderDetail = ({ params }: { params: { id: number } }) => {
                                     <tr key={detail.orderDetailId}>
                                         <td className="text-start title">
                                             <Link href={"#"}>
-                                                <Image src={`${detail.productImage}`} width={"15%"} className="mx-2" />
+                                                <Image src={`${detail.productImage}`} width={"15%"} className="mx-2" alt={`Sản phẩm ${detail.productName}`} />
                                                 {detail.productName}
                                             </Link>
                                         </td>

@@ -1,15 +1,10 @@
 'use client'
-
-import OrdersDetail from "@/app/user/orders/detail/[id]/page";
-import { formatPrice } from "@/components/Utils/Format";
-import { useEffect, useState } from "react";
-import { Button, Col, Modal, Row, Table } from "react-bootstrap";
-import useSWR from "swr";
+import { Button, Modal } from "react-bootstrap";
 
 interface OrderProps {
     showOrderSuccessModal: boolean;
     setShowOrderSuccessModal: (v: boolean) => void;
-    orderId: number;
+    orderId?: number;
 }
 const ModalOrderSuccess = (props: OrderProps) => {
     const { showOrderSuccessModal, setShowOrderSuccessModal, orderId } = props;
