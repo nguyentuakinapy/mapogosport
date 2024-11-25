@@ -1,30 +1,22 @@
 'use client';
-import { Container } from 'react-bootstrap';
-import { useEffect, useState } from 'react';
-import Form from 'react-bootstrap/Form';
-import { Button } from 'react-bootstrap';
-import Pagination from 'react-bootstrap/Pagination';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Button, Pagination, Form, Container } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
-import Table from 'react-bootstrap/Table';
-import 'react-datepicker/dist/react-datepicker.css'; // Ensure to import the styles
+import 'react-datepicker/dist/react-datepicker.css';
 import MyVerticallyCenteredModal from '@/components/ModalOrder/MoDal'
-import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
 import { toast } from "react-toastify";
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-
 import { formatPrice, formatDate, formatDateForApi, formatDateNotime } from '@/components/Utils/Format';
 
 const Admin = () => {
-
     const [selectedDate, setSelectedDate] = useState<Date | null>(null); // Set Date type or null
     const [selectedDate1, setSelectedDate1] = useState<Date | null>(null); // Set Date type or null
-    // Tạo state để lưu trữ mục được chọn
     const [selectedOption, setSelectedOption] = useState('Danh Sách Hóa Đơn');
     const [selectedOptionDay, setSelectedOptionDay] = useState('Hôm Nay');
     const [showModal, setShowModal] = useState(false);
-    const [selectedOrderId, setSelectedOrderId] = useState(null); // Để lưu trữ orderId của đơn hàng được chọn
+    const [selectedOrderId, setSelectedOrderId] = useState<number>(0); // Để lưu trữ orderId của đơn hàng được chọn
     const [dataColumnnToday, setDataColumnnChartToday] = useState([]);
     const [dataColumnnYesterday, setDataColumnnChartYesterday] = useState([]);
     const [dataColumnnChart7Day, setDataColumnnChart7Day] = useState([]);
@@ -35,16 +27,14 @@ const Admin = () => {
     const [dataOrderYesterday, setDataOrderYesterday] = useState([]);
     const [dataOrderOneMonth, setDataOrderOneMonth] = useState([]);
     const [dataOrder7day, setDataOrder7day] = useState([]);
-    // Hàm xử lý khi người dùng chọn một mục
 
-    const handleSelectChange = (e) => {
+    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
         setSelectedOption(value);
     };
 
-    const handleSelectDay = (event) => {
+    const handleSelectDay = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedOption = event.target.value;
-        console.log("Selected Option: ", selectedOption);
         setSelectedOptionDay(selectedOption);
     };
 
@@ -55,30 +45,21 @@ const Admin = () => {
             setSelectedDate1(null);
             setDataListOther([]);
             setDataColumnnChartOther([]);
-            console.log("States reset for non-date options");
         }
     }, [selectedOptionDay]);
-
-
-
 
     const handleFindDate = async () => {
         try {
             if (selectedOptionDay === "Một Ngày") {
                 const date = formatDateForApi(selectedDate);
-                console.log(date);
-
                 const response = await axios.get(`http://localhost:8080/rest/admin/order-between?date=${date}`);
                 const response1 = await axios.get(`http://localhost:8080/rest/admin/category-product-total-between?date=${date}`)
                 setDataListOther(response.data);
                 setDataColumnnChartOther(response1.data);
-                // console.log(">>>date ", date);
 
             } else if (selectedOptionDay === "Nhiều Ngày") {
                 const startDay = formatDateForApi(selectedDate);
                 const endDay = formatDateForApi(selectedDate1);
-                console.log("s day: ", startDay);
-                console.log("end day: ", endDay);
                 const response = await axios.get(`http://localhost:8080/rest/admin/order-between?startDay=${startDay}&endDay=${endDay}`);
                 const response1 = await axios.get(`http://localhost:8080/rest/admin/category-product-total-between?startDay=${startDay}&endDay=${endDay}`)
                 setDataListOther(response.data);
@@ -89,7 +70,6 @@ const Admin = () => {
             // Optional: Show error message to the user
         }
     };
-
 
     const ColumnChart = () => {
         useEffect(() => {
@@ -117,7 +97,7 @@ const Admin = () => {
             }
         }, []);
 
-        const chartOptions = [
+        const chartOptions = useMemo(() => [
             {
                 option: 'Hôm Nay',
                 title: 'Biểu đồ hoạt động hôm nay',
@@ -190,7 +170,7 @@ const Admin = () => {
                         ['Loading', 'Loading', 'color: #76A7FA', 0]
                     ]
             },
-        ];
+        ], [dataColumnnToday, dataColumnnYesterday, dataColumnnChart7Day, dataColumnnChartOneMonth, dataColumnnChartOther]);
 
         useEffect(() => {
             const loadGoogleCharts = () => {
@@ -219,12 +199,12 @@ const Admin = () => {
                     vAxis: { title: 'Tiền (VND)' },
                 };
 
-                const chart = new window.google.visualization.ColumnChart(document.getElementById('columnChart'));
+                const chart = new window.google.visualization.ColumnChart(document.getElementById('columnChart')!);
                 chart.draw(data, options);
             };
 
             loadGoogleCharts();
-        }, [selectedOptionDay, dataColumnnToday, dataColumnnYesterday, dataColumnnChart7Day, dataColumnnChartOneMonth, dataColumnnChartOther]);
+        }, [selectedOptionDay, chartOptions]);
 
         return (
             <div id="columnChart" className='justify-content-center'></div>
@@ -235,9 +215,7 @@ const Admin = () => {
         const fetchDataOrderToDay = async () => {
             try {
                 const response = await axios.get(`http://localhost:8080/rest/admin/orderToDay`);
-                // console.log('Response received:', response); // In ra toàn bộ response
                 setDataOrderToDay(response.data);
-                // console.log('dataOrderToDay:', response.data); // In ra dữ liệu
             } catch (error) {
                 console.error('Error:', error); // Sử dụng console.error để hiển thị lỗi
             }
@@ -250,9 +228,7 @@ const Admin = () => {
         const fetchDataOrderYesterday = async () => {
             try {
                 const response = await axios.get(`http://localhost:8080/rest/admin/orderYesterday`);
-                // console.log('Response received:', response);
                 setDataOrderYesterday(response.data);
-                // console.log('dataOrderYesterday:', response.data);
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -266,9 +242,7 @@ const Admin = () => {
         const fetchDataOrder7day = async () => {
             try {
                 const response = await axios.get(`http://localhost:8080/rest/admin/order7day`);
-                // console.log('Response received:', response);
                 setDataOrder7day(response.data);
-                // console.log('dataOrderYesterday:', response.data);
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -282,9 +256,7 @@ const Admin = () => {
         const fetchDataOrderOneMonth = async () => {
             try {
                 const response = await axios.get(`http://localhost:8080/rest/admin/orderOneMonth`);
-                // console.log('Response received:', response);
                 setDataOrderOneMonth(response.data);
-                // console.log('dataOrderYesterday:', response.data);
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -300,17 +272,16 @@ const Admin = () => {
         }
     }, [selectedOptionDay]); // Dependency array to run when selectedOptionDay changes
 
-
-
     const LisOrder = () => {
-        const renderTable = (title: string, data: []) => {
+        const [currentPage, setCurrentPage] = useState(1);
+        const itemsPerPage = 10;
+
+        const renderTable = (title: string, data: Order[]) => {
             // Tính tổng tiền
             const totalAmount = data.reduce((sum, order) => sum + order.amount, 0);
-            const [currentPage, setCurrentPage] = useState(1);
-            const itemsPerPage = 10;
 
             // Sắp xếp dữ liệu từ ngày mới nhất đến cũ nhất
-            const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const sortedData = [...data].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
             // Tính toán dữ liệu cho trang hiện tại
             const indexOfLastItem = currentPage * itemsPerPage;
@@ -520,7 +491,7 @@ const Admin = () => {
             ];
 
             const orderData = getOrderData();
-            orderData.forEach((order, index) => {
+            orderData.forEach((order: Order, index) => {
                 worksheet1.addRow({
                     index: index + 1,
                     fullname: order.user.fullname || 'Chưa có tên',
@@ -532,7 +503,7 @@ const Admin = () => {
             });
 
             // Thêm tổng tiền vào cuối sheet "Danh sách Hóa đơn"
-            const totalAmount = orderData.reduce((sum, order) => sum + order.amount, 0);
+            const totalAmount = orderData.reduce((sum, order: Order) => sum + order.amount, 0);
             worksheet1.addRow({ date: '', status: 'Tổng Tiền', amount: totalAmount });
 
             // Tạo worksheet cho "Biểu đồ"
@@ -678,7 +649,6 @@ const Admin = () => {
                     <>
                         <ColumnChart />
                         <LisOrder />
-
                     </>
                 ) : null}
 

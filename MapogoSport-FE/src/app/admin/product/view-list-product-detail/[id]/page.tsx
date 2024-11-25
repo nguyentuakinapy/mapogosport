@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
-import { Table, Button, Collapse } from "react-bootstrap";
+import { Table, Button, Collapse, Image } from "react-bootstrap";
 import { useState } from "react";
 import ProductDetailModalProps from "@/components/Admin/Modal/product.detail.addNew";
 
@@ -130,8 +130,7 @@ export default function ViewListDetail() {
 
                   <td>
                     {detail.image ? (
-                      <img
-                        src={`/images/product-images/${detail.image}`}
+                      <Image src={`/images/product-images/${detail.image}`}
                         alt={detail.color}
                         style={{ width: "50px" }}
                       />

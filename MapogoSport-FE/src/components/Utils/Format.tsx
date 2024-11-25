@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: Date) => {
   const date = new Date(dateString);
   return date.toLocaleString("vi-VN", {
     year: "numeric",
@@ -11,7 +11,7 @@ const formatDate = (dateString: string) => {
     second: "2-digit",
   });
 };
-const formatDateNotime = (dateString: string) => {
+const formatDateNotime = (dateString: Date) => {
   const date = new Date(dateString);
   return date.toLocaleString("vi-VN", {
     year: "numeric",
@@ -32,7 +32,7 @@ const formatDateForApi = (date: Date | null) => {
 
 
 
-const formatPrice = (price) => {
+const formatPrice = (price: number) => {
   // Kiểm tra nếu price không hợp lệ hoặc không phải là số
   if (typeof price !== "number" || isNaN(price)) {
     return "Giá không hợp lệ"; // Hoặc bất kỳ thông báo mặc định nào

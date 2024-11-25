@@ -4,10 +4,9 @@ import { Button, Col, Modal, Row, Form } from 'react-bootstrap';
 import useSWR from 'swr';
 import { formatPrice } from '@/components/Utils/Format';
 import { toast } from 'react-toastify';
-import axios from 'axios';
 
 const SubcriptionPage = () => {
-    const fetcher = (url) => fetch(url).then((res) => res.json());
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const { data, mutate } = useSWR('http://localhost:8080/rest/accountpackage', fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
@@ -422,8 +421,6 @@ const SubcriptionPage = () => {
             </Modal.Footer>
         </Modal>
     ), [modalShow, editedPackage]);
-
-
 
     const [benefitSelections, setBenefitSelections] = useState([{ benefitId: '', description: '' }]);
     // Hàm để thêm một dropdown mới cho lựa chọn lợi ích
