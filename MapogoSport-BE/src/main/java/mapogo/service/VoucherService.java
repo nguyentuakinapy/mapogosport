@@ -14,8 +14,6 @@ public interface VoucherService {
 
 	//của Mỵ từ đây
 	Voucher findById(int id);
-  
-	List<Voucher> findByUserName(String username);
 	
 	Voucher createVoucher(Map<String, Object> bd);
 	//đến đây

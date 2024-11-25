@@ -44,14 +44,6 @@ public class VoucherRestController {
 		return voucherService.finAll();
 	}
 
-	// của Mỵ từ đây
-
-	@GetMapping("/findVoucherByUsername/{username}")
-	public List<Voucher> getfindVoucher(@PathVariable("username") String username) {
-		return voucherService.findByUserName(username);
-	}
-	// đến đây
-
 	  @PostMapping("/create/voucher")
 	    public ResponseEntity<Voucher> createVoucher(@RequestBody Map<String, Object> bd) {
 	        Voucher createdVoucher = voucherService.createVoucher(bd);
