@@ -2,6 +2,7 @@ package mapogo.chat;
 
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import mapogo.dao.MessageDAO;
@@ -29,6 +31,8 @@ public class ChatController {
 	EmailService emailService;
 	@Autowired
 	UserService userService;
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
 	
 	public String bodyEmail(String sender, String tempStr) {
 		
@@ -160,6 +164,52 @@ public class ChatController {
 //        }else {
 //        	System.err.println("không cần gửi mail");
 //        }
+     // Nội dung tin nhắn bạn muốn gửi
+//	     Map<String, String> payload = new HashMap<>();
+//	     payload.put("sender", sender);
+//	     payload.put("message", originalMessage);
+//	     payload.put("receiver", receiver);
+//	     payload.put("timestamp", new Date().toString());
+//        Message m = new Message();
+//        User uS = new User(); 
+//        uS = userService.findByUsername(sender);
+//        User uR =  new User(); 
+//        uR =userService.findByUsername(receiver);
+//        
+//        
+//        m.setSender(uS);
+//        m.setReceiver(uR);
+//        m.setContent(originalMessage);
+//        m.setIsDeleted(false);
+//        m.setCreatedAt(new Date());
+//        System.err.println("messs "+m);
+        Map<String, String> payload = new HashMap<>();
+
+     User senderUser = userService.findByUsername(sender);
+     if (senderUser == null) {
+         throw new RuntimeException("Sender not found: " + sender);
+     }
+     payload.put("sender", senderUser.getUsername());
+     payload.put("senderFullName", senderUser.getFullname()); // Giả sử User có trường fullName
+
+     User receiverUser = userService.findByUsername(receiver);
+     if (receiverUser == null) {
+         throw new RuntimeException("Receiver not found: " + receiver);
+     }
+     payload.put("receiver", receiverUser.getUsername());
+     payload.put("receiverFullName", receiverUser.getFullname()); // Giả sử User có trường fullName
+
+     payload.put("message", originalMessage);
+     payload.put("timestamp", new Date().toString());
+
+     // Gửi Map qua WebSocket
+     String topicNotify = "/topic/notify/" + receiver;
+     messagingTemplate.convertAndSend(topicNotify, payload);
+
+     System.out.println("Message payload sent to topic: " + payload);
+
+        
+	
         
         messageDAO.save(message);
         return tempStr;
