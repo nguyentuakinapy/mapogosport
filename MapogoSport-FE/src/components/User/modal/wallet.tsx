@@ -204,24 +204,6 @@ const WalletPage = () => {
         } catch (error) {
             console.error('Error during payment:', error);
         }
-
-        // fetch(`http://localhost:8080/rest/wallet/${userData?.username}/${money}`, {
-        //     method: 'PUT',
-        //     headers: {
-        //         'Accept': 'application/json, text/plain, */*',
-        //         'Content-Type': 'application/json',
-        //     },
-        // }).then(async (res) => {
-        //     if (!res.ok) {
-        //         toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-        //         return;
-        //     }
-        //     mutate(`http://localhost:8080/rest/wallet/transaction/${userData?.wallet.walletId}`);
-        //     setNotificationModal(false);
-        //     toast.success('Nạp tiền thành công!');
-        // });
-
-
     }
 
     const renderNotification = () => {
