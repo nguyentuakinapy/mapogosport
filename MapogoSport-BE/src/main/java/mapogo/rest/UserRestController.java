@@ -2,7 +2,6 @@ package mapogo.rest;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
@@ -27,27 +25,17 @@ import org.springframework.web.servlet.view.RedirectView;
 import jakarta.servlet.http.HttpServletRequest;
 import mapogo.dao.AuthorityDAO;
 import mapogo.dao.OwnerDAO;
-import mapogo.dao.ProductDAO;
 import mapogo.dao.SubsciptionPaymentDAO;
-import mapogo.dao.UserDAO;
 import mapogo.dao.UserSubscriptionDAO;
 import mapogo.dao.UserVoucherDAO;
-import mapogo.dao.WalletDAO;
 import mapogo.dto.PaymentDTO;
 import mapogo.entity.AccountPackage;
 import mapogo.entity.Authority;
-import mapogo.entity.Booking;
-import mapogo.entity.BookingDetail;
 import mapogo.entity.Notification;
 import mapogo.entity.Owner;
-import mapogo.entity.PaymentMethod;
-import mapogo.entity.Product;
 import mapogo.entity.SubscriptionPayment;
-import mapogo.entity.Transaction;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
-import mapogo.entity.UserVoucher;
-import mapogo.entity.Wallet;
 import mapogo.service.AccountPackageService;
 import mapogo.service.EmailService;
 import mapogo.service.OwnerService;
@@ -249,7 +237,7 @@ public class UserRestController {
 	@GetMapping("/subscription/paymentInfo-momo")
 	public RedirectView paymentInfoMomo(@RequestParam(value = "resultCode") String resultCode,
 			@RequestParam(value = "extraData") String data) {
-		
+
 		String[] parts = data.split("-");
 		int userSubscriptionId = Integer.parseInt(parts[0]);
 		int ownerId = Integer.parseInt(parts[1]);
@@ -271,7 +259,6 @@ public class UserRestController {
 
 		return new RedirectView("http://localhost:3000");
 	}
-	
 
 	@GetMapping("/user/subscription/{id}")
 	public UserSubscription findUserSubscriptionByUser(@PathVariable("id") String username) {
@@ -306,9 +293,43 @@ public class UserRestController {
 	@Autowired
 	WalletService walletService;
 
-	@PutMapping("/wallet/{username}/{money}")
-	public void addMoney(@PathVariable("username") String username,
-			@PathVariable("money") Double money) {
-		walletService.addMoney(username, money);
+	// của Mỵ từ đây
+	@PostMapping("/wallet/createpaymentrecharge")
+	public ResponseEntity<?> createPaymentRecharge(@RequestBody Map<String, Object> requestBody,
+			HttpServletRequest req) throws UnsupportedEncodingException {
+		PaymentDTO paymentDTO = userSubService.createPaymentRecharge(requestBody, req);
+		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
+
+	@GetMapping("/wallet/createpaymentrecharge/infoVnpay")
+	public RedirectView getInfoVnpay(@RequestParam(value = "vnp_ResponseCode") String responseCode,
+			@RequestParam(value = "vnp_OrderInfo") String data) {
+		String[] parts = data.split("-");
+		String username = (parts[0]);
+		Double money = Double.parseDouble(parts[1]);
+
+		if (responseCode.equals("00")) {
+			walletService.addMoney(username, money);
+
+		}
+			return new RedirectView("http://localhost:3000/user/wallet");
+
+	}
+	
+	@GetMapping("/wallet/createpaymentrecharge/infoMomo")
+	public RedirectView getInfoMomo(@RequestParam(value = "resultCode") String responseCode,
+			@RequestParam(value = "extraData") String data) {
+		String[] parts = data.split("-");
+		String username = (parts[0]);
+		Double money = Double.parseDouble(parts[1]);
+
+		if (responseCode.equals("0")) {
+			walletService.addMoney(username, money);
+
+		}		
+		return new RedirectView("http://localhost:3000/user/wallet");
+
+	}
+
+	// đến đây
 }

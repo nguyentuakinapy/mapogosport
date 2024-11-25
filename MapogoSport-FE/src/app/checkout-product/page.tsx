@@ -194,10 +194,10 @@ const CheckoutPage = () => {
     if (!user1) {
       errors.push('Người dùng không tồn tại');
     }
-    if (!phoneNumberSelected || phoneNumberSelected !== 'other') {
+    if (!phoneNumberSelected) {
       errors.push('Vui lòng chọn số điện thoại');
     }
-    if (!customPhoneNumber && !phoneNumberSelected) {
+    if (!customPhoneNumber && phoneNumberSelected === 'other') {
       errors.push('Vui lòng nhập số điện thoại');
     }
     if (!isValidPhoneNumber(customPhoneNumber) && customPhoneNumber) {

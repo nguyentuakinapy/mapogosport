@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import mapogo.dao.AuthorityDAO;
 import mapogo.dto.OrderDTO;
+import mapogo.entity.Authority;
 import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
 import mapogo.entity.Transaction;
@@ -140,6 +142,9 @@ public class OrderRestController {
 
 	@Autowired
 	TransactionService transactionService;
+	
+	@Autowired
+	AuthorityDAO authDAO;
 
 	@PostMapping("/create_order")
 	public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
@@ -156,15 +161,17 @@ public class OrderRestController {
 			transaction.setDescription("Thanh toán hóa đơn: " + createdOrder.getOrderId());
 			transaction.setTransactionType("-" + createdOrder.getAmount());
 			transactionService.create(transaction);
+			
+			//wallet admin
+			User admin = userService.findByUsername("myntd");
+			Wallet walletAdmin = walletService.findByUsername(admin);
+			walletAdmin.setBalance(walletAdmin.getBalance().add(BigDecimal.valueOf(orderDTO.getAmount())));
+			walletService.update(walletAdmin);
 		}
 
 		return ResponseEntity.ok(createdOrder);
 	}
 
-//	@GetMapping("/order/getByOrderId/{orderId}")
-//	public List<Map<String, Object>> getByOrderId(@PathVariable("orderId") Integer orderId) {
-//		return orderService.findOrderById(orderId);
-//	}
 
 	@PutMapping("/order/cancel")
 	public void cancelOrder(@RequestBody Map<String, Object> orderData) {
