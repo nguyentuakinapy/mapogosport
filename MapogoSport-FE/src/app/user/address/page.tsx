@@ -11,7 +11,7 @@ import ModalUpdateAddress from '@/components/User/modal/user.updateAddress'
 export default function Address() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [username, setUsername] = useState<string | null>(null);
-    const [addressUsers, setAddressUsers] = useState<any[]>([]);
+    const [addressUsers, setAddressUsers] = useState<AddressUsers[]>([]);
     const [showAddAddress, setShowAddAddress] = useState<boolean>(false);
     const [showUpdateAddress, setShowUpdateAddress] = useState<boolean>(false);
     const [selectedAddressUser, setSelectedAddressUser] = useState<any>(null);

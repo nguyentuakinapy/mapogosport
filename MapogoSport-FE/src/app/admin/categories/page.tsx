@@ -11,8 +11,7 @@ import jsPDF from 'jspdf';
 import { RobotoBase64 } from '../../../../public/font/Roboto-Regular';
 import { toast } from "react-toastify";
 import CategoryFieldAddNew from '@/components/Admin/Modal/categoryField.addNew';
-
-
+import autoTable from 'jspdf-autotable';
 
 const AdminProduct = () => {
 
@@ -296,7 +295,7 @@ const AdminProduct = () => {
 
     const exportPDF = () => {
         try {
-            const doc: any = new jsPDF();
+            const doc: jsPDF = new jsPDF();
 
             doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
             doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
@@ -315,7 +314,7 @@ const AdminProduct = () => {
                         categories.name
                     ];
                     tableRows.push(categoryData);
-                    doc.autoTable({
+                    autoTable(doc, {
                         head: [tableColumn],
                         body: tableRows,
                         startY: 20,
@@ -333,7 +332,7 @@ const AdminProduct = () => {
                             3: { halign: 'right', cellWidth: 30 },
                             4: { halign: 'left' },
                         },
-                        didParseCell: (data: any) => {
+                        didParseCell: (data) => {
                             if (data.cell.text.length > 0) {
                                 data.cell.text[0] = data.cell.text[0];
                             }
@@ -353,7 +352,7 @@ const AdminProduct = () => {
                     ];
                     tableRows.push(categoryProductData);
                 });
-                doc.autoTable({
+                autoTable(doc, {
                     head: [tableColumn],
                     body: tableRows,
                     startY: 20,
@@ -371,7 +370,7 @@ const AdminProduct = () => {
                         3: { halign: 'right', cellWidth: 30 },
                         4: { halign: 'left' },
                     },
-                    didParseCell: (data: any) => {
+                    didParseCell: (data) => {
                         if (data.cell.text.length > 0) {
                             data.cell.text[0] = data.cell.text[0];
                         }

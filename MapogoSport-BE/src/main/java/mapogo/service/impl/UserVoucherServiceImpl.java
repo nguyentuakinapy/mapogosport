@@ -37,6 +37,7 @@ public class UserVoucherServiceImpl implements UserVoucherService{
 			voucherData.put("name", userVoucher.getVoucher().getName());
 			voucherData.put("endDate", userVoucher.getVoucher().getEndDate());
 			voucherData.put("status", userVoucher.getVoucher().getStatus());
+			voucherData.put("discountPercent", userVoucher.getVoucher().getDiscountPercent());
 			
 			userVoucherData.put("voucher", voucherData);
 			resultList.add(userVoucherData);
