@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import 'react-datepicker/dist/react-datepicker.css';
 import { createTimeStringH } from "@/components/Utils/booking-time";
 
-
 interface BookingProps {
     showBookingModal: boolean;
     setShowBookingModal: (v: boolean) => void;
@@ -408,10 +407,9 @@ const BookingModal = (props: BookingProps) => {
         let index = 0;
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
-            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
-                bookings.map(b => {
+            for (const [_weekIndex, bookings] of Object.entries(dateWeek)) {
+                bookings.forEach(() => {
                     index = index + 1;
-
                 })
             }
         }
@@ -785,8 +783,8 @@ const BookingModal = (props: BookingProps) => {
             <>
                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
                 <ul>
-                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {formatPrice(sportDetail && sportDetail.price)}.</li>
-                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {formatPrice(sportDetail && sportDetail.peakHourPrices)}.</li>
+                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {sportDetail && sportDetail.price.toLocaleString()}.</li>
+                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {sportDetail && sportDetail.peakHourPrices.toLocaleString()}.</li>
                     <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>
                     <li><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}.</li>
                     <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
@@ -1021,7 +1019,7 @@ const BookingModal = (props: BookingProps) => {
                                     {Object.entries(weeks).map(([index, details]) => (
                                         <div key={index}>
                                             {details.map((detail, i) => (
-                                                <span key={i}>{formatDateNotime(detail.date)}</span>
+                                                <span key={i}>{new Date(detail.date).toLocaleDateString()}</span>
                                             ))}
                                         </div>
                                     ))}
@@ -1033,7 +1031,7 @@ const BookingModal = (props: BookingProps) => {
                                 <b className="text-uppercase">Đã có sân đặt vào {week}</b><br />
                                 {bookings.map((booking) => (
                                     <div key={booking.bookingDetailId}>
-                                        Ngày: {formatDateNotime(booking.date)}  Giờ: {booking.startTime} - {booking.endTime}  {/* Có thể hiển thị thêm thông tin khác ở đây */}
+                                        Ngày: {new Date(booking.date).toLocaleDateString()}  Giờ: {booking.startTime} - {booking.endTime}  {/* Có thể hiển thị thêm thông tin khác ở đây */}
                                     </div>
                                 ))}
                             </div>

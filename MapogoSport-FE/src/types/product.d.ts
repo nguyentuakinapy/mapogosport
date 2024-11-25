@@ -11,6 +11,7 @@ interface Product {
     price: number;
     image: File | string;
     stock: double;
+    productReviews: ProductReview[];
 }
 
 

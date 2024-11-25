@@ -3,7 +3,7 @@ import HomeLayout from '@/components/HomeLayout';
 import axios from 'axios';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import { Button, FloatingLabel, Form, InputGroup, Collapse } from 'react-bootstrap';
+import { Button, FloatingLabel, Form, Collapse } from 'react-bootstrap';
 import { formatPrice } from '@/components/Utils/Format';
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
@@ -13,7 +13,6 @@ import Link from 'next/link';
 
 const CheckoutPage = () => {
   const fetcher = (url: string) => fetch(url).then(res => res.json());
-  const [open, setOpen] = useState(false);
   const [open_1, setOpen_1] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -494,15 +493,9 @@ const CheckoutPage = () => {
                 {/* COD */}
                 <div className="card-body d-flex list-group-item align-items-center">
                   <div className="form-check flex-grow-1">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="paymentMethod"
-                      id="cod" checked={paymentMethod === 'COD'}
-                      aria-expanded={open}
-                      value={"COD"}
-                      onChange={handlePaymentMethodChange}
-                    />
+                    <input className="form-check-input" type="radio"
+                      name="paymentMethod" id="cod" checked={paymentMethod === 'COD'}
+                      value={"COD"} onChange={handlePaymentMethodChange} />
                     <label className="form-check-label" htmlFor="cod">
                       Thanh toán khi nhận hàng (COD)
                     </label>
@@ -512,16 +505,10 @@ const CheckoutPage = () => {
                 {/* Ví */}
                 <div className="card-body d-flex list-group-item align-items-center">
                   <div className="form-check flex-grow-1">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="paymentMethod"
-                      id="cod"
-                      aria-expanded={open}
-                      value={"Thanh toán ví"}
-                      onChange={handlePaymentMethodChange}
-                    />
-                    <label className="form-check-label" htmlFor="cod">
+                    <input className="form-check-input" type="radio"
+                      name="paymentMethod" id="wallet" value={"Thanh toán ví"}
+                      onChange={handlePaymentMethodChange} />
+                    <label className="form-check-label" htmlFor="wallet">
                       Thanh toán bằng ví của bạn
                     </label>
                   </div>
@@ -538,16 +525,10 @@ const CheckoutPage = () => {
                 {/* Vnpay */}
                 <div className="card-body d-flex list-group-item align-items-center">
                   <div className="form-check flex-grow-1">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="paymentMethod"
-                      id="vnpay"
-                      aria-expanded={open}
-                      value="VNPay"
-                      onChange={handlePaymentMethodChange}
-                    />
-                    <label className="form-check-label" htmlFor="cod">
+                    <input className="form-check-input" type="radio"
+                      name="paymentMethod" id="vnpay" value="VNPay"
+                      onChange={handlePaymentMethodChange} />
+                    <label className="form-check-label" htmlFor="vnpay">
                       Thanh toán qua ví điện tử VNPay
                     </label>
                   </div>
@@ -556,16 +537,10 @@ const CheckoutPage = () => {
                 {/* MoMo */}
                 <div className="card-body d-flex list-group-item align-items-center">
                   <div className="form-check flex-grow-1">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="paymentMethod"
-                      id="vnpay"
-                      aria-expanded={open}
-                      value="MoMo"
-                      onChange={handlePaymentMethodChange}
-                    />
-                    <label className="form-check-label" htmlFor="cod">
+                    <input className="form-check-input" type="radio"
+                      name="paymentMethod" id="momo" value="MoMo"
+                      onChange={handlePaymentMethodChange} />
+                    <label className="form-check-label" htmlFor="momo">
                       Thanh toán qua ví điện tử MoMo
                     </label>
                   </div>

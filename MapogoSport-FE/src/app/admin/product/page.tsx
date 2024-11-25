@@ -1,16 +1,6 @@
-////// page 	product
 "use client";
 import Link from "next/link";
-import {
-  Button,
-  Table,
-  Badge,
-  Image,
-  OverlayTrigger,
-  Tooltip,
-  Nav,
-  Form,
-} from "react-bootstrap";
+import { Button, Table, Badge, Image, OverlayTrigger, Tooltip, Nav, Form } from "react-bootstrap";
 import "../product/adminStyleProduct.scss";
 import React, { useState, useEffect } from "react";
 import ProductAddNew from "@/components/Admin/Modal/product.addNew";
@@ -35,8 +25,7 @@ const AdminProduct = () => {
   const getDatas = async () => {
     const apiProducts = "http://localhost:8080/rest/products";
 
-    const apiCategoriesProducts =
-      "http://localhost:8080/rest/category-products";
+    const apiCategoriesProducts = "http://localhost:8080/rest/category-products";
     const [productsRes, categoriesRes] = await Promise.all([
       axios.get(apiProducts),
       axios.get(apiCategoriesProducts),
@@ -109,11 +98,6 @@ const AdminProduct = () => {
       setCategoryProducts(data.categoriesRes?.data || []);
     }
   }, [data]);
-
-  // // Hàm thêm sản phẩm mới vào danh sách
-  // const handleAddProduct = (newProduct: Product) => {
-  //   setProducts((prevProducts) => [...prevProducts, newProduct]);
-  // };
 
   const handleEditClick = (product: Product) => {
     console.log("product ht ", product);
@@ -202,9 +186,6 @@ const AdminProduct = () => {
 
   // Tính toán dữ liệu cho trang hiện tại
   const startIndex = (currentPage - 1) * itemsPerPage;
-
-  // const currentItems = products.slice(startIndex, startIndex + itemsPerPage);
-  // const totalPages = Math.ceil(products.length / itemsPerPage);
 
   const currentItems = filteredProducts.slice(
     startIndex,
@@ -327,11 +308,7 @@ const AdminProduct = () => {
                     </div>
                     <div>
                       <span>Trạng thái:</span>
-                      <Badge
-                        bg={
-                          product.status === "Còn hàng" ? "success" : "danger"
-                        }
-                      >
+                      <Badge bg={product.status === "Còn hàng" ? "success" : "danger"}>
                         {product.status}
                       </Badge>
                     </div>
@@ -344,24 +321,13 @@ const AdminProduct = () => {
                   </td>
                   <td className="text-center align-middle">
                     <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
-                      <Button
-                        style={{ 'backgroundColor': '#132239' }}
-                        // variant="warning"
-                        className="m-1"
-                        onClick={() => handleEditClick(product)}
-                      >
+                      <Button style={{ 'backgroundColor': '#132239' }} className="m-1" onClick={() => handleEditClick(product)}>
                         <i className="bi bi-pencil-fill"></i>
                       </Button>
                     </OverlayTrigger>
                     <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
-                      <Button
-                        // variant="danger"
-                        style={{ 'backgroundColor': '#132239' }}
-                        className="m-1"
-                        // onClick={() => handleDelete(product.productId)}
-                        disabled={product.status === "Hết hàng"}
-                        onClick={() => markProductAsOutOfStock(product.productId)}
-                      >
+                      <Button style={{ 'backgroundColor': '#132239' }} className="m-1" disabled={product.status === "Hết hàng"}
+                        onClick={() => markProductAsOutOfStock(product.productId)}>
                         <i className="bi bi-trash3-fill"></i>
                       </Button>
                     </OverlayTrigger>
@@ -381,10 +347,8 @@ const AdminProduct = () => {
   };
 
   if (queryDemo.isPending) return <div>Đang tải...</div>;
-  // if (productError) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
   if (isLoading) return <div>Đang tải...</div>;
-  // if (categoryError) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
   return (
     <div style={{ fontSize: "14px" }}>
@@ -397,9 +361,7 @@ const AdminProduct = () => {
         {/* Dropdown chọn loại sản phẩm */}
         <div className="d-flex align-items-center" style={{ gap: "10px" }}>
           <i className="bi bi-funnel fs-4"></i>
-          <Form.Control
-            as="select"
-            name="categoryProduct"
+          <Form.Control as="select" name="categoryProduct"
             value={selectedType}
             onChange={() => handleSelectedCategory}
             style={{ minWidth: "200px" }}
@@ -535,7 +497,6 @@ const AdminProduct = () => {
         currentProduct={currentProduct}
         modalType={modalType}
         categoryProducts={categoryProducts}
-        // onAddProduct={handleAddProduct}
         onFetch={refetch}
         setIsNeedScroll={setIsNeedScroll}
       />

@@ -651,8 +651,8 @@ const BookingModal = React.memo((props: BookingProps) => {
             <>
                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
                 <ul>
-                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {formatPrice(sportDetail && sportDetail.price)}.</li>
-                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {formatPrice(sportDetail && sportDetail.peakHourPrices)}.</li>
+                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {(sportDetail && sportDetail.price.toLocaleString())} đ.</li>
+                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {sportDetail && sportDetail.peakHourPrices.toLocaleString()} đ.</li>
                     <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>
                     <li><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}.</li>
                     <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
@@ -793,7 +793,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                                     {Object.entries(weeks).map(([index, details]) => (
                                         <div key={index}>
                                             {details.map((detail, i) => (
-                                                <span key={i}>{formatDateNotime(detail.date)}</span>
+                                                <span key={i}>{new Date(detail.date).toLocaleDateString()}</span>
                                             ))}
                                         </div>
                                     ))}
@@ -805,7 +805,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                                 <b className="text-uppercase">Đã có sân đặt vào {week}</b><br />
                                 {bookings.map((booking) => (
                                     <div key={booking.bookingDetailId}>
-                                        Ngày: {formatDateNotime(booking.date)}  Giờ: {booking.startTime} - {booking.endTime}
+                                        Ngày: {new Date(booking.date).toLocaleDateString()}  Giờ: {booking.startTime} - {booking.endTime}
                                     </div>
                                 ))}
                             </div>
