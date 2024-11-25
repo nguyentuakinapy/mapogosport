@@ -1,9 +1,7 @@
 'use client'
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
-import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 
@@ -25,7 +23,7 @@ const CartBadge = ({ username }: { username: string }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 
-    const { data, error, isLoading } = useSWR(
+    const { data } = useSWR(
         username == "" ? null : `http://localhost:8080/rest/cart/count/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,

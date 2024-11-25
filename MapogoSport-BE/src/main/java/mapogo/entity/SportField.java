@@ -76,6 +76,6 @@ public class SportField implements Serializable{
     @JsonManagedReference //tanthanh
 //    @JsonBackReference //phihung (27/10)
     private List<FieldReview> fieldReviews;
-    
+ 
 }
 

@@ -30,6 +30,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "qa": "cross-env NEXT_PUBLIC_API_URL=https://akinagi.vn/api NODE_ENV=qa next start",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -79,6 +80,7 @@
     "@types/react": "18.3.5",
     "@types/react-dom": "18.3.0",
     "@types/sockjs-client": "1.5.4",
+    "cross-env": "^7.0.3",
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.11",
     "typescript": "5.6.2"

@@ -1,4 +1,4 @@
-import { createTimeStringH } from "@/components/Utils/booking-time";
+import { createTimeStringH, isDateInRange } from "@/components/Utils/booking-time";
 import { formatPrice } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
@@ -301,14 +301,82 @@ const BookingModal = (props: OwnerProps) => {
     }, [bookingBySubscriptionKey])
 
     const confirmDataBooking = async () => {
-
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == idSportDetail);
 
         let isAvailable = true;
-
         let checkTime = false;
 
+        let hourStart;
+        let minuteStart;
+        let hourEnd;
+        let minuteEnd;
 
+        if (sportDetail && dateBooking) {
+            for (const s of sportDetail.statusSportFieldDetails) {
+                if (isDateInRange(dateBooking, s.startDate, s.endDate)) {
+                    if (sport) {
+                        if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === dateBooking) {
+
+                            if (new Date(s.startDate).getMinutes() > 30) {
+                                hourStart = new Date(s.startDate).getHours() + 1;
+                                minuteStart = '00';
+                            } else {
+                                hourStart = new Date(s.startDate).getHours();
+                                minuteStart = '30';
+                            }
+
+                            const timeStringH: string[] = createTimeStringH(
+                                `${hourStart}h${minuteStart}`,
+                                sport.closing
+                            );
+
+                            if (new Date(s.endDate).getTime() <= new Date().getTime()) {
+                                break;
+                            }
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        } else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === dateBooking) {
+                            if (new Date(s.endDate).getMinutes() > 30) {
+                                hourEnd = new Date(s.endDate).getHours() + 1;
+                                minuteEnd = '00';
+                            } else {
+                                hourEnd = new Date(s.endDate).getHours();
+                                minuteEnd = '30';
+                            }
+
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                `${hourEnd}h${minuteEnd}`
+                            );
+
+                            if (new Date(s.startDate).getTime() >= new Date().getTime()) {
+                                break;
+                            }
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourEnd}h${minuteEnd}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         if (applyOne) {
             // if (dateBookingTemporary != dateBooking && idSportDetailTemporary != idSportDetail) {
             if (bookingDetailData && new Date(bookingDetailData.date).setHours(0, 0, 0, 0) !== new Date().setHours(0, 0, 0, 0)) {
@@ -502,8 +570,6 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     const createTimeByTimeOnStageAll = async () => {
-        // console.log('dataBookingBySubscriptionKey', bookingBySubscriptionKey);
-
         const timeSlots = [];
 
         if (bookingBySubscriptionKey) {
@@ -529,8 +595,6 @@ const BookingModal = (props: OwnerProps) => {
                 timeSlots.pop();
             }
         }
-        console.log(timeSlots);
-
         setDataTimeOnStageAll(timeSlots);
     }
 
@@ -570,17 +634,12 @@ const BookingModal = (props: OwnerProps) => {
         const [endHours, endMinutes] = endTime.split('h').map(Number);
         const [checkHours, checkMinutes] = checkTime.split('h').map(Number);
 
-        // Tạo đối tượng Date cho từng thời gian
         const startDate = new Date(0, 0, 0, startHours, startMinutes);
         const endDate = new Date(0, 0, 0, endHours, endMinutes);
         const checkDate = new Date(0, 0, 0, checkHours, checkMinutes);
 
-        // Kiểm tra thời gian nằm trong khoảng
         return checkDate >= startDate && checkDate <= endDate;
     }
-
-
-
 
     const convertToMinutes = (time: string) => {
         const [hours, minutes] = time.split('h').map(Number);
@@ -620,18 +679,6 @@ const BookingModal = (props: OwnerProps) => {
             }
 
             setPrice(totalAmount);
-            // if (isEven(timeBooking)) {
-            //     setPrice(sportDetail.price * timeBooking / 2);
-            //     // toast.success(sportDetail.price * timeBooking / 2);
-            // } else {
-            //     if (timeBooking == 1) {
-            //         setPrice((sportDetail.price * timeBooking) / 2);
-            //         // toast.success((sportDetail.price * timeBooking) / 2)
-            //     } else {
-            //         setPrice((sportDetail.price * timeBooking / 2));
-            //         // toast.success((sportDetail.price * timeBooking / 2))
-            //     }
-            // }
         }
     }
 
@@ -815,6 +862,79 @@ const BookingModal = (props: OwnerProps) => {
             }
         }
         timeSlots.pop();
+
+        let hourStart;
+        let minuteStart;
+        let hourEnd;
+        let minuteEnd;
+
+        if (sportDetail && dateBooking) {
+            for (const s of sportDetail.statusSportFieldDetails) {
+                if (isDateInRange(dateBooking, s.startDate, s.endDate)) {
+                    if (sport) {
+                        if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === dateBooking) {
+                            if (new Date(s.startDate).getMinutes() > 30) {
+                                hourStart = new Date(s.startDate).getHours() + 1;
+                                minuteStart = '00';
+                            } else {
+                                hourStart = new Date(s.startDate).getHours();
+                                minuteStart = '30';
+                            }
+
+                            const currentStartTime = `${hourStart}h${minuteStart}`;
+                            const timeStringH: string[] = createTimeStringH(
+                                currentStartTime,
+                                sport.closing
+                            );
+
+                            if (new Date(s.endDate).getTime() <= new Date().getTime()) {
+                                break;
+                            }
+
+                            for (const time of timeSlots) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == time) {
+                                    toast.warning(s.startDate + "Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        } else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === dateBooking) {
+                            if (new Date(s.endDate).getMinutes() > 30) {
+                                hourEnd = new Date(s.endDate).getHours() + 1;
+                                minuteEnd = '00';
+                            } else {
+                                hourEnd = new Date(s.endDate).getHours();
+                                minuteEnd = '30';
+                            }
+
+                            const currentEndTime = `${hourEnd}h${minuteEnd}`;
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                currentEndTime
+                            );
+
+                            if (new Date(s.startDate).getTime() >= new Date().getTime()) {
+                                break;
+                            }
+
+                            for (const time of timeSlots) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (currentEndTime == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         if (dateBookingTemporary != dateBooking && idSportDetailTemporary != idSportDetail) {
             if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {

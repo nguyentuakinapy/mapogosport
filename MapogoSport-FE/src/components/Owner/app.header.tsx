@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
 import { formatDateNotime } from '../Utils/Format';
-import { Row } from 'react-bootstrap';
 import { usePathname } from 'next/navigation';
 interface HeaderProps {
     isAniActive: boolean;
@@ -39,7 +38,6 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     const [hideNotification, setHideNotification] = useState<boolean>(false);
     const [notification, setNotification] = useState<NotificationUser[]>();
     const userData = useData();
-    const [checkBooking, setCheckBooking] = useState<number>(1);
     const [checkNotification, setCheckNotification] = useState<number>(1);
     const path = usePathname();
 
@@ -47,7 +45,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
         if (userData) {
             getNotification(userData.username)
         }
-    }, [userData, checkBooking, checkNotification]);
+    }, [userData, checkNotification]);
 
     const getNotification = async (username: string) => {
         const response = await fetch(`http://localhost:8080/rest/user/notification/${username}`);

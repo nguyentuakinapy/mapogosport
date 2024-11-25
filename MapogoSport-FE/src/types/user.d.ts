@@ -21,20 +21,20 @@ interface User {
             addressDetail: string;
         }
     ];
-    phoneNumberUsers: [
-        {
-            phoneNumberUserId: number;
-            phoneNumber: {
-                phoneNumberId: number;
-                phoneNumber: string;
-            },
-            active: boolean;
-        }
-    ],
+    phoneNumberUsers: PhoneNumberUser[];
     wallet: {
         walletId: number;
         balance: number;
     }
+}
+
+interface PhoneNumberUser {
+    phoneNumberUserId: number;
+    phoneNumber: {
+        phoneNumberId: number;
+        phoneNumber: string;
+    },
+    active: boolean;
 }
 
 interface Authorities {
