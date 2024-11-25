@@ -56,16 +56,7 @@ interface BookingDetail {
     bookingDetailId: number;
     startTime: string;
     endTime: string;
-    sportFieldDetail: {
-        sportFielDetailId: number;
-        name: string;
-        price: number;
-        peakHourPrices: number;
-        size: string;
-        status: string;
-        percentDeposit: number;
-        peakHour: string;
-    };
+    sportFieldDetail: SportFieldDetail;
     price: number;
     date: string;
     subscriptionKey: string;
@@ -87,6 +78,7 @@ interface BookingDetailFullName {
         status: string;
         percentDeposit: number;
         peakHour: string;
+        statusSportFieldDetails: StatusSportFieldDetails[];
     };
     price: number;
     date: string;

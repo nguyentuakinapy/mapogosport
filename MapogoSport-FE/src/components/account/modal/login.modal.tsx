@@ -185,6 +185,11 @@ export default function Login(props: LoginProps) {
             }
         }
     };
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSubmit();
+        }
+    };
 
     return (
         <>
@@ -216,7 +221,7 @@ export default function Login(props: LoginProps) {
                             <Form.Control
                                 type="text"
                                 placeholder="Vui long nhập tên đăng nhập!"
-                                value={username}
+                                value={username} onKeyDown={handleKeyDown}
                                 onChange={(e) => setUsername(e.target.value)}
                             />
                         </Form.Group>
@@ -224,7 +229,7 @@ export default function Login(props: LoginProps) {
                             <Form.Control
                                 type="password"
                                 placeholder="Vui long nhập mật khẩu!"
-                                value={password}
+                                value={password} onKeyDown={handleKeyDown}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </Form.Group>
