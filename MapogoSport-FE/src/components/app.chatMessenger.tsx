@@ -586,6 +586,7 @@ import SockJS from "sockjs-client";
 import { useData } from "@/app/context/UserContext";
 import { useSearchParams } from "next/navigation";
 import { Content } from "next/font/google";
+import { toast } from "react-toastify";
 
 export default function ChatBox() {
   
@@ -792,13 +793,29 @@ export default function ChatBox() {
       (frame) => {
         console.log("Đã kết nối STOMP server:", frame);
         setIsConnected(true); // Đánh dấu kết nối STOMP thành công
+       
+        const topicDefault =  `/topic/notify/${currentUser?.username}`
+        stompClient.current.subscribe(topicDefault, (message) =>{
+          console.log("Nhận được message:", message.body);
+
+          const parsedMessage = JSON.parse(message.body);
+          console.log('selcect ed chat ', receiver);
+          console.log('selcect ed chat ', selectedChat);
+          
+          toast.info('Bạn nhận được tin nhắn từ '+ parsedMessage.senderFullName)
+
+          console.log("Sender:", parsedMessage.sender);
+          console.log("Message:", parsedMessage.message);
+          console.log("timestamp:", parsedMessage.timestamp);
+        })
+        console.log(`Đã gửi lệnh đăng ký tới topic: ${topicDefault}`);
+
       },
       (error) => {
         console.log("Lỗi kết nối tới STOMP server:", error);
         setIsConnected(false); // Đánh dấu kết nối STOMP thành công
       }
     );
-
     // Đóng kết nối khi component bị hủy
     return () => {
       if (stompClient.current) {
@@ -811,50 +828,6 @@ export default function ChatBox() {
 
   const [topicCurrent, setTopicCurrent] = useState<string>("");
 
-
-  //   useEffect(() => {
-  //     if (!isLoadByReceiverUsernameOrCurrentUser) {
-  //       if (
-  //         topicCurrent &&
-  //         isConnected &&
-  //         !subscribedTopics.includes(topicCurrent)
-  //       ) {
-  //         // toast.success("lòa alij");
-  //         console.log("Đăng ký topic:", topicCurrent);
-
-  //         // Đăng ký topic
-  //         const subscription = stompClient.current.subscribe(
-  //           topicCurrent,
-  //           (message) => {
-  //             const receivedMessage = JSON.parse(message.body);
-  //             if (
-  //               receivedMessage.sender === currentUser?.username ||
-  //               receivedMessage.receiver === currentUser?.username
-  //             ) {
-  //               setChatListRealTime((prevMessages) => [
-  //                 ...prevMessages,
-  //                 receivedMessage,
-  //               ]);
-  //               mutate();
-  //               mutateByReceiverUsernameOrCurrentUser();
-  //             }
-  //           }
-  //         );
-
-  //         // Thêm topic vào danh sách đã đăng ký
-  //         setSubscribedTopics((prevTopics) => [...prevTopics, topicCurrent]);
-
-  //         // Hủy đăng ký khi topicCurrent thay đổi hoặc component bị hủy
-  //         return () => {
-  //           console.log("Hủy đăng ký topic:", topicCurrent);
-  //           subscription.unsubscribe();
-  //           setSubscribedTopics((prevTopics) =>
-  //             prevTopics.filter((topic) => topic !== topicCurrent)
-  //           );
-  //         };
-  //       }
-  //     }
-  //   }, [topicCurrent, isConnected]); // useEffect sẽ chạy khi topicCurrent hoặc isConnected thay đổi
 
   const checkLogin = () => {
     let isLogin = false;
@@ -1066,6 +1039,7 @@ export default function ChatBox() {
           });
         }
       });
+      // toast.warning('sleceffff '+ selectedChat?.username)
 
       // Cập nhật trạng thái đã đăng ký topic
       setSubscribedTopics((prevTopics) => [...prevTopics, topic]);
@@ -1414,8 +1388,8 @@ export default function ChatBox() {
                           : null;
 
                       if (!chatUser) return null;
-                      console.log('sssssssss ',chatUser);
-                      console.log('chat group time ', formatTime(chatGroup.timestamp));
+                      // console.log('sssssssss ',chatUser);
+                      // console.log('chat group time ', formatTime(chatGroup.timestamp));
                       ;
                       
 
@@ -1618,8 +1592,8 @@ export default function ChatBox() {
                       )
                       .map((msg, index) => {
                         // Log nội dung và thời gian của tin nhắn
-                        console.log(`Message #${index + 1}:`, msg);
-                        console.log(`Timestamp for message #${index + 1}:`, msg.timestamp);
+                        // console.log(`Message #${index + 1}:`, msg);
+                        // console.log(`Timestamp for message #${index + 1}:`, msg.timestamp);
 
                         return (
                           <div
