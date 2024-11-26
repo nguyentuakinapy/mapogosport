@@ -15,6 +15,7 @@ import { IFrame } from "@stomp/stompjs";
 import { toast } from "react-toastify";
 
 export default function ChatBox() {
+
   interface Message {
     messageId: number;
     sender: User;
@@ -123,6 +124,7 @@ export default function ChatBox() {
       chatListCurrentUserByDMM.length === 0 &&
       selectedChat
       //  && selectedChat === ""
+
     ) {
       console.log("Đã kết nối, gọi handleSelectChat với adminDefault...");
       handleSelectChat(adminDefault); // Chỉ gọi khi isConnected là true
@@ -374,6 +376,7 @@ export default function ChatBox() {
     }
   }, [chatListRealTime]); // Theo dõi sự thay đổi của danh sách tin nhắn
 
+
   const handleSendMessage = () => {
     if (
       inputMessage.trim() !== "" &&
@@ -452,7 +455,9 @@ export default function ChatBox() {
             timestamp: new Date().toISOString(),
           },
         ];
+
       }
+     
       return prevChats;
     });
     // mới thêm 19/11
@@ -638,6 +643,7 @@ export default function ChatBox() {
       // setChatListCurrentUserByDMM(groupedMessagesArray as Message[]);
 
       // mới thêm 19/11
+
       if (
         ownerCurrent &&
         !groupedMessagesArray.some(
@@ -848,6 +854,7 @@ export default function ChatBox() {
                         chatGroup.user?.username !== currentUser?.username  ? chatGroup.user : null;
 
                       if (!chatUser) return null;
+
                       // console.log('sssssssss ',chatUser);
                       // console.log('chat group time ', formatTime(chatGroup.timestamp));
                       return (
@@ -871,6 +878,7 @@ export default function ChatBox() {
                                 marginRight: "10px",
                               }}
                               onError={(e) => {
+
                                 e.currentTarget.src =
                                   "/chat_page/assets/images/users/user-8.png"; // Ảnh mặc định
                               }}
@@ -884,6 +892,7 @@ export default function ChatBox() {
                           <div className=" mt-1 row">
                             <p className=" col text-start">
                               {dataMessageTemporary === null
+
                                 ? chatGroup.content: chatUser.username ===dataMessageTemporary.username
                                 ? dataMessageTemporary.content : chatGroup.content}
                               {/* {chatGroup.content || "Không có nội dung"} */}
@@ -1012,6 +1021,7 @@ export default function ChatBox() {
                     className="p-0 mx-2"
                   >
                     <i
+
                       className={`h6 bi ${
                         isMaximized
                           ? "bi-arrows-angle-contract"
@@ -1060,18 +1070,19 @@ export default function ChatBox() {
                         return (
                           <div
                             key={msg.messageId || index}
-                            className={`d-flex ${
-                              msg.sender.username === currentUser?.username ||
-                              msg.sender === currentUser?.username
+                            className={`d-flex ${msg.sender.username === currentUser?.username ||
+                                msg.sender === currentUser?.username
                                 ? "justify-content-end"
                                 : "justify-content-start"
-                            }`}
+                              }`}
                           >
+
                             <div
                               className={`p-2 rounded mb-2`}
                               style={{
                                 maxWidth: "80%",
                                 backgroundColor:
+
                                   msg.sender.username ===
                                     currentUser?.username ||
                                   msg.sender === currentUser?.username
@@ -1081,6 +1092,7 @@ export default function ChatBox() {
                                   msg.sender.username ===
                                     currentUser?.username ||
                                   msg.sender === currentUser?.username
+
                                     ? "black" // Màu chữ cho tin nhắn gửi đi
                                     : "black", // Màu chữ cho tin nhắn nhận được
                               }}
