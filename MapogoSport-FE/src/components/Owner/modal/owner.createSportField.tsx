@@ -2,34 +2,32 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, OverlayTrigger, Tooltip, Image } from "react-bootstrap";
 import { toast } from "react-toastify";
+import useSWR, { mutate } from "swr";
 
 interface SportFieldProps {
     showSportFieldModal: boolean;
     setShowSportFieldModal: (v: boolean) => void;
     selectedSportField?: SportField | null;
+    username: string | null;
 }
-const ModalCreateSportField = (props: SportFieldProps) => {
-    const { showSportFieldModal, setShowSportFieldModal, selectedSportField } = props;
 
+const ModalCreateSportField = (props: SportFieldProps) => {
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const { showSportFieldModal, setShowSportFieldModal, selectedSportField, username } = props;
     const [fieldName, setFieldName] = useState("");
     const [openTime, setOpenTime] = useState<string | null>(null);
     const [closeTime, setCloseTime] = useState<string | null>(null);
-    const [selectedFieldType, setSelectedFieldType] = useState("");
+    const [selectedFieldType, setSelectedFieldType] = useState<number>(0);
     const [address, setAddress] = useState("");
     const [description, setDescription] = useState("");
     const [status, setStatus] = useState("");
     const [avatar, setAvatar] = useState<File | string>("/images/logo.png");  // Chọn avatar chính
     const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);  // Chọn ảnh gallery phụ
-    const [fieldTypes, setFieldTypes] = useState([]);
-    const [galleryImages, setGalleryImages] = useState<File[]>([]);  // Chọn ảnh gallery phụ
-
-    const userSession = sessionStorage.getItem("user");
-    const user = userSession ? JSON.parse(userSession) : null;
-
-    const [openHour, setOpenHour] = useState<number | null>(null);
-    const [openMinute, setOpenMinute] = useState<number | null>(null);
-    const [closeHour, setCloseHour] = useState<number | null>(null);
-    const [closeMinute, setCloseMinute] = useState<number | null>(null);
+    const [galleryImages, setGalleryImages] = useState<GalleryField[]>([]);  // Chọn ảnh gallery phụ
+    const [openHour, setOpenHour] = useState<number>(0);
+    const [openMinute, setOpenMinute] = useState<number>(0);
+    const [closeHour, setCloseHour] = useState<number>(0);
+    const [closeMinute, setCloseMinute] = useState<number>(0);
 
     useEffect(() => {
         if (showSportFieldModal) {
@@ -37,14 +35,17 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                 setFieldName("");
                 setOpenTime(null);
                 setCloseTime(null);
-                setSelectedFieldType("");
+                setSelectedFieldType(0);
                 setAddress("");
                 setDescription("");
                 setStatus("");
+                setOpenHour(0);
+                setCloseHour(0);
+                setCloseMinute(0);
+                setOpenMinute(0);
             } else {
                 setFieldName(selectedSportField.name);
                 setOpenTime(selectedSportField.opening);
-
                 const [hourStr, minuteStr] = selectedSportField.opening.split('h');
                 setOpenHour(parseInt(hourStr, 10));
                 setOpenMinute(parseInt(minuteStr, 10));
@@ -52,40 +53,26 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                 const [hourStr1, minuteStr1] = selectedSportField.closing.split('h');
                 setCloseHour(parseInt(hourStr1, 10));
                 setCloseMinute(parseInt(minuteStr1, 10));
-
                 setSelectedFieldType(selectedSportField.categoriesField.categoriesFieldId);
                 setAddress(selectedSportField.address);
                 setDescription(selectedSportField.decription);
                 setStatus(selectedSportField.status);
-                // Không quên đặt avatar nếu có
                 setAvatar(selectedSportField.image || "/images/logo.png");
-                // Nếu bạn có ảnh gallery, có thể thêm ở đây
             }
         }
     }, [showSportFieldModal, selectedSportField]);
 
 
-    // Lấy danh sách loại sân từ API khi modal mở
-    useEffect(() => {
-        if (showSportFieldModal) {
-            axios.get("http://localhost:8080/rest/category_field")
-                .then(response => setFieldTypes(response.data))
-                .catch(error => console.error("Lỗi khi tải danh sách loại sân:", error));
-        }
-    }, [showSportFieldModal]);
+    const { data: fieldTypes } = useSWR<CategoryField[]>("http://localhost:8080/rest/category_field", fetcher);
+
+    const { data } = useSWR(selectedSportField &&
+        `http://localhost:8080/rest/sportfield/gallery/${selectedSportField.sportFieldId}`, fetcher);
 
     useEffect(() => {
-        if (showSportFieldModal && selectedSportField) {
-            // Gọi API để lấy danh sách ảnh gallery
-            axios.get(`http://localhost:8080/rest/sportfield/gallery/${selectedSportField.sportFieldId}`)
-                .then(response => {
-                    setGalleryImages(response.data);
-                })
-                .catch(error => {
-                    console.error("Lỗi khi tải danh sách ảnh gallery:", error);
-                });
+        if (data) {
+            setGalleryImages(data);
         }
-    }, [showSportFieldModal, selectedSportField]);
+    }, [data]);
 
     // Đóng modal và reset các trường nhập liệu
     const handleClose = () => {
@@ -93,13 +80,15 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         setFieldName("");
         setOpenTime(null);
         setCloseTime(null);
-        setSelectedFieldType("");
+        setSelectedFieldType(0);
         setAddress("");
         setDescription("");
         setStatus("");
         setAvatar("/images/logo.png");
         setSelectedGalleryFiles([]);
         setGalleryImages([]);
+        setOpenHour(0);
+        setCloseHour(0);
     };
 
     // Xử lý thay đổi ảnh đại diện (avatar)
@@ -130,41 +119,14 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         }
     }, [closeHour, closeMinute]);
 
-    const checkForm = () => {
-        const errors = []; // Mảng lưu trữ các thông báo lỗi
-
-        if (!fieldName) {
-            errors.push("Vui lòng nhập tên sân.");
-        }
-        if (!openTime) {
-            errors.push("Vui lòng nhập giờ mở cửa.");
-        }
-        if (!closeTime) {
-            errors.push("Vui lòng nhập giờ đóng cửa.");
-        }
-        if (!selectedFieldType) {
-            errors.push("Vui lòng chọn loại sân.");
-        }
-        if (!address) {
-            errors.push("Vui lòng nhập địa chỉ.");
-        }
-        if (!description) {
-            errors.push("Vui lòng nhập mô tả.");
-        }
-
-        if (errors.length > 0) {
-            alert(errors.join("\n")); // Hiển thị tất cả lỗi trên một alert
-            return false; // Trả về false để biểu thị rằng kiểm tra không thành công
-        }
-
-        return true; // Trả về true nếu tất cả các trường hợp đều hợp lệ
-    };
-
     const handleUpdate = () => {
-        if (!checkForm()) return;
+        if (!fieldName || !openTime || !closeTime || !selectedFieldType || !address || !description) {
+            toast.error("Vui lòng điền đầy đủ thông tin!");
+            return;
+        }
 
         const sportFieldData = {
-            sportFieldId: selectedSportField.sportFieldId,
+            sportFieldId: selectedSportField?.sportFieldId,
             name: fieldName,
             opening: `${openTime}`,
             closing: `${closeTime}`,
@@ -179,7 +141,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         formData.append("sportFieldData", new Blob([JSON.stringify(sportFieldData)], { type: "application/json" }));
 
         // Chỉ thêm avatar nếu nó là file mới hoặc khác ảnh gốc
-        if (avatar instanceof File || avatar !== selectedSportField.image) {
+        if (avatar instanceof File || avatar !== selectedSportField?.image) {
             formData.append("avatar", avatar as File);
         }
 
@@ -197,7 +159,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         })
             .then(response => {
                 console.log("Thông tin sân đã được lưu thay đổi:", response.data);
-                mutate(`http://localhost:8080/rest/sportfields/lists/${user.username}`);
+                mutate(`http://localhost:8080/rest/sportfields/lists/${username}`);
                 handleClose();
             })
             .catch(error => {
@@ -210,7 +172,10 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     // Lưu thông tin sân thể thao và gửi ảnh lên server
     const handleSave = () => {
         setLoading(true);
-        if (!checkForm()) return;
+        if (!fieldName || !openTime || !closeTime || !selectedFieldType || !address || !description) {
+            toast.error("Vui lòng nhập tên sân.");
+            return;
+        }
         const sportFieldData = {
             name: fieldName,
             opening: `${openTime}`,
@@ -219,7 +184,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             address: address,
             decription: description,
             status: status,
-            owner: user?.username
+            owner: username
         };
 
         // Tạo FormData để gửi dữ liệu dưới dạng multipart/form-data
@@ -245,7 +210,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         })
             .then(response => {
                 console.log("Thông tin sân đã được lưu:", response.data);
-                mutate(`http://localhost:8080/rest/sportfields/lists/${user.username}`);
+                mutate(`http://localhost:8080/rest/sportfields/lists/${username}`);
                 handleClose();
             })
             .catch(error => {
@@ -254,9 +219,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     };
 
     //xóa hình
-    const handleDeleteGallery = async (
-        gallerySportFieldId: number
-    ) => {
+    const handleDeleteGallery = async (gallerySportFieldId: number) => {
         const confirmed = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
 
         if (!confirmed) {
@@ -283,36 +246,26 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     };
 
     return (
-        <Modal show={showSportFieldModal} onHide={handleClose} size="xl" centered backdrop="static" keyboard={false}>
-            <Modal.Header closeButton>
-                <Modal.Title>{selectedSportField ? 'Sửa Khu Vực' : 'Thêm Khu Vực'}</Modal.Title>
+        <Modal show={showSportFieldModal} size="xl" centered backdrop="static" keyboard={false}>
+            <Modal.Header>
+                <Modal.Title className="text-danger text-uppercase d-flex m-auto">{selectedSportField ? 'Sửa Khu Vực' : 'Thêm Khu Vực'}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Row>
                     <Col className="col-8">
                         <FloatingLabel controlId="floatingFieldName" label="Tên sân" className="mb-3">
-                            <Form.Control
-                                type="text"
-                                placeholder="Tên sân"
-                                value={fieldName}
+                            <Form.Control type="text" placeholder="Tên sân" value={fieldName}
                                 onChange={(e) => setFieldName(e.target.value)}
                             />
                         </FloatingLabel>
                         <Row>
-                            {/*  */}
                             <Col className="col-6">
                                 <label className="">
-                                    Giờ mở cửa: {openHour !== null && openMinute !== null ? `${openHour}h${openMinute.toString().padStart(2, '0')}` : "Chưa chọn"}
+                                    Giờ mở cửa: {openHour !== 0 && openMinute !== null ? `${openHour}h${openMinute.toString().padStart(2, '0')}` : "Chưa chọn"}
                                 </label>
                                 <div className="d-flex">
-                                    <Form.Select
-                                        value={openHour ?? ''}
-                                        onChange={(e) => {
-                                            setOpenHour(parseInt(e.target.value, 10));
-                                        }}
-                                        className="me-2"
-                                    >
-                                        <option value="">Chọn giờ</option>
+                                    <Form.Select value={openHour ?? ''} onChange={(e) => { setOpenHour(parseInt(e.target.value, 10)); }} className="me-2">
+                                        <option>Chọn giờ</option>
                                         {[...Array(24).keys()].map((hour) => (
                                             <option key={hour} value={hour}>
                                                 {hour}
@@ -324,8 +277,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                         onChange={(e) => {
                                             setOpenMinute(parseInt(e.target.value, 10));
                                         }}>
-                                        <option value="">Chọn phút</option>
-                                        {[0, 15, 30, 45].map((minute) => (
+                                        {[0, 30].map((minute) => (
                                             <option key={minute} value={minute}>
                                                 {minute}
                                             </option>
@@ -336,7 +288,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
 
                             <Col className="col-6 mb-3">
                                 <label className="">
-                                    Giờ đóng cửa: {closeHour !== null && closeMinute !== null ? `${closeHour}h${closeMinute.toString().padStart(2, '0')}` : "Chưa chọn"}
+                                    Giờ đóng cửa: {closeHour !== 0 && closeMinute !== null ? `${closeHour}h${closeMinute.toString().padStart(2, '0')}` : "Chưa chọn"}
                                 </label>                                <div className="d-flex">
                                     <Form.Select
                                         value={closeHour ?? ''}
@@ -345,7 +297,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                         }}
                                         className="me-2"
                                     >
-                                        <option value="">Chọn giờ</option>
+                                        <option>Chọn giờ</option>
                                         {[...Array(24).keys()].filter((hour) => hour > (openHour ?? -1)).map((hour) => (
                                             <option key={hour} value={hour}>
                                                 {hour}
@@ -359,8 +311,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
 
                                         }}
                                     >
-                                        <option value="">Chọn phút</option>
-                                        {[0, 15, 30, 45].map((minute) => (
+                                        {[0, 30].map((minute) => (
                                             <option key={minute} value={minute}>
                                                 {minute}
                                             </option>
@@ -375,13 +326,9 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                         <Row>
                             <Col className="col-6">
                                 <FloatingLabel controlId="floatingFieldType" label="Loại sân" className="mb-3">
-                                    <Form.Select
-                                        aria-label="Loại sân"
-                                        value={selectedFieldType}
-                                        onChange={(e) => setSelectedFieldType(e.target.value)} // Đảm bảo lưu ID
-                                    >
+                                    <Form.Select value={selectedFieldType} onChange={(e) => setSelectedFieldType(Number(e.target.value))}>
                                         <option value="">Chọn loại sân</option>
-                                        {fieldTypes.length > 0 ? (
+                                        {fieldTypes && fieldTypes.length > 0 ? (
                                             fieldTypes.map((type) => (
                                                 <option key={type.categoriesFieldId} value={type.categoriesFieldId}>
                                                     {type.name}
@@ -395,11 +342,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                             </Col>
                             <Col className="col-6">
                                 <FloatingLabel controlId="floatingStatus" label="Trạng thái" className="mb-3">
-                                    <Form.Select
-                                        aria-label="Trạng thái"
-                                        value={status}
-                                        onChange={(e) => setStatus(e.target.value)}
-                                    >
+                                    <Form.Select value={status} onChange={(e) => setStatus(e.target.value)}>
                                         <option value="">Chọn trạng thái</option>
                                         <option value="Hoạt động">Hoạt động</option>
                                         <option value="Tạm đóng">Tạm đóng</option>
@@ -434,7 +377,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                         <Form.Group controlId="avatarInput" className="mt-2">
                             <Form.Label>{selectedSportField ? 'Đổi ảnh đại diện' : 'Chọn ảnh đại diện'}</Form.Label>
                             <Form.Control type="file" accept="image/*" onChange={handleAvatarChange} className="d-none" />
-                            <Button variant="outline-primary" size="sm" onClick={() => document.getElementById("avatarInput").click()}>
+                            <Button variant="outline-primary" size="sm" onClick={() => document.getElementById("avatarInput")!.click()}>
                                 <i className="bi bi-person-circle mx-1"></i>
                             </Button>
                         </Form.Group>
@@ -482,7 +425,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                         <Form.Group controlId="galleryInput" className="mt-2">
                             <Form.Label>Thêm ảnh vào thư viện</Form.Label>
                             <Form.Control type="file" multiple accept="image/*" onChange={handleGalleryChange} className="d-none" />
-                            <Button variant="outline-primary" size="sm" onClick={() => document.getElementById("galleryInput").click()}>
+                            <Button variant="outline-primary" size="sm" onClick={() => document.getElementById("galleryInput")!.click()}>
                                 <i className="bi bi-images mx-1"></i> Thêm ảnh
                             </Button>
                             <p>Ảnh mới</p>
@@ -528,7 +471,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             </Modal.Body >
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>Hủy</Button>
-                <Button variant="success" onClick={selectedSportField ? handleUpdate : handleSave} disabled={loading}>
+                <Button style={{ background: '#142239' }} onClick={selectedSportField ? handleUpdate : handleSave} disabled={loading}>
                     {selectedSportField ? 'Lưu Thay Đổi' : 'Thêm Khu Vực'}
                 </Button>
             </Modal.Footer>

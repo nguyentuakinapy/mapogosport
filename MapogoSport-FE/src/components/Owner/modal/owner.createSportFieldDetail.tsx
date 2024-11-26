@@ -1,27 +1,25 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Button, Col, Form, Modal, Row, FloatingLabel } from "react-bootstrap";
+import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup } from "react-bootstrap";
+import { toast } from "react-toastify";
 import { mutate } from "swr";
-
 
 interface SportFieldDetailProps {
     showSportFieldDetailModal: boolean;
     setShowSportFieldDetailModal: (v: boolean) => void;
-    selectedSportFieldDetail: any; // Thay thế `any` bằng kiểu dữ liệu cụ thể nếu có
-    setSelectedSportFieldDetail: (field: any) => void;
-    id: number | undefined; // Thêm id vào props và xác định kiểu dữ liệu
+    selectedSportFieldDetail?: SportFieldDetail | null;
+    id?: string | string[];
     owner?: Owner
 }
 
 const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
     const { showSportFieldDetailModal, setShowSportFieldDetailModal, selectedSportFieldDetail, id, owner } = props;
-
     const [fieldName, setFieldName] = useState("");
-    const [price, setPrice] = useState<number | null>(null);
-    const [peakHourPrices, setPeakHourPrices] = useState<number | null>(null);
+    const [price, setPrice] = useState<number>(0);
+    const [peakHourPrices, setPeakHourPrices] = useState<number>(0);
     const [size, setSize] = useState("");
     const [status, setStatus] = useState("");
-    const [percentDeposit, setPercentDeposit] = useState("");
+    const [percentDeposit, setPercentDeposit] = useState<number>(0);
     const [peakHour, setPeakHour] = useState("");
 
     useEffect(() => {
@@ -29,13 +27,11 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
             if (!selectedSportFieldDetail) {
                 setFieldName("");
                 setStatus("");
-                setPrice(null);
-                setPeakHourPrices(null);
+                setPrice(0);
+                setPeakHourPrices(0);
                 setSize("");
-                setPercentDeposit("");
+                setPercentDeposit(0);
                 setPeakHour("");
-                setDisplayPeakPrice('');
-                setDisplayPrice('');
             } else {
                 setFieldName(selectedSportFieldDetail.name);
                 setStatus(selectedSportFieldDetail.status);
@@ -44,8 +40,6 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
                 setSize(selectedSportFieldDetail.size);
                 setPercentDeposit(selectedSportFieldDetail.percentDeposit);
                 setPeakHour(selectedSportFieldDetail.peakHour);
-                setDisplayPeakPrice(selectedSportFieldDetail.peakHourPrices);
-                setDisplayPrice(selectedSportFieldDetail.price);
             }
         }
     }, [showSportFieldDetailModal, selectedSportFieldDetail]);
@@ -55,49 +49,18 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
         setShowSportFieldDetailModal(false);
         setFieldName("");
         setStatus("");
-        setPrice(null);
-        setPeakHourPrices(null);
+        setPrice(0);
+        setPeakHourPrices(0);
         setSize("");
-        setPercentDeposit("");
+        setPercentDeposit(0);
         setPeakHour("");
-        setDisplayPeakPrice('');
-        setDisplayPrice('');
     };
 
-    const checkForm = () => {
-        const errors = []; // Mảng lưu trữ thông báo lỗi
-
-        if (!fieldName) {
-            errors.push("Vui lòng điền tên sân.");
-        }
-        if (!peakHour) {
-            errors.push("Vui lòng nhập khung giờ vàng.");
-        }
-        if (!size) {
-            errors.push("Vui lòng điền kích thước.");
-        }
-        if (!status) {
-            errors.push("Vui lòng chọn trạng thái.");
-        }
-        if (percentDeposit === null || percentDeposit === "") { // Kiểm tra cho giá trị null hoặc chuỗi rỗng
-            errors.push("Vui lòng nhập phần trăm cọc.");
-        }
-        if (peakHourPrices === null || peakHourPrices === null) { // Kiểm tra cho giá trị null hoặc chuỗi rỗng
-            errors.push("Vui lòng nhập giá giờ vàng.");
-        }
-        if (price === null || price === null) { // Kiểm tra cho giá trị null hoặc chuỗi rỗng
-            errors.push("Vui lòng nhập giá thuê.");
-        }
-
-        if (errors.length > 0) {
-            alert(errors.join("\n")); // Hiển thị tất cả các lỗi
-            return false; // Trả về false nếu có lỗi
-        }
-
-        return true; // Trả về true nếu không có lỗi
-    }
     const handleSave = () => {
-        if (!checkForm()) return; // Chỉ lưu khi `checkForm()` trả về true
+        if (!fieldName || !peakHour || !size || !status || !percentDeposit || !peakHourPrices || !price) {
+            toast.error("Vui lòng điền đầy đủ thông tin sân.");
+            return;
+        }
 
         const SportFieldDetailData = {
             sportFieldId: id,
@@ -114,22 +77,22 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-        })
-            .then(response => {
-                console.log("Thông tin sân đã được lưu:", response.data);
-                mutate(`http://localhost:8080/rest/sportfielddetail/lists/${id}`);
-                mutate(`http://localhost:8080/rest/sport_field_by_owner/${owner?.ownerId}`);
-                handleClose();
-            })
-            .catch(error => {
-                console.error("Lỗi khi lưu thông tin sân:", error.response ? error.response.data : error.message);
-            });
+        }).then(() => {
+            mutate(`http://localhost:8080/rest/sportfielddetail/lists/${id}`);
+            mutate(`http://localhost:8080/rest/sport_field_by_owner/${owner?.ownerId}`);
+            handleClose();
+            toast.success("Thêm sân thành công!");
+        }).catch(error => {
+            console.error("Lỗi khi lưu thông tin sân:", error.response ? error.response.data : error.message);
+        });
     };
     const handleUpdate = () => {
-        if (!checkForm()) return; // Chỉ lưu khi `checkForm()` trả về true
-
+        if (!fieldName || !peakHour || !size || !status || !percentDeposit || !peakHourPrices || !price) {
+            toast.error("Vui lòng điền đầy đủ thông tin sân.");
+            return;
+        }
         const SportFieldDetailData = {
-            sportFieldDetailId: selectedSportFieldDetail.sportFielDetailId,
+            sportFieldDetailId: selectedSportFieldDetail?.sportFielDetailId,
             name: fieldName,
             peakHour: peakHour,
             size: size,
@@ -138,55 +101,35 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
             peakHourPrices: peakHourPrices,
             price: price
         };
-        console.log(selectedSportFieldDetail);
-
-        console.log(SportFieldDetailData.sportFieldDetailId);
-
         axios.post("http://localhost:8080/rest/SportFieldDetail/update", SportFieldDetailData, {
             headers: {
                 'Content-Type': 'application/json',
             },
-        })
-            .then(response => {
-                console.log("Thông tin sân đã được lưu thay đổi:", response.data);
-                mutate(`http://localhost:8080/rest/sportfielddetail/lists/${id}`);
-                handleClose();
-            })
-            .catch(error => {
-                console.error("Lỗi khi lưu thay đổi thông tin sân:", error.response ? error.response.data : error.message);
-            });
+        }).then(() => {
+            mutate(`http://localhost:8080/rest/sportfielddetail/lists/${id}`);
+            handleClose();
+            toast.success("Cập nhật thành công!");
+        }).catch(error => {
+            console.error("Lỗi khi lưu thay đổi thông tin sân:", error.response ? error.response.data : error.message);
+        });
     }
-    const [displayPrice, setDisplayPrice] = useState<string>("");
+
     const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const rawValue = e.target.value.replace(/\D/g, ""); // Loại bỏ tất cả ký tự không phải số
-        const numericValue = Number(rawValue);
-
-        // Cập nhật giá trị số vào state `price`
+        const rawValue = e.target.value.replace(/\D/g, "");
+        const numericValue = rawValue === "" ? 0 : Number(rawValue);
         setPrice(numericValue);
-
-        // Cập nhật hiển thị dạng tiền tệ vào `displayPrice`
-        setDisplayPrice(
-            new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(numericValue)
-        );
     };
 
-    const [displayPeakPrice, setDisplayPeakPrice] = useState<string>("");
     const handlePeakPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const rawValue = e.target.value.replace(/\D/g, ""); // Loại bỏ tất cả ký tự không phải số
-        const numericValue = Number(rawValue);
-
-        // Cập nhật giá trị số vào state `price`
+        const rawValue = e.target.value.replace(/\D/g, "");
+        const numericValue = rawValue === "" ? 0 : Number(rawValue);
         setPeakHourPrices(numericValue);
-
-        // Cập nhật hiển thị dạng tiền tệ vào `displayPrice`
-        setDisplayPeakPrice(
-            new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(numericValue)
-        );
     };
+
     return (
-        <Modal show={showSportFieldDetailModal} onHide={handleClose} size="lg" centered backdrop="static" keyboard={false}>
-            <Modal.Header closeButton>
-                <Modal.Title>{selectedSportFieldDetail ? 'Sửa sân' : 'Thêm sân'}</Modal.Title>
+        <Modal show={showSportFieldDetailModal} size="lg" centered backdrop="static" keyboard={false}>
+            <Modal.Header>
+                <Modal.Title className="d-flex m-auto fw-bold text-danger text-uppercase">{selectedSportFieldDetail ? 'Sửa sân' : 'Thêm sân'}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <FloatingLabel controlId="floatingFieldName" label="Tên sân" className="mb-3">
@@ -199,34 +142,31 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
                 </FloatingLabel>
                 <Row>
                     <Col className="col-6">
-                        <FloatingLabel controlId="floatingOpenTime" label="Giá thuê" className="mb-3">
-                            <Form.Control
-                                type="text"
-                                placeholder="Giá thuê"
-                                value={displayPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                onChange={handlePriceChange}
-                            />
-                        </FloatingLabel>
+
+                        <InputGroup className="mb-3">
+                            <FloatingLabel controlId="floatingOpenTime" label="Giá thuê">
+                                <Form.Control type="text" placeholder="Giá thuê"
+                                    value={price.toLocaleString()}
+                                    onChange={handlePriceChange} />
+                            </FloatingLabel>
+                            <InputGroup.Text style={{ fontSize: '15px', fontWeight: 700, border: '1px solid' }}>VNĐ</InputGroup.Text>
+                        </InputGroup>
                     </Col>
                     <Col className="col-6">
-                        <FloatingLabel controlId="floatingCloseTime" label="Giá giờ vàng" className="mb-3">
-                            <Form.Control
-                                type="text"
-                                placeholder="Giá giờ vàng"
-                                value={displayPeakPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                onChange={handlePeakPriceChange}
-                            />
-                        </FloatingLabel>
+                        <InputGroup className="mb-3">
+                            <FloatingLabel controlId="floatingCloseTime" label="Giá giờ vàng">
+                                <Form.Control type="text" placeholder="Giá giờ vàng"
+                                    value={peakHourPrices.toLocaleString()}
+                                    onChange={handlePeakPriceChange} />
+                            </FloatingLabel>
+                            <InputGroup.Text style={{ fontSize: '15px', fontWeight: 700, border: '1px solid' }}>VNĐ</InputGroup.Text>
+                        </InputGroup>
                     </Col>
                 </Row>
                 <Row>
                     <Col className="col-6">
                         <FloatingLabel controlId="floatingStatus" label="Trạng thái" className="mb-3">
-                            <Form.Select
-                                aria-label="Trạng thái"
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                            >
+                            <Form.Select style={{ border: '1px solid' }} value={status} onChange={(e) => setStatus(e.target.value)}>
                                 <option value="">Chọn trạng thái</option>
                                 <option value="Hoạt động">Hoạt động</option>
                                 <option value="Tạm đóng">Tạm đóng</option>
@@ -236,11 +176,7 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
                     </Col>
                     <Col className="col-6">
                         <FloatingLabel controlId="floatingStatus" label="Kích thước" className="mb-3">
-                            <Form.Select
-                                aria-label=""
-                                value={size}
-                                onChange={(e) => setSize(e.target.value)}
-                            >
+                            <Form.Select style={{ border: '1px solid' }} value={size} onChange={(e) => setSize(e.target.value)}>
                                 <option value="">Chọn kích thước</option>
                                 <option value="5 người">5 người</option>
                                 <option value="7 người">7 người</option>
@@ -292,7 +228,7 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
             </Modal.Body >
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>Hủy</Button>
-                <Button variant="success" onClick={selectedSportFieldDetail ? handleUpdate : handleSave}>
+                <Button style={{ background: '#142239' }} onClick={selectedSportFieldDetail ? handleUpdate : handleSave}>
                     {selectedSportFieldDetail ? 'Lưu Thay Đổi' : 'Thêm sân'}
                 </Button>
             </Modal.Footer>
