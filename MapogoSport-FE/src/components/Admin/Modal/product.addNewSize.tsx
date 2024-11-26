@@ -40,7 +40,7 @@ const ModalProductAddNewSize = ({
   };
 
   const addNewSize = async () => {
-    if(!newSizeName){
+    if (!newSizeName) {
       toast.warning("Vui lòng nhập kích cỡ trước khi lưu")
       return
     }
@@ -253,13 +253,13 @@ const ModalProductAddNewSize = ({
     mutationFn: (productDetailSize: ProductDetailSize) => {
       return modalTypeProductDetail === "edit"
         ? updateProductDetailSize(
-            currentProductDetailSize!.productDetailSizeId,
-            productDetailSize
-          )
+          currentProductDetailSize!.productDetailSizeId,
+          productDetailSize
+        )
         : createProductDetailSize(
-            selectedProductDetail!.productDetailId,
-            productDetailSize
-          );
+          selectedProductDetail!.productDetailId,
+          productDetailSize
+        );
     },
     onSuccess: () => {
       toast.success("Kích cỡ đã được lưu thành công!");
@@ -313,7 +313,7 @@ const ModalProductAddNewSize = ({
 
   return (
     <div>
-      <Modal 
+      <Modal
         show={isShowAddNewSize}
         onHide={handleCloseModal}
         className="modal-dialog-centered modal-add-color"

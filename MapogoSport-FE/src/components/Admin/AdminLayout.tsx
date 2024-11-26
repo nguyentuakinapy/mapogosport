@@ -73,9 +73,6 @@ export default function AdminLayout({
         sessionStorage.setItem("isAniActive", JSON.stringify(!isAniActive));
     }
 
-    const [refreshKey, setRefreshKey] = useState<number>(0);
-
-
     useEffect(() => {
         const isAniActive = sessionStorage.getItem("isAniActive");
         if (isAniActive) {
@@ -84,7 +81,7 @@ export default function AdminLayout({
     }, []);
 
     return (
-        <UserProvider refreshKey={refreshKey}>
+        <UserProvider refreshKey={1}>
             <ReactQueryProvider>
                 <Nav isAniActive={isAniActive} toggleAni={toggleAni} />
                 <Header isAniActive={isAniActive} toggleAni={toggleAni} weather={weather} />

@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
@@ -96,9 +96,7 @@ export default function Login(props: LoginProps) {
         }
 
     }
-    const { showLoginModal, setShowLoginModal } = props;
-    const { showRegisterModal, setShowRegisterModal } = props;
-    const { showForgotPassword, setShowForgotPassword } = props;
+    const { showLoginModal, setShowLoginModal, setShowRegisterModal, setShowForgotPassword } = props;
 
     const handleClose = () => {
         setShowLoginModal(false);

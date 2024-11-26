@@ -1,17 +1,13 @@
 'use client'
 import BookingChart from '@/components/Owner/Statistic/BookingChart';
-// import CustomerChartPage from '@/components/Owner/Statistic/CustomerChartPage';
 import RevenueChart from '@/components/Owner/Statistic/RevenuaChart';
 import { useEffect, useState } from 'react';
-import { Button, InputGroup, Nav, Table } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileExport } from '@fortawesome/free-solid-svg-icons';
+import { InputGroup, Nav, Table } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { formatPrice } from "@/components/Utils/Format"
 import ModalTableDetail from '@/components/Owner/modal/tableDetailStatictis.modal';
 import CustomerLineChart from '@/components/Owner/Statistic/CustomerLineChart';
-import { userAgent } from 'next/server';
 import ModalTableDetailCustomer from '@/components/Owner/modal/tableDetailCustomer.modal';
 import ModalTableDetailCustomerByFullName from '@/components/Owner/modal/tableDetailCustomerByFullName.modal,';
 import ExcelJS from 'exceljs';
@@ -33,12 +29,12 @@ export default function Home() {
   const [bookingdetailBySportField, setBookingdetailBySportField] = useState<BookingDetail[]>([])
   const [owner, setOwner] = useState<Owner>();
   const [selectedFieldId, setSelectedFieldId] = useState<number | null>(null);
-  const [selectSportFieldDetail, setSelectSportFieldDetail] = useState<any>([]);
+  // const [selectSportFieldDetail, setSelectSportFieldDetail] = useState<any>([]);
   const [sportFieldDetailIds, setSportFieldDetailIds] = useState<number[]>([]);
-  const [revenueBySportFieldDetail, setRevenueBySportFieldDetail] = useState<any>([])
+  // const [revenueBySportFieldDetail, setRevenueBySportFieldDetail] = useState<any>([])
   const [chartData, setChartData] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [idSportFieldDetailTable, setIdSportFieldDetailTable] = useState<number | null>(null);
+  // const [idSportFieldDetailTable, setIdSportFieldDetailTable] = useState<number | null>(null);
   const [bookingDetailBySpFDetail, setBookingDetailBySpFDetail] = useState<BookingDetail[]>([]);
   // by Date
   const [bookingSuccessByDate, setBookingSuccessByDate] = useState<Booking[]>([]);
@@ -50,7 +46,7 @@ export default function Home() {
   const [customerData, setCustomerData] = useState<any[]>([]);
   const [rankCustomerOffline, setRankCustomerOffline] = useState<any[]>([])
   const [rankCustomerOnline, setRankCustomerOnline] = useState<any[]>([])
-  const [selectedUsername, setSelectedUsername] = useState<string | null>(null)
+  // const [selectedUsername, setSelectedUsername] = useState<string | null>(null)
   const [showModalRank, setShowModalRank] = useState(false);
   const [showModalRankOffline, setShowModalRankOffline] = useState(false);
   const [bookingByUsernameModal, setBookingByUsernameModal] = useState<Booking[]>([])
@@ -160,7 +156,7 @@ export default function Home() {
         try {
           const response = await fetch(`http://localhost:8080/rest/sport_field/${selectedFieldId}`);
           const data = await response.json();
-          setSelectSportFieldDetail(data);
+          // setSelectSportFieldDetail(data);
           console.log("sportFieldDetail", data);
           // Get array sportFielDetailId and save in state sportFieldDetailIds
           const ids = data.sportFielDetails.map((detail: any) => detail.sportFielDetailId);
@@ -168,13 +164,13 @@ export default function Home() {
           console.log("sportFieldDetailIds:", ids);
         } catch (error) {
           console.log("error fetch bookingdetail", error);
-          setSelectSportFieldDetail([]);
+          // setSelectSportFieldDetail([]);
           setSportFieldDetailIds([]);
         }
       };
       fetchData();
     } else {
-      setSelectSportFieldDetail([]);
+      // setSelectSportFieldDetail([]);
       setSportFieldDetailIds([]);
     }
   }, [selectedFieldId]);
@@ -217,7 +213,6 @@ export default function Home() {
           const idsString = sportFieldDetailIds.join(',');
           const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportFieldDetail/${idsString}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
           const data = await response.json();
-          setRevenueBySportFieldDetail(data);
           const formattedData = [
             ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
             ...data.map((item: any) => [item[0], item[1], item[2], item[3], item[4]])
@@ -226,13 +221,11 @@ export default function Home() {
           console.log("revenuedata oooooooooooooooooooo", data);
         } catch (error) {
           console.log("error fetch ", error);
-          setRevenueBySportFieldDetail([]);
           setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
         }
       };
       fetchData();
     } else {
-      setRevenueBySportFieldDetail([]);
       setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
     }
   }, [sportFieldDetailIds, bookingIdsString]);
@@ -396,12 +389,11 @@ export default function Home() {
   // Function handel detail table
 
   const handleOpenModal = (id: number) => {
-    setIdSportFieldDetailTable(id); // Update state immediately
     setShowModal(true);
     console.log('chartData:', chartData);
     console.log('totalBookingPrice:', totalBookingPrice);
     console.log("idSportFieldDetailTable", id);
-    
+
     if (startDate || endDate) {
       // Fetch modal data based on the provided id and date range
       const fetchModalDataByDate = async () => {
@@ -533,7 +525,6 @@ export default function Home() {
 
   // Detail modal rank by username
   const handleOpenModalRank = (username: string) => {
-    setSelectedUsername(username); // Update state immediately
     console.log("username", username)
     setShowModalRank(true);
     // Fetch modal data based on the provided username
@@ -557,7 +548,6 @@ export default function Home() {
 
   //Detail modal rank by fullname
   const handleOpenModalRankOffline = (fullname: string) => {
-    setSelectedUsername(fullname); // Update state immediately
     console.log("fullName", fullname)
     setShowModalRankOffline(true);
     // Fetch modal data based on the provided username

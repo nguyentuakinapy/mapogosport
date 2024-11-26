@@ -138,10 +138,7 @@ const AdminProduct = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedType, setSelectedType] = useState<number>(); // Giá trị mặc định là rỗng
 
-  const handleSelectedCategory = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = event.target.value;
-    setSelectedType(Number(selectedId));
-  }
+
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -178,7 +175,6 @@ const AdminProduct = () => {
       );
     }
     if (selectedType) {
-      console.log("selectedType  " + selectedType);
 
       filtered = filtered.filter((product) => product.categoryProduct.categoryProductId === selectedType)
 
@@ -401,7 +397,7 @@ const AdminProduct = () => {
             as="select"
             name="categoryProduct"
             value={selectedType}
-            onChange={() => handleSelectedCategory}
+            onChange={(e) => setSelectedType(Number(e.target.value))}
             style={{ minWidth: "200px" }}
           >
             <option value="">Tất cả loại sản phẩm</option>

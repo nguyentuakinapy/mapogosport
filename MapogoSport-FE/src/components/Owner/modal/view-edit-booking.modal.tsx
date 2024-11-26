@@ -306,16 +306,18 @@ const BookingModal = (props: OwnerProps) => {
         let isAvailable = true;
         let checkTime = false;
 
-        let hourStart;
-        let minuteStart;
-        let hourEnd;
-        let minuteEnd;
 
         if (sportDetail && dateBooking) {
             for (const s of sportDetail.statusSportFieldDetails) {
+
+                let hourStart;
+                let minuteStart;
+                let hourEnd;
+                let minuteEnd;
+
                 if (isDateInRange(dateBooking, s.startDate, s.endDate)) {
                     if (sport) {
-                        if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === dateBooking) {
+                        if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === dateBooking && s.endDate !== null) {
 
                             if (new Date(s.startDate).getMinutes() > 30) {
                                 hourStart = new Date(s.startDate).getHours() + 1;
@@ -325,14 +327,19 @@ const BookingModal = (props: OwnerProps) => {
                                 minuteStart = '30';
                             }
 
+                            if (new Date(s.endDate).getMinutes() > 30) {
+                                hourEnd = new Date(s.endDate).getHours() + 1;
+                                minuteEnd = '00';
+                            } else {
+                                hourEnd = new Date(s.endDate).getHours();
+                                minuteEnd = '30';
+                            }
+                            // toast.success(s.statusName + "NGos cc")
+
                             const timeStringH: string[] = createTimeStringH(
                                 `${hourStart}h${minuteStart}`,
-                                sport.closing
+                                `${hourEnd}h${minuteEnd}`
                             );
-
-                            if (new Date(s.endDate).getTime() <= new Date().getTime()) {
-                                break;
-                            }
 
                             for (const time of dataTimeOnStage) {
                                 const result = timeStringH.includes(time);
@@ -344,7 +351,8 @@ const BookingModal = (props: OwnerProps) => {
                                     return;
                                 }
                             }
-                        } else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === dateBooking) {
+                        }
+                        else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === dateBooking) {
                             if (new Date(s.endDate).getMinutes() > 30) {
                                 hourEnd = new Date(s.endDate).getHours() + 1;
                                 minuteEnd = '00';
@@ -352,15 +360,12 @@ const BookingModal = (props: OwnerProps) => {
                                 hourEnd = new Date(s.endDate).getHours();
                                 minuteEnd = '30';
                             }
+                            // toast.success(s.statusName + "NGos ccasasdasd")
 
                             const timeStringH: string[] = createTimeStringH(
                                 sport.opening,
                                 `${hourEnd}h${minuteEnd}`
                             );
-
-                            if (new Date(s.startDate).getTime() >= new Date().getTime()) {
-                                break;
-                            }
 
                             for (const time of dataTimeOnStage) {
                                 const result = timeStringH.includes(time);
@@ -368,6 +373,26 @@ const BookingModal = (props: OwnerProps) => {
                                     toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
                                     return;
                                 } else if (`${hourEnd}h${minuteEnd}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                        else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] !== dateBooking && s.endDate === null) {
+
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                sport.closing
+                            );
+                            // toast.success(s.statusName + "NGos ccasasdasdasdasdasdsa")
+
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == time) {
                                     toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
                                     return;
                                 }
@@ -599,7 +624,29 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     useEffect(() => {
-        getPriceByTimeBooking();
+        const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == idSportDetail);
+
+        if (startTimeBooking && endTimeBooking && sportDetail) {
+            const peakHourStart = sportDetail.peakHour.split('-')[0];
+            const peakHourEnd = sportDetail.peakHour.split('-')[1];
+
+            const timeSlots: string[] = createTimeStringH(startTimeBooking, endTimeBooking);
+
+            const price = sportDetail.price / 2;
+            const pricePeakHour = sportDetail.peakHourPrices / 2;
+
+            let totalAmount = 0;
+
+            for (const time of timeSlots) {
+                if (isTimeWithinRange(peakHourStart, peakHourEnd, time)) {
+                    totalAmount += pricePeakHour;
+                } else {
+                    totalAmount += price;
+                }
+            }
+
+            setPrice(totalAmount);
+        }
         createTimeByTimeOnStage();
     }, [startTimeBooking, endTimeBooking])
 
@@ -655,32 +702,6 @@ const BookingModal = (props: OwnerProps) => {
 
     const [price, setPrice] = useState<number>();
 
-    const getPriceByTimeBooking = () => {
-
-        const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == idSportDetail);
-
-        if (startTimeBooking && endTimeBooking && sportDetail) {
-            const peakHourStart = sportDetail.peakHour.split('-')[0];
-            const peakHourEnd = sportDetail.peakHour.split('-')[1];
-
-            const timeSlots: string[] = createTimeStringH(startTimeBooking, endTimeBooking);
-
-            const price = sportDetail.price / 2;
-            const pricePeakHour = sportDetail.peakHourPrices / 2;
-
-            let totalAmount = 0;
-
-            for (const time of timeSlots) {
-                if (isTimeWithinRange(peakHourStart, peakHourEnd, time)) {
-                    totalAmount += pricePeakHour;
-                } else {
-                    totalAmount += price;
-                }
-            }
-
-            setPrice(totalAmount);
-        }
-    }
 
     useEffect(() => {
         setConfirmData(false);
@@ -806,10 +827,6 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     useEffect(() => {
-        getAddNewPriceByTimeBooking()
-    }, [newEndTimeBooking, newIdSportBooking])
-
-    const getAddNewPriceByTimeBooking = () => {
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == newIdSportBooking);
 
         if (bookingDetailData && newEndTimeBooking && bookingDetailData.endTime && sportDetail) {
@@ -832,7 +849,7 @@ const BookingModal = (props: OwnerProps) => {
             }
             setNewPriceBooking(totalAmount);
         }
-    }
+    }, [newEndTimeBooking, newIdSportBooking])
 
     const confirmNewDataBooking = async () => {
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == newIdSportBooking);
@@ -863,16 +880,17 @@ const BookingModal = (props: OwnerProps) => {
         }
         timeSlots.pop();
 
-        let hourStart;
-        let minuteStart;
-        let hourEnd;
-        let minuteEnd;
-
         if (sportDetail && dateBooking) {
             for (const s of sportDetail.statusSportFieldDetails) {
+                let hourStart;
+                let minuteStart;
+                let hourEnd;
+                let minuteEnd;
+
                 if (isDateInRange(dateBooking, s.startDate, s.endDate)) {
                     if (sport) {
-                        if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === dateBooking) {
+                        if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === dateBooking && s.endDate !== null) {
+
                             if (new Date(s.startDate).getMinutes() > 30) {
                                 hourStart = new Date(s.startDate).getHours() + 1;
                                 minuteStart = '00';
@@ -881,27 +899,6 @@ const BookingModal = (props: OwnerProps) => {
                                 minuteStart = '30';
                             }
 
-                            const currentStartTime = `${hourStart}h${minuteStart}`;
-                            const timeStringH: string[] = createTimeStringH(
-                                currentStartTime,
-                                sport.closing
-                            );
-
-                            if (new Date(s.endDate).getTime() <= new Date().getTime()) {
-                                break;
-                            }
-
-                            for (const time of timeSlots) {
-                                const result = timeStringH.includes(time);
-                                if (result) {
-                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
-                                    return;
-                                } else if (`${hourStart}h${minuteStart}` == time) {
-                                    toast.warning(s.startDate + "Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
-                                    return;
-                                }
-                            }
-                        } else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === dateBooking) {
                             if (new Date(s.endDate).getMinutes() > 30) {
                                 hourEnd = new Date(s.endDate).getHours() + 1;
                                 minuteEnd = '00';
@@ -909,23 +906,65 @@ const BookingModal = (props: OwnerProps) => {
                                 hourEnd = new Date(s.endDate).getHours();
                                 minuteEnd = '30';
                             }
+                            // toast.success(s.statusName + "NGos cc")
 
-                            const currentEndTime = `${hourEnd}h${minuteEnd}`;
                             const timeStringH: string[] = createTimeStringH(
-                                sport.opening,
-                                currentEndTime
+                                `${hourStart}h${minuteStart}`,
+                                `${hourEnd}h${minuteEnd}`
                             );
 
-                            if (new Date(s.startDate).getTime() >= new Date().getTime()) {
-                                break;
-                            }
-
-                            for (const time of timeSlots) {
+                            for (const time of dataTimeOnStage) {
                                 const result = timeStringH.includes(time);
                                 if (result) {
                                     toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
                                     return;
-                                } else if (currentEndTime == time) {
+                                } else if (`${hourStart}h${minuteStart}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                        else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === dateBooking) {
+                            if (new Date(s.endDate).getMinutes() > 30) {
+                                hourEnd = new Date(s.endDate).getHours() + 1;
+                                minuteEnd = '00';
+                            } else {
+                                hourEnd = new Date(s.endDate).getHours();
+                                minuteEnd = '30';
+                            }
+                            // toast.success(s.statusName + "NGos ccasasdasd")
+
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                `${hourEnd}h${minuteEnd}`
+                            );
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourEnd}h${minuteEnd}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                        else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] !== dateBooking && s.endDate === null) {
+
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                sport.closing
+                            );
+                            // toast.success(s.statusName + "NGos ccasasdasdasdasdasdsa")
+
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == time) {
                                     toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
                                     return;
                                 }
@@ -1195,7 +1234,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={formatPrice(newPriceBooking) || ""}
+                                                value={newPriceBooking}
                                                 disabled={isAddBooking}
                                             />
                                         </FloatingLabel>
@@ -1203,7 +1242,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={formatPrice(bookingDetailData?.totalAmount) || ""}
+                                                value={bookingDetailData?.totalAmount}
                                                 disabled={editBooking}
                                             />
                                         </FloatingLabel>
@@ -1305,7 +1344,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={formatPrice(price) || ""}
+                                                value={price}
                                                 disabled={editBooking}
                                             />
                                         </FloatingLabel>
@@ -1313,7 +1352,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={formatPrice(bookingDetailData?.totalAmount) || ""}
+                                                value={bookingDetailData?.totalAmount}
                                                 disabled={editBooking}
                                             />
                                         </FloatingLabel>
