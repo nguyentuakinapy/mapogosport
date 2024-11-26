@@ -234,7 +234,7 @@ export default function ChatBox() {
           //   const isChatExists = prevChats.some(
           //     (item) => item.user.username === parsedMessage.sender
           //   );
-  
+
           //   if (!isChatExists) {
           //     //  toast.success("có chạy vào không");
           //     const newUser: User = {
@@ -264,7 +264,7 @@ export default function ChatBox() {
           //       },
           //       ...prevChats,
           //     ];
-            
+
           //   }
           //   return prevChats; // Không thay đổi nếu đã tồn tại
           // });
@@ -273,9 +273,9 @@ export default function ChatBox() {
             const existingChatIndex = prevChats.findIndex(
               (item) => item.user.username === parsedMessage.sender
             );
-            console.log('existingChatIndex =>>>'+ existingChatIndex);
-            
-          
+            console.log('existingChatIndex =>>>' + existingChatIndex);
+
+
             if (existingChatIndex !== -1) {  // == 1 là đã tồn tại
               // Nếu chat đã tồn tại, tạo một bản sao và cập nhật nội dung
               const updatedChats = [...prevChats];
@@ -301,10 +301,10 @@ export default function ChatBox() {
               ];
             }
           });
-       
-          
-          console.log('setChatListCurrentUserByDMM =>>>>>>> ',chatListCurrentUserByDMM);
-          
+
+
+          console.log('setChatListCurrentUserByDMM =>>>>>>> ', chatListCurrentUserByDMM);
+
 
           toast.info(
             "Bạn nhận được tin nhắn từ " + parsedMessage.senderFullName
@@ -359,7 +359,7 @@ export default function ChatBox() {
   const inputRef = useRef<HTMLInputElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
 
-  const [dataMessageTemporary, setDataMessageTemporary] =useState<dataMess | null>(null);
+  const [dataMessageTemporary, setDataMessageTemporary] = useState<dataMess | null>(null);
 
   useEffect(() => {
     if (messageListRef.current) {
@@ -453,7 +453,7 @@ export default function ChatBox() {
         ];
 
       }
-     
+
       return prevChats;
     });
     // mới thêm 19/11
@@ -632,7 +632,7 @@ export default function ChatBox() {
       );
 
       const groupedMessagesArray = Object.values(groupedMessages);
-      
+
       setChatListCurrentUserByDMM(groupedMessagesArray);
       // setChatListCurrentUserByDMM(groupedMessagesArray as Message[]);
 
@@ -705,7 +705,7 @@ export default function ChatBox() {
       console.error("chat list: ", chatListRealTime);
     } //               mới
   }, [data]);
-  
+
   useEffect(() => {
     // Lấy URL từ phía client khi component đã được mount
     // setUrl(window.location.href);
@@ -846,7 +846,7 @@ export default function ChatBox() {
                   {chatListCurrentUserByDMM.length > 0 ? (
                     filteredChatList.map((chatGroup, index) => {
                       const chatUser =
-                        chatGroup.user?.username !== currentUser?.username  ? chatGroup.user : null;
+                        chatGroup.user?.username !== currentUser?.username ? chatGroup.user : null;
 
                       if (!chatUser) return null;
 
@@ -969,7 +969,7 @@ export default function ChatBox() {
                             {adminDefault?.fullname
                               ? "Admin Mapogo"
                               : "Không có tên"
-                              }
+                            }
                             g
                           </strong>
                         </div>
@@ -1110,24 +1110,22 @@ export default function ChatBox() {
                             >
                               {msg.content}
                               {/* Hiển thị thời gian nếu tồn tại */}
-                              <em
-                                className="mt-2"
-                                style={{
-                                  display: "block",
-                                  fontSize: "0.8em",
-                                  color: "black",
-                                }}
-                              >
-                                {msg.createdAt
-                                  ? formatTime(msg.createdAt)
-                                  : "Không có thời gian"}
-                              </em>
-                            </div>
+                            <em
+                              className="mt-2"
+                              style={{
+                                display: "block",
+                                fontSize: "0.8em",
+                                color: "black",
+                              }}
+                            >
+                              {msg.createdAt
+                                ? formatTime(msg.createdAt)
+                                : "Không có thời gian"}
+                            </em>
                           </div>
                         );
                       })}
                   </div>
-
                   {/* Phần nhập liệu và nút gửi */}
                   <div className="card-footer d-flex p-2">
                     <Form.Control
@@ -1152,7 +1150,7 @@ export default function ChatBox() {
             </div>
           )}
         </div>
-      </div>
+      </div >
     </>
   );
 }
