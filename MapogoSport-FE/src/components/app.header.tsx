@@ -13,6 +13,7 @@ import ForgotPassword from './account/modal/forgotPassword.modal';
 import ChangePasswordNew from './account/modal/change-password-new.modal';
 import { useData } from '@/app/context/UserContext';
 import { logOut } from '@/app/utils/Log-Out';
+import Image from 'next/image';
 
 
 
@@ -92,7 +93,7 @@ const Header = (props: HeaderProps) => {
                 position: 'sticky', zIndex: '1001', backgroundColor: '#090e1e', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)'
             }}>
                 <Container>
-                    <Navbar><Link href={'/'} ><img src="/images/logo-black.png" style={{ width: '80px' }} alt="" /></Link></Navbar>
+                    <Navbar><Link href={'/'} ><Image src="/images/logo-black.png" width={100} height={60} alt="" /></Link></Navbar>
                     <Navbar.Toggle aria-controls="navbarScroll" />
                     <Navbar.Collapse id="navbarScroll">
                         {/* <Form className="d-flex m-auto">

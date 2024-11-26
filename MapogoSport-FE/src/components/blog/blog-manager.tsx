@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image';
 import React, { useState } from 'react';
 import { Table, Button, Modal, Form, Row, Col, FormCheck } from 'react-bootstrap';
 
@@ -142,7 +143,7 @@ const BlogManagement = () => {
 
                                 {/* Hình ảnh */}
                                 <td className="text-center align-middle">
-                                    <img
+                                    <Image
                                         src={`/chat_page/assets/images/posts/${post.imagePost}`}
                                         alt="Hình ảnh bài viết"
                                         style={{ width: '150px', height: 'auto' }}
@@ -266,7 +267,7 @@ const BlogManagement = () => {
                                             onChange={(e) => handleImageUpload(e)} // Thêm logic tải hình ảnh ở đây
                                         />
                                         {selectedBlog?.imagePost && (
-                                            <img
+                                            <Image
                                                 src={`/chat_page/assets/images/posts/${selectedBlog.imagePost}`}
                                                 alt="Hình ảnh Blog"
                                                 style={{ width: '100px', marginTop: '10px' }}

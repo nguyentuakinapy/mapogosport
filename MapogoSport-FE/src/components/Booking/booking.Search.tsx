@@ -117,17 +117,14 @@ const SearchSportField = (props: SearchBookingProps) => {
             //     return;
             // }
             if (selectedSportDetail) {
-                // toast.warning("Không tìm thấy sân phù hợp theo nhu cầu!");
-                // return;
-                let hourStart;
-                let minuteStart;
-                let hourEnd;
-                let minuteEnd;
-
                 for (const s of selectedSportDetail.statusSportFieldDetails) {
+                    let hourStart;
+                    let minuteStart;
+                    let hourEnd;
+                    let minuteEnd;
                     if (isDateInRange(selectedDate, s.startDate, s.endDate)) {
                         if (sportField) {
-                            if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === selectedDate) {
+                            if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === selectedDate && s.endDate !== null) {
                                 if (new Date(s.startDate).getMinutes() > 30) {
                                     hourStart = new Date(s.startDate).getHours() + 1;
                                     minuteStart = '00';
@@ -136,15 +133,19 @@ const SearchSportField = (props: SearchBookingProps) => {
                                     minuteStart = '30';
                                 }
 
-                                const currentStartTime = `${hourStart}h${minuteStart}`;
-                                const timeStringH: string[] = createTimeStringH(
-                                    currentStartTime,
-                                    sportField.closing
-                                );
-
-                                if (new Date(s.endDate).getTime() <= new Date().getTime()) {
-                                    break;
+                                if (new Date(s.endDate).getMinutes() > 30) {
+                                    hourEnd = new Date(s.endDate).getHours() + 1;
+                                    minuteEnd = '00';
+                                } else {
+                                    hourEnd = new Date(s.endDate).getHours();
+                                    minuteEnd = '30';
                                 }
+                                // toast.success(s.statusName + "NGos cc")
+
+                                const timeStringH: string[] = createTimeStringH(
+                                    `${hourStart}h${minuteStart}`,
+                                    `${hourEnd}h${minuteEnd}`
+                                );
 
                                 const result = timeStringH.includes(selectedTime);
                                 if (result) {
@@ -179,6 +180,19 @@ const SearchSportField = (props: SearchBookingProps) => {
                                     toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
                                     return;
                                 } else if (currentEndTime == selectedTime) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            } else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] !== selectedDate && s.endDate === null) {
+
+                                const timeStringH: string[] = createTimeStringH(
+                                    sportField.opening,
+                                    sportField.closing
+                                );
+                                // toast.success(s.statusName + "NGos ccasasdasdasdasdasdsa")
+
+                                const result = timeStringH.includes(selectedTime);
+                                if (result) {
                                     toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
                                     return;
                                 }

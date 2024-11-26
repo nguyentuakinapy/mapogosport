@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { Form, Modal } from "react-bootstrap"
+import { Modal } from "react-bootstrap"
 import { toast } from "react-toastify";
 import "./account.scss"
 import { hashPassword } from "@/components/Utils/Format";
@@ -13,7 +13,7 @@ interface ChangeNewPasswordProps {
 }
 export default function ChangePasswordNew(props: ChangeNewPasswordProps) {
     const { showChangePasswordNew, setShowChangePasswordNew } = props;
-    const { showLoginModal, setShowLoginModal } = props;
+    const { setShowLoginModal } = props;
 
     const [createPassword, setCreatePassword] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");

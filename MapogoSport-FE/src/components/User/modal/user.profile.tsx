@@ -44,18 +44,7 @@ const ProfileContent = (props: ProfileContentProps) => {
         }
     }, [data]);
 
-    const updateUserData = () => {
-        setUserData((prevUserData) => {
-            if (!prevUserData) return prevUserData;
-            return {
-                ...prevUserData,
-                fullname: fullName,
-                email: email,
-                birthday: birthday,
-                gender: gender,
-            };
-        });
-    };
+
 
     const handleSave = () => {
         if (!fullName) {
@@ -80,7 +69,16 @@ const ProfileContent = (props: ProfileContentProps) => {
     };
 
     useEffect(() => {
-        updateUserData();
+        setUserData((prevUserData) => {
+            if (!prevUserData) return prevUserData;
+            return {
+                ...prevUserData,
+                fullname: fullName,
+                email: email,
+                birthday: birthday,
+                gender: gender,
+            };
+        });
     }, [fullName, email, birthday, gender]);
 
     if (isLoading) return <div>Đang tải...</div>;

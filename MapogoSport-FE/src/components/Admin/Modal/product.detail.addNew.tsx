@@ -19,7 +19,7 @@ const ProductDetailModal = ({ show, onClose, productDetail, onSave }: ProductDet
 
   useEffect(() => {
     if (productDetail) {
-      setFormValues(productDetail);
+      setFormValues(productDetail); z
     } else {
       setFormValues({ color: "", size: "", quantity: 1, image: "" });
     }

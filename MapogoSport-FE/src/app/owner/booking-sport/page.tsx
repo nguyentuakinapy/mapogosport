@@ -189,7 +189,7 @@ export default function BookingSport() {
                 });
                 setBookingsOnWeek(newBookingsOnWeek);
             }
-            setCheckDataBooking1(!checkDataBooking1)
+            setCheckDataBookingConfirm(prev => !prev)
         }
         setDataTimeSport((prevData) => [...prevData, ...newData]);
 
@@ -197,13 +197,14 @@ export default function BookingSport() {
 
     // SET STATUS
     const [checkDataBooking, setCheckDataBooking] = useState<boolean>(false);
-    const [checkDataBooking1, setCheckDataBooking1] = useState<boolean>(false);
+    const [checkDataBookingConfirm, setCheckDataBookingConfirm] = useState<boolean>(false);
 
     useEffect(() => {
         setCheckDataBooking(prev => !prev);
-    }, [checkDataBooking1]);
+    }, [checkDataBookingConfirm]);
 
     useEffect(() => {
+        setCheckLoadingData(true)
         refreshStatusBooking();
     }, [onDay, startWeek, endWeek, selectDate, checkDataBooking, selectSport]);
 
@@ -250,7 +251,6 @@ export default function BookingSport() {
     };
 
     useEffect(() => {
-        setCheckLoadingData(true)
         if (selectDate === 1) {
             setStatusOnWeek();
         } else if (selectDate === 0) {
@@ -272,7 +272,7 @@ export default function BookingSport() {
             const updatedBookingsOnWeek = { ...bookingsOnWeek };
             Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
                 const sportDataTemporary = { ...sportData };
-                Object.entries(sportDataTemporary).forEach(([sport, statuses]) => {
+                Object.entries(sportDataTemporary).forEach(([sport,]) => {
                     sportDataTemporary[sport] = [];
                 });
                 updatedBookingsOnWeek[time] = sportDataTemporary;
@@ -535,10 +535,10 @@ export default function BookingSport() {
                         ...prevBookingsOnDay,
                         [time]: statuses
                     }));
-                    setCheckLoadingData(false)
                 })
             })
         }
+        setCheckLoadingData(false)
     }
 
     const setStatusOnWeek = async () => {
@@ -747,7 +747,7 @@ export default function BookingSport() {
                         }
 
                         Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                            Object.entries(sportData).forEach(([sport, statuses]) => {
+                            Object.entries(sportData).forEach(([sport,]) => {
 
                                 if (dayYear && sport === item.sportFieldDetail.name) {
 

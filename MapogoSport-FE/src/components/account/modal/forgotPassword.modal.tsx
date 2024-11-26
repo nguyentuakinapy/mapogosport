@@ -42,7 +42,7 @@ const VerificationCodeInput: React.FC<VerificationCodeInputProps> = ({ onCodeCha
 
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
         const pasteData = e.clipboardData.getData('text').split('').slice(0, 6); // Lấy 6 ký tự đầu tiên từ dữ liệu dán
-        const updatedCode = pasteData.map((char, i) => (isNaN(Number(char)) ? '' : char)); // Chỉ lấy ký tự là số
+        const updatedCode = pasteData.map((char,) => (isNaN(Number(char)) ? '' : char)); // Chỉ lấy ký tự là số
         setCode(updatedCode);
 
         updatedCode.forEach((_, i) => {
@@ -92,14 +92,13 @@ interface ForgotPasswordProps {
 
 export default function ForgotPassword(props: ForgotPasswordProps) {
     const { showForgotPassword, setShowForgotPassword } = props;
-    const { showChangePasswordNew, setShowChangePasswordNew } = props;
+    const { setShowChangePasswordNew } = props;
 
     const [timeLeft, setTimeLeft] = useState(0);
 
     const [email, setEmail] = useState<string>("");
     const [codeOtp, setCodeOtp] = useState<string>();
     const [otp, setOtp] = useState<string>("");
-    const [otpValue, setOtpValue] = useState<string>("");
 
     const coolDownTime = async () => {
         if (!email) {
@@ -199,7 +198,6 @@ export default function ForgotPassword(props: ForgotPasswordProps) {
         setShowForgotPassword(false);
         setEmail("");
         setOtp("");
-        setOtpValue("");
         sessionStorage.removeItem('usernameNewPass');
     }
 

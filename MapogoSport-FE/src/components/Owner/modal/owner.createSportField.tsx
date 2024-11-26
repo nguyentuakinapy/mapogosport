@@ -257,7 +257,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                 console.error("Lỗi khi lưu thông tin sân:", error.response ? error.response.data : error.message);
             });
     };
-    
+
     //xóa hình
     const handleDeleteGallery = async (
         gallerySportFieldId: number
@@ -435,7 +435,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                     <Col md={4}>
                         {/* Phần 1: Avatar */}
                         <h5>Ảnh đại diện</h5>
-                        <img src={avatar instanceof File ? URL.createObjectURL(avatar) : avatar} alt="Sport field avatar" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }} />
+                        <Image src={avatar instanceof File ? URL.createObjectURL(avatar) : avatar} alt="Sport field avatar" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }} />
                         <Form.Group controlId="avatarInput" className="mt-2">
                             <Form.Label>{selectedSportField ? 'Đổi ảnh đại diện' : 'Chọn ảnh đại diện'}</Form.Label>
                             <Form.Control type="file" accept="image/*" onChange={handleAvatarChange} className="d-none" />

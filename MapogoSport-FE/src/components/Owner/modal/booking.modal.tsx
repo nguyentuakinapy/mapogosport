@@ -478,8 +478,8 @@ const BookingModal = (props: BookingProps) => {
         let index = 0;
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
-            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
-                bookings.map(b => {
+            for (const [, bookings] of Object.entries(dateWeek)) {
+                bookings.map(() => {
                     index = index + 1;
 
                 })
@@ -922,7 +922,7 @@ const BookingModal = (props: BookingProps) => {
                             </div>
                             <div className="d-flex justify-content-around">
                                 <span className="mx-auto"><b>Đơn giá: </b> <em className="text-danger">{endTime ? `${priceForSelectedTime?.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
-                                <span className="mx-auto"><b>Trả trước: </b> <em className="text-danger">{sportDetail && totalAmount ? (totalAmount * (sportDetail.percentDeposit / 100)).toLocaleString("vi-VN", { style: "currency", currency: "VND", }) : '???'}</em>. </span>
+                                <span className="mx-auto"><b>Trả trước: </b> <em className="text-danger">{sportDetail && price ? (price * (sportDetail.percentDeposit / 100)).toLocaleString("vi-VN", { style: "currency", currency: "VND", }) : '???'}</em>. </span>
                                 <span className="mx-auto"><b>Tổng tiền: </b><em className="text-danger">{price ? `${price?.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
                             </div>
                         </Row>
