@@ -32,6 +32,7 @@ public interface BookingService {
 	
 	List<Object[]> findRevenueBySportFieldDetailIdsByDate(List<Integer> sportFieldDetailIds, List<Integer> bookingId, List<String> status, String startDate, String endDate);
 	
+	List<BookingDetail> findBookingDetailBySportFieldIdAndDate(Integer sportFieldDetailIds, List<Integer> bookingId, List<String> status, String startDate, String endDate);
 	//Chart Customer
 	
 	Integer totalCustomer(Integer ownerId);

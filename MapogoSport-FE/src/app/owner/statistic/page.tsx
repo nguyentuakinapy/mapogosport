@@ -143,9 +143,12 @@ export default function Home() {
     }
   }, [owner]);
 
+  // Get element first of sportField base select sportfieldetail
   useEffect(() => {
     if (sportFieldByOwner.length > 0) {
       setSelectedFieldId(sportFieldByOwner[0].sportFieldId);
+    } else {
+      setSelectedFieldId(null);
     }
   }, [sportFieldByOwner]);
 
@@ -163,16 +166,20 @@ export default function Home() {
           const ids = data.sportFielDetails.map((detail: any) => detail.sportFielDetailId);
           setSportFieldDetailIds(ids); // Save ID in sportFieldDetailIds
           console.log("sportFieldDetailIds:", ids);
-
         } catch (error) {
           console.log("error fetch bookingdetail", error);
+          setSelectSportFieldDetail([]);
+          setSportFieldDetailIds([]);
         }
       };
       fetchData();
+    } else {
+      setSelectSportFieldDetail([]);
+      setSportFieldDetailIds([]);
     }
   }, [selectedFieldId]);
 
-  console.log("hiiiiiiiiiiiiiiii", sportFieldDetailIds)
+  console.log("hiiiiiiiiiiiiiiii", sportFieldDetailIds);
 
   //Fetch bookingdetail by sportField and ownerId
   useEffect(() => {
@@ -182,15 +189,19 @@ export default function Home() {
           const idsString = sportFieldDetailIds.join(',');
           const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportField/byowner/${idsString}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
           const data = await response.json();
-          setBookingdetailBySportField(data)
-          console.log("bookingDetail", data)
+          setBookingdetailBySportField(data);
+          console.log("bookingDetail", data);
         } catch (error) {
-          console.log("error fetch bookingdetail", error)
+          console.log("error fetch bookingdetail", error);
+          setBookingdetailBySportField([]);
         }
-      }
-      fetchData()
+      };
+      fetchData();
+    } else {
+      setBookingdetailBySportField([]);
     }
-  }, [owner?.ownerId, sportFieldDetailIds, bookingIdsString])
+  }, [owner?.ownerId, sportFieldDetailIds, bookingIdsString]);
+
 
   //Calculate total price from booking details
   const totalBookingPrice = bookingdetailBySportField.reduce((total, bookingDetail) => {
@@ -206,20 +217,25 @@ export default function Home() {
           const idsString = sportFieldDetailIds.join(',');
           const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportFieldDetail/${idsString}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
           const data = await response.json();
-          setRevenueBySportFieldDetail(data)
+          setRevenueBySportFieldDetail(data);
           const formattedData = [
             ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
             ...data.map((item: any) => [item[0], item[1], item[2], item[3], item[4]])
           ];
           setChartData(formattedData);
-          console.log("revenuedata oooooooooooooooooooo", data)
+          console.log("revenuedata oooooooooooooooooooo", data);
         } catch (error) {
-          console.log("error fetch ", error)
+          console.log("error fetch ", error);
+          setRevenueBySportFieldDetail([]);
+          setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
         }
-      }
-      fetchData()
+      };
+      fetchData();
+    } else {
+      setRevenueBySportFieldDetail([]);
+      setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
     }
-  }, [sportFieldDetailIds, bookingIdsString])
+  }, [sportFieldDetailIds, bookingIdsString]);
 
 
 
@@ -232,8 +248,7 @@ export default function Home() {
 
   // Revenue by Date
 
-
-  //fetch booking success by Date
+  // Fetch booking success by Date
   useEffect(() => {
     if (owner?.ownerId) {
       const fetchData = async () => {
@@ -256,13 +271,21 @@ export default function Home() {
           }
 
           const data = await response.json();
-          setBookingSuccessByDate(data);
-          console.log("Booking Success Data By Date:", data);
+          if (!data || data.length === 0) {
+            console.log("No booking success data available");
+            setBookingSuccessByDate([]);
+          } else {
+            setBookingSuccessByDate(data);
+            console.log("Booking Success Data By Date:", data);
+          }
         } catch (error) {
           console.log("Error fetching revenue", error);
+          setBookingSuccessByDate([]);
         }
       };
       fetchData();
+    } else {
+      setBookingSuccessByDate([]);
     }
   }, [owner, startDate, endDate]);
 
@@ -276,8 +299,7 @@ export default function Home() {
   }, 0)
 
   console.log(totalAmountBookingByDate)
-
-  //Fetch bookingdetail by sportField and ownerId by Date
+  // Fetch bookingdetail by sportField and ownerId by Date
   useEffect(() => {
     if (owner?.ownerId && sportFieldDetailIds.length > 0 && bookingIdsStringDate) {
       const fetchData = async () => {
@@ -305,17 +327,24 @@ export default function Home() {
           }
 
           const data = await response.json();
-          setBookingdetailBySportFieldByDate(data);
-          console.log("Booking Detail by Date:", data);
+          if (!data || data.length === 0) {
+            console.log("No booking details available");
+            setBookingdetailBySportFieldByDate([]);
+          } else {
+            setBookingdetailBySportFieldByDate(data);
+            console.log("Booking Detail by Date:", data);
+          }
         } catch (error) {
           console.error("Error fetching booking details:", error);
+          setBookingdetailBySportFieldByDate([]);
         }
       };
 
       fetchData();
+    } else {
+      setBookingdetailBySportFieldByDate([]);
     }
   }, [owner?.ownerId, sportFieldDetailIds, bookingIdsStringDate, startDate, endDate]);
-
 
   // Calculate total price from booking details
   const totalBookingDetailPriceByDate = bookingdetailBySportFieldByDate.reduce((total, bookingDetail) => {
@@ -328,30 +357,41 @@ export default function Home() {
     if (sportFieldDetailIds.length > 0 && bookingIdsStringDate) {
       const fetchData = async () => {
         try {
-          //set startDate for endDate when endDate is isEmty
+          // Set endDate to startDate if only startDate is provided
           const effectiveEndDate = endDate || startDate;
+
           // Helper function to format date to UTC and only include YYYY-MM-DD
           const formatDate = (date: Date | null) => {
             if (!date) return '';
             const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
             return utcDate.toISOString().split('T')[0];
           };
+
           const idsString = sportFieldDetailIds.join(',');
           const response = await fetch(`http://localhost:8080/rest/bookingDetail/bySportField/byDate/${idsString}/${bookingIdsStringDate}/Đã hoàn thành,Chưa bắt đầu/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`);
           const data = await response.json();
-          const formattedData = [
-            ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
-            ...data.map((item: any) => [item[0], item[1], item[2], item[3], item[4]])
-          ];
-          setChartData(formattedData);
-          console.log("revenuedata oooooooooooooooooooo", data)
+
+          if (!data || data.length === 0) {
+            console.log("No data available");
+            setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
+          } else {
+            const formattedData = [
+              ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
+              ...data.map((item: any) => [item[0], item[1], item[2], item[3], item[4]])
+            ];
+            setChartData(formattedData);
+            console.log("revenuedata oooooooooooooooooooo", data);
+          }
         } catch (error) {
-          console.log("error fetch ", error)
+          console.log("error fetch ", error);
+          setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
         }
-      }
-      fetchData()
+      };
+      fetchData();
+    } else {
+      setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
     }
-  }, [sportFieldDetailIds, bookingIdsStringDate, startDate, endDate])
+  }, [sportFieldDetailIds, bookingIdsStringDate, startDate, endDate]);
 
   // Function handel detail table
 
@@ -361,20 +401,45 @@ export default function Home() {
     console.log('chartData:', chartData);
     console.log('totalBookingPrice:', totalBookingPrice);
     console.log("idSportFieldDetailTable", id);
+    
+    if (startDate || endDate) {
+      // Fetch modal data based on the provided id and date range
+      const fetchModalDataByDate = async () => {
+        try {
+          const effectiveEndDate = endDate || startDate;
+          const formatDate = (date: Date | null) => {
+            if (!date) return '';
+            const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            return utcDate.toISOString().split('T')[0];
+          };
 
-    // Fetch modal data based on the provided id
-    const fetchModalData = async () => {
-      try {
-        const response = await fetch(`http://localhost:8080/rest/bookingdetail/bysportFieldDetail/${id}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
-        const data = await response.json();
-        setBookingDetailBySpFDetail(data); // Store modal-specific data
-        console.log("Booking Detail by SportFieldDetail for Modal", data);
-      } catch (error) {
-        console.log("Error fetching modal booking details", error);
-      }
-    };
+          const response = await fetch(
+            `http://localhost:8080/rest/bookingdetail/bysportFieldDetailAndDate/${id}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`
+          );
+          const data = await response.json();
+          setBookingDetailBySpFDetail(data); // Store modal-specific data
+          console.log("Booking Detail by SportFieldDetail for Modal by Date", data);
+        } catch (error) {
+          console.log("Error fetching modal booking details by date", error);
+        }
+      };
 
-    fetchModalData();
+      fetchModalDataByDate();
+    } else {
+      // Fetch modal data based on the provided id
+      const fetchModalData = async () => {
+        try {
+          const response = await fetch(`http://localhost:8080/rest/bookingdetail/bysportFieldDetail/${id}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
+          const data = await response.json();
+          setBookingDetailBySpFDetail(data); // Store modal-specific data
+          console.log("Booking Detail by SportFieldDetail for Modal", data);
+        } catch (error) {
+          console.log("Error fetching modal booking details", error);
+        }
+      };
+
+      fetchModalData();
+    }
   };
 
   const handleCloseModal = () => {
@@ -753,7 +818,6 @@ export default function Home() {
                     </select>
 
 
-
                   </div>
                   <div className="col-6 card-title text-end " style={{ fontSize: '20px' }}>
                     <span className="price-amount">Tổng doanh thu: {formatPrice(
@@ -1104,10 +1168,6 @@ export default function Home() {
                   </div>
                 )}
               </div>
-
-
-
-
             </div>
           </>
         );
