@@ -1,7 +1,7 @@
 'use client'
 import UserLayout from "@/components/User/UserLayout";
 import Link from "next/link";
-import { Col, Row, Image } from "react-bootstrap";
+import { Col, Row } from "react-bootstrap";
 import '../../types/user.scss'
 import { useEffect, useState } from "react";
 import useSWR from "swr";

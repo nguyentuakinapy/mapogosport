@@ -1,5 +1,7 @@
 'use client'
 
+import Image from "next/image";
+
 const Footer = () => {
     return (
         <>
@@ -53,7 +55,7 @@ const Footer = () => {
                     </div>
                 </footer>
                 <div className="text-center p-3" style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)' }}>
-                    <img src="/images/logo.png" style={{ width: '50px' }} alt="" />
+                    <Image src="/images/logo.png" width={80} height={40} alt="" />
                     <a className="text-body text-decoration-none" href="#">MapogoSport</a>
                 </div>
             </section >

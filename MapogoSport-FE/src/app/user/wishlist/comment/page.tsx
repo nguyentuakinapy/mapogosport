@@ -54,7 +54,7 @@ const CommentPage = () => {
             const username = localStorage.getItem('username');
             if (username) {
                 const url = isFieldReview ? `http://localhost:8080/rest/user/fieldReview/${id}`
-                    : `http://localhost:8080/rest/user/productReview/${id}`;
+                    : `http://localhost:8080/rest/user/productReview/rest/user/productReview/${id}`;
                 fetch(url, {
                     method: 'DELETE',
                     headers: {

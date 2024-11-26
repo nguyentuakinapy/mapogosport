@@ -36,6 +36,17 @@ const convertToMinutes = (time: string) => {
     return (hours * 60) + minutes;
 };
 
+const isDateInRange = (dateToCheck: string, startDate: Date, endDate?: Date): boolean => {
+    const date = new Date(new Date(dateToCheck).setHours(0, 0, 0, 0));
+    const start = new Date(new Date(startDate).setHours(0, 0, 0, 0));
 
+    if (!endDate) {
+        return date >= start;
+    }
 
-export { createTimeStringH, calculateTimeDifference, convertToMinutes };
+    const end = new Date(new Date(endDate).setHours(0, 0, 0, 0));
+
+    return date >= start && date <= end;
+};
+
+export { createTimeStringH, calculateTimeDifference, convertToMinutes, isDateInRange };

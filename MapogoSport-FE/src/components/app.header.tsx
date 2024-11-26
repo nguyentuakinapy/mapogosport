@@ -1,9 +1,7 @@
 'use client'
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
-import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 
@@ -15,6 +13,7 @@ import ForgotPassword from './account/modal/forgotPassword.modal';
 import ChangePasswordNew from './account/modal/change-password-new.modal';
 import { useData } from '@/app/context/UserContext';
 import { logOut } from '@/app/utils/Log-Out';
+import Image from 'next/image';
 
 
 
@@ -25,7 +24,7 @@ const CartBadge = ({ username }: { username: string }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 
-    const { data, error, isLoading } = useSWR(
+    const { data } = useSWR(
         username == "" ? null : `http://localhost:8080/rest/cart/count/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
@@ -94,7 +93,7 @@ const Header = (props: HeaderProps) => {
                 position: 'sticky', zIndex: '1001', backgroundColor: '#090e1e', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)'
             }}>
                 <Container>
-                    <Navbar><Link href={'/'} ><img src="/images/logo-black.png" style={{ width: '80px' }} alt="" /></Link></Navbar>
+                    <Navbar><Link href={'/'} ><Image src="/images/logo-black.png" width={100} height={60} alt="" /></Link></Navbar>
                     <Navbar.Toggle aria-controls="navbarScroll" />
                     <Navbar.Collapse id="navbarScroll">
                         {/* <Form className="d-flex m-auto">

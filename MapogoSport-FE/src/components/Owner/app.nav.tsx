@@ -1,4 +1,5 @@
 import { logOut } from "@/app/utils/Log-Out";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { OverlayTrigger, Tooltip, Image } from "react-bootstrap";
@@ -14,7 +15,7 @@ export default function Nav({ isAniActive }: NavProps) {
             {!isAniActive ?
                 <div className={`nav-left-block`}>
                     <div className="logo text-center p-2">
-                        <a href="/"> <Image src="/images/logo.png" style={{ width: '60%' }} alt="Logo" /></a>
+                        <a href="/"> <Image src="/images/logo.png" width={200} height={100} alt="Logo" /></a>
                     </div>
                     <div className="mt-5">
                         <nav className="container m-auto">
@@ -32,7 +33,7 @@ export default function Nav({ isAniActive }: NavProps) {
                 :
                 <div className={`nav-left-none-icon`}>
                     <div className="logo text-center mt-3">
-                        <a href="/"> <Image src="/images/logo.png" style={{ width: '100%' }} alt="Logo" /></a>
+                        <a href="/"> <Image src="/images/logo.png" width={80} height={40} alt="Logo" /></a>
                     </div>
                     <div className="mt-5">
                         <nav className="container m-auto">

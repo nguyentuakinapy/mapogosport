@@ -4,7 +4,7 @@ import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, Nav } from "r
 import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
 import 'react-datepicker/dist/react-datepicker.css';
-import { createTimeStringH } from "@/components/Utils/booking-time";
+import { createTimeStringH, isDateInRange } from "@/components/Utils/booking-time";
 
 interface BookingProps {
     showBookingModal: boolean;
@@ -25,39 +25,31 @@ const BookingModal = (props: BookingProps) => {
     const [selectTime, setSelectTime] = useState<string>('Chọn thời gian');
     const [selectTimeOnStage, setSelectTimeOnStage] = useState<string>('Chọn thời gian');
     const [activeTab, setActiveTab] = useState<string>('all');
-    // const [dataPaymentMethod, setDataPaymentMethod] = useState<PaymentMethod[]>();
     const [checkPrepayPrice, setCheckPrepayPrice] = useState<boolean>(true);
     const [totalAmount, setTotalAmount] = useState<number>();
-    // const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
     const [fullName, setFullName] = useState<string>("");
     const [phoneNumber, setPhoneNumber] = useState<string>("");
-
-
-    // const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-    // const { data } = useSWR(`http://localhost:8080/rest/paymentMethod`, fetcher, {
-    //     revalidateIfStale: false,
-    //     revalidateOnFocus: false,
-    //     revalidateOnReconnect: false,
-    // });
 
     // BOOKING DETAIL
     const [endTime, setEndTime] = useState<string>();
     const [price, setPrice] = useState<number>();
 
-    // useEffect(() => {
-    //     setDataPaymentMethod(data);
-    // }, [data])
-
-
-    const [operatingTime, setOperatingTime] = useState<number>(0);
-    const [operatingTimeFetchData, setOperatingTimeFetchData] = useState<number>(0);
     const [dataTime, setDataTime] = useState<string[]>();
     const [dataTimeTemporary, setDataTimeTemporary] = useState<string[]>();
 
     useEffect(() => {
-        const checkTimeBooking = async () => {
-            if (!startTime || !dayStartBooking) return;
+        const checkAndCreateTimeBooking = async () => {
+            if (!startTime || !dayStartBooking || !sportDetail || !sport) return;
+
+            let operatingTime: number = 0;
+
+            if (startTime && sport.closing) {
+                const [openHour, openMinute] = startTime.split("h").map(Number);
+                const [closeHour, closeMinute] = sport.closing.split("h").map(Number);
+                const totalOpenMinutes = openHour * 60 + openMinute;
+                const totalCloseMinutes = closeHour * 60 + closeMinute;
+                operatingTime = ((totalCloseMinutes - totalOpenMinutes) / 60);
+            }
 
             const newData = [startTime];
             for (let i = 0; i < operatingTime * 2; i++) {
@@ -69,9 +61,13 @@ const BookingModal = (props: BookingProps) => {
             }
 
             let count = 0;
+            let hourStart;
+            let minuteStart;
+            let hourEnd;
+            let minuteEnd;
+
             for (const time of newData) {
                 if (count >= 6) {
-                    setOperatingTimeFetchData(6);
                     break;
                 }
 
@@ -81,42 +77,139 @@ const BookingModal = (props: BookingProps) => {
                     );
 
                     if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
-                    const text = await response.text();
 
+                    const text = await response.text();
                     if (text) {
                         const dataBooking = JSON.parse(text);
                         if (dataBooking && Object.keys(dataBooking).length > 0) {
-                            setOperatingTimeFetchData(count);
                             break;
                         }
-                    } else {
-                        setOperatingTimeFetchData(count);
                     }
                 } catch (error) {
                     console.error("API or JSON parsing error:", error);
                 }
+
                 count++;
             }
-        }
 
-        checkTimeBooking();
+            for (const s of sportDetail.statusSportFieldDetails) {
+                if (isDateInRange(dayStartBooking, s.startDate, s.endDate)) {
+                    let check = false;
+                    let checkFetch = false;
+                    let countTemporary = 0;
+                    if (sport) {
+                        if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === dayStartBooking) {
+                            if (new Date(s.startDate).getMinutes() > 30) {
+                                hourStart = new Date(s.startDate).getHours() + 1;
+                                minuteStart = '00';
+                            } else {
+                                hourStart = new Date(s.startDate).getHours();
+                                minuteStart = '30';
+                            }
+                            // toast.success(s.startDate)
 
-    }, [operatingTime]);
+                            const currentStartTime = `${hourStart}h${minuteStart}`;
+                            const timeStringH: string[] = createTimeStringH(
+                                currentStartTime,
+                                sport.closing
+                            );
 
-    useEffect(() => {
-        if (startTime && sport?.closing) {
-            const [openHour, openMinute] = startTime.split("h").map(Number);
-            const [closeHour, closeMinute] = sport.closing.split("h").map(Number);
-            const totalOpenMinutes = openHour * 60 + openMinute;
-            const totalCloseMinutes = closeHour * 60 + closeMinute;
-            setOperatingTime((totalCloseMinutes - totalOpenMinutes) / 60);
-        }
-    }, [startTimeKey, startTime]);
+                            if (new Date(s.endDate).getTime() <= new Date().getTime()) {
+                                break;
+                            }
 
-    useEffect(() => {
-        const createDataTime = () => {
-            const newData: string[] = [];
+                            for (const time of newData) {
+                                if (countTemporary >= 6) {
+                                    break;
+                                }
+                                try {
+                                    const response = await fetch(
+                                        `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
+                                    );
 
+                                    if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+
+                                    const text = await response.text();
+                                    if (text) {
+                                        const dataBooking = JSON.parse(text);
+                                        if (dataBooking && Object.keys(dataBooking).length > 0) {
+                                            checkFetch = true;
+                                            break;
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error("API or JSON parsing error:", error);
+                                }
+                                const result = timeStringH.includes(time);
+                                if (!result) {
+                                    // toast.success(time)
+                                    countTemporary++;
+                                    check = true;
+                                }
+                            }
+                        } else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === dayStartBooking) {
+                            if (new Date(s.endDate).getMinutes() > 30) {
+                                hourEnd = new Date(s.endDate).getHours() + 1;
+                                minuteEnd = '00';
+                            } else {
+                                hourEnd = new Date(s.endDate).getHours();
+                                minuteEnd = '30';
+                            }
+
+                            const currentEndTime = `${hourEnd}h${minuteEnd}`;
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                currentEndTime
+                            );
+
+                            if (new Date(s.startDate).getTime() >= new Date().getTime()) {
+                                break;
+                            }
+
+                            if (timeStringH.includes(startTime)) {
+                                for (const time of newData) {
+                                    if (countTemporary >= 6) {
+                                        break;
+                                    }
+                                    try {
+                                        const response = await fetch(
+                                            `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
+                                        );
+
+                                        if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+
+                                        const text = await response.text();
+                                        if (text) {
+                                            const dataBooking = JSON.parse(text);
+                                            if (dataBooking && Object.keys(dataBooking).length > 0) {
+                                                checkFetch = true;
+                                                break;
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.error("API or JSON parsing error:", error);
+                                    }
+                                    const result = timeStringH.includes(time);
+                                    if (!result) {
+                                        countTemporary++;
+                                        check = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (checkFetch) {
+                        count = countTemporary;
+                        break;
+                    } else if (check) {
+                        count = countTemporary - 2;
+                        break;
+                    }
+                }
+            }
+
+            const newDataTime: string[] = [];
             const timeIntervals = [];
 
             for (let hours = 0; hours <= 24; hours++) {
@@ -136,27 +229,25 @@ const BookingModal = (props: BookingProps) => {
                     timeIntervals.push({ label, value: hours + minutes / 60 });
                 }
             }
-            for (let index = 0; index < operatingTimeFetchData; index++) {
-                newData.push(timeIntervals[index].label);
+            for (let index = 0; index < count; index++) {
+                newDataTime.push(timeIntervals[index].label);
             }
             if (activeTab === 'all') {
-                newData.shift()
-                setDataTimeTemporary(newData);
+                newDataTime.shift()
+                setDataTimeTemporary(newDataTime);
             }
         }
-
-        createDataTime();
-    }, [operatingTimeFetchData])
-
+        checkAndCreateTimeBooking();
+    }, [startTimeKey, startTime, dayStartBooking, sportDetail, activeTab, sport]);
 
 
     useEffect(() => {
         getPriceByTimeBooking(selectTime);
-    }, [selectTime]);
+    }, [selectTime, sportDetail]);
 
     useEffect(() => {
         getPriceByTimeBooking(selectTimeOnStage);
-    }, [selectTimeOnStage]);
+    }, [selectTimeOnStage, sportDetail]);
 
     const getPriceByTimeBooking = (slTime: string) => {
         if (slTime == 'Chọn thời gian') {
@@ -224,8 +315,6 @@ const BookingModal = (props: BookingProps) => {
     }
 
     const handleSave = async () => {
-        // const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
-        // if (isOffline) {
         const phoneRegex = /^0\d{9}$/;
 
         if (!fullName) {
@@ -238,20 +327,7 @@ const BookingModal = (props: BookingProps) => {
             toast.error("Vui lòng chọn thời gian!");
             return;
         }
-        //  else if (!paymentMethod) {
-        //     toast.error("Phương thức thanh toán không hợp lệ!");
-        //     return;
-        // }
-        // } else {
-        //     if (!username) {
-        //         toast.error("Vui lòng nhập tên đăng nhập!");
-        //         return;
-        //     } else if (!paymentMethod) {
-        //         toast.error("Phương thức thanh toán không hợp lệ!");
-        //         return;
-        //     }
-        // }
-        // if (isOffline) {
+
         const resUserSubscription = await fetch(`http://localhost:8080/rest/user/subscription/${localStorage.getItem("username")}`);
         if (!resUserSubscription.ok) {
             throw new Error('Error fetching data');
@@ -266,8 +342,6 @@ const BookingModal = (props: BookingProps) => {
 
         const countBooking = await resCountBooking.json();
 
-        // toast.success(userSubscription.accountPackage.limitBookings + 'countBooking' + countBooking);
-
         if (countBooking >= userSubscription.accountPackage.limitBookings) {
             toast.success("Bạn đã quá số lần đặt sân cho gói miễn phí!"); return
         }
@@ -278,16 +352,7 @@ const BookingModal = (props: BookingProps) => {
         }
         const dataUser = await responseUser.json() as User;
         createBooking(6, dataUser);
-        // }
-        // else {
-        //     const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
-        //     if (!responseUser.ok) {
-        //         toast.error('Tên người dùng không tồn tại!');
-        //         return;
-        //     }
-        //     const dataUser = await responseUser.json() as User;
-        //     createBooking(paymentMethod, dataUser);
-        // }
+
         setCheckDataStatus(!checkDataStatus);
         handleClose();
     }
@@ -302,10 +367,6 @@ const BookingModal = (props: BookingProps) => {
             [index: number]: DateDetail[];
         };
     };
-
-    type WeekBookingDetail = {
-        [week: string]: BookingDetail[];
-    }
 
     useEffect(() => {
         setStartDate(new Date(dayStartBooking));
@@ -400,8 +461,17 @@ const BookingModal = (props: BookingProps) => {
         setDataTimeOnStage(timeSlots);
     };
 
+    type WeekBookingDetail = {
+        [week: string]: BookingDetail[];
+    }
+
+    type NotificationStatusSport = {
+        [week: string]: string[];
+    };
+
     const [selectedWeek, setSelectedWeek] = useState<string[]>([]);
     const [sportFieldDuplicate, setSportFieldDuplicate] = useState<WeekBookingDetail>({});
+    const [checkSportFieldDuplicate, setCheckSportFieldDuplicate] = useState<NotificationStatusSport>({});
 
     useEffect(() => {
         let index = 0;
@@ -416,15 +486,30 @@ const BookingModal = (props: BookingProps) => {
         if (price) {
             setTotalAmount(price * index);
         }
-    }, [selectedWeek])
+    }, [selectedWeek, weekDays, price])
 
     const getWeekDate = async (weekDate: string) => {
         const dateWeek = weekDays[weekDate];
-        if (!selectedWeek.includes(weekDate)) {
+        if (!selectedWeek.includes(weekDate) && sportDetail) {
             for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
                 for (const booking of bookings) {
-
                     try {
+                        for (const s of sportDetail.statusSportFieldDetails) {
+                            if (isDateInRange(booking.date, s.startDate, s.endDate) && s.statusName !== "Hoạt động") {
+                                // const weekDate = booking.date; // Có thể thay thế bằng cách lấy tuần từ ngày, ví dụ: const weekDate = getWeek(booking.date);
+                                setCheckSportFieldDuplicate(prevState => ({
+                                    ...prevState,
+                                    [weekDate]: prevState[weekDate]
+                                        ? prevState[weekDate].some(existingItem => existingItem === `Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`)
+                                            ? prevState[weekDate]
+                                            : [...prevState[weekDate], `Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`]
+                                        : [`Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`],
+                                }));
+
+                                // toast.success(s.statusName + s.endDate)
+                            }
+                        }
+
                         const response = await fetch(
                             `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${booking.date}`
                         );
@@ -467,6 +552,15 @@ const BookingModal = (props: BookingProps) => {
                     return newState;
                 }
                 return prevSportFieldDuplicate;
+            })
+
+            setCheckSportFieldDuplicate(prev => {
+                const newState = { ...prev };
+                if (prev[weekDate]) {
+                    delete newState[weekDate];
+                    return newState;
+                }
+                return prev;
             })
         }
     }
@@ -665,14 +759,13 @@ const BookingModal = (props: BookingProps) => {
 
     const handleClose = () => {
         setShowBookingModal(false);
-        setOperatingTime(0);
-        setOperatingTimeFetchData(0);
         setTotalAmount(0);
         setPrice(0);
         setWeekDays({});
         setSelectedWeek([]);
         setActiveTab("all");
         setSportFieldDuplicate({});
+        setCheckSportFieldDuplicate({});
         setSelectTime("Chọn thời gian");
         setFullName("");
         setPhoneNumber("");
@@ -680,8 +773,6 @@ const BookingModal = (props: BookingProps) => {
     }
 
     useEffect(() => {
-        setOperatingTime(0);
-        setOperatingTimeFetchData(0);
         setTotalAmount(0);
         setPrice(0);
         setWeekDays({});
@@ -703,37 +794,7 @@ const BookingModal = (props: BookingProps) => {
                         onChange={(e) => setFullName(e.target.value)}
                     />
                 </FloatingLabel>
-                {/* <InputGroup className="mb-2">
-                    {isOffline ? (
-                        <FloatingLabel controlId="floatingUsername" label="Họ và tên!" className="flex-grow-1">
-                            <Form.Control
-                                type="text"
-                                placeholder="Vui lòng nhập tên đăng nhập!"
-                                value={fullName}
-                                onChange={(e) => setFullName(e.target.value)}
-                            />
-                        </FloatingLabel>
-                    ) : (
-                        <FloatingLabel controlId="floatingFullName" label="Vui lòng nhập tên đăng nhập!" className="flex-grow-1">
-                            <Form.Control
-                                type="text"
-                                placeholder="Vui lòng nhập tên đăng nhập!"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                            />
-                        </FloatingLabel>
-                    )}
-                    <InputGroup.Text className="border border-dark" aria-label="Checkbox for following text input bg-white">
-                        <Form.Check
-                            type="checkbox"
-                            label="Offline"
-                            checked={isOffline}
-                            onChange={(e) => setIsOffline(e.target.checked)}
-                        />
-                    </InputGroup.Text>
-                </InputGroup> */}
 
-                {/* {isOffline && ( */}
                 <FloatingLabel controlId="floatingPhoneNumber" label="Số điện thoại!" className="flex-grow-1 mb-2">
                     <Form.Control
                         type="text"
@@ -742,7 +803,6 @@ const BookingModal = (props: BookingProps) => {
                         onChange={(e) => setPhoneNumber(e.target.value)}
                     />
                 </FloatingLabel>
-                {/* )} */}
             </>
         )
     }
@@ -819,48 +879,6 @@ const BookingModal = (props: BookingProps) => {
                                         ))}
                                     </Form.Select>
                                 </FloatingLabel>
-                                {/* <div className="d-flex justify-content-center mb-2">
-                                    <div className="form-check me-5">
-                                        <input
-                                            value="prepay"
-                                            // checked={checkPaymentMethod}
-                                            // onChange={handleRadioChange}
-                                            className="form-check-input border"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="flexRadioDefault1"
-                                        />
-                                        <label className="form-check-label" htmlFor="flexRadioDefault1">
-                                            Thanh toán bằng ví
-                                        </label>
-                                    </div>
-                                    <div className="form-check">
-                                        <input
-                                            value="full"
-                                            // checked={!checkPaymentMethod}
-                                            // onChange={handleRadioChange}
-                                            className="form-check-input border"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="flexRadioDefault2"
-                                        />
-                                        <label className="form-check-label" htmlFor="flexRadioDefault2">
-                                            Thanh toán chuyển khoản
-                                        </label>
-                                    </div>
-                                </div> */}
-                                {/* <FloatingLabel controlId="floatingPaymentMethod" label="Phương thức thanh toán *">
-                                    <Form.Select
-                                        value={paymentMethodId}
-                                        onChange={(e) => setPaymentMethodId(Number(e.target.value))}
-                                        aria-label="Default select example"
-                                    >
-                                        <option value="0">Phương thức thanh toán *</option>
-                                        {dataPaymentMethod && dataPaymentMethod.map((item) => (
-                                            <option key={item.paymentMethodId} value={item.paymentMethodId}>{item.name}</option>
-                                        ))}
-                                    </Form.Select>
-                                </FloatingLabel> */}
                             </Col>
                         </Row>
                         <h6 className="text-uppercase text-danger fw-bold text-center my-2">Thông tin đặt sân</h6>
@@ -902,7 +920,7 @@ const BookingModal = (props: BookingProps) => {
                             </div>
                             <div className="d-flex justify-content-around">
                                 <span className="mx-auto"><b>Đơn giá: </b> <em className="text-danger">{endTime ? `${priceForSelectedTime?.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
-                                <span className="mx-auto"><b>Trả trước: </b> <em className="text-danger">{sportDetail && totalAmount ? (totalAmount * (sportDetail.percentDeposit / 100)).toLocaleString("vi-VN", { style: "currency", currency: "VND", }) : '???'}</em>. </span>
+                                <span className="mx-auto"><b>Trả trước: </b> <em className="text-danger">{sportDetail && price ? (price * (sportDetail.percentDeposit / 100)).toLocaleString("vi-VN", { style: "currency", currency: "VND", }) : '???'}</em>. </span>
                                 <span className="mx-auto"><b>Tổng tiền: </b><em className="text-danger">{price ? `${price?.toLocaleString()} đ` : 'Vui lòng chọn thời gian đá'}</em>. </span><br />
                             </div>
                         </Row>
@@ -918,48 +936,6 @@ const BookingModal = (props: BookingProps) => {
                             <Col>
                                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin người đặt</h6>
                                 {renderInputBooking()}
-                                {/* <div className="d-flex justify-content-center mb-2">
-                                    <div className="form-check me-5">
-                                        <input
-                                            value="prepay"
-                                            // checked={checkPaymentMethod}
-                                            // onChange={handleRadioChange}
-                                            className="form-check-input border"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="flexRadioDefault1"
-                                        />
-                                        <label className="form-check-label" htmlFor="flexRadioDefault1">
-                                            Thanh toán bằng ví
-                                        </label>
-                                    </div>
-                                    <div className="form-check">
-                                        <input
-                                            value="full"
-                                            // checked={!checkPaymentMethod}
-                                            // onChange={handleRadioChange}
-                                            className="form-check-input border"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="flexRadioDefault2"
-                                        />
-                                        <label className="form-check-label" htmlFor="flexRadioDefault2">
-                                            Thanh toán chuyển khoản
-                                        </label>
-                                    </div>
-                                </div> */}
-                                {/* <FloatingLabel controlId="floatingPaymentMethod" label="Phương thức thanh toán *">
-                                    <Form.Select style={{ border: '1px solid' }}
-                                        value={paymentMethodId}
-                                        onChange={(e) => setPaymentMethodId(Number(e.target.value))}
-                                        aria-label="Default select example"
-                                    >
-                                        <option value="0">Phương thức thanh toán *</option>
-                                        {dataPaymentMethod && dataPaymentMethod.map((item) => (
-                                            <option key={item.paymentMethodId} value={item.paymentMethodId}>{item.name}</option>
-                                        ))}
-                                    </Form.Select>
-                                </FloatingLabel> */}
                             </Col>
                         </Row>
                         <h6 className="text-uppercase text-danger fw-bold text-center my-2">Thời gian</h6>
@@ -1026,6 +1002,15 @@ const BookingModal = (props: BookingProps) => {
                                 </Col>
                             ))}
                         </Row>
+                        {Object.entries(checkSportFieldDuplicate).map(([week, messages]) => (
+                            <div key={week} className="bg-dark p-2 text-center mx-4 mt-2 text-light">
+                                <b className="text-uppercase">{week}</b><br />
+                                {messages.map((message, index) => (
+                                    <div key={index}>{message}</div>
+                                ))}
+
+                            </div>
+                        ))}
                         {Object.entries(sportFieldDuplicate).map(([week, bookings]) => (
                             <div key={week} className="bg-dark p-2 text-center mx-4 mt-2 text-light">
                                 <b className="text-uppercase">Đã có sân đặt vào {week}</b><br />
@@ -1108,7 +1093,8 @@ const BookingModal = (props: BookingProps) => {
                             onClick={() => handleSave()}>Xác nhận</Button>
                         :
                         <Button style={{ backgroundColor: "#142239" }}
-                            disabled={Object.keys(sportFieldDuplicate).length === 0 && selectedWeek.length !== 0 ? false : true}
+                            disabled={Object.keys(sportFieldDuplicate).length === 0 && selectedWeek.length !== 0 && Object.keys(checkSportFieldDuplicate).length === 0 && selectedWeek.length !== 0 ? false : true
+                            }
                             onClick={() => handleSaveByPeriod()}>Xác nhận</Button>
                     }
                 </Modal.Footer>

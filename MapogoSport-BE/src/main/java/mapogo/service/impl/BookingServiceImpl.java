@@ -457,6 +457,15 @@ public class BookingServiceImpl implements BookingService {
 		return o.getBookings().size();
 	}
 
+	@Override
+	public List<BookingDetail> findBookingDetailBySportFieldIdAndDate(Integer sportFieldDetailIds,
+			List<Integer> bookingId, List<String> status, String startDate, String endDate) {
+		// TODO Auto-generated method stub
+		Date sqlStartDate = Date.valueOf(startDate);
+		Date sqlEndDate = Date.valueOf(endDate);
+		return bookingDAO.findBookingDetailBySportFieldIdAndDate(sportFieldDetailIds, bookingId, status, sqlStartDate, sqlEndDate);
+	}
+
 	// của Mỵ từ đây
 	@Autowired
 	PaymentMethodService payService;

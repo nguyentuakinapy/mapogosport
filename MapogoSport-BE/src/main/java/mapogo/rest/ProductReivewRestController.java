@@ -24,8 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/rest")
-
+@RequestMapping("/rest/user/productReview")
 public class ProductReivewRestController {
 
 	@Autowired
@@ -63,12 +62,12 @@ public class ProductReivewRestController {
 		return result;
 	}
 
-	@DeleteMapping("/user/productReview/{productReviewId}")
+	@DeleteMapping("/{productReviewId}")
 	public void deleteByUser(@PathVariable("productReviewId") Integer productReviewId) {
 		proReviewService.deleteReviewByUser(productReviewId);
 	}
 
-	@GetMapping("/user/find-review-by-rating/{productId}/{rating}")
+	@GetMapping("/find-review-by-rating/{productId}/{rating}")
 	public List<ProductReview> getMethodName(@PathVariable("productId") Integer productId,
 			@PathVariable("rating") Integer rating) {
 		return proReviewService.findReviewByRating(productId, rating);

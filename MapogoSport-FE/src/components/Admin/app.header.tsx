@@ -98,8 +98,10 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
 
         stompClient.connect({}, () => {
             stompClient.subscribe('/topic/notification/username', (message) => {
-                toast.success("Bạn vừa có thông báo mơí!")
-                setCheckNotification(prev => prev + 1);
+                if (message.body === localStorage.getItem('username')) {
+                    toast.success("Bạn vừa có thông báo mơí!")
+                    setCheckNotification(prev => prev + 1);
+                }
             });
 
             stompClient.subscribe('/topic/notification/isRead', (message) => {

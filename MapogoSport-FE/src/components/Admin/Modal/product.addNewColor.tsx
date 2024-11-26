@@ -34,7 +34,7 @@ const ModalProductAddNewColor = ({
     { label: "Xanh dương", value: "Xanh dương", style: "blue" },
     { label: "Nâu", value: "Nâu", style: "brown" },
     { label: "Xám", value: "Xám", style: "gray" },
-];
+  ];
 
 
   // const [color, setColor] = useState(newColor);

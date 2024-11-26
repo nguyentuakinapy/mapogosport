@@ -84,10 +84,11 @@ const PageVoucher = () => {
     //Handel select voucher khi active
     const filterVouchers = (vouchers: Voucher[]) => {
         const currentTime = new Date().getTime();
+        const statusactive = 'active'
         return vouchers.filter(voucher => {
             const activeTime = new Date(voucher.activeDate).getTime();
             const endTime = new Date(voucher.endDate).getTime();
-            return currentTime >= activeTime && currentTime <= endTime;
+            return (currentTime >= activeTime && currentTime <= endTime) && (voucher.status === statusactive);
         });
     };
 
@@ -123,9 +124,12 @@ const PageVoucher = () => {
                                 </div>
                                 <div className="get col-2 text-center ">
                                     <button type="button" className="btn btn-dark text-center "
-                                        onClick={() => handelSubmitGetVoucher(voucher.voucherId)}
+                                        onClick={() => {
+                                            handelSubmitGetVoucher(voucher.voucherId)
+                                        }
+                                        }
                                         disabled={voucher.quantity === 0}
-                                    >Nhận</button>
+                                    > Nhận</button>
                                 </div>
                             </div>
                         ))}

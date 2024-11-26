@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import 'react-datepicker/dist/react-datepicker.css';
 import { useData } from "@/app/context/UserContext";
 import { createTimeStringH } from "../Utils/booking-time";
-import { useSearchParams } from "next/navigation";
 
 interface BookingProps {
     showBookingModal: boolean;
@@ -51,8 +50,8 @@ const BookingModal = React.memo((props: BookingProps) => {
     const [price, setPrice] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);
     const [operatingTimeFetchData, setOperatingTimeFetchData] = useState<number>(0);
-    const [dataTime, setDataTime] = useState<String[]>();
-    const [dataTimeTemporary, setDataTimeTemporary] = useState<String[]>();
+    const [dataTime, setDataTime] = useState<string[]>();
+    const [dataTimeTemporary, setDataTimeTemporary] = useState<string[]>();
 
     useEffect(() => {
         const fetchPaymentMethods = async () => {
@@ -355,8 +354,8 @@ const BookingModal = React.memo((props: BookingProps) => {
         let index = 0;
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
-            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
-                bookings.map(b => {
+            for (const [, bookings] of Object.entries(dateWeek)) {
+                bookings.map(() => {
                     index = index + 1;
                 })
             }
@@ -369,7 +368,7 @@ const BookingModal = React.memo((props: BookingProps) => {
     const getWeekDate = async (weekDate: string) => {
         const dateWeek = weekDays[weekDate];
         if (!selectedWeek.includes(weekDate)) {
-            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
+            for (const [, bookings] of Object.entries(dateWeek)) {
                 for (const booking of bookings) {
                     try {
                         const response = await fetch(
@@ -574,7 +573,7 @@ const BookingModal = React.memo((props: BookingProps) => {
 
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
-            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
+            for (const [, bookings] of Object.entries(dateWeek)) {
                 bookings.map(async b => {
                     await fetch('http://localhost:8080/rest/booking/detail', {
                         method: 'POST',
@@ -660,7 +659,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                 </ul>
             </>
         )
-    }, [sportDetail]);
+    }, [sportDetail, sport]);
 
     const bookerInfo = () => {
         return (
