@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
 import { hashPassword } from "@/components/Utils/Format";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { usePathname, useRouter } from 'next/navigation'; // Để kiểm tra đường dẫn
+
 
 interface LoginProps {
     showLoginModal: boolean;
@@ -35,6 +37,7 @@ export default function Login(props: LoginProps) {
     //         revalidateOnReconnect: false
     //     }
     // );
+
 
     useEffect(() => {
         const userCookie = Cookies.get('user');
@@ -77,6 +80,7 @@ export default function Login(props: LoginProps) {
                     // localStorage.setItem('username', dataUser.username);
                     sessionStorage.setItem('user', JSON.stringify(dataUser));
                     setRefreshKey(refreshKey + 1);
+                    console.log(">>>> check data user auth: ", dataUser);
                     toast.success("Đăng nhập thành công!");
                     // if (dataUser.authorities[0].role.name == "ROLE_ADMIN") {
                     //     window.location.href = "/admin";
@@ -87,6 +91,27 @@ export default function Login(props: LoginProps) {
                     // } else {
                     //     window.location.href = "/";
                     // }
+
+                    const resultsFromNextSercer = await fetch('/api/auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(dataUser),
+
+                    }).then(async (response) => {
+                        const payload = await response.json();
+                        const data = {
+                            status: response.status,
+                            payload
+                        }
+                        if (!response.ok) {
+                            throw data
+                        }
+                        return data
+                    })
+                    // console.log(">>>> check data auth: ", resultsFromNextSercer);
+
                 } else {
                     toast.error("Thông tin đăng nhập không đúng!");
                 }
@@ -99,6 +124,19 @@ export default function Login(props: LoginProps) {
     const { showLoginModal, setShowLoginModal } = props;
     const { showRegisterModal, setShowRegisterModal } = props;
     const { showForgotPassword, setShowForgotPassword } = props;
+
+
+    // useEffect(() => {
+    //     const sessionDataAuthRow = Cookies.get('sessionDataAuth');
+    //     if (!sessionDataAuthRow) {
+    //         setShowLoginModal(true);
+    //     } else {
+    //         setShowLoginModal(false);
+    //     }
+    // }, [setShowLoginModal]);
+
+
+
 
     const handleClose = () => {
         setShowLoginModal(false);
@@ -175,7 +213,14 @@ export default function Login(props: LoginProps) {
                     // localStorage.setItem('username', dataUser.username);
                     sessionStorage.setItem('user', JSON.stringify(dataUser));
                     setRefreshKey(refreshKey + 1);
+
                     toast.success("Đăng nhập thành công!");
+                    // fetch('/api/auth', {
+                    //     method: 'POST',
+                    //     body: JSON.stringify(dataUser)
+                    // })
+
+
                     handleClose();
                 } else {
                     toast.error("Đăng nhập không thành công!");
