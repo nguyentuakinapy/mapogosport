@@ -261,9 +261,11 @@ export default function BookingSport() {
     const [isFirstRender, setIsFirstRender] = useState(true);
 
     const refreshStatusBooking = () => {
+        setCheckLoadingData(true)
+
         if (selectDate === 0) {
             const updatedBookingsOnDay = { ...bookingsOnDay };
-            Object.entries(updatedBookingsOnDay).forEach(([time, statuses]) => {
+            Object.entries(updatedBookingsOnDay).forEach(([time, _statuses]) => {
                 updatedBookingsOnDay[time] = [];
             });
             setBookingsOnDay(updatedBookingsOnDay);
@@ -494,7 +496,7 @@ export default function BookingSport() {
 
                 Object.entries(bookingsOnDay).forEach(([time, statuses]) => {
                     if (sportDetails && sportDetails[index].sportFielDetailId == item.sportFieldDetail.sportFielDetailId) {
-                        let timeIndex = newData.indexOf(time)
+                        const timeIndex = newData.indexOf(time)
                         const [hour, minute] = time.split('h').map(Number);
                         const timeDate = new Date(onDay);
                         timeDate.setHours(hour, minute);
@@ -566,7 +568,7 @@ export default function BookingSport() {
                 // START SET STATUS ON TIME
 
                 Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                    Object.entries(sportData).forEach(([sport, statuses]) => {
+                    Object.entries(sportData).forEach(([sport, _statuses]) => {
                         if (!sportData[sport][dayIndex] && dayYear) {
                             const [hour, minute] = time.split('h').map(Number);
                             const timeDate1 = new Date(dayYear);
@@ -619,7 +621,7 @@ export default function BookingSport() {
                                 );
 
                                 Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                                    Object.entries(sportData).forEach(([sport, statuses]) => {
+                                    Object.entries(sportData).forEach(([sport, _statuses]) => {
                                         if (sport === sportDetails[index].name && timeStringH.includes(time)) {
                                             sportData[sport][dayIndex] = {
                                                 status: i.statusName === "Hoạt động" ? "Còn trống" : i.statusName,
@@ -633,7 +635,7 @@ export default function BookingSport() {
                                 });
                             } else if (i && sportDetails) {
                                 Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                                    Object.entries(sportData).forEach(([sport, statuses]) => {
+                                    Object.entries(sportData).forEach(([sport, _statuses]) => {
                                         if (new Date(i.startDate).toISOString().split("T")[0] === dayYear) {
                                             let hourStart;
                                             let minuteStart;
@@ -856,8 +858,8 @@ export default function BookingSport() {
         const bookingCounts: any = {};
         const displayedBookingIds = new Set();
 
-        Object.entries(bookingsOnDay).map(([time, statuses], i) => (
-            statuses.map((status, index) => {
+        Object.entries(bookingsOnDay).map(([_time, statuses]) => (
+            statuses.map((status) => {
                 const bookingId = status.bookingId;
                 if (bookingId && bookingId !== 0) {
                     bookingCounts[bookingId] = (bookingCounts[bookingId] || 0) + 1;
@@ -865,7 +867,7 @@ export default function BookingSport() {
             })
         ))
 
-        return Object.entries(bookingsOnDay).map(([time, statuses], i) => (
+        return Object.entries(bookingsOnDay).map(([time, statuses]) => (
             <tr key={time}>
                 <td className="title" style={{ textAlign: 'center' }}>{time}</td>
                 {statuses.map((status, index) => {
@@ -938,7 +940,7 @@ export default function BookingSport() {
         const bookingCounts: any = {};
         const displayedBookingIds = new Set();
 
-        Object.entries(bookingsOnWeek).forEach(([time, sportData]) => {
+        Object.entries(bookingsOnWeek).forEach(([_time, sportData]) => {
             const sportFielDetails = dataSport[selectSport]?.sportFielDetails || [];
             sportFielDetails.forEach(item => {
                 const bookingData = sportData[item.name] || [];
@@ -970,7 +972,7 @@ export default function BookingSport() {
                 </thead>
                 <tbody>
 
-                    {Object.entries(bookingsOnWeek).map(([time, sportData], i) => {
+                    {Object.entries(bookingsOnWeek).map(([time, sportData]) => {
                         if (dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails) {
                             const sportFielDetails = dataSport[selectSport].sportFielDetails;
                             return (
@@ -1084,7 +1086,6 @@ export default function BookingSport() {
             toast.error("Lỗi");
         }
     };
-    let hasExecuted = false;
 
     // Notification
     useEffect(() => {
@@ -1101,9 +1102,9 @@ export default function BookingSport() {
                 return;
             }
             const getFindBookingSport = async () => {
-                if (!hasExecuted && currentMinutes === 0) {
+                if (currentMinutes === 0) {
                     await fetchBookingNotification(dateNow, now.getHours().toString() + 'h30', selectedSportData.sportFieldId);
-                } else if (!hasExecuted && currentMinutes === 30) {
+                } else if (currentMinutes === 30) {
                     await fetchBookingNotification(dateNow, (now.getHours() + 1).toString() + 'h00', selectedSportData.sportFieldId);
                 }
             }
@@ -1242,7 +1243,7 @@ export default function BookingSport() {
         setBookingsOnWeek({});
     }
 
-    const [isFullScreen, setIsFullScreen] = useState(false);
+    const [_isFullScreen, setIsFullScreen] = useState(false);
 
     const toggleFullScreen = () => {
         if (!document.fullscreenElement) {

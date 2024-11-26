@@ -3,13 +3,15 @@ import UserLayout from "@/components/User/UserLayout";
 import { FloatingLabel, Form, Nav, Pagination } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { useData } from "@/app/context/UserContext";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import jsPDF from "jspdf";
 import 'jspdf-autotable';
 import { RobotoBase64 } from "../../../../public/font/Roboto-Regular";
 import { toast } from "react-toastify";
 import '../types/wallet.scss';
 import NotificationModal from "@/components/Owner/modal/notification.modal";
+import autoTable from "jspdf-autotable";
+import Image from "next/image";
 
 const WalletPage = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -116,7 +118,7 @@ const WalletPage = () => {
 
     const exportPDF = () => {
         try {
-            const doc: any = new jsPDF();
+            const doc: jsPDF = new jsPDF();
 
             doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
             doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
@@ -137,7 +139,7 @@ const WalletPage = () => {
                 tableRows.push(transactionData);
             });
 
-            doc.autoTable({
+            autoTable(doc, {
                 head: [tableColumn],
                 body: tableRows,
                 startY: 20,
@@ -154,7 +156,7 @@ const WalletPage = () => {
                     2: { halign: 'right' },
                     3: { halign: 'center' },
                 },
-                didParseCell: (data: any) => {
+                didParseCell: (data) => {
                     if (data.cell.text.length > 0) {
                         data.cell.text[0] = data.cell.text[0];
                     }
@@ -241,10 +243,10 @@ const WalletPage = () => {
                                 Thanh toán qua ví điện tử VNPay
                             </label>
                         </div>
-                        <img
+                        <Image
                             src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
-                            alt="VNPay"
-                            style={{ maxWidth: '50px' }}
+                            alt="VNPay12312"
+                            width={50} height={50}
                         />
                     </div>
                     <div className="card-body d-flex list-group-item align-items-center">
@@ -261,10 +263,10 @@ const WalletPage = () => {
                                 Thanh toán qua ví điện tử MoMo
                             </label>
                         </div>
-                        <img
+                        <Image
                             src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png"
-                            alt="MoMo"
-                            style={{ maxWidth: '50px' }}
+                            alt="MoMo 123123"
+                            width={50} height={50}
                         />
                     </div>
                 </div>

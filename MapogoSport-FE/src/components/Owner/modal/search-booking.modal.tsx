@@ -54,24 +54,20 @@ const SearchBookingModal = (props: SearchBookingProps) => {
 
     useEffect(() => {
         if (sportField) {
-            getTime()
-        };
-    }, [sportField]);
-
-    const getTime = () => {
-        if (sportField) {
-            const open = sportField?.opening;
-            const close = sportField?.closing;
-            if (open && typeof open === 'string' && close && typeof close === 'string') {
-                const numberOpen = open.match(/\d+/);
-                const numberClose = close.match(/\d+/);
-                if (numberOpen && numberClose) {
-                    setOpening(Number(numberOpen[0]));
-                    setOperatingTime(Number(numberClose[0]) - Number(numberOpen[0]));
+            if (sportField) {
+                const open = sportField.opening;
+                const close = sportField.closing;
+                if (open && typeof open === 'string' && close && typeof close === 'string') {
+                    const numberOpen = open.match(/\d+/);
+                    const numberClose = close.match(/\d+/);
+                    if (numberOpen && numberClose) {
+                        setOpening(Number(numberOpen[0]));
+                        setOperatingTime(Number(numberClose[0]) - Number(numberOpen[0]));
+                    }
                 }
             }
-        }
-    }
+        };
+    }, [sportField]);
 
     useEffect(() => {
         const newData: string[] = [];
@@ -96,20 +92,22 @@ const SearchBookingModal = (props: SearchBookingProps) => {
                 }
             }
         }
-        const index = newData.indexOf(sportField?.opening || 'NA');
-        if (index !== -1) {
-            newData.splice(0, index);
+        if (sportField) {
+            const index = newData.indexOf(sportField.opening || 'NA');
+            if (index !== -1) {
+                newData.splice(0, index);
+            }
         }
         const modifiedValidTimes = newData.slice(0, -2);
         setValidTimes(modifiedValidTimes);
     }, [operatingTime, opening]);
 
     const handleFindField = async () => {
-        if (selectedDate && selectedTime) {
+        if (selectedDate && selectedTime && sportField) {
             const response = await fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${selectedSportType}/${selectedDate}/${selectedDate}`);
             const bookingsFromAPI: BookingDetail[] = await response.json();
             let isBooked = false;
-            const selectedSportDetail = sportField?.sportFielDetails.find(detail => detail.sportFielDetailId === selectedSportType);
+            const selectedSportDetail = sportField.sportFielDetails.find(detail => detail.sportFielDetailId === selectedSportType);
 
             if (selectedSportDetail) {
                 for (const s of selectedSportDetail.statusSportFieldDetails) {
