@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
-import { Table, Button, Collapse } from "react-bootstrap";
+import { Table, Button, Collapse, Image } from "react-bootstrap";
 import { useState } from "react";
 import ProductDetailModalProps from "@/components/Admin/Modal/product.detail.addNew";
 
@@ -19,7 +19,7 @@ export default function ViewListDetail() {
   );
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedProductDetail, setSelectedProductDetail] =
-    useState<ProductDetail[]>([]);
+    useState<ProductDetail>();
 
   // Fetch ProductDetail dựa vào productId
   const { data: productDetails, error: errorProductDetails } = useSWR<
@@ -65,7 +65,7 @@ export default function ViewListDetail() {
   // Hàm để đóng modal
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
-    setSelectedProductDetail(null);
+    setSelectedProductDetail(undefined);
   };
 
   return (
@@ -110,14 +110,14 @@ export default function ViewListDetail() {
                             detail.color === "đỏ"
                               ? "red"
                               : detail.color === "xanh"
-                              ? "blue"
-                              : detail.color === "vàng"
-                              ? "yellow"
-                              : detail.color === "trắng"
-                              ? "white"
-                              : detail.color === "đen"
-                              ? "black"
-                              : "gray", // Màu mặc định nếu không khớp
+                                ? "blue"
+                                : detail.color === "vàng"
+                                  ? "yellow"
+                                  : detail.color === "trắng"
+                                    ? "white"
+                                    : detail.color === "đen"
+                                      ? "black"
+                                      : "gray", // Màu mặc định nếu không khớp
                           color: detail.color === "trắng" ? "black" : "white", // Màu chữ
                         }}
                       >
@@ -130,8 +130,7 @@ export default function ViewListDetail() {
 
                   <td>
                     {detail.image ? (
-                      <img
-                        src={`/images/product-images/${detail.image}`}
+                      <Image src={`/images/product-images/${detail.image}`}
                         alt={detail.color}
                         style={{ width: "50px" }}
                       />
@@ -142,14 +141,14 @@ export default function ViewListDetail() {
                   <td>
                     {detail.galleries && detail.galleries.length > 0
                       ? detail.galleries.map((gallery) => (
-                          <span key={gallery.galleryId}>
-                            {gallery.name}
-                            <br />
-                          </span>
-                        ))
+                        <span key={gallery.galleryId}>
+                          {gallery.name}
+                          <br />
+                        </span>
+                      ))
                       : "Không có gallery"}
                   </td>
-                 {/*  <td>
+                  {/*  <td>
                     {totalQuantities[detail.productDetailId] ||
                       "Đang load số lượng"}{" "}
                     Hiển thị tổng số lượng
@@ -230,9 +229,9 @@ export default function ViewListDetail() {
                       <td>
                         {detailSize.price
                           ? detailSize.price.toLocaleString("vi-VN", {
-                              style: "currency",
-                              currency: "VND",
-                            })
+                            style: "currency",
+                            currency: "VND",
+                          })
                           : "N/A"}
                       </td>
                       <td>{detailSize.quantity || "Không có số lượng"}</td>

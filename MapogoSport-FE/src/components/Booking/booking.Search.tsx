@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
 import CheckoutModal from '@/components/Booking/booking.Checkout';
+import { createTimeStringH, isDateInRange } from "../Utils/booking-time";
 
 interface SearchBookingProps {
     showSearchBookingModal: boolean;
@@ -21,7 +22,7 @@ const SearchSportField = (props: SearchBookingProps) => {
     const [startTime, setStartTime] = useState("");
     const [dayStartBooking, setDayStartBooking] = useState("");
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
-    const [startTimeKey, setStartTimeKey] = useState<boolean>(true);
+    const startTimeKey: boolean = true;
     const [validTimes, setValidTimes] = useState<string[]>([]);
     const [opening, setOpening] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);
@@ -102,7 +103,7 @@ const SearchSportField = (props: SearchBookingProps) => {
         }
         const modifiedValidTimes = newData.slice(0, -2);
         setValidTimes(modifiedValidTimes);
-    }, [operatingTime, opening]);
+    }, [operatingTime, opening, sportField]);
 
     const handleFindField = async () => {
         if (selectedDate && selectedTime) {
@@ -111,9 +112,80 @@ const SearchSportField = (props: SearchBookingProps) => {
             let isBooked = false;
             const selectedSportDetail = sportField?.sportFielDetails.find(detail => detail.sportFielDetailId === selectedSportType);
 
-            if (selectedSportDetail && selectedSportDetail.status === "Tạm đóng") {
-                toast.warning("Không tìm thấy sân phù hợp theo nhu cầu!");
-                return;
+            // if (selectedSportDetail && selectedSportDetail.status === "Tạm đóng") {
+            //     toast.warning("Không tìm thấy sân phù hợp theo nhu cầu!");
+            //     return;
+            // }
+            if (selectedSportDetail) {
+                // toast.warning("Không tìm thấy sân phù hợp theo nhu cầu!");
+                // return;
+                let hourStart;
+                let minuteStart;
+                let hourEnd;
+                let minuteEnd;
+
+                for (const s of selectedSportDetail.statusSportFieldDetails) {
+                    if (isDateInRange(selectedDate, s.startDate, s.endDate)) {
+                        if (sportField) {
+                            if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === selectedDate) {
+                                if (new Date(s.startDate).getMinutes() > 30) {
+                                    hourStart = new Date(s.startDate).getHours() + 1;
+                                    minuteStart = '00';
+                                } else {
+                                    hourStart = new Date(s.startDate).getHours();
+                                    minuteStart = '30';
+                                }
+
+                                const currentStartTime = `${hourStart}h${minuteStart}`;
+                                const timeStringH: string[] = createTimeStringH(
+                                    currentStartTime,
+                                    sportField.closing
+                                );
+
+                                if (new Date(s.endDate).getTime() <= new Date().getTime()) {
+                                    break;
+                                }
+
+                                const result = timeStringH.includes(selectedTime);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == selectedTime) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+
+                            } else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === selectedDate) {
+                                if (new Date(s.endDate).getMinutes() > 30) {
+                                    hourEnd = new Date(s.endDate).getHours() + 1;
+                                    minuteEnd = '00';
+                                } else {
+                                    hourEnd = new Date(s.endDate).getHours();
+                                    minuteEnd = '30';
+                                }
+
+                                const currentEndTime = `${hourEnd}h${minuteEnd}`;
+                                const timeStringH: string[] = createTimeStringH(
+                                    sportField.opening,
+                                    currentEndTime
+                                );
+
+                                if (new Date(s.startDate).getTime() >= new Date().getTime()) {
+                                    break;
+                                }
+
+                                const result = timeStringH.includes(selectedTime);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (currentEndTime == selectedTime) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             const currentDateTime = new Date();

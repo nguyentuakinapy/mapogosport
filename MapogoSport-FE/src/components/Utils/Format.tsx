@@ -1,7 +1,6 @@
-import React, { Component } from "react";
 import { createHash } from 'crypto';
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: Date) => {
   const date = new Date(dateString);
   return date.toLocaleString("vi-VN", {
     year: "numeric",
@@ -12,7 +11,7 @@ const formatDate = (dateString) => {
     second: "2-digit",
   });
 };
-const formatDateNotime = (dateString) => {
+const formatDateNotime = (dateString: Date) => {
   const date = new Date(dateString);
   return date.toLocaleString("vi-VN", {
     year: "numeric",
@@ -21,26 +20,19 @@ const formatDateNotime = (dateString) => {
   });
 };
 
-// const formatDateForApi = (date: Date | null) => {
-//   if (!date) return '';
-//   const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-//   return utcDate.toISOString().split('T')[0];
-// };
 const formatDateForApi = (date: Date | null) => {
-  if (!date) return ''; // Nếu date là null, trả về chuỗi rỗng
+  if (!date) return '';
 
-  // Lấy múi giờ hiện tại của hệ thống
-  const offsetMs = date.getTimezoneOffset() * 60 * 1000; // Đổi phút sang milliseconds
-  const localDate = new Date(date.getTime() - offsetMs); // Điều chỉnh múi giờ
+  const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+  const localDate = new Date(date.getTime() - offsetMs);
 
-  // Chuyển thành chuỗi định dạng yyyy-MM-dd'T'HH:mm:ss
-  return localDate.toISOString().split('.')[0]; // Bỏ phần '.000Z'
+  return localDate.toISOString().split('.')[0];
 };
 
 
 
 
-const formatPrice = (price) => {
+const formatPrice = (price: number) => {
   // Kiểm tra nếu price không hợp lệ hoặc không phải là số
   if (typeof price !== "number" || isNaN(price)) {
     return "Giá không hợp lệ"; // Hoặc bất kỳ thông báo mặc định nào

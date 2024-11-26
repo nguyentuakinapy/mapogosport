@@ -10,7 +10,7 @@ interface OrderProps {
     onHide: () => void; // Function to close modal
 }
 
-const MyVerticallyCenteredModal = ({ showModal, setShowModal, orderId, onHide }: OrderProps) => {
+const MyVerticallyCenteredModal = ({ showModal, orderId, onHide }: OrderProps) => {
     const [dataOrderDetail, setDataOrderDetail] = useState([]);
 
     useEffect(() => {

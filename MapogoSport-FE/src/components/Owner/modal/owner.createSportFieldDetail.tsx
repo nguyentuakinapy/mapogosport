@@ -1,8 +1,7 @@
-import { width } from "@fortawesome/free-brands-svg-icons/fa42Group";
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel } from "react-bootstrap";
-import useSWR, { mutate } from "swr";
+import { mutate } from "swr";
 
 
 interface SportFieldDetailProps {
@@ -15,7 +14,7 @@ interface SportFieldDetailProps {
 }
 
 const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
-    const { showSportFieldDetailModal, setShowSportFieldDetailModal, selectedSportFieldDetail, setSelectedSportFieldDetail, id, owner } = props;
+    const { showSportFieldDetailModal, setShowSportFieldDetailModal, selectedSportFieldDetail, id, owner } = props;
 
     const [fieldName, setFieldName] = useState("");
     const [price, setPrice] = useState<number | null>(null);
@@ -24,8 +23,6 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
     const [status, setStatus] = useState("");
     const [percentDeposit, setPercentDeposit] = useState("");
     const [peakHour, setPeakHour] = useState("");
-    const userSession = sessionStorage.getItem("user");
-    const user = userSession ? JSON.parse(userSession) : null;
 
     useEffect(() => {
         if (showSportFieldDetailModal) {

@@ -1,11 +1,12 @@
 import { ReactNode } from "react";
-import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 
 interface OwnerProps {
     showNotificationModal: boolean;
     setNotificationModal: (v: boolean) => void;
     renderNotification: () => ReactNode;
     textHeadNotification: string;
+    size?: string
 }
 
 const NotificationModal = (props: OwnerProps) => {
@@ -18,7 +19,7 @@ const NotificationModal = (props: OwnerProps) => {
 
     return (
         <>
-            <Modal show={showNotificationModal} onHide={() => handleClose()} size="lg" aria-labelledby="contained-modal-title-vcenter"
+            <Modal show={showNotificationModal} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
                 centered backdrop="static" keyboard={false}>
                 <Modal.Header>
                     <Modal.Title className="text-uppercase text-danger fw-bold m-auto">{textHeadNotification}</Modal.Title>

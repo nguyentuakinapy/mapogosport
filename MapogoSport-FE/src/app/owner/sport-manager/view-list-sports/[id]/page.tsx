@@ -12,19 +12,20 @@ const SportFieldDetailList = () => {
     // const [sportFieldDetail, setSportFieldDetail] = useState([]);
     const [showSportFieldDetailModal, setShowSportFieldDetailModal] = useState<boolean>(false)
     const [selectedSportFieldDetail, setSelectedSportFieldDetail] = useState(null);
-    const userSession = sessionStorage.getItem('user');
-    const user = userSession ? JSON.parse(userSession) : null;
+
 
     const { id } = useParams();
-    const fetcher = (url) => axios.get(url).then(res => res.data);
+    const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
     useEffect(() => {
         getOwner();
-    }, [user])
+    }, [])
 
     const [owner, setOwner] = useState<Owner>();
 
     const getOwner = async () => {
+        const userSession = sessionStorage.getItem('user');
+        const user = userSession ? JSON.parse(userSession) : null;
         if (user) {
             const responseOwner = await fetch(`http://localhost:8080/rest/owner/${user.username}`);
             if (!responseOwner.ok) {

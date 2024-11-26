@@ -1,5 +1,5 @@
 "use client"; // chưa phân trang
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
@@ -18,12 +18,11 @@ import { toast } from "react-toastify";
 import useSWR from "swr";
 import "../admin.scss";
 import ModalProductAddNewSize from "./product.addNewSize";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface UserProps {
   showAddProduct: boolean;
   setShowAddProduct: (v: boolean) => void;
-  currentProduct: Product | null;
+  currentProduct?: Product;
   modalType: "add" | "edit";
   categoryProducts: CategoryProduct[];
   // onAddProduct: (product: Product) => void;
@@ -32,13 +31,8 @@ interface UserProps {
 }
 const BASE_URL = "http://localhost:8080";
 
-interface ProductWasAdd {
-  productNewId: number;
-}
 let ProductWasCreated: number;
 let canProceed = false;
-
-// let  ProductDetailWasCreated: number;
 
 const ProductAddNew = ({
   showAddProduct,
@@ -155,7 +149,7 @@ const ProductAddNew = ({
       console.log("=======putData", putData);
 
       return axios.post(
-        `http://localhost:8080/rest/products`,
+        `http://localhost:8080/rest/products/admin/create`,
         putData.formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -169,7 +163,7 @@ const ProductAddNew = ({
       console.log("=======putData", putData);
 
       return axios.put(
-        `http://localhost:8080/rest/products/${putData.id}`,
+        `http://localhost:8080/rest/products/admin/${putData.id}`,
         putData.formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -488,7 +482,7 @@ const ProductAddNew = ({
           toast.warning(`Vui lòng nhập trường: ${field}`);
         }
       });
-      
+
 
       // Cập nhật trạng thái các trường lỗi
       const newErrorFields = {};
@@ -770,11 +764,11 @@ const ProductAddNew = ({
     }
   }, [formValues.image]);
   // Hàm để xóa ảnh trong danh sách đã chọn
-const handleRemoveImage = (index) => {
-  // Xóa ảnh khỏi mảng `selectedGalleryFiles`
-  const updatedFiles = selectedGalleryFiles.filter((_, i) => i !== index);
-  setSelectedGalleryFiles(updatedFiles); // Cập nhật lại state với mảng đã xóa
-};
+  const handleRemoveImage = (index) => {
+    // Xóa ảnh khỏi mảng `selectedGalleryFiles`
+    const updatedFiles = selectedGalleryFiles.filter((_, i) => i !== index);
+    setSelectedGalleryFiles(updatedFiles); // Cập nhật lại state với mảng đã xóa
+  };
 
 
   // // Xử lý lỗi và trạng thái loading
@@ -1220,7 +1214,7 @@ const handleRemoveImage = (index) => {
                   eventKey="add-details"
                   // onClick={() => handleTabClick("add-details")}
                   onClick={() => handleOpenTabColor("add-details")}
-                  // disabled={selectedProductDetail}
+                // disabled={selectedProductDetail}
                 >
                   Thêm màu sắc & kích cỡ
                 </Nav.Link>
@@ -1259,7 +1253,7 @@ const handleRemoveImage = (index) => {
                             disabled
                             value={formValues.stock || 0}
                             onChange={handleInputChangeNumber}
-                            // isInvalid={!!errorFields.stock && !formValues.stock}
+                          // isInvalid={!!errorFields.stock && !formValues.stock}
                           />
                           <Form.Label htmlFor="stock">
                             Số lượng <b className="text-danger">*</b>
@@ -1386,7 +1380,7 @@ const handleRemoveImage = (index) => {
                           />
                         </Form.Floating>
                       </Form.Group>
-                      
+
 
                       <Form.Group id="formImage d-flex">
                         <Form.Label className="fw-bold">
@@ -1416,37 +1410,37 @@ const handleRemoveImage = (index) => {
                             />
                           </div>
                           <div className="image-container-preview">
-                          <div className="boder-image">
-                            {previewImage ? (
-                              <div
-                                className="preview-image"
-                                style={{ marginLeft: "10px" }}
-                              >
-                                <Image
-                                  src={previewImage}
-                                  alt="Preview"
-                                  fluid
-                                  className="preview-img"
-                                />
-                              </div>
-                            ) : (
-                              <div
-                                className="preview-image"
-                                style={{ marginLeft: "10px" }}
-                              >
-                                <Image
-                                  src="/images/logo.png"
-                                  alt="Preview"
-                                  fluid
-                                  className="preview-img"
-                                />
-                              </div>
-                            )}
-                            {/* Nút tải ảnh */}
-                            <label htmlFor="file" className="upload-icon">
-                              <i className="bi bi-cloud-arrow-up"></i>
-                            </label>
-                          </div>
+                            <div className="boder-image">
+                              {previewImage ? (
+                                <div
+                                  className="preview-image"
+                                  style={{ marginLeft: "10px" }}
+                                >
+                                  <Image
+                                    src={previewImage}
+                                    alt="Preview"
+                                    fluid
+                                    className="preview-img"
+                                  />
+                                </div>
+                              ) : (
+                                <div
+                                  className="preview-image"
+                                  style={{ marginLeft: "10px" }}
+                                >
+                                  <Image
+                                    src="/images/logo.png"
+                                    alt="Preview"
+                                    fluid
+                                    className="preview-img"
+                                  />
+                                </div>
+                              )}
+                              {/* Nút tải ảnh */}
+                              <label htmlFor="file" className="upload-icon">
+                                <i className="bi bi-cloud-arrow-up"></i>
+                              </label>
+                            </div>
                           </div>
                         </div>
                       </Form.Group>
@@ -1456,14 +1450,15 @@ const handleRemoveImage = (index) => {
                 <Col xs={4}>
                   <div>
                     {formValues.image === null ||
-                    previewImage ||
-                    !isImageValid ? (
+                      previewImage ||
+                      !isImageValid ? (
                       <Image
                         src="/images/logo.png"
-                        
+
                         alt="Default image"
                         fluid
-                        style={{ objectFit: "cover", maxHeight: "300px" ,
+                        style={{
+                          objectFit: "cover", maxHeight: "300px",
                           display: formValues.image ? "none" : "block"
                         }}
                       />
@@ -1485,7 +1480,7 @@ const handleRemoveImage = (index) => {
                   </div>
 
                   <div>
-   {/* {(formValues.image && modalType === "edit") ? (
+                    {/* {(formValues.image && modalType === "edit") ? (
     <Image
       src={formValues.image}
       alt="formValues.image"
@@ -1558,8 +1553,8 @@ const handleRemoveImage = (index) => {
 
                     {/* Hiển thị màu sản phẩm */}
                     {currentProduct?.productId &&
-                    productDetails &&
-                    productDetails.length > 0 ? ( // Kiểm tra nếu có sản phẩm và danh sách màu không rỗng
+                      productDetails &&
+                      productDetails.length > 0 ? ( // Kiểm tra nếu có sản phẩm và danh sách màu không rỗng
                       productDetails.map((detailDemo) => {
                         // Tìm màu tương ứng từ optionColor
                         const colorOption = optionColor.find(
@@ -1622,46 +1617,46 @@ const handleRemoveImage = (index) => {
             selectedProductDetail && ( // selectedProductDetail chứa dữ liệu truyền vào
               <Form>
                 <Row>
-                 
+
                   <Col>
-  {/* Kiểm tra nếu chưa chọn ảnh và không có ảnh preview, hiển thị thông báo */}
-  {!selectedProductDetail?.image && !previewImageProductColor && (
-    <p className="text-danger">Vui lòng chọn ảnh.</p>
-  )}
+                    {/* Kiểm tra nếu chưa chọn ảnh và không có ảnh preview, hiển thị thông báo */}
+                    {!selectedProductDetail?.image && !previewImageProductColor && (
+                      <p className="text-danger">Vui lòng chọn ảnh.</p>
+                    )}
 
-  {/* ẢNH CHÍNH CỦA MÀU */}
-  <Form.Group id="formImage d-flex">
-    <Form.Label className="fw-bold">Hình ảnh:</Form.Label>
+                    {/* ẢNH CHÍNH CỦA MÀU */}
+                    <Form.Group id="formImage d-flex">
+                      <Form.Label className="fw-bold">Hình ảnh:</Form.Label>
 
-    {/* Hình ảnh hiển thị */}
-    <div className="d-flex align-items-center">
-      <div className="image-container-new">
-        {/* Nếu chưa có ảnh, hiển thị ảnh mặc định */}
-        <img
-          src={selectedProductDetail?.image || previewImageProductColor || "/images/logo.png"}
-          alt="Product image"
-          className="img-thumbnail shadow-sm" // Thêm bóng đổ
-        />
+                      {/* Hình ảnh hiển thị */}
+                      <div className="d-flex align-items-center">
+                        <div className="image-container-new">
+                          {/* Nếu chưa có ảnh, hiển thị ảnh mặc định */}
+                          <img
+                            src={selectedProductDetail?.image || previewImageProductColor || "/images/logo.png"}
+                            alt="Product image"
+                            className="img-thumbnail shadow-sm" // Thêm bóng đổ
+                          />
 
-        {/* Input để chọn ảnh, được ẩn đi */}
-        <Form.Control
-          id="file"
-          className="file-input"
-          type="file"
-          name="image"
-          onChange={handleImageChangeProductColor}
-          accept="image/png, image/jpeg, image/jpg"
-          style={{ display: "none" }} // Ẩn input file
-        />
+                          {/* Input để chọn ảnh, được ẩn đi */}
+                          <Form.Control
+                            id="file"
+                            className="file-input"
+                            type="file"
+                            name="image"
+                            onChange={handleImageChangeProductColor}
+                            accept="image/png, image/jpeg, image/jpg"
+                            style={{ display: "none" }} // Ẩn input file
+                          />
 
-        {/* Nút tải ảnh */}
-        <label htmlFor="file" className="upload-icon-new">
-          <i className="bi bi-camera-fill"></i>
-        </label>
-      </div>
+                          {/* Nút tải ảnh */}
+                          <label htmlFor="file" className="upload-icon-new">
+                            <i className="bi bi-camera-fill"></i>
+                          </label>
+                        </div>
 
-      {/* Hiển thị ảnh xem trước nếu có */}
-      {/* {previewImageProductColor && (
+                        {/* Hiển thị ảnh xem trước nếu có */}
+                        {/* {previewImageProductColor && (
         <div className="preview-image" style={{ marginLeft: "10px" }}>
           <Image
             src={previewImageProductColor}
@@ -1671,9 +1666,9 @@ const handleRemoveImage = (index) => {
           />
         </div>
       )} */}
-    </div>
-  </Form.Group>
-</Col>
+                      </div>
+                    </Form.Group>
+                  </Col>
 
                   <Col>
                     <Form.Group className="mb-3">
@@ -1741,16 +1736,16 @@ const handleRemoveImage = (index) => {
                                   border: "1px solid #ddd",
                                 }}
                               />
-                               {/* Nút xóa ảnh */}
-          <Button
-            variant="danger"
-            size="sm"
-            className="position-absolute rounded-circle top-0 end-0"
-            style={{ transform: "translate(25%, -25%)" }}
-            onClick={() => handleRemoveImage(index)}
-          >
-            <i className="bi bi-x-circle"></i>
-          </Button>
+                              {/* Nút xóa ảnh */}
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                className="position-absolute rounded-circle top-0 end-0"
+                                style={{ transform: "translate(25%, -25%)" }}
+                                onClick={() => handleRemoveImage(index)}
+                              >
+                                <i className="bi bi-x-circle"></i>
+                              </Button>
                             </div>
                           ))
                         ) : galleries.length === 0 ? (

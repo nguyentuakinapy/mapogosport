@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import 'react-datepicker/dist/react-datepicker.css';
 import { useData } from "@/app/context/UserContext";
 import { createTimeStringH } from "../Utils/booking-time";
+import { useSearchParams } from "next/navigation";
 
 interface BookingProps {
     showBookingModal: boolean;
@@ -442,10 +443,11 @@ const BookingModal = React.memo((props: BookingProps) => {
                 return;
             }
             const amountToPay = checkPrepayPrice && prepayPrice !== undefined ? prepayPrice : totalAmount;
-            if (!userData?.wallet?.balance || userData.wallet.balance < amountToPay) {
+            if (!userData?.wallet?.balance || userData.wallet.balance < amountToPay && paymentMethod.name !== 'Thanh toán ví') {
                 toast.error("Số dư trong ví của bạn không đủ để đặt sân! Vui lòng nạp tiền vào ví!");
                 return;
             }
+
             const responseBooking = await fetch('http://localhost:8080/rest/booking', {
                 method: 'POST',
                 headers: {
@@ -494,12 +496,40 @@ const BookingModal = React.memo((props: BookingProps) => {
                     subscriptionKey: activeTab !== 'byDay' ? 'createKey' : null
                 })
             });
-            toast.success("Đặt sân thành công!");
+
+            if (paymentMethod.name === "VNPay" || paymentMethod.name === "MoMo") {
+                try {
+                    const responsePayment = await fetch('http://localhost:8080/rest/booking/payment', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            bookingId: resBooking.bookingId,
+                            totalAmount,
+                            percentDeposit: sportDetail?.percentDeposit,
+                            paymentMethodName: paymentMethod.name,
+                            status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
+
+                        })
+                    });
+                    const responseData = await responsePayment.json();
+                    const paymentUrl = responseData.url;
+                    console.log(paymentUrl);
+
+                    // chuyển hướng đến URL thanh toán
+                    window.location.href = paymentUrl;
+                } catch (error) {
+                    console.error('Error during payment:', error);
+                }
+            }
         } catch (error) {
             console.log(error);
         }
     }
 
+    //
     const createBookingByPeriod = async (paymentMethod: PaymentMethod) => {
         if (totalAmount === undefined || totalAmount <= 0) {
             toast.error("Số tiền thanh toán không hợp lệ!");
@@ -630,7 +660,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                 </ul>
             </>
         )
-    }, [sportDetail]);
+    }, [sportDetail, sport]);
 
     const bookerInfo = () => {
         return (
@@ -641,7 +671,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                         <Form.Control type="text" value={userData?.fullname} readOnly />
                     </FloatingLabel>
                 </InputGroup>
-                <FloatingLabel controlId="floatingPaymentMethod" label={<span>Phương thức thanh toán <span className="text-danger">*</span></span>}>
+                <FloatingLabel className="mb-2" controlId="floatingPaymentMethod" label={<span>Phương thức thanh toán <span className="text-danger">*</span></span>}>
                     <Form.Select value={paymentMethodId} onChange={(e) => setPaymentMethodId(Number(e.target.value))}>
                         <option value="0">Chọn phương thức thanh toán</option>
                         {memoizedData && memoizedData.map((item) => (
@@ -651,6 +681,12 @@ const BookingModal = React.memo((props: BookingProps) => {
                         ))}
                     </Form.Select>
                 </FloatingLabel>
+                {paymentMethodId === 7 && (
+                    <FloatingLabel controlId="floatingPaymentMethod" label={<span>Số dư ví của bạn</span>}>
+                        <Form.Control type="text" value={userData?.wallet.balance.toLocaleString() + ' đ'} disabled
+                        />
+                    </FloatingLabel>
+                )}
             </>
         )
     };
@@ -737,7 +773,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                                     placeholderText="Đến ngày" className="form-control end" dateFormat="dd/MM/yyyy" />
                             </InputGroup>
                             <InputGroup className="search-date mb-2">
-                                <Form.Control value={startTime} onChange={(e) => undefined} placeholder="Thời gian bắt đầu" />
+                                <Form.Control value={startTime} placeholder="Thời gian bắt đầu" />
                                 <Form.Select style={{ border: '1px solid' }} value={selectTimeOnStage} className="me-3"
                                     onChange={(e) => setSelectTimeOnStage(e.target.value)}>
                                     <option value="Chọn thời gian">Chọn thời gian đá</option>

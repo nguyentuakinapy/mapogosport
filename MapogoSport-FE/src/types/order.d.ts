@@ -11,17 +11,7 @@ interface Order {
         name: string;
         description: string
     };
-    voucher: {
-        voucherId: number;
-        name: string;
-        discountPercent: number;
-        quantity: number;
-        createDate: Date;
-        endDate: Date;
-        status: status;
-        discountCode: string;
-        activeDate: string;
-    } | null;
+    voucher: Voucher;
     note: string | null;
     shipFee: number;
     orderDetails: OrderDetail[];
@@ -37,7 +27,7 @@ interface OrderDetail {
             product: Product;
             color: string;
             image: string;
-            //galleries: Galleries[]
+            galleries: Galleries[];
         },
         size: {
             sizeId: number;

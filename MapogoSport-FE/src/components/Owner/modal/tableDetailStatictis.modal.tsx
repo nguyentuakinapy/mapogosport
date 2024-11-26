@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
-import { Modal, Image, Button, Table } from "react-bootstrap";
-import { toast } from "react-toastify";
-import useSWR, { mutate } from "swr";
+import { useState } from "react";
+import { Modal, Table } from "react-bootstrap";
 import { formatPrice } from "@/components/Utils/Format"
 
 interface ModalTableDetailProps {

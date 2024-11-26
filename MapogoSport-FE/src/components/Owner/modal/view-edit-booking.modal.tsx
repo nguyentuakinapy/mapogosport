@@ -1,6 +1,6 @@
-import { createTimeStringH } from "@/components/Utils/booking-time";
+import { createTimeStringH, isDateInRange } from "@/components/Utils/booking-time";
 import { formatPrice } from "@/components/Utils/Format";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
 import NotificationModal from "./notification.modal";
@@ -19,7 +19,7 @@ interface OwnerProps {
 
 const BookingModal = (props: OwnerProps) => {
     const { showViewOrEditBookingModal, setShowViewOrEditBookingModal, sport, bookingBySubscriptionKey
-        , owner, checkDataStatus, setCheckDataStatus, startTimeKey, bookingDetailData } = props;
+        , checkDataStatus, setCheckDataStatus, bookingDetailData } = props;
 
     const [editBooking, setEditBooking] = useState<boolean>(true);
     const [dateBooking, setDateBooking] = useState<string>();
@@ -186,11 +186,9 @@ const BookingModal = (props: OwnerProps) => {
         }
 
         const timeOpen = sport && sport.opening.match(/(\d+)h(\d+)/);
-        const hourOpen = timeOpen ? Number(timeOpen[1]) : 0;
         const minuteOpen = timeOpen ? Number(timeOpen[2]) : 0;
 
         const timeClose = sport && sport.closing.match(/(\d+)h(\d+)/);
-        const hourClose = timeClose ? Number(timeClose[1]) : 0;
         const minuteClose = timeClose ? Number(timeClose[2]) : 0;
 
         const checkDay = dateBooking && new Date().setHours(0, 0, 0, 0) === new Date(dateBooking).setHours(0, 0, 0, 0);
@@ -303,14 +301,82 @@ const BookingModal = (props: OwnerProps) => {
     }, [bookingBySubscriptionKey])
 
     const confirmDataBooking = async () => {
-
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == idSportDetail);
 
         let isAvailable = true;
-
         let checkTime = false;
 
+        let hourStart;
+        let minuteStart;
+        let hourEnd;
+        let minuteEnd;
 
+        if (sportDetail && dateBooking) {
+            for (const s of sportDetail.statusSportFieldDetails) {
+                if (isDateInRange(dateBooking, s.startDate, s.endDate)) {
+                    if (sport) {
+                        if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === dateBooking) {
+
+                            if (new Date(s.startDate).getMinutes() > 30) {
+                                hourStart = new Date(s.startDate).getHours() + 1;
+                                minuteStart = '00';
+                            } else {
+                                hourStart = new Date(s.startDate).getHours();
+                                minuteStart = '30';
+                            }
+
+                            const timeStringH: string[] = createTimeStringH(
+                                `${hourStart}h${minuteStart}`,
+                                sport.closing
+                            );
+
+                            if (new Date(s.endDate).getTime() <= new Date().getTime()) {
+                                break;
+                            }
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        } else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === dateBooking) {
+                            if (new Date(s.endDate).getMinutes() > 30) {
+                                hourEnd = new Date(s.endDate).getHours() + 1;
+                                minuteEnd = '00';
+                            } else {
+                                hourEnd = new Date(s.endDate).getHours();
+                                minuteEnd = '30';
+                            }
+
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                `${hourEnd}h${minuteEnd}`
+                            );
+
+                            if (new Date(s.startDate).getTime() >= new Date().getTime()) {
+                                break;
+                            }
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourEnd}h${minuteEnd}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         if (applyOne) {
             // if (dateBookingTemporary != dateBooking && idSportDetailTemporary != idSportDetail) {
             if (bookingDetailData && new Date(bookingDetailData.date).setHours(0, 0, 0, 0) !== new Date().setHours(0, 0, 0, 0)) {
@@ -504,8 +570,6 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     const createTimeByTimeOnStageAll = async () => {
-        // console.log('dataBookingBySubscriptionKey', bookingBySubscriptionKey);
-
         const timeSlots = [];
 
         if (bookingBySubscriptionKey) {
@@ -531,13 +595,11 @@ const BookingModal = (props: OwnerProps) => {
                 timeSlots.pop();
             }
         }
-        console.log(timeSlots);
-
         setDataTimeOnStageAll(timeSlots);
     }
 
-
     useEffect(() => {
+        getPriceByTimeBooking();
         createTimeByTimeOnStage();
     }, [startTimeBooking, endTimeBooking])
 
@@ -572,19 +634,12 @@ const BookingModal = (props: OwnerProps) => {
         const [endHours, endMinutes] = endTime.split('h').map(Number);
         const [checkHours, checkMinutes] = checkTime.split('h').map(Number);
 
-        // Tạo đối tượng Date cho từng thời gian
         const startDate = new Date(0, 0, 0, startHours, startMinutes);
         const endDate = new Date(0, 0, 0, endHours, endMinutes);
         const checkDate = new Date(0, 0, 0, checkHours, checkMinutes);
 
-        // Kiểm tra thời gian nằm trong khoảng
         return checkDate >= startDate && checkDate <= endDate;
     }
-
-    useEffect(() => {
-        getPriceByTimeBooking();
-    }, [startTimeBooking, endTimeBooking])
-
 
     const convertToMinutes = (time: string) => {
         const [hours, minutes] = time.split('h').map(Number);
@@ -597,10 +652,6 @@ const BookingModal = (props: OwnerProps) => {
 
         return endTotalMinutes - startTotalMinutes;
     };
-
-    const isEven = (number: number): boolean => {
-        return number % 2 === 0;
-    }
 
     const [price, setPrice] = useState<number>();
 
@@ -628,18 +679,6 @@ const BookingModal = (props: OwnerProps) => {
             }
 
             setPrice(totalAmount);
-            // if (isEven(timeBooking)) {
-            //     setPrice(sportDetail.price * timeBooking / 2);
-            //     // toast.success(sportDetail.price * timeBooking / 2);
-            // } else {
-            //     if (timeBooking == 1) {
-            //         setPrice((sportDetail.price * timeBooking) / 2);
-            //         // toast.success((sportDetail.price * timeBooking) / 2)
-            //     } else {
-            //         setPrice((sportDetail.price * timeBooking / 2));
-            //         // toast.success((sportDetail.price * timeBooking / 2))
-            //     }
-            // }
         }
     }
 
@@ -824,6 +863,79 @@ const BookingModal = (props: OwnerProps) => {
         }
         timeSlots.pop();
 
+        let hourStart;
+        let minuteStart;
+        let hourEnd;
+        let minuteEnd;
+
+        if (sportDetail && dateBooking) {
+            for (const s of sportDetail.statusSportFieldDetails) {
+                if (isDateInRange(dateBooking, s.startDate, s.endDate)) {
+                    if (sport) {
+                        if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === dateBooking) {
+                            if (new Date(s.startDate).getMinutes() > 30) {
+                                hourStart = new Date(s.startDate).getHours() + 1;
+                                minuteStart = '00';
+                            } else {
+                                hourStart = new Date(s.startDate).getHours();
+                                minuteStart = '30';
+                            }
+
+                            const currentStartTime = `${hourStart}h${minuteStart}`;
+                            const timeStringH: string[] = createTimeStringH(
+                                currentStartTime,
+                                sport.closing
+                            );
+
+                            if (new Date(s.endDate).getTime() <= new Date().getTime()) {
+                                break;
+                            }
+
+                            for (const time of timeSlots) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == time) {
+                                    toast.warning(s.startDate + "Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        } else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === dateBooking) {
+                            if (new Date(s.endDate).getMinutes() > 30) {
+                                hourEnd = new Date(s.endDate).getHours() + 1;
+                                minuteEnd = '00';
+                            } else {
+                                hourEnd = new Date(s.endDate).getHours();
+                                minuteEnd = '30';
+                            }
+
+                            const currentEndTime = `${hourEnd}h${minuteEnd}`;
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                currentEndTime
+                            );
+
+                            if (new Date(s.startDate).getTime() >= new Date().getTime()) {
+                                break;
+                            }
+
+                            for (const time of timeSlots) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (currentEndTime == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if (dateBookingTemporary != dateBooking && idSportDetailTemporary != idSportDetail) {
             if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
                 for (const time of timeSlots) {
@@ -916,15 +1028,29 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     const [note, setNote] = useState<string>();
+
     const testOnclick = () => {
         // toast.success("NGON TA: " + note);
         handleCancelBookingDetail()
+        setNote("");
     }
 
     const renderNotification = () => {
         return (
-            <div className="text-center">
-                <FloatingLabel controlId="floatingTextarea2" label="Lý do hủy">
+            <div >
+                <Form>
+                    <Form.Group>
+                        <div>
+                            {["Hủy bởi yêu cầu của khách hàng", "Hủy bởi chủ sân"].map((option, index) => (
+                                <Form.Check key={index} type="radio" className="mb-3" id={`reason-${index}`}
+                                    label={option} value={option} onChange={(e) => setNote(e.target.value)}
+                                    checked={note === option}
+                                />
+                            ))}
+                        </div>
+                    </Form.Group>
+                </Form>
+                {/* <FloatingLabel controlId="floatingTextarea2" label="Lý do hủy">
                     <Form.Control
                         as="textarea"
                         placeholder="Leave a comment here"
@@ -932,8 +1058,8 @@ const BookingModal = (props: OwnerProps) => {
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                     />
-                </FloatingLabel>
-                <button onClick={testOnclick} className="mt-2 w-100 btn btn-outline-danger">XÁC NHẬN HỦY</button>
+                </FloatingLabel> */}
+                <button onClick={testOnclick} className="mt-2 w-100 btn btn-danger">XÁC NHẬN HỦY</button>
             </div>
 
         )
@@ -955,7 +1081,7 @@ const BookingModal = (props: OwnerProps) => {
                                         {/* Kiểm tra ngày hiện tại và ngày đặt */}
                                         {new Date().setHours(0, 0, 0, 0) === new Date(bookingDetailData.date).setHours(0, 0, 0, 0) ?
                                             (new Date().getHours() * 60) + new Date().getMinutes() < (parseInt(bookingDetailData.endTime.split('h')[0]) * 60) + parseInt(bookingDetailData.endTime.split('h')[1]) && (
-                                                <OverlayTrigger overlay={<Tooltip>Sửa {new Date().setHours(0, 0, 0, 0)} - {new Date(bookingDetailData.date).setHours(0, 0, 0, 0)}</Tooltip>}>
+                                                <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                                                     <i
                                                         className="bi bi-pencil-square ms-2 text-dark"
                                                         onClick={() => {
@@ -982,7 +1108,7 @@ const BookingModal = (props: OwnerProps) => {
                                             </OverlayTrigger>
                                         }
 
-                                        <h6 className="text-uppercase text-danger m-auto fw-bold text-center">
+                                        <h6 className="text-uppercase text-danger m-auto fw-bold text-center mb-2">
                                             Thông tin đặt - {bookingDetailData?.sportFieldDetail.name}
                                         </h6>
 
@@ -1063,14 +1189,25 @@ const BookingModal = (props: OwnerProps) => {
                                             </>
                                         )}
                                     </InputGroup>
-                                    <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Giờ kết thúc!"
-                                            value={formatPrice(newPriceBooking) || ""}
-                                            disabled={isAddBooking}
-                                        />
-                                    </FloatingLabel>
+
+                                    <InputGroup>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(newPriceBooking) || ""}
+                                                disabled={isAddBooking}
+                                            />
+                                        </FloatingLabel>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng đơn!" className="ms-2 flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(bookingDetailData?.totalAmount) || ""}
+                                                disabled={editBooking}
+                                            />
+                                        </FloatingLabel>
+                                    </InputGroup>
                                 </>
                                 :
                                 <>
@@ -1163,14 +1300,24 @@ const BookingModal = (props: OwnerProps) => {
                                             </>
                                         )}
                                     </InputGroup>
-                                    <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Giờ kết thúc!"
-                                            value={formatPrice(price) || ""}
-                                            disabled={editBooking}
-                                        />
-                                    </FloatingLabel>
+                                    <InputGroup>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng tiền!" className="flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(price) || ""}
+                                                disabled={editBooking}
+                                            />
+                                        </FloatingLabel>
+                                        <FloatingLabel controlId="floatingDate" label="Tổng đơn!" className="ms-2 flex-grow-1 mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Giờ kết thúc!"
+                                                value={formatPrice(bookingDetailData?.totalAmount) || ""}
+                                                disabled={editBooking}
+                                            />
+                                        </FloatingLabel>
+                                    </InputGroup>
                                 </>
                             }
                         </Col>
@@ -1212,16 +1359,7 @@ const BookingModal = (props: OwnerProps) => {
                         {/* )} */}
 
                     </Row>
-                    <Row>
-                        <FloatingLabel controlId="floatingUsernam1e" label="Hình thức đặt sân! *" className="flex-grow-1 mb-2">
-                            <Form.Control
-                                value={formatPrice(bookingDetailData?.totalAmount)}
-                                type="text"
-                                placeholder="Vui lòng nhập tên đăng nhập!"
-                                disabled
-                            />
-                        </FloatingLabel>
-                    </Row>
+
                     <Row className="mx-1 mb-2">
 
                         {bookingDetailData?.subscriptionKey && bookingDetailData.subscriptionKey.includes('keybooking') && (
@@ -1245,10 +1383,39 @@ const BookingModal = (props: OwnerProps) => {
                                             <button onClick={() => confirmDataBooking()} className="btn btn-dark m-auto" style={{ width: '97%' }}>Kiểm tra chỉnh sửa sân</button>
                                         )
                                     ) : (
-                                        <button className="btn btn-danger m-auto" onClick={() =>
-                                            // handleCancelBookingDetail()
-                                            setNotificationModal(true)
-                                        } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                        <>
+                                            {bookingDetailData.statusBooking !== "Đã thanh toán" ? (
+                                                // bookingDetailData.status !== "Đã hoàn thành" ? (
+                                                // <>ok</>
+
+                                                // ) : (
+                                                parseInt(bookingDetailData.endTime.split('h')[0]) * 60 +
+                                                parseInt(bookingDetailData.endTime.split('h')[1]) >
+                                                new Date().getHours() * 60 + new Date().getMinutes() && (
+                                                    <button className="btn btn-danger m-auto" onClick={() =>
+                                                        // handleCancelBookingDetail()
+                                                        setNotificationModal(true)
+                                                    } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                                )
+                                                // )
+
+                                            ) : (
+                                                bookingDetailData.subscriptionKey && bookingDetailData.subscriptionKey.includes("addNew") ? (
+                                                    <button className="btn btn-danger m-auto" onClick={() =>
+                                                        // handleCancelBookingDetail()
+                                                        setNotificationModal(true)
+                                                    } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                                ) : (
+                                                    parseInt(bookingDetailData.endTime.split('h')[0]) * 60 +
+                                                    parseInt(bookingDetailData.endTime.split('h')[1]) >
+                                                    new Date().getHours() * 60 + new Date().getMinutes() && (
+                                                        <button className="btn btn-danger m-auto" onClick={() =>
+                                                            // handleCancelBookingDetail()
+                                                            setNotificationModal(true)
+                                                        } style={{ width: '97%' }}>Hủy đặt sân</button>
+                                                    ))
+                                            )}
+                                        </>
                                     )
                                 )
                             ) : (
@@ -1280,7 +1447,7 @@ const BookingModal = (props: OwnerProps) => {
                     </Button>
                 </Modal.Footer>
             </Modal >
-            <NotificationModal textHeadNotification={"Lý do hủy sân"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
+            <NotificationModal size={undefined} textHeadNotification={"Lý do hủy sân"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
             </NotificationModal>
         </>
     )

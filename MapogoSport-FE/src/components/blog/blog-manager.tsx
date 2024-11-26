@@ -1,8 +1,6 @@
 'use client'
 import React, { useState } from 'react';
-import AdminLayout from '@/components/Admin/AdminLayout';
 import { Table, Button, Modal, Form, Row, Col, FormCheck } from 'react-bootstrap';
-import OwnerLayout from '@/components/Owner/OwnerLayout';
 
 const BlogManagement = () => {
     const [showModal, setShowModal] = useState(false);

@@ -13,6 +13,8 @@ import mapogo.entity.UserSubscription;
 public interface UserSubscriptionService {
 	//của Mỵ từ đây
 	PaymentDTO createSubscriptionPayment(Map<String, Object> data, HttpServletRequest req) throws UnsupportedEncodingException;
-	
+	PaymentDTO createOwnerPayment(Map<String, Object> data, HttpServletRequest req) throws UnsupportedEncodingException;
+	PaymentDTO createPaymentRecharge(Map<String, Object> data, HttpServletRequest req) throws UnsupportedEncodingException;
+
 	//đến đây
 }

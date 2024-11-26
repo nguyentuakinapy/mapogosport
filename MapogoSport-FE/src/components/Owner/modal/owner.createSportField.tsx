@@ -1,8 +1,7 @@
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, OverlayTrigger, Tooltip, Image } from "react-bootstrap";
 import { toast } from "react-toastify";
-import useSWR, { mutate } from "swr";
 
 interface SportFieldProps {
     showSportFieldModal: boolean;
@@ -15,10 +14,10 @@ interface SportFieldProps {
     setSelectedSportField: (field: any) => void;
 }
 const ModalCreateSportField = (props: SportFieldProps) => {
-    const { showSportFieldModal, setShowSportFieldModal, selectedSportField, setSelectedSportField } = props;
+    const { showSportFieldModal, setShowSportFieldModal, selectedSportField } = props;
 
     const [fieldName, setFieldName] = useState("");
-    const [openTime, setOpenTime] = useState<String | null>(null);
+    const [openTime, setOpenTime] = useState<string | null>(null);
     const [closeTime, setCloseTime] = useState<string | null>(null);
     const [selectedFieldType, setSelectedFieldType] = useState("");
     const [address, setAddress] = useState("");
@@ -258,7 +257,8 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                 console.error("Lỗi khi lưu thông tin sân:", error.response ? error.response.data : error.message);
             });
     };
-
+    
+    //xóa hình
     const handleDeleteGallery = async (
         gallerySportFieldId: number
     ) => {
@@ -469,7 +469,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                                     top: "-8px", right: "-8px", width: "24px", height: "24px", borderRadius: "50%",
                                                     display: "flex", alignItems: "center", justifyContent: "center", padding: "0", boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                                                 }}
-                                                onClick={(event) => {
+                                                onClick={() => {
                                                     handleDeleteGallery(
                                                         image.gallerySportFieldId
                                                     );
@@ -515,8 +515,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                                     top: "-8px", right: "-8px", width: "24px", height: "24px", borderRadius: "50%", display: "flex",
                                                     alignItems: "center", justifyContent: "center", padding: "0", boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                                                 }}
-                                                onClick={(event) => {
-                                                    // event.stopPropagation(); // Ngăn sự kiện chọn màu chạy
+                                                onClick={() => {
                                                     handleDeleteGalleryNew(
                                                         index
                                                     );

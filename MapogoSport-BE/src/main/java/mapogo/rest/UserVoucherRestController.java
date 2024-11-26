@@ -72,7 +72,7 @@ public class UserVoucherRestController {
 	
 	@GetMapping("/user/voucher/{username}")
 	public List<Map<String, Object>> findByUser(@PathVariable("username") String username) {
-		return userVoucherService.findByUser(username);
+		return userVoucherService.findByUserMap(username);
 	}
 	
 }

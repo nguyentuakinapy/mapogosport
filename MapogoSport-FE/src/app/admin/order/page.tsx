@@ -12,6 +12,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
+import autoTable from "jspdf-autotable";
 
 const AdminOrder = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -59,10 +60,6 @@ const AdminOrder = () => {
             case 'Đã hoàn thành': return 'success';
             default: return 'secondary';
         }
-    };
-
-    const handleViewDetail = (order: OrderMap) => {
-        sessionStorage.setItem('selectedOrder', JSON.stringify(order));
     };
 
     const handleStatusChange = (orderId: number, newStatus: string) => {
@@ -204,7 +201,7 @@ const AdminOrder = () => {
 
     const exportPDF = () => {
         try {
-            const doc: any = new jsPDF();
+            const doc: jsPDF = new jsPDF();
 
             doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
             doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
@@ -227,7 +224,7 @@ const AdminOrder = () => {
                 tableRows.push(orderData);
             });
 
-            doc.autoTable({
+            autoTable(doc, {
                 head: [tableColumn],
                 body: tableRows,
                 startY: 20,
@@ -246,7 +243,7 @@ const AdminOrder = () => {
                     4: { halign: 'left' },
                     5: { halign: 'center' },
                 },
-                didParseCell: (data: any) => {
+                didParseCell: (data) => {
                     if (data.cell.text.length > 0) {
                         data.cell.text[0] = data.cell.text[0];
                     }

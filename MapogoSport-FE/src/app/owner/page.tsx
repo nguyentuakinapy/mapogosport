@@ -1,6 +1,6 @@
 'use client'
 import { formatPrice } from "@/components/Utils/Format";
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Nav, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
@@ -9,9 +9,7 @@ import ProfileContent from "@/components/User/modal/user.profile";
 import BlogManager from "@/components/blog/blog-manager";
 import Wallet from "@/components/User/modal/wallet";
 
-const BookingContext = createContext<AccountPackage | undefined>(undefined);
-
-export default function Owner({ children }: { children: ReactNode }) {
+export default function Owner() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [activeTab, setActiveTab] = useState<string>('profile');
     const [accountPackages, setAccountPackages] = useState<AccountPackage[]>();
@@ -215,113 +213,105 @@ export default function Owner({ children }: { children: ReactNode }) {
                 );
         }
     };
-    if (!children) {
-        return (
-            <>
-                {/* Modal chọn phương thức thanh toán */}
-                <Modal show={showModal} onHide={handleCloseModal} centered>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Chọn phương thức thanh toán</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <div className="list-group">
-                            <div className="card-body d-flex list-group-item align-items-center">
-                                <div className="form-check flex-grow-1">
-                                    <input
-                                        className="form-check-input"
-                                        type="radio"
-                                        name="paymentMethod"
-                                        id="vnpay"
-                                        value="VNPay"
-                                        onChange={handlePaymentMethodChange}
-                                    />
-                                    <label className="form-check-label" htmlFor="vnpay">
-                                        Thanh toán qua ví điện tử VNPay
-                                    </label>
-                                </div>
-                                <img
-                                    src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
-                                    alt="VNPay"
-                                    style={{ maxWidth: '50px' }}
-                                />
-                            </div>
-                            <div className="card-body d-flex list-group-item align-items-center">
-                                <div className="form-check flex-grow-1">
-                                    <input
-                                        className="form-check-input"
-                                        type="radio"
-                                        name="paymentMethod"
-                                        id="momo"
-                                        value="MoMo"
-                                        onChange={handlePaymentMethodChange}
-                                    />
-                                    <label className="form-check-label" htmlFor="momo">
-                                        Thanh toán qua ví điện tử MoMo
-                                    </label>
-                                </div>
-                                <img
-                                    src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png"
-                                    alt="MoMo"
-                                    style={{ maxWidth: '50px' }}
-                                />
-                            </div>
-                        </div>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleCloseModal}>
-                            Hủy
-                        </Button>
-                        <Button
-                            variant="primary"
-                            onClick={() => handleUpdateSubscription(selectedAccountPackage || undefined)}
-                            disabled={!selectedPaymentMethod}
-                        >
-                            Thanh toán
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-                <div className="profile-header">
-                    <div className="profile-info">
-                        <h2>{userData?.fullname}</h2>
-                        <p>Chào mừng bạn đến với hệ thống quản lý dành cho chủ sân của MapogoSport</p>
-                        <div className="stats">
-                            <span>0 Bài Viết</span>
-                            <span>{dataSport && dataSport.length}/{userSubscription?.accountPackage.limitSportFields}</span>
-                            <span>0 Được thích</span>
-                            <span>
-                                {userSubscription && userSubscription.accountPackage ? userSubscription.accountPackage.packageName : 'Không có gói nào'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div className="font-14">
-                    <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
-                        <Nav.Item>
-                            <Nav.Link eventKey="profile" className="tab-link">Thông tin cá nhân</Nav.Link>
-                        </Nav.Item>
-                        <Nav.Item>
-                            <Nav.Link eventKey="post" className="tab-link">Bài viết</Nav.Link>
-                        </Nav.Item>
-                        <Nav.Item>
-                            <Nav.Link eventKey="bank" className="tab-link">Ví & Tài khoản ngân hàng</Nav.Link>
-                        </Nav.Item>
-                        <Nav.Item>
-                            <Nav.Link eventKey="package" className="tab-link">Gói nâng cấp</Nav.Link>
-                        </Nav.Item>
-                    </Nav>
-                    <div className="mt-3">
-                        {renderContent()}
-                    </div>
-                </div>
-
-            </>
-        )
-    }
     return (
-        <>{children}</>
+        <>
+            {/* Modal chọn phương thức thanh toán */}
+            <Modal show={showModal} onHide={handleCloseModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Chọn phương thức thanh toán</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="list-group">
+                        <div className="card-body d-flex list-group-item align-items-center">
+                            <div className="form-check flex-grow-1">
+                                <input
+                                    className="form-check-input"
+                                    type="radio"
+                                    name="paymentMethod"
+                                    id="vnpay"
+                                    value="VNPay"
+                                    onChange={handlePaymentMethodChange}
+                                />
+                                <label className="form-check-label" htmlFor="vnpay">
+                                    Thanh toán qua ví điện tử VNPay
+                                </label>
+                            </div>
+                            <img
+                                src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
+                                alt="VNPay"
+                                style={{ maxWidth: '50px' }}
+                            />
+                        </div>
+                        <div className="card-body d-flex list-group-item align-items-center">
+                            <div className="form-check flex-grow-1">
+                                <input
+                                    className="form-check-input"
+                                    type="radio"
+                                    name="paymentMethod"
+                                    id="momo"
+                                    value="MoMo"
+                                    onChange={handlePaymentMethodChange}
+                                />
+                                <label className="form-check-label" htmlFor="momo">
+                                    Thanh toán qua ví điện tử MoMo
+                                </label>
+                            </div>
+                            <img
+                                src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png"
+                                alt="MoMo"
+                                style={{ maxWidth: '50px' }}
+                            />
+                        </div>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Hủy
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => handleUpdateSubscription(selectedAccountPackage || undefined)}
+                        disabled={!selectedPaymentMethod}
+                    >
+                        Thanh toán
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            <div className="profile-header">
+                <div className="profile-info">
+                    <h2>{userData?.fullname}</h2>
+                    <p>Chào mừng bạn đến với hệ thống quản lý dành cho chủ sân của MapogoSport</p>
+                    <div className="stats">
+                        <span>0 Bài Viết</span>
+                        <span>{dataSport && dataSport.length}/{userSubscription?.accountPackage.limitSportFields}</span>
+                        <span>0 Được thích</span>
+                        <span>
+                            {userSubscription && userSubscription.accountPackage ? userSubscription.accountPackage.packageName : 'Không có gói nào'}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div className="font-14">
+                <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
+                    <Nav.Item>
+                        <Nav.Link eventKey="profile" className="tab-link">Thông tin cá nhân</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link eventKey="post" className="tab-link">Bài viết</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link eventKey="bank" className="tab-link">Ví & Tài khoản ngân hàng</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link eventKey="package" className="tab-link">Gói nâng cấp</Nav.Link>
+                    </Nav.Item>
+                </Nav>
+                <div className="mt-3">
+                    {renderContent()}
+                </div>
+            </div>
+
+        </>
     )
-
-
-
 }
 

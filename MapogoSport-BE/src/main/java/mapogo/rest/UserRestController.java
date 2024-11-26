@@ -18,28 +18,24 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 
 import jakarta.servlet.http.HttpServletRequest;
-import mapogo.dao.ProductDAO;
+import mapogo.dao.AuthorityDAO;
+import mapogo.dao.OwnerDAO;
 import mapogo.dao.SubsciptionPaymentDAO;
-import mapogo.dao.UserDAO;
 import mapogo.dao.UserSubscriptionDAO;
 import mapogo.dao.UserVoucherDAO;
-import mapogo.dao.WalletDAO;
 import mapogo.dto.PaymentDTO;
 import mapogo.entity.AccountPackage;
+import mapogo.entity.Authority;
 import mapogo.entity.Notification;
 import mapogo.entity.Owner;
-import mapogo.entity.PaymentMethod;
-import mapogo.entity.Product;
 import mapogo.entity.SubscriptionPayment;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
-import mapogo.entity.UserVoucher;
 import mapogo.service.AccountPackageService;
 import mapogo.service.EmailService;
 import mapogo.service.OwnerService;
@@ -149,12 +145,17 @@ public class UserRestController {
 	@Autowired
 	SubsciptionPaymentDAO subsciptionPaymentDAO;
 
+	@Autowired
+	OwnerDAO ownerDAO;
+
+	@Autowired
+	AuthorityDAO authorityDAO;
+
+	// Gia hạn
 	@PutMapping("/user/subscription/{userSubscriptionId}")
 	public ResponseEntity<?> updateUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId,
 			@RequestBody Map<String, Object> requestBody, HttpServletRequest req) throws UnsupportedEncodingException {
-		// thanh toán
 		PaymentDTO paymentDTO = userSubService.createSubscriptionPayment(requestBody, req);
-		System.out.println(paymentDTO.getURL());
 		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
 
@@ -199,6 +200,66 @@ public class UserRestController {
 		subsciptionPaymentDAO.save(subPayment);
 	}
 
+	// đăng ký
+	@PostMapping("/subscription/payment")
+	public ResponseEntity<?> userSubscriptionPayment(@RequestBody Map<String, Object> requestBody,
+			HttpServletRequest req) throws UnsupportedEncodingException {
+		PaymentDTO paymentDTO = userSubService.createOwnerPayment(requestBody, req);
+		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
+	}
+
+	@GetMapping("/subscription/paymentInfo-Vnpay")
+	public RedirectView paymentInfoVnpay(@RequestParam(value = "vnp_ResponseCode") String responseCode,
+			@RequestParam(value = "vnp_OrderInfo") String data) {
+		String[] parts = data.split("-");
+		int userSubscriptionId = Integer.parseInt(parts[0]);
+		int ownerId = Integer.parseInt(parts[1]);
+		int authorityId = Integer.parseInt(parts[2]);
+		UserSubscription userSubscription = userSubscriptionDAO.findById(userSubscriptionId).get();
+
+		if (responseCode.equals("00")) {
+			int accountPackageId = userSubscription.getAccountPackage().getAccountPackageId();
+			// SubscriptionPayment
+			createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
+			return new RedirectView("http://localhost:3000/owner");
+
+		} else {
+			userSubscriptionDAO.delete(userSubscription);
+			Owner owner = ownerDAO.findById(ownerId).get();
+			ownerDAO.delete(owner);
+			Authority auth = authorityDAO.findById(authorityId).get();
+			authorityDAO.delete(auth);
+		}
+
+		return new RedirectView("http://localhost:3000");
+	}
+
+	@GetMapping("/subscription/paymentInfo-momo")
+	public RedirectView paymentInfoMomo(@RequestParam(value = "resultCode") String resultCode,
+			@RequestParam(value = "extraData") String data) {
+
+		String[] parts = data.split("-");
+		int userSubscriptionId = Integer.parseInt(parts[0]);
+		int ownerId = Integer.parseInt(parts[1]);
+		int authorityId = Integer.parseInt(parts[2]);
+		UserSubscription userSubscription = userSubscriptionDAO.findById(userSubscriptionId).get();
+		if (resultCode.equals("0")) {
+			int accountPackageId = userSubscription.getAccountPackage().getAccountPackageId();
+			// SubscriptionPayment
+			createSubcriptionPayment(accountPackageId, userSubscriptionId, "MoMo");
+			return new RedirectView("http://localhost:3000/owner");
+
+		} else {
+			userSubscriptionDAO.delete(userSubscription);
+			Owner owner = ownerDAO.findById(ownerId).get();
+			ownerDAO.delete(owner);
+			Authority auth = authorityDAO.findById(authorityId).get();
+			authorityDAO.delete(auth);
+		}
+
+		return new RedirectView("http://localhost:3000");
+	}
+
 	@GetMapping("/user/subscription/{id}")
 	public UserSubscription findUserSubscriptionByUser(@PathVariable("id") String username) {
 		return userService.findUserSubscriptionByUser(username);
@@ -232,9 +293,43 @@ public class UserRestController {
 	@Autowired
 	WalletService walletService;
 
-	@PutMapping("/wallet/{username}/{money}")
-	public void addMoney(@PathVariable("username") String username,
-			@PathVariable("money") Double money) {
-		walletService.addMoney(username, money);
+	// của Mỵ từ đây
+	@PostMapping("/wallet/createpaymentrecharge")
+	public ResponseEntity<?> createPaymentRecharge(@RequestBody Map<String, Object> requestBody,
+			HttpServletRequest req) throws UnsupportedEncodingException {
+		PaymentDTO paymentDTO = userSubService.createPaymentRecharge(requestBody, req);
+		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
+
+	@GetMapping("/wallet/createpaymentrecharge/infoVnpay")
+	public RedirectView getInfoVnpay(@RequestParam(value = "vnp_ResponseCode") String responseCode,
+			@RequestParam(value = "vnp_OrderInfo") String data) {
+		String[] parts = data.split("-");
+		String username = (parts[0]);
+		Double money = Double.parseDouble(parts[1]);
+
+		if (responseCode.equals("00")) {
+			walletService.addMoney(username, money);
+
+		}
+			return new RedirectView("http://localhost:3000/user/wallet");
+
+	}
+	
+	@GetMapping("/wallet/createpaymentrecharge/infoMomo")
+	public RedirectView getInfoMomo(@RequestParam(value = "resultCode") String responseCode,
+			@RequestParam(value = "extraData") String data) {
+		String[] parts = data.split("-");
+		String username = (parts[0]);
+		Double money = Double.parseDouble(parts[1]);
+
+		if (responseCode.equals("0")) {
+			walletService.addMoney(username, money);
+
+		}		
+		return new RedirectView("http://localhost:3000/user/wallet");
+
+	}
+
+	// đến đây
 }

@@ -1,11 +1,20 @@
 package mapogo.rest;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,14 +24,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
+import jakarta.servlet.http.HttpServletRequest;
+import mapogo.dao.BookingDAO;
+import mapogo.dao.BookingDetailDAO;
+import mapogo.dto.PaymentDTO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
+
+import mapogo.entity.SportField;
+import mapogo.entity.SportFieldDetail;
+import mapogo.entity.Transaction;
+import mapogo.entity.User;
+import mapogo.entity.Wallet;
+
 import mapogo.service.BookingDetailService;
 import mapogo.service.BookingService;
 import mapogo.service.TransactionService;
+import mapogo.service.UserSubscriptionService;
+import mapogo.service.WalletService;
 
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/rest")
 public class BookingRestController {
@@ -95,6 +118,96 @@ public class BookingRestController {
 		return bookingDetailService.createBookingDetail(bd);
 	}
 
+	@PostMapping("/booking/payment")
+	public ResponseEntity<?> createPayment(@RequestBody Map<String, Object> data, HttpServletRequest req)
+			throws UnsupportedEncodingException {
+		PaymentDTO paymentDTO = bookingService.createPaymentVNPay(data, req);
+		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
+
+	}
+
+	@Autowired
+	BookingDAO bookingDao;
+
+	@Autowired
+	BookingDetailDAO bookingDetailDAO;
+
+	@Autowired
+	WalletService walletService;
+
+	private void createTransaction(User user, String trimmedAmount, Integer bookingId, String paymentMethod) {
+		// update +Balance
+		Wallet wallet = walletService.findByUsername(user);
+
+		// create transaction
+		Transaction transaction = new Transaction();
+		transaction.setWallet(wallet);
+		transaction.setAmount(new BigDecimal(trimmedAmount));
+		transaction.setCreatedAt(LocalDateTime.now());
+		transaction.setDescription("Nạp từ hóa đơn đặt sân: " + bookingId + " (" + paymentMethod + ")");
+		transaction.setTransactionType("+" + trimmedAmount);
+		transactionService.create(transaction);
+
+		// create bookingPayment
+
+		// -balance -> create transaction
+		Transaction transaction1 = new Transaction();
+		transaction1.setWallet(wallet);
+		transaction1.setAmount(new BigDecimal(trimmedAmount));
+		transaction1.setCreatedAt(LocalDateTime.now());
+		transaction1.setDescription("Thanh toán hóa đơn đặt sân: " + bookingId);
+		transaction1.setTransactionType("-" + trimmedAmount);
+		transactionService.create(transaction1);
+	}
+
+	@GetMapping("/booking/paymentInfo")
+	public RedirectView updateUserSubscription2(@RequestParam(value = "vnp_ResponseCode") String responseCode,
+			@RequestParam(value = "vnp_OrderInfo") Integer bookingId,
+			@RequestParam(value = "vnp_Amount") String amount) {
+		Booking booking = bookingDao.findById(bookingId).get();
+		Integer sportFieldId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportField().getSportFieldId();
+		User user = booking.getUser();
+		String trimmedAmount = amount.substring(0, amount.length() - 2);
+
+		if (responseCode.equals("00")) {
+			createTransaction(user, trimmedAmount, bookingId, "VNPay");
+			return new RedirectView(
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=success");
+		} else {
+			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId);
+			for (BookingDetail bookingDetail : bookingDetails) {
+				bookingDetailDAO.delete(bookingDetail);
+			}
+			bookingDao.delete(booking);
+			return new RedirectView(
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=fail");
+		}
+	}
+
+	@GetMapping("/booking/paymentInfo-momo")
+	public RedirectView paymentInfoMomo(@RequestParam(value = "resultCode") String resultCode,
+			@RequestParam(value = "extraData") String bookingId, @RequestParam(value = "amount") String amount) {
+		int bookingId1 = Integer.parseInt(bookingId);
+		Booking booking = bookingDao.findById(bookingId1).get();
+		Integer sportFieldId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportField().getSportFieldId();
+		User user = booking.getUser();
+
+		if (resultCode.equals("0")) {
+			createTransaction(user, amount, bookingId1, "MoMo");
+			return new RedirectView(
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=success");
+
+		} else {
+			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId1);
+			for (BookingDetail bookingDetail : bookingDetails) {
+				bookingDetailDAO.delete(bookingDetail);
+			}
+			bookingDao.delete(booking);
+			return new RedirectView(
+					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=fail");
+		}
+	}
+
 	@GetMapping("/booking/successful/revenue/{status}/{ownerId}")
 	public List<Booking> findBookingAmountByOwnerAndStatus(@PathVariable("ownerId") Integer ownerId,
 			@PathVariable("status") String status) {
@@ -162,6 +275,7 @@ public class BookingRestController {
 			@PathVariable("status") List<String> status, @PathVariable("startDate") String startDate,
 			@PathVariable("endDate") String enDate) {
 		return bookingService.findBookingDetailBySportFieldIdAndDate(sportFieldIds, bookingId, status, startDate, enDate);
+
 	}
 
 	@GetMapping("/booking/byOwnerId/totalCustomer/{ownerId}")
@@ -220,6 +334,7 @@ public class BookingRestController {
 
 	@PostMapping("/payment/process/{bookingId}")
 	public void processPayment(@PathVariable("bookingId") Integer bookingId, @RequestParam double totalAmount) {
+//		transactionService.createTransactionByPaymentBooking(bookingId, totalAmount);
 		transactionService.createTransactionUserByPaymentBooking(bookingId, totalAmount);
 		transactionService.createTransactionOwnerByPaymentBooking(bookingId, totalAmount);
 	}

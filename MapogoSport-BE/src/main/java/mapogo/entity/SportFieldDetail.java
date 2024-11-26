@@ -55,4 +55,8 @@ public class SportFieldDetail implements Serializable {
 	@OneToMany(mappedBy = "sportFieldDetail", cascade = CascadeType.ALL) // corrected from "sportsField"
 	@JsonBackReference
 	private List<BookingDetail> bookingDetails;
+	
+    @OneToMany(mappedBy = "sportFieldDetail")
+	@JsonManagedReference	
+	private List<StatusSportFieldDetails> statusSportFieldDetails;
 }

@@ -2,7 +2,6 @@
 "use client";
 import Link from "next/link";
 import {
-  FormCheck,
   Button,
   Table,
   Badge,
@@ -13,7 +12,7 @@ import {
   Form,
 } from "react-bootstrap";
 import "../product/adminStyleProduct.scss";
-import React, { useState, useEffect, SelectHTMLAttributes } from "react";
+import React, { useState, useEffect } from "react";
 import ProductAddNew from "@/components/Admin/Modal/product.addNew";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -23,18 +22,13 @@ const AdminProduct = () => {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalType, setModalType] = useState<"add" | "edit">("add"); // 'add' hoặc 'edit'
-  const [currentProduct, setCurrentProduct] = useState<Product[]>([]); // Sản phẩm hiện tại
+  const [currentProduct, setCurrentProduct] = useState<Product>(); // Sản phẩm hiện tại
 
   const [products, setProducts] = useState<Product[]>([]);
   const [isNeedScroll, setIsNeedScroll] = useState<boolean>(false);
   const [categoryProducts, setCategoryProducts] = useState<CategoryProduct[]>(
     []
   );
-
-
-
-  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
-  const [selectAllProduct, setSelectAllProduct] = useState(false);
 
   const BASE_URL = "http://localhost:8080";
 
@@ -74,9 +68,6 @@ const AdminProduct = () => {
           axios.get(apiCategoriesProducts),
         ]);
 
-        // console.log('Products:', productsRes.data); // Ghi lại sản phẩm
-        // console.log('Category Products:', categoriesRes.data); // Ghi lại danh mục sản phẩm
-
         // Lưu dữ liệu vào state
         setProducts(productsRes.data); // Dữ liệu từ API products
         setCategoryProducts(categoriesRes.data); // Dữ liệu từ API category_products
@@ -87,7 +78,7 @@ const AdminProduct = () => {
     fetchData();
   }, []);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryFn: async () => await getDatas(),
     queryKey: ["product_category"], //Array according to Documentation
   });
@@ -100,21 +91,16 @@ const AdminProduct = () => {
   useEffect(() => {
     if (!isNeedScroll) return;
     if (products.length > 0) {
-      console.log(
-        "iddddddddddddddddddddddddd",
-        products[products.length - 1].productId.toString()
-      );
 
       const ele = document.getElementById(
         products[products.length - 1].productId.toString()
       );
       if (ele) {
-        // window.scrollTo(ele.offsetLeft,ele.offsetTop, behavior)
         ele.scrollIntoView();
         setIsNeedScroll(false);
       }
     }
-  }, [products]);
+  }, [isNeedScroll, products]);
 
   // load lại data
   useEffect(() => {
@@ -124,70 +110,35 @@ const AdminProduct = () => {
     }
   }, [data]);
 
-  // Hàm thêm sản phẩm mới vào danh sách
-  const handleAddProduct = (newProduct: Product) => {
-    setProducts((prevProducts) => [...prevProducts, newProduct]);
-  };
+  // // Hàm thêm sản phẩm mới vào danh sách
+  // const handleAddProduct = (newProduct: Product) => {
+  //   setProducts((prevProducts) => [...prevProducts, newProduct]);
+  // };
 
   const handleEditClick = (product: Product) => {
     console.log("product ht ", product);
 
-    setCurrentProduct(product); // Cập nhật sản phẩm hiện tại
+    setCurrentProduct(product)
     setModalType("edit"); // Đặt loại modal thành 'edit'
     setShowModal(true); // Hiển thị modal
   };
 
   const handleCreateClick = () => {
-    setCurrentProduct(null); // Đặt sản phẩm hiện tại là null để tạo mới
+    setCurrentProduct(undefined); // Đặt sản phẩm hiện tại là null để tạo mới
     setModalType("add"); // Đặt loại modal thành 'add'
     setShowModal(true); // Hiển thị modal
   };
 
   const handleCloseModal = () => {
     setShowModal(false); // Đóng modal
-    setCurrentProduct(null); // Reset sản phẩm hiện tại
-  };
-
-  const handleSelectAllProduct = () => {
-    if (selectAllProduct) {
-      setSelectedProducts([]);
-    } else {
-      setSelectedProducts(products.map((product) => product.productId));
-    }
-    setSelectAllProduct(!selectAllProduct);
-  };
-
-  const handleSelectProduct = (id: number) => {
-    if (selectedProducts.includes(id)) {
-      setSelectedProducts(
-        selectedProducts.filter((productId) => productId !== id)
-      );
-    } else {
-      setSelectedProducts([...selectedProducts, id]);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    const confirmed = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
-
-    if (!confirmed) {
-      return; // Nếu người dùng không xác nhận, thoát khỏi hàm
-    }
-    try {
-      await axios.delete(`${BASE_URL}/rest/products/${id}`);
-      setProducts(products.filter((product) => product.productId !== id));
-      toast.success("Xóa sản phẩm thành công");
-    } catch (error) {
-      toast.success("Xóa sản phẩm không thành công");
-      console.error("Error deleting product:", error);
-    }
+    setCurrentProduct(undefined); // Reset sản phẩm hiện tại
   };
 
   // Tìm kiếm
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedType, setSelectedType] = useState<number>(); // Giá trị mặc định là rỗng
 
-  const handleSelectedCategory =(event: React.ChangeEvent<HTMLSelectElement>)=>{
+  const handleSelectedCategory = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = event.target.value;
     setSelectedType(Number(selectedId));
   }
@@ -196,47 +147,47 @@ const AdminProduct = () => {
     setSearchTerm(event.target.value);
   };
 
-    // Xử lý khi thay đổi tab
-      const handleTabSelect = (tab) => {
-        setActiveTab(tab);
-      };
-      // Hàm loại bỏ dấu tiếng Việt
-      const removeVietnameseTones = (str) => {
-        return str
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .replace(/đ/g, "d")
-          .replace(/Đ/g, "D");
-      };
+  // Xử lý khi thay đổi tab
+  const handleTabSelect = (tab: string) => {
+    setActiveTab(tab);
+  };
+  // Hàm loại bỏ dấu tiếng Việt
+  const removeVietnameseTones = (str: string) => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D");
+  };
 
-      // Hàm lọc sản phẩm đã cập nhật
-      const getFilteredProducts = () => {
-        // Bước 1: Lọc theo trạng thái
-        let filtered = products;
-        if (activeTab === "inStock") {
-          filtered = products.filter((product) => product.status === "Còn hàng");
-        } else if (activeTab === "outStock") {
-          filtered = products.filter((product) => product.status === "Hết hàng");
-        }
+  // Hàm lọc sản phẩm đã cập nhật
+  const getFilteredProducts = () => {
+    // Bước 1: Lọc theo trạng thái
+    let filtered = products;
+    if (activeTab === "inStock") {
+      filtered = products.filter((product) => product.status === "Còn hàng");
+    } else if (activeTab === "outStock") {
+      filtered = products.filter((product) => product.status === "Hết hàng");
+    }
 
-        // Bước 2: Lọc theo từ khóa tìm kiếm không dấu
-        if (searchTerm) {
-          const normalizedSearchTerm = removeVietnameseTones(searchTerm).toLowerCase();
-          filtered = filtered.filter((product) =>
-            removeVietnameseTones(product.name).toLowerCase().includes(normalizedSearchTerm)
-          );
-        }
-        if(selectedType){
-          console.log("selectedType  "+selectedType);
-          
-          filtered = filtered.filter((product) => product.categoryProduct.categoryProductId === selectedType)
-          
-          console.log("ssssssssssss "+products[0].categoryProduct.categoryProductId);
-          
-        }
+    // Bước 2: Lọc theo từ khóa tìm kiếm không dấu
+    if (searchTerm) {
+      const normalizedSearchTerm = removeVietnameseTones(searchTerm).toLowerCase();
+      filtered = filtered.filter((product) =>
+        removeVietnameseTones(product.name).toLowerCase().includes(normalizedSearchTerm)
+      );
+    }
+    if (selectedType) {
+      console.log("selectedType  " + selectedType);
 
-        return filtered;
-      };
+      filtered = filtered.filter((product) => product.categoryProduct.categoryProductId === selectedType)
+
+      console.log("ssssssssssss " + products[0].categoryProduct.categoryProductId);
+
+    }
+
+    return filtered;
+  };
 
   // const filteredProducts = products.filter((product) =>
   //   product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -251,10 +202,10 @@ const AdminProduct = () => {
 
   // Tính toán dữ liệu cho trang hiện tại
   const startIndex = (currentPage - 1) * itemsPerPage;
-  
+
   // const currentItems = products.slice(startIndex, startIndex + itemsPerPage);
   // const totalPages = Math.ceil(products.length / itemsPerPage);
-  
+
   const currentItems = filteredProducts.slice(
     startIndex,
     startIndex + itemsPerPage
@@ -262,7 +213,7 @@ const AdminProduct = () => {
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   // Xử lý khi bấm vào trang mới
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
   // Xử lý khi bấm nút "Lùi"
@@ -279,14 +230,7 @@ const AdminProduct = () => {
     }
   };
 
-  const handleLastPage = () => {
-    setCurrentPage(totalPages);
-  };
-  const handleFirstPage = () => {
-    setCurrentPage(1);
-  };
-
-  const formatCurrency = (value) => {
+  const formatCurrency = (value: number) => {
     if (value === null || value === undefined) return "";
     return value.toLocaleString("vi-VN", {
       style: "currency",
@@ -294,32 +238,32 @@ const AdminProduct = () => {
     });
   };
 
-        // Hàm để cập nhật trạng thái sản phẩm thành "Hết hàng"
-      const markProductAsOutOfStock = async (productId: number) => {
-        console.log("productId ",productId);
-        
-        const confirmed = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
+  // Hàm để cập nhật trạng thái sản phẩm thành "Hết hàng"
+  const markProductAsOutOfStock = async (productId: number) => {
+    console.log("productId ", productId);
 
-        if (!confirmed) {
-          return; // Nếu người dùng không xác nhận, thoát khỏi hàm
-        }
-        try {
-          const response = await axios.put(
-            `${BASE_URL}/rest/products/${productId}/mark-as-out-of-stock`
-          );
-          toast.success("Cập nhật trạng thái sản phẩm thành công");
+    const confirmed = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
 
-          // Sử dụng mutate để cập nhật lại dữ liệu sản phẩm
-          // mutate(`${BASE_URL}/rest/products`);
-          refetch();
+    if (!confirmed) {
+      return; // Nếu người dùng không xác nhận, thoát khỏi hàm
+    }
+    try {
+      const response = await axios.put(
+        `${BASE_URL}/rest/products/${productId}/mark-as-out-of-stock`
+      );
+      toast.success("Cập nhật trạng thái sản phẩm thành công");
 
-          return response.data;
-        } catch (error) {
-          console.error("Lỗi khi cập nhật trạng thái sản phẩm:", error);
-          toast.error("Lỗi khi cập nhật trạng thái sản phẩm");
-          throw error;
-        }
-      };
+      // Sử dụng mutate để cập nhật lại dữ liệu sản phẩm
+      // mutate(`${BASE_URL}/rest/products`);
+      refetch();
+
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi khi cập nhật trạng thái sản phẩm:", error);
+      toast.error("Lỗi khi cập nhật trạng thái sản phẩm");
+      throw error;
+    }
+  };
 
   const renderContent = () => {
     return (
@@ -401,7 +345,7 @@ const AdminProduct = () => {
                   <td className="text-center align-middle">
                     <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
                       <Button
-                      style={{'backgroundColor': '#132239'}}
+                        style={{ 'backgroundColor': '#132239' }}
                         // variant="warning"
                         className="m-1"
                         onClick={() => handleEditClick(product)}
@@ -412,10 +356,10 @@ const AdminProduct = () => {
                     <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
                       <Button
                         // variant="danger"
-                        style={{'backgroundColor': '#132239'}}
+                        style={{ 'backgroundColor': '#132239' }}
                         className="m-1"
                         // onClick={() => handleDelete(product.productId)}
-                        disabled={ product.status === "Hết hàng" }
+                        disabled={product.status === "Hết hàng"}
                         onClick={() => markProductAsOutOfStock(product.productId)}
                       >
                         <i className="bi bi-trash3-fill"></i>
@@ -423,12 +367,12 @@ const AdminProduct = () => {
                     </OverlayTrigger>
                   </td>
                 </tr>
-              )): (
+              )) : (
                 <tr >
-                <td colSpan={11} className="text-center h6 ">
-                <p >Không có dữ liệu </p>
-                </td>
-              </tr>
+                  <td colSpan={11} className="text-center h6 ">
+                    <p >Không có dữ liệu </p>
+                  </td>
+                </tr>
               )}
           </tbody>
         </Table>
@@ -457,7 +401,7 @@ const AdminProduct = () => {
             as="select"
             name="categoryProduct"
             value={selectedType}
-            onChange={handleSelectedCategory}
+            onChange={() => handleSelectedCategory}
             style={{ minWidth: "200px" }}
           >
             <option value="">Tất cả loại sản phẩm</option>
@@ -493,13 +437,13 @@ const AdminProduct = () => {
         >
           <i className="bi bi-plus-circle me-2"></i>Thêm Sản Phẩm
         </Button>
-          </div>
+      </div>
 
       <Nav
         variant="pills"
         activeKey={activeTab}
         // onSelect={(selectedKey) => setActiveTab(selectedKey as string)}
-        onSelect={(selectedKey) => handleTabSelect(selectedKey)}
+        onSelect={(selectedKey) => handleTabSelect(selectedKey ? selectedKey : '')}
         className="custom-tabs my-3"
       >
         <Nav.Item>
@@ -520,7 +464,7 @@ const AdminProduct = () => {
       </Nav>
 
       <div className="mt-3">
-        {renderContent(currentItems)}
+        {renderContent()}
 
         {currentItems.length > 0 ? (
           <div className="pagination">
@@ -548,9 +492,8 @@ const AdminProduct = () => {
             {/* Các nút số trang */}
             {Array.from({ length: totalPages }, (_, index) => (
               <button
-                className={`btn mx-1 text-light ${
-                  currentPage === index + 1 ? "active" : ""
-                }`}
+                className={`btn mx-1 text-light ${currentPage === index + 1 ? "active" : ""
+                  }`}
                 style={{
                   backgroundColor: currentPage === index + 1 ? "grey" : "#132239",
                   border: currentPage === index + 1 ? "2px solid white" : "none",
@@ -583,7 +526,7 @@ const AdminProduct = () => {
           </div>
         ) : null}
 
-        
+
       </div>
 
       <ProductAddNew
@@ -592,7 +535,7 @@ const AdminProduct = () => {
         currentProduct={currentProduct}
         modalType={modalType}
         categoryProducts={categoryProducts}
-        onAddProduct={handleAddProduct}
+        // onAddProduct={handleAddProduct}
         onFetch={refetch}
         setIsNeedScroll={setIsNeedScroll}
       />
