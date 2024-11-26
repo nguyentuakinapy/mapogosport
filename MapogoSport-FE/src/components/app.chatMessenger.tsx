@@ -588,7 +588,7 @@ import { useSearchParams } from "next/navigation";
 import { Content } from "next/font/google";
 
 export default function ChatBox() {
-  
+
   interface Message {
     messageId: number;
     sender: User;
@@ -693,13 +693,13 @@ export default function ChatBox() {
       isConnected &&
       adminDefault &&
       chatListCurrentUserByDMM.length === 0 &&
-      selectedChat === "" 
+      selectedChat === ""
     ) {
       console.log("Đã kết nối, gọi handleSelectChat với adminDefault...");
       handleSelectChat(adminDefault); // Chỉ gọi khi isConnected là true
     } else if (ownerCurrent) {  // ownerCurrent là kiểu user
       handleSelectChat(ownerCurrent);
-      
+
     }
   }, [
     isConnected,
@@ -888,17 +888,17 @@ export default function ChatBox() {
   const [dataMessageTemporary, setDataMessageTemporary] =
     useState<dataMess>(null);
 
-    useEffect(() => {
-      if (messageListRef.current) {
-        messageListRef.current.scrollTo({
-          top: messageListRef.current.scrollHeight,
-          // behavior: "smooth", // Thêm smooth scrolling
-        });
-        mutate;
-        mutateByReceiverUsernameOrCurrentUser;
-      }
-    }, [chatListRealTime]); // Theo dõi sự thay đổi của danh sách tin nhắn
-    
+  useEffect(() => {
+    if (messageListRef.current) {
+      messageListRef.current.scrollTo({
+        top: messageListRef.current.scrollHeight,
+        // behavior: "smooth", // Thêm smooth scrolling
+      });
+      mutate;
+      mutateByReceiverUsernameOrCurrentUser;
+    }
+  }, [chatListRealTime]); // Theo dõi sự thay đổi của danh sách tin nhắn
+
 
   const handleSendMessage = () => {
     if (
@@ -964,7 +964,7 @@ export default function ChatBox() {
 
     setSelectedChat(chat);
     // mới thêm 19/11
-      // Kiểm tra nếu chat chưa tồn tại trong chatListCurrentUserByDMM, thì thêm mới
+    // Kiểm tra nếu chat chưa tồn tại trong chatListCurrentUserByDMM, thì thêm mới
     setChatListCurrentUserByDMM((prevChats) => {
       const isChatExists = prevChats.some(
         (item) => item.user.username === chat.username
@@ -978,12 +978,12 @@ export default function ChatBox() {
             timestamp: new Date().toISOString(),
           },
         ];
-        
+
       }
       //  setIsExitingMy(true);
       //   setAdminDefault(dataAdmin);
       //   console.log('ssssssssssss ',dataAdmin);
-        
+
       //   setIsExitingMyAdminDefault(true); 
       return prevChats;
     });
@@ -1169,7 +1169,7 @@ export default function ChatBox() {
 
       // mới thêm 19/11
       if (ownerCurrent && !groupedMessagesArray.some(
-          (item) => item.user.username === ownerCurrent.username)
+        (item) => item.user.username === ownerCurrent.username)
       ) {
         setChatListCurrentUserByDMM((prevChats) => [
           ...prevChats,
@@ -1181,7 +1181,7 @@ export default function ChatBox() {
         ]);
       }
       // mới thêm 19/11
-      
+
       console.log("Danh sách chat real-time đã nhóm: ", groupedMessagesArray);
       console.log(
         "Danh sách setChatListCurrentUserByDMM: ",
@@ -1190,7 +1190,7 @@ export default function ChatBox() {
     }
   }, [dataByReceiverUsernameOrCurrentUser]);
 
-  const formatTime = (createAt: Date | string) =>{
+  const formatTime = (createAt: Date | string) => {
     const date = createAt instanceof Date ? createAt : new Date(createAt);
     if (isNaN(date.getTime())) return "Invalid Date";
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1414,10 +1414,10 @@ export default function ChatBox() {
                           : null;
 
                       if (!chatUser) return null;
-                      console.log('sssssssss ',chatUser);
+                      console.log('sssssssss ', chatUser);
                       console.log('chat group time ', formatTime(chatGroup.timestamp));
                       ;
-                      
+
 
                       return (
                         <ListGroup.Item
@@ -1426,23 +1426,23 @@ export default function ChatBox() {
                           className="d-flex flex-column"
                         >
                           <div className="d-flex align-items-center ">
-                          <img
-                            src={
-                              chatUser?.avatar
-                                ? chatUser.avatar
-                                : "/chat_page/assets/images/users/user-5.png"
-                            }
-                            alt={chatUser?.username || "Không có tên"}
-                            style={{
-                              width: "40px",
-                              height: "40px",
-                              borderRadius: "50%",
-                              marginRight: "10px",
-                            }}
-                            onError={(e) => {
-                              e.currentTarget.src = "/chat_page/assets/images/users/user-8.png"; // Ảnh mặc định
-                            }}
-                          />
+                            <img
+                              src={
+                                chatUser?.avatar
+                                  ? chatUser.avatar
+                                  : "/chat_page/assets/images/users/user-5.png"
+                              }
+                              alt={chatUser?.username || "Không có tên"}
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "50%",
+                                marginRight: "10px",
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.src = "/chat_page/assets/images/users/user-8.png"; // Ảnh mặc định
+                              }}
+                            />
 
                             <strong>
                               {index + 1} -{" "}
@@ -1455,10 +1455,10 @@ export default function ChatBox() {
                                 ? chatGroup.content
                                 : chatUser.username ===
                                   dataMessageTemporary.username
-                                ? dataMessageTemporary.content
-                                : chatGroup.content}
+                                  ? dataMessageTemporary.content
+                                  : chatGroup.content}
                               {/* {chatGroup.content || "Không có nội dung"} */}
-                               
+
                             </p>
                             {/* <p className="col text-end"> {formatTime(chatGroup.timestamp)}</p> */}
                           </div>
@@ -1578,8 +1578,8 @@ export default function ChatBox() {
                   >
                     <i
                       className={`h6 bi ${isMaximized
-                          ? "bi-arrows-angle-contract"
-                          : "bi-arrows-fullscreen"
+                        ? "bi-arrows-angle-contract"
+                        : "bi-arrows-fullscreen"
                         }`}
                     ></i>
                   </Button>
@@ -1624,12 +1624,11 @@ export default function ChatBox() {
                         return (
                           <div
                             key={msg.messageId || index}
-                            className={`d-flex ${
-                              msg.sender.username === currentUser?.username ||
-                              msg.sender === currentUser?.username
+                            className={`d-flex ${msg.sender.username === currentUser?.username ||
+                                msg.sender === currentUser?.username
                                 ? "justify-content-end"
                                 : "justify-content-start"
-                            }`}
+                              }`}
                           >
                             {/* <div
                               className={`p-2 rounded mb-2 ${
@@ -1640,26 +1639,26 @@ export default function ChatBox() {
                               }`}
                               style={{ maxWidth: "80%" }}
                             > */}
-                             <div
-  className={`p-2 rounded mb-2`}
-  style={{
-    maxWidth: "80%",
-    backgroundColor:
-      msg.sender.username === currentUser?.username ||
-      msg.sender === currentUser?.username
-        ? "#66c7ff" // Màu dành cho tin nhắn gửi đi
-        : "#f0f0f0", // Màu dành cho tin nhắn nhận được
-    color:
-      msg.sender.username === currentUser?.username ||
-      msg.sender === currentUser?.username
-        ? "black" // Màu chữ cho tin nhắn gửi đi
-        : "black", // Màu chữ cho tin nhắn nhận được
-  }}
-> 
+                            <div
+                              className={`p-2 rounded mb-2`}
+                              style={{
+                                maxWidth: "80%",
+                                backgroundColor:
+                                  msg.sender.username === currentUser?.username ||
+                                    msg.sender === currentUser?.username
+                                    ? "#66c7ff" // Màu dành cho tin nhắn gửi đi
+                                    : "#f0f0f0", // Màu dành cho tin nhắn nhận được
+                                color:
+                                  msg.sender.username === currentUser?.username ||
+                                    msg.sender === currentUser?.username
+                                    ? "black" // Màu chữ cho tin nhắn gửi đi
+                                    : "black", // Màu chữ cho tin nhắn nhận được
+                              }}
+                            >
                               {msg.content}
                               {/* Hiển thị thời gian nếu tồn tại */}
                               <em
-                              className="mt-2"
+                                className="mt-2"
                                 style={{
                                   display: "block",
                                   fontSize: "0.8em",

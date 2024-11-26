@@ -120,7 +120,7 @@ const ProductDetail = () => {
     // product_review
     // const [data, setData] = useState<Review[]>([]); // Khai báo kiểu dữ liệu cho data
     const fetchProductData = (url: string) => fetch(url).then((res) => res.json());
-    const { data } = useSWR(`http://localhost:8080/rest/${idProduct}`, fetchProductData, {
+    const { data } = useSWR(`http://localhost:8080/rest/user/productReview/${idProduct}`, fetchProductData, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -136,8 +136,8 @@ const ProductDetail = () => {
                 toast.warning("Bạn chưa đăng nhập!");
                 return;
             }
-            if (comment.length < 15) {
-                toast.warning("Cần phải nhập ít nhất 15 ký tự");
+            if (rating <= 0) {
+                toast.warning("Cần phải chọn đánh giá");
                 return;
             }
 
@@ -157,7 +157,7 @@ const ProductDetail = () => {
                 };
 
                 try {
-                    const response = await fetch('http://localhost:8080/rest/save', {
+                    const response = await fetch('http://localhost:8080/rest/user/productReview/save', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ const ProductDetail = () => {
                         throw new Error(`Có lỗi xảy ra khi gửi đánh giá: ${errorMessage}`);
                     }
 
-                    mutate(`http://localhost:8080/rest/${idProduct}`)
+                    mutate(`http://localhost:8080/rest/user/productReview/${idProduct}`)
                     console.log("Đánh giá đã được gửi thành công");
                     props.onHide(); // Close modal after successful submission
                     toast.success("Gửi đánh giá thành công!");
@@ -375,7 +375,6 @@ const ProductDetail = () => {
             console.log("Người dùng chưa đăng nhập");
         }
     };
-    const [rating, setRating] = useState(null);
     const [filteredData, setFilteredData] = useState(null); // State to store filtered reviews
 
     const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // `null` để hiển thị tất cả mặc định
@@ -394,7 +393,7 @@ const ProductDetail = () => {
 
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/rest/user/find-review-by-rating/${idProduct}/${value}`);
+                const response = await axios.get(`http://localhost:8080/rest/user/productReview/find-review-by-rating/${idProduct}/${value}`);
                 if (response.data) {
                     setFilteredData(response.data); // Cập nhật bình luận theo số sao
                     console.log("Filtered reviews by rating:", response.data);
