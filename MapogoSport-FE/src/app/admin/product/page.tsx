@@ -178,20 +178,16 @@ const AdminProduct = () => {
       );
     }
     if (selectedType) {
-      console.log("selectedType  " + selectedType);
+      // console.log("selectedType  " + selectedType);
 
       filtered = filtered.filter((product) => product.categoryProduct.categoryProductId === selectedType)
 
-      console.log("ssssssssssss " + products[0].categoryProduct.categoryProductId);
+      // console.log("ssssssssssss " + products[0].categoryProduct.categoryProductId);
 
     }
 
     return filtered;
   };
-
-  // const filteredProducts = products.filter((product) =>
-  //   product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
 
   const filteredProducts = getFilteredProducts();
 
@@ -203,8 +199,6 @@ const AdminProduct = () => {
   // Tính toán dữ liệu cho trang hiện tại
   const startIndex = (currentPage - 1) * itemsPerPage;
 
-  // const currentItems = products.slice(startIndex, startIndex + itemsPerPage);
-  // const totalPages = Math.ceil(products.length / itemsPerPage);
 
   const currentItems = filteredProducts.slice(
     startIndex,
@@ -401,7 +395,7 @@ const AdminProduct = () => {
             as="select"
             name="categoryProduct"
             value={selectedType}
-            onChange={() => handleSelectedCategory}
+            onChange={handleSelectedCategory}
             style={{ minWidth: "200px" }}
           >
             <option value="">Tất cả loại sản phẩm</option>
