@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @CrossOrigin("*")
-@RequestMapping("/rest")
+@RequestMapping("/rest/category_field")
 @RestController
 public class CategoryFieldRestController {
 
@@ -37,7 +37,7 @@ public class CategoryFieldRestController {
 	@Autowired
 	private Cloudinary cloudinary;
 
-	@GetMapping("/category_field")
+	@GetMapping()
 	public List<CategoryField> getAll() {
 		return categoryFieldService.findAll();
 	}
