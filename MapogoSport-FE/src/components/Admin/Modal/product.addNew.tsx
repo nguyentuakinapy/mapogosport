@@ -149,7 +149,7 @@ const ProductAddNew = ({
       console.log("=======putData", putData);
 
       return axios.post(
-        `http://localhost:8080/rest/products`,
+        `http://localhost:8080/rest/products/admin/create`,
         putData.formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -163,7 +163,7 @@ const ProductAddNew = ({
       console.log("=======putData", putData);
 
       return axios.put(
-        `http://localhost:8080/rest/products/${putData.id}`,
+        `http://localhost:8080/rest/products/admin/${putData.id}`,
         putData.formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

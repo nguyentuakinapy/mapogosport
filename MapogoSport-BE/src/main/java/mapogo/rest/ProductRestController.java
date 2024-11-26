@@ -91,7 +91,7 @@ public class ProductRestController {
 		return dotIndex == -1 ? "" : fileName.substring(dotIndex + 1);
 	}
 
-	@PostMapping
+	@PostMapping("/admin/create")
 	public ResponseEntity<Integer> createProduct(@RequestPart("product") String productJson,
 			@RequestPart("fileimage") MultipartFile image) {
 		try {
@@ -161,7 +161,7 @@ public class ProductRestController {
 		}
 	}
 
-	@PutMapping("/{id}")
+	@PutMapping("/admin/{id}")
 	public Product updateProduct(@PathVariable Integer id, @RequestPart("product") String productJson,
 			@RequestPart(value = "fileimage", required = false) MultipartFile image) {
 		try {

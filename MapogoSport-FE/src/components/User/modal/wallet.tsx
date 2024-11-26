@@ -175,36 +175,102 @@ const WalletPage = () => {
     };
 
     const [money, setMoney] = useState<number>();
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
 
-    const addMoneyToWallet = () => {
-        fetch(`http://localhost:8080/rest/wallet/${userData?.username}/${money}`, {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json',
-            },
-        }).then(async (res) => {
-            if (!res.ok) {
-                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                return;
-            }
-            mutate(`http://localhost:8080/rest/wallet/transaction/${userData?.wallet.walletId}`);
-            setNotificationModal(false);
-            toast.success('Nạp tiền thành công!');
-        });
+
+    const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSelectedPaymentMethod(e.target.value);
+    };
+    const addMoneyToWallet = async () => {
+        try {
+            const responsePayment = await fetch(`http://localhost:8080/rest/wallet/createpaymentrecharge`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    money,
+                    selectedPaymentMethod,
+                    username: userData?.username,
+                })
+            });
+            const responseData = await responsePayment.json();
+            const paymentUrl = responseData.url;
+            console.log(paymentUrl);
+
+            // chuyển hướng đến URL thanh toán
+            window.location.href = paymentUrl;
+        } catch (error) {
+            console.error('Error during payment:', error);
+        }
     }
 
     const renderNotification = () => {
         return (
-            <div className="text-center">
+            <div className="">
                 <FloatingLabel controlId="floatingTextarea2" label="Số tiền cần nạp!">
                     <Form.Control
+                        type="number"
                         placeholder="Leave a comment here"
                         value={money}
+                        min={10000} // Thiết lập giá trị tối thiểu
                         onChange={(e) => setMoney(Number(e.target.value))}
+
                     />
+                    {money !== undefined && money < 10000 && (
+                        <div className="text-danger mt-2">
+                            Số tiền tối thiểu là 10,000 VNĐ.
+                        </div>
+                    )}
                 </FloatingLabel>
-                <button onClick={addMoneyToWallet} className="mt-2 w-100 btn btn-danger">Nạp tiền</button>
+
+
+                <div className="list-group mt-3 border border-1">
+                    <div className="card-body d-flex list-group-item align-items-center">
+                        <div className="form-check flex-grow-1">
+                            <input
+                                className="form-check-input"
+                                type="radio"
+                                name="paymentMethod"
+                                id="vnpay"
+                                value="VNPay"
+                                onChange={handlePaymentMethodChange}
+                            />
+                            <label className="form-check-label" htmlFor="vnpay">
+                                Thanh toán qua ví điện tử VNPay
+                            </label>
+                        </div>
+                        <img
+                            src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
+                            alt="VNPay"
+                            style={{ maxWidth: '50px' }}
+                        />
+                    </div>
+                    <div className="card-body d-flex list-group-item align-items-center">
+                        <div className="form-check flex-grow-1">
+                            <input
+                                className="form-check-input"
+                                type="radio"
+                                name="paymentMethod"
+                                id="momo"
+                                value="MoMo"
+                                onChange={handlePaymentMethodChange}
+                            />
+                            <label className="form-check-label" htmlFor="momo">
+                                Thanh toán qua ví điện tử MoMo
+                            </label>
+                        </div>
+                        <img
+                            src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png"
+                            alt="MoMo"
+                            style={{ maxWidth: '50px' }}
+                        />
+                    </div>
+                </div>
+                <button onClick={addMoneyToWallet} disabled={!money || money <= 10000 || !selectedPaymentMethod}
+
+                    className="mt-2 w-100 btn btn-danger">Nạp tiền</button>
             </div>
 
         )
@@ -220,7 +286,10 @@ const WalletPage = () => {
                 <div className="box-ultil">
                     <div><b>Số dư:</b> {userData?.wallet.balance.toLocaleString()} ₫</div>
                     <div className="d-flex justify-content-between align-items-center">
-                        <div className="btn-wallet" onClick={() => setNotificationModal(true)}>Nạp tiền</div>
+                        <div className="btn-wallet" onClick={() => {
+                            setMoney(undefined); setSelectedPaymentMethod('');
+                            setNotificationModal(true)
+                        }}>Nạp tiền</div>
                         <div className="btn-wallet" onClick={exportPDF}>Xuất file PDF</div>
                     </div>
                 </div>
