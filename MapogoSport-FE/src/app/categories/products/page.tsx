@@ -5,9 +5,7 @@ import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 import { formatPrice } from "@/components/Utils/Format"
 
-
 const Categories = () => {
-
     const [products, setProducts] = useState<Product[]>([]);
     const [icon, setIcon] = useState<boolean[]>([]); // Để quản lý trạng thái của các biểu tượng
     const [categoriesProduct, setCategoriesProduct] = useState<CategoryProduct[]>([])
@@ -44,11 +42,8 @@ const Categories = () => {
             try {
                 const response = await fetch('http://localhost:8080/rest/products');
                 const data = await response.json();
-                console.log(data);
                 setProducts(data);
                 setRatingPreview(data.productReviews.rating)
-                console.log("data rating")
-                console.log("data Product: ", data)
                 setIcon(new Array(data.length).fill(false)); // Khởi tạo trạng thái icon
             } catch (error) {
                 console.log("Lỗi khi gọi API: ", error);

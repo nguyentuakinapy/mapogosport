@@ -2,7 +2,7 @@ import { logOut } from "@/app/utils/Log-Out";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { OverlayTrigger, Tooltip, Image } from "react-bootstrap";
 
 interface NavProps {
     isAniActive: boolean;

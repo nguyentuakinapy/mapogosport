@@ -51,7 +51,7 @@ export default function Address() {
                     'Accept': 'application/json, text/plain, */*',
                     'Content-Type': 'application/json',
                 }
-            }).then(async (res) => {
+            }).then((res) => {
                 if (!res.ok) {
                     toast.error(`Xóa địa chỉ không thành công! Vui lòng thử lại sau!`);
                     return

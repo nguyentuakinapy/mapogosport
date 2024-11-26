@@ -6,12 +6,7 @@ import { toast } from "react-toastify";
 interface SportFieldProps {
     showSportFieldModal: boolean;
     setShowSportFieldModal: (v: boolean) => void;
-}
-interface SportFieldProps {
-    showSportFieldModal: boolean;
-    setShowSportFieldModal: (v: boolean) => void;
-    selectedSportField: any; // Thay thế `any` bằng kiểu dữ liệu cụ thể nếu có
-    setSelectedSportField: (field: any) => void;
+    selectedSportField?: SportField | null;
 }
 const ModalCreateSportField = (props: SportFieldProps) => {
     const { showSportFieldModal, setShowSportFieldModal, selectedSportField } = props;
