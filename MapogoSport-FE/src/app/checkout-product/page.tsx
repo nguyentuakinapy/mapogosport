@@ -194,10 +194,10 @@ const CheckoutPage = () => {
     if (!user1) {
       errors.push('Người dùng không tồn tại');
     }
-    if (!phoneNumberSelected || phoneNumberSelected !== 'other') {
+    if (!phoneNumberSelected) {
       errors.push('Vui lòng chọn số điện thoại');
     }
-    if (!customPhoneNumber && !phoneNumberSelected) {
+    if (!customPhoneNumber && phoneNumberSelected === 'other') {
       errors.push('Vui lòng nhập số điện thoại');
     }
     if (!isValidPhoneNumber(customPhoneNumber) && customPhoneNumber) {
@@ -499,7 +499,6 @@ const CheckoutPage = () => {
                       type="radio"
                       name="paymentMethod"
                       id="cod" checked={paymentMethod === 'COD'}
-                      aria-expanded={open}
                       value={"COD"}
                       onChange={handlePaymentMethodChange}
                     />
@@ -517,7 +516,6 @@ const CheckoutPage = () => {
                       type="radio"
                       name="paymentMethod"
                       id="cod"
-                      aria-expanded={open}
                       value={"Thanh toán ví"}
                       onChange={handlePaymentMethodChange}
                     />
@@ -543,7 +541,6 @@ const CheckoutPage = () => {
                       type="radio"
                       name="paymentMethod"
                       id="vnpay"
-                      aria-expanded={open}
                       value="VNPay"
                       onChange={handlePaymentMethodChange}
                     />
@@ -561,7 +558,6 @@ const CheckoutPage = () => {
                       type="radio"
                       name="paymentMethod"
                       id="vnpay"
-                      aria-expanded={open}
                       value="MoMo"
                       onChange={handlePaymentMethodChange}
                     />

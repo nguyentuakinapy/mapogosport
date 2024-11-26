@@ -660,7 +660,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                 </ul>
             </>
         )
-    }, [sportDetail]);
+    }, [sportDetail, sport]);
 
     const bookerInfo = () => {
         return (

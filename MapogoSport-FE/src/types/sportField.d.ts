@@ -19,7 +19,13 @@ interface SportField {
     longitude: number;
     distance: number;
     fieldReviews: ProductReview[];
+}
 
+interface StatusSportFieldDetails {
+    statusSportFieldDetailId: number
+    startDate: date
+    endDate: date
+    statusName: date
 }
 
 interface SportFieldDetail {
@@ -32,4 +38,5 @@ interface SportFieldDetail {
     percentDeposit: number;
     peakHour: string;
     availableTimes: string[];
+    statusSportFieldDetails: StatusSportFieldDetails[];
 }

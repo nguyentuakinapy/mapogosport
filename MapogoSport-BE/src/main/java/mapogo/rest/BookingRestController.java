@@ -269,6 +269,15 @@ public class BookingRestController {
 				enDate);
 	}
 
+	@GetMapping("/bookingdetail/bysportFieldDetailAndDate/{sportFieldIds}/{bookingId}/{status}/{startDate}/{endDate}")
+	public List<BookingDetail> findBookingDetailBySportFieldIdAndDate(
+			@PathVariable("sportFieldIds") Integer sportFieldIds, @PathVariable("bookingId") List<Integer> bookingId,
+			@PathVariable("status") List<String> status, @PathVariable("startDate") String startDate,
+			@PathVariable("endDate") String enDate) {
+		return bookingService.findBookingDetailBySportFieldIdAndDate(sportFieldIds, bookingId, status, startDate, enDate);
+
+	}
+
 	@GetMapping("/booking/byOwnerId/totalCustomer/{ownerId}")
 	public Integer totalCustomer(@PathVariable("ownerId") Integer ownerId) {
 

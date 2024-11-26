@@ -19,6 +19,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
 
     const [orderDetail, setOrderDetail] = useState<OrderDetailMap[]>([]);
     const [orderInfo, setOrderInfo] = useState<any>(null);
+    const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
 
     useEffect(() => {
         if (data) {
@@ -72,13 +73,9 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                 toast.error(`Hủy đơn hàng không thành công! Vui lòng thử lại sau!`);
                 return;
             }
+            mutate(`http://localhost:8080/rest/user/orders/detail/${params.id}`);
             toast.success('Hủy đơn hàng thành công!');
-            if (order) {
-                setOrder({
-                    ...order,
-                    status: 'Đã hủy',
-                });
-            }
+
         });
     };
 
@@ -138,7 +135,13 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                 <div className="btn-layout"><Button className="btn-buyAgain">Tiếp tục mua hàng</Button></div>
             ) : orderInfo?.status === 'Đã hủy' ? (
                 <div className="btn-layout"><Button className="btn-buyAgain">Mua lại</Button></div>
-            ) : <div className="btn-layout"><Button className="btn-cancel" onClick={handleStatusChange}>Hủy hóa đơn</Button></div>}
+            ) : <div className="btn-layout"><Button className="btn-cancel" disabled={orderInfo?.status === "Đang vận chuyển"}
+                onClick={() => setShowCancelModal(true)} >Hủy đơn hàng</Button></div>}
+            <CancelOrderModal
+                show={showCancelModal}
+                onHide={() => setShowCancelModal(false)}
+                onConfirm={handleCancelOrder}
+            />
         </UserLayout>
     )
 }

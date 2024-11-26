@@ -257,7 +257,8 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                 console.error("Lỗi khi lưu thông tin sân:", error.response ? error.response.data : error.message);
             });
     };
-
+    
+    //xóa hình
     const handleDeleteGallery = async (
         gallerySportFieldId: number
     ) => {
