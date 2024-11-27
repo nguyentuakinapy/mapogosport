@@ -1,5 +1,5 @@
 'use client'
-import { Container, Carousel, Row, Col, Image } from "react-bootstrap";
+import { Container, Row, Col, Image } from "react-bootstrap";
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
@@ -19,16 +19,13 @@ function Categories() {
         setCurrentPage(pageNumber);
     };
 
-    const [rating, setRating] = useState<number>(1.5);
     const [sportFields, setSportFields] = useState<SportField[]>([]);
-    const [icon, setIcon] = useState<boolean[]>([]);
     const [categoriesField, setCategoriesField] = useState<CategoryField[]>([]);
     const [selectedCategoryField, setSelectedCategoryField] = useState<number[]>([]);
     const [updatedSportFields, setUpdatedSportFields] = useState<SportField[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [currentLocation, setCurrentLocation] = useState<{ lat: number, lng: number } | null>(null);
-    const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -112,30 +109,6 @@ function Categories() {
         }
     }, []);
 
-    const renderStars = (rating: number) => {
-        const fullStars = Math.floor(rating);
-        const halfStar = rating - fullStars >= 0.5;
-        const stars = [];
-        for (let i = 0; i < fullStars; i++) {
-            stars.push(<i key={i} className="bi bi-star-fill"></i>);
-        }
-        if (halfStar) {
-            stars.push(<i key={fullStars} className="bi bi-star-half"></i>);
-        }
-        for (let i = stars.length; i < 5; i++) {
-            stars.push(<i key={i} className="bi bi-star"></i>);
-        }
-        return stars;
-    };
-
-    const onClickIcon = (index: number) => {
-        setIcon(prev => {
-            const newIcon = [...prev];
-            newIcon[index] = !newIcon[index];
-            return newIcon;
-        });
-    };
-
     const handelCategories = (categoryFieldId: number) => {
         setSelectedCategoryField(prev =>
             prev.includes(categoryFieldId) ? prev.filter(id => id !== categoryFieldId) : [...prev, categoryFieldId]
@@ -200,7 +173,7 @@ function Categories() {
                         <Row>
                             <h3 className="title-section mb-4">
                                 <span className="icon">
-                                    <img nh-lazy="image" className="img-fluid" alt="Flash Sale"
+                                    <Image nh-lazy="image" className="img-fluid" alt="Flash Sale"
                                         src="https://media.tenor.com/zc4ZHOVUylEAAAAi/philcorbett-football.gif" />
                                 </span>
                                 Danh sách sân

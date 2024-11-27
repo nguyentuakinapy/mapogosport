@@ -178,11 +178,12 @@ export default function Login(props: LoginProps) {
                 } else {
                     toast.error("Đăng nhập không thành công!");
                 }
-            } catch (error: any) {
+            } catch (error) {
                 toast.error("Đăng nhập không thành công!");
             }
         }
     };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             handleSubmit();

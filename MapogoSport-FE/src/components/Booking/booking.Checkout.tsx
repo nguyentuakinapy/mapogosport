@@ -363,7 +363,7 @@ const BookingModal = React.memo((props: BookingProps) => {
         if (price) {
             setTotalAmount(price * index);
         }
-    }, [selectedWeek])
+    }, [selectedWeek, price])
 
     const getWeekDate = async (weekDate: string) => {
         const dateWeek = weekDays[weekDate];
