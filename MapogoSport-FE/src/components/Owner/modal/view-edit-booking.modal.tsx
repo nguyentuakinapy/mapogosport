@@ -1,5 +1,4 @@
 import { createTimeStringH, isDateInRange } from "@/components/Utils/booking-time";
-import { formatPrice } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -297,8 +296,33 @@ const BookingModal = (props: OwnerProps) => {
     const [dataTimeOnStageAll, setDataTimeOnStageAll] = useState<string[]>([]);
 
     useEffect(() => {
-        createTimeByTimeOnStageAll();
-    }, [bookingBySubscriptionKey])
+        const timeSlots = [];
+
+        if (bookingBySubscriptionKey) {
+            for (const item of bookingBySubscriptionKey) {
+                const getTime = startTimeBooking && startTimeBooking.match(/(\d+)h(\d+)/);
+                const startHours = getTime ? Number(getTime[1]) : 0;
+                const startMinutes = getTime ? Number(getTime[2]) : 0;
+
+                let currentHours = startHours;
+                let currentMinutes = startMinutes;
+
+                if (item.startTime && item.endTime) {
+                    for (let i = 0; i <= calculateTimeDifference(item.startTime, item.endTime) / 30; i++) {
+                        timeSlots.push(`${currentHours}h${currentMinutes === 0 ? '00' : currentMinutes}`);
+                        currentMinutes += 30;
+
+                        if (currentMinutes >= 60) {
+                            currentHours += Math.floor(currentMinutes / 60);
+                            currentMinutes = currentMinutes % 60;
+                        }
+                    }
+                }
+                timeSlots.pop();
+            }
+        }
+        setDataTimeOnStageAll(timeSlots);
+    }, [bookingBySubscriptionKey, startTimeBooking])
 
     const confirmDataBooking = async () => {
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == idSportDetail);
@@ -594,34 +618,6 @@ const BookingModal = (props: OwnerProps) => {
         }
     }
 
-    const createTimeByTimeOnStageAll = async () => {
-        const timeSlots = [];
-
-        if (bookingBySubscriptionKey) {
-            for (const item of bookingBySubscriptionKey) {
-                const getTime = startTimeBooking && startTimeBooking.match(/(\d+)h(\d+)/);
-                const startHours = getTime ? Number(getTime[1]) : 0;
-                const startMinutes = getTime ? Number(getTime[2]) : 0;
-
-                let currentHours = startHours;
-                let currentMinutes = startMinutes;
-
-                if (item.startTime && item.endTime) {
-                    for (let i = 0; i <= calculateTimeDifference(item.startTime, item.endTime) / 30; i++) {
-                        timeSlots.push(`${currentHours}h${currentMinutes === 0 ? '00' : currentMinutes}`);
-                        currentMinutes += 30;
-
-                        if (currentMinutes >= 60) {
-                            currentHours += Math.floor(currentMinutes / 60);
-                            currentMinutes = currentMinutes % 60;
-                        }
-                    }
-                }
-                timeSlots.pop();
-            }
-        }
-        setDataTimeOnStageAll(timeSlots);
-    }
 
     useEffect(() => {
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == idSportDetail);
@@ -647,10 +643,6 @@ const BookingModal = (props: OwnerProps) => {
 
             setPrice(totalAmount);
         }
-        createTimeByTimeOnStage();
-    }, [startTimeBooking, endTimeBooking])
-
-    const createTimeByTimeOnStage = () => {
         const getTime = startTimeBooking && startTimeBooking.match(/(\d+)h(\d+)/);
         const startHours = getTime ? Number(getTime[1]) : 0;
         const startMinutes = getTime ? Number(getTime[2]) : 0;
@@ -673,8 +665,7 @@ const BookingModal = (props: OwnerProps) => {
         }
         timeSlots.pop();
         setDataTimeOnStage(timeSlots);
-    }
-
+    }, [startTimeBooking, endTimeBooking])
 
     const isTimeWithinRange = (startTime: string, endTime: string, checkTime: string): boolean => {
         const [startHours, startMinutes] = startTime.split('h').map(Number);
@@ -1037,6 +1028,31 @@ const BookingModal = (props: OwnerProps) => {
         }
     }
 
+    useEffect(() => {
+        const sportFieldDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId === idSportDetail);
+        if (startTimeBooking && endTimeBooking && sportFieldDetail) {
+            const peakHourStart = sportFieldDetail.peakHour.split('-')[0];
+            const peakHourEnd = sportFieldDetail.peakHour.split('-')[1];
+
+            const timeSlots: string[] = createTimeStringH(startTimeBooking, endTimeBooking);
+
+            const price = sportFieldDetail.price / 2;
+            const pricePeakHour = sportFieldDetail.peakHourPrices / 2;
+
+            let totalAmount = 0;
+
+            for (const time of timeSlots) {
+                if (isTimeWithinRange(peakHourStart, peakHourEnd, time)) {
+                    totalAmount += pricePeakHour;
+                } else {
+                    totalAmount += price;
+                }
+            }
+
+            setPrice(totalAmount);
+        }
+    }, [idSportDetail])
+
     const handleUpdateNewBooking = () => {
         fetch(`http://localhost:8080/rest/booking/detail/add/new`, {
             method: 'POST',
@@ -1234,7 +1250,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={newPriceBooking}
+                                                value={newPriceBooking?.toLocaleString() + ' đ'}
                                                 disabled={isAddBooking}
                                             />
                                         </FloatingLabel>
@@ -1242,7 +1258,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={bookingDetailData?.totalAmount}
+                                                value={bookingDetailData?.totalAmount.toLocaleString() + ' đ'}
                                                 disabled={editBooking}
                                             />
                                         </FloatingLabel>
@@ -1344,7 +1360,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={price}
+                                                value={price?.toLocaleString() + ' đ'}
                                                 disabled={editBooking}
                                             />
                                         </FloatingLabel>
@@ -1352,7 +1368,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={bookingDetailData?.totalAmount}
+                                                value={bookingDetailData?.totalAmount.toLocaleString() + ' đ'}
                                                 disabled={editBooking}
                                             />
                                         </FloatingLabel>

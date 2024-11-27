@@ -796,7 +796,7 @@ export default function ChatBox() {
             >
               <Image
                 src="/images/mail_giphy.webp"
-                alt="Messenger"
+                alt="message"
                 width={40}
                 height={40}
                 style={{ cursor: "pointer" }}

@@ -1,4 +1,4 @@
-import { formatDateNotime, formatPrice } from "@/components/Utils/Format";
+import { formatDateNotime } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, Nav } from "react-bootstrap";
 import DatePicker from "react-datepicker";
@@ -44,6 +44,8 @@ const BookingModal = (props: BookingProps) => {
             let operatingTime: number = 0;
 
             if (startTime && sport.closing) {
+                console.log(startTime, sport.closing);
+
                 const [openHour, openMinute] = startTime.split("h").map(Number);
                 const [closeHour, closeMinute] = sport.closing.split("h").map(Number);
                 const totalOpenMinutes = openHour * 60 + openMinute;
@@ -73,7 +75,7 @@ const BookingModal = (props: BookingProps) => {
 
                 try {
                     const response = await fetch(
-                        `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
+                        `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail.sportFielDetailId}/${dayStartBooking}`
                     );
 
                     if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
@@ -91,7 +93,6 @@ const BookingModal = (props: BookingProps) => {
 
                 count++;
             }
-
             for (const s of sportDetail.statusSportFieldDetails) {
                 if (isDateInRange(dayStartBooking, s.startDate, s.endDate)) {
                     let check = false;
@@ -233,6 +234,7 @@ const BookingModal = (props: BookingProps) => {
                 newDataTime.push(timeIntervals[index].label);
             }
             if (activeTab === 'all') {
+
                 newDataTime.shift()
                 setDataTimeTemporary(newDataTime);
             }
@@ -242,12 +244,14 @@ const BookingModal = (props: BookingProps) => {
 
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         getPriceByTimeBooking(selectTime);
     }, [selectTime, sportDetail]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         getPriceByTimeBooking(selectTimeOnStage);
-    }, [selectTimeOnStage, sportDetail]);
+    }, [selectTimeOnStage, sportDetail,]);
 
     const getPriceByTimeBooking = (slTime: string) => {
         if (slTime == 'Chọn thời gian') {
@@ -414,6 +418,7 @@ const BookingModal = (props: BookingProps) => {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         setSportFieldDuplicate({});
         setWeekDays({});
         setSelectedWeek([]);
@@ -465,13 +470,13 @@ const BookingModal = (props: BookingProps) => {
         [week: string]: BookingDetail[];
     }
 
-    type NotificationStatusSport = {
-        [week: string]: string[];
-    };
+    // type NotificationStatusSport = {
+    //     [week: string]: string[];
+    // };
 
     const [selectedWeek, setSelectedWeek] = useState<string[]>([]);
     const [sportFieldDuplicate, setSportFieldDuplicate] = useState<WeekBookingDetail>({});
-    const [checkSportFieldDuplicate, setCheckSportFieldDuplicate] = useState<NotificationStatusSport>({});
+    // const [checkSportFieldDuplicate, setCheckSportFieldDuplicate] = useState<NotificationStatusSport>({});
 
     useEffect(() => {
         let index = 0;
@@ -494,21 +499,21 @@ const BookingModal = (props: BookingProps) => {
             for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
                 for (const booking of bookings) {
                     try {
-                        for (const s of sportDetail.statusSportFieldDetails) {
-                            if (isDateInRange(booking.date, s.startDate, s.endDate) && s.statusName !== "Hoạt động") {
-                                // const weekDate = booking.date; // Có thể thay thế bằng cách lấy tuần từ ngày, ví dụ: const weekDate = getWeek(booking.date);
-                                setCheckSportFieldDuplicate(prevState => ({
-                                    ...prevState,
-                                    [weekDate]: prevState[weekDate]
-                                        ? prevState[weekDate].some(existingItem => existingItem === `Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`)
-                                            ? prevState[weekDate]
-                                            : [...prevState[weekDate], `Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`]
-                                        : [`Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`],
-                                }));
+                        // for (const s of sportDetail.statusSportFieldDetails) {
+                        //     if (isDateInRange(booking.date, s.startDate, s.endDate) && s.statusName !== "Hoạt động") {
+                        //         // const weekDate = booking.date; // Có thể thay thế bằng cách lấy tuần từ ngày, ví dụ: const weekDate = getWeek(booking.date);
+                        //         setCheckSportFieldDuplicate(prevState => ({
+                        //             ...prevState,
+                        //             [weekDate]: prevState[weekDate]
+                        //                 ? prevState[weekDate].some(existingItem => existingItem === `Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`)
+                        //                     ? prevState[weekDate]
+                        //                     : [...prevState[weekDate], `Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`]
+                        //                 : [`Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`],
+                        //         }));
 
-                                // toast.success(s.statusName + s.endDate)
-                            }
-                        }
+                        //         // toast.success(s.statusName + s.endDate)
+                        //     }
+                        // }
 
                         const response = await fetch(
                             `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${booking.date}`
@@ -554,14 +559,14 @@ const BookingModal = (props: BookingProps) => {
                 return prevSportFieldDuplicate;
             })
 
-            setCheckSportFieldDuplicate(prev => {
-                const newState = { ...prev };
-                if (prev[weekDate]) {
-                    delete newState[weekDate];
-                    return newState;
-                }
-                return prev;
-            })
+            // setCheckSportFieldDuplicate(prev => {
+            //     const newState = { ...prev };
+            //     if (prev[weekDate]) {
+            //         delete newState[weekDate];
+            //         return newState;
+            //     }
+            //     return prev;
+            // })
         }
     }
 
@@ -765,7 +770,7 @@ const BookingModal = (props: BookingProps) => {
         setSelectedWeek([]);
         setActiveTab("all");
         setSportFieldDuplicate({});
-        setCheckSportFieldDuplicate({});
+        // setCheckSportFieldDuplicate({});
         setSelectTime("Chọn thời gian");
         setFullName("");
         setPhoneNumber("");
@@ -843,8 +848,8 @@ const BookingModal = (props: BookingProps) => {
             <>
                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
                 <ul>
-                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {sportDetail && sportDetail.price.toLocaleString()}.</li>
-                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {sportDetail && sportDetail.peakHourPrices.toLocaleString()}.</li>
+                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {sportDetail && sportDetail.price.toLocaleString()} đ.</li>
+                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {sportDetail && sportDetail.peakHourPrices.toLocaleString()} đ.</li>
                     <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>
                     <li><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}.</li>
                     <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
@@ -914,7 +919,7 @@ const BookingModal = (props: BookingProps) => {
                         </div>
                         <Row>
                             <div className="d-flex justify-content-between">
-                                <span className="mx-5 mx-auto"><b> Ngày đặt: </b>{dayStartBooking}. </span><br />
+                                <span className="mx-5 mx-auto"><b> Ngày đặt: </b>{new Date(dayStartBooking).toLocaleDateString()}. </span><br />
 
                                 <span className="mx-5 mx-auto"><b> Thời gian đá: </b>{startTime} - {endTime ? endTime : '???'}</span><br />
                             </div>
@@ -1002,7 +1007,7 @@ const BookingModal = (props: BookingProps) => {
                                 </Col>
                             ))}
                         </Row>
-                        {Object.entries(checkSportFieldDuplicate).map(([week, messages]) => (
+                        {/* {Object.entries(checkSportFieldDuplicate).map(([week, messages]) => (
                             <div key={week} className="bg-dark p-2 text-center mx-4 mt-2 text-light">
                                 <b className="text-uppercase">{week}</b><br />
                                 {messages.map((message, index) => (
@@ -1010,7 +1015,7 @@ const BookingModal = (props: BookingProps) => {
                                 ))}
 
                             </div>
-                        ))}
+                        ))} */}
                         {Object.entries(sportFieldDuplicate).map(([week, bookings]) => (
                             <div key={week} className="bg-dark p-2 text-center mx-4 mt-2 text-light">
                                 <b className="text-uppercase">Đã có sân đặt vào {week}</b><br />
@@ -1093,7 +1098,9 @@ const BookingModal = (props: BookingProps) => {
                             onClick={() => handleSave()}>Xác nhận</Button>
                         :
                         <Button style={{ backgroundColor: "#142239" }}
-                            disabled={Object.keys(sportFieldDuplicate).length === 0 && selectedWeek.length !== 0 && Object.keys(checkSportFieldDuplicate).length === 0 && selectedWeek.length !== 0 ? false : true
+                            disabled={Object.keys(sportFieldDuplicate).length === 0
+                                // && selectedWeek.length !== 0 && Object.keys(checkSportFieldDuplicate).length === 0 && selectedWeek.length !== 0
+                                ? false : true
                             }
                             onClick={() => handleSaveByPeriod()}>Xác nhận</Button>
                     }

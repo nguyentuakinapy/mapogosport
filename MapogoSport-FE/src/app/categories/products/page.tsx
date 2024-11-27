@@ -52,13 +52,6 @@ const Categories = () => {
         fetchData();
     }, []);
 
-    // const onClickIcon = (index: number) => {
-    //     setIcon(prev => {
-    //         const newIcon = [...prev];
-    //         newIcon[index] = !newIcon[index];
-    //         return newIcon;
-    //     });
-    // };
     const uniqueBrands = [...new Set(products.map(product => product.brand))];
 
     const handleCategoryChange = (categoryId: number) => {
@@ -84,7 +77,6 @@ const Categories = () => {
         <HomeLayout>
             <Container className='pt-5'>
                 <Row>
-                    {/* Sidebar responsive: hidden on small screens, show on larger */}
                     <Col lg={2} md={3} sm={12} className="mb-3">
                         <div className="d-flex mb-3">
                             <div className="fw-bold text-uppercase filter-panel">
@@ -166,7 +158,7 @@ const Categories = () => {
                                                     <div className="onsale"></div>
                                                 </div>
                                                 <div className=" ratio-1-1">
-                                                    <Link href={`/product-detail/${product.productId}`}>
+                                                    <Link href={`/categories/products/detail/${product.productId}`}>
                                                         <img
                                                             className="w-100 h-100 img-fluid"
                                                             style={{
@@ -184,10 +176,10 @@ const Categories = () => {
 
                                             <div className="inner-content">
                                                 <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
-                                                    <Link href={`/product-detail/${product.productId}`}>{product.name}</Link>
+                                                    <Link href={`/categories/products/detail/${product.productId}`}>{product.name}</Link>
                                                 </div>
                                                 <div className="product-category ms-1">
-                                                    <Link href={`/product-detail/${product.productId}`}>{product.categoryProduct.name}</Link>
+                                                    <Link href={`/categories/products/detail/${product.productId}`}>{product.categoryProduct.name}</Link>
                                                 </div>
                                                 <div className="price">
                                                     <span className="price-amount ms-1">{formatPrice(product.price)}</span>

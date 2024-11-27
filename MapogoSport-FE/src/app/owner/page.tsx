@@ -1,13 +1,14 @@
 'use client'
 import { formatPrice } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
-import { Button, Col, Form, Modal, Nav, Row } from "react-bootstrap";
+import { Button, Col, Modal, Nav, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { useData } from "../context/UserContext";
 import ProfileContent from "@/components/User/modal/user.profile";
 import BlogManager from "@/components/blog/blog-manager";
 import Wallet from "@/components/User/modal/wallet";
+import Image from "next/image";
 
 export default function Owner() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -16,7 +17,6 @@ export default function Owner() {
     const [userSubscription, setUserSubscription] = useState<UserSubscription>();
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
     const userData = useData();
-    const [owner, setOwner] = useState<Owner>();
     const [dataSport, setDataSport] = useState<SportField[]>([]);
 
     const [showModal, setShowModal] = useState(false);
@@ -24,28 +24,26 @@ export default function Owner() {
     const [selectedAccountPackage, setSelectedAccountPackage] = useState<AccountPackage | null>(null);
 
     useEffect(() => {
+        const getOwner = async () => {
+            if (userData) {
+                const responseOwner = await fetch(`http://localhost:8080/rest/owner/${userData.username}`);
+                if (!responseOwner.ok) {
+                    throw new Error('Error fetching data');
+                }
+                const dataOwner = await responseOwner.json() as Owner;
+
+                const response = await fetch(`http://localhost:8080/rest/sport_field_by_owner/${dataOwner.ownerId}`);
+                if (!response.ok) {
+                    throw new Error('Error fetching data');
+                }
+                const dataS = await response.json() as SportField[];
+                setDataSport(dataS);
+            }
+        };
         getOwner();
     }, [userData])
 
-    const getOwner = async () => {
-        if (userData) {
-            const responseOwner = await fetch(`http://localhost:8080/rest/owner/${userData.username}`);
-            if (!responseOwner.ok) {
-                throw new Error('Error fetching data');
-            }
-            const dataOwner = await responseOwner.json() as Owner;
-            setOwner(dataOwner);
-
-            const response = await fetch(`http://localhost:8080/rest/sport_field_by_owner/${dataOwner.ownerId}`);
-            if (!response.ok) {
-                throw new Error('Error fetching data');
-            }
-            const dataS = await response.json() as SportField[];
-            setDataSport(dataS);
-        }
-    };
-
-    const { data: ap, error: erAp, isLoading: isLoadingAp } = useSWR(
+    const { data: ap } = useSWR(
         `http://localhost:8080/rest/accountpackage`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
@@ -56,7 +54,7 @@ export default function Owner() {
         setAccountPackages(ap);
     }, [ap])
 
-    const { data: userSub, error: errorUserSub, isLoading: isLoadingUserSub } = useSWR(
+    const { data: userSub } = useSWR(
         `http://localhost:8080/rest/user/subscription/${userData?.username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
@@ -236,10 +234,10 @@ export default function Owner() {
                                     Thanh toán qua ví điện tử VNPay
                                 </label>
                             </div>
-                            <img
+                            <Image
                                 src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
-                                alt="VNPay"
-                                style={{ maxWidth: '50px' }}
+                                alt="VNPay12312"
+                                width={50} height={50}
                             />
                         </div>
                         <div className="card-body d-flex list-group-item align-items-center">
@@ -256,10 +254,10 @@ export default function Owner() {
                                     Thanh toán qua ví điện tử MoMo
                                 </label>
                             </div>
-                            <img
+                            <Image
                                 src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png"
-                                alt="MoMo"
-                                style={{ maxWidth: '50px' }}
+                                alt="MoMo 123123"
+                                width={50} height={50}
                             />
                         </div>
                     </div>

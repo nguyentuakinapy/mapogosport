@@ -6,3 +6,4 @@ interface ProductDetail {
   product: Product;
   productDetailSizes: ProductDetailSize[]
 }
+z
