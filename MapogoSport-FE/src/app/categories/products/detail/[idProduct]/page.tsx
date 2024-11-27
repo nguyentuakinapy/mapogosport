@@ -1,15 +1,11 @@
 'use client';
-
-import { Container, Row, Col, Button, ButtonGroup, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Container, Row, Col, Button, ButtonGroup, Form, OverlayTrigger, Tooltip, Image } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
-// import '../globals.css';
-import Image from 'next/image';
 import Collapse from 'react-bootstrap/Collapse';
 import HomeLayout from '@/components/HomeLayout';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { toast } from "react-toastify";
-import { formatPrice } from '@/components/Utils/Format'
 import useSWR, { mutate } from 'swr';
 import ModalReviewProductField from '@/components/Review/review.product';
 
@@ -205,55 +201,22 @@ const ProductDetail = () => {
     return (
         <>
             <HomeLayout>
-                <Container className="mt-5 py-3 container1 bg-light" style={{ maxWidth: '1170px' }}>
-                    <Row className='p-5'>
-                        {/* Cột hình ảnh sản phẩm */}
-                        <Col className='ms-5' style={{ maxWidth: '550px' }}>
-                            <img
-                                src={`${findByIdProduct?.image}`}
-                                className='w-100'
-                                alt="Main product"
-                                id="main-product-image"
-                                title={findByIdProduct?.name}
-                                style={{ width: '100%', height: '400px', objectFit: 'contain' }}
+                <Container className="mt-3 container1 bg-light" style={{ maxWidth: '1170px' }}>
+                    <Row className='pt-3'>
+                        <Col xs={6}>
+                            <Image src={`${findByIdProduct?.image}`}
+                                alt={findByIdProduct?.name} id="main-product-image"
+                                style={{ width: '100%', height: '500px', objectFit: 'cover' }}
                             />
                             <div id="imageGalleryCarousel" className="carousel slide mt-3" data-bs-ride="carousel">
                                 <div className="carousel-inner">
-                                    {/* {imageGallery[0].galleries.map((_galleryItem, index) => (
-                                                <div
-                                                    key={index}
-                                                    className={`carousel-item ${index === 0 ? 'active' : ''}`} // First item is active
-                                                >
-                                                    <div className="row justify-content-center">
-                                                        {imageGallery[0].galleries.slice(index, index + 3).map((item, subIndex) => (
-                                                            <div className="col-4 d-flex justify-content-center" key={subIndex}>
-                                                                <img
-                                                                    src={item.name}
-                                                                    className="img-fluid"
-                                                                    alt={`Gallery image ${index + subIndex + 1}`}
-                                                                    style={{ width: '90px', height: '90px', objectFit: 'cover', cursor: 'pointer' }}
-                                                                    onClick={() => {
-                                                                        document.getElementById('main-product-image').src = item.name;
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            ))} */}
                                     {imageGallery.map((item, index) => {
                                         return (
-                                            <div
-                                                key={item.productDetailId}
-                                                className={`carousel-item ${index === 0 ? 'active' : ''}`} // First item is active
-                                            >
+                                            <div key={item.productDetailId} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
                                                 <div className="row justify-content-center">
                                                     {item.galleries.slice(index, index + 3).map((item, subIndex) => (
                                                         <div className="col-4 d-flex justify-content-center" key={subIndex}>
-                                                            <img
-                                                                src={item.name}
-                                                                className="img-fluid"
-                                                                alt={`Gallery image ${index + subIndex + 1}`}
+                                                            <Image src={item.name} alt={`Gallery image ${index + subIndex + 1}`}
                                                                 style={{ width: '90px', height: '90px', objectFit: 'cover', cursor: 'pointer' }}
                                                                 onClick={() => {
                                                                     (document.getElementById('main-product-image') as HTMLImageElement).src = item.name;
@@ -266,8 +229,6 @@ const ProductDetail = () => {
                                         )
                                     })}
                                 </div>
-
-
                                 <button className="carousel-control-prev" type="button" data-bs-target="#imageGalleryCarousel" data-bs-slide="prev">
                                     <span className="carousel-control-prev-icon" aria-hidden="true"></span>
                                     <span className="visually-hidden">Previous</span>
@@ -278,7 +239,7 @@ const ProductDetail = () => {
                                 </button>
                             </div>
                         </Col>
-                        <Col className='ms-5' style={{ marginLeft: '100px' }}>
+                        <Col xs={6}>
                             <h4>{findByIdProduct?.name}</h4>
                             <div className='star-comment '>
                                 <div className="star d-flex">
@@ -304,9 +265,7 @@ const ProductDetail = () => {
                                 <div className="d-flex flex-wrap">
                                     {imageGallery.map((item, index) => {
                                         return (
-                                            <Button
-                                                key={index}
-                                                className="me-2 mb-2"
+                                            <Button key={index} className="me-2 mb-2"
                                                 variant={idSize === item.productDetailId ? 'dark' : 'outline-secondary'}
                                                 onClick={() => {
                                                     setIdSize(item.productDetailId);
@@ -314,12 +273,8 @@ const ProductDetail = () => {
                                                     setSelectedSizeQuantity(item.detailSizes.length > 0 ? item.detailSizes[0].quantity : 0);
                                                     (document.getElementById('main-product-image') as HTMLImageElement).src = item.image;
 
-                                                }}
-
-                                            >
-                                                <img
-                                                    src={`${item.image}`} // Assuming the image URL is the third element in the colorItem array
-                                                    alt={item.color}
+                                                }}>
+                                                <Image src={`${item.image}`} alt={item.color}
                                                     style={{ width: '40px', height: '40px', marginRight: '10px', objectFit: 'cover' }}
                                                 />
                                                 {item.color}
@@ -433,13 +388,7 @@ const ProductDetail = () => {
                             .map((review: ProductReviewData) => (
                                 <Row className="mt-5 ms-5" key={review.productReviewId}>
                                     <Col>
-                                        <Image
-                                            src="/img/avatar.jpg"
-                                            alt="Hình ảnh thu nhỏ"
-                                            width={35}
-                                            height={35}
-                                            className="rounded-circle"
-                                        />
+                                        <Image src="/img/avatar.jpg" alt="Hình ảnh thu nhỏ" width={35} height={35} className="rounded-circle" />
                                         <span className="me-4">{review.user.fullname}</span>
                                         <i className="bi bi-calendar me-2"></i>
                                         <span>{new Date(review.datedAt).toLocaleString('vi-VN')}</span>

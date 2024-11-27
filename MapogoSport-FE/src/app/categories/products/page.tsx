@@ -14,12 +14,6 @@ const Categories = () => {
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
-    const handlePageChange = (pageNumber: number) => {
-        setCurrentPage(pageNumber);
-    };
 
     const { data: categoriesProduct } = useSWR<CategoryProduct[]>("http://localhost:8080/rest/category-products", fetcher);
     const { data: products } = useSWR<Product[]>("http://localhost:8080/rest/products", fetcher);
