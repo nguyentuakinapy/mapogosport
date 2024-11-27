@@ -35,11 +35,6 @@ public interface ProductDetailDAO extends JpaRepository<ProductDetail, Integer> 
 	Optional<Double> findPriceByProductDetailIdAndSizeId(@Param("productDetailId") Integer productDetailId,
 			@Param("sizeId") Integer sizeId);
 
-	@Query("SELECT pd, g " +
-		       "FROM ProductDetail pd " +
-		       "LEFT JOIN Gallery g ON g.productDetail = pd " +
-		       "WHERE pd.productDetailId = :productDetailId")
-		List<Object[]> findByImageDetailAndGalleryByIdProductDetail(@Param("productDetailId") Integer productDetailId); //hiển thị image và gallery theo idproductDetail
 
 	// select image productDetail by productId
 //	@Query("SELECT pd.image\r\n" 

@@ -1,15 +1,15 @@
 
 import { useData } from "@/app/context/UserContext";
 import { logOut } from "@/app/utils/Log-Out";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 interface NavProps {
     isAniActive: boolean;
     toggleAni: () => void;
 }
-export default function Nav({ isAniActive, toggleAni }: NavProps) {
+export default function Nav({ isAniActive }: NavProps) {
     const path = usePathname();
 
     const userData = useData();
@@ -20,7 +20,7 @@ export default function Nav({ isAniActive, toggleAni }: NavProps) {
                 <div className={`nav-left-block`}>
                     <div className="logo text-center p-2">
                         <a href='/'>
-                            <img src="/images/logo.png" style={{ width: '60%' }} alt="Logo" />
+                            <Image src="/images/logo.png" width={200} height={100} alt="Logo" />
                         </a>
 
                     </div>
@@ -44,7 +44,7 @@ export default function Nav({ isAniActive, toggleAni }: NavProps) {
                 :
                 <div className={`nav-left-none-icon`}>
                     <div className="logo text-center mt-3">
-                        <a href="/"> <img src="/images/logo.png" style={{ width: '100%' }} alt="Logo" /></a>
+                        <a href="/"> <Image src="/images/logo.png" width={80} height={40} alt="Logo" /></a>
                     </div>
                     <div className="mt-5">
                         <nav className="container m-auto">

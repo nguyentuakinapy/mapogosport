@@ -18,6 +18,8 @@ import './userStyle.scss'
 import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
+import Image from 'next/image';
+
 
 
 const CartBadge = ({ username }: { username: string }) => {
@@ -222,7 +224,7 @@ const handleDeleteNotification = (username: string) => {
                 position: 'sticky', zIndex: '1001', backgroundColor: '#090e1e', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)'
             }}>
                 <Container>
-                    <Navbar><Link href={'/'} ><img src="/images/logo-black.png" style={{ width: '80px' }} alt="" /></Link></Navbar>
+                    <Navbar><Link href={'/'} ><Image src="/images/logo-black.png" width={100} height={60} alt="" /></Link></Navbar>
                     <Navbar.Toggle aria-controls="navbarScroll" />
                     <Navbar.Collapse id="navbarScroll">
                         {/* <Form className="d-flex m-auto">
@@ -340,7 +342,7 @@ const handleDeleteNotification = (username: string) => {
                                     {/* <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-target="#changePassword" style={{ cursor: 'pointer' }}>Thay đổi mật khẩu</a> */}
                                     <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowForgotPassword(true)} style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
                                     {/* <hr className='m-0' /> */}
-                                    <Link href='/user/profile' className={`dropdown-item text-decoration-none text-dark ${userData ? '' : 'd-none'}`}>Thông tin tài khoản</Link>
+                                    <Link href='/user' className={`dropdown-item text-decoration-none text-dark ${userData ? '' : 'd-none'}`}>Thông tin tài khoản</Link>
                                     {userData && userData.authorities.map((item, index) => {
                                         if (item.role.name === "ROLE_USER") {
                                             return null;

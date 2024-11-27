@@ -1,4 +1,4 @@
-import { Button, Col, Form, Modal, Row, FloatingLabel } from "react-bootstrap";
+import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import '../admin.scss';
 import { useEffect, useState } from "react";
 import DatePicker from 'react-datepicker';
@@ -52,7 +52,7 @@ const Authority = (props: UserProps) => {
         console.log("trước:", selectedRoles);
 
         try {
-            const response = await axios.post(`http://localhost:8080/rest/update-user-authority/${user?.username}`, selectedRoles);
+            await axios.post(`http://localhost:8080/rest/update-user-authority/${user?.username}`, selectedRoles);
             mutate(`http://localhost:8080/rest/list-users`)
             toast.success(`Cập nhật vai trò của "${user.username}" thành công!`);
         } catch (error) {

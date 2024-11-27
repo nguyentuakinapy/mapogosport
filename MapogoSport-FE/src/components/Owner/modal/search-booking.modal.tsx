@@ -1,4 +1,5 @@
 import BookingModal from "@/components/Owner/modal/booking.modal";
+import { createTimeStringH, isDateInRange } from "@/components/Utils/booking-time";
 import { useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
@@ -8,7 +9,7 @@ interface SearchBookingProps {
     showSearchBookingModal: boolean;
     setSearchShowBookingModal: (v: boolean) => void;
     dataTimeSport: string[];
-    sportField?: SportField;
+    sportField: SportField;
 }
 
 const SearchBookingModal = (props: SearchBookingProps) => {
@@ -23,7 +24,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
     const [startTimeKey, setStartTimeKey] = useState<number>(1);
     const [validTimes, setValidTimes] = useState<string[]>([]);
     const [opening, setOpening] = useState<number>();
-    const [operatingTime, setOperatingTime] = useState<number>(0);
+    // const [operatingTime, setOperatingTime] = useState<number>(0);
     const [checkDataStatus, setCheckDataStatus] = useState<boolean>(true);
 
     useEffect(() => {
@@ -52,67 +53,140 @@ const SearchBookingModal = (props: SearchBookingProps) => {
     };
 
     useEffect(() => {
+        let operatingTime = 0;
         if (sportField) {
-            getTime()
-        };
-    }, [sportField]);
-
-    const getTime = () => {
-        if (sportField) {
-            const open = sportField?.opening;
-            const close = sportField?.closing;
+            const open = sportField.opening;
+            const close = sportField.closing;
             if (open && typeof open === 'string' && close && typeof close === 'string') {
                 const numberOpen = open.match(/\d+/);
                 const numberClose = close.match(/\d+/);
                 if (numberOpen && numberClose) {
                     setOpening(Number(numberOpen[0]));
-                    setOperatingTime(Number(numberClose[0]) - Number(numberOpen[0]));
+                    operatingTime = (Number(numberClose[0]) - Number(numberOpen[0]));
                 }
             }
-        }
-    }
-
-    useEffect(() => {
-        const newData: string[] = [];
-        for (let index = 0; index < (operatingTime * 2) + 1; index++) {
-            if (newData.length === 0) {
-                newData.push(String(opening + "h00"));
-            } else {
-                if (newData[newData.length - 1].includes("h30")) {
-                    const getDataTime = newData[newData.length - 2];
-                    const getTime = getDataTime.match(/\d+/);
-                    if (getTime) {
-                        newData.push(String(Number(getTime[0]) + 1) + "h00");
-                    }
-
+            const newData: string[] = [];
+            for (let index = 0; index < (operatingTime * 2) + 1; index++) {
+                if (newData.length === 0) {
+                    newData.push(String(opening + "h00"));
                 } else {
-                    const getDataTime = newData[newData.length - 1];
-                    const getTime = getDataTime.match(/\d+/);
-                    if (getTime) {
-                        const createOpening = String(getTime[0]) + "h30";
-                        newData.push(createOpening);
+                    if (newData[newData.length - 1].includes("h30")) {
+                        const getDataTime = newData[newData.length - 2];
+                        const getTime = getDataTime.match(/\d+/);
+                        if (getTime) {
+                            newData.push(String(Number(getTime[0]) + 1) + "h00");
+                        }
+
+                    } else {
+                        const getDataTime = newData[newData.length - 1];
+                        const getTime = getDataTime.match(/\d+/);
+                        if (getTime) {
+                            const createOpening = String(getTime[0]) + "h30";
+                            newData.push(createOpening);
+                        }
                     }
                 }
             }
+            const index = newData.indexOf(sportField.opening || 'NA');
+            if (index !== -1) {
+                newData.splice(0, index);
+            }
+            const modifiedValidTimes = newData.slice(0, -2);
+            setValidTimes(modifiedValidTimes);
         }
-        const index = newData.indexOf(sportField?.opening || 'NA');
-        if (index !== -1) {
-            newData.splice(0, index);
-        }
-        const modifiedValidTimes = newData.slice(0, -2);
-        setValidTimes(modifiedValidTimes);
-    }, [operatingTime, opening]);
+    }, [sportField]);
 
     const handleFindField = async () => {
-        if (selectedDate && selectedTime) {
+        if (selectedDate && selectedTime && sportField) {
             const response = await fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${selectedSportType}/${selectedDate}/${selectedDate}`);
             const bookingsFromAPI: BookingDetail[] = await response.json();
             let isBooked = false;
-            const selectedSportDetail = sportField?.sportFielDetails.find(detail => detail.sportFielDetailId === selectedSportType);
+            const selectedSportDetail = sportField.sportFielDetails.find(detail => detail.sportFielDetailId === selectedSportType);
 
-            if (selectedSportDetail && selectedSportDetail.status === "Tạm đóng") {
-                toast.warning("Không tìm thấy sân phù hợp theo nhu cầu!");
-                return;
+            if (selectedSportDetail) {
+                for (const s of selectedSportDetail.statusSportFieldDetails) {
+                    let hourStart;
+                    let minuteStart;
+                    let hourEnd;
+                    let minuteEnd;
+                    if (isDateInRange(selectedDate, s.startDate, s.endDate)) {
+                        if (sportField) {
+                            if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === selectedDate && s.endDate !== null) {
+                                if (new Date(s.startDate).getMinutes() > 30) {
+                                    hourStart = new Date(s.startDate).getHours() + 1;
+                                    minuteStart = '00';
+                                } else {
+                                    hourStart = new Date(s.startDate).getHours();
+                                    minuteStart = '30';
+                                }
+
+                                if (new Date(s.endDate).getMinutes() > 30) {
+                                    hourEnd = new Date(s.endDate).getHours() + 1;
+                                    minuteEnd = '00';
+                                } else {
+                                    hourEnd = new Date(s.endDate).getHours();
+                                    minuteEnd = '30';
+                                }
+                                // toast.success(s.statusName + "NGos cc")
+
+                                const timeStringH: string[] = createTimeStringH(
+                                    `${hourStart}h${minuteStart}`,
+                                    `${hourEnd}h${minuteEnd}`
+                                );
+
+                                const result = timeStringH.includes(selectedTime);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == selectedTime) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+
+                            } else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === selectedDate) {
+                                if (new Date(s.endDate).getMinutes() > 30) {
+                                    hourEnd = new Date(s.endDate).getHours() + 1;
+                                    minuteEnd = '00';
+                                } else {
+                                    hourEnd = new Date(s.endDate).getHours();
+                                    minuteEnd = '30';
+                                }
+
+                                const currentEndTime = `${hourEnd}h${minuteEnd}`;
+                                const timeStringH: string[] = createTimeStringH(
+                                    sportField.opening,
+                                    currentEndTime
+                                );
+
+                                if (new Date(s.startDate).getTime() >= new Date().getTime()) {
+                                    break;
+                                }
+
+                                const result = timeStringH.includes(selectedTime);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (currentEndTime == selectedTime) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            } else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] !== selectedDate && s.endDate === null) {
+
+                                const timeStringH: string[] = createTimeStringH(
+                                    sportField.opening,
+                                    sportField.closing
+                                );
+                                // toast.success(s.statusName + "NGos ccasasdasdasdasdasdsa")
+
+                                const result = timeStringH.includes(selectedTime);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             const currentDateTime = new Date();

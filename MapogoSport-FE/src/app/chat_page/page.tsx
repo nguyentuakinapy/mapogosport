@@ -1,10 +1,10 @@
 'use client'; // Chỉ định rằng đây là một component client-side trong Next.js
-import { useState } from "react"; // Nhập hook useState từ React để quản lý trạng thái
-import { Container, Row, Col, ListGroup, InputGroup, FormControl, Button, Form, Image } from 'react-bootstrap'; // Nhập các thành phần từ React Bootstrap
+import React, { useState } from "react"; // Nhập hook useState từ React để quản lý trạng thái
+import { Container, Row, Col, ListGroup, InputGroup, FormControl, Button, Image } from 'react-bootstrap'; // Nhập các thành phần từ React Bootstrap
 import './types/chat_page.scss'; // Nhập file SCSS để định dạng cho trang chat
 
 const MessengerPage = () => {
-  
+
   // Khởi tạo trạng thái messages với một số tin nhắn mẫu
   const [messages, setMessages] = useState([
     { type: "receive", text: "Hello bạn?", img: "/chat_page/assets/images/users/user-6.png" },
@@ -32,19 +32,19 @@ const MessengerPage = () => {
     // Thêm nhiều người dùng nếu cần
   ]);
 
-    // Khởi tạo trạng thái activeUser với người dùng mặc định
+  // Khởi tạo trạng thái activeUser với người dùng mặc định
   const [activeUser, setActiveUser] = useState(chatList[0]?.user); // Để dấu '?' để tránh trường hợp nếu mảng r
 
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value); // Cập nhật giá trị input tin nhắn khi người dùng nhập
   };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value); // Set giá trị SearchValue ==  từ khóa người dùng nhập vào
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Ngăn chặn hành vi mặc định của form
     if (inputValue.trim() === '') return; // Không gửi tin nhắn trống
 
@@ -70,9 +70,9 @@ const MessengerPage = () => {
   };
 
   // Lọc danh sách chat theo giá trị tìm kiếm
-  const filteredChatList = chatList.filter(chat => 
+  const filteredChatList = chatList.filter(chat =>
     chat.user.toLowerCase().includes(searchValue.toLowerCase()) // Kiểm tra nếu tên người dùng bao gồm giá trị tìm kiếm
-                                  // searchValue được thay đổi qua hàm handleSearchChange -> hàm chỉ lấy giá trị của input
+    // searchValue được thay đổi qua hàm handleSearchChange -> hàm chỉ lấy giá trị của input
   );
 
   return (
@@ -145,13 +145,9 @@ const MessengerPage = () => {
         <Col md={9} xs={9} className="d-flex flex-column"> {/* Cột bên phải cho tin nhắn */}
           <div className="p-3 border-bottom d-flex justify-content-between align-items-center"> {/* Thanh tiêu đề cho tin nhắn */}
             <div className="d-flex align-items-center">
-              <Image
-                src={chatList.find(chat => chat.user === activeUser)?.avatar} // Ảnh đại diện của người dùng đang hoạt động
-                className="rounded-circle me-2"
-                alt="Người dùng"
-                width={50}
-                height={50}
-              />
+              <Image src={chatList.find(chat => chat.user === activeUser)?.avatar} // Ảnh đại diện của người dùng đang hoạt động
+                className="rounded-circle me-2" alt="Người dùng"
+                width={50} height={50} />
               <span>{activeUser}</span> {/* Tên người dùng đang hoạt động */}
             </div>
           </div>
@@ -161,13 +157,9 @@ const MessengerPage = () => {
               {messages.map((message, index) => ( // Lặp qua danh sách tin nhắn
                 <li key={index} className={`mb-3 d-flex ${message.type === "reply" ? "justify-content-end" : ""}`}> {/* Định dạng cho từng tin nhắn */}
                   {message.type === "receive" && ( // Nếu tin nhắn là nhận
-                    <Image
-                      src={message.img} // Ảnh đại diện của người gửi
-                      className="rounded-circle me-2"
-                      alt="Người dùng"
-                      width={40}
-                      height={40}
-                    />
+                    <Image src={message.img} // Ảnh đại diện của người gửi
+                      className="rounded-circle me-2" alt="Người dùng"
+                      width={40} height={40} />
                   )}
                   <div className={`message-bubble p-2 rounded ${message.type === "reply" ? "bg-primary text-white" : "bg-light"}`}> {/* Bóng tin nhắn với màu khác nhau cho tin nhắn nhận và trả lời */}
                     <p className="mb-0">{message.text}</p> {/* Văn bản của tin nhắn */}
@@ -187,18 +179,10 @@ const MessengerPage = () => {
                 </div>
 
                 <div className="input-group flex-grow-1 mx-2"> {/* Nhóm input cho văn bản tin nhắn */}
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Nhập tin nhắn..." // Placeholder cho input tin nhắn
-                    aria-label="Nhập tin nhắn..."
-                    value={inputValue} // Giá trị input
-                    onChange={handleInputChange} // Gọi hàm khi giá trị thay đổi
-                  />
+                  <input type="text" className="form-control" placeholder="Nhập tin nhắn..."
+                    value={inputValue} onChange={handleInputChange} />
                 </div>
-                <button type="submit" className="btn btn-primary"> {/* Nút gửi tin nhắn */}
-                  {/* Gửi */}<i class="bi bi-send-fill"></i>
-                </button>
+                <button type="submit" className="btn btn-primary"><i className="bi bi-send-fill"></i></button>
               </form>
             </div>
           </div>

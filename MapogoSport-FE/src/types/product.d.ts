@@ -1,5 +1,4 @@
 interface Product {
-    filter(arg0: (_: any, idx: any) => boolean): unknown;
     productId: number;
     name: string;
     categoryProduct: CategoryProduct;
@@ -11,6 +10,7 @@ interface Product {
     price: number;
     image: File | string;
     stock: double;
+    productReviews: ProductReview[];
 }
 
 

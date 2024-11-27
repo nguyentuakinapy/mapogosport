@@ -1,5 +1,4 @@
-import { createTimeStringH } from "@/components/Utils/booking-time";
-import { formatPrice } from "@/components/Utils/Format";
+import { createTimeStringH, isDateInRange } from "@/components/Utils/booking-time";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -297,18 +296,136 @@ const BookingModal = (props: OwnerProps) => {
     const [dataTimeOnStageAll, setDataTimeOnStageAll] = useState<string[]>([]);
 
     useEffect(() => {
-        createTimeByTimeOnStageAll();
-    }, [bookingBySubscriptionKey])
+        const timeSlots = [];
+
+        if (bookingBySubscriptionKey) {
+            for (const item of bookingBySubscriptionKey) {
+                const getTime = startTimeBooking && startTimeBooking.match(/(\d+)h(\d+)/);
+                const startHours = getTime ? Number(getTime[1]) : 0;
+                const startMinutes = getTime ? Number(getTime[2]) : 0;
+
+                let currentHours = startHours;
+                let currentMinutes = startMinutes;
+
+                if (item.startTime && item.endTime) {
+                    for (let i = 0; i <= calculateTimeDifference(item.startTime, item.endTime) / 30; i++) {
+                        timeSlots.push(`${currentHours}h${currentMinutes === 0 ? '00' : currentMinutes}`);
+                        currentMinutes += 30;
+
+                        if (currentMinutes >= 60) {
+                            currentHours += Math.floor(currentMinutes / 60);
+                            currentMinutes = currentMinutes % 60;
+                        }
+                    }
+                }
+                timeSlots.pop();
+            }
+        }
+        setDataTimeOnStageAll(timeSlots);
+    }, [bookingBySubscriptionKey, startTimeBooking])
 
     const confirmDataBooking = async () => {
-
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == idSportDetail);
 
         let isAvailable = true;
-
         let checkTime = false;
 
 
+        if (sportDetail && dateBooking) {
+            for (const s of sportDetail.statusSportFieldDetails) {
+
+                let hourStart;
+                let minuteStart;
+                let hourEnd;
+                let minuteEnd;
+
+                if (isDateInRange(dateBooking, s.startDate, s.endDate)) {
+                    if (sport) {
+                        if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === dateBooking && s.endDate !== null) {
+
+                            if (new Date(s.startDate).getMinutes() > 30) {
+                                hourStart = new Date(s.startDate).getHours() + 1;
+                                minuteStart = '00';
+                            } else {
+                                hourStart = new Date(s.startDate).getHours();
+                                minuteStart = '30';
+                            }
+
+                            if (new Date(s.endDate).getMinutes() > 30) {
+                                hourEnd = new Date(s.endDate).getHours() + 1;
+                                minuteEnd = '00';
+                            } else {
+                                hourEnd = new Date(s.endDate).getHours();
+                                minuteEnd = '30';
+                            }
+                            // toast.success(s.statusName + "NGos cc")
+
+                            const timeStringH: string[] = createTimeStringH(
+                                `${hourStart}h${minuteStart}`,
+                                `${hourEnd}h${minuteEnd}`
+                            );
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                        else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === dateBooking) {
+                            if (new Date(s.endDate).getMinutes() > 30) {
+                                hourEnd = new Date(s.endDate).getHours() + 1;
+                                minuteEnd = '00';
+                            } else {
+                                hourEnd = new Date(s.endDate).getHours();
+                                minuteEnd = '30';
+                            }
+                            // toast.success(s.statusName + "NGos ccasasdasd")
+
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                `${hourEnd}h${minuteEnd}`
+                            );
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourEnd}h${minuteEnd}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                        else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] !== dateBooking && s.endDate === null) {
+
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                sport.closing
+                            );
+                            // toast.success(s.statusName + "NGos ccasasdasdasdasdasdsa")
+
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         if (applyOne) {
             // if (dateBookingTemporary != dateBooking && idSportDetailTemporary != idSportDetail) {
             if (bookingDetailData && new Date(bookingDetailData.date).setHours(0, 0, 0, 0) !== new Date().setHours(0, 0, 0, 0)) {
@@ -501,103 +618,8 @@ const BookingModal = (props: OwnerProps) => {
         }
     }
 
-    const createTimeByTimeOnStageAll = async () => {
-        // console.log('dataBookingBySubscriptionKey', bookingBySubscriptionKey);
-
-        const timeSlots = [];
-
-        if (bookingBySubscriptionKey) {
-            for (const item of bookingBySubscriptionKey) {
-                const getTime = startTimeBooking && startTimeBooking.match(/(\d+)h(\d+)/);
-                const startHours = getTime ? Number(getTime[1]) : 0;
-                const startMinutes = getTime ? Number(getTime[2]) : 0;
-
-                let currentHours = startHours;
-                let currentMinutes = startMinutes;
-
-                if (item.startTime && item.endTime) {
-                    for (let i = 0; i <= calculateTimeDifference(item.startTime, item.endTime) / 30; i++) {
-                        timeSlots.push(`${currentHours}h${currentMinutes === 0 ? '00' : currentMinutes}`);
-                        currentMinutes += 30;
-
-                        if (currentMinutes >= 60) {
-                            currentHours += Math.floor(currentMinutes / 60);
-                            currentMinutes = currentMinutes % 60;
-                        }
-                    }
-                }
-                timeSlots.pop();
-            }
-        }
-        console.log(timeSlots);
-
-        setDataTimeOnStageAll(timeSlots);
-    }
 
     useEffect(() => {
-        getPriceByTimeBooking();
-        createTimeByTimeOnStage();
-    }, [startTimeBooking, endTimeBooking])
-
-    const createTimeByTimeOnStage = () => {
-        const getTime = startTimeBooking && startTimeBooking.match(/(\d+)h(\d+)/);
-        const startHours = getTime ? Number(getTime[1]) : 0;
-        const startMinutes = getTime ? Number(getTime[2]) : 0;
-
-        const timeSlots = [];
-
-        let currentHours = startHours;
-        let currentMinutes = startMinutes;
-
-        if (startTimeBooking && endTimeBooking) {
-            for (let i = 0; i <= calculateTimeDifference(startTimeBooking, endTimeBooking) / 30; i++) {
-                timeSlots.push(`${currentHours}h${currentMinutes === 0 ? '00' : currentMinutes}`);
-                currentMinutes += 30;
-
-                if (currentMinutes >= 60) {
-                    currentHours += Math.floor(currentMinutes / 60);
-                    currentMinutes = currentMinutes % 60;
-                }
-            }
-        }
-        timeSlots.pop();
-        setDataTimeOnStage(timeSlots);
-    }
-
-
-    const isTimeWithinRange = (startTime: string, endTime: string, checkTime: string): boolean => {
-        const [startHours, startMinutes] = startTime.split('h').map(Number);
-        const [endHours, endMinutes] = endTime.split('h').map(Number);
-        const [checkHours, checkMinutes] = checkTime.split('h').map(Number);
-
-        // Tạo đối tượng Date cho từng thời gian
-        const startDate = new Date(0, 0, 0, startHours, startMinutes);
-        const endDate = new Date(0, 0, 0, endHours, endMinutes);
-        const checkDate = new Date(0, 0, 0, checkHours, checkMinutes);
-
-        // Kiểm tra thời gian nằm trong khoảng
-        return checkDate >= startDate && checkDate <= endDate;
-    }
-
-
-
-
-    const convertToMinutes = (time: string) => {
-        const [hours, minutes] = time.split('h').map(Number);
-        return (hours * 60) + minutes;
-    };
-
-    const calculateTimeDifference = (start: string, end: string) => {
-        const startTotalMinutes = convertToMinutes(start);
-        const endTotalMinutes = convertToMinutes(end);
-
-        return endTotalMinutes - startTotalMinutes;
-    };
-
-    const [price, setPrice] = useState<number>();
-
-    const getPriceByTimeBooking = () => {
-
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == idSportDetail);
 
         if (startTimeBooking && endTimeBooking && sportDetail) {
@@ -620,20 +642,57 @@ const BookingModal = (props: OwnerProps) => {
             }
 
             setPrice(totalAmount);
-            // if (isEven(timeBooking)) {
-            //     setPrice(sportDetail.price * timeBooking / 2);
-            //     // toast.success(sportDetail.price * timeBooking / 2);
-            // } else {
-            //     if (timeBooking == 1) {
-            //         setPrice((sportDetail.price * timeBooking) / 2);
-            //         // toast.success((sportDetail.price * timeBooking) / 2)
-            //     } else {
-            //         setPrice((sportDetail.price * timeBooking / 2));
-            //         // toast.success((sportDetail.price * timeBooking / 2))
-            //     }
-            // }
         }
+        const getTime = startTimeBooking && startTimeBooking.match(/(\d+)h(\d+)/);
+        const startHours = getTime ? Number(getTime[1]) : 0;
+        const startMinutes = getTime ? Number(getTime[2]) : 0;
+
+        const timeSlots = [];
+
+        let currentHours = startHours;
+        let currentMinutes = startMinutes;
+
+        if (startTimeBooking && endTimeBooking) {
+            for (let i = 0; i <= calculateTimeDifference(startTimeBooking, endTimeBooking) / 30; i++) {
+                timeSlots.push(`${currentHours}h${currentMinutes === 0 ? '00' : currentMinutes}`);
+                currentMinutes += 30;
+
+                if (currentMinutes >= 60) {
+                    currentHours += Math.floor(currentMinutes / 60);
+                    currentMinutes = currentMinutes % 60;
+                }
+            }
+        }
+        timeSlots.pop();
+        setDataTimeOnStage(timeSlots);
+    }, [startTimeBooking, endTimeBooking])
+
+    const isTimeWithinRange = (startTime: string, endTime: string, checkTime: string): boolean => {
+        const [startHours, startMinutes] = startTime.split('h').map(Number);
+        const [endHours, endMinutes] = endTime.split('h').map(Number);
+        const [checkHours, checkMinutes] = checkTime.split('h').map(Number);
+
+        const startDate = new Date(0, 0, 0, startHours, startMinutes);
+        const endDate = new Date(0, 0, 0, endHours, endMinutes);
+        const checkDate = new Date(0, 0, 0, checkHours, checkMinutes);
+
+        return checkDate >= startDate && checkDate <= endDate;
     }
+
+    const convertToMinutes = (time: string) => {
+        const [hours, minutes] = time.split('h').map(Number);
+        return (hours * 60) + minutes;
+    };
+
+    const calculateTimeDifference = (start: string, end: string) => {
+        const startTotalMinutes = convertToMinutes(start);
+        const endTotalMinutes = convertToMinutes(end);
+
+        return endTotalMinutes - startTotalMinutes;
+    };
+
+    const [price, setPrice] = useState<number>();
+
 
     useEffect(() => {
         setConfirmData(false);
@@ -759,10 +818,6 @@ const BookingModal = (props: OwnerProps) => {
     }
 
     useEffect(() => {
-        getAddNewPriceByTimeBooking()
-    }, [newEndTimeBooking, newIdSportBooking])
-
-    const getAddNewPriceByTimeBooking = () => {
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == newIdSportBooking);
 
         if (bookingDetailData && newEndTimeBooking && bookingDetailData.endTime && sportDetail) {
@@ -785,7 +840,7 @@ const BookingModal = (props: OwnerProps) => {
             }
             setNewPriceBooking(totalAmount);
         }
-    }
+    }, [newEndTimeBooking, newIdSportBooking])
 
     const confirmNewDataBooking = async () => {
         const sportDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId == newIdSportBooking);
@@ -815,6 +870,101 @@ const BookingModal = (props: OwnerProps) => {
             }
         }
         timeSlots.pop();
+
+        if (sportDetail && dateBooking) {
+            for (const s of sportDetail.statusSportFieldDetails) {
+                let hourStart;
+                let minuteStart;
+                let hourEnd;
+                let minuteEnd;
+
+                if (isDateInRange(dateBooking, s.startDate, s.endDate)) {
+                    if (sport) {
+                        if (s.statusName !== "Hoạt động" && new Date(s.startDate).toISOString().split("T")[0] === dateBooking && s.endDate !== null) {
+
+                            if (new Date(s.startDate).getMinutes() > 30) {
+                                hourStart = new Date(s.startDate).getHours() + 1;
+                                minuteStart = '00';
+                            } else {
+                                hourStart = new Date(s.startDate).getHours();
+                                minuteStart = '30';
+                            }
+
+                            if (new Date(s.endDate).getMinutes() > 30) {
+                                hourEnd = new Date(s.endDate).getHours() + 1;
+                                minuteEnd = '00';
+                            } else {
+                                hourEnd = new Date(s.endDate).getHours();
+                                minuteEnd = '30';
+                            }
+                            // toast.success(s.statusName + "NGos cc")
+
+                            const timeStringH: string[] = createTimeStringH(
+                                `${hourStart}h${minuteStart}`,
+                                `${hourEnd}h${minuteEnd}`
+                            );
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                        else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] === dateBooking) {
+                            if (new Date(s.endDate).getMinutes() > 30) {
+                                hourEnd = new Date(s.endDate).getHours() + 1;
+                                minuteEnd = '00';
+                            } else {
+                                hourEnd = new Date(s.endDate).getHours();
+                                minuteEnd = '30';
+                            }
+                            // toast.success(s.statusName + "NGos ccasasdasd")
+
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                `${hourEnd}h${minuteEnd}`
+                            );
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourEnd}h${minuteEnd}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                        else if (s.statusName !== "Hoạt động" && new Date(s.endDate).toISOString().split("T")[0] !== dateBooking && s.endDate === null) {
+
+                            const timeStringH: string[] = createTimeStringH(
+                                sport.opening,
+                                sport.closing
+                            );
+                            // toast.success(s.statusName + "NGos ccasasdasdasdasdasdsa")
+
+
+                            for (const time of dataTimeOnStage) {
+                                const result = timeStringH.includes(time);
+                                if (result) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                } else if (`${hourStart}h${minuteStart}` == time) {
+                                    toast.warning("Sân " + s.statusName.toLowerCase() + " vui lòng chọn sân khác!");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         if (dateBookingTemporary != dateBooking && idSportDetailTemporary != idSportDetail) {
             if (sport && dateBooking && new Date(dateBooking).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
@@ -877,6 +1027,31 @@ const BookingModal = (props: OwnerProps) => {
             toast.warning('Đã có sân đặt rồi!');
         }
     }
+
+    useEffect(() => {
+        const sportFieldDetail = sport?.sportFielDetails.find(item => item.sportFielDetailId === idSportDetail);
+        if (startTimeBooking && endTimeBooking && sportFieldDetail) {
+            const peakHourStart = sportFieldDetail.peakHour.split('-')[0];
+            const peakHourEnd = sportFieldDetail.peakHour.split('-')[1];
+
+            const timeSlots: string[] = createTimeStringH(startTimeBooking, endTimeBooking);
+
+            const price = sportFieldDetail.price / 2;
+            const pricePeakHour = sportFieldDetail.peakHourPrices / 2;
+
+            let totalAmount = 0;
+
+            for (const time of timeSlots) {
+                if (isTimeWithinRange(peakHourStart, peakHourEnd, time)) {
+                    totalAmount += pricePeakHour;
+                } else {
+                    totalAmount += price;
+                }
+            }
+
+            setPrice(totalAmount);
+        }
+    }, [idSportDetail])
 
     const handleUpdateNewBooking = () => {
         fetch(`http://localhost:8080/rest/booking/detail/add/new`, {
@@ -1075,7 +1250,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={formatPrice(newPriceBooking) || ""}
+                                                value={newPriceBooking?.toLocaleString() + ' đ'}
                                                 disabled={isAddBooking}
                                             />
                                         </FloatingLabel>
@@ -1083,7 +1258,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={formatPrice(bookingDetailData?.totalAmount) || ""}
+                                                value={bookingDetailData?.totalAmount.toLocaleString() + ' đ'}
                                                 disabled={editBooking}
                                             />
                                         </FloatingLabel>
@@ -1185,7 +1360,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={formatPrice(price) || ""}
+                                                value={price?.toLocaleString() + ' đ'}
                                                 disabled={editBooking}
                                             />
                                         </FloatingLabel>
@@ -1193,7 +1368,7 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={formatPrice(bookingDetailData?.totalAmount) || ""}
+                                                value={bookingDetailData?.totalAmount.toLocaleString() + ' đ'}
                                                 disabled={editBooking}
                                             />
                                         </FloatingLabel>

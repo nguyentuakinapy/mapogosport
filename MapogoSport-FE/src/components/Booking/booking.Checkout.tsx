@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import 'react-datepicker/dist/react-datepicker.css';
 import { useData } from "@/app/context/UserContext";
 import { createTimeStringH } from "../Utils/booking-time";
-import { useSearchParams } from "next/navigation";
 
 interface BookingProps {
     showBookingModal: boolean;
@@ -51,8 +50,8 @@ const BookingModal = React.memo((props: BookingProps) => {
     const [price, setPrice] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);
     const [operatingTimeFetchData, setOperatingTimeFetchData] = useState<number>(0);
-    const [dataTime, setDataTime] = useState<String[]>();
-    const [dataTimeTemporary, setDataTimeTemporary] = useState<String[]>();
+    const [dataTime, setDataTime] = useState<string[]>();
+    const [dataTimeTemporary, setDataTimeTemporary] = useState<string[]>();
 
     useEffect(() => {
         const fetchPaymentMethods = async () => {
@@ -355,8 +354,8 @@ const BookingModal = React.memo((props: BookingProps) => {
         let index = 0;
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
-            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
-                bookings.map(b => {
+            for (const [, bookings] of Object.entries(dateWeek)) {
+                bookings.map(() => {
                     index = index + 1;
                 })
             }
@@ -364,12 +363,12 @@ const BookingModal = React.memo((props: BookingProps) => {
         if (price) {
             setTotalAmount(price * index);
         }
-    }, [selectedWeek])
+    }, [selectedWeek, price])
 
     const getWeekDate = async (weekDate: string) => {
         const dateWeek = weekDays[weekDate];
         if (!selectedWeek.includes(weekDate)) {
-            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
+            for (const [, bookings] of Object.entries(dateWeek)) {
                 for (const booking of bookings) {
                     try {
                         const response = await fetch(
@@ -574,7 +573,7 @@ const BookingModal = React.memo((props: BookingProps) => {
 
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
-            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
+            for (const [, bookings] of Object.entries(dateWeek)) {
                 bookings.map(async b => {
                     await fetch('http://localhost:8080/rest/booking/detail', {
                         method: 'POST',
@@ -651,8 +650,8 @@ const BookingModal = React.memo((props: BookingProps) => {
             <>
                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
                 <ul>
-                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {formatPrice(sportDetail && sportDetail.price)}.</li>
-                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {formatPrice(sportDetail && sportDetail.peakHourPrices)}.</li>
+                    <li><span className="fw-bold">Giá đặt sân / 1h:</span> {(sportDetail && sportDetail.price.toLocaleString())} đ.</li>
+                    <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {sportDetail && sportDetail.peakHourPrices.toLocaleString()} đ.</li>
                     <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>
                     <li><span className="fw-bold">Kích thước sân:</span> {sportDetail && sportDetail.size}.</li>
                     <li><span className="fw-bold">Trạng thái:</span> {sport && sport.status}.</li>
@@ -660,7 +659,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                 </ul>
             </>
         )
-    }, [sportDetail]);
+    }, [sportDetail, sport]);
 
     const bookerInfo = () => {
         return (
@@ -793,7 +792,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                                     {Object.entries(weeks).map(([index, details]) => (
                                         <div key={index}>
                                             {details.map((detail, i) => (
-                                                <span key={i}>{formatDateNotime(detail.date)}</span>
+                                                <span key={i}>{new Date(detail.date).toLocaleDateString()}</span>
                                             ))}
                                         </div>
                                     ))}
@@ -805,7 +804,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                                 <b className="text-uppercase">Đã có sân đặt vào {week}</b><br />
                                 {bookings.map((booking) => (
                                     <div key={booking.bookingDetailId}>
-                                        Ngày: {formatDateNotime(booking.date)}  Giờ: {booking.startTime} - {booking.endTime}
+                                        Ngày: {new Date(booking.date).toLocaleDateString()}  Giờ: {booking.startTime} - {booking.endTime}
                                     </div>
                                 ))}
                             </div>

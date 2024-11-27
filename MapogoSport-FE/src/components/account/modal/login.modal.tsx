@@ -1,10 +1,12 @@
 'use client'
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
 import { hashPassword } from "@/components/Utils/Format";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'; // Để kiểm tra đường dẫn
+
 
 interface LoginProps {
     showLoginModal: boolean;
@@ -35,6 +37,7 @@ export default function Login(props: LoginProps) {
     //         revalidateOnReconnect: false
     //     }
     // );
+
 
     useEffect(() => {
         const userCookie = Cookies.get('user');
@@ -77,6 +80,7 @@ export default function Login(props: LoginProps) {
                     // localStorage.setItem('username', dataUser.username);
                     sessionStorage.setItem('user', JSON.stringify(dataUser));
                     setRefreshKey(refreshKey + 1);
+                    console.log(">>>> check data user auth: ", dataUser);
                     toast.success("Đăng nhập thành công!");
                     // if (dataUser.authorities[0].role.name == "ROLE_ADMIN") {
                     //     window.location.href = "/admin";
@@ -87,6 +91,27 @@ export default function Login(props: LoginProps) {
                     // } else {
                     //     window.location.href = "/";
                     // }
+
+                    await fetch('/api/auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(dataUser),
+
+                    }).then(async (response) => {
+                        const payload = await response.json();
+                        const data = {
+                            status: response.status,
+                            payload
+                        }
+                        if (!response.ok) {
+                            throw data
+                        }
+                        return data
+                    })
+                    // console.log(">>>> check data auth: ", resultsFromNextSercer);
+
                 } else {
                     toast.error("Thông tin đăng nhập không đúng!");
                 }
@@ -96,9 +121,51 @@ export default function Login(props: LoginProps) {
         }
 
     }
-    const { showLoginModal, setShowLoginModal } = props;
-    const { showRegisterModal, setShowRegisterModal } = props;
-    const { showForgotPassword, setShowForgotPassword } = props;
+    const { showLoginModal, setShowLoginModal, setShowRegisterModal, setShowForgotPassword } = props;
+
+
+    // useEffect(() => {
+    //     const sessionDataAuthRow = Cookies.get('sessionDataAuth');
+    //     if (!sessionDataAuthRow) {
+    //         setShowLoginModal(true);
+    //     } else {
+    //         setShowLoginModal(false);
+    //     }
+    // }, [setShowLoginModal]);
+
+    const searchParams = useSearchParams();
+    const router = useRouter(); // Using useRouter
+
+    useEffect(() => {
+        const notLoggedIn = searchParams.get('notLoggedIn');
+        const noRights = searchParams.get('noRights');
+
+        // Check if the 'notLoggedIn' query parameter exists and equals 'true'
+        if (notLoggedIn === 'true') {
+            setShowLoginModal(true);
+            toast.error("Bạn chưa đăng nhập!");
+
+            // Update the URL by removing the query parameter without reloading the page
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('notLoggedIn');
+
+            // Corrected usage of router.replace
+            router.replace(newUrl.toString());
+        }
+
+        if (noRights === 'true') {
+            setShowLoginModal(true);
+            toast.error("Bạn không có quyền truy cập!");
+
+            // Update the URL by removing the query parameter without reloading the page
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('noRights');
+
+            // Corrected usage of router.replace
+            router.replace(newUrl.toString());
+        }
+    }, [searchParams, router, setShowLoginModal]); // Add router as a dependency
+
 
     const handleClose = () => {
         setShowLoginModal(false);
@@ -175,14 +242,41 @@ export default function Login(props: LoginProps) {
                     // localStorage.setItem('username', dataUser.username);
                     sessionStorage.setItem('user', JSON.stringify(dataUser));
                     setRefreshKey(refreshKey + 1);
+
                     toast.success("Đăng nhập thành công!");
+                    await fetch('/api/auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(dataUser),
+
+                    }).then(async (response) => {
+                        const payload = await response.json();
+                        const data = {
+                            status: response.status,
+                            payload
+                        }
+                        if (!response.ok) {
+                            throw data
+                        }
+                        return data
+                    })
+
+
                     handleClose();
                 } else {
                     toast.error("Đăng nhập không thành công!");
                 }
-            } catch (error: any) {
+            } catch (error) {
                 toast.error("Đăng nhập không thành công!");
             }
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSubmit();
         }
     };
 
@@ -216,7 +310,7 @@ export default function Login(props: LoginProps) {
                             <Form.Control
                                 type="text"
                                 placeholder="Vui long nhập tên đăng nhập!"
-                                value={username}
+                                value={username} onKeyDown={handleKeyDown}
                                 onChange={(e) => setUsername(e.target.value)}
                             />
                         </Form.Group>
@@ -224,7 +318,7 @@ export default function Login(props: LoginProps) {
                             <Form.Control
                                 type="password"
                                 placeholder="Vui long nhập mật khẩu!"
-                                value={password}
+                                value={password} onKeyDown={handleKeyDown}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </Form.Group>

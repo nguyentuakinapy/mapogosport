@@ -25,7 +25,7 @@ public interface ProductDetailService {
 	
 	Optional<Double> findPriceByProductDetailIdAndSizeId(Integer productDetailId, Integer sizeId);
 	
-	List<Object[]> findByImageDetailAndGalleryByIdProductDetail(Integer productDetailId);
+	List<ProductDetail> findByImageDetailAndGalleryByIdProductDetail(Integer productId);
 
 	Optional<ProductDetail> findByIdProduct(Integer id);// select productDetail by productId
 	

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { Form, Modal } from "react-bootstrap"
+import { Modal } from "react-bootstrap"
 import { toast } from "react-toastify";
 import "./account.scss"
 import { hashPassword } from "@/components/Utils/Format";
@@ -19,7 +19,7 @@ interface RegisterProps {
 
 export default function Register(props: RegisterProps) {
     const { showRegisterModal, setShowRegisterModal } = props;
-    const { showLoginModal, setShowLoginModal, setRefreshKey, refreshKey } = props;
+    const { setShowLoginModal, setRefreshKey, refreshKey } = props;
 
     const [username, setUsername] = useState<string>("");
     const [email, setEmail] = useState<string>("");
@@ -27,16 +27,10 @@ export default function Register(props: RegisterProps) {
     const [password, setPassword] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
     const [createPassword, setCreatePassword] = useState<string>("");
-    const [authority, setAuthority] = useState<number>(4);
+    const authority = 4;
 
     const [otp, setOtp] = useState<string>("");
     const [otpValue, setOtpValue] = useState<string>("");
-
-    const [errorFullName, setErrorFullName] = useState<boolean>(false);
-    const [errorUsername, setErrorUsername] = useState<boolean>(false);
-    const [errorPassword, setErrorPassword] = useState<boolean>(false);
-    const [errorForgotPassword, setErrorForgotPassword] = useState<boolean>(false);
-    const [errorOtp, setErrorOtp] = useState<boolean>(false);
 
     const [timeLeft, setTimeLeft] = useState(5);
     const [checkButton, setCheckButton] = useState<boolean>(false);
@@ -52,8 +46,7 @@ export default function Register(props: RegisterProps) {
         }
 
         try {
-            const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
-            const check = await responseUser.json() as User;
+            await fetch(`http://localhost:8080/rest/user/${username}`);
             toast.warning("Tên đăng nhập đã tồn tại!");
             return;
         } catch (error) {
@@ -178,20 +171,6 @@ export default function Register(props: RegisterProps) {
             toast.warning("Vui lòng nhập Email!");
         }
     }
-
-    useEffect(() => {
-        const handleKeyDown = (event: any) => {
-            if (event.key == "Escape") {
-                handleClose();
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, []);
 
     const handleClose = () => {
         setShowRegisterModal(false);
@@ -362,13 +341,13 @@ export default function Register(props: RegisterProps) {
                                 </div>
 
                                 <div className="form-group mb-3">
-                                    <input type="text" className={`form-control ${errorFullName ? 'error' : ''} border border-dark`} placeholder="Tên đăng nhập *"
+                                    <input type="text" className={`form-control  border border-dark`} placeholder="Tên đăng nhập *"
                                         value={username} onChange={(e) => setUsername(e.target.value)}
                                     />
                                 </div>
                                 <div className="mb-3">
                                     <div className="form-group">
-                                        <input type="text" className={`form-control ${errorFullName ? 'error' : ''} border border-dark`} placeholder="Họ và tên *"
+                                        <input type="text" className={`form-control  border border-dark`} placeholder="Họ và tên *"
                                             value={fullName} onChange={(e) => setFullName(e.target.value)}
                                         />
                                     </div>

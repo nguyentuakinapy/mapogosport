@@ -11,10 +11,11 @@ import SockJS from "sockjs-client";
 import { useData } from "@/app/context/UserContext";
 import { useSearchParams } from "next/navigation";
 import { IFrame } from "@stomp/stompjs";
-
 import { toast } from "react-toastify";
+import Image from "next/image";
 
 export default function ChatBox() {
+
   interface Message {
     messageId: number;
     sender: User;
@@ -48,8 +49,6 @@ export default function ChatBox() {
   const [username, setUsername] = useState<string>("");
 
   const [adminDefault, setAdminDefault] = useState<User | undefined>();
-
-  // const [adminDefaultNew, setAdminDefaultNew] = useState<User | undefined>();
 
   const [usernameFormUrl, setUsernameFormUrl] = useState<string>("");
 
@@ -123,6 +122,7 @@ export default function ChatBox() {
       chatListCurrentUserByDMM.length === 0 &&
       selectedChat
       //  && selectedChat === ""
+
     ) {
       console.log("Đã kết nối, gọi handleSelectChat với adminDefault...");
       handleSelectChat(adminDefault); // Chỉ gọi khi isConnected là true
@@ -234,9 +234,9 @@ export default function ChatBox() {
             const existingChatIndex = prevChats.findIndex(
               (item) => item?.user?.username === parsedMessage.sender
             );
-            console.log('existingChatIndex =>>>'+ existingChatIndex);
-            
-          
+            console.log('existingChatIndex =>>>' + existingChatIndex);
+
+
             if (existingChatIndex !== -1) {  // == 1 là đã tồn tại
               // Nếu chat đã tồn tại, tạo một bản sao và cập nhật nội dung
               const updatedChats = [...prevChats];
@@ -262,10 +262,10 @@ export default function ChatBox() {
               ];
             }
           });
-       
-          
-          console.log('setChatListCurrentUserByDMM =>>>>>>> ',chatListCurrentUserByDMM);
-          
+
+
+          console.log('setChatListCurrentUserByDMM =>>>>>>> ', chatListCurrentUserByDMM);
+
 
           toast.info(
             "Bạn nhận được tin nhắn từ " + parsedMessage.senderFullName
@@ -320,7 +320,7 @@ export default function ChatBox() {
   const inputRef = useRef<HTMLInputElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
 
-  const [dataMessageTemporary, setDataMessageTemporary] =useState<dataMess | null>(null);
+  const [dataMessageTemporary, setDataMessageTemporary] = useState<dataMess | null>(null);
 
   useEffect(() => {
     if (messageListRef.current) {
@@ -332,6 +332,7 @@ export default function ChatBox() {
       mutateByReceiverUsernameOrCurrentUser;
     }
   }, [chatListRealTime]); // Theo dõi sự thay đổi của danh sách tin nhắn
+
 
   const handleSendMessage = () => {
     if (
@@ -413,6 +414,7 @@ export default function ChatBox() {
         }
         return prevChats;
       });
+
 
     if (chatListCurrentUserByDMM.length === 0 && adminDefault) {
       setShowChat(true);
@@ -695,6 +697,7 @@ export default function ChatBox() {
         return updatedChats;
       });
 
+
       // mới thêm 19/11
 
       if (
@@ -851,7 +854,6 @@ export default function ChatBox() {
     } //               mới
   }, [data]);
 
-
   useEffect(() => {
     const currentPath = window.location.pathname;
     if (currentPath === "/chat_page") {
@@ -926,12 +928,14 @@ export default function ChatBox() {
               }}
               // onClick={username != "" ? handleChatToggle : handleChatListToggle }
               onClick={handleChatListToggle}
-              // Khi click vào icon sẽ mở form chat nhấn vào sẽ thành TRUE
+            // Khi click vào icon sẽ mở form chat nhấn vào sẽ thành TRUE
             >
-              <img
+              <Image
                 src="/images/mail_giphy.webp"
-                alt="Messenger"
-                style={{ width: "40px", cursor: "pointer" }}
+                alt="message"
+                width={40}
+                height={40}
+                style={{ cursor: "pointer" }}
               />
             </div>
           </>
@@ -978,9 +982,10 @@ export default function ChatBox() {
                   {chatListCurrentUserByDMM.length > 0 ? (
                     filteredChatList.map((chatGroup, index) => {
                       const chatUser =
-                        chatGroup.user?.username !== currentUser?.username  ? chatGroup.user : null;
+                        chatGroup.user?.username !== currentUser?.username ? chatGroup.user : null;
 
                       if (!chatUser) return null;
+
                       // console.log('sssssssss ',chatUser);
                       // console.log('chat group time ', formatTime(chatGroup.timestamp));
                       return (
@@ -990,20 +995,23 @@ export default function ChatBox() {
                           className="d-flex flex-column"
                         >
                           <div className="d-flex align-items-center ">
-                            <img
+                            <Image
                               src={
                                 chatUser?.avatar
                                   ? chatUser.avatar
                                   : "/chat_page/assets/images/users/user-5.png"
                               }
                               alt={chatUser?.username || "Không có tên"}
+                              width={40}
+                              height={40}
                               style={{
-                                width: "40px",
-                                height: "40px",
+                                // width: "40px",
+                                // height: "40px",
                                 borderRadius: "50%",
                                 marginRight: "10px",
                               }}
                               onError={(e) => {
+
                                 e.currentTarget.src =
                                   "/chat_page/assets/images/users/user-8.png"; // Ảnh mặc định
                               }}
@@ -1017,8 +1025,11 @@ export default function ChatBox() {
                           <div className=" mt-1 row">
                             <p className=" col text-start">
                               {dataMessageTemporary === null
-                                ? chatGroup.content: chatUser.username ===dataMessageTemporary.username
-                                ? dataMessageTemporary.content : chatGroup.content}
+                                ? chatGroup.content
+                                : chatUser.username ===
+                                  dataMessageTemporary.username
+                                  ? dataMessageTemporary.content
+                                  : chatGroup.content}
                               {/* {chatGroup.content || "Không có nội dung"} */}
                             </p>
                             {/* <p className="col text-end"> {formatTime(chatGroup.timestamp)}</p> */}
@@ -1067,6 +1078,7 @@ export default function ChatBox() {
                   null
                   }
                   {/* sdsds 
+
                   {isExitingMyIfAdminDefault && isExitingMy && adminDefault ? (
                     <div className="text-center ">
                       <ListGroup.Item
@@ -1074,23 +1086,26 @@ export default function ChatBox() {
                         className="d-flex flex-column rounded"
                       >
                         <div className="d-flex align-items-center">
-                          <img
+                          <Image
                             src={
                               adminDefault?.avatar
                                 ? adminDefault?.avatar
                                 : "/chat_page/assets/images/users/user-5.png"
                             }
                             alt={adminDefault?.username || "Không có tên"}
+                            width={40}
+                            height={40}
                             style={{
-                              width: "40px",
-                              height: "40px",
+                              // width: "40px",
+                              // height: "40px",
                               borderRadius: "50%",
                               marginRight: "10px",
                             }}
                           />
                           <strong>
                             {adminDefault?.fullname}
-                            g
+
+                            
                           </strong>
                         </div>
                         <div>
@@ -1118,11 +1133,13 @@ export default function ChatBox() {
               }}
             >
               <div className="card-header d-flex align-items-center bg-light">
-                <img
+                <Image
                   src="/images/logo.png"
                   alt="Chat Logo"
                   className="me-2"
-                  style={{ width: "30px" }}
+                  // style={{ width: "30px" }}
+                  width={30}
+                  height={30}
                 />
                 <h6 className="mb-0 title">{selectedChat?.fullname}</h6>
                 <div className="ms-auto">
@@ -1133,9 +1150,8 @@ export default function ChatBox() {
                     className="p-0"
                   >
                     <i
-                      className={`h6 bi ${
-                        isMinimized ? "bi-arrows-angle-expand" : "bi-dash-lg"
-                      }`}
+                      className={`h6 bi ${isMinimized ? "bi-arrows-angle-expand" : "bi-dash-lg"
+                        }`}
                     ></i>
                   </Button>
                   <Button
@@ -1145,11 +1161,11 @@ export default function ChatBox() {
                     className="p-0 mx-2"
                   >
                     <i
-                      className={`h6 bi ${
-                        isMaximized
-                          ? "bi-arrows-angle-contract"
-                          : "bi-arrows-fullscreen"
-                      }`}
+                      className={`h6 bi ${isMaximized
+                        ? "bi-arrows-angle-contract"
+                        : "bi-arrows-fullscreen"
+                        }`}
+
                     ></i>
                   </Button>
                   <Button
@@ -1193,51 +1209,59 @@ export default function ChatBox() {
                         return (
                           <div
                             key={msg.messageId || index}
-                            className={`d-flex ${
-                              msg.sender.username === currentUser?.username ||
+                            className={`d-flex ${msg.sender.username === currentUser?.username ||
                               msg.sender === currentUser?.username
-                                ? "justify-content-end"
-                                : "justify-content-start"
-                            }`}
+                              ? "justify-content-end"
+                              : "justify-content-start"
+                              }`}
                           >
+                            {/* <div
+                              className={`p-2 rounded mb-2 ${
+                                msg.sender.username === currentUser?.username ||
+                                msg.sender === currentUser?.username
+                                  ? "bg-primary text-white"
+                                  : "bg-light text-dark"
+                              }`}
+                          >
+
                             <div
                               className={`p-2 rounded mb-2`}
                               style={{
                                 maxWidth: "80%",
                                 backgroundColor:
+
                                   msg.sender.username ===
                                     currentUser?.username ||
-                                  msg.sender === currentUser?.username
+                                    msg.sender === currentUser?.username
                                     ? "#66c7ff" // Màu dành cho tin nhắn gửi đi
                                     : "#f0f0f0", // Màu dành cho tin nhắn nhận được
                                 color:
                                   msg.sender.username ===
                                     currentUser?.username ||
-                                  msg.sender === currentUser?.username
+                                    msg.sender === currentUser?.username
+
                                     ? "black" // Màu chữ cho tin nhắn gửi đi
                                     : "black", // Màu chữ cho tin nhắn nhận được
                               }}
                             >
                               {msg.content}
                               {/* Hiển thị thời gian nếu tồn tại */}
-                              <em
-                                className="mt-2"
-                                style={{
-                                  display: "block",
-                                  fontSize: "0.8em",
-                                  color: "black",
-                                }}
-                              >
-                                {msg.createdAt
-                                  ? formatTime(msg.createdAt)
-                                  : "Không có thời gian"}
-                              </em>
-                            </div>
+                            <em
+                              className="mt-2"
+                              style={{
+                                display: "block",
+                                fontSize: "0.8em",
+                                color: "black",
+                              }}
+                            >
+                              {msg.createdAt
+                                ? formatTime(msg.createdAt)
+                                : "Không có thời gian"}
+                            </em>
                           </div>
                         );
                       })}
                   </div>
-
                   {/* Phần nhập liệu và nút gửi */}
                   <div className="card-footer d-flex p-2">
                     <Form.Control
@@ -1262,7 +1286,7 @@ export default function ChatBox() {
             </div>
           )}
         </div>
-      </div>
+      </div >
     </>
   );
 }

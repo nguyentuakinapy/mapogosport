@@ -10,6 +10,7 @@ import Popup from "@/components/User/modal/popup-voucher.modal";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import { formatPrice } from "@/components/Utils/Format";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Home() {
   const [rating, setRating] = useState<number>(1.5);
@@ -37,6 +38,25 @@ export default function Home() {
     }
     return stars;
   };
+
+  // const searchParams = useSearchParams();
+  // const router = useRouter(); // Using useRouter
+
+  // useEffect(() => {
+  //   const notLoggedIn = searchParams.get('notLoggedIn');
+
+  //   // Check if the 'notLoggedIn' query parameter exists and equals 'true'
+  //   if (notLoggedIn === 'true') {
+  //     toast.error("Bạn chưa đăng nhập!");
+
+  //     // Update the URL by removing the query parameter without reloading the page
+  //     const newUrl = new URL(window.location.href);
+  //     newUrl.searchParams.delete('notLoggedIn');
+
+  //     // Corrected usage of router.replace
+  //     router.replace(newUrl.toString());
+  //   }
+  // }, [searchParams, router]); // Add router as a dependency
 
   // Hiển thị khu vực sân
   useEffect(() => {
@@ -274,7 +294,7 @@ export default function Home() {
                         {renderStars(rating)}
                       </div>
                     </div>
-                    <Link href={`/sport-detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
+                    <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
                   </div>
                 </div>
               </Col>

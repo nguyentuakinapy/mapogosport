@@ -43,7 +43,6 @@ body {
     align-items: center;
     border-bottom: 5px solid #142239;
     padding-bottom: 1rem;
-    margin-bottom: 1rem;
 
     .btn-sd-admin {
         background-color: #142239 !important;
@@ -305,9 +304,8 @@ body {
 /*======================================================Subcription CSS Start======================================================*/
 .packageUpdate {
     width: 100%;
-    margin: auto;
     box-shadow: 8px 8px #e2dfdf;
-    height: auto;
+    min-height: 100%;
     border-radius: 0;
     border: 1px solid black;
 
@@ -323,14 +321,23 @@ body {
     }
 
     .btn-sub {
-        background-color: #142239;
-        border: 1px solid #142239;
+        background-color: #142239 !important;
+        border: 1px solid #142239 !important;
         margin: 10px 20px;
+        width: 200px;
 
-        &:hover {
+        &:active {
             background-color: white;
             color: black;
             font-weight: 700;
+            border: 1px solid #142239
+        }
+
+        &:hover {
+            background-color: white !important;
+            color: black !important;
+            font-weight: 700;
+            border: 1px solid #142239 !important;
         }
     }
 }

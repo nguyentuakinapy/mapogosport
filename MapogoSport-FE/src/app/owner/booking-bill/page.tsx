@@ -14,6 +14,7 @@ import { debounce } from "lodash";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
 import CancelBookingModal from "@/components/Owner/modal/cancelBooking";
+import autoTable from "jspdf-autotable";
 
 const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -232,7 +233,7 @@ const OwnerBookingBill = () => {
 
     const exportPDF = () => {
         try {
-            const doc: any = new jsPDF();
+            const doc: jsPDF = new jsPDF();
 
             doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
             doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
@@ -257,7 +258,7 @@ const OwnerBookingBill = () => {
                 tableRows.push(orderData);
             });
 
-            doc.autoTable({
+            autoTable(doc, {
                 head: [tableColumn],
                 body: tableRows,
                 startY: 20,
@@ -349,7 +350,11 @@ const OwnerBookingBill = () => {
         }
     };
 
-    if (isLoading) return <div>Đang tải...</div>;
+    if (isLoading) return <div style={{ height: 'calc(100vh - 160px)' }} className="d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-danger" role="status">
+            <span className="visually-hidden">Loading...</span>
+        </div>
+    </div>;
     if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
     return (

@@ -1,19 +1,39 @@
 "use client";
 import HomeLayout from '@/components/HomeLayout';
 import React, { useState, useEffect } from 'react';
-import { Col, Button, ButtonGroup, Form, Spinner } from 'react-bootstrap';
+import { Col, Button, ButtonGroup, Form, Image } from 'react-bootstrap';
 import './style.css';
-import axios from 'axios';
 import { formatPrice } from '@/components/Utils/Format';
 import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';
 import Link from 'next/link';
 
-
 const Cart = () => {
-
-
+  const fetcher = (url: string) => fetch(url).then((res) => res.json());
   const [quantities, setQuantities] = useState<number[]>([]);
+  const [dataCart, setDataCart] = useState<Cart[]>([]);
+  const [username, setUsername] = useState<string>("");
+  const [selectAll, setSelectAll] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<boolean[]>([]);
+  const [totalPrice, setTotalPrice] = useState(0); // Khởi tạo state để lưu tổng tiền
+
+  useEffect(() => {
+    const username = localStorage.getItem('username');
+    if (username) {
+      setUsername(username);
+    }
+  }, []);
+
+  const { data, error } = useSWR(username && `http://localhost:8080/rest/cart/${username}`, fetcher);
+
+  useEffect(() => {
+    if (data) {
+      setDataCart(data);
+      const cartQuantities = data.map((item: Cart) => item.quantity);
+      setQuantities(cartQuantities);
+      setSelectedProducts(data.map(() => false));
+    }
+  }, [data]);
 
   // Cập nhật hàm tăng số lượng
   const increaseQuantity = (index: number) => {
@@ -25,7 +45,6 @@ const Cart = () => {
     // Cập nhật tổng tiền ngay lập tức
     updateTotalPrice(selectedProducts, newQuantities);
   };
-
 
   // Cập nhật hàm giảm số lượng
   const decreaseQuantity = (index: number) => {
@@ -52,20 +71,23 @@ const Cart = () => {
 
   // Hàm cập nhật số lượng lên server
   const updateQuantityOnServer = async (index: number, newQuantity: number) => {
-    try {
-      const cartItemId = dataCart[index].cartId; // Giả sử mỗi mục giỏ hàng có một `cartId`
-      await axios.put(`http://localhost:8080/rest/cart/update/${cartItemId}`, {
+    const cartItemId = dataCart[index].cartId;
+    await fetch(`http://localhost:8080/rest/cart/update/${cartItemId}`, {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         quantity: newQuantity,
-      });
-      console.log(`Cập nhật số lượng cho sản phẩm ${cartItemId} thành ${newQuantity}`);
-    } catch (err) {
-      console.log("Lỗi khi cập nhật số lượng lên server:", err);
-    }
+      })
+    }).then((res) => {
+      if (!res.ok) {
+        toast.error("Lỗi khi cập nhật số lượng!");
+        return;
+      }
+    })
   };
-
-  const [selectAll, setSelectAll] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState<boolean[]>([]);
-  const [totalPrice, setTotalPrice] = useState(0); // Khởi tạo state để lưu tổng tiền
 
   // Hàm chọn tất cả sản phẩm
   const handleSelectAll = () => {
@@ -127,8 +149,7 @@ const Cart = () => {
       return; // Ngừng xử lý nếu có sản phẩm không đủ tồn kho
     }
 
-    const cartIds = selectedProducts
-      .map((isSelected, index) => (isSelected ? dataCart[index].cartId : null))
+    const cartIds = selectedProducts.map((isSelected, index) => (isSelected ? dataCart[index].cartId : null))
       .filter(id => id !== null);
 
     if (cartIds.length === 0) {
@@ -145,32 +166,31 @@ const Cart = () => {
 
   };
 
-  //
   const handleDeleCartItem = async (index: number) => {
-    if (!user) {
+    if (!username) {
       console.log("Người dùng chưa đăng nhập.");
-      return; // Không thực hiện nếu người dùng chưa đăng nhập
+      return;
     }
-
-    try {
-      const cartItemId = dataCart[index].cartId; // Lấy ID của sản phẩm muốn xóa
-      await axios.delete(`http://localhost:8080/rest/cart/delete/${cartItemId}`);
-
-      console.log(`>>> Xóa sản phẩm ${cartItemId} thành công`);
-
-      // Cập nhật lại danh sách giỏ hàng
+    const cartItemId = dataCart[index].cartId;
+    await fetch(`http://localhost:8080/rest/cart/delete/${cartItemId}`, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json',
+      },
+    }).then((res) => {
+      if (!res.ok) {
+        toast.error("Lỗi khi xóa sản phẩm!");
+        return;
+      }
       const updatedDataCart = dataCart.filter((_, i) => i !== index);
       setDataCart(updatedDataCart);
-
-      // Cập nhật danh sách selectedProducts (bỏ sản phẩm bị xóa ra khỏi danh sách)
       const updatedSelectedProducts = selectedProducts.filter((_, i) => i !== index);
       setSelectedProducts(updatedSelectedProducts);
-
-      // Cập nhật số lượng còn lại
       const updatedQuantities = updatedDataCart.map(item => item.quantity);
       setQuantities(updatedQuantities);
+      console.log();
 
-      // Nếu sản phẩm bị xóa đang được chọn, cập nhật lại tổng tiền
       if (selectedProducts[index]) {
         const total = updatedSelectedProducts.reduce((sum, selected, idx) => {
           if (selected) {
@@ -181,59 +201,20 @@ const Cart = () => {
         setTotalPrice(total); // Cập nhật tổng tiền
       }
 
-      // Cập nhật lại số lượng giỏ hàng
-      mutate(`http://localhost:8080/rest/cart/count/${user.username}`); // Tái tải dữ liệu
+      mutate(`http://localhost:8080/rest/cart/count/${username}`); // Tái tải dữ liệu
       toast.success("Xóa thành công !");
-
-    } catch (err) {
-      console.error("Lỗi xóa cart:", err);
-      toast.error("Có lỗi xảy ra khi xóa sản phẩm.");
-    }
+    })
   };
 
-
-
-
-  // Dữ liệu giỏ hàng
-  const [dataCart, setDataCart] = useState([]);
-  const userSession = sessionStorage.getItem('user');
-  const user = userSession ? JSON.parse(userSession) : null;
-
-  useEffect(() => {
-    // Hàm lấy dữ liệu giỏ hàng
-    const fetchDataCart = async () => {
-      try {
-        // Đảm bảo người dùng tồn tại trước khi gọi API
-        if (user && user.username) {
-          const response = await axios.get(`http://localhost:8080/rest/cart/${user.username}`);
-
-          setDataCart(response.data); // Lưu dữ liệu giỏ hàng vào state
-          console.log(">>> check data Cart: ", response.data);
-          // Trích xuất số lượng từ dữ liệu giỏ hàng
-          const cartQuantities = response.data.map((item: any) => item.quantity);
-          setQuantities(cartQuantities); // Đặt số lượng vào state
-
-          // Khởi tạo trạng thái `selectedProducts` với giá trị false cho mỗi sản phẩm (không chọn sản phẩm nào ban đầu)
-          setSelectedProducts(response.data.map(() => false));
-        } else {
-          console.log('Không tìm thấy người dùng');
-        }
-      } catch (err) {
-        console.log('Lỗi:', err);
-      }
-    };
-
-    fetchDataCart();
-
-  }, []);
+  if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
   return (
     <HomeLayout>
       <h1 className="text-center pt-4 mb-">Giỏ hàng</h1>
       <div className="container" >
         <div className="d-flex">
-          <Col className={`${dataCart && dataCart.length > 0 ? 'col-md-8' : 'col-md-12'}   p-3 mb-5 rounded ${user ? 'shadow bg-body' : ' '}`}>
-            {user && (
+          <Col className={`${dataCart && dataCart.length > 0 ? 'col-md-8' : 'col-md-12'}   p-3 mb-5 rounded ${username ? 'shadow bg-body' : ' '}`}>
+            {username && (
               <>
                 <div className="table-responsive">
                   {dataCart && dataCart.length > 0 ? (
@@ -266,7 +247,7 @@ const Cart = () => {
                               />
                             </td>
                             <td>
-                              <img
+                              <Image
                                 src={`${cart.productDetailSize.productDetail.image}`}
                                 className="img-fluid me-5 rounded-circle"
                                 style={{ width: '80px', height: '80px' }}
@@ -319,7 +300,7 @@ const Cart = () => {
                     <div className="text-center">
                       <i className="bi bi-bag-plus-fill" style={{ fontSize: '100px' }}></i>
                       <p className="text-muted fs-5">Bạn cần thêm một sản phẩm vào giỏ hàng của mình
-                        <br /> Vui lòng quay lại <strong>"Trang sản phẩm"</strong> và tìm sản phẩm của bạn  </p>
+                        <br /> Vui lòng quay lại <strong>&ldquo;Trang sản phẩm&rdquo;</strong> và tìm sản phẩm của bạn  </p>
                       <Link className='btn btn-dark text-white mb-5'
                         style={{ textDecoration: 'none', color: '#333' }}
                         href="/categories/products"
