@@ -8,7 +8,7 @@ interface UserVoucher {
 }
 
 interface Voucher {
-        voucherId?: number
+        voucherId: number
         name: string
         discountPercent: number
         quantity: number
@@ -17,5 +17,5 @@ interface Voucher {
         status: string
         discountCode: string
         activeDate: Date
-        createdBy: string
+        createdBy: User
 }

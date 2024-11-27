@@ -277,7 +277,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                                                 <b>{item.title}</b>
                                                                 <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
                                                                     <div className=''>{item.message}</div>
-                                                                    <div className='ms-auto'>{formatDateNotime(item.createdAt)}</div>
+                                                                    <div className='ms-auto'>{new Date(item.createdAt).toLocaleDateString()}</div>
                                                                 </div>
                                                             </Link>
                                                         </div>

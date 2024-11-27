@@ -1,11 +1,12 @@
 interface AccountPackage {
-    accountPackageId: number
-    packageName: string
-    price: number
-    durationDays: number
-    limitSportFields: number
-    limitBookings: number
-    accountPackageBenefits: AccountPackageBenefit[]
+    accountPackageId: number;
+    packageName: string;
+    price: number;
+    durationDays: number;
+    limitSportFields: number;
+    limitBookings: number;
+    status: string;
+    accountPackageBenefits: AccountPackageBenefit[];
 }
 
 interface AccountPackageBenefit {
