@@ -7,10 +7,7 @@ import '@/app/user/types/user.scss';
 import { fetchCoordinates } from "../../../app/utils/geocode";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-
 function Categories() {
-
-    // Pagination
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -103,7 +100,7 @@ function Categories() {
     useEffect(() => {
         const storedFilters = sessionStorage.getItem('searchFilters');
         if (storedFilters) {
-            const { name, type, area } = JSON.parse(storedFilters);
+            const { name, type } = JSON.parse(storedFilters);
             if (name) setSearchTerm(name);
             if (type) setSelectedCategoryField(type);
         }
@@ -172,7 +169,7 @@ function Categories() {
                         </div>
 
                         <div className="mt-3">
-                            <div style={{fontSize:'15px'}}><i className="bi bi-pin-map-fill me-2"></i>Bật vị trí lên để sắp xếp sân gần nhất!</div>
+                            <div style={{ fontSize: '15px' }}><i className="bi bi-pin-map-fill me-2"></i>Bật vị trí lên để sắp xếp sân gần nhất!</div>
                         </div>
 
                     </Col>
