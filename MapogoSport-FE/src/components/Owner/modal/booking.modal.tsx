@@ -45,6 +45,8 @@ const BookingModal = (props: BookingProps) => {
             let operatingTime: number = 0;
 
             if (startTime && sport.closing) {
+                console.log(startTime, sport.closing);
+
                 const [openHour, openMinute] = startTime.split("h").map(Number);
                 const [closeHour, closeMinute] = sport.closing.split("h").map(Number);
                 const totalOpenMinutes = openHour * 60 + openMinute;
@@ -74,7 +76,7 @@ const BookingModal = (props: BookingProps) => {
 
                 try {
                     const response = await fetch(
-                        `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
+                        `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail.sportFielDetailId}/${dayStartBooking}`
                     );
 
                     if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
@@ -92,7 +94,6 @@ const BookingModal = (props: BookingProps) => {
 
                 count++;
             }
-
             for (const s of sportDetail.statusSportFieldDetails) {
                 if (isDateInRange(dayStartBooking, s.startDate, s.endDate)) {
                     let check = false;
@@ -234,6 +235,7 @@ const BookingModal = (props: BookingProps) => {
                 newDataTime.push(timeIntervals[index].label);
             }
             if (activeTab === 'all') {
+
                 newDataTime.shift()
                 setDataTimeTemporary(newDataTime);
             }

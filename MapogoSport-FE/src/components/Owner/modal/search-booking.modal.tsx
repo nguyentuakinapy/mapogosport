@@ -9,7 +9,7 @@ interface SearchBookingProps {
     showSearchBookingModal: boolean;
     setSearchShowBookingModal: (v: boolean) => void;
     dataTimeSport: string[];
-    sportField?: SportField;
+    sportField: SportField;
 }
 
 const SearchBookingModal = (props: SearchBookingProps) => {
@@ -24,7 +24,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
     const [startTimeKey, setStartTimeKey] = useState<number>(1);
     const [validTimes, setValidTimes] = useState<string[]>([]);
     const [opening, setOpening] = useState<number>();
-    const [operatingTime, setOperatingTime] = useState<number>(0);
+    // const [operatingTime, setOperatingTime] = useState<number>(0);
     const [checkDataStatus, setCheckDataStatus] = useState<boolean>(true);
 
     useEffect(() => {
@@ -53,54 +53,48 @@ const SearchBookingModal = (props: SearchBookingProps) => {
     };
 
     useEffect(() => {
+        let operatingTime = 0;
         if (sportField) {
-            if (sportField) {
-                const open = sportField.opening;
-                const close = sportField.closing;
-                if (open && typeof open === 'string' && close && typeof close === 'string') {
-                    const numberOpen = open.match(/\d+/);
-                    const numberClose = close.match(/\d+/);
-                    if (numberOpen && numberClose) {
-                        setOpening(Number(numberOpen[0]));
-                        setOperatingTime(Number(numberClose[0]) - Number(numberOpen[0]));
-                    }
+            const open = sportField.opening;
+            const close = sportField.closing;
+            if (open && typeof open === 'string' && close && typeof close === 'string') {
+                const numberOpen = open.match(/\d+/);
+                const numberClose = close.match(/\d+/);
+                if (numberOpen && numberClose) {
+                    setOpening(Number(numberOpen[0]));
+                    operatingTime = (Number(numberClose[0]) - Number(numberOpen[0]));
                 }
             }
-        };
-    }, [sportField]);
-
-    useEffect(() => {
-        const newData: string[] = [];
-        for (let index = 0; index < (operatingTime * 2) + 1; index++) {
-            if (newData.length === 0) {
-                newData.push(String(opening + "h00"));
-            } else {
-                if (newData[newData.length - 1].includes("h30")) {
-                    const getDataTime = newData[newData.length - 2];
-                    const getTime = getDataTime.match(/\d+/);
-                    if (getTime) {
-                        newData.push(String(Number(getTime[0]) + 1) + "h00");
-                    }
-
+            const newData: string[] = [];
+            for (let index = 0; index < (operatingTime * 2) + 1; index++) {
+                if (newData.length === 0) {
+                    newData.push(String(opening + "h00"));
                 } else {
-                    const getDataTime = newData[newData.length - 1];
-                    const getTime = getDataTime.match(/\d+/);
-                    if (getTime) {
-                        const createOpening = String(getTime[0]) + "h30";
-                        newData.push(createOpening);
+                    if (newData[newData.length - 1].includes("h30")) {
+                        const getDataTime = newData[newData.length - 2];
+                        const getTime = getDataTime.match(/\d+/);
+                        if (getTime) {
+                            newData.push(String(Number(getTime[0]) + 1) + "h00");
+                        }
+
+                    } else {
+                        const getDataTime = newData[newData.length - 1];
+                        const getTime = getDataTime.match(/\d+/);
+                        if (getTime) {
+                            const createOpening = String(getTime[0]) + "h30";
+                            newData.push(createOpening);
+                        }
                     }
                 }
             }
-        }
-        if (sportField) {
             const index = newData.indexOf(sportField.opening || 'NA');
             if (index !== -1) {
                 newData.splice(0, index);
             }
+            const modifiedValidTimes = newData.slice(0, -2);
+            setValidTimes(modifiedValidTimes);
         }
-        const modifiedValidTimes = newData.slice(0, -2);
-        setValidTimes(modifiedValidTimes);
-    }, [operatingTime, opening]);
+    }, [sportField]);
 
     const handleFindField = async () => {
         if (selectedDate && selectedTime && sportField) {

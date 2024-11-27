@@ -318,17 +318,11 @@ const ProductDetail = () => {
                                             <span className="visually-hidden">Next</span>
                                         </button>
                                     </div>
-
-
-
                                 </>
                             ) : (
                                 <p>No images available</p>
                             )}
                         </Col>
-
-
-                        {/* Thông tin sản phẩm */}
                         <Col className='ms-5' style={{ marginLeft: '100px' }}>
                             <h4>{findByIdProduct.name}</h4>
                             <div className='star-comment '>
@@ -426,9 +420,7 @@ const ProductDetail = () => {
                             </div>
                         </Col>
                     </Row>
-
                 </Container>
-
                 {/*=================    */}
                 <Container className="p-3 mt-4 mb-4">
                     <Row>
@@ -447,7 +439,6 @@ const ProductDetail = () => {
                     </Row>
                 </Container>
                 {/*=================    */}
-
                 <Container className="p-3 container">
                     <Row className="mt-2 text-center">
                         <Col>
@@ -472,40 +463,36 @@ const ProductDetail = () => {
                             </button>
                         ))}
                     </div>
-
-                    {
-                        (filteredData ? filteredData : data) && Array.isArray(filteredData ? filteredData : data) ? (
-                            (filteredData || data)
-                                .sort((a, b) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime())
-                                .slice(0, visibleCount)
-                                .map((review) => (
-                                    <Row className="mt-5 ms-5" key={review.productReviewId}>
-                                        <Col>
-                                            <Image
-                                                src="/img/avatar.jpg"
-                                                alt="Hình ảnh thu nhỏ"
-                                                width={35}
-                                                height={35}
-                                                className="rounded-circle"
-                                            />
-                                            <span className="me-4">{review.user.fullname}</span>
-                                            <i className="bi bi-calendar me-2"></i>
-                                            <span>{new Date(review.datedAt).toLocaleString('vi-VN')}</span>
-                                            <div>
-                                                <span className="text-warning ms-5 fs-3">
-                                                    {'★'.repeat(review.rating)}
-                                                </span>
-                                                <br />
-                                                <span className="ms-5">{review.comment}</span>
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                ))
-                        ) : (
-                            <p>Loading...</p> // Display a loading message while data is being fetched
-                        )
-                    }
-
+                    {(filteredData ? filteredData : data) && Array.isArray(filteredData ? filteredData : data) ? (
+                        (filteredData || data)
+                            .sort((a, b) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime())
+                            .slice(0, visibleCount)
+                            .map((review) => (
+                                <Row className="mt-5 ms-5" key={review.productReviewId}>
+                                    <Col>
+                                        <Image
+                                            src="/img/avatar.jpg"
+                                            alt="Hình ảnh thu nhỏ"
+                                            width={35}
+                                            height={35}
+                                            className="rounded-circle"
+                                        />
+                                        <span className="me-4">{review.user.fullname}</span>
+                                        <i className="bi bi-calendar me-2"></i>
+                                        <span>{new Date(review.datedAt).toLocaleString('vi-VN')}</span>
+                                        <div>
+                                            <span className="text-warning ms-5 fs-3">
+                                                {'★'.repeat(review.rating)}
+                                            </span>
+                                            <br />
+                                            <span className="ms-5">{review.comment}</span>
+                                        </div>
+                                    </Col>
+                                </Row>
+                            ))
+                    ) : (
+                        <p>Loading...</p> // Display a loading message while data is being fetched
+                    )}
                     {data && visibleCount < data.length ? (
                         // Hiển thị nút "Tải thêm bình luận" nếu còn bình luận để tải thêm
                         <div className="mt-3 text-center">
