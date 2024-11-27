@@ -1,147 +1,69 @@
 "use client";
-
 import useSWR from "swr";
 import { useEffect, useState } from "react";
-import {
-  Badge,
-  Button,
-  Nav,
-  OverlayTrigger,
-  Table,
-  Tooltip,
-} from "react-bootstrap";
+import { Badge, Button, Form, Nav, OverlayTrigger, Pagination, Table, Tooltip } from "react-bootstrap";
 import "../adminStyle.scss";
 import VoucherAddNew from "@/components/Admin/Modal/voucher.addNew";
 import { useData } from "@/app/context/UserContext";
-import axios from "axios";
 import { toast } from "react-toastify";
 
 const VoucherPage = () => {
-  interface Voucher {
-    voucherId?: number;
-    name: string;
-    discountPercent: number;
-    quantity: number;
-    createDate: Date;
-    endDate: Date;
-    status: string;
-    discountCode: string;
-    activeDate: Date;
-    createdBy: User;
-  }
-
   const [activeTab, setActiveTab] = useState<string>("all");
   const [showAddVoucher, setShowAddVoucher] = useState<boolean>(false);
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
   const BASE_URL = "http://localhost:8080";
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
-
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 5;
+  const currentUser = useData();
   const fetcher = (url: string) => fetch(url).then((r) => r.json());
-  const voucherFetch = useSWR(`${BASE_URL}/rest/voucher/findAll`, fetcher);
+
+  const { data, isLoading, error, mutate } = useSWR(`${BASE_URL}/rest/voucher/findAll`, fetcher);
 
   useEffect(() => {
-    if (voucherFetch?.data) {
-      setVouchers(voucherFetch?.data);
+    if (data) {
+      setVouchers(data);
     }
-  }, [voucherFetch?.data]);
-
-  const currentUser = useData();
+  }, [data]);
 
   const handleEdit = (voucher: Voucher) => {
-    console.log("dddddđ " + voucher?.name);
-
     setEditingVoucher(voucher);
     setShowAddVoucher(true);
   };
 
-  const isConfirmed = () => {
-    return window.confirm("Bạn có chắc chắn muốn xóa voucher này?");
-  };
-
-  // tìm kiếm
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
-
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
+    setSearchTerm(event.target.value.toLowerCase());
   };
 
-  // Lọc voucher theo tìm kiếm và ngày
-  const filteredVouchers = vouchers.filter((voucher) => {
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    const isMatchingSearch =
-      voucher.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-      voucher.discountCode.toLowerCase().includes(lowerCaseSearchTerm) ||
-      (voucher.createdBy?.username?.toLowerCase() || "").includes(
-        lowerCaseSearchTerm
-      );
+  const filteredVouchers = vouchers.filter(voucher => {
+    return (
+      voucher.name.toLowerCase().includes(searchTerm) ||
+      voucher.discountCode.toLowerCase().includes(searchTerm) ||
+      (voucher.createdBy?.fullname?.toLowerCase()).includes(searchTerm)
+    )
+  }).filter(voucher => {
+    switch (activeTab) {
+      case 'valid': return voucher.status === "active";
+      case 'inactive': return voucher.status === "inactive";
+      default: return true;
+    }
+  }).filter(voucher => {
+    if (selectedStatus === "activited") return voucher.status === "active" && new Date(voucher.endDate) > new Date();
+    if (selectedStatus === "expired") return voucher.status === "inactive" && new Date(voucher.endDate) <= new Date();
+    return true;
+  });;
 
-    const isWithinDateRange =
-      (startDate
-        ? new Date(voucher.activeDate) >= new Date(startDate)
-        : true) &&
-      (endDate ? new Date(voucher.endDate) <= new Date(endDate) : true);
-
-    // Lọc theo trạng thái tab
-    const isTabMatch = (activeTab: string) => {
-      switch (activeTab) {
-        case "all": // Toàn bộ
-          return true;
-        // case "activited": // Đang hoạt động
-        //   return (
-        //     voucher.status === "active" &&
-        //     new Date(voucher.activeDate) <= new Date()
-        //   );
-        // case "expired": // Đã hết hạn
-        //   return new Date(voucher.endDate) < new Date();
-        case "valid": // Còn hiệu lực
-          return (
-            voucher.status === "active" &&
-            new Date(voucher.activeDate) <= new Date() &&
-            new Date(voucher.endDate) > new Date()
-          );
-        case "inactive": // Hết hiệu lực
-          if (selectedStatus === "expired") {
-            // Đã hết hạn
-            return new Date(voucher.endDate) < new Date();
-          } else if (selectedStatus === "activited") {
-            return (
-              voucher.status === "inactive" && // Đang hoạt động
-              new Date(voucher.endDate) >= new Date()
-            );
-          } else {
-            return (
-              voucher.status === "inactive" ||
-              new Date(voucher.endDate) < new Date()
-            );
-          }
-        default:
-          return true;
-      }
-    };
-
-    return isMatchingSearch && isWithinDateRange && isTabMatch(activeTab);
-    // return isMatchingSearch && isWithinDateRange;
-  });
-  // tìm kiếm
-
-  // phân trang
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 5; // Số lượng voucher mỗi trang
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentVouchers = filteredVouchers.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalPages = Math.ceil(filteredVouchers.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
+  const renderContent = () => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredVouchers.slice(indexOfFirstItem, indexOfLastItem);
+    return renderTable(currentItems);
   };
+
   const handleNextPage = () => {
+    const totalPages = Math.ceil(vouchers.length / itemsPerPage);
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
@@ -153,32 +75,22 @@ const VoucherPage = () => {
     }
   };
 
-  const handleFirstPage = () => {
-    setCurrentPage(1);
-  };
-
-  const handleLastPage = () => {
-    setCurrentPage(totalPages);
-  };
-
-  //
-
   const handleDelete = async (voucherId: number) => {
-    if (!isConfirmed()) {
-      return; // Nếu người dùng không xác nhận, thoát khỏi hàm
-    }
-    if (voucherId) {
-      try {
-        const response = await axios.put(
-          `${BASE_URL}/rest/delete/voucher/${voucherId}`
-        );
+    if (window.confirm('Bạn có chắc muốn xóa địa chỉ này?')) {
+      fetch(`${BASE_URL}/rest/delete/voucher/${voucherId}`, {
+        method: 'PUT',
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Content-Type': 'application/json',
+        }
+      }).then((res) => {
+        if (!res.ok) {
+          toast.error("xóa voucher không thành công");
+          return;
+        }
         toast.success("xóa voucher thành công");
-        console.log(response.data);
-        voucherFetch.mutate;
-      } catch (error) {
-        toast.error("xóa voucher không thành công");
-        console.error("Error deleting ProductDetailSize:", error);
-      }
+        mutate();
+      });
     }
   };
 
@@ -186,28 +98,20 @@ const VoucherPage = () => {
     const role = event.target.value;
     setSelectedStatus(role);
   };
-  useEffect(() => {
-    console.log("search  ", selectedStatus);
-  }, [selectedStatus]);
 
-  const renderContent = () => {
+  const renderTable = (filteredVouchers: Voucher[]) => {
     return (
       <>
         {activeTab === "inactive" && (
           <div className="d-flex align-items-center mb-3">
             <i className="bi bi-funnel me-2 fs-4"></i>
-            <select
-              className="form-select"
-              style={{ width: "auto" }}
-              value={selectedStatus}
-              onChange={handleSelectChange}
-            >
+            <Form.Select className="form-select" style={{ width: "auto" }} value={selectedStatus} onChange={handleSelectChange}>
               <option selected>Tất cả hết hiệu lực</option>
               <option value="activited">
                 Còn hạn nhưng không còn hiệu lực
               </option>
               <option value="expired">Hết hạn và đã hết hiệu lực</option>
-            </select>
+            </Form.Select>
           </div>
         )}
 
@@ -230,49 +134,33 @@ const VoucherPage = () => {
                 </th>
               </tr>
             </thead>
-            {currentVouchers.length > 0 ? (
+            {filteredVouchers.length > 0 ? (
               <tbody>
-                {currentVouchers.map((voucher, index) => (
+                {filteredVouchers.map((voucher, index) => (
                   <tr key={voucher.voucherId}>
                     <td>{index + 1}</td>
                     <td className="text-start title">{voucher.discountCode}</td>
                     <td className="text-start title">{voucher.name}</td>
                     <td>{voucher.discountPercent}%</td>
                     <td>{voucher.quantity}</td>
-                    <td>{new Date(voucher.createDate).toLocaleDateString()}</td>
-                    <td>{new Date(voucher.activeDate).toLocaleDateString()}</td>
-                    <td>{new Date(voucher.endDate).toLocaleDateString()}</td>
+                    <td>{new Date(voucher.createDate).toLocaleDateString('vi-GB')}</td>
+                    <td>{new Date(voucher.activeDate).toLocaleDateString('vi-GB')}</td>
+                    <td>{new Date(voucher.endDate).toLocaleDateString('vi-GB')}</td>
                     <td>
-                      <Badge
-                        bg={voucher.status === "active" ? "success" : "danger"}
-                      >
-                        {voucher.status === "active"
-                          ? "Có hiệu lực"
-                          : "Không có hiệu lực"}
+                      <Badge bg={voucher.status === "active" ? "success" : "danger"}>
+                        {voucher.status === "active" ? "Có hiệu lực" : "Không có hiệu lực"}
                       </Badge>
                     </td>
-                    <td>
-                      {voucher.createdBy?.username
-                        ? voucher.createdBy?.fullname
-                        : "chưa có"}
-                    </td>
+                    <td>{voucher.createdBy?.fullname}</td>
                     <td className="text-end">
                       <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
-                        <Button
-                          variant="link"
-                          className="btn-edit me-3"
-                          onClick={() => handleEdit(voucher)}
-                        >
+                        <Button variant="link" className="btn-edit me-3" onClick={() => handleEdit(voucher)}>
                           <i className="bi bi-pencil-square"></i>
                         </Button>
                       </OverlayTrigger>
                       <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
-                        <Button
-                          disabled={voucher?.status === "inactive"}
-                          variant="link"
-                          className="btn-edit me-3"
-                          onClick={() => handleDelete(voucher?.voucherId)}
-                        >
+                        <Button disabled={voucher?.status === "inactive"} variant="link"
+                          className="btn-edit me-3" onClick={() => handleDelete(voucher?.voucherId)}>
                           <i className="bi bi-trash3"></i>
                         </Button>
                       </OverlayTrigger>
@@ -288,130 +176,45 @@ const VoucherPage = () => {
               </tr>
             )}
           </Table>
-          {currentVouchers.length > 0 && (
-            <div className="d-flex justify-content-center ">
-              <nav>
-                <ul className="pagination">
-                  {/* Nút tới đầu trang 
-                <li
-                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
-                >
-                  <button className="page-link" onClick={handleFirstPage}>
-                    {"<<"} Đầu
-                  </button>
-                </li>*/}
-
-                  {/* Nút lùi */}
-                  <li
-                    className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
-                  >
-                    <button className="page-link" onClick={handlePreviousPage}>
-                      {"<"} Lùi
-                    </button>
-                  </li>
-
-                  {/* Nút chọn trang */}
-                  {Array.from({ length: totalPages }, (_, index) => (
-                    <li
-                      key={index + 1}
-                      className={`page-item ${currentPage === index + 1 ? "active" : ""
-                        }`}
-                    >
-                      <button
-                        className="page-link"
-                        onClick={() => handlePageChange(index + 1)}
-                      >
-                        {index + 1}
-                      </button>
-                    </li>
-                  ))}
-
-                  {/* Nút tới */}
-                  <li
-                    className={`page-item ${currentPage === totalPages ? "disabled" : ""
-                      }`}
-                  >
-                    <button className="page-link" onClick={handleNextPage}>
-                      Tới {">"}
-                    </button>
-                  </li>
-
-                  {/* Nút tới cuối trang 
-                <li
-                  className={`page-item ${
-                    currentPage === totalPages ? "disabled" : ""
-                  }`}
-                >
-                  <button className="page-link" onClick={handleLastPage}>
-                    Cuối {">>"}
-                  </button>
-                </li>*/}
-                </ul>
-              </nav>
-            </div>
-          )}
         </div>
       </>
     );
   };
 
-  if (voucherFetch.isLoading) return <div>Đang loading dữ liệu voucher</div>;
+  const renderPagination = () => {
+    const totalPages = Math.ceil(filteredVouchers.length / itemsPerPage);
+    const pages = [];
+
+    if (totalPages <= 1) return null;
+
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(
+        <Pagination.Item key={i} active={currentPage === i} onClick={() => setCurrentPage(i)}>{i}</Pagination.Item>
+      );
+    }
+
+    return (
+      <Pagination>
+        <Pagination.Prev onClick={handlePreviousPage} disabled={currentPage === 1} />
+        {pages}
+        <Pagination.Next onClick={handleNextPage} disabled={currentPage === totalPages} />
+      </Pagination>
+    );
+  };
+
+  if (isLoading) return <div>Đang loading dữ liệu voucher</div>;
+  if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
+
   return (
     <div style={{ fontSize: "14px" }}>
       <div className="box-ultil">
         <b className="text-danger" style={{ fontSize: "20px" }}>
           Quản lý mã giảm giá/ Tổng: {vouchers?.length || 0} mã giảm giá
         </b>
-        {/* <div className="row "> */}
-        {/* Ngày bắt đầu 
-          <div className="col-md-6">
-            <div className="form-group">
-              <label htmlFor="startDate" className="form-label">
-                Ngày bắt đầu:
-              </label>
-              <input
-                type="date"
-                id="startDate"
-                value={startDate}
-                onChange={handleStartDateChange}
-                className="form-control"
-              />
-            </div>
-          </div>*/}
-
-        {/* Ngày kết thúc 
-          <div className="col-md-6">
-            <div className="form-group">
-              <label htmlFor="endDate" className="form-label">
-                Ngày kết thúc:
-              </label>
-              <input
-                type="date"
-                id="endDate"
-                value={endDate}
-                onChange={handleEndDateChange}
-                className="form-control"
-              />
-            </div>
-          </div>*/}
-        {/* </div> */}
-
-        <input
-          type="text"
-          placeholder="Tìm kiếm mã giảm giá..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          style={{
-            padding: "5px 10px",
-            fontSize: "14px",
-            borderRadius: "5px",
-            border: "1px solid #ddd",
-            width: "200px",
-          }}
-        />
-        <Button
-          className="btn-sd-admin"
-          style={{ fontSize: "15px" }}
+        <div>
+          <Form.Control type="text" placeholder="Tìm theo tên và địa chỉ..." onChange={handleSearchChange} />
+        </div>
+        <Button className="btn-sd-admin" style={{ fontSize: "15px" }}
           onClick={() => {
             setEditingVoucher(null);
             setShowAddVoucher(true);
@@ -420,47 +223,21 @@ const VoucherPage = () => {
           <i className="bi bi-plus-circle me-2"></i>Tạo mã giảm giá
         </Button>
       </div>
-      <Nav
-        variant="pills"
-        activeKey={activeTab}
-        onSelect={(selectedKey) => setActiveTab(selectedKey as string)}
-        className="custom-tabs my-3"
-      >
+      <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
         <Nav.Item>
-          <Nav.Link eventKey="all" className="tab-link">
-            Toàn bộ
-          </Nav.Link>
+          <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link eventKey="valid" className="tab-link">
-            Còn hiệu lực
-          </Nav.Link>
+          <Nav.Link eventKey="valid" className="tab-link">Còn hiệu lực</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link eventKey="inactive" className="tab-link">
-            Hết hiệu lực
-          </Nav.Link>
+          <Nav.Link eventKey="inactive" className="tab-link">Hết hiệu lực</Nav.Link>
         </Nav.Item>
-
-        {/* <Nav.Item>
-          <Nav.Link eventKey="activited" className="tab-link">
-            Đang hoạt động
-          </Nav.Link>
-        </Nav.Item>*/}
-        {/* <Nav.Item>
-          <Nav.Link eventKey="expired" className="tab-link">
-            Đã hết hạn
-          </Nav.Link>
-        </Nav.Item>  */}
       </Nav>
-      <div className="mt-3">{renderContent()}</div>
-      <VoucherAddNew
-        currentUser={currentUser}
-        showAddVoucher={showAddVoucher}
-        setShowAddVoucher={setShowAddVoucher}
-        voucher={editingVoucher}
-        onFetch={voucherFetch.mutate}
-      />
+      {renderContent()}
+      {renderPagination()}
+      <VoucherAddNew currentUser={currentUser} showAddVoucher={showAddVoucher} setShowAddVoucher={setShowAddVoucher}
+        voucher={editingVoucher} onFetch={mutate} />
     </div>
   );
 };

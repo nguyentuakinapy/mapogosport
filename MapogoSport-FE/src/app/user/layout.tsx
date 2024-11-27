@@ -1,4 +1,5 @@
 import HomeLayout from "@/components/HomeLayout"
+import { ReactNode } from "react"
 
 export const metadata = {
     title: 'Quản lý tài khoản'
@@ -7,7 +8,7 @@ export const metadata = {
 export default function Layout({
     children,
 }: {
-    children: React.ReactNode
+    children: ReactNode
 }) {
     return (
         <HomeLayout>{children}</HomeLayout>

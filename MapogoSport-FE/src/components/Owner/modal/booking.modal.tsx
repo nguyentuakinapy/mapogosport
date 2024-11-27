@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import 'react-datepicker/dist/react-datepicker.css';
 import { createTimeStringH, isDateInRange } from "@/components/Utils/booking-time";
 
-
 interface BookingProps {
     showBookingModal: boolean;
     setShowBookingModal: (v: boolean) => void;
@@ -477,10 +476,9 @@ const BookingModal = (props: BookingProps) => {
         let index = 0;
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
-            for (const [, bookings] of Object.entries(dateWeek)) {
-                bookings.map(() => {
+            for (const [_weekIndex, bookings] of Object.entries(dateWeek)) {
+                bookings.forEach(() => {
                     index = index + 1;
-
                 })
             }
         }
@@ -993,7 +991,7 @@ const BookingModal = (props: BookingProps) => {
                                     {Object.entries(weeks).map(([index, details]) => (
                                         <div key={index}>
                                             {details.map((detail, i) => (
-                                                <span key={i}>{formatDateNotime(new Date(detail.date))}</span>
+                                                <span key={i}>{new Date(detail.date).toLocaleDateString()}</span>
                                             ))}
                                         </div>
                                     ))}
@@ -1005,7 +1003,7 @@ const BookingModal = (props: BookingProps) => {
                                 <b className="text-uppercase">Đã có sân đặt vào {week}</b><br />
                                 {bookings.map((booking) => (
                                     <div key={booking.bookingDetailId}>
-                                        Ngày: {formatDateNotime(new Date(booking.date))}  Giờ: {booking.startTime} - {booking.endTime}  {/* Có thể hiển thị thêm thông tin khác ở đây */}
+                                        Ngày: {new Date(booking.date).toLocaleDateString()}  Giờ: {booking.startTime} - {booking.endTime}  {/* Có thể hiển thị thêm thông tin khác ở đây */}
                                     </div>
                                 ))}
                             </div>
