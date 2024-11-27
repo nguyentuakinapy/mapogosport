@@ -39,24 +39,24 @@ export default function Home() {
     return stars;
   };
 
-  const searchParams = useSearchParams();
-  const router = useRouter(); // Using useRouter
+  // const searchParams = useSearchParams();
+  // const router = useRouter(); // Using useRouter
 
-  useEffect(() => {
-    const notLoggedIn = searchParams.get('notLoggedIn');
+  // useEffect(() => {
+  //   const notLoggedIn = searchParams.get('notLoggedIn');
 
-    // Check if the 'notLoggedIn' query parameter exists and equals 'true'
-    if (notLoggedIn === 'true') {
-      toast.error("Bạn chưa đăng nhập!");
+  //   // Check if the 'notLoggedIn' query parameter exists and equals 'true'
+  //   if (notLoggedIn === 'true') {
+  //     toast.error("Bạn chưa đăng nhập!");
 
-      // Update the URL by removing the query parameter without reloading the page
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('notLoggedIn');
+  //     // Update the URL by removing the query parameter without reloading the page
+  //     const newUrl = new URL(window.location.href);
+  //     newUrl.searchParams.delete('notLoggedIn');
 
-      // Corrected usage of router.replace
-      router.replace(newUrl.toString());
-    }
-  }, [searchParams, router]); // Add router as a dependency
+  //     // Corrected usage of router.replace
+  //     router.replace(newUrl.toString());
+  //   }
+  // }, [searchParams, router]); // Add router as a dependency
 
   // Hiển thị khu vực sân
   useEffect(() => {
