@@ -35,9 +35,15 @@ public interface UserService {
 	
 	List<Notification> findNotificationByUsername(String username);
 	
+	List<Notification> findByUser_UsernameContainingAndTypeContaining(String username, String type);;
+	
 	void setViewNotification(String username);
 	
+	void setViewNotificationTypeNotifyMess(String username);
+	
 	void deleteNotification(String username);
+	
+	void deleteNotificationHaveTypeNotifyMess(String username);
 	
 	void setIsReadNotification(Integer notificationId);
 }

@@ -24,6 +24,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import jakarta.servlet.http.HttpServletRequest;
 import mapogo.dao.AuthorityDAO;
+import mapogo.dao.NotificationDAO;
 import mapogo.dao.OwnerDAO;
 import mapogo.dao.SubsciptionPaymentDAO;
 import mapogo.dao.UserSubscriptionDAO;
@@ -57,6 +58,9 @@ public class UserRestController {
 
 	@Autowired
 	UserVoucherDAO userVoucherRepository;
+	
+	@Autowired
+	NotificationDAO notificationDAO;
 
 	@GetMapping("/user/{username}")
 	public User findUseLoginUser(@PathVariable("username") String username) {
@@ -274,10 +278,23 @@ public class UserRestController {
 	public List<Notification> findNotificationByUsername(@PathVariable("username") String username) {
 		return userService.findNotificationByUsername(username);
 	}
+	
+	@GetMapping("/user/findByUser_UsernameContainingAndTypeContaining/{username}/{type}")
+	public List<Notification> findByUser_UsernameContainingAndTypeContaining(@PathVariable("username") String username, 
+			@PathVariable("type") String type)
+	{
+		return userService.findByUser_UsernameContainingAndTypeContaining(username,type);
+	}
 
 	@PutMapping("/user/notification/{username}")
 	public void setViewNotification(@PathVariable("username") String username) {
 		userService.setViewNotification(username);
+	}
+	
+	@PutMapping("/user/notification/setViewNotificationTypeNotifyMess/{username}")
+	public void setViewNotificationTypeNotifyMess(@PathVariable("username") String username) {
+	    System.err.println("API request received with username: " + username);  // Log thêm thông tin
+		userService.setViewNotificationTypeNotifyMess(username);
 	}
 
 	@PutMapping("/user/notification/is/read/{notificationId}")
@@ -288,6 +305,10 @@ public class UserRestController {
 	@DeleteMapping("/user/notification/{username}")
 	public void deleteNotification(@PathVariable("username") String username) {
 		userService.deleteNotification(username);
+	}
+	@DeleteMapping("/user/notification/deleteNotificationHaveTypeNotifyMess/{username}")
+	public void deleteNotificationHaveTypeNotifyMess(@PathVariable("username") String username) {
+		userService.deleteNotificationHaveTypeNotifyMess(username);
 	}
 
 	@Autowired
