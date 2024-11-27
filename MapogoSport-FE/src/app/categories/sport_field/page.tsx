@@ -185,13 +185,21 @@ function Categories() {
                         </div>
 
                         <div className="filter checkbox-filter mt-3">
-                            <label className="checkbox mb-1">
+                            <label className="checkbox mb-1 search-label">
                                 <input
+                                    className="search-input"
+                                    style={{ borderRadius: '6px' }}
                                     type="text"
-                                    placeholder="Tìm kiếm theo tên, địa chỉ..."
+                                    placeholder="🔍Tìm theo tên, địa chỉ..."
                                     value={searchTerm}
-                                    onChange={handleSearchChange} />
+                                    onChange={handleSearchChange}
+                                />
                             </label>
+
+                        </div>
+
+                        <div className="mt-3">
+                            <div style={{fontSize:'15px'}}><i className="bi bi-pin-map-fill me-2"></i>Bật vị trí lên để sắp xếp sân gần nhất!</div>
                         </div>
 
                     </Col>

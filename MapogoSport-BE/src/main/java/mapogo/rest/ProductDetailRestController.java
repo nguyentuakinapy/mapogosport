@@ -94,9 +94,9 @@ public class ProductDetailRestController {
 		return productDetailService.findPriceByProductDetailIdAndSizeId(productDetailId, sizeId);
 	}
 
-	@GetMapping("/product-detail/image/gallery/{productDetailId}")
-	public List<Object[]> findByImageDetailAndGalleryByIdProductDetail(@PathVariable Integer productDetailId) {
-		return productDetailService.findByImageDetailAndGalleryByIdProductDetail(productDetailId);
+	@GetMapping("/product-detail/image/gallery/{productId}")
+	public List<ProductDetail> findByImageDetailAndGalleryByIdProductDetail(@PathVariable("productId") Integer productId) {
+		return productDetailService.findByImageDetailAndGalleryByIdProductDetail(productId);
 	}
 
 	@GetMapping("/cmm/{id}")

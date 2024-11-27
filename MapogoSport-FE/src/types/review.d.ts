@@ -18,3 +18,16 @@ interface ProductReview {
     comment: string;
     datedAt: Date;
 }
+
+
+interface ProductReviewData {
+    productReviewId: number;
+    product: {
+        productId: number;
+        productName: string;
+    };
+    rating: number;
+    comment: string;
+    datedAt: Date;
+    user: User
+}

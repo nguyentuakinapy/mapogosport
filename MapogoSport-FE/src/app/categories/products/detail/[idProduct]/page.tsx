@@ -14,24 +14,19 @@ import useSWR, { mutate } from 'swr';
 import ModalReviewProductField from '@/components/Review/review.product';
 
 const ProductDetail = () => {
-    const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState<number>(1);
     const [open, setOpen] = useState(false);
 
     const decreaseQuantity = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
     const [modalShow, setModalShow] = useState<boolean>(false);
-    const [selectedProductDetailSizeId, setSelectedProductDetailSizeId] = useState(null);
-    const [color, setColor] = useState([]);
-    const [size, setSizeByColor] = useState([]);
-    const [selectedColor, setSelectedColor] = useState(null);
-    const [selectedSize, setSelectedSize] = useState(null);
-    const [imageGallery, setImageGallery] = useState([]);
-    const [idSize, setIdSize] = useState(null);
-    const [price, setPrice] = useState([]);
-    const [selectedProductDetailId, setSelectedProductDetailId] = useState(null);
+    const [selectedSize, setSelectedSize] = useState<number>();
+    const [imageGallery, setImageGallery] = useState<ProductDetailAndDetailSize[]>([]);
+    const [idSize, setIdSize] = useState<number>();
+    const [price, setPrice] = useState<number>();
     const { idProduct } = useParams();
     const [visibleCount, setVisibleCount] = useState(5);
 
-    const [selectedSizeQuantity, setSelectedSizeQuantity] = useState(0);
+    const [selectedSizeQuantity, setSelectedSizeQuantity] = useState<number>(0);
     const increaseQuantity = () => {
         if (quantity < selectedSizeQuantity) {
             setQuantity(quantity + 1);
@@ -52,7 +47,7 @@ const ProductDetail = () => {
     const handleClickBtn = () => {
         setOpen(true);
     }
-    const [findByIdProduct, setFindByIdProduct] = useState<Product[]>([])
+    const [findByIdProduct, setFindByIdProduct] = useState<Product>()
 
 
     // FindByIdProduct
@@ -61,16 +56,29 @@ const ProductDetail = () => {
             const fetchData = async () => {
                 try {
                     const response = await fetch(`http://localhost:8080/rest/products/${idProduct}`)
-                    const data = await response.json();
+                    const data = await response.json() as Product;
                     setFindByIdProduct(data)
                     console.log("data cuat hht ", data)
                 } catch (error) {
                     console.log('Loi data', error)
                 }
+
+                try {
+                    const response = await fetch(`http://localhost:8080/rest/product-detail/image/gallery/${idProduct}`)
+                    const data = await response.json() as ProductDetailAndDetailSize[];
+                    setImageGallery(data)
+                    setSelectedSize(data[0].detailSizes.length > 0 ? data[0].detailSizes[0].detailSizeId : 0);
+                    setSelectedSizeQuantity(data[0].detailSizes.length > 0 ? data[0].detailSizes[0].quantity : 0);
+                    setPrice(data[0].detailSizes[0].price);
+                    setIdSize(data[0].productDetailId)
+                    console.log("image,Gallery", data)
+                    console.log("image,Gallery", data[0].detailSizes[0].price)
+                } catch (error) {
+                    console.log("error image, gallery", error)
+                }
             }
             fetchData()
         }
-
     }, [idProduct])
 
     // product_review
@@ -84,94 +92,22 @@ const ProductDetail = () => {
 
 
     // Fetch colors based on product ID
-    useEffect(() => {
-        if (idProduct) {
-            const fetchData = async () => {
-                try {
-                    const response = await fetch(`http://localhost:8080/rest/product-detail/color/${idProduct}`);
-                    const data = await response.json();
-                    setColor(data);
-                    if (data.length > 0) {
-                        // Đặt màu đầu tiên và ID chi tiết sản phẩm làm mặc định
-                        setSelectedColor(data[0][0]);
-                        setSelectedProductDetailId(data[0][1]);  // Giả sử phần tử thứ hai là ID chi tiết sản phẩm
-                    }
-                } catch (error) {
-                    console.error('Error fetching colors:', error);
-                }
-            };
-            fetchData();
-        }
-    }, [idProduct]);
+
 
 
     // Select Size by color to product detail
-    useEffect(() => {
-        if (selectedProductDetailId) {
-            const fetchData = async () => {
-                try {
-                    const response = await fetch(`http://localhost:8080/rest/product-detail/size/${selectedProductDetailId}`);
-                    const data = await response.json();
-                    setSizeByColor(data);
-                    console.log("màu", data);
-                    if (data.length > 0) {
-                        // Đặt kích thước mặc định đầu tiên
-                        setSelectedSize(data[0].size.sizeName);
-                        setIdSize(data[0].size.sizeId);
-                        setSelectedProductDetailSizeId(data[0].productDetailSizeId); // Sử dụng ID từ dữ liệu trả về
-                        setSelectedSizeQuantity(data[0].quantity)
-                    }
-                } catch (error) {
-                    console.log("error size", error);
-                }
-            }
-            fetchData();
-        }
-    }, [selectedProductDetailId]);
+
     // select price by size and productDetailId
 
-    useEffect(() => {
-        console.log("idSize", idSize)
-        if (selectedProductDetailId && idSize) {
-            // console.log("idSize: ", idSize)
-            const fetchData = async () => {
-                try {
-                    const response = await fetch(`http://localhost:8080/rest/product-detail/price-by-size/${selectedProductDetailId}/${idSize}`)
-                    const data = await response.json()
-                    setPrice(data)
-                    console.log("data price", data)
-                    console.log("price")
-                } catch (error) {
-                    console.log("error price by size", error)
-                }
-            }
-            fetchData()
-        }
-    }, [selectedProductDetailId, idSize])
 
     //Select image and gallery by idProductDetail
-    useEffect(() => {
-        if (selectedProductDetailId) {
-            console.log("Selected Product Detail ID:", selectedProductDetailId);
-            const fetchData = async () => {
-                try {
-                    const response = await fetch(`http://localhost:8080/rest/product-detail/image/gallery/${selectedProductDetailId}`)
-                    const data = await response.json()
-                    setImageGallery(data)
-                    console.log("image,Gallery", data)
-                } catch (error) {
-                    console.log("error image, gallery", error)
-                }
-            }
-            fetchData()
-        }
-    }, [selectedProductDetailId])
 
-    // cập nhật màu và trạng thái
-    const handleColorSelect = (colorItem) => {
-        setSelectedColor(colorItem[0]); // Đặt màu đã chọn
-        setSelectedProductDetailId(colorItem[1]); // Đặt ID chi tiết sản phẩm
-    };
+
+    // // cập nhật màu và trạng thái
+    // const handleColorSelect = (colorItem) => {
+    //     setSelectedColor(colorItem[0]); // Đặt màu đã chọn
+    //     setSelectedProductDetailId(colorItem[1]); // Đặt ID chi tiết sản phẩm
+    // };
 
     const handleAddToCart = async () => {
         console.log("số lượng size là ", selectedSizeQuantity)
@@ -184,7 +120,7 @@ const ProductDetail = () => {
             }
             const dataAddCart = {
                 username,
-                productDetailSizeId: selectedProductDetailSizeId,
+                productDetailSizeId: selectedSize,
                 date: new Date(),
                 totalAmount: 150.00,
                 quantity: quantity
@@ -220,9 +156,9 @@ const ProductDetail = () => {
     };
     const [filteredData, setFilteredData] = useState(null); // State to store filtered reviews
 
-    const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // `null` để hiển thị tất cả mặc định
+    const [selectedRatingFilter, setSelectedRatingFilter] = useState<number | null>(null); // `null` để hiển thị tất cả mặc định
 
-    const handleClick = (value) => {
+    const handleClick = (value: number | null) => {
         if (selectedRatingFilter === value) {
             // Nếu đã chọn số sao này rồi, nhấn lại sẽ xóa bộ lọc
             setSelectedRatingFilter(null);
@@ -254,8 +190,10 @@ const ProductDetail = () => {
     };
 
     const handleChatMess = () => {
-        if (user) {
-            if (user?.username !== "myntd") {
+        const username = localStorage.getItem('username');
+
+        if (username) {
+            if (username !== "myntd") {
                 window.history.pushState({}, "", `?status=default`);
             } else {
                 toast.info('Bạn không thể nhắn với chính mình ')
@@ -271,26 +209,23 @@ const ProductDetail = () => {
                     <Row className='p-5'>
                         {/* Cột hình ảnh sản phẩm */}
                         <Col className='ms-5' style={{ maxWidth: '550px' }}>
-                            {imageGallery.length > 0 ? (
-                                <>
-                                    <img
-                                        src={`${imageGallery[0][0].image}`}
-                                        className='w-100'
-                                        alt="Main product"
-                                        id="main-product-image"
-                                        title={imageGallery[0][0].image}
-                                        style={{ width: '100%', height: '400px', objectFit: 'contain' }}
-                                    />
-                                    <div id="imageGalleryCarousel" class="carousel slide mt-3" data-bs-ride="carousel">
-                                        <div className="carousel-inner">
-
-                                            {imageGallery[0][0].galleries.map((galleryItem, index) => (
+                            <img
+                                src={`${findByIdProduct?.image}`}
+                                className='w-100'
+                                alt="Main product"
+                                id="main-product-image"
+                                title={findByIdProduct?.name}
+                                style={{ width: '100%', height: '400px', objectFit: 'contain' }}
+                            />
+                            <div id="imageGalleryCarousel" className="carousel slide mt-3" data-bs-ride="carousel">
+                                <div className="carousel-inner">
+                                    {/* {imageGallery[0].galleries.map((_galleryItem, index) => (
                                                 <div
                                                     key={index}
                                                     className={`carousel-item ${index === 0 ? 'active' : ''}`} // First item is active
                                                 >
                                                     <div className="row justify-content-center">
-                                                        {imageGallery[0][0].galleries.slice(index, index + 3).map((item, subIndex) => (
+                                                        {imageGallery[0].galleries.slice(index, index + 3).map((item, subIndex) => (
                                                             <div className="col-4 d-flex justify-content-center" key={subIndex}>
                                                                 <img
                                                                     src={item.name}
@@ -305,26 +240,46 @@ const ProductDetail = () => {
                                                         ))}
                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
+                                            ))} */}
+                                    {imageGallery.map((item, index) => {
+                                        return (
+                                            <div
+                                                key={item.productDetailId}
+                                                className={`carousel-item ${index === 0 ? 'active' : ''}`} // First item is active
+                                            >
+                                                <div className="row justify-content-center">
+                                                    {item.galleries.slice(index, index + 3).map((item, subIndex) => (
+                                                        <div className="col-4 d-flex justify-content-center" key={subIndex}>
+                                                            <img
+                                                                src={item.name}
+                                                                className="img-fluid"
+                                                                alt={`Gallery image ${index + subIndex + 1}`}
+                                                                style={{ width: '90px', height: '90px', objectFit: 'cover', cursor: 'pointer' }}
+                                                                onClick={() => {
+                                                                    (document.getElementById('main-product-image') as HTMLImageElement).src = item.name;
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
 
 
-                                        <button className="carousel-control-prev" type="button" data-bs-target="#imageGalleryCarousel" data-bs-slide="prev">
-                                            <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-                                            <span className="visually-hidden">Previous</span>
-                                        </button>
-                                        <button className="carousel-control-next" type="button" data-bs-target="#imageGalleryCarousel" data-bs-slide="next">
-                                            <span className="carousel-control-next-icon" aria-hidden="true"></span>
-                                            <span className="visually-hidden">Next</span>
-                                        </button>
-                                    </div>
-                                </>
-                            ) : (
-                                <p>No images available</p>
-                            )}
+                                <button className="carousel-control-prev" type="button" data-bs-target="#imageGalleryCarousel" data-bs-slide="prev">
+                                    <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span className="visually-hidden">Previous</span>
+                                </button>
+                                <button className="carousel-control-next" type="button" data-bs-target="#imageGalleryCarousel" data-bs-slide="next">
+                                    <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span className="visually-hidden">Next</span>
+                                </button>
+                            </div>
                         </Col>
                         <Col className='ms-5' style={{ marginLeft: '100px' }}>
-                            <h4>{findByIdProduct.name}</h4>
+                            <h4>{findByIdProduct?.name}</h4>
                             <div className='star-comment '>
                                 <div className="star d-flex">
                                     Đánh giá: 4/5 <i className="text-warning mx-2 bi bi-star-fill"></i> (1 Đánh giá)
@@ -339,51 +294,59 @@ const ProductDetail = () => {
 
                             </div>
                             <h5 className="text-danger mt-3">
-                                {price ? formatPrice(price) : formatPrice(findByIdProduct.price)}
+                                {selectedSize !== 0 ?
+                                    imageGallery.find(item => item.productDetailId === idSize)?.
+                                        detailSizes.find(item => item.detailSizeId === selectedSize)?.price.toLocaleString() + " đ" : price?.toLocaleString() + " đ"
+                                }
                             </h5>
                             <div className="mb-3">
                                 <span className="d-block fw-bold mb-2">Màu sắc:</span>
                                 <div className="d-flex flex-wrap">
-                                    {color.map((colorItem, index) => {
+                                    {imageGallery.map((item, index) => {
                                         return (
                                             <Button
                                                 key={index}
                                                 className="me-2 mb-2"
-                                                variant={selectedColor === colorItem[0] ? 'dark' : 'outline-secondary'}
-                                                onClick={() => handleColorSelect(colorItem)}
+                                                variant={idSize === item.productDetailId ? 'dark' : 'outline-secondary'}
+                                                onClick={() => {
+                                                    setIdSize(item.productDetailId);
+                                                    setSelectedSize(item.detailSizes.length > 0 ? item.detailSizes[0].detailSizeId : 0);
+                                                    setSelectedSizeQuantity(item.detailSizes.length > 0 ? item.detailSizes[0].quantity : 0);
+                                                    (document.getElementById('main-product-image') as HTMLImageElement).src = item.image;
+
+                                                }}
+
                                             >
                                                 <img
-                                                    src={`${colorItem[2]}`} // Assuming the image URL is the third element in the colorItem array
-                                                    alt={colorItem[0]}
+                                                    src={`${item.image}`} // Assuming the image URL is the third element in the colorItem array
+                                                    alt={item.color}
                                                     style={{ width: '40px', height: '40px', marginRight: '10px', objectFit: 'cover' }}
                                                 />
-                                                {colorItem[0]}
+                                                {item.color}
                                             </Button>
                                         );
                                     })}
                                 </div>
                             </div>
 
-                            {size.length > 0 && (
+                            {idSize && (
                                 <div className="mb-3">
                                     <span className="d-block fw-bold mb-2">Size:</span>
                                     <div className="d-flex flex-wrap">
-                                        {size.map((item) => {
+                                        {imageGallery.find(item => item.productDetailId === idSize)?.detailSizes.map((item) => {
                                             return (
                                                 <>
                                                     <Button
-                                                        key={item.size.sizeId}
+                                                        key={item.detailSizeId}
                                                         className="me-2 mb-2"
-                                                        variant={selectedSize === item.size.sizeName ? 'dark' : 'outline-secondary'}
+                                                        variant={selectedSize === item.detailSizeId ? 'dark' : 'outline-secondary'}
                                                         disabled={item.quantity <= 0}
                                                         onClick={() => {
-                                                            setSelectedSize(item.size.sizeName);
-                                                            setSelectedProductDetailSizeId(item.productDetailSizeId);
-                                                            setIdSize(item.size.sizeId);
+                                                            setSelectedSize(item.detailSizeId);
                                                             setSelectedSizeQuantity(item.quantity)
                                                         }}
                                                     >
-                                                        {item.size.sizeName}
+                                                        {item.size}
                                                     </Button>
                                                 </>
                                             );
@@ -426,7 +389,7 @@ const ProductDetail = () => {
                     <Row>
                         <Collapse in={open}>
                             <Col className="m-auto" >
-                                <p>{findByIdProduct.description}</p>
+                                <p>{findByIdProduct?.description}</p>
                             </Col>
                         </Collapse>
                         <div onClick={() => setOpen(!open)}
@@ -465,9 +428,9 @@ const ProductDetail = () => {
                     </div>
                     {(filteredData ? filteredData : data) && Array.isArray(filteredData ? filteredData : data) ? (
                         (filteredData || data)
-                            .sort((a, b) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime())
+                            .sort((a: ProductReviewData, b: ProductReviewData) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime())
                             .slice(0, visibleCount)
-                            .map((review) => (
+                            .map((review: ProductReviewData) => (
                                 <Row className="mt-5 ms-5" key={review.productReviewId}>
                                     <Col>
                                         <Image
