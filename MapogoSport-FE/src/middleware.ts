@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
     const sessionDataAuth = request.cookies.get('sessionDataAuth')?.value; // Lấy cookie
     const pathname = request.nextUrl.pathname;
 
-    const privatePaths = ['/admin', '/owner', '/user/profile'];
+    const privatePaths = ['/admin', '/owner', '/user'];
 
     const isPrivatePath = privatePaths.some((path) => pathname.startsWith(path));
 
@@ -34,18 +34,40 @@ export function middleware(request: NextRequest) {
 
         try {
             sessionData = JSON.parse(sessionDataAuth) as SessionData;
+            console.log(">>>> check ROLE: ",sessionData.authorities.map(a => a.role.name));
+            
         } catch (error) {
             console.error("Failed to parse sessionDataAuth:", error);
             return NextResponse.next();
         }
 
-        if (sessionData && sessionData.authorities) {
+        if (sessionData && Array.isArray(sessionData.authorities)) {
             const hasAdminRole = sessionData.authorities.some((auth) => auth.role.name === "ROLE_ADMIN");
             const hasOwnerRole = sessionData.authorities.some((auth) => auth.role.name === "ROLE_OWNER");
             const hasStaffRole = sessionData.authorities.some((auth) => auth.role.name === "ROLE_STAFF");
             const hasUserRole = sessionData.authorities.some((auth) => auth.role.name === "ROLE_USER");
 
-            // Logic ngăn cản truy cập trái phép
+
+            const hasAllRoles = hasAdminRole && hasOwnerRole && hasStaffRole && hasUserRole ;
+            const hasAllRolesNoRoleUser = hasAdminRole && hasOwnerRole && hasStaffRole ;
+            const case1 =  hasUserRole && hasOwnerRole ;
+            const case2 =  hasUserRole && hasStaffRole ;
+
+            if (case2 && pathname.startsWith('/admin') || pathname.startsWith('/user')) {
+                return NextResponse.next();
+            } 
+
+            if (case1 && pathname.startsWith('/owner') || pathname.startsWith('/user')) {
+                return NextResponse.next();
+            }
+        
+            if (hasAllRoles && isPrivatePath) {
+                return NextResponse.next();
+            }
+            if (hasAllRolesNoRoleUser && isPrivatePath) {
+                return NextResponse.next();
+            }
+
             // Ngăn người dùng ROLE_ADMIN vào `/owner`
             if (hasAdminRole && pathname.startsWith('/owner')) {
                 const noRightsUrl = new URL('/', request.url);
@@ -68,7 +90,7 @@ export function middleware(request: NextRequest) {
             }
 
             // Chỉ có ROLE_USER nhưng cố truy cập các đường dẫn riêng tư
-            if (hasUserRole && !hasAdminRole && !hasOwnerRole && !hasStaffRole && isPrivatePath) {
+            if (hasUserRole && isPrivatePath) {
                 const noRightsUrl = new URL('/', request.url);
                 noRightsUrl.searchParams.set('noRights', 'true');
                 return NextResponse.redirect(noRightsUrl);
@@ -84,7 +106,12 @@ export function middleware(request: NextRequest) {
                 return NextResponse.next();
             }
 
-            // Cho phép ROLE_STAFF vào đường dẫn tương thích nếu cần
+            // Cho phép ROLE_STAFF vào đường dẫn tương thích nếu cần (ví dụ, không có hạn chế cụ thể)
+            if (hasStaffRole && pathname.startsWith('/admin')) {
+                return NextResponse.next();
+            }
+
+        
         } else {
             console.error("Invalid sessionData structure:", sessionData);
         }
