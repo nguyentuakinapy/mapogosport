@@ -3,9 +3,12 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+
 import LoginModal from './account/modal/login.modal';
 import RegisterModal from './account/modal/register.modal';
 import useSWR from 'swr';
+
 import ForgotPassword from './account/modal/forgotPassword.modal';
 import ChangePasswordNew from './account/modal/change-password-new.modal';
 import { useData } from '@/app/context/UserContext';
@@ -16,7 +19,7 @@ import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import Image from 'next/image';
-import { Col, Row } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
 
 
@@ -41,7 +44,7 @@ const CartBadge = ({ username }: { username: string }) => {
 
 
     return (
-        <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
+        <span className="position-absolute  top-1 start-100 translate-middle badge rounded-pill bg-danger">
             {cartCount}
             <span className="visually-hidden">items in cart</span>
         </span>
@@ -218,70 +221,69 @@ const Header = (props: HeaderProps) => {
 
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
-            <div style={{
+            <Navbar expand="lg" style={{
                 position: 'sticky', zIndex: '1001', backgroundColor: '#090e1e', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)'
             }}>
                 <Container>
-                    <Row
-                        className="d-flex align-items-center nav-home"
-                        style={{ maxHeight: '100px', height: '80px' }}
-                    >
-                        <Col xs={5} className="d-flex">
-                            <Link href="/blog" className='head-hv-nav text-decoration-none'><i className="bi bi-book-fill me-2"></i>Bài viết</Link>
+                    <Navbar><Link href={'/'} ><Image src="/images/logo-black.png" width={100} height={60} alt="" /></Link></Navbar>
+                    <Navbar.Toggle aria-controls="navbarScroll" />
+                    <Navbar.Collapse id="navbarScroll">
+                        {/* <Nav className="ms-auto my-2 my-lg-0 d-flex justify-content-center align-items-center nav-home">
+
+                        </Nav> */}
+                        <Nav
+                            className="ms-auto my-2 my-lg-0 d-flex justify-content-center align-items-center nav-home"
+                            style={{ maxHeight: '100px' }}
+                            navbarScroll
+                        >   <Link href="/blog" className='head-hv-nav text-decoration-none'><i className="bi bi-book-fill me-2"></i>Bài viết</Link>
                             <Link href="/categories/products" className='head-hv-nav text-decoration-none'><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
                             <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy-fill me-2"></i>Sân thể thao</Link>
 
-                        </Col>
-                        <Col xs={2} className="text-center">
-                            <Link href={'/'} ><Image src="/images/logo-black.png" width={100} height={60} alt="" /></Link>
-                        </Col>
-                        <Col xs={5} className="d-flex">
-                            <div className="ms-auto d-flex">
-                                <Nav className='position-relative'>
-                                    <Link href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</Link>
-                                    <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
-                                        0
-                                        <span className="visually-hidden">unread messages</span>
-                                    </span>
-                                    {userData && <CartBadge username={userData.username} />}
-                                </Nav>
-                                <div className="dropdown">
-                                    <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i className="bi bi-person-fill me-2"></i>{userData ? userData?.fullname : 'Tài khoản'}
-                                    </span>
-                                    <ul className="dropdown-menu">
-                                        <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowLoginModal(true)} style={{ cursor: 'pointer' }} >Đăng nhập</a>
-                                        <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowRegisterModal(true)} style={{ cursor: 'pointer' }}>Đăng ký</a>
-                                        {/* <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#changeEmail" style={{ cursor: 'pointer' }}>Thay đổi Email</a> */}
-                                        {/* <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-target="#changePassword" style={{ cursor: 'pointer' }}>Thay đổi mật khẩu</a> */}
-                                        <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowForgotPassword(true)} style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
-                                        {/* <hr className='m-0' /> */}
-                                        <Link href='/user' className={`dropdown-item text-decoration-none text-dark ${userData ? '' : 'd-none'}`}>Thông tin tài khoản</Link>
-                                        {userData && userData.authorities.map((item, index) => {
-                                            if (item.role.name === "ROLE_USER") {
-                                                return null;
-                                            }
-                                            if (item.role.name === "ROLE_OWNER") {
-                                                return (
-                                                    <a key={index} href='/owner' className={`dropdown-item text-decoration-none text-dark`}>Chủ sân</a>
-                                                );
-                                            }
-                                            if (item.role.name === "ROLE_ADMIN") {
-                                                return (
-                                                    <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Quản trị viên</a>
-                                                );
-                                            } else if (item.role.name === "ROLE_STAFF") {
-                                                return (
-                                                    <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Nhân viên</a>
-                                                );
-                                            }
-                                            return null;
-                                        })}
 
-                                        <a className={`dropdown-item ${userData ? '' : 'd-none'}`} onClick={() => logOut()} style={{ cursor: 'pointer' }}>Đăng xuất</a>
-                                    </ul>
-                                </div>
-                                <Nav className="position-relative">
+                            <div className="dropdown">
+                                <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i className="bi bi-person-fill me-2"></i>{userData ? userData?.fullname : 'Tài khoản'}
+                                </span>
+                                <ul className="dropdown-menu">
+                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowLoginModal(true)} style={{ cursor: 'pointer' }} >Đăng nhập</a>
+                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowRegisterModal(true)} style={{ cursor: 'pointer' }}>Đăng ký</a>
+                                    {/* <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-toggle="modal" data-bs-target="#changeEmail" style={{ cursor: 'pointer' }}>Thay đổi Email</a> */}
+                                    {/* <a className={`dropdown-item ${userData ? 'd-none' : ''}`} data-bs-target="#changePassword" style={{ cursor: 'pointer' }}>Thay đổi mật khẩu</a> */}
+                                    <a className={`dropdown-item ${userData ? 'd-none' : ''}`} onClick={() => setShowForgotPassword(true)} style={{ cursor: 'pointer' }}>Quên mật khẩu</a>
+                                    {/* <hr className='m-0' /> */}
+                                    <Link href='/user' className={`dropdown-item text-decoration-none text-dark ${userData ? '' : 'd-none'}`}>Thông tin tài khoản</Link>
+                                    {userData && userData.authorities.map((item, index) => {
+                                        if (item.role.name === "ROLE_USER") {
+                                            return null;
+                                        }
+                                        if (item.role.name === "ROLE_OWNER") {
+                                            return (
+                                                <a key={index} href='/owner' className={`dropdown-item text-decoration-none text-dark`}>Chủ sân</a>
+                                            );
+                                        }
+                                        if (item.role.name === "ROLE_ADMIN") {
+                                            return (
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Quản trị viên</a>
+                                            );
+                                        } else if (item.role.name === "ROLE_STAFF") {
+                                            return (
+                                                <a key={index} href='/admin' className={`dropdown-item text-decoration-none text-dark`}>Nhân viên</a>
+                                            );
+                                        }
+                                        return null;
+                                    })}
+
+                                    <a className={`dropdown-item ${userData ? '' : 'd-none'}`} onClick={() => logOut()} style={{ cursor: 'pointer' }}>Đăng xuất</a>
+                                </ul>
+                            </div>
+                            <Nav className='position-relative me-2'>
+                                <Link href="/cart" className='head-hv-nav text-decoration-none'>
+                                    <i className="bi bi-cart"></i></Link>
+                                {userData && <CartBadge username={userData.username} />}
+                            </Nav>
+                            <Nav className="d-flex align-items-center">
+
+                                <Nav.Item className="position-relative">
                                     <Link
                                         href="#"
                                         passHref
@@ -298,8 +300,9 @@ const Header = (props: HeaderProps) => {
                                     </Link>
 
                                     <span onClick={() => setHideNotification(!hideNotification)}
-                                        className="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger">
+                                        className="position-absolute translate-middle badge rounded-pill bg-danger">
                                         {notification ? notification.filter(item => !item.isRead).length : 0}
+                                        <span className="visually-hidden">unread messages</span>
                                     </span>
 
                                     <div className={`notification ${hideNotification ? 'd-block' : 'd-none'}`}>
@@ -318,7 +321,7 @@ const Header = (props: HeaderProps) => {
                                                 userData && handleViewNotification(userData.username);
                                             }}
                                             style={{ backgroundColor: '#142239' }}
-                                            className="btn w-100 ms-auto mb-2 text-light"
+                                            className="btn w-100 ms-auto mb-2"
                                         >
                                             Đánh dấu tất cả là đã đọc
                                         </button>
@@ -359,23 +362,23 @@ const Header = (props: HeaderProps) => {
                                             </div>
                                         )}
                                     </div>
-                                </Nav>
-                            </div>
-                        </Col>
-                    </Row>
+                                </Nav.Item>
+                            </Nav>
+                        </Nav>
+                    </Navbar.Collapse>
                 </Container>
-            </div>
+            </Navbar>
             {/* <Navbar className="bg-body-secondary" style={{ boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
-            <Container>
-                {categoryFields.map((categoryFields: CategoryField) => (
-                    <Nav className='hv-nav' key={categoryFields.categoriesFieldId}>
-                        <Link href="#" className="hv-link text-decoration-none">
-                            {categoryFields.name}
-                        </Link>
-                    </Nav>
-                ))}
-            </Container>
-        </Navbar> */}
+                <Container>
+                    {categoryFields.map((categoryFields: CategoryField) => (
+                        <Nav className='hv-nav' key={categoryFields.categoriesFieldId}>
+                            <Link href="#" className="hv-link text-decoration-none">
+                                {categoryFields.name}
+                            </Link>
+                        </Nav>
+                    ))}
+                </Container>
+            </Navbar> */}
             <LoginModal setRefreshKey={setRefreshKey} refreshKey={refreshKey}
                 showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}
                 showRegisterModal={showRegisterModal} setShowRegisterModal={setShowRegisterModal}
@@ -387,7 +390,6 @@ const Header = (props: HeaderProps) => {
             ></ForgotPassword>
             <ChangePasswordNew showChangePasswordNew={showChangePasswordNew} setShowChangePasswordNew={setShowChangePasswordNew} showLoginModal={showLoginModal} setShowLoginModal={setShowLoginModal}></ChangePasswordNew>
         </main >
-
     );
 }
 
