@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
 import { hashPassword } from "@/components/Utils/Format";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { usePathname, useRouter } from 'next/navigation'; // Để kiểm tra đường dẫn
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'; // Để kiểm tra đường dẫn
 
 
 interface LoginProps {
@@ -92,7 +92,7 @@ export default function Login(props: LoginProps) {
                     //     window.location.href = "/";
                     // }
 
-                    const resultsFromNextSercer = await fetch('/api/auth', {
+                    await fetch('/api/auth', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -133,7 +133,38 @@ export default function Login(props: LoginProps) {
     //     }
     // }, [setShowLoginModal]);
 
+    const searchParams = useSearchParams();
+    const router = useRouter(); // Using useRouter
 
+    useEffect(() => {
+        const notLoggedIn = searchParams.get('notLoggedIn');
+        const noRights = searchParams.get('noRights');
+
+        // Check if the 'notLoggedIn' query parameter exists and equals 'true'
+        if (notLoggedIn === 'true') {
+            setShowLoginModal(true);
+            toast.error("Bạn chưa đăng nhập!");
+
+            // Update the URL by removing the query parameter without reloading the page
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('notLoggedIn');
+
+            // Corrected usage of router.replace
+            router.replace(newUrl.toString());
+        }
+
+        if (noRights === 'true') {
+            setShowLoginModal(true);
+            toast.error("Bạn không có quyền truy cập!");
+
+            // Update the URL by removing the query parameter without reloading the page
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('noRights');
+
+            // Corrected usage of router.replace
+            router.replace(newUrl.toString());
+        }
+    }, [searchParams, router, setShowLoginModal]); // Add router as a dependency
 
 
     const handleClose = () => {
@@ -213,10 +244,24 @@ export default function Login(props: LoginProps) {
                     setRefreshKey(refreshKey + 1);
 
                     toast.success("Đăng nhập thành công!");
-                    // fetch('/api/auth', {
-                    //     method: 'POST',
-                    //     body: JSON.stringify(dataUser)
-                    // })
+                    await fetch('/api/auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(dataUser),
+
+                    }).then(async (response) => {
+                        const payload = await response.json();
+                        const data = {
+                            status: response.status,
+                            payload
+                        }
+                        if (!response.ok) {
+                            throw data
+                        }
+                        return data
+                    })
 
 
                     handleClose();

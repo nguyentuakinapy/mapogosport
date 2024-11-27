@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   const sessionDataAuth = res;
 
   // Log giá trị sessionDataAuth
-  console.log('sessionDataAuth:', sessionDataAuth);
+  // console.log('sessionDataAuth:', sessionDataAuth);
 
   if (!sessionDataAuth) {
     return new Response(
