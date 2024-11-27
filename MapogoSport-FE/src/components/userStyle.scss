@@ -1,0 +1,44 @@
+.box-comment-container {
+    color: white;
+    padding: 8px;
+    border-radius: 8px;
+  
+    .box-comment {
+      color: white;
+      width: 100%;
+      text-decoration: none !important;
+  
+      &:hover {
+        background-color: rgb(161, 161, 161);
+        border-radius: 8px;
+      }
+    }
+  
+    .btn-cmt {
+      display: flex;
+      align-items: center;
+      margin-right: 10px;
+      cursor: pointer;
+      text-decoration: none !important;
+    }
+  
+    &:last-child {
+      margin-bottom: 0px !important;
+    }
+  }
+  .notification {
+    cursor: default !important;
+    position: absolute;
+    top: 95%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    max-height: 500px;
+    background-color: rgb(255, 255, 255);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(4, 4, 4, 0.1);
+    padding: 10px;
+    z-index: 1000;
+    overflow-y: scroll;
+  }

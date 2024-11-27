@@ -20,6 +20,17 @@ const formatDateNotime = (dateString: Date) => {
   });
 };
 
+const formatTimeNoDate = (dateString: Date) => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true, // Đảm bảo rằng thời gian sử dụng định dạng 12 giờ (AM/PM)
+  });
+};
+
+
 const formatDateForApi = (date: Date | null) => {
   if (!date) return '';
 
@@ -59,6 +70,6 @@ const hashPassword = (password: string): string => {
   return hash;
 };
 
-export { formatDate, formatPrice, hashPassword, formatDateForApi, formatDateNotime, formatDateVN };
+export { formatDate, formatPrice, hashPassword, formatDateForApi, formatDateNotime, formatDateVN, formatTimeNoDate };
 
 
