@@ -55,8 +55,8 @@ const SportFieldList = () => {
                                     className='me-3' style={{ width: '300px' }} alt="cc" />
                             </div>
                             <div className='me-auto mt-3'>
-                                <b>{sf.name}</b><br />
-                                <b className='font-14'>{sf.address}</b><br />
+                                <b>Tên sân: {sf.name}</b><br />
+                                <b className='font-14'>Địa chỉ: {sf.address}</b><br />
                                 <span className='font-14'>Trạng thái: {sf.status}</span><br />
                                 <span className='font-14'>Thời gian mở cửa: {sf.opening} - {sf.closing}</span><br />
                                 <span className='font-14'>Số lượng sân: {sf.quantity}</span>
@@ -84,7 +84,7 @@ const SportFieldList = () => {
                     : (<><i className="bi bi-plus-circle"></i> Thêm khu vực</>)}
             </Button>
             <ModalCreateSportField showSportFieldModal={showSportFieldModal} setShowSportFieldModal={setShowSportFieldModal}
-                selectedSportField={selectedSportField} />
+                selectedSportField={selectedSportField} username={username} />
 
         </>
     );

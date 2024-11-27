@@ -200,7 +200,7 @@ function Categories() {
                         <Row>
                             <h3 className="title-section mb-4">
                                 <span className="icon">
-                                    <img nh-lazy="image" className="img-fluid" alt="Flash Sale"
+                                    <Image nh-lazy="image" className="img-fluid" alt="Flash Sale"
                                         src="https://media.tenor.com/zc4ZHOVUylEAAAAi/philcorbett-football.gif" />
                                 </span>
                                 Danh sách sân
