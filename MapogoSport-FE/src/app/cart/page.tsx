@@ -300,7 +300,7 @@ const Cart = () => {
                     <div className="text-center">
                       <i className="bi bi-bag-plus-fill" style={{ fontSize: '100px' }}></i>
                       <p className="text-muted fs-5">Bạn cần thêm một sản phẩm vào giỏ hàng của mình
-                        <br /> Vui lòng quay lại <strong>"Trang sản phẩm"</strong> và tìm sản phẩm của bạn  </p>
+                        <br /> Vui lòng quay lại <strong>&ldquo;Trang sản phẩm&rdquo;</strong> và tìm sản phẩm của bạn  </p>
                       <Link className='btn btn-dark text-white mb-5'
                         style={{ textDecoration: 'none', color: '#333' }}
                         href="/categories/products"
