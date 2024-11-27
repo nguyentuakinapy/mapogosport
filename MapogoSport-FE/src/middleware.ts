@@ -15,14 +15,14 @@ interface SessionData {
 }
 
 export function middleware(request: NextRequest) {
-    const sessionDataAuth = request.cookies.get('sessionDataAuth')?.value; // Get the cookie
+    const sessionDataAuth = request.cookies.get('sessionDataAuth')?.value; // Lấy cookie
     const pathname = request.nextUrl.pathname;
 
     const privatePaths = ['/admin', '/owner', '/user/profile'];
 
     const isPrivatePath = privatePaths.some((path) => pathname.startsWith(path));
 
-    // Redirect if no session data is found and the path is private
+    // Kiểm tra nếu không có session và đường dẫn là riêng tư
     if (isPrivatePath && !sessionDataAuth) {
         const loginUrl = new URL('/', request.url);
         loginUrl.searchParams.set('notLoggedIn', 'true');
@@ -44,34 +44,47 @@ export function middleware(request: NextRequest) {
             const hasOwnerRole = sessionData.authorities.some((auth) => auth.role.name === "ROLE_OWNER");
             const hasStaffRole = sessionData.authorities.some((auth) => auth.role.name === "ROLE_STAFF");
             const hasUserRole = sessionData.authorities.some((auth) => auth.role.name === "ROLE_USER");
-            // If the user is an ADMIN, they should not be allowed to access /owner
+
+            // Logic ngăn cản truy cập trái phép
+            // Ngăn người dùng ROLE_ADMIN vào `/owner`
             if (hasAdminRole && pathname.startsWith('/owner')) {
                 const noRightsUrl = new URL('/', request.url);
                 noRightsUrl.searchParams.set('noRights', 'true');
                 return NextResponse.redirect(noRightsUrl);
             }
 
-            // If the user is an OWNER, they should not be allowed to access /admin
+            // Ngăn người dùng ROLE_OWNER vào `/admin`
             if (hasOwnerRole && pathname.startsWith('/admin')) {
                 const noRightsUrl = new URL('/', request.url);
                 noRightsUrl.searchParams.set('noRights', 'true');
                 return NextResponse.redirect(noRightsUrl);
             }
 
-            if(hasStaffRole && pathname.startsWith('/owner')){
-                const noRightsUrl = new URL('/', request.url);
-                noRightsUrl.searchParams.set('noRights', 'true');
-                return NextResponse.redirect(noRightsUrl);
-            }
-              // Nếu người dùng chỉ có ROLE_USER và cố truy cập đường dẫn riêng tư
-              if (hasUserRole && isPrivatePath) {
+            // Ngăn người dùng ROLE_STAFF vào `/owner`
+            if (hasStaffRole && pathname.startsWith('/owner')) {
                 const noRightsUrl = new URL('/', request.url);
                 noRightsUrl.searchParams.set('noRights', 'true');
                 return NextResponse.redirect(noRightsUrl);
             }
 
-            // Allow access if conditions pass
-            return NextResponse.next();
+            // Chỉ có ROLE_USER nhưng cố truy cập các đường dẫn riêng tư
+            if (hasUserRole && !hasAdminRole && !hasOwnerRole && !hasStaffRole && isPrivatePath) {
+                const noRightsUrl = new URL('/', request.url);
+                noRightsUrl.searchParams.set('noRights', 'true');
+                return NextResponse.redirect(noRightsUrl);
+            }
+
+            // Cho phép ROLE_OWNER vào `/owner`
+            if (hasOwnerRole && pathname.startsWith('/owner')) {
+                return NextResponse.next();
+            }
+
+            // Cho phép ROLE_ADMIN vào `/admin`
+            if (hasAdminRole && pathname.startsWith('/admin')) {
+                return NextResponse.next();
+            }
+
+            // Cho phép ROLE_STAFF vào đường dẫn tương thích nếu cần
         } else {
             console.error("Invalid sessionData structure:", sessionData);
         }
