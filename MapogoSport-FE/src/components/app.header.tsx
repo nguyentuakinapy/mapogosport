@@ -20,6 +20,7 @@ import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import Image from 'next/image';
 import { Form } from 'react-bootstrap';
+import { usePathname } from 'next/navigation';
 
 
 
@@ -57,6 +58,8 @@ interface HeaderProps {
 }
 
 const Header = (props: HeaderProps) => {
+    const path = usePathname();
+
     const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
     const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
@@ -236,14 +239,14 @@ const Header = (props: HeaderProps) => {
                             style={{ maxHeight: '100px' }}
                             navbarScroll
                         >
-                            <Link href="/blog" className='head-hv-nav text-decoration-none'><i className="bi bi-filter-square-fill me-2"></i>Chính sách</Link>
-                            <Link href="/blog" className='head-hv-nav text-decoration-none'><i className="bi bi-book-fill me-2"></i>Bài viết</Link>
-                            <Link href="/categories/products" className='head-hv-nav text-decoration-none'><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
-                            <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy-fill me-2"></i>Sân thể thao</Link>
+                            <Link href="/policy" className={`head-hv-nav text-decoration-none ${path.includes("policy") && `active-link`}`}><i className="bi bi-filter-square-fill me-2"></i>Chính sách</Link>
+                            <Link href="/blog" className={`head-hv-nav text-decoration-none ${path.includes("blog") && `active-link`}`}><i className="bi bi-book-fill me-2"></i>Bài viết</Link>
+                            <Link href="/categories/products" className={`head-hv-nav text-decoration-none ${path.includes("categories/products") && `active-link`}`}><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
+                            <Link href="/categories/sport_field" className={`head-hv-nav text-decoration-none ${path.includes("categories/sport_field") && `active-link`}`}><i className="bi bi-trophy-fill me-2"></i>Sân thể thao</Link>
 
 
                             <div className="dropdown">
-                                <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
+                                <span className={`dropdown-toggle head-hv-nav text-decoration-none demo ${path.includes("/user") && `active-link`}`} style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
                                     <i className="bi bi-person-fill me-2"></i>{userData ? userData?.fullname : 'Tài khoản'}
                                 </span>
                                 <ul className="dropdown-menu">
@@ -279,7 +282,7 @@ const Header = (props: HeaderProps) => {
                                 </ul>
                             </div>
                             <Nav className='position-relative me-2'>
-                                <Link href="/cart" className='head-hv-nav text-decoration-none'>
+                                <Link href="/cart" className={`head-hv-nav text-decoration-none ${path.includes("/cart") && `active-link`}`}>
                                     <i className="bi bi-cart-fill"></i></Link>
                                 {userData && <CartBadge username={userData.username} />}
                             </Nav>
@@ -292,7 +295,7 @@ const Header = (props: HeaderProps) => {
                                         setHideNotification(!hideNotification);
                                     }}
                                         className='fw-bold text-light'>
-                                        <i className="bi bi-bell-fill head-hv-nav " style={{ cursor: 'pointer' }} />
+                                        <i className={`bi bi-bell-fill head-hv-nav ${hideNotification && 'active-link'}`} style={{ cursor: 'pointer' }} />
                                     </span>
 
                                     <span onClick={() => setHideNotification(!hideNotification)}

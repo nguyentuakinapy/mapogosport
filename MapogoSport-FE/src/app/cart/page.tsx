@@ -7,6 +7,7 @@ import { formatPrice } from '@/components/Utils/Format';
 import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';
 import Link from 'next/link';
+import Loading from '@/components/loading';
 
 const Cart = () => {
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -207,7 +208,7 @@ const Cart = () => {
   };
 
   if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
-
+  if (!data) return <HomeLayout><div className='d-flex justify-content-center align-items-center' style={{ height: '90vh' }}><Loading></Loading></div></HomeLayout>
   return (
     <HomeLayout>
       <h1 className="text-center pt-4 mb-">Giỏ hàng</h1>

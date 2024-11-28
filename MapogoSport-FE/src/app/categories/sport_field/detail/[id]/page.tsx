@@ -15,6 +15,7 @@ import { useSearchParams } from 'next/navigation';
 import { createTimeStringH, isDateInRange } from '@/components/Utils/booking-time';
 import Image from 'next/image';
 import { useData } from '@/app/context/UserContext';
+import Loading from '@/components/loading';
 
 type BookingsTypeOnWeek = {
     [time: string]: {
@@ -139,28 +140,6 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     }, [sportField]);
 
     useEffect(() => {
-        if (dataTimeSport.length > 0 && sportField?.sportFielDetails) {
-            const newBookingsOnWeek = { ...bookingsOnWeek };
-            const validTimes = dataTimeSport.filter(time => time !== "undefinedh00" && time !== null);
-            const sportDetails = sportField && sportField.sportFielDetails;
-            if (sportDetails) {
-                sportDetails.forEach((item) => {
-                    validTimes.forEach((time) => {
-                        if (!newBookingsOnWeek[time]) {
-                            newBookingsOnWeek[time] = {};
-                        }
-                        if (!newBookingsOnWeek[time][item.name]) {
-                            newBookingsOnWeek[time][item.name] = [];
-                        }
-                    });
-                });
-                setBookingsOnWeek(newBookingsOnWeek);
-            }
-            setCheckDataBooking1(!checkDataBooking1);
-        }
-    }, [dataTimeSport, sportField, bookingsOnWeek, checkDataBooking1]);
-
-    useEffect(() => {
         const newData: string[] = [];
         for (let index = 0; index < (operatingTime * 2) + 1; index++) {
             if (newData.length === 0) {
@@ -187,8 +166,29 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         if (index !== -1) {
             newData.splice(0, index);
         }
-        setDataTimeSport((prevData) => [...prevData, ...newData]);
-    }, [operatingTime, sportField?.opening, opening]);
+
+        setDataTimeSport(newData);
+
+        if (newData.length > 0 && sportField?.sportFielDetails) {
+            const newBookingsOnWeek = { ...bookingsOnWeek };
+            const validTimes = newData.filter(time => time !== "undefinedh00" && time !== null);
+            const sportDetails = sportField && sportField.sportFielDetails;
+            if (sportDetails) {
+                sportDetails.forEach((item) => {
+                    validTimes.forEach((time) => {
+                        if (!newBookingsOnWeek[time]) {
+                            newBookingsOnWeek[time] = {};
+                        }
+                        if (!newBookingsOnWeek[time][item.name]) {
+                            newBookingsOnWeek[time][item.name] = [];
+                        }
+                    });
+                });
+                setBookingsOnWeek(newBookingsOnWeek);
+            }
+            setCheckDataBooking1(!checkDataBooking1);
+        }
+    }, [operatingTime]);
 
     useEffect(() => {
         setDayOnWeek();
@@ -220,8 +220,10 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     const initialEndWeek = new Date();
     initialEndWeek.setDate(initialEndWeek.getDate() + 7);
     const [endWeek, setEndWeek] = useState<string>(initialEndWeek.toISOString().split('T')[0]);
+    const [checkLoadingData, setCheckLoadingData] = useState<boolean>(false);
 
     useEffect(() => {
+        setCheckLoadingData(true);
         if (startWeek) {
             setDayOnWeek();
         }
@@ -240,6 +242,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     }, [dayYears, sportFieldDetailId]);
 
     const setStatusOnWeek = async () => {
+        setCheckLoadingData(true)
         const updatedBookingsOnWeek = { ...bookingsOnWeek };
         const currentDateTime = new Date();
 
@@ -426,6 +429,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                 console.error(error);
             }
         }
+        setCheckLoadingData(false);
     };
 
     const setOnWeek = (direction: 'forward' | 'backward') => {
@@ -556,7 +560,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
 
 
 
-    if (isLoading) return <HomeLayout><div>Đang tải...</div></HomeLayout>;
+    if (isLoading) return <HomeLayout><div className='d-flex justify-content-center align-items-center' style={{ height: '90vh' }}><Loading></Loading></div></HomeLayout>;
     if (error) return <HomeLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></HomeLayout>;
 
     return (
@@ -683,40 +687,44 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                         </div>
                     </div>
                     <div className='book-calendar-content'>
-                        <div className='d-flex'>
-                            <div className='table-price'>
-                                <Table className='text-center'>
-                                    <tbody>
-                                        {days && days.map((day, dayIndex) => (
-                                            <tr key={dayIndex}>
-                                                <td>{day}</td>
-                                                {Object.entries(bookingsOnWeek).filter(([time]) => filterTimesByFrame(time))
-                                                    .map(([time, sportData], timeIndex) => {
-                                                        const sportFielDetails = sportField?.sportFielDetails.filter(detail =>
-                                                            detail.sportFielDetailId === sportFieldDetailId
-                                                        )
-                                                        return sportFielDetails?.map((item) => (
-                                                            <td key={`${time}-${item.sportFielDetailId}-${dayIndex}`}>
-                                                                {Object.entries(sportData).map(([sport, status]) => (
-                                                                    sport === item.name && (
-                                                                        <div key={`${sport}-${timeIndex}-${dayIndex}`} className={`${getBadgeClass(status[dayIndex])}`}
-                                                                            sport-detail={item.sportFielDetailId} time-data={time}
-                                                                            day-data={dayYears && dayYears[dayIndex]}
-                                                                            onClick={status[dayIndex] === 'Còn trống' ? handleBooking : undefined}>
-                                                                            <span className='time-label'>{time}</span>
-                                                                            <div className='status-label'>{status[dayIndex]}</div>
-                                                                        </div>
-                                                                    )
-                                                                ))}
-                                                            </td>
-                                                        ));
-                                                    })}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </Table>
+                        {checkLoadingData ?
+                            <div className='d-flex justify-content-center align-items-center' style={{ height: '500px' }}><Loading></Loading></div>
+                            :
+                            <div className='d-flex'>
+                                <div className='table-price'>
+                                    <Table className='text-center'>
+                                        <tbody>
+                                            {days && days.map((day, dayIndex) => (
+                                                <tr key={dayIndex}>
+                                                    <td>{day}</td>
+                                                    {Object.entries(bookingsOnWeek).filter(([time]) => filterTimesByFrame(time))
+                                                        .map(([time, sportData], timeIndex) => {
+                                                            const sportFielDetails = sportField?.sportFielDetails.filter(detail =>
+                                                                detail.sportFielDetailId === sportFieldDetailId
+                                                            )
+                                                            return sportFielDetails?.map((item) => (
+                                                                <td key={`${time}-${item.sportFielDetailId}-${dayIndex}`}>
+                                                                    {Object.entries(sportData).map(([sport, status]) => (
+                                                                        sport === item.name && (
+                                                                            <div key={`${sport}-${timeIndex}-${dayIndex}`} className={`${getBadgeClass(status[dayIndex])}`}
+                                                                                sport-detail={item.sportFielDetailId} time-data={time}
+                                                                                day-data={dayYears && dayYears[dayIndex]}
+                                                                                onClick={status[dayIndex] === 'Còn trống' ? handleBooking : undefined}>
+                                                                                <span className='time-label'>{time}</span>
+                                                                                <div className='status-label'>{status[dayIndex]}</div>
+                                                                            </div>
+                                                                        )
+                                                                    ))}
+                                                                </td>
+                                                            ));
+                                                        })}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </Table>
+                                </div>
                             </div>
-                        </div>
+                        }
                     </div>
                 </div>
                 <Row className='mt-3'>

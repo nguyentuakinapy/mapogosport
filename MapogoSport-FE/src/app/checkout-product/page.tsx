@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import { useSearchParams } from 'next/navigation';
 import ModalOrderSuccess from '@/components/ModalOrder/modal.Success';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const CheckoutPage = () => {
   const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -151,7 +152,6 @@ const CheckoutPage = () => {
     }
   }, [addressSelected, apiAddress]);
 
-  const [order, setOrder] = useState();
   const [orderStatus, setOrderStatus] = useState('Chờ xác nhận');
   const [paymentMethod, setPaymentMethod] = useState('COD');
 
@@ -262,7 +262,6 @@ const CheckoutPage = () => {
       });
       console.log("Dữ liệu trả về từ API:", response.data);
 
-      setOrder(response.data);
       return response.data; // Trả về thông tin đơn hàng
     } catch (error) {
       toast.error("Không thể tạo đơn hàng!")
@@ -294,7 +293,7 @@ const CheckoutPage = () => {
         }));
 
         try {
-          const orderDetailResponse = await axios.post(
+          await axios.post(
             `http://localhost:8080/rest/create_orderDetail`,
             listCartCheckout,
             {
@@ -364,7 +363,7 @@ const CheckoutPage = () => {
           }));
 
           try {
-            const orderDetailResponse = await axios.post(
+            await axios.post(
               `http://localhost:8080/rest/create_orderDetail`,
               listCartCheckout,
               {
@@ -532,7 +531,11 @@ const CheckoutPage = () => {
                       Thanh toán qua ví điện tử VNPay
                     </label>
                   </div>
-                  <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png" alt="VNPay" style={{ maxWidth: "50px" }} />
+                  <Image
+                    src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
+                    alt="VNPay12312"
+                    width={50} height={50}
+                  />
                 </div>
                 {/* MoMo */}
                 <div className="card-body d-flex list-group-item align-items-center">
@@ -544,7 +547,11 @@ const CheckoutPage = () => {
                       Thanh toán qua ví điện tử MoMo
                     </label>
                   </div>
-                  <img src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png" alt="MoMo" style={{ maxWidth: "50px" }} />
+                  <Image
+                    src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png"
+                    alt="MoMo 123123"
+                    width={50} height={50}
+                  />
                 </div>
               </div>
             </div>
@@ -559,10 +566,10 @@ const CheckoutPage = () => {
                   <div key={index} style={{ maxHeight: '130px', overflowY: 'auto' }}>
                     <div className="order-item d-flex align-items-center my-3">
                       <div className="product-image me-3 position-relative">
-                        <img
+                        <Image
                           src={`${cart.productDetailSize.productDetail.image}`}
                           className="img-fluid rounded-circle"
-                          style={{ width: "50px", height: "50px" }}
+                          width={50} height={50}
                           alt=""
                         />
                         <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
