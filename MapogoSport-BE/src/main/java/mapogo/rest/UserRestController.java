@@ -97,7 +97,7 @@ public class UserRestController {
 	@PostMapping("/user/sendMail")
 	public String sendMail(@RequestBody String email) {
 		String otp = RandomUtils.generateOTP();
-		emailService.sendEmail(email, "MapogoSport", "Bạn đã yêu cầu gửi mã xác nhận mới! Mã của bạn là: " + otp);
+		emailService.sendEmail(email, "MapogoSport", otp);
 		return otp;
 	}
 
