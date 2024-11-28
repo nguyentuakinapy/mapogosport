@@ -113,6 +113,5 @@ export function middleware(request: NextRequest) {
             console.error("Invalid sessionData structure:", sessionData);
         }
     }
-
     return NextResponse.next();
 }

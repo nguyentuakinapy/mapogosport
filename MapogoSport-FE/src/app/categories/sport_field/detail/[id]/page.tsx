@@ -1,5 +1,5 @@
 "use client";
-import { Container, Row, Col, Form, Image, FloatingLabel, Table, Button, Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { Container, Row, Col, Form, FloatingLabel, Table, Button, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import React, { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 import useSWR from 'swr';
@@ -12,8 +12,9 @@ import MapComponent from "../../../../utils/MapComponent";
 import { fetchCoordinates } from "../../../../utils/geocode";
 import SearchSportField from '@/components/Booking/booking.Search';
 import { useSearchParams } from 'next/navigation';
-import { useData } from '@/app/context/UserContext';
 import { createTimeStringH, isDateInRange } from '@/components/Utils/booking-time';
+import Image from 'next/image';
+import { useData } from '@/app/context/UserContext';
 
 type BookingsTypeOnWeek = {
     [time: string]: {
@@ -45,25 +46,10 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [dataReview, setDataReview] = useState<FieldReview[]>([]);
     const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
-    const [gallery, setGallery] = useState<GalleryField[]>([]);
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
 
-    // const currentUser = useData();
-    const [currentUser, setCurrentUser] = useState<string>("");
+    const currentUser = useData();
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem('username');
-        if (storedUser) {
-            setCurrentUser(storedUser);
-        }
-    }, []);
-
-    // useEffect(()=>{
-    //     toast.success("ddddddddddddddddddd 12"+ currentUser);
-
-    // },[currentUser])
-
-    //Toast sau khi đặt
     const searchParams = useSearchParams();
     const status = searchParams.get('status');
     useEffect(() => {
@@ -78,11 +64,16 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         const timeoutId = setTimeout(() => {
             setStatusOnWeek();
         }, 500);
-
         return () => clearTimeout(timeoutId);
     }, [checkDataStatus]);
 
     const { data: reviewData } = useSWR(`http://localhost:8080/rest/fieldReview/${params.id}`, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
+
+    const { data: gallery } = useSWR<GalleryField[]>(`http://localhost:8080/rest/sportfield/gallery/${params.id}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -93,7 +84,6 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         setVisibleCount(visibleCount + 5);
     };
     const hideReviews = () => {
-
         setVisibleCount(visibleCount - 5);
     }
 
@@ -103,47 +93,27 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         revalidateOnReconnect: false,
     });
 
-
-    /* QA thêm useParam */
-    const path = useSearchParams();
-
-    useEffect(() => {
-        // console.log(path.get("status"));
-        // console.log("path hieenj taij ",path.toString());
-        const encodedStatus = path.get("status");
-
-        if (encodedStatus) {
-            try {
-                // Giải mã username từ Base64
-                const decodedUsername = atob(encodedStatus);
-                console.log("Username giải mã:", decodedUsername);
-            } catch (error) {
-                console.error("Lỗi khi giải mã username:", error);
-            }
-        }
-    }, [path])
-
-
     const handleChatMess = () => {
         if (data?.owner?.user?.username) {
             const ownerUsername = data.owner.user.username;
             const encodedUsername = btoa(ownerUsername);
-            if (ownerUsername !== currentUser) {
-                window.history.pushState({}, "", `?status=${encodedUsername}`);
-            } else {
-                toast.info('Bạn không thể nhắn với chính mình ')
+            if (ownerUsername === currentUser) {
+                toast.info('Bạn không thể nhắn với chính mình ');
+                return;
             }
+            window.history.pushState({}, "", `?status=${encodedUsername}`);
         }
     }
-    /* QA thêm useParam */
 
     useEffect(() => {
         if (data && reviewData) {
             setSportField(data);
             setDataReview(reviewData);
-            fetchCoordinates(data.address).then((coords) => {
-                if (coords) setCoordinates(coords);
-            });
+            if (data.address) {
+                fetchCoordinates(data.address).then((coords) => {
+                    if (coords) setCoordinates(coords);
+                });
+            }
             if (data.sportFielDetails?.length > 0) {
                 const firstDetail = data.sportFielDetails[0];
                 setSportFieldDetailId(firstDetail.sportFielDetailId);
@@ -155,24 +125,18 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
 
     useEffect(() => {
         if (sportField) {
-            getTime()
+            const open = sportField?.opening;
+            const close = sportField?.closing;
+            if (open && typeof open === 'string' && close && typeof close === 'string') {
+                const numberOpen = open.match(/\d+/);
+                const numberClose = close.match(/\d+/);
+                if (numberOpen && numberClose) {
+                    setOpening(Number(numberOpen[0]));
+                    setOperatingTime(Number(numberClose[0]) - Number(numberOpen[0]));
+                }
+            }
         };
     }, [sportField]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`http://localhost:8080/rest/sportfield/gallery/${params.id}`)
-                const data = await response.json()
-                setGallery(data)
-                console.log("data hht", data)
-            } catch (error) {
-                console.log("Lỗi khi fetch data Gallery", error)
-            }
-        }
-        fetchData()
-    }, [])
-
 
     useEffect(() => {
         if (dataTimeSport.length > 0 && sportField?.sportFielDetails) {
@@ -194,7 +158,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
             }
             setCheckDataBooking1(!checkDataBooking1);
         }
-    }, [dataTimeSport, sportField]);
+    }, [dataTimeSport, sportField, bookingsOnWeek, checkDataBooking1]);
 
     useEffect(() => {
         const newData: string[] = [];
@@ -224,22 +188,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
             newData.splice(0, index);
         }
         setDataTimeSport((prevData) => [...prevData, ...newData]);
-    }, [operatingTime, opening]);
-
-    const getTime = () => {
-        if (sportField) {
-            const open = sportField?.opening;
-            const close = sportField?.closing;
-            if (open && typeof open === 'string' && close && typeof close === 'string') {
-                const numberOpen = open.match(/\d+/);
-                const numberClose = close.match(/\d+/);
-                if (numberOpen && numberClose) {
-                    setOpening(Number(numberOpen[0]));
-                    setOperatingTime(Number(numberClose[0]) - Number(numberOpen[0]));
-                }
-            }
-        }
-    }
+    }, [operatingTime, sportField?.opening, opening]);
 
     useEffect(() => {
         setDayOnWeek();
@@ -311,7 +260,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                     const bookingsForDay = dataBooking.filter(item => item.date === dayYear);
 
                     Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                        Object.entries(sportData).forEach(([sport, statuses]) => {
+                        Object.entries(sportData).forEach(([sport]) => {
                             if (!sportData[sport][dayIndex] && dayYear) {
                                 const [hour, minute] = time.split('h').map(Number);
                                 const timeDate1 = new Date(dayYear);
@@ -436,7 +385,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                             }
 
                             Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                                Object.entries(sportData).forEach(([sport, statuses]) => {
+                                Object.entries(sportData).forEach(([sport]) => {
                                     if (sport === item.sportFieldDetail.name) {
                                         const [hour, minute] = time.split('h').map(Number);
                                         const timeDate = new Date(dayYear);
@@ -463,7 +412,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                         const timeDate1 = new Date(dayYear);
                                         timeDate1.setHours(hour, minute);
 
-                                        sportData[sport][dayIndex] = (timeDate1 < currentDateTime) ? "Chưa đặt" : "Còn trống";
+                                        sportData[sport][dayIndex] = (timeDate1 < currentDateTime) ? "Quá hạn" : "Còn trống";
                                     }
                                 }
                             });
@@ -638,17 +587,15 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                         </div>
                         <Row>
                             <Col lg={8}>
-                                {gallery.length > 0 ? (
+                                {gallery && gallery.length > 0 ? (
                                     <>
-                                        <div id="carouselExampleControls" className="carousel slide mt-3" data-bs-ride="carousel">
+                                        <div id="carouselExampleControls" className="carousel slide" data-bs-ride="carousel">
                                             <div className="carousel-inner">
                                                 {gallery.map((galleryItem, index) => (
                                                     <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
-                                                        <img
-                                                            src={`${galleryItem.image}`}
-                                                            className="d-block w-100 h-100"
+                                                        <Image width={856} height={450} src={`${galleryItem.image}`}
                                                             alt={`Gallery image ${index + 1}`}
-                                                            style={{ width: '100px', maxHeight: '450px', objectFit: 'cover', cursor: 'pointer' }}
+                                                            style={{ width: '100%', maxHeight: '450px', objectFit: 'cover', cursor: 'pointer' }}
                                                         />
                                                     </div>
                                                 ))}
@@ -664,10 +611,9 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                         </div>
                                     </>
                                 ) : (
-                                    sportField && <Image src={sportField.image} width={850} height={450} rounded />
+                                    sportField && <Image src={sportField.image} width={850} height={450} alt={''} />
 
                                 )}
-
                             </Col>
                             <Col lg={4}>
                                 <div className="sportField-info-detail bg-white">
@@ -749,7 +695,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                                                         const sportFielDetails = sportField?.sportFielDetails.filter(detail =>
                                                             detail.sportFielDetailId === sportFieldDetailId
                                                         )
-                                                        return sportFielDetails?.map((item, sportIndex) => (
+                                                        return sportFielDetails?.map((item) => (
                                                             <td key={`${time}-${item.sportFielDetailId}-${dayIndex}`}>
                                                                 {Object.entries(sportData).map(([sport, status]) => (
                                                                     sport === item.name && (
