@@ -48,24 +48,35 @@ export function middleware(request: NextRequest) {
             const hasUserRole = sessionData.authorities.some((auth) => auth.role.name === "ROLE_USER");
 
 
-            const hasAllRoles = hasAdminRole && hasOwnerRole && hasStaffRole && hasUserRole ;
-            const hasAllRolesNoRoleUser = hasAdminRole && hasOwnerRole && hasStaffRole ;
-            const case1 =  hasUserRole && hasOwnerRole ;
-            const case2 =  hasUserRole && hasStaffRole ;
-                      // Cho phép ROLE_OWNER vào `/owner`
-                      if (hasOwnerRole && pathname.startsWith('/owner')) {
-                        return NextResponse.next();
-                    }
-        
-                    // Cho phép ROLE_ADMIN vào `/admin`
-                    if (hasAdminRole && pathname.startsWith('/admin')) {
-                        return NextResponse.next();
-                    }
-        
-                    // Cho phép ROLE_STAFF vào đường dẫn tương thích nếu cần (ví dụ, không có hạn chế cụ thể)
-                    if (hasStaffRole && pathname.startsWith('/admin')) {
-               return NextResponse.next();
-           }
+            const hasAllRoles = hasAdminRole && hasOwnerRole && hasStaffRole && hasUserRole;
+            const hasAllRolesNoRoleUser = hasAdminRole && hasOwnerRole && hasStaffRole;
+            const case1 = hasUserRole && hasOwnerRole;
+            const case2 = hasUserRole && hasStaffRole;
+            // Cho phép ROLE_OWNER vào `/owner`
+            if (hasOwnerRole && pathname.startsWith('/owner')) {
+                return NextResponse.next();
+            }
+
+            // Cho phép ROLE_ADMIN vào `/admin`
+            if (hasAdminRole && pathname.startsWith('/admin')) {
+                return NextResponse.next();
+            }
+
+            // Cho phép ROLE_ADMIN vào `/admin`
+            if (hasAdminRole && pathname.startsWith('/admin/statistics')) {
+                return NextResponse.next();
+            }
+
+            if (hasStaffRole && pathname.startsWith('/admin/statistics')) {
+                const noRightsUrl = new URL('/', request.url);
+                noRightsUrl.searchParams.set('noRights', 'true');
+                return NextResponse.redirect(noRightsUrl);
+            }
+
+            // Cho phép ROLE_STAFF vào đường dẫn tương thích nếu cần (ví dụ, không có hạn chế cụ thể)
+            if (hasStaffRole && pathname.startsWith('/admin')) {
+                return NextResponse.next();
+            }
 
 
             if (case2 && pathname.startsWith('/admin') || pathname.startsWith('/user')) {
