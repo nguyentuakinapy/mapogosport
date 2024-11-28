@@ -170,7 +170,7 @@ const Admin = () => {
                         ['Loading', 'Loading', 'color: #76A7FA', 0]
                     ]
             },
-        ], [dataColumnnToday, dataColumnnYesterday, dataColumnnChart7Day, dataColumnnChartOneMonth, dataColumnnChartOther]);
+        ], []);
 
         useEffect(() => {
             const loadGoogleCharts = () => {
@@ -204,7 +204,7 @@ const Admin = () => {
             };
 
             loadGoogleCharts();
-        }, [selectedOptionDay, chartOptions]);
+        }, [chartOptions]);
 
         return (
             <div id="columnChart" className='justify-content-center'></div>

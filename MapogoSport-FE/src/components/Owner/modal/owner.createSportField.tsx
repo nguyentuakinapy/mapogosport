@@ -30,37 +30,35 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     const [closeMinute, setCloseMinute] = useState<number>(0);
 
     useEffect(() => {
-        if (showSportFieldModal) {
-            if (!selectedSportField) {
-                setFieldName("");
-                setOpenTime(null);
-                setCloseTime(null);
-                setSelectedFieldType(0);
-                setAddress("");
-                setDescription("");
-                setStatus("");
-                setOpenHour(0);
-                setCloseHour(0);
-                setCloseMinute(0);
-                setOpenMinute(0);
-            } else {
-                setFieldName(selectedSportField.name);
-                setOpenTime(selectedSportField.opening);
-                const [hourStr, minuteStr] = selectedSportField.opening.split('h');
-                setOpenHour(parseInt(hourStr, 10));
-                setOpenMinute(parseInt(minuteStr, 10));
-                setCloseTime(selectedSportField.closing);
-                const [hourStr1, minuteStr1] = selectedSportField.closing.split('h');
-                setCloseHour(parseInt(hourStr1, 10));
-                setCloseMinute(parseInt(minuteStr1, 10));
-                setSelectedFieldType(selectedSportField.categoriesField.categoriesFieldId);
-                setAddress(selectedSportField.address);
-                setDescription(selectedSportField.decription);
-                setStatus(selectedSportField.status);
-                setAvatar(selectedSportField.image || "/images/logo.png");
-            }
+        if (!selectedSportField) {
+            setFieldName("");
+            setOpenTime(null);
+            setCloseTime(null);
+            setSelectedFieldType(0);
+            setAddress("");
+            setDescription("");
+            setStatus("");
+            setOpenHour(0);
+            setCloseHour(0);
+            setCloseMinute(0);
+            setOpenMinute(0);
+        } else {
+            setFieldName(selectedSportField.name);
+            setOpenTime(selectedSportField.opening);
+            const [hourStr, minuteStr] = selectedSportField.opening.split('h');
+            setOpenHour(parseInt(hourStr, 10));
+            setOpenMinute(parseInt(minuteStr, 10));
+            setCloseTime(selectedSportField.closing);
+            const [hourStr1, minuteStr1] = selectedSportField.closing.split('h');
+            setCloseHour(parseInt(hourStr1, 10));
+            setCloseMinute(parseInt(minuteStr1, 10));
+            setSelectedFieldType(selectedSportField.categoriesField.categoriesFieldId);
+            setAddress(selectedSportField.address);
+            setDescription(selectedSportField.decription);
+            setStatus(selectedSportField.status);
+            setAvatar(selectedSportField.image || "/images/logo.png");
         }
-    }, [showSportFieldModal, selectedSportField]);
+    }, [selectedSportField]);
 
 
     const { data: fieldTypes } = useSWR<CategoryField[]>("http://localhost:8080/rest/category_field", fetcher);

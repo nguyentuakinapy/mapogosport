@@ -34,10 +34,10 @@ export function middleware(request: NextRequest) {
 
         try {
             sessionData = JSON.parse(sessionDataAuth) as SessionData;
-            console.log(">>>> check ROLE: ",sessionData.authorities.map(a => a.role.name));
-            
+            // console.log(">>>> check ROLE: ", sessionData.authorities.map(a => a.role.name));
+
         } catch (error) {
-            console.error("Failed to parse sessionDataAuth:", error);
+            // console.error("Failed to parse sessionDataAuth:", error);
             return NextResponse.next();
         }
 
@@ -67,14 +67,15 @@ export function middleware(request: NextRequest) {
                return NextResponse.next();
            }
 
+
             if (case2 && pathname.startsWith('/admin') || pathname.startsWith('/user')) {
                 return NextResponse.next();
-            } 
+            }
 
             if (case1 && pathname.startsWith('/owner') || pathname.startsWith('/user')) {
                 return NextResponse.next();
             }
-        
+
             if (hasAllRoles && isPrivatePath) {
                 return NextResponse.next();
             }
@@ -110,13 +111,9 @@ export function middleware(request: NextRequest) {
                 return NextResponse.redirect(noRightsUrl);
             }
 
-  
-
-        
         } else {
             console.error("Invalid sessionData structure:", sessionData);
         }
     }
-
     return NextResponse.next();
 }

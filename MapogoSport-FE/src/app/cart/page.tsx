@@ -7,6 +7,7 @@ import { formatPrice } from '@/components/Utils/Format';
 import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';
 import Link from 'next/link';
+import Loading from '@/components/loading';
 
 const Cart = () => {
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -260,7 +261,7 @@ const Cart = () => {
 
 
   if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
-
+  if (!data) return <HomeLayout><div className='d-flex justify-content-center align-items-center' style={{ height: '90vh' }}><Loading></Loading></div></HomeLayout>
   return (
     <HomeLayout>
       <h1 className="text-center pt-4 mb-">Giỏ hàng</h1>
@@ -359,7 +360,7 @@ const Cart = () => {
                     <div className="text-center">
                       <i className="bi bi-bag-plus-fill" style={{ fontSize: '100px' }}></i>
                       <p className="text-muted fs-5">Bạn cần thêm một sản phẩm vào giỏ hàng của mình
-                        <br /> Vui lòng quay lại <strong>"Trang sản phẩm"</strong> và tìm sản phẩm của bạn  </p>
+                        <br /> Vui lòng quay lại <strong>&ldquo;Trang sản phẩm&rdquo;</strong> và tìm sản phẩm của bạn  </p>
                       <Link className='btn btn-dark text-white mb-5'
                         style={{ textDecoration: 'none', color: '#333' }}
                         href="/categories/products"

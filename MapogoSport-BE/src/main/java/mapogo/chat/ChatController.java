@@ -16,7 +16,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import mapogo.dao.MessageDAO;
+import mapogo.dao.NotificationDAO;
 import mapogo.entity.Message;
+import mapogo.entity.Notification;
 import mapogo.entity.User;
 import mapogo.service.EmailService;
 import mapogo.service.UserService;
@@ -33,79 +35,9 @@ public class ChatController {
 	UserService userService;
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
+	@Autowired
+	NotificationDAO notificationDAO;
 	
-	public String bodyEmail(String sender, String tempStr) {
-		
-		  String body = String.format("""
-			        <!DOCTYPE html>
-			        <html lang="en">
-			        <head>
-			            <meta charset="UTF-8">
-			            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-			            <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-			            <title>Email Template</title>
-			            <style>
-			            body{
-			                    background-color: #fefefe;
-			            }
-			            
-			                .email-container {
-			                    max-width: 600px;
-			                    margin: auto;
-			                    padding: 20px;
-			                    border: 1px solid #ddd;
-			                    border-radius: 5px;
-			                    font-family: Arial, sans-serif;
-			                    background-color: #fff;
-			                }
-			                .email-header {
-			                    text-align: center;
-			                    padding-bottom: 5px;
-			                }
-			                .email-header img {
-			                    max-width: 300px;
-			                }
-			                .email-content {
-			                    text-align: left;
-			                }
-			                .email-content h2 {
-			                    color: #333;
-			                }
-			                .email-footer {
-			                    text-align: center;
-			                    padding-top: 20px;
-			                    font-size: 12px;
-			                    color: #777;
-			                }
-			            </style>
-			        </head>
-			        <body>
-			            <div class="email-container">
-			                <div class="email-header">
-			                    <img src="https://res.cloudinary.com/disnzpdvj/image/upload/v1732072868/logo_ixjedz.png" alt="Logo">
-			                    <h2>MAPOGO SPORT</h2>
-			                </div>
-			                <div class="email-content">
-			                    <p>Tin nhắn mới từ <strong>%s</strong></p>
-			                    <p>Đây là tin mới nhất...</p>
-			                    <ul>
-			                        <li>Tung ra những voucher hời cho bạn!</li>
-			                        <li>Thường xuyên cập nhật sân mới nhất</li>
-			                        <li>Cá nhân hóa trải nghiệm</li>
-			                    </ul>
-			                    <p>Nội dung mới nhất là: <strong>%s</strong></p>
-			                    <p>Best regards,<br>The Mapogo Sport Team</p>
-			                </div>
-			                <div class="email-footer">
-			                    <p>123 Tân Chánh Hiệp, Thành phố Hồ Chí Minh, 7000</p>
-			                    <p>&copy; 2024 Mapogo Sport. All rights reserved.</p>
-			                </div>
-			            </div>
-			        </body>
-			        </html>
-	""", sender, tempStr);
-		return body;
-	}
 	 
 	
 
@@ -153,36 +85,6 @@ public class ChatController {
         
         System.err.println("message: "+message.getIsDeleted());
         System.err.println("message: "+message.getCreatedAt());
-        
-//        String emailByReceiver = userService.findByUsername(receiver).getEmail();
-//        System.err.println("emailByReceiver "+ emailByReceiver);
-//        if(emailByReceiver != "" && !emailByReceiver.isEmpty()) {
-//        	String emailSubject = String.format("%s đã gửi tin nhắn cho bạn",sender);
-//        	System.err.println("emailSubject " +emailSubject);
-//        	String emailContent = bodyEmail(sender, originalMessage);
-//          emailService.sendEmailOfQuocAnh(emailByReceiver, emailSubject, emailContent);
-//        }else {
-//        	System.err.println("không cần gửi mail");
-//        }
-     // Nội dung tin nhắn bạn muốn gửi
-//	     Map<String, String> payload = new HashMap<>();
-//	     payload.put("sender", sender);
-//	     payload.put("message", originalMessage);
-//	     payload.put("receiver", receiver);
-//	     payload.put("timestamp", new Date().toString());
-//        Message m = new Message();
-//        User uS = new User(); 
-//        uS = userService.findByUsername(sender);
-//        User uR =  new User(); 
-//        uR =userService.findByUsername(receiver);
-//        
-//        
-//        m.setSender(uS);
-//        m.setReceiver(uR);
-//        m.setContent(originalMessage);
-//        m.setIsDeleted(false);
-//        m.setCreatedAt(new Date());
-//        System.err.println("messs "+m);
         Map<String, String> payload = new HashMap<>();
 
      User senderUser = userService.findByUsername(sender);
@@ -202,15 +104,22 @@ public class ChatController {
      payload.put("message", originalMessage);
      payload.put("timestamp", new Date().toString());
 
+     Notification n = new Notification();
+		n.setUser(receiverUser);
+		n.setTitle("Thông báo tin nhắn mới");
+		n.setMessage(senderUser.getFullname() + " vừa gửi tin cho bạn");
+		n.setType("notifyMess");
+		n.setBooking(null);
+		notificationDAO.save(n);
+     
      // Gửi Map qua WebSocket
      String topicNotify = "/topic/notify/" + receiver;
      messagingTemplate.convertAndSend(topicNotify, payload);
-
      System.out.println("Message payload sent to topic: " + payload);
+     
+     System.err.println("n.getUsername() "+ receiverUser.getUsername());
+     messagingTemplate.convertAndSend("/topic/notification/username", receiverUser.getUsername());
 
-        
-	
-        
         messageDAO.save(message);
         return tempStr;
     }

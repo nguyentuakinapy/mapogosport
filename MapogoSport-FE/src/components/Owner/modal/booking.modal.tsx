@@ -244,14 +244,12 @@ const BookingModal = (props: BookingProps) => {
 
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         getPriceByTimeBooking(selectTime);
     }, [selectTime, sportDetail]);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         getPriceByTimeBooking(selectTimeOnStage);
-    }, [selectTimeOnStage, sportDetail,]);
+    }, [selectTimeOnStage, sportDetail]);
 
     const getPriceByTimeBooking = (slTime: string) => {
         if (slTime == 'Chọn thời gian') {
@@ -422,13 +420,6 @@ const BookingModal = (props: BookingProps) => {
         setSportFieldDuplicate({});
         setWeekDays({});
         setSelectedWeek([]);
-        createTimeByTimeOnStage();
-        if (startDate && endDate && selectTimeOnStage != 'Chọn thời gian') {
-            renderWeekDay();
-        }
-    }, [startDate, endDate, selectTimeOnStage])
-
-    const createTimeByTimeOnStage = () => {
         const getTime = startTime.match(/(\d+)h(\d+)/);
         const startHours = getTime ? Number(getTime[1]) : 0;
         const startMinutes = getTime ? Number(getTime[2]) : 0;
@@ -459,12 +450,15 @@ const BookingModal = (props: BookingProps) => {
                     currentMinutes = currentMinutes % 60;
                 }
             }
+            setEndTime(timeSlots[timeSlots.length - 1]);
+            setDataTime(['1 giờ', '1 giờ 30 phút', '2 giờ', '2 giờ 30 phút', '3 giờ']);
+            timeSlots.pop();
+            setDataTimeOnStage(timeSlots);
+        };
+        if (startDate && endDate && selectTimeOnStage != 'Chọn thời gian') {
+            renderWeekDay();
         }
-        setEndTime(timeSlots[timeSlots.length - 1]);
-        setDataTime(['1 giờ', '1 giờ 30 phút', '2 giờ', '2 giờ 30 phút', '3 giờ']);
-        timeSlots.pop();
-        setDataTimeOnStage(timeSlots);
-    };
+    }, [startDate, endDate, selectTimeOnStage])
 
     type WeekBookingDetail = {
         [week: string]: BookingDetail[];
@@ -981,12 +975,9 @@ const BookingModal = (props: BookingProps) => {
                                 <Form.Select style={{ border: '1px solid' }} value={selectTimeOnStage} className="me-3"
                                     onChange={(e) => setSelectTimeOnStage(e.target.value)} aria-label="Default select example">
                                     <option value="Chọn thời gian">Chọn thời gian</option>
-                                    {/* <option value="30 phút">30 phút</option> */}
-                                    <option value="1 giờ">1 giờ</option>
-                                    <option value="1 giờ 30 phút">1 giờ 30 phút</option>
-                                    <option value="2 giờ">2 giờ</option>
-                                    <option value="2 giờ 30 phút">2 giờ 30 phút</option>
-                                    <option value="3 giờ">3 giờ</option>
+                                    {dataTime && dataTime.map((time, index) => (
+                                        <option key={index} value={String(time)}>{time}</option>
+                                    ))}
                                 </Form.Select>
                             </InputGroup>
                         </div>
@@ -1007,15 +998,6 @@ const BookingModal = (props: BookingProps) => {
                                 </Col>
                             ))}
                         </Row>
-                        {/* {Object.entries(checkSportFieldDuplicate).map(([week, messages]) => (
-                            <div key={week} className="bg-dark p-2 text-center mx-4 mt-2 text-light">
-                                <b className="text-uppercase">{week}</b><br />
-                                {messages.map((message, index) => (
-                                    <div key={index}>{message}</div>
-                                ))}
-
-                            </div>
-                        ))} */}
                         {Object.entries(sportFieldDuplicate).map(([week, bookings]) => (
                             <div key={week} className="bg-dark p-2 text-center mx-4 mt-2 text-light">
                                 <b className="text-uppercase">Đã có sân đặt vào {week}</b><br />

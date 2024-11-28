@@ -1,5 +1,7 @@
 package mapogo.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import mapogo.dao.ProductDAO;
 import mapogo.dao.ProductDetailDAO;
 import mapogo.dto.GalleryDTO;
 import mapogo.dto.ProductDTO;
@@ -24,6 +27,9 @@ import mapogo.service.ProductDetailService;
 public class ProductDetailServiceImpl implements ProductDetailService{
 	@Autowired
 	ProductDetailDAO detailDAO;
+	
+	@Autowired
+	ProductDAO productDAO;
 	
 	@Override
 	public List<ProductDetail> findAll() {
@@ -53,8 +59,22 @@ public class ProductDetailServiceImpl implements ProductDetailService{
 	}
 
 	@Override
-	public List<Object[]> findByImageDetailAndGalleryByIdProductDetail(Integer productDetailId) {
-		return detailDAO.findByImageDetailAndGalleryByIdProductDetail(productDetailId);
+	public List<ProductDetail> findByImageDetailAndGalleryByIdProductDetail(Integer productId) {
+		Product p = productDAO.findById(productId).get();
+		List<ProductDetail> pd = p.getProductDetails();
+		pd.forEach(item -> {
+			List<Map<String, Object>> detailSizes = new ArrayList<Map<String,Object>>();
+			item.getProductDetailSizes().forEach(itemSize -> {
+				Map<String, Object> size = new HashMap<>();
+				size.put("detailSizeId", itemSize.getProductDetailSizeId());
+				size.put("price", itemSize.getPrice());
+				size.put("size", itemSize.getSize().getSizeName());
+				size.put("quantity", itemSize.getQuantity());
+				detailSizes.add(size);
+			});
+			item.setDetailSizes(detailSizes);
+		});
+		return pd;
 	}
 
 	@Override

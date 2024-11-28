@@ -133,33 +133,7 @@ export default function Owner() {
             case 'bank':
                 return (
                     <div className="font-14">
-                        {/* <Form.Group className="mb-3">
-                            <Form.Floating className="mb-3">
-                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
-                                />
-                                <Form.Label>Bank Account</Form.Label>
-                            </Form.Floating>
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Floating className="mb-3">
-                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
-                                />
-                                <Form.Label>Momo Account</Form.Label>
-                            </Form.Floating>
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Floating className="mb-3">
-                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
-                                />
-                                <Form.Label>VNPay Account</Form.Label>
-                            </Form.Floating>
-                        </Form.Group>
-                        <div className="d-flex justify-content-end">
-                            <Button className='btn btn-profile'>
-                                <i className="bi bi-floppy2"></i> Lưu
-                            </Button>
-                        </div> */}
-                        <Wallet></Wallet>
+                        <Wallet />
                     </div>
                 )
             case 'package':
