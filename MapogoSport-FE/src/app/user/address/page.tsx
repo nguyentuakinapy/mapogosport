@@ -7,6 +7,7 @@ import '../types/user.scss'
 import useSWR, { mutate } from 'swr'
 import { toast } from 'react-toastify'
 import ModalUpdateAddress from '@/components/User/modal/user.updateAddress'
+import { decodeString } from '@/components/Utils/Format'
 
 export default function Address() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -22,7 +23,9 @@ export default function Address() {
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
-        setUsername(storedUsername);
+        if (storedUsername) {
+            setUsername(decodeString(storedUsername));
+        }
     }, []);
 
     const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/${username}`, fetcher, {

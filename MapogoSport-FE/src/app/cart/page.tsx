@@ -3,7 +3,7 @@ import HomeLayout from '@/components/HomeLayout';
 import React, { useState, useEffect } from 'react';
 import { Col, Button, ButtonGroup, Form, Image } from 'react-bootstrap';
 import './style.css';
-import { formatPrice } from '@/components/Utils/Format';
+import { decodeString, formatPrice } from '@/components/Utils/Format';
 import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';
 import Link from 'next/link';
@@ -21,7 +21,7 @@ const Cart = () => {
   useEffect(() => {
     const username = localStorage.getItem('username');
     if (username) {
-      setUsername(username);
+      setUsername(decodeString(username));
     }
   }, []);
 

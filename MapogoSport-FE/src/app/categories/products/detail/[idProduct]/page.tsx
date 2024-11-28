@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';
 import ModalReviewProductField from '@/components/Review/review.product';
 import Loading from '@/components/loading';
+import { decodeString } from '@/components/Utils/Format';
 
 const ProductDetail = () => {
     const [quantity, setQuantity] = useState<number>(1);
@@ -76,7 +77,7 @@ const ProductDetail = () => {
     const handleAddToCart = async () => {
         console.log("số lượng size là ", selectedSizeQuantity)
 
-        const username = localStorage.getItem('username');
+        const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
             if (selectedSizeQuantity <= 0) {
                 toast.info("Không thể thêm vào giỏ hàng vì size này đã hết. Vui lòng chọn 1 size khác")
@@ -156,7 +157,7 @@ const ProductDetail = () => {
         const username = localStorage.getItem('username');
 
         if (username) {
-            if (username !== "myntd") {
+            if (decodeString(username) !== "myntd") {
                 window.history.pushState({}, "", `?status=default`);
             } else {
                 toast.info('Bạn không thể nhắn với chính mình ')
@@ -174,7 +175,7 @@ const ProductDetail = () => {
                     </div>
                     :
 
-                    <div style={{ minHeight: '90vh', height: '90vh' }}>
+                    <div>
                         <Container className="mt-3 container1 bg-light" style={{ maxWidth: '1170px' }}>
                             <Row className='pt-3'>
                                 <Col xs={6}>

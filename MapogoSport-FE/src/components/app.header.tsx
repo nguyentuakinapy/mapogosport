@@ -13,7 +13,7 @@ import ForgotPassword from './account/modal/forgotPassword.modal';
 import ChangePasswordNew from './account/modal/change-password-new.modal';
 import { useData } from '@/app/context/UserContext';
 import { logOut } from '@/app/utils/Log-Out';
-import { formatTimeNoDate } from './Utils/Format';
+import { decodeString, formatTimeNoDate } from './Utils/Format';
 import './userStyle.scss'
 import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
@@ -123,14 +123,14 @@ const Header = (props: HeaderProps) => {
 
             // chạy được chức năng đã đọc cập nhật lại liền được
             stompClient.subscribe('/topic/notification/isRead', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
                 }
             });
 
             // stompClient.subscribe('/topic/username', (message) => {
-            //     if (message.body === localStorage.getItem('username')) {
+            //     if (message.body === decodeString(String(localStorage.getItem('username')))) {
             //         toast.success("Bạn vừa có thông báo mơí!")
             //     }
             //     getNotification(message.body);
@@ -139,7 +139,7 @@ const Header = (props: HeaderProps) => {
 
 
             stompClient.subscribe('/topic/notification/username', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     // toast.success("Bạn vừa có thông báo mới! nè cậu");
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
@@ -148,14 +148,14 @@ const Header = (props: HeaderProps) => {
 
             // chạy được chức năng đã đọc all cập nhật lại liền được
             stompClient.subscribe('/topic/notification/isReadAll/username', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
                 }
             });
             // đccc
             stompClient.subscribe('/topic/notification/delete/username', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
                 }

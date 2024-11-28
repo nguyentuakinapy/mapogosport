@@ -5,6 +5,7 @@ import '../types/user.scss'
 import useSWR from "swr";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { decodeString } from "@/components/Utils/Format";
 
 const CouponPage = () => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -13,7 +14,9 @@ const CouponPage = () => {
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
-        setUsername(storedUsername);
+        if (storedUsername) {
+            setUsername(decodeString(storedUsername));
+        }
     }, []);
 
     const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/voucher/${username}`, fetcher, {

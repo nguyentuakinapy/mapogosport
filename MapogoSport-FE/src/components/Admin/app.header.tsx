@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
-import { formatDateNotime } from '../Utils/Format';
+import { decodeString, formatDateNotime } from '../Utils/Format';
 import { usePathname } from 'next/navigation';
 
 interface HeaderProps {
@@ -98,42 +98,42 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
 
         stompClient.connect({}, () => {
             stompClient.subscribe('/topic/notification/username', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     toast.success("Bạn vừa có thông báo mơí!")
                     setCheckNotification(prev => prev + 1);
                 }
             });
 
             stompClient.subscribe('/topic/notification/isRead', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
                 }
             });
 
             stompClient.subscribe('/topic/username', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     toast.success("Bạn vừa có thông báo mơí!")
                 }
                 getNotification(message.body);
             });
 
             stompClient.subscribe('/topic/order/new', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     toast.success("Bạn vừa có đơn đặt hàng mơí!")
                     getNotification(message.body);
                 }
             });
 
             stompClient.subscribe('/topic/order/cancel', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     toast.success("Có đơn hàng vừa hủy!")
                     getNotification(message.body);
                 }
             });
 
             stompClient.subscribe('/topic/notification/username', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     toast.success("Bạn vừa có thông báo mới!");
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
@@ -141,14 +141,14 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
             });
 
             stompClient.subscribe('/topic/notification/isReadAll/username', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
                 }
             });
 
             stompClient.subscribe('/topic/notification/delete/username', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
                 }

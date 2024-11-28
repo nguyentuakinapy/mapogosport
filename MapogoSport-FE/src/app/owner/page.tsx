@@ -1,5 +1,5 @@
 'use client'
-import { formatPrice } from "@/components/Utils/Format";
+import { decodeString, formatPrice } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
 import { Button, Col, Modal, Nav, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -114,7 +114,7 @@ export default function Owner() {
     useEffect(() => {
         const username = localStorage.getItem('username');
         if (username) {
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${username}`);
+            setUsernameFetchApi(`http://localhost:8080/rest/user/${decodeString(username)}`);
         }
     }, []);
 

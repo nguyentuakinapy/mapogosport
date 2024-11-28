@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import Popup from "@/components/User/modal/popup-voucher.modal";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
-import { formatPrice } from "@/components/Utils/Format";
+import { decodeJson, decodeString, formatPrice } from "@/components/Utils/Format";
 import useSWR from "swr";
 import Loading from "../components/loading";
 
@@ -79,7 +79,7 @@ export default function Home() {
   useEffect(() => {
     const userSession = sessionStorage.getItem('user');
     if (userSession) {
-      setUserData(JSON.parse(userSession) as User);
+      setUserData(JSON.parse(decodeJson(userSession)) as User);
     }
   }, [])
 
@@ -98,8 +98,8 @@ export default function Home() {
     stompClient.connect({}, () => {
       stompClient.subscribe('/topic/login', (message) => {
         const userSession = sessionStorage.getItem('user');
-        if (userSession && message.body == localStorage.getItem('username')) {
-          setUserData(JSON.parse(userSession) as User);
+        if (userSession && message.body == decodeString(String(localStorage.getItem('username')))) {
+          setUserData(JSON.parse(decodeJson(userSession)) as User);
         }
       });
     });

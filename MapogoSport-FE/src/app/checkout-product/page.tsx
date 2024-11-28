@@ -4,7 +4,7 @@ import axios from 'axios';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { Button, FloatingLabel, Form, Collapse } from 'react-bootstrap';
-import { formatPrice } from '@/components/Utils/Format';
+import { decodeString, formatPrice } from '@/components/Utils/Format';
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
 import { useSearchParams } from 'next/navigation';
@@ -29,7 +29,7 @@ const CheckoutPage = () => {
     const username = localStorage.getItem('username');
     if (storedCartIds && username) {
       setCartIds(JSON.parse(storedCartIds));
-      setUsername(username);
+      setUsername(decodeString(username));
     }
   }, []);
 

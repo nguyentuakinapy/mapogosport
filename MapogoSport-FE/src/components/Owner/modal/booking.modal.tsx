@@ -1,10 +1,10 @@
-import { formatDateNotime } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, Nav } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
 import 'react-datepicker/dist/react-datepicker.css';
 import { createTimeStringH, isDateInRange } from "@/components/Utils/booking-time";
+import { decodeString } from "@/components/Utils/Format";
 
 interface BookingProps {
     showBookingModal: boolean;
@@ -330,7 +330,7 @@ const BookingModal = (props: BookingProps) => {
             return;
         }
 
-        const resUserSubscription = await fetch(`http://localhost:8080/rest/user/subscription/${localStorage.getItem("username")}`);
+        const resUserSubscription = await fetch(`http://localhost:8080/rest/user/subscription/${decodeString(String(localStorage.getItem("username")))}`);
         if (!resUserSubscription.ok) {
             throw new Error('Error fetching data');
         }
@@ -569,19 +569,15 @@ const BookingModal = (props: BookingProps) => {
         const [endHours, endMinutes] = endTime.split('h').map(Number);
         const [checkHours, checkMinutes] = checkTime.split('h').map(Number);
 
-        // Tạo đối tượng Date cho từng thời gian
         const startDate = new Date(0, 0, 0, startHours, startMinutes);
         const endDate = new Date(0, 0, 0, endHours, endMinutes);
         const checkDate = new Date(0, 0, 0, checkHours, checkMinutes);
 
-        // Kiểm tra thời gian nằm trong khoảng
         return checkDate >= startDate && checkDate <= endDate;
     }
 
     const handleSaveByPeriod = async () => {
-        // const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
 
-        // if (isOffline) {
         if (!fullName) {
             toast.error("Vui lòng nhập họ và tên!");
             return;
@@ -589,21 +585,8 @@ const BookingModal = (props: BookingProps) => {
             toast.error("Vui lòng nhập số điện thoại!");
             return;
         }
-        // else if (!paymentMethod) {
-        //     toast.error("Phương thức thanh toán không hợp lệ!");
-        //     return;
-        // }
-        // } else {
-        //     if (!username) {
-        //         toast.error("Vui lòng nhập tên đăng nhập!");
-        //         return;
-        //     } else if (!paymentMethod) {
-        //         toast.error("Phương thức thanh toán không hợp lệ!");
-        //         return;
-        //     }
-        // }
 
-        const resUserSubscription = await fetch(`http://localhost:8080/rest/user/subscription/${localStorage.getItem("username")}`);
+        const resUserSubscription = await fetch(`http://localhost:8080/rest/user/subscription/${decodeString(String(localStorage.getItem("username")))}`);
         if (!resUserSubscription.ok) {
             throw new Error('Error fetching data');
         }
@@ -617,28 +600,16 @@ const BookingModal = (props: BookingProps) => {
 
         const countBooking = await resCountBooking.json();
 
-        // toast.success(userSubscription.accountPackage.limitBookings + 'countBooking' + countBooking);
-
         if (countBooking >= userSubscription.accountPackage.limitBookings) {
             toast.success("Bạn đã quá số lần đặt sân cho gói miễn phí!"); return
         }
 
-        // if (isOffline) {
         const responseUser = await fetch(`http://localhost:8080/rest/user/sportoffline`);
         if (!responseUser.ok) {
             throw new Error('Error fetching data');
         }
         const dataUser = await responseUser.json() as User;
         createBookingByPeriod(6, dataUser);
-        // } else {
-        //     const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
-        //     if (!responseUser.ok) {
-        //         toast.error('Tên người dùng không tồn tại!');
-        //         return;
-        //     }
-        //     const dataUser = await responseUser.json() as User;
-        //     createBookingByPeriod(paymentMethod, dataUser);
-        // }
 
         setCheckDataStatus(!checkDataStatus);
         handleClose();

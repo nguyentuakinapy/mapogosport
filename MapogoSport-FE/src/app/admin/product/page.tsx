@@ -25,7 +25,7 @@ const AdminProduct = () => {
   const getDatas = async () => {
     const apiProducts = "http://localhost:8080/rest/products";
 
-    const apiCategoriesProducts = "http://localhost:8080/rest/category-products";
+    const apiCategoriesProducts = "http://localhost:8080/rest/category_product/category-products";
     const [productsRes, categoriesRes] = await Promise.all([
       axios.get(apiProducts),
       axios.get(apiCategoriesProducts),
@@ -49,7 +49,7 @@ const AdminProduct = () => {
         const apiProducts = "http://localhost:8080/rest/products";
 
         const apiCategoriesProducts =
-          "http://localhost:8080/rest/category-products";
+          "http://localhost:8080/rest/category_product/category-products";
 
         // Gọi cả hai API cùng lúc
         const [productsRes, categoriesRes] = await Promise.all([
