@@ -28,7 +28,7 @@ const ProductDetail = () => {
     const increaseQuantity = () => {
         if (quantity < selectedSizeQuantity) {
             setQuantity(quantity + 1);
-        } else {
+        } else {z
             toast.info("Số lượng vượt quá giới hạn.");
         }
     };
@@ -73,97 +73,6 @@ const ProductDetail = () => {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
-
-
-    // Fetch colors based on product ID
-    useEffect(() => {
-        if (idProduct) {
-            const fetchData = async () => {
-                try {
-                    const response = await fetch(`http://localhost:8080/rest/product-detail/color/${idProduct}`);
-                    const data = await response.json();
-                    setColor(data);
-                    if (data.length > 0) {
-                        // Đặt màu đầu tiên và ID chi tiết sản phẩm làm mặc định
-                        setSelectedColor(data[0][0]);
-                        setSelectedProductDetailId(data[0][1]);  // Giả sử phần tử thứ hai là ID chi tiết sản phẩm
-                    }
-                } catch (error) {
-                    console.error('Error fetching colors:', error);
-                }
-            };
-            fetchData();
-        }
-    }, [idProduct]);
-
-
-    // Select Size by color to product detail
-    useEffect(() => {
-        if (selectedProductDetailId) {
-            const fetchData = async () => {
-                try {
-                    const response = await fetch(`http://localhost:8080/rest/product-detail/size/${selectedProductDetailId}`);
-                    const data = await response.json();
-                    setSizeByColor(data);
-                    console.log("màu", data);
-                    if (data.length > 0) {
-                        // Đặt kích thước mặc định đầu tiên
-                        setSelectedSize(data[0].size.sizeName);
-                        setIdSize(data[0].size.sizeId);
-                        setSelectedProductDetailSizeId(data[0].productDetailSizeId); // Sử dụng ID từ dữ liệu trả về
-                        setSelectedSizeQuantity(data[0].quantity)
-                    }
-                } catch (error) {
-                    console.log("error size", error);
-                }
-            }
-            fetchData();
-        }
-    }, [selectedProductDetailId]);
-    // select price by size and productDetailId
-
-    useEffect(() => {
-        console.log("idSize", idSize)
-        if (selectedProductDetailId && idSize) {
-            // console.log("idSize: ", idSize)
-            const fetchData = async () => {
-                try {
-                    const response = await fetch(`http://localhost:8080/rest/product-detail/price-by-size/${selectedProductDetailId}/${idSize}`)
-                    const data = await response.json()
-                    setPrice(data)
-                    console.log("data price", data)
-                    console.log("price")
-                } catch (error) {
-                    console.log("error price by size", error)
-                }
-            }
-            fetchData()
-        }
-    }, [selectedProductDetailId, idSize])
-
-    //Select image and gallery by idProductDetail
-    useEffect(() => {
-        if (selectedProductDetailId) {
-            console.log("Selected Product Detail ID:", selectedProductDetailId);
-            const fetchData = async () => {
-                try {
-                    const response = await fetch(`http://localhost:8080/rest/product-detail/image/gallery/${selectedProductDetailId}`)
-                    const data = await response.json()
-                    setImageGallery(data)
-                    console.log("image,Gallery", data)
-                } catch (error) {
-                    console.log("error image, gallery", error)
-                }
-            }
-            fetchData()
-        }
-    }, [selectedProductDetailId])
-
-    // cập nhật màu và trạng thái
-    const handleColorSelect = (colorItem) => {
-        setSelectedColor(colorItem[0]); // Đặt màu đã chọn
-        setSelectedProductDetailId(colorItem[1]); // Đặt ID chi tiết sản phẩm
-    };
 
     const handleAddToCart = async () => {
         console.log("số lượng size là ", selectedSizeQuantity)
@@ -257,12 +166,6 @@ const ProductDetail = () => {
             toast.warning('Vui lòng đăng nhập để chat với chủ shop')
         }
     }
-    // trung binh rating
-    const reviewCount = data?.length || 0; // Total number of reviews
-    const averageRating = reviewCount > 0
-        ? (data.reduce((total: number, review: ProductReview) => total + review.rating, 0) / reviewCount).toFixed(1)
-        : "0.0"; // Calculate average rating to one decimal place or set to "0.0" if no reviews
-
     return (
         <>
             <HomeLayout>
@@ -310,26 +213,19 @@ const ProductDetail = () => {
                                             <span className="visually-hidden">Next</span>
                                         </button>
                                     </div>
-
-                                </>
-                            ) : (
-                                <p>No images available</p>
-                            )}
-                        </Col>
-                        <Col className='ms-5' style={{ marginLeft: '100px' }}>
-                            <h4>{findByIdProduct.name}</h4>
-                            <div className='star-comment '>
-                                <div className="star d-flex">
-                                    Đánh giá: {averageRating} <i className="text-warning mx-2 bi bi-star-fill"></i> ({reviewCount} Đánh giá)
-                                    <div className="btn-option-icon">
-                                        <i className="text-danger bi bi-heart-fill mx-2"></i>
-                                        <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>
-                                            <i onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>
-                                        </OverlayTrigger>
-                                    </div>
-                                </div>
-
-
+                                </Col>
+                                <Col xs={6}>
+                                    <h4>{findByIdProduct?.name}</h4>
+                                    <div className='star-comment '>
+                                        <div className="star d-flex">
+                                            Đánh giá: 4/5 <i className="text-warning mx-2 bi bi-star-fill"></i> (1 Đánh giá)
+                                            <div className="btn-option-icon">
+                                                <i className="text-danger bi bi-heart-fill mx-2"></i>
+                                                <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>
+                                                    <i onClick={handleChatMess} className="bi bi-chat-dots-fill text-primary"></i>
+                                                </OverlayTrigger>
+                                            </div>
+                                        </div>
 
 
                                     </div>
