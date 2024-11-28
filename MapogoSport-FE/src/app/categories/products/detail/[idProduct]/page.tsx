@@ -166,6 +166,13 @@ const ProductDetail = () => {
             toast.warning('Vui lòng đăng nhập để chat với chủ shop')
         }
     }
+
+
+    const reviewCount = data?.length || 0; // Ensure data is defined and default to 0
+    const averageRating = reviewCount > 0
+        ? (data.reduce((total: number, review: ProductReview) => total + review.rating, 0) / reviewCount).toFixed(1)
+        : "0.0"; // Calculate average rating or default to "0.0"
+
     return (
         <>
             <HomeLayout>
@@ -218,7 +225,7 @@ const ProductDetail = () => {
                                     <h4>{findByIdProduct?.name}</h4>
                                     <div className='star-comment '>
                                         <div className="star d-flex">
-                                            Đánh giá: 4/5 <i className="text-warning mx-2 bi bi-star-fill"></i> (1 Đánh giá)
+                                            Đánh giá: {averageRating} <i className="text-warning mx-2 bi bi-star-fill"></i> ({reviewCount} Đánh giá)
                                             <div className="btn-option-icon">
                                                 <i className="text-danger bi bi-heart-fill mx-2"></i>
                                                 <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>
