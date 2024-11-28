@@ -12,7 +12,3 @@ interface Product {
     stock: double;
     productReviews: ProductReview[];
 }
-
-
-
-

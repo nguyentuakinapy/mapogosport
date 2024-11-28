@@ -44,10 +44,6 @@ const AdminOrder = () => {
         }
     }, [data]);
 
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [activeTab, searchTerm]);
-
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value.toLowerCase());
     };
