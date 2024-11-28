@@ -83,6 +83,9 @@ const ProductDetail = () => {
     });
 
 
+
+
+
     // Fetch colors based on product ID
     useEffect(() => {
         if (idProduct) {
@@ -264,6 +267,12 @@ const ProductDetail = () => {
             toast.warning('Vui lòng đăng nhập để chat với chủ shop')
         }
     }
+    // trung binh rating
+    const reviewCount = data?.length || 0; // Total number of reviews
+    const averageRating = reviewCount > 0
+        ? (data.reduce((total: number, review: ProductReview) => total + review.rating, 0) / reviewCount).toFixed(1)
+        : "0.0"; // Calculate average rating to one decimal place or set to "0.0" if no reviews
+
     return (
         <>
             <HomeLayout>
@@ -281,7 +290,7 @@ const ProductDetail = () => {
                                         title={imageGallery[0][0].image}
                                         style={{ width: '100%', height: '400px', objectFit: 'contain' }}
                                     />
-                                    <div id="imageGalleryCarousel" class="carousel slide mt-3" data-bs-ride="carousel">
+                                    <div id="imageGalleryCarousel" className="carousel slide mt-3" data-bs-ride="carousel">
                                         <div className="carousel-inner">
 
                                             {imageGallery[0][0].galleries.map((galleryItem, index) => (
@@ -327,7 +336,7 @@ const ProductDetail = () => {
                             <h4>{findByIdProduct.name}</h4>
                             <div className='star-comment '>
                                 <div className="star d-flex">
-                                    Đánh giá: 4/5 <i className="text-warning mx-2 bi bi-star-fill"></i> (1 Đánh giá)
+                                    Đánh giá: {averageRating} <i className="text-warning mx-2 bi bi-star-fill"></i> ({reviewCount} Đánh giá)
                                     <div className="btn-option-icon">
                                         <i className="text-danger bi bi-heart-fill mx-2"></i>
                                         <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>

@@ -12,7 +12,7 @@ import MapComponent from "../../../../utils/MapComponent";
 import { fetchCoordinates } from "../../../../utils/geocode";
 import SearchSportField from '@/components/Booking/booking.Search';
 import { useSearchParams } from 'next/navigation';
-import { useData } from '@/app/context/UserContext';
+// import { useData } from '@/app/context/UserContext';
 import { createTimeStringH, isDateInRange } from '@/components/Utils/booking-time';
 
 type BookingsTypeOnWeek = {
@@ -610,6 +610,11 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     if (isLoading) return <HomeLayout><div>Đang tải...</div></HomeLayout>;
     if (error) return <HomeLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></HomeLayout>;
 
+    // trung binh rating
+    const reviewCount = reviewData?.length || 0; // Total number of reviews
+    const averageRating = reviewCount > 0
+        ? (reviewData.reduce((total: number, review: FieldReview) => total + review.rating, 0) / reviewCount).toFixed(1)
+        : "0.0"; // Calculate average rating to one decimal place or set to "0.0" if no reviews
     return (
         <HomeLayout>
             <Container style={{ fontSize: '15px' }}>
@@ -623,7 +628,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                             </div>
                             <div className='star-comment'>
                                 <div className="star">
-                                    Đánh giá: 4/5 <i className="bi bi-star-fill"></i> (1 Đánh giá)
+                                    Đánh giá: {averageRating} <i className="bi bi-star-fill"></i> ({reviewCount} Đánh giá)
                                 </div>
                                 <div className="btn-option-icon ">
 
