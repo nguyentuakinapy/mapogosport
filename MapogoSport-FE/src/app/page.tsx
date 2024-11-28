@@ -11,7 +11,7 @@ import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import { formatPrice } from "@/components/Utils/Format";
 import useSWR from "swr";
-import Loading from "./loading";
+import Loading from "../components/loading";
 
 export default function Home() {
   const rating = 1.5;
@@ -293,7 +293,7 @@ export default function Home() {
             <div className="d-flex justify-content-between">
               <button className="btn btn-danger" onClick={() => {
                 if (pageSportField === 1) {
-                  setPageSportField(sportFields.length);
+                  setPageSportField(sportFields.length - 3);
                 } else {
                   setPageSportField(prev => prev - 1);
                 }
@@ -352,7 +352,7 @@ export default function Home() {
             <div className="d-flex justify-content-between">
               <button className="btn btn-danger" onClick={() => {
                 if (pageVoucher === 1) {
-                  setPageVoucher(filteredVouchers.length);
+                  setPageVoucher(filteredVouchers.length - 2);
                 } else {
                   setPageVoucher(prev => prev - 1);
                 }
@@ -450,7 +450,7 @@ export default function Home() {
             <div className="d-flex justify-content-between">
               <button className="btn btn-danger" onClick={() => {
                 if (pageProduct === 1) {
-                  setPageProduct(products.length);
+                  setPageProduct(products.length - 3);
                 } else {
                   setPageProduct(prev => prev - 1);
                 }
