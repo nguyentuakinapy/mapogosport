@@ -12,7 +12,7 @@ function AuthorityComponent() {
     const [selectedRole, setSelectedRole] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    
+
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
     const { data, error } = useSWR('http://localhost:8080/rest/list-users', fetcher);
@@ -25,7 +25,11 @@ function AuthorityComponent() {
     }, [data]);
 
     if (error) return <div>Error fetching users: {error.message}</div>;
-    if (!data) return <div>Loading...</div>;
+    if (!data) return <div className="d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-danger" role="status">
+            <span className="visually-hidden">Loading...</span>
+        </div>
+    </div>;
 
     const handleRoleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const role = event.target.value;

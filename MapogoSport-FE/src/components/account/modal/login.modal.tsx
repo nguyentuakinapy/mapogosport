@@ -25,19 +25,6 @@ export default function Login(props: LoginProps) {
     const [password, setPassword] = useState<string>("");
     const [checkRememberMe, setCheckRememberMe] = useState<boolean>(false);
     const { setRefreshKey, refreshKey } = props;
-    // Data auto fet khi update data
-    // const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-    // const { data, error, isLoading } = useSWR(
-    //     `http://localhost:8080/rest/user/${username}`,
-    //     fetcher,
-    //     {
-    //         revalidateIfStale: false,
-    //         revalidateOnFocus: false,
-    //         revalidateOnReconnect: false
-    //     }
-    // );
-
 
     useEffect(() => {
         const userCookie = Cookies.get('user');
@@ -46,18 +33,13 @@ export default function Login(props: LoginProps) {
             setUsername(parsedUserData.username);
             setPassword(parsedUserData.password);
             setCheckRememberMe(true);
-            // console.log("Dữ liệu người dùng từ cookie:", parsedUserData);
-        } else {
-            // console.log("Không có dữ liệu người dùng trong cookie.");
         }
     }, []);
 
     const handleSubmit = async () => {
-        if (!username) {
+        if (!username || !password) {
             toast.warning("Vui lòng nhập thông tin!");
             return;
-        } else if (!password) {
-            toast.warning("Vui lòng nhập thông tin!");
         } else {
             try {
                 const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
@@ -67,6 +49,11 @@ export default function Login(props: LoginProps) {
                 const dataUser = await responseUser.json() as User;
                 // console.log(hashPassword(password));
                 if (dataUser.password == hashPassword(password)) {
+                    if (!dataUser.enabled) {
+                        toast.error("Tài khoản đã vô hiệu hóa!")
+                        return;
+                    }
+
                     if (checkRememberMe) {
                         const user = { username, password };
                         Cookies.set('user', JSON.stringify(user), { expires: 7 });
@@ -77,21 +64,10 @@ export default function Login(props: LoginProps) {
 
                     const usernameLocal = dataUser.username.replace(/['"]+/g, '');
                     localStorage.setItem('username', usernameLocal);
-                    // localStorage.setItem('username', dataUser.username);
                     sessionStorage.setItem('user', JSON.stringify(dataUser));
                     setRefreshKey(refreshKey + 1);
                     console.log(">>>> check data user auth: ", dataUser);
                     toast.success("Đăng nhập thành công!");
-                    // if (dataUser.authorities[0].role.name == "ROLE_ADMIN") {
-                    //     window.location.href = "/admin";
-                    // } else if (dataUser.authorities[0].role.name == "ROLE_STAFF") {
-                    //     window.location.href = "/admin";
-                    // } else if (dataUser.authorities[0].role.name == "ROLE_OWNER") {
-                    //     window.location.href = "/owner";
-                    // } else {
-                    //     window.location.href = "/";
-                    // }
-
                     await fetch('/api/auth', {
                         method: 'POST',
                         headers: {
@@ -110,8 +86,6 @@ export default function Login(props: LoginProps) {
                         }
                         return data
                     })
-                    // console.log(">>>> check data auth: ", resultsFromNextSercer);
-
                 } else {
                     toast.error("Thông tin đăng nhập không đúng!");
                 }

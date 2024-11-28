@@ -235,7 +235,9 @@ const Header = (props: HeaderProps) => {
                             className="ms-auto my-2 my-lg-0 d-flex justify-content-center align-items-center nav-home"
                             style={{ maxHeight: '100px' }}
                             navbarScroll
-                        >   <Link href="/blog" className='head-hv-nav text-decoration-none'><i className="bi bi-book-fill me-2"></i>Bài viết</Link>
+                        >
+                            <Link href="/blog" className='head-hv-nav text-decoration-none'><i className="bi bi-filter-square-fill me-2"></i>Chính sách</Link>
+                            <Link href="/blog" className='head-hv-nav text-decoration-none'><i className="bi bi-book-fill me-2"></i>Bài viết</Link>
                             <Link href="/categories/products" className='head-hv-nav text-decoration-none'><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
                             <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy-fill me-2"></i>Sân thể thao</Link>
 
@@ -278,26 +280,20 @@ const Header = (props: HeaderProps) => {
                             </div>
                             <Nav className='position-relative me-2'>
                                 <Link href="/cart" className='head-hv-nav text-decoration-none'>
-                                    <i className="bi bi-cart"></i></Link>
+                                    <i className="bi bi-cart-fill"></i></Link>
                                 {userData && <CartBadge username={userData.username} />}
                             </Nav>
                             <Nav className="d-flex align-items-center">
 
                                 <Nav.Item className="position-relative">
-                                    <Link
-                                        href="#"
-                                        passHref
-                                        onClick={(e) => {
-                                            e.preventDefault(); // Ngừng hành động mặc định của thẻ <a>
-                                            setHideNotification(!hideNotification);
-                                        }}
-                                        className='head-hv-nav text-decoration-none '
-                                    >
-                                        <span
-                                            className='fw-bold text-light'>
-                                            <i className="bi bi-bell-fill" style={{ fontSize: 'large' }} />
-                                        </span>
-                                    </Link>
+
+                                    <span onClick={(e) => {
+                                        e.preventDefault(); // Ngừng hành động mặc định của thẻ <a>
+                                        setHideNotification(!hideNotification);
+                                    }}
+                                        className='fw-bold text-light'>
+                                        <i className="bi bi-bell-fill head-hv-nav " style={{ cursor: 'pointer' }} />
+                                    </span>
 
                                     <span onClick={() => setHideNotification(!hideNotification)}
                                         className="position-absolute translate-middle badge rounded-pill bg-danger">
