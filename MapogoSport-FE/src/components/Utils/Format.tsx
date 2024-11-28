@@ -85,9 +85,16 @@ const decodeString = (encodedData: string): string => {
   return Buffer.from(encodedData, 'base64').toString('utf-8');
 }
 
+const removeVietnameseTones = (str: string) => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
+};
 export {
   formatDate, formatPrice, hashPassword, encodeJson, decodeJson, encodeString, decodeString,
-  formatDateForApi, formatDateNotime, formatDateVN, formatTimeNoDate
+  formatDateForApi, formatDateNotime, formatDateVN, formatTimeNoDate,removeVietnameseTones
 };
 
 

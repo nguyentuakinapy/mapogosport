@@ -11,6 +11,7 @@ import SockJS from "sockjs-client";
 import { useData } from "@/app/context/UserContext";
 import { useSearchParams } from "next/navigation";
 import { IFrame } from "@stomp/stompjs";
+import { removeVietnameseTones } from './Utils/Format';
 
 import { toast } from "react-toastify";
 import InputChat from "./InputChat/InputChat";
@@ -1033,10 +1034,13 @@ export default function ChatBox() {
   const handleMinimizeToggle = () => {
     setIsMinimized(!isMinimized); // nếu true thì thực hiện phóng to
   };
+
   const [searchKeyword, setSearchKeyword] = useState<string>("");
   const filteredChatList = chatListCurrentUserByDMM.filter((chatGroup) =>
-    chatGroup?.user?.username.toLowerCase().includes(searchKeyword.toLowerCase())
-  );
+    // chatGroup?.user?.username.toLowerCase().includes(searchKeyword.toLowerCase())
+  removeVietnameseTones(chatGroup?.user?.username.toLowerCase()).includes(
+    removeVietnameseTones(searchKeyword.toLowerCase())
+  ));
   console.log("receiver====>", receiver);
   console.log("current topic====>", currentTopic);
 
@@ -1115,7 +1119,8 @@ export default function ChatBox() {
                   {chatListCurrentUserByDMM.length > 0 ? (
                     filteredChatList.map((chatGroup, index) => {
                       const chatUser =
-                        chatGroup.user?.username !== currentUser?.username ? chatGroup.user : null;
+                        chatGroup.user?.username !== currentUser?.username  ? chatGroup.user : null;
+                        const isActive = selectedChat?.username === chatUser?.username;
 
                       if (!chatUser) return null;
                       // console.log('sssssssss ',chatUser);
@@ -1124,9 +1129,12 @@ export default function ChatBox() {
                         <ListGroup.Item
                           key={chatUser?.username || index}
                           onClick={() => handleSelectChat(chatUser)}
-                          className="d-flex flex-column"
+                          // className="d-flex flex-column"
+                          className={`d-flex flex-column ${isActive ? 'active-chat' : ''}`}  // Thêm class 'active-chat' nếu mục được chọn
+
                         >
                           <div className="d-flex align-items-center ">
+                          {/* <div className={`d-flex align-items-center  ${isActive ? 'active-link' : ''}`}> */}
                             <img
                               src={
                                 chatUser?.avatar
