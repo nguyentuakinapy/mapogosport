@@ -1,19 +1,8 @@
-"use client"; // chưa phân trang
+"use client";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import {
-  Button,
-  Col,
-  Form,
-  Image,
-  Modal,
-  Nav,
-  OverlayTrigger,
-  Row,
-  Table,
-  Tooltip,
-} from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Button, Col, Form, Image, Modal, Nav, OverlayTrigger, Row, Table, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR from "swr";
 import "../admin.scss";
@@ -22,132 +11,61 @@ import ModalProductAddNewSize from "./product.addNewSize";
 interface UserProps {
   showAddProduct: boolean;
   setShowAddProduct: (v: boolean) => void;
-  currentProduct?: Product;
-  modalType: "add" | "edit";
-  categoryProducts: CategoryProduct[];
-  // onAddProduct: (product: Product) => void;
-  onFetch: any;
-  setIsNeedScroll: Dispatch<SetStateAction<boolean>>;
+  currentProduct: Product | null;
+  categoryProducts?: CategoryProduct[];
 }
 const BASE_URL = "http://localhost:8080";
 
 let ProductWasCreated: number;
 let canProceed = false;
 
-const ProductAddNew = ({
-  showAddProduct,
-  setShowAddProduct,
-  currentProduct,
-  modalType,
-  categoryProducts,
-  onFetch,
-  setIsNeedScroll,
-}: UserProps) => {
-  const [value, setValue] = useState("");
-  const option = [
-    { label: "Hết hàng", value: "Hết hàng" },
-    { label: "Còn hàng", value: "Còn hàng" },
-  ];
+const option = [
+  { label: "Hết hàng", value: "Hết hàng" },
+  { label: "Còn hàng", value: "Còn hàng" },
+];
 
-  const optionColor = [
-    { label: "Xanh", value: "Xanh", style: "green" },
-    { label: "Đỏ", value: "Đỏ", style: "red" },
-    { label: "Vàng", value: "Vàng", style: "yellow" },
-    { label: "Cam", value: "Cam", style: "orange" },
-    { label: "Tím", value: "Tím", style: "purple" },
-    { label: "Hồng", value: "Hồng", style: "pink" },
-    { label: "Đen", value: "Đen", style: "black" },
-    { label: "Trắng", value: "Trắng", style: "white" },
-    { label: "Xanh biển", value: "Xanh bi?n", style: "blue" },
-    { label: "Nâu", value: "Nâu", style: "brown" },
-    { label: "Xám", value: "Xám", style: "gray" },
-  ];
+const optionColor = [
+  { label: "Xanh", value: "Xanh", style: "green" },
+  { label: "Đỏ", value: "Đỏ", style: "red" },
+  { label: "Vàng", value: "Vàng", style: "yellow" },
+  { label: "Cam", value: "Cam", style: "orange" },
+  { label: "Tím", value: "Tím", style: "purple" },
+  { label: "Hồng", value: "Hồng", style: "pink" },
+  { label: "Đen", value: "Đen", style: "black" },
+  { label: "Trắng", value: "Trắng", style: "white" },
+  { label: "Xanh biển", value: "Xanh bi?n", style: "blue" },
+  { label: "Nâu", value: "Nâu", style: "brown" },
+  { label: "Xám", value: "Xám", style: "gray" },
+];
 
-  // >>>>>>>>>>>>>>>
+const ProductAddNew = (props: UserProps) => {
+  const { showAddProduct, setShowAddProduct, currentProduct, categoryProducts } = props;
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-  const [productDetailWasCreated, setProductDetailWasCreated] = useState<
-    number | null
-  >(null);
-
-  // State để quản lý productDetailId được mở
-  const [openProductDetailId, setOpenProductDetailId] = useState<number | null>(
-    null
-  ); // lấy ID của sản phẩm hiện tại
-  // const [showDetailModal, setShowDetailModal] = useState(false);    // quản lý modal -- hiện chưa dùng
-  const [selectedProductDetail, setSelectedProductDetail] =
-    // useState<ProductDetail[]>([]); // lấy sản phẩm chi tiết chi tiết theo ID product
-    useState<ProductDetail>([]); // lấy sản phẩm chi tiết chi tiết theo ID product
-
-  const [selectedProductDetailSize, setSelectedProductDetailSize] = useState<
-    ProductDetailSize[]
-  >([]); // lấy sản phẩm chi tiết chi tiết theo ID product
-
-  // Fetch ProductDetail dựa vào productId
-
-  // Chỉ fetch dữ liệu khi currentProduct?.productId có giá trị
-  const {
-    data: productDetails,
-    error: errorProductDetails,
-    mutate: mutateProductDetails,
-    isLoading: productDetailsLoading,
-  } = useSWR<ProductDetail[]>(
-    currentProduct?.productId
-      ? `${BASE_URL}/rest/product-detail/${currentProduct?.productId}`
-      : null,
-    fetcher
-  );
-  useEffect(() => {
-    console.log("productDetails", productDetails);
-  }, [productDetails]);
-
+  const [productDetailWasCreated, setProductDetailWasCreated] = useState<number | null>(null);
+  const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetail[]>([]);
+  const [selectedProductDetailSize, setSelectedProductDetailSize] = useState<ProductDetailSize[]>([]);
   const [galleries, setGalleries] = useState<Gallery[]>([]);
+  const [modalTypeProductDetail, setModalTypeProductDetail] = useState<"add" | "edit">("add"); // 'add' hoặc 'edit'
+  const [currentProductDetailSize, setCurrentProductDetailSize] = useState<ProductDetailSize | null>(null);
+  const [isShowAddNewSize, setIsShowAddNewSize] = useState<boolean>(false);
+  const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("edit");
+  const [newColor, setNewColor] = useState<string>("");
+
+  const { data: productDetails, error: errorProductDetails, mutate: mutateProductDetails, isLoading: productDetailsLoading } =
+    useSWR<ProductDetail[]>(currentProduct && `${BASE_URL}/rest/product-detail/${currentProduct?.productId}`, fetcher);
+
+  const { data: productDetailGallery } = useSWR(selectedProductDetail && `${BASE_URL}/rest/gallery/${selectedProductDetail[0]?.productDetailId}`, fetcher);
 
   useEffect(() => {
-    const fetchData_productDetailGalleryRes = async () => {
-      try {
-        const productDetailGalleryRes = await axios.get(
-          `http://localhost:8080/rest/gallery/${selectedProductDetail.productDetailId}`
-        );
-        // Lưu dữ liệu vào state
-        setGalleries(productDetailGalleryRes.data); // Dữ liệu từ API
-        console.log("galleries ", productDetailGalleryRes.data); // Log dữ liệu nhận được
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    if (selectedProductDetail.productDetailId) {
-      fetchData_productDetailGalleryRes();
+    if (productDetailGallery) {
+      setGalleries(productDetailGallery)
     }
-  }, [selectedProductDetail.productDetailId]); // Chỉ chạy khi productDetailId thay đổi
-
-  const [modalTypeProductDetail, setModalTypeProductDetail] = useState<
-    "add" | "edit"
-  >("add"); // 'add' hoặc 'edit'
-
-  const [currentProductDetailSize, setCurrentProductDetailSize] =
-    useState<ProductDetailSize | null>(null);
-
-  const [isShowAddNewSize, setIsShowAddNewSize] = useState<boolean>(false);
-
-  const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);
-
-  //>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  const [activeTab, setActiveTab] = useState<string>("edit");
-  const [isShowAddColor, setIsShowAddColor] = useState<boolean>(false);
-
-  // >>>> hàm lấy product Id
-  const [prodcutDetail_Id, setProdcutDetail_Id] = useState<number | null>(null);
-
-  // Hàm thêm màu sắc
-  const [newColor, setNewColor] = useState<string>("");
+  }, [productDetailGallery]);
 
   // fech data product
   const mutationAddProdcut = useMutation({
     mutationFn: (putData: any) => {
-      console.log("=======putData", putData);
-
       return axios.post(
         `http://localhost:8080/rest/products/admin/create`,
         putData.formData,
@@ -157,7 +75,7 @@ const ProductAddNew = ({
       );
     },
   });
-  // fetch data category
+
   const mutation = useMutation({
     mutationFn: (putData: any) => {
       console.log("=======putData", putData);
@@ -171,7 +89,7 @@ const ProductAddNew = ({
       );
     },
   });
-  // fetch data category
+
   const mutationAddProductDetail = useMutation({
     mutationFn: (putData: any) => {
       return axios.post(
@@ -184,77 +102,23 @@ const ProductAddNew = ({
     },
   });
 
-  const handleOpenModalAddColor = (selectedProductDetail_color: string) => {
-    if (newColor) {
-      // Cập nhật màu sắc hiện tại
-      selectedProductDetail_color = newColor; // Cập nhật màu sắc hiện tại
-    }
-    setIsShowAddColor(true); // Đóng modal
-  };
-
-  const handleSelectedColor = (detailDemo) => {
+  const handleSelectedColor = (detailDemo: ProductDetail[]) => {
     // Kiểm tra các trường bắt buộc
-    const requiredFields = [
-      "name",
-      "brand",
-      "status",
-      "country",
-      "price",
-      "description",
-    ];
+    const requiredFields = ["name", "brand", "status", "country", "price", "description"];
     const isFormValid = validateFormFields(formValues, requiredFields);
 
     if (!isFormValid) {
       return; // Dừng hàm nếu có trường chưa nhập
     }
-
-    setProdcutDetail_Id(detailDemo);
-    console.log("product detail Id: ", detailDemo.productDetailId);
-    console.log("product detail: ", detailDemo);
-
     setSelectedProductDetail(detailDemo);
-    // setActiveTab("add-details");
   };
 
-  const handleSelectedColorCombobox = (color) => {
-    const selectedDetail = productDetails.find(
-      (detail) => detail.color === color
-    );
-    setSelectedProductDetail(selectedDetail);
-  };
-
-  const [formValues, setFormValues] = useState<Product>({
-    name: "",
-    categoryProduct: {
-      categoryProductId: 1,
-      name: "",
-    },
-    description: "",
-    price: 0,
-    status: option[0].value,
-    brand: "",
-    country: "",
-    image: "",
-    stock: 0,
-  });
+  const [formValues, setFormValues] = useState<Product | null>(null);
 
   const [previewImage, setPreviewImage] = useState<string | null>(null); // Dùng để lưu đường dẫn ảnh xem trước
 
   const setFormValueNull = () => {
-    setFormValues({
-      name: "",
-      categoryProduct: {
-        categoryProductId: 1,
-        name: "",
-      },
-      description: "",
-      price: 0,
-      status: option[0].value,
-      brand: "",
-      country: "",
-      image: "",
-      stock: 0,
-    });
+    setFormValues(null);
     setDisplayPrice("");
     setNewColor("");
     setPreviewImageProductColor(null);
@@ -264,7 +128,7 @@ const ProductAddNew = ({
   };
 
   useEffect(() => {
-    if (modalType === "edit" && currentProduct) {
+    if (showAddProduct && currentProduct) {
       setFormValues({
         ...currentProduct,
         categoryProduct: {
@@ -273,10 +137,9 @@ const ProductAddNew = ({
         image: currentProduct.image || "", // Hiển thị ảnh hiện có từ sản phẩm
       });
     } else {
-      // trường hợp này là thêm mới nên set form thành rỗng
       setFormValueNull();
     }
-  }, [modalType, currentProduct, categoryProducts]);
+  }, [currentProduct, showAddProduct]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -284,7 +147,7 @@ const ProductAddNew = ({
     >
   ) => {
     const { name, value } = e.target;
-    setFormValues({ ...formValues, [name]: value });
+    setFormValues({ ...formValues!, [name]: value });
 
     console.log("selected Input change value: ", value);
   };
@@ -298,7 +161,7 @@ const ProductAddNew = ({
     if (!isNaN(numericValue) && numericValue >= 0) {
       // Cập nhật giá trị số vào formValues
       setFormValues((prevValues) => ({
-        ...prevValues,
+        ...prevValues!,
         price: numericValue,
       }));
 
@@ -312,15 +175,15 @@ const ProductAddNew = ({
     }
   };
   useEffect(() => {
-    if (formValues.price !== 0) {
+    if (formValues?.price && formValues.price !== 0) {
       setDisplayPrice(
         new Intl.NumberFormat("vi-VN", {
           style: "currency",
           currency: "VND",
-        }).format(formValues.price)
+        }).format(formValues?.price)
       );
     }
-  }, [formValues.price]);
+  }, [formValues?.price]);
 
   const handleInputChangeNumber = (
     e: React.ChangeEvent<
@@ -333,7 +196,7 @@ const ProductAddNew = ({
     // Check if the value is a valid non-negative number
     if (!isNaN(numericValue) && numericValue >= 0) {
       setFormValues((prevValues) => ({
-        ...prevValues,
+        ...prevValues!,
         [name]: numericValue,
       }));
     } else {
@@ -345,8 +208,7 @@ const ProductAddNew = ({
 
   const handleSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target;
-    setValue(value);
-    setFormValues((prevValues) => ({ ...prevValues, status: value }));
+    setFormValues((prevValues) => ({ ...prevValues!, status: value }));
 
     console.log("selected value: ", value);
   };
@@ -370,12 +232,12 @@ const ProductAddNew = ({
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const selectedId = event.target.value; // Lấy ID của loại sản phẩm đã chọn
-    const selectedCategory = categoryProducts.find(
+    const selectedCategory = categoryProducts?.find(
       (cat) => cat.categoryProductId === Number(selectedId)
     );
 
     setFormValues((prevValues) => ({
-      ...prevValues,
+      ...prevValues!,
       categoryProduct: {
         categoryProductId: Number(selectedId), // Cập nhật ID của loại sản phẩm
         name: selectedCategory?.name || "", // Lấy tên từ loại sản phẩm đã chọn
@@ -396,38 +258,34 @@ const ProductAddNew = ({
   const handleClose = () => {
     setShowAddProduct(false);
     setSelectedProductDetail([]);
-    setFormValueNull(); // onFetch();
+    setFormValueNull();
     setActiveTab("edit"); // set sang atb edit
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (modalType === "add") {
-      console.log("modal type add");
-
+    if (!currentProduct) {
       // Chế độ thêm: chỉ hiển thị ảnh xem trước của tệp đã chọn
       if (e.target.files && e.target.files[0]) {
         const file = e.target.files[0];
         setPreviewImage(URL.createObjectURL(file)); // Tạo URL xem trước
         setFormValues((prevFormValues) => ({
-          ...prevFormValues,
+          ...prevFormValues!,
           image: file, // Lưu đối tượng File
         }));
       } else {
         setFormValues((prevFormValues) => ({
-          ...prevFormValues,
+          ...prevFormValues!,
           image: "", // Đặt hình ảnh thành rỗng nếu không có tệp được chọn
         }));
         setPreviewImage(null); // Xóa ảnh xem trước
       }
-    } else if (modalType === "edit") {
-      console.log("modal type edit");
-
+    } else if (currentProduct) {
       // Chế độ chỉnh sửa: giữ lại ảnh gốc trừ khi có tệp mới được chọn
       if (e.target.files && e.target.files[0]) {
         const file = e.target.files[0];
         setPreviewImage(URL.createObjectURL(file)); // Hiển thị ảnh xem trước của tệp mới
         setFormValues((prevFormValues) => ({
-          ...prevFormValues,
+          ...prevFormValues!,
           image: file, // Cập nhật formValues với tệp mới
         }));
       } else {
@@ -560,14 +418,14 @@ const ProductAddNew = ({
 
       // Kiểm tra nếu có hình ảnh mới được chọn
       if (previewImage) {
-        const file = formValues.image; // Đây là file đã được chọn
+        const file = formValues?.image; // Đây là file đã được chọn
 
         if (file instanceof File) {
           const fileName = `${file.name.replace(/\s+/g, "_")}`;
           imageUrl = fileName; // Cập nhật tên file hình ảnh
           formData.append("fileimage", file); // Thêm file hình ảnh vào FormData
           console.log("image u: ", imageUrl);
-          console.log("form value image: ", formValues.image);
+          console.log("form value image: ", formValues?.image);
         } else {
           console.error("file không phải là một đối tượng File:", file);
         }
@@ -575,32 +433,29 @@ const ProductAddNew = ({
 
       // Tạo đối tượng product với các thuộc tính
 
-      console.log("jjjjjjkl", formValues);
-
       const productData = {
-        name: formValues.name,
-        brand: formValues.brand,
+        name: formValues?.name,
+        brand: formValues?.brand,
         categoryProduct: {
-          categoryProductId: formValues.categoryProduct.categoryProductId,
+          categoryProductId: formValues?.categoryProduct.categoryProductId,
         },
-        status: formValues.status,
-        country: formValues.country,
-        price: formValues.price,
-        description: formValues.description,
+        status: formValues?.status,
+        country: formValues?.country,
+        price: formValues?.price,
+        description: formValues?.description,
         image: imageUrl,
-        stock: formValues.stock,
+        stock: formValues?.stock,
       };
 
       // Thêm product vào FormData dưới dạng chuỗi JSON
       formData.append("product", JSON.stringify(productData));
 
       // trường hợp thêm dữ liệu Product mới chưa có Product detail
-      if (modalType === "add") {
+      if (!currentProduct) {
         if (!validateForm()) {
           // check luôn cả Product detail vì 2 cả hai cùng lúc
           return;
         }
-        setIsNeedScroll(true);
         await mutationAddProdcut.mutateAsync(
           { formData: formData },
           {
@@ -622,12 +477,10 @@ const ProductAddNew = ({
                   handleClose();
                 }
               }
-
-              onFetch();
             },
           }
         );
-      } else if (modalType === "edit" && currentProduct) {
+      } else if (currentProduct) {
         // Trường hợp sản phẩm chưa có ProductDetail nào
         if (!productDetails || productDetails.length === 0) {
           // Chỉ cho phép nếu có đủ thông tin để tạo ProductDetail mới
@@ -701,12 +554,10 @@ const ProductAddNew = ({
                 handleUpdateProductDetail(
                   selectedProductDetail.productDetailId
                 );
-                // onFetch();
                 mutateProductDetails();
               } else if (newColor !== "") {
                 console.log("Thêm ProductDetail mới do có thay đổi màu sắc");
                 handleAddNewProductDetail(currentProduct?.productId);
-                onFetch();
               }
 
               // Đóng modal và cập nhật lại danh sách nếu tất cả thông tin đã hoàn tất
@@ -714,7 +565,6 @@ const ProductAddNew = ({
                 toast.success(
                   "Sản phẩm và chi tiết sản phẩm đã được cập nhật thành công"
                 );
-                onFetch(); // Làm mới dữ liệu sau khi cập nhật
               }
             },
           }
@@ -724,7 +574,6 @@ const ProductAddNew = ({
       toast.error(`Lỗi khi lưu sản phẩm: ${error}`);
       console.error("Lỗi khi lưu sản phẩm:", error);
     }
-    onFetch();
     handleClose();
   };
 
@@ -750,7 +599,7 @@ const ProductAddNew = ({
   const [isImageValid, setIsImageValid] = useState(true);
 
   useEffect(() => {
-    if (formValues.image) {
+    if (formValues?.image) {
       // Kiểm tra nếu ảnh có thể tải được
       fetch(formValues.image)
         .then((response) => {
@@ -762,7 +611,7 @@ const ProductAddNew = ({
         })
         .catch(() => setIsImageValid(false)); // Nếu có lỗi khi tải ảnh
     }
-  }, [formValues.image]);
+  }, [formValues?.image]);
   // Hàm để xóa ảnh trong danh sách đã chọn
   const handleRemoveImage = (index) => {
     // Xóa ảnh khỏi mảng `selectedGalleryFiles`
@@ -770,65 +619,12 @@ const ProductAddNew = ({
     setSelectedGalleryFiles(updatedFiles); // Cập nhật lại state với mảng đã xóa
   };
 
-
   // // Xử lý lỗi và trạng thái loading
   if (errorProductDetails)
     return <div>Lỗi loading dữ liệu chi tiết sản phẩm...</div>;
   if (errorProductDetailSizes)
     return <div>Lỗi loading dữ liệu size màu chi tiết sản phẩm...</div>;
-  // if (!productDetails)
-  //   return <div>Đang loading dữ liệu chi tiết sản phẩm...</div>;
-  // const handleOpenTabColor = (tab: string) => {
-  //   // Kiểm tra các trường bắt buộc
-  //   const requiredFields = [
-  //     "name",
-  //     "brand",
-  //     "status",
-  //     "country",
-  //     "price",
-  //     "description",
-  //
-  //   ];
-  //   const isFormValid = validateFormFields(formValues, requiredFields);
 
-  //   if (!isFormValid) {
-  //     return; // Dừng hàm nếu có trường chưa nhập
-  //   }
-
-  //   setActiveTab(tab); // Chuyển tab nếu đã chọn màu hoặc là tab khác
-  //   // setSelectedProductDetail([])
-  //   if(tab === "edit"){
-  //   if (
-  //     !selectedProductDetail ||
-  //     selectedProductDetail.productDetailId == null
-  //   ) {
-  //     if (
-  //       newColor ||
-  //       previewImageProductColor ||
-  //       selectedGalleryFiles.length > 0
-  //     ) {
-  //       console.log("giữ nguyên");
-  //     } else {
-  //       setSelectedProductDetail([]);
-  //       setGalleries([]);
-  //       setSelectedGalleryFiles([]);
-  //     }
-  //   } else {
-  //     // Nếu đã chọn `selectedProductDetail`, giữ nguyên giá trị hiện tại
-  //     console.log(
-  //       "Chuyển tab, giữ nguyên ProductDetail đã chọn với ID:",
-  //       selectedProductDetail.productDetailId
-  //     );
-  //     handleSelectedColor(selectedProductDetail);
-  //   }
-  // }else if(tab ==="add-details"){
-  //   setNewColor("")
-  //   setPreviewImageProductColor(null)
-  //   setSelectedProductDetail([]);
-  //   setGalleries([]);
-  //   setSelectedGalleryFiles([]);
-  // }
-  // };
   const handleTabClick = (tab: string) => {
     const requiredFields = [
       "name",
@@ -978,8 +774,7 @@ const ProductAddNew = ({
       );
       toast.success("xóa thành công");
       console.log(response.data);
-      mutate(); // Gọi mutate để refetch dữ liệu
-      onFetch();
+      mutate();
     } catch (error) {
       toast.error("xóa không thành công");
       console.error("Error deleting ProductDetailSize:", error);
@@ -1136,7 +931,6 @@ const ProductAddNew = ({
       toast.success("Xóa sản phẩm chi tiết thành công");
       // handleClose();
       mutateProductDetails();
-      onFetch();
     } catch (error) {
       toast.error("Xóa sản phẩm chi tiết không thành công");
       console.error("Error deleting product:", error);
@@ -1188,7 +982,7 @@ const ProductAddNew = ({
       >
         <Modal.Header>
           <Modal.Title className="text-uppercase text-danger">
-            {modalType === "add" ? "Thêm sản phẩm" : "Chỉnh sửa sản phẩm"}
+            {!currentProduct ? "Thêm sản phẩm" : "Chỉnh sửa sản phẩm"}
           </Modal.Title>
         </Modal.Header>
         {/* <h5 className="text-danger text-center">
@@ -1235,9 +1029,9 @@ const ProductAddNew = ({
                             type="text"
                             placeholder="Tên"
                             name="name"
-                            value={formValues.name}
+                            value={formValues?.name}
                             onChange={handleInputChange}
-                            isInvalid={!!errorFields.name && !formValues.name}
+                            isInvalid={!!errorFields.name && !formValues?.name}
                           />
                           <Form.Label htmlFor="name">
                             Tên sản phẩm <b className="text-danger">*</b>
@@ -1251,7 +1045,7 @@ const ProductAddNew = ({
                             placeholder="Số lượng"
                             // name="stock"
                             disabled
-                            value={formValues.stock || 0}
+                            value={formValues?.stock || 0}
                             onChange={handleInputChangeNumber}
                           // isInvalid={!!errorFields.stock && !formValues.stock}
                           />
@@ -1268,12 +1062,9 @@ const ProductAddNew = ({
                             type="text"
                             placeholder="Giá"
                             name="price"
-                            // value={formValues.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || ""}
-                            // onChange={handleInputChangeNumber}
-                            // isInvalid={!!errorFields.price  && !formValues.price}
                             value={displayPrice} // Hiển thị giá trị tiền tệ
                             onChange={handlePriceChange}
-                            isInvalid={!formValues.price && !!errorFields.price}
+                            isInvalid={!formValues?.price && !!errorFields.price}
                           />
                           <Form.Label htmlFor="stock">
                             Giá <b className="text-danger">*</b>
@@ -1286,9 +1077,9 @@ const ProductAddNew = ({
                             type="text"
                             placeholder="Hãng"
                             name="brand"
-                            value={formValues.brand}
+                            value={formValues?.brand}
                             onChange={handleInputChange}
-                            isInvalid={!!errorFields.brand && !formValues.brand}
+                            isInvalid={!!errorFields.brand && !formValues?.brand}
                           />
                           <Form.Label htmlFor="brand">
                             Hãng <b className="text-danger">*</b>
@@ -1300,10 +1091,10 @@ const ProductAddNew = ({
                           <Form.Control
                             as="select"
                             name="categoryProduct"
-                            value={formValues.categoryProduct.categoryProductId}
+                            value={formValues?.categoryProduct.categoryProductId}
                             onChange={handleCategorySelect}
                           >
-                            {categoryProducts.map((category) => (
+                            {categoryProducts?.map((category) => (
                               <option
                                 key={category.categoryProductId}
                                 value={category.categoryProductId}
@@ -1323,7 +1114,7 @@ const ProductAddNew = ({
                             as="select"
                             name="status"
                             disabled
-                            value={formValues.status}
+                            value={formValues?.status}
                             onChange={handleSelect}
                           >
                             {option.map((option) => (
@@ -1345,10 +1136,10 @@ const ProductAddNew = ({
                             type="text"
                             placeholder="country"
                             name="country"
-                            value={formValues.country}
+                            value={formValues?.country}
                             onChange={handleInputChange}
                             isInvalid={
-                              !!errorFields.country && !formValues.country
+                              !!errorFields.country && !formValues?.country
                             }
                           />
                           <Form.Label htmlFor="country">
@@ -1366,11 +1157,11 @@ const ProductAddNew = ({
                             placeholder="Mô tả"
                             name="description"
                             rows={6}
-                            value={formValues.description}
+                            value={formValues?.description}
                             onChange={handleInputChange}
                             isInvalid={
-                              !!errorFields.description &&
-                              !formValues.description
+                              !!errorFields?.description &&
+                              !formValues?.description
                             }
                             style={{
                               width: "100%",
@@ -1392,14 +1183,6 @@ const ProductAddNew = ({
                         {/* Hình ảnh hiển thị */}
                         <div className="d-flex align-items-center">
                           <div className="image-container">
-                            {/* {!previewImage && (
-                              <Image
-                                src={formValues.image || ""}
-                                className="img-thumbnail shadow-sm" // Thêm bóng đổ
-                                alt="dsdsdsđs"
-                              />
-                            )} */}
-                            {/* Input để chọn ảnh, được ẩn đi */}
                             <Form.Control
                               id="file"
                               className="file-input"
@@ -1449,7 +1232,7 @@ const ProductAddNew = ({
                 </Col>
                 <Col xs={4}>
                   <div>
-                    {formValues.image === null ||
+                    {formValues?.image === null ||
                       previewImage ||
                       !isImageValid ? (
                       <Image
@@ -1459,7 +1242,7 @@ const ProductAddNew = ({
                         fluid
                         style={{
                           objectFit: "cover", maxHeight: "300px",
-                          display: formValues.image ? "none" : "block"
+                          display: formValues?.image ? "none" : "block"
                         }}
                       />
                     ) : previewImage ? (
@@ -1471,41 +1254,15 @@ const ProductAddNew = ({
                       />
                     ) : (
                       <Image
-                        src={formValues.image || "/images/logo.png"} // Fallback image
+                        src={`${formValues?.image}` || "/images/logo.png"} // Fallback image
                         alt="Default image sdsdsd"
                         fluid
                         style={{ objectFit: "cover", maxHeight: "300px" }}
                       />
                     )}
                   </div>
-
                   <div>
-                    {/* {(formValues.image && modalType === "edit") ? (
-    <Image
-      src={formValues.image}
-      alt="formValues.image"
-      fluid
-      style={{ objectFit: "cover", maxHeight: "300px" }}
-    />
-  ) : previewImage ? (
-    <Image
-      src={previewImage}
-      alt="Preview image "
-      fluid
-      style={{ objectFit: "cover", maxHeight: "300px" }}
-    />
-  ) : (
-    <Image
-      src="/images/logo.png"// Fallback image
-      alt="Default image"
-      fluid
-      style={{ objectFit: "cover", maxHeight: "300px" }}
-    />
-  )} */}
-                  </div>
-
-                  <div>
-                    {previewImage && modalType === "add" && (
+                    {previewImage && !currentProduct && (
                       <div style={{ marginTop: "10px" }}>
                         <p>Hình ảnh minh họa:</p>
                         <Image
@@ -1654,18 +1411,6 @@ const ProductAddNew = ({
                             <i className="bi bi-camera-fill"></i>
                           </label>
                         </div>
-
-                        {/* Hiển thị ảnh xem trước nếu có */}
-                        {/* {previewImageProductColor && (
-        <div className="preview-image" style={{ marginLeft: "10px" }}>
-          <Image
-            src={previewImageProductColor}
-            alt="Preview"
-            fluid
-            className="preview-img"
-          />
-        </div>
-      )} */}
                       </div>
                     </Form.Group>
                   </Col>
@@ -1713,7 +1458,7 @@ const ProductAddNew = ({
                         size="sm"
                         className="mx-2"
                         onClick={() =>
-                          document.getElementById("galleryInput").click()
+                          document.getElementById("galleryInput")!.click()
                         }
                       >
                         <i className="bi bi-plus-circle mx-1"></i>
@@ -1929,17 +1674,7 @@ const ProductAddNew = ({
         </Modal.Body>
 
         <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={handleClose}
-            disabled={
-              mutation.isPending ||
-              mutationAddProdcut.isPending ||
-              productDetails?.length === 0
-            }
-          >
-            Đóng
-          </Button>
+          <Button variant="secondary" onClick={handleClose}>Đóng</Button>
           <Button
             type="submit"
             variant="danger"

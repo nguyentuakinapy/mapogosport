@@ -7,7 +7,6 @@ interface ProductDetail {
   productDetailSizes: ProductDetailSize[]
 }
 
-
 interface ProductDetailAndDetailSize {
   name: string;
   color: string;
