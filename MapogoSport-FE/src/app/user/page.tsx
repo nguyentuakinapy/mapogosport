@@ -3,16 +3,16 @@ import { useEffect, useState } from 'react';
 import UserLayout from '@/components/User/UserLayout';
 import './types/user.scss';
 import ProfileContent from '@/components/User/modal/user.profile';
+import { useData } from '../context/UserContext';
 
 export default function RootLayout() {
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
-
+    const user = useData();
     useEffect(() => {
-        const username = localStorage.getItem('username');
-        if (username) {
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${username}`);
+        if (user) {
+            setUsernameFetchApi(`http://localhost:8080/rest/user/${user.username}`);
         }
-    }, []);
+    }, [user]);
 
     return (
         <UserLayout>

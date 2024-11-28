@@ -40,9 +40,6 @@ const formatDateForApi = (date: Date | null) => {
   return localDate.toISOString().split('.')[0];
 };
 
-
-
-
 const formatPrice = (price: number) => {
   // Kiểm tra nếu price không hợp lệ hoặc không phải là số
   if (typeof price !== "number" || isNaN(price)) {
@@ -70,6 +67,27 @@ const hashPassword = (password: string): string => {
   return hash;
 };
 
-export { formatDate, formatPrice, hashPassword, formatDateForApi, formatDateNotime, formatDateVN, formatTimeNoDate };
+const encodeJson = (data: object): string => {
+  const jsonString = JSON.stringify(data);
+  return Buffer.from(jsonString).toString('base64');
+}
+
+const decodeJson = (encodedData: string): string => {
+  const jsonString = Buffer.from(encodedData, 'base64').toString('utf-8');
+  return jsonString;
+}
+
+const encodeString = (data: string): string => {
+  return Buffer.from(data).toString('base64');
+}
+
+const decodeString = (encodedData: string): string => {
+  return Buffer.from(encodedData, 'base64').toString('utf-8');
+}
+
+export {
+  formatDate, formatPrice, hashPassword, encodeJson, decodeJson, encodeString, decodeString,
+  formatDateForApi, formatDateNotime, formatDateVN, formatTimeNoDate
+};
 
 

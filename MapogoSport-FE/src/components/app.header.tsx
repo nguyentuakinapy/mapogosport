@@ -13,7 +13,7 @@ import ForgotPassword from './account/modal/forgotPassword.modal';
 import ChangePasswordNew from './account/modal/change-password-new.modal';
 import { useData } from '@/app/context/UserContext';
 import { logOut } from '@/app/utils/Log-Out';
-import { formatTimeNoDate } from './Utils/Format';
+import { decodeString, formatTimeNoDate } from './Utils/Format';
 import './userStyle.scss'
 import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
@@ -123,14 +123,14 @@ const Header = (props: HeaderProps) => {
 
             // chạy được chức năng đã đọc cập nhật lại liền được
             stompClient.subscribe('/topic/notification/isRead', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
                 }
             });
 
             // stompClient.subscribe('/topic/username', (message) => {
-            //     if (message.body === localStorage.getItem('username')) {
+            //     if (message.body === decodeString(String(localStorage.getItem('username')))) {
             //         toast.success("Bạn vừa có thông báo mơí!")
             //     }
             //     getNotification(message.body);
@@ -139,7 +139,7 @@ const Header = (props: HeaderProps) => {
 
 
             stompClient.subscribe('/topic/notification/username', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     // toast.success("Bạn vừa có thông báo mới! nè cậu");
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
@@ -148,14 +148,14 @@ const Header = (props: HeaderProps) => {
 
             // chạy được chức năng đã đọc all cập nhật lại liền được
             stompClient.subscribe('/topic/notification/isReadAll/username', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
                 }
             });
             // đccc
             stompClient.subscribe('/topic/notification/delete/username', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
                 }
@@ -181,6 +181,25 @@ const Header = (props: HeaderProps) => {
             }
         })
     }
+    const handleReadedNotifi = (notificationId: number, titleNotifi: string)=>{
+        handleIsReadNotification(notificationId);
+        let temp : string;
+        let afterSlash : string
+        temp= titleNotifi
+          if(titleNotifi && titleNotifi.includes('/')){
+             afterSlash = titleNotifi.split('/').pop()  ?? ''; // "SENDER-teonv"
+            // Lấy phần sau dấu `-`
+            temp = afterSlash.split('-').pop() ?? ''; // "teonv"
+          }else{
+            temp = ''
+          }
+            console.log('temp=>>>>>>>>>>>>>>>> ',temp);
+            if(temp !== ''){
+                const usernameSenderNotifi = temp;
+                const encodedUsername = btoa(usernameSenderNotifi);
+                    window.history.pushState({}, "", `?status=${encodedUsername}`);
+            }
+        }
 
 
     const handleViewNotification = (username: string) => {
@@ -300,7 +319,9 @@ const Header = (props: HeaderProps) => {
 
                                     <span onClick={() => setHideNotification(!hideNotification)}
                                         className="position-absolute translate-middle badge rounded-pill bg-danger">
-                                        {notification ? notification.filter(item => !item.isRead).length : 0}
+                                        {/* {notification ? notification.filter(item => !item.isRead).length : 0} */}
+                                        {notification ? notification.filter(item => item.isRead === false).length > 5 ? '5+' :
+                                        notification.filter(item => item.isRead === false).length : 0}
                                         <span className="visually-hidden">unread messages</span>
                                     </span>
 
@@ -338,7 +359,8 @@ const Header = (props: HeaderProps) => {
                                                     >
                                                         <div className="d-flex justify-content-between align-items-center">
                                                             <Link
-                                                                onClick={() => handleIsReadNotification(item.notificationId)}
+                                                                // onClick={() => handleIsReadNotification(item.notificationId)}
+                                                                onClick={() => handleReadedNotifi(item.notificationId, item.title)}
                                                                 href='#'
                                                                 className="box-comment"
                                                                 style={{
@@ -346,7 +368,12 @@ const Header = (props: HeaderProps) => {
                                                                     color: item.isRead ? 'black' : undefined,
                                                                 }}
                                                             >
-                                                                <b>{item.title}</b>
+                                                                {/* <b>{item.title}</b> */}
+                                                                <b>
+                                                                {item.title.includes('/')
+                                                                    ? item.title.substring(0, item.title.lastIndexOf('/'))
+                                                                    : item.title}
+                                                                </b>
                                                                 <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
                                                                     <div>{item.message}</div>
                                                                     <div className="ms-auto">{formatTimeNoDate(new Date(item.createdAt))}</div>

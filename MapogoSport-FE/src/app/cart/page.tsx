@@ -3,7 +3,7 @@ import HomeLayout from '@/components/HomeLayout';
 import React, { useState, useEffect } from 'react';
 import { Col, Button, ButtonGroup, Form, Image } from 'react-bootstrap';
 import './style.css';
-import { formatPrice } from '@/components/Utils/Format';
+import { decodeString, formatPrice } from '@/components/Utils/Format';
 import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';
 import Link from 'next/link';
@@ -21,7 +21,7 @@ const Cart = () => {
   useEffect(() => {
     const username = localStorage.getItem('username');
     if (username) {
-      setUsername(username);
+      setUsername(decodeString(username));
     }
   }, []);
 
@@ -207,6 +207,59 @@ const Cart = () => {
     })
   };
 
+  const handleDeleteAll = async () => {
+    if (!username) {
+      console.log("Người dùng chưa đăng nhập.");
+      return;
+    }
+
+    // Get the selected products' cart IDs
+    const selectedCartItems = dataCart.filter((_, index) => selectedProducts[index]);
+    if (selectedCartItems.length === 0) {
+      toast.warning("Vui lòng chọn ít nhất một sản phẩm để xóa!");
+      return;
+    }
+
+    try {
+      const deleteRequests = selectedCartItems.map(cartItem =>
+        fetch(`http://localhost:8080/rest/cart/delete/${cartItem.cartId}`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json',
+          },
+        })
+      );
+
+      const responses = await Promise.all(deleteRequests);
+      const allSuccessful = responses.every(res => res.ok);
+
+      if (!allSuccessful) {
+        toast.error("Lỗi khi xóa một số sản phẩm được chọn!");
+        return;
+      }
+
+      // Update the cart data by removing deleted items
+      const updatedDataCart = dataCart.filter((_, index) => !selectedProducts[index]);
+      setDataCart(updatedDataCart);
+
+      // Update the selected products and quantities
+      const updatedSelectedProducts = updatedDataCart.map(() => false);
+      setSelectedProducts(updatedSelectedProducts);
+      setQuantities(updatedDataCart.map(item => item.quantity));
+
+      // Update the total price
+      setTotalPrice(0);
+
+      mutate(`http://localhost:8080/rest/cart/count/${username}`); // Refresh the cart count
+      toast.success("Đã xóa các sản phẩm được chọn!");
+    } catch (error) {
+      console.error("Lỗi khi xóa các sản phẩm được chọn:", error);
+      toast.error("Có lỗi xảy ra khi xóa các sản phẩm được chọn!");
+    }
+  };
+
+
   if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
   if (!data) return <HomeLayout><div className='d-flex justify-content-center align-items-center' style={{ height: '90vh' }}><Loading></Loading></div></HomeLayout>
   return (
@@ -239,63 +292,69 @@ const Cart = () => {
                       </thead>
                       <tbody>
                         {dataCart.map((cart, index: number) => (
-                          <tr key={index}>
-                            <td>
-                              <input
-                                type="checkbox"
-                                checked={selectedProducts[index]}
-                                onChange={() => handleProductSelect(index)}
-                              />
-                            </td>
-                            <td>
-                              <Image
-                                src={`${cart.productDetailSize.productDetail.image}`}
-                                className="img-fluid me-5 rounded-circle"
-                                style={{ width: '80px', height: '80px' }}
-                                alt=""
-                              />
-                            </td>
-                            <td>
-                              <Link
-                                style={{ textDecoration: 'none', color: '#333' }}
-                                href={`/product-detail/${cart.productDetailSize.productDetail.product.productId}`}
-                              >
-                                <p className="mb-0">
-                                  {cart.productDetailSize.productDetail.product.name}
-                                  <br />({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})
-                                </p>
-                              </Link>
-                            </td>
-                            <td>
-                              <p className="mb-0">{formatPrice(cart.productDetailSize.price)}</p>
-                            </td>
-                            <td>
-                              <div className="d-flex mb-0">
-                                <ButtonGroup className="ms-3">
-                                  <Button variant="outline-secondary" onClick={() => decreaseQuantity(index)}>-</Button>
-                                  <Form.Control
-                                    type="text"
-                                    value={quantities[index]} // Hiển thị số lượng
-                                    readOnly
-                                    className="text-center"
-                                    style={{ maxWidth: '50px' }}
-                                  />
-                                  <Button variant="outline-secondary" onClick={() => increaseQuantity(index)}>+</Button>
-                                </ButtonGroup>
-                              </div>
-                            </td>
-                            <td>
-                              <button
-                                className="btn btn-md rounded-circle bg-light border"
-                                style={{ width: '35px', height: '35px', padding: 0 }}
-                                onClick={() => handleDeleCartItem(index)}
-                              >
-                                <i className="text-danger bi bi-x"></i>
-                              </button>
-                            </td>
-                          </tr>
+                          <>
+                            <tr key={index}>
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedProducts[index]}
+                                  onChange={() => handleProductSelect(index)}
+                                />
+                              </td>
+                              <td>
+                                <Image
+                                  src={`${cart.productDetailSize.productDetail.image}`}
+                                  className="img-fluid me-5 rounded-circle"
+                                  style={{ width: '80px', height: '80px' }}
+                                  alt=""
+                                />
+                              </td>
+                              <td>
+                                <Link
+                                  style={{ textDecoration: 'none', color: '#333' }}
+                                  href={`/product-detail/${cart.productDetailSize.productDetail.product.productId}`}
+                                >
+                                  <p className="mb-0">
+                                    {cart.productDetailSize.productDetail.product.name}
+                                    <br />({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})
+                                  </p>
+                                </Link>
+                              </td>
+                              <td>
+                                <p className="mb-0">{formatPrice(cart.productDetailSize.price)}</p>
+                              </td>
+                              <td>
+                                <div className="d-flex mb-0">
+                                  <ButtonGroup className="ms-3">
+                                    <Button variant="outline-secondary" onClick={() => decreaseQuantity(index)}>-</Button>
+                                    <Form.Control
+                                      type="text"
+                                      value={quantities[index]} // Hiển thị số lượng
+                                      readOnly
+                                      className="text-center"
+                                      style={{ maxWidth: '50px' }}
+                                    />
+                                    <Button variant="outline-secondary" onClick={() => increaseQuantity(index)}>+</Button>
+                                  </ButtonGroup>
+                                </div>
+                              </td>
+                              <td>
+                                <button
+                                  className="btn btn-md rounded-circle bg-light border"
+                                  style={{ width: '35px', height: '35px', padding: 0 }}
+                                  onClick={() => handleDeleCartItem(index)}
+                                >
+                                  <i className="text-danger bi bi-x"></i>
+                                </button>
+                              </td>
+                            </tr>
+
+                          </>
+
                         ))}
+
                       </tbody>
+
                     </table>
                   ) : (
                     <div className="text-center">
@@ -308,7 +367,20 @@ const Cart = () => {
                       > Trang Sản Phẩm</Link>
                     </div>
                   )}
+
                 </div>
+                {dataCart?.length <= 1 ? (
+                  null
+                ) : (
+                  <div className="d-flex justify-content-end mt-4">
+                    <button
+                      className="btn btn-dark px-3 me-3 py-3 text-light"
+                      onClick={handleDeleteAll}
+                    >
+                      Xóa Tất Cả
+                    </button>
+                  </div>
+                )}
 
               </>
             )}

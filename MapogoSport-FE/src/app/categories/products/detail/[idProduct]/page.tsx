@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';
 import ModalReviewProductField from '@/components/Review/review.product';
 import Loading from '@/components/loading';
+import { decodeString } from '@/components/Utils/Format';
 
 const ProductDetail = () => {
     const [quantity, setQuantity] = useState<number>(1);
@@ -27,7 +28,7 @@ const ProductDetail = () => {
     const increaseQuantity = () => {
         if (quantity < selectedSizeQuantity) {
             setQuantity(quantity + 1);
-        } else {
+        } else {z
             toast.info("Số lượng vượt quá giới hạn.");
         }
     };
@@ -76,7 +77,7 @@ const ProductDetail = () => {
     const handleAddToCart = async () => {
         console.log("số lượng size là ", selectedSizeQuantity)
 
-        const username = localStorage.getItem('username');
+        const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
             if (selectedSizeQuantity <= 0) {
                 toast.info("Không thể thêm vào giỏ hàng vì size này đã hết. Vui lòng chọn 1 size khác")
@@ -156,7 +157,7 @@ const ProductDetail = () => {
         const username = localStorage.getItem('username');
 
         if (username) {
-            if (username !== "myntd") {
+            if (decodeString(username) !== "myntd") {
                 window.history.pushState({}, "", `?status=default`);
             } else {
                 toast.info('Bạn không thể nhắn với chính mình ')
@@ -165,6 +166,13 @@ const ProductDetail = () => {
             toast.warning('Vui lòng đăng nhập để chat với chủ shop')
         }
     }
+
+
+    const reviewCount = data?.length || 0; // Ensure data is defined and default to 0
+    const averageRating = reviewCount > 0
+        ? (data.reduce((total: number, review: ProductReview) => total + review.rating, 0) / reviewCount).toFixed(1)
+        : "0.0"; // Calculate average rating or default to "0.0"
+
     return (
         <>
             <HomeLayout>
@@ -174,7 +182,7 @@ const ProductDetail = () => {
                     </div>
                     :
 
-                    <div style={{ minHeight: '90vh', height: '90vh' }}>
+                    <div>
                         <Container className="mt-3 container1 bg-light" style={{ maxWidth: '1170px' }}>
                             <Row className='pt-3'>
                                 <Col xs={6}>
@@ -217,7 +225,7 @@ const ProductDetail = () => {
                                     <h4>{findByIdProduct?.name}</h4>
                                     <div className='star-comment '>
                                         <div className="star d-flex">
-                                            Đánh giá: 4/5 <i className="text-warning mx-2 bi bi-star-fill"></i> (1 Đánh giá)
+                                            Đánh giá: {averageRating} <i className="text-warning mx-2 bi bi-star-fill"></i> ({reviewCount} Đánh giá)
                                             <div className="btn-option-icon">
                                                 <i className="text-danger bi bi-heart-fill mx-2"></i>
                                                 <OverlayTrigger overlay={<Tooltip>Trò chuyện</Tooltip>}>

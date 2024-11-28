@@ -6,6 +6,7 @@ import { useData } from "../context/UserContext";
 import BlogManager from "@/components/blog/blog-manager";
 import Wallet from "@/components/User/modal/wallet";
 import AuthorityComponent from "@/components/Admin/authority";
+import { decodeString } from "@/components/Utils/Format";
 
 export default function Owner() {
     const [activeTab, setActiveTab] = useState<string>('all');
@@ -15,7 +16,7 @@ export default function Owner() {
     useEffect(() => {
         const username = localStorage.getItem('username');
         if (username) {
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${username}`);
+            setUsernameFetchApi(`http://localhost:8080/rest/user/${decodeString(username)}`);
         }
     }, []);
 
