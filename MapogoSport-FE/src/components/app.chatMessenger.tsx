@@ -11,6 +11,7 @@ import SockJS from "sockjs-client";
 import { useData } from "@/app/context/UserContext";
 import { useSearchParams } from "next/navigation";
 import { IFrame } from "@stomp/stompjs";
+import { removeVietnameseTones } from './Utils/Format';
 
 import { toast } from "react-toastify";
 import InputChat from "./InputChat/InputChat";
@@ -1033,10 +1034,13 @@ export default function ChatBox() {
   const handleMinimizeToggle = () => {
     setIsMinimized(!isMinimized); // nếu true thì thực hiện phóng to
   };
+
   const [searchKeyword, setSearchKeyword] = useState<string>("");
   const filteredChatList = chatListCurrentUserByDMM.filter((chatGroup) =>
-    chatGroup?.user?.username.toLowerCase().includes(searchKeyword.toLowerCase())
-  );
+    // chatGroup?.user?.username.toLowerCase().includes(searchKeyword.toLowerCase())
+  removeVietnameseTones(chatGroup?.user?.username.toLowerCase()).includes(
+    removeVietnameseTones(searchKeyword.toLowerCase())
+  ));
   console.log("receiver====>", receiver);
   console.log("current topic====>", currentTopic);
 
