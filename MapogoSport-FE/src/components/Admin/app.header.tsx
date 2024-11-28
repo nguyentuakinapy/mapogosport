@@ -249,7 +249,9 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                 </a>
                                 <span onClick={() => setHideNotification(!hideNotification)} style={{ top: '12%', left: '85%', fontSize: '10px' }}
                                     className="position-absolute translate-middle badge rounded-pill bg-danger">
-                                    {notification ? notification.filter(item => item.isRead === false).length : 0}
+                                    {/* {notification ? notification.filter(item => item.isRead === false).length : 0} */}
+                                    {notification ? notification.filter(item => item.isRead === false).length > 5 ? '5+' :
+                                     notification.filter(item => item.isRead === false).length : 0}
                                 </span>
                                 <div className={`notification ${hideNotification ? 'd-block' : 'd-none'}`} >
                                     <div className="d-flex align-items-center">
@@ -278,7 +280,12 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                                                     fontSize: '15px',
                                                                     color: item.isRead ? 'black' : undefined
                                                                 }}>
-                                                                <b>{item.title}</b>
+                                                                {/* <b>{item.title}</b> */}
+                                                                <b>
+                                                                {item.title.includes('/')
+                                                                    ? item.title.substring(0, item.title.lastIndexOf('/'))
+                                                                    : item.title}
+                                                                </b>
                                                                 <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
                                                                     <div className=''>{item.message}</div>
                                                                     <div className='ms-auto'>{new Date(item.createdAt).toLocaleDateString()}</div>
