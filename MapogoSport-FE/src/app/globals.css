@@ -1026,3 +1026,7 @@ table th {
   margin-right: 0;
   /* Bỏ margin-right cho phần tử cuối cùng */
 }
+
+.active-chat {
+  background-color: #66c7ff !important;
+}

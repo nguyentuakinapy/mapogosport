@@ -1120,6 +1120,7 @@ export default function ChatBox() {
                     filteredChatList.map((chatGroup, index) => {
                       const chatUser =
                         chatGroup.user?.username !== currentUser?.username  ? chatGroup.user : null;
+                        const isActive = selectedChat?.username === chatUser?.username;
 
                       if (!chatUser) return null;
                       // console.log('sssssssss ',chatUser);
@@ -1128,9 +1129,12 @@ export default function ChatBox() {
                         <ListGroup.Item
                           key={chatUser?.username || index}
                           onClick={() => handleSelectChat(chatUser)}
-                          className="d-flex flex-column"
+                          // className="d-flex flex-column"
+                          className={`d-flex flex-column ${isActive ? 'active-chat' : ''}`}  // Thêm class 'active-chat' nếu mục được chọn
+
                         >
                           <div className="d-flex align-items-center ">
+                          {/* <div className={`d-flex align-items-center  ${isActive ? 'active-link' : ''}`}> */}
                             <img
                               src={
                                 chatUser?.avatar
