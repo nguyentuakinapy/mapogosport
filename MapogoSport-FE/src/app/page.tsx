@@ -1,5 +1,5 @@
 'use client'
-import { Container, Row, Col, Image, Form, Button, Carousel } from "react-bootstrap";
+import { Container, Row, Col, Image, Form, Button } from "react-bootstrap";
 import { useEffect, useState } from 'react';
 import HomeLayout from "@/components/HomeLayout";
 import Link from "next/link";
@@ -10,14 +10,14 @@ import Popup from "@/components/User/modal/popup-voucher.modal";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import { formatPrice } from "@/components/Utils/Format";
-import { useRouter, useSearchParams } from "next/navigation";
+import useSWR from "swr";
+import Loading from "./loading";
 
 export default function Home() {
-  const [rating, setRating] = useState<number>(1.5);
-  const [sportFields, setSportFields] = useState<SportField[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [vouchers, setVouchers] = useState<Voucher[]>([]);
-  const [refreshKey, setRefreshKey] = useState<number>(999);
+  const rating = 1.5;
+  const [pageSportField, setPageSportField] = useState<number>(1);
+  const [pageProduct, setPageProduct] = useState<number>(1);
+  const [pageVoucher, setPageVoucher] = useState<number>(1);
   const [showCreateOwnerModal, setShowCreateOwnerModal] = useState<boolean>(false);
   const [typeFilter, setTypeFilter] = useState<any>(null);
   const [nameFilter, setNameFilter] = useState<any>(null);
@@ -39,58 +39,31 @@ export default function Home() {
     return stars;
   };
 
-  // const searchParams = useSearchParams();
-  // const router = useRouter(); // Using useRouter
+  const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-  // useEffect(() => {
-  //   const notLoggedIn = searchParams.get('notLoggedIn');
+  const { data: sportFields } = useSWR<SportField[]>(`http://localhost:8080/rest/sport_field`, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
 
-  //   // Check if the 'notLoggedIn' query parameter exists and equals 'true'
-  //   if (notLoggedIn === 'true') {
-  //     toast.error("Bạn chưa đăng nhập!");
+  const { data: products } = useSWR<Product[]>(`http://localhost:8080/rest/products`, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
 
-  //     // Update the URL by removing the query parameter without reloading the page
-  //     const newUrl = new URL(window.location.href);
-  //     newUrl.searchParams.delete('notLoggedIn');
+  const { data: categoryFields } = useSWR<CategoryField[]>(`http://localhost:8080/rest/category_field`, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
 
-  //     // Corrected usage of router.replace
-  //     router.replace(newUrl.toString());
-  //   }
-  // }, [searchParams, router]); // Add router as a dependency
-
-  // Hiển thị khu vực sân
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/rest/sport_field');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log(data);
-        setSportFields(data);
-      } catch (error) {
-        console.error("Fetch error: ", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // Fetch base product
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/rest/products');
-        const data = await response.json();
-        console.log(data);
-        setProducts(data);
-      } catch (error) {
-        console.log("Lỗi khi gọi API: ", error);
-      }
-    };
-    fetchData();
-  }, []);
+  const { data: voucher } = useSWR<Voucher[]>(`http://localhost:8080/rest/voucher/findAll`, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
 
   const createOwnerSubmit = () => {
     const user = localStorage.getItem('username');
@@ -100,20 +73,6 @@ export default function Home() {
       toast.warning("Bạn chưa đăng nhập, vui lòng đăng nhập hoặc đăng ký tài khoản!")
     }
   }
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`http://localhost:8080/rest/voucher/active`);
-        const data = await response.json();
-        setVouchers(data)
-        console.log("voucher", data)
-      } catch (error) {
-        console.log("lỗi voucher", error)
-      }
-    }
-    fetchData()
-  }, [])
 
   const [userData, setUserData] = useState<User>();
 
@@ -131,21 +90,6 @@ export default function Home() {
     const ownerRoleExists = authorities.some(item => item.role.name === "ROLE_OWNER");
     setHasOwnerRole(ownerRoleExists);
   }, [userData]);
-
-  const [categoryFields, setCategoryFields] = useState<CategoryField[]>([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const reponse = await fetch('http://localhost:8080/rest/category_field')
-        const data = await reponse.json();
-        setCategoryFields(data)
-      } catch (error) {
-        console.log("Lỗi call Api rồi: ", error)
-      }
-    }
-    fetchData();
-  }, [])
 
   useEffect(() => {
     const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
@@ -174,24 +118,6 @@ export default function Home() {
     window.location.href = "/categories/sport_field";
   };
 
-  // VOUCHER
-  const [voucher, setVoucher] = useState<Voucher[]>([])
-
-  useEffect(() => {
-
-    fetchDataVoucher()
-  }, [])
-
-  const fetchDataVoucher = async () => {
-    try {
-      const response = await fetch(`http://localhost:8080/rest/voucher/findAll`);
-      const data = await response.json();
-      setVoucher(data);
-      console.log("Voucher", data)
-    } catch (error) {
-      console.log("Error fetch voucher data", error)
-    }
-  }
   //Handel select voucher khi active
   const filterVouchers = (vouchers: Voucher[]) => {
     const currentTime = new Date().getTime();
@@ -201,8 +127,11 @@ export default function Home() {
       return currentTime >= activeTime && currentTime <= endTime;
     });
   };
+  let filteredVouchers: Voucher[] = [];
+  if (voucher) {
+    filteredVouchers = filterVouchers(voucher);
+  }
 
-  const filteredVouchers = filterVouchers(voucher);
 
   return (
     <HomeLayout>
@@ -217,7 +146,7 @@ export default function Home() {
             <div className="input-group" style={{ width: '70%', backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: '8px', padding: '10px' }}>
               <Form.Select onChange={(e) => setTypeFilter(e.target.value)} style={{ borderWidth: '0 1px 0 0', borderStyle: 'solid', borderColor: 'black' }}>
                 <option value={'0'}>Lọc theo loại sân</option>
-                {categoryFields.map(item => (
+                {categoryFields && categoryFields.map(item => (
                   <option key={item.categoriesFieldId} value={item.categoriesFieldId}>{item.name}</option>
                 ))}
               </Form.Select>
@@ -252,168 +181,6 @@ export default function Home() {
         </Row>
       </Container>
       {/* GIỚI THIỆU VỀ CHỦ SÂN */}
-
-      {/* SÂN THỂ THAO MỚI  */}
-      <Container className="pt-5">
-        <div className="row a-more">
-          <h3 className="fw-bold col-10">SÂN THỂ THAO MỚI</h3>
-          <div className="col-2 text-end">
-            <a href="/categories/sport_field" className="see-more-link">Xem Thêm</a>
-          </div>
-        </div>
-        <div style={{ fontSize: '15px' }}>
-          <Row className="">
-            {sportFields.slice(0, 4).map((field: SportField) => (
-              <Col xs={3} key={field.sportFieldId}>
-                <div className="user-border">
-                  <div className="mb-3">
-                    <Link href={"#"}>
-                      <Image
-                        src={`${field.image}`}
-                        alt={field.name}
-                        style={{
-                          maxHeight: "200px",
-                          maxWidth: "450px",
-                          minHeight: "200px",
-                          objectFit: "cover"
-                        }}
-                      />
-                    </Link>
-                  </div>
-                  <div className="content">
-                    <div className="mb-1 title">
-                      <Link href={"#"}><b>{field.name}</b></Link>
-                    </div>
-                    <div className="address mb-1">
-                      <span className="me-2">Khu vực:</span>{field.address}
-                      <span className="mx-2">-</span>Hồ Chí Minh
-                    </div>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div>Số sân: {field.quantity}</div>
-                      <div className="star-item text-warning">
-                        {renderStars(rating)}
-                      </div>
-                    </div>
-                    <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
-                  </div>
-                </div>
-              </Col>
-            ))}
-          </Row>
-        </div>
-        {/* VOUCHER */}
-        <div className="row a-more mt-5">
-          <h3 className="fw-bold col-10">MÃ GIẢM GIÁ SẢN PHẨM</h3>
-          <div className="col-2 text-end">
-            <a href="/voucher" className="see-more-link">Xem Thêm</a>
-          </div>
-        </div>
-        <div style={{ fontSize: '15px' }}>
-          <div className="d-flex m-auto">
-            {filteredVouchers.slice(0, 3).map((voucher, index) => (
-              <div key={index} className="voucher-item p-2 mx-3">
-                <div className="voucher-info text-center col-4 border-end">
-                  <div className="circle">
-                    <span className="brand-name">Mapogo</span>
-                  </div>
-                </div>
-                <div className="voucher-discount text-center col-6 ">
-                  <span className="discount">Giảm giá {voucher.discountPercent} %</span>
-                  <span className="expiry">HSD: {new Date(voucher.endDate).toLocaleDateString('en-GB')}</span> <br />
-                  <em className='text-secondary' style={{ fontSize: "12px" }}>Số lượng: {voucher.quantity}</em>
-                </div>
-                <div className="get col-2 text-center ">
-                  <button type="button" className="btn btn-dark text-center "
-                    // onClick={() => handelSubmitGetVoucher(voucher.voucherId)}
-                    disabled={voucher.quantity === 0}
-                  >Nhận</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* SẢN PHẨM */}
-        <div className="row a-more mt-5">
-          <h3 className="fw-bold col-10">SẢN PHẨM MỚI</h3>
-          <div className="col-2 text-end">
-            <a href="/categories/products" className="see-more-link">Xem Thêm</a>
-          </div>
-        </div>
-        <Row>
-          {products.slice(0, 4).map((product, index) => {
-            const reviews = product.productReviews || [];
-            const reviewCount = reviews.length; // Total number of reviews
-            const averageRating = reviewCount > 0
-              ? (reviews.reduce((total, review) => total + review.rating, 0) / reviewCount).toFixed(1)
-              : "0.0"; // Calculate average rating to one decimal place or set to "0.0" if no reviews
-
-            const fullStars = Math.floor(parseFloat(averageRating)); // Full stars based on integer part of averageRating
-            const hasHalfStar = parseFloat(averageRating) - fullStars >= 0.5; // Determine if a half star is needed
-            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Remaining stars are empty stars
-
-            return (
-              <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
-                <div nh-product={product.productId} className="product-item card border">
-                  <div className="inner-image mb-3">
-                    <div className="product-status">
-                      <div className="onsale"></div>
-                    </div>
-                    <Link href={`/product-detail/${product.productId}`}>
-                      <img
-                        className="w-100 h-100 p-1"
-                        style={{
-                          aspectRatio: "1 / 0.8", // Tạo tỷ lệ vuông
-                          maxWidth: "350px",
-                          maxHeight: "250px",
-                          objectFit: "cover",
-                          borderRadius: '10px'
-                        }}
-                        alt={product.name}
-                        src={`${typeof product.image === 'string' ? product.image : ''}`}
-                      />
-
-                    </Link>
-                  </div>
-
-                  <div className="inner-content">
-                    <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
-                      <Link href={`/product-detail/${product.productId}`}>{product.name}</Link>
-                    </div>
-                    <div className="product-category ms-1">
-                      <Link href={`/product-detail/${product.productId}`}>{product.categoryProduct.name}</Link>
-                    </div>
-                    <div className="price">
-                      <span className="price-amount ms-1">{formatPrice(product.price)}</span>
-                    </div>
-
-                    {/* Average rating stars */}
-                    <div className="star-item star d-flex mt-1 ms-1">
-                      <div className="icon text-warning mb-2">
-                        {[...Array(fullStars)].map((_, i) => (
-                          <i key={`full-${i}`} className="bi bi-star-fill"></i>
-                        ))}
-                        {hasHalfStar && <i className="bi bi-star-half"></i>}
-                        {[...Array(emptyStars)].map((_, i) => (
-                          <i key={`empty-${i}`} className="bi bi-star"></i>
-                        ))}
-                      </div>
-                      {/* Display average rating and review count */}
-                      <div className="number ms-1">({averageRating} stars, {reviewCount} reviews)</div>
-                    </div>
-
-                  </div>
-                </div>
-              </Col>
-            );
-          })}
-        </Row>
-      </Container>
-
-
-
-
-
-
       <Container className="pt-3">
         <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">
           <div className="carousel-inner">
@@ -470,59 +237,244 @@ export default function Home() {
             <span className="visually-hidden">Next</span>
           </button>
         </div>
-        {/*  */}
-        <div className="row mt-2">
-          <div className="col">
-            <img src="https://img.thegioithethao.vn/media/banner/banner_gio_vang.png" className="w-100" alt="" />
-          </div>
-          <div className="col">
-            <img src="https://img.thegioithethao.vn/media/banner/thi-cong-cai-tao.png" className="w-100" alt="" />
-          </div>
-        </div>
-        {/* Deal hot cho bạn */}
-        <div>
-          <h3 className="text-center fw-bold mt-5">DEAL HOT CHO BẠN</h3>
-          <div className="row">
-            <div className="col">
-              <img src="https://img.thegioithethao.vn/media/icon/thi-cong-cai-tao.webp" className="w-100" alt="" />
-            </div>
-            <div className="col">
-              <img src="https://img.thegioithethao.vn/media/icon/thi-cong-cai-tao.webp" className="w-100" alt="" />
-            </div>
-            <div className="col">
-              <img src="https://img.thegioithethao.vn/media/icon/thi-cong-cai-tao.webp" className="w-100" alt="" />
-            </div>
-            <div className="col">
-              <img src="https://img.thegioithethao.vn/media/icon/thi-cong-cai-tao.webp" className="w-100" alt="" />
-            </div>
-          </div>
-        </div>
-        {/* Thông tin nổi bật */}
-        <div>
-          <h3 className="text-center fw-bold mt-5">THÔNG TIN NỔI BẬT</h3>
-          <div className="row">
-            <div className="col">
-              BLOG
-            </div>
-            <div className="col">
-              BLOG
-            </div>
-            <div className="col">
-              BLOG
-            </div>
-            <div className="col">
-              BLOG
-            </div>
-          </div>
-        </div>
         {/* VOUCHER */}
-
         <div className="App">
           <Popup />
         </div>
+      </Container>
+      {/* SÂN THỂ THAO MỚI  */}
+      <Container className="pt-5">
+        <div className="row a-more">
+          <h3 className="fw-bold col-10">SÂN THỂ THAO MỚI</h3>
+          <div className="col-2 text-end">
+            <a href="/categories/sport_field" className="see-more-link">Xem Thêm</a>
+          </div>
+        </div>
+        <Row style={{ fontSize: '15px' }}>
+          {!sportFields ?
+            <Loading></Loading>
+            : sportFields && sportFields.slice(pageSportField - 1, pageSportField + 3).map((field: SportField) => (
+              <Col xs={3} key={field.sportFieldId}>
+                <div className="user-border">
+                  <div className="mb-3">
+                    <Link href={"#"}>
+                      <Image
+                        src={`${field.image}`}
+                        alt={field.name}
+                        style={{
+                          maxHeight: "200px",
+                          maxWidth: "450px",
+                          minHeight: "200px",
+                          objectFit: "cover"
+                        }}
+                      />
+                    </Link>
+                  </div>
+                  <div className="content">
+                    <div className="mb-1 title">
+                      <Link href={"#"}><b>{field.name}</b></Link>
+                    </div>
+                    <div className="address mb-1">
+                      <span className="me-2">Khu vực:</span>{field.address}
+                      <span className="mx-2">-</span>Hồ Chí Minh
+                    </div>
+                    <div className="d-flex align-items-center justify-content-between">
+                      <div>Số sân: {field.quantity}</div>
+                      <div className="star-item text-warning">
+                        {renderStars(rating)}
+                      </div>
+                    </div>
+                    <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
+                  </div>
+                </div>
+              </Col>
+            ))}
+          {sportFields && (
+            <div className="d-flex justify-content-between">
+              <button className="btn btn-danger" onClick={() => {
+                if (pageSportField === 1) {
+                  setPageSportField(sportFields.length);
+                } else {
+                  setPageSportField(prev => prev - 1);
+                }
+              }}>
+                <i className="bi bi-arrow-left-short"></i>
+              </button>
+              <span className="text-danger fw-bold">{pageSportField}/{sportFields.length - 3}</span>
+              <button className="btn btn-danger" onClick={() => {
+                if (pageSportField === sportFields.length - 3) {
+                  setPageSportField(1);
+                } else {
+                  setPageSportField(prev => prev + 1);
+                }
+              }}>
+                <i className="bi bi-arrow-right-short"></i>
+              </button>
+            </div>
+          )}
+        </Row>
+        {/* VOUCHER */}
+        <div className="row a-more mt-5">
+          <h3 className="fw-bold col-10">MÃ GIẢM GIÁ SẢN PHẨM</h3>
+          <div className="col-2 text-end">
+            <a href="/voucher" className="see-more-link">Xem Thêm</a>
+          </div>
+        </div>
+        <div style={{ fontSize: '15px' }}>
+          <div className="d-flex m-auto">
+            {!voucher ?
+              <div className="m-auto">
+                <Loading></Loading>
+              </div>
+              :
+              filteredVouchers.slice(pageVoucher - 1, pageVoucher + 2).map((voucher, index) => (
+                <div key={index} className="voucher-item p-2 mx-3">
+                  <div className="voucher-info text-center col-4 border-end">
+                    <div className="circle">
+                      <span className="brand-name">Mapogo</span>
+                    </div>
+                  </div>
+                  <div className="voucher-discount text-center col-6 ">
+                    <span className="discount">Giảm giá {voucher.discountPercent} %</span>
+                    <span className="expiry">HSD: {new Date(voucher.endDate).toLocaleDateString('en-GB')}</span> <br />
+                    <em className='text-secondary' style={{ fontSize: "12px" }}>Số lượng: {voucher.quantity}</em>
+                  </div>
+                  <div className="get col-2 text-center ">
+                    <button type="button" className="btn btn-dark text-center "
+                      // onClick={() => handelSubmitGetVoucher(voucher.voucherId)}
+                      disabled={voucher.quantity === 0}
+                    >Nhận</button>
+                  </div>
+                </div>
+              ))}
+          </div>
+          {voucher && (
+            <div className="d-flex justify-content-between">
+              <button className="btn btn-danger" onClick={() => {
+                if (pageVoucher === 1) {
+                  setPageVoucher(filteredVouchers.length);
+                } else {
+                  setPageVoucher(prev => prev - 1);
+                }
+              }}>
+                <i className="bi bi-arrow-left-short"></i>
+              </button>
+              <span className="text-danger fw-bold">{pageVoucher}/{filteredVouchers.length - 2}</span>
+              <button className="btn btn-danger" onClick={() => {
+                if (pageVoucher === filteredVouchers.length - 2) {
+                  setPageVoucher(1);
+                } else {
+                  setPageVoucher(prev => prev + 1);
+                }
+              }}>
+                <i className="bi bi-arrow-right-short"></i>
+              </button>
+            </div>
+          )}
+        </div>
+        {/* SẢN PHẨM */}
+        <div className="row a-more mt-5">
+          <h3 className="fw-bold col-10">SẢN PHẨM MỚI</h3>
+          <div className="col-2 text-end">
+            <a href="/categories/products" className="see-more-link">Xem Thêm</a>
+          </div>
+        </div>
+        <Row>
+          {!products ?
+            <Loading></Loading>
+            :
+            products.slice(pageProduct - 1, pageProduct + 3).map((product) => {
+              const reviews = product.productReviews || [];
+              const reviewCount = reviews.length;
+              const averageRating = reviewCount > 0
+                ? (reviews.reduce((total, review) => total + review.rating, 0) / reviewCount).toFixed(1)
+                : "0.0";
+
+              const fullStars = Math.floor(parseFloat(averageRating));
+              const hasHalfStar = parseFloat(averageRating) - fullStars >= 0.5;
+              const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+              return (
+                <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
+                  <div nh-product={product.productId} className="product-item card border">
+                    <div className="inner-image mb-3">
+                      <div className="product-status">
+                        <div className="onsale"></div>
+                      </div>
+                      <Link href={`/product-detail/${product.productId}`}>
+                        <img
+                          className="w-100 h-100 p-1"
+                          style={{
+                            aspectRatio: "1 / 0.8", // Tạo tỷ lệ vuông
+                            maxWidth: "350px",
+                            maxHeight: "250px",
+                            objectFit: "cover",
+                            borderRadius: '10px'
+                          }}
+                          alt={product.name}
+                          src={`${typeof product.image === 'string' ? product.image : ''}`}
+                        />
+
+                      </Link>
+                    </div>
+
+                    <div className="inner-content">
+                      <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
+                        <Link href={`/product-detail/${product.productId}`}>{product.name}</Link>
+                      </div>
+                      <div className="product-category ms-1">
+                        <Link href={`/product-detail/${product.productId}`}>{product.categoryProduct.name}</Link>
+                      </div>
+                      <div className="price">
+                        <span className="price-amount ms-1">{formatPrice(product.price)}</span>
+                      </div>
+
+                      <div className="star-item star d-flex mt-1 ms-1">
+                        <div className="icon text-warning mb-2">
+                          {[...Array(fullStars)].map((_, i) => (
+                            <i key={`full-${i}`} className="bi bi-star-fill"></i>
+                          ))}
+                          {hasHalfStar && <i className="bi bi-star-half"></i>}
+                          {[...Array(emptyStars)].map((_, i) => (
+                            <i key={`empty-${i}`} className="bi bi-star"></i>
+                          ))}
+                        </div>
+                        <div className="number ms-1">({averageRating} sao, {reviewCount} đánh giá)</div>
+                      </div>
+                    </div>
+                  </div>
+                </Col>
+              );
+            })}
+          {products && (
+            <div className="d-flex justify-content-between">
+              <button className="btn btn-danger" onClick={() => {
+                if (pageProduct === 1) {
+                  setPageProduct(products.length);
+                } else {
+                  setPageProduct(prev => prev - 1);
+                }
+              }}>
+                <i className="bi bi-arrow-left-short"></i>
+              </button>
+              <span className="text-danger fw-bold">{pageProduct}/{products.length - 3}</span>
+              <button className="btn btn-danger" onClick={() => {
+                if (pageProduct === products.length - 3) {
+                  setPageProduct(1);
+                } else {
+                  setPageProduct(prev => prev + 1);
+                }
+              }}>
+                <i className="bi bi-arrow-right-short"></i>
+              </button>
+            </div>
+          )}
+        </Row>
       </Container>
       <CreateOwnerModal showCreateOwnerModal={showCreateOwnerModal}
         setShowCreateOwnerModal={setShowCreateOwnerModal} userData={userData || undefined} />
     </HomeLayout>
   )
 }
+
+

@@ -1,25 +1,16 @@
 'use client'
 import ProfileContent from "@/components/User/modal/user.profile";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { useData } from "../context/UserContext";
-import AuthorityComponent from "./authority/page";
 import BlogManager from "@/components/blog/blog-manager";
 import Wallet from "@/components/User/modal/wallet";
+import AuthorityComponent from "@/components/Admin/authority";
 
 export default function Owner() {
     const [activeTab, setActiveTab] = useState<string>('all');
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
-    const searchParams = useSearchParams();
-    const check = searchParams.get('check');
     const userData = useData();
-
-    useEffect(() => {
-        if (check === 'withdraw') {
-            setActiveTab('withdraw');
-        }
-    }, [check]);
 
     useEffect(() => {
         const username = localStorage.getItem('username');
@@ -49,12 +40,14 @@ export default function Owner() {
                         <Wallet></Wallet>
                     </div>
                 );
-            default:
+            case 'authority':
                 return (
                     <div className="font-14">
                         <AuthorityComponent />
                     </div>
                 );
+            default:
+                window.location.href = "/"
         }
     };
     return (
@@ -84,7 +77,7 @@ export default function Owner() {
                     </Nav.Item>
                     {userData?.authorities.find(item => item.role.name === 'ROLE_ADMIN')?.role.name &&
                         <Nav.Item>
-                            <Nav.Link eventKey="withdraw" className="tab-link">Phân quyền</Nav.Link>
+                            <Nav.Link eventKey="authority" className="tab-link">Phân quyền</Nav.Link>
                         </Nav.Item>
                     }
 

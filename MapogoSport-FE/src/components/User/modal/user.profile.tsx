@@ -81,7 +81,11 @@ const ProfileContent = (props: ProfileContentProps) => {
         });
     }, [fullName, email, birthday, gender]);
 
-    if (isLoading) return <div>Đang tải...</div>;
+    if (isLoading) return <div className="d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-danger" role="status">
+            <span className="visually-hidden">Loading...</span>
+        </div>
+    </div>;
     if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
     return (

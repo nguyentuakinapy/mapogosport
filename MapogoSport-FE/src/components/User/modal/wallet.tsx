@@ -278,7 +278,11 @@ const WalletPage = () => {
         )
     }
 
-    if (isLoading) return <UserLayout>Đang tải...</UserLayout>;
+    if (isLoading) return <div className="d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-danger" role="status">
+            <span className="visually-hidden">Loading...</span>
+        </div>
+    </div>;
     if (error) return <UserLayout>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</UserLayout>;
 
     return (
