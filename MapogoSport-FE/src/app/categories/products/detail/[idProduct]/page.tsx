@@ -28,7 +28,7 @@ const ProductDetail = () => {
     const increaseQuantity = () => {
         if (quantity < selectedSizeQuantity) {
             setQuantity(quantity + 1);
-        } else {
+        } else {z
             toast.info("Số lượng vượt quá giới hạn.");
         }
     };
@@ -167,11 +167,11 @@ const ProductDetail = () => {
         }
     }
 
+
     const reviewCount = data?.length || 0; // Ensure data is defined and default to 0
     const averageRating = reviewCount > 0
         ? (data.reduce((total: number, review: ProductReview) => total + review.rating, 0) / reviewCount).toFixed(1)
         : "0.0"; // Calculate average rating or default to "0.0"
-
 
     return (
         <>
