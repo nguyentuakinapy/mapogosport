@@ -225,6 +225,24 @@ export default function Register(props: RegisterProps) {
                     sessionStorage.setItem('user', JSON.stringify(encodeJson(dataUser)));
                     setRefreshKey(refreshKey + 1);
                     toast.success("Đăng nhập thành công!");
+                    await fetch('/api/auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(dataUser),
+
+                    }).then(async (response) => {
+                        const payload = await response.json();
+                        const data = {
+                            status: response.status,
+                            payload
+                        }
+                        if (!response.ok) {
+                            throw data
+                        }
+                        return data
+                    })
                     handleClose();
                 } else {
                     toast.error("Đăng nhập không thành công!");
@@ -277,6 +295,24 @@ export default function Register(props: RegisterProps) {
                         localStorage.setItem('username', encodeString(usernameLocal));
                         sessionStorage.setItem('user', JSON.stringify(encodeJson(resUser)));
                         setRefreshKey(refreshKey + 1);
+                        await fetch('/api/auth', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(resUser),
+
+                        }).then(async (response) => {
+                            const payload = await response.json();
+                            const data = {
+                                status: response.status,
+                                payload
+                            }
+                            if (!response.ok) {
+                                throw data
+                            }
+                            return data
+                        })
                         handleClose();
                     }
 
