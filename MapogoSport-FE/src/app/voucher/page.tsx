@@ -1,5 +1,6 @@
 'use client'
 import HomeLayout from '@/components/HomeLayout';
+import { decodeString } from '@/components/Utils/Format';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -8,15 +9,14 @@ const PageVoucher = () => {
 
     const handelSubmitGetVoucher = async (voucherId: number) => {
 
-        const userSession = sessionStorage.getItem('user');
-        const user = userSession && JSON.parse(userSession) as User;
+        const username = decodeString(String(localStorage.getItem("username")));
 
-        if (!user || !user.username) {
+        if (!username) {
             toast.warning("Bạn chưa đăng nhập!");
             return;
         }
 
-        const checkResponse = await fetch(`http://localhost:8080/rest/userVoucher/check/${user.username}/${voucherId}`);
+        const checkResponse = await fetch(`http://localhost:8080/rest/userVoucher/check/${username}/${voucherId}`);
         const alreadyHasVoucher = await checkResponse.json();
 
         if (alreadyHasVoucher) {
@@ -25,7 +25,7 @@ const PageVoucher = () => {
         }
         const UserVoucher = {
             user: {
-                username: user.username,
+                username: username,
             },
             voucher: {
                 voucherId: voucherId
@@ -36,7 +36,7 @@ const PageVoucher = () => {
 
 
         try {
-            await fetch(`http://localhost:8080/rest/userVoucher/create/${UserVoucher.voucher.voucherId}/${localStorage.getItem("username")}`, {
+            await fetch(`http://localhost:8080/rest/userVoucher/create/${UserVoucher.voucher.voucherId}/${username}`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
-import { hashPassword } from "@/components/Utils/Format";
+import { decodeJson, encodeJson, encodeString, hashPassword } from "@/components/Utils/Format";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'; // Để kiểm tra đường dẫn
 
@@ -25,11 +25,15 @@ export default function Login(props: LoginProps) {
     const [password, setPassword] = useState<string>("");
     const [checkRememberMe, setCheckRememberMe] = useState<boolean>(false);
     const { setRefreshKey, refreshKey } = props;
+    const { showLoginModal, setShowLoginModal, setShowRegisterModal, setShowForgotPassword } = props;
+
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
     useEffect(() => {
         const userCookie = Cookies.get('user');
         if (userCookie) {
-            const parsedUserData = JSON.parse(userCookie);
+            const parsedUserData = JSON.parse(decodeJson(userCookie));
             setUsername(parsedUserData.username);
             setPassword(parsedUserData.password);
             setCheckRememberMe(true);
@@ -56,18 +60,20 @@ export default function Login(props: LoginProps) {
 
                     if (checkRememberMe) {
                         const user = { username, password };
-                        Cookies.set('user', JSON.stringify(user), { expires: 7 });
+                        Cookies.set('user', JSON.stringify(encodeJson(user)), { expires: 7 });
                     } else {
                         Cookies.remove('user');
                     }
                     handleClose();
 
                     const usernameLocal = dataUser.username.replace(/['"]+/g, '');
-                    localStorage.setItem('username', usernameLocal);
-                    sessionStorage.setItem('user', JSON.stringify(dataUser));
+
+                    localStorage.setItem('username', encodeString(usernameLocal));
+                    sessionStorage.setItem('user', JSON.stringify(encodeJson(dataUser)));
+
                     setRefreshKey(refreshKey + 1);
-                    console.log(">>>> check data user auth: ", dataUser);
                     toast.success("Đăng nhập thành công!");
+
                     await fetch('/api/auth', {
                         method: 'POST',
                         headers: {
@@ -93,22 +99,7 @@ export default function Login(props: LoginProps) {
                 toast.error("Thông tin đăng nhập không đúng! ");
             }
         }
-
     }
-    const { showLoginModal, setShowLoginModal, setShowRegisterModal, setShowForgotPassword } = props;
-
-
-    // useEffect(() => {
-    //     const sessionDataAuthRow = Cookies.get('sessionDataAuth');
-    //     if (!sessionDataAuthRow) {
-    //         setShowLoginModal(true);
-    //     } else {
-    //         setShowLoginModal(false);
-    //     }
-    // }, [setShowLoginModal]);
-
-    const searchParams = useSearchParams();
-    const router = useRouter(); // Using useRouter
 
     useEffect(() => {
         const notLoggedIn = searchParams.get('notLoggedIn');
@@ -147,7 +138,7 @@ export default function Login(props: LoginProps) {
         setPassword("");
         const userCookie = Cookies.get('user');
         if (userCookie) {
-            const parsedUserData = JSON.parse(userCookie);
+            const parsedUserData = JSON.parse(decodeJson(userCookie));
             setUsername(parsedUserData.username);
             setPassword(parsedUserData.password);
             setCheckRememberMe(true);
@@ -156,23 +147,6 @@ export default function Login(props: LoginProps) {
             console.log("Không có dữ liệu người dùng trong cookie.");
         }
     }
-
-    // useEffect(() => {
-    //     const handleKeyDown = (event: any) => {
-    //         // if (event.key === 'Enter') {
-    //         //     handleSubmit();
-    //         // }
-    //         if (event.key == "Escape") {
-    //             handleClose();
-    //         }
-    //     };
-
-    //     window.addEventListener('keydown', handleKeyDown);
-
-    //     return () => {
-    //         window.removeEventListener('keydown', handleKeyDown);
-    //     };
-    // }, []);
 
     useEffect(() => {
         console.log("Client-side code running");
@@ -212,9 +186,8 @@ export default function Login(props: LoginProps) {
                 if (parseInt(dataUser.password) === 123) {
 
                     const usernameLocal = dataUser.username.replace(/['"]+/g, '');
-                    localStorage.setItem('username', usernameLocal);
-                    // localStorage.setItem('username', dataUser.username);
-                    sessionStorage.setItem('user', JSON.stringify(dataUser));
+                    localStorage.setItem('username', encodeString(usernameLocal));
+                    sessionStorage.setItem('user', JSON.stringify(encodeJson(dataUser)));
                     setRefreshKey(refreshKey + 1);
 
                     toast.success("Đăng nhập thành công!");

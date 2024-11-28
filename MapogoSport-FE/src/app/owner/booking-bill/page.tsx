@@ -15,6 +15,7 @@ import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
 import autoTable from "jspdf-autotable";
 import CancelBookingModal from "@/components/Owner/modal/booking.cancelBooking";
+import { decodeString } from "@/components/Utils/Format";
 
 const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -36,7 +37,9 @@ const OwnerBookingBill = () => {
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
-        setUsername(storedUsername);
+        if (storedUsername) {
+            setUsername(decodeString(storedUsername));
+        }
     }, []);
 
     const { data: bookingData, error, isLoading } = useSWR<BookingFindAll[]>(`http://localhost:8080/rest/owner/booking/findAll/${username}`, fetcher, {

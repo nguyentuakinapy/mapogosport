@@ -8,6 +8,7 @@ import '../../types/user.scss';
 import Link from "next/link";
 import useSWR, { mutate } from "swr";
 import { toast } from "react-toastify";
+import { decodeString } from "@/components/Utils/Format";
 
 const CommentPage = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -22,7 +23,7 @@ const CommentPage = () => {
     const [itemsPerPage] = useState(10);
 
     useEffect(() => {
-        const username = localStorage.getItem('username');
+        const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
             setFieldFetchAPI(`http://localhost:8080/rest/user/fieldReview/${username}`);
             setProductFetchAPI(`http://localhost:8080/rest/user/productReview/${username}`);
