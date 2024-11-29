@@ -9,7 +9,7 @@ interface SearchBookingProps {
     showSearchBookingModal: boolean;
     setSearchShowBookingModal: (v: boolean) => void;
     dataTimeSport: string[];
-    sportField: SportField;
+    sportField?: SportField;
 }
 
 const SearchBookingModal = (props: SearchBookingProps) => {

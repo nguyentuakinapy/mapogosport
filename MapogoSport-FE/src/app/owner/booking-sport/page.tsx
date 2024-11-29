@@ -8,11 +8,12 @@ import ViewEditBookingModal from "@/components/Owner/modal/view-edit-booking.mod
 import { calculateTimeDifference, createTimeStringH, isDateInRange } from "@/components/Utils/booking-time";
 import { decodeString, formatDateVN } from "@/components/Utils/Format";
 import { Stomp } from "@stomp/stompjs";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Col, Row, Table } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
 import SockJS from "sockjs-client";
+import useSWR, { mutate } from "swr";
 
 type BookingsTypeOnDay = {
     [time: string]: BookingDetails[];
@@ -42,12 +43,12 @@ export default function BookingSport() {
     const [bookingsOnDay, setBookingsOnDay] = useState<BookingsTypeOnDay>({});
     const [bookingsOnWeek, setBookingsOnWeek] = useState<BookingsTypeOnWeek>({})
     const user = useData();
-    const [owner, setOwner] = useState<Owner>();
+    // const [owner, setOwner] = useState<Owner>();
     const [selectSport, setSelectSport] = useState<number>(0);
     const [checkNotification, setCheckNotification] = useState<number>(1);
     const [checkUsername, setCheckUsername] = useState<string>();
     const [selectDate, setSelectDate] = useState<number>(0);
-    const [dataSport, setDataSport] = useState<SportField[]>([])
+    // const [dataSport, setDataSport] = useState<SportField[]>([])
     const [days, setDays] = useState<string[]>();
     const [dayYears, setDayYears] = useState<string[]>();
     const [opening, setOpening] = useState<number>();
@@ -96,26 +97,42 @@ export default function BookingSport() {
     //     setDayOnWeek();
     // }, [])
 
-    useEffect(() => {
-        getOwnerAndSport();
-    }, [user])
+    // useEffect(() => {
+    //     getOwnerAndSport();
+    // }, [user])
 
-    const getOwnerAndSport = async () => {
-        if (user) {
-            const responseOwner = await fetch(`http://localhost:8080/rest/owner/${user.username}`);
-            if (!responseOwner.ok) {
-                throw new Error('Error fetching data');
-            }
-            const dataOwner = await responseOwner.json() as Owner;
-            setOwner(dataOwner);
-            const responseSport = await fetch(`http://localhost:8080/rest/sport_field_by_owner/${dataOwner.ownerId}`);
-            if (!responseSport.ok) {
-                throw new Error('Error fetching data');
-            }
-            const dataSport = await responseSport.json() as SportField[];
-            setDataSport(dataSport);
-        }
-    }
+    // const getOwnerAndSport = async () => {
+    //     if (user) {
+    //         const responseOwner = await fetch(`http://localhost:8080/rest/owner/${user.username}`);
+    //         if (!responseOwner.ok) {
+    //             throw new Error('Error fetching data');
+    //         }
+    //         const dataOwner = await responseOwner.json() as Owner;
+    //         setOwner(dataOwner);
+    //         const responseSport = await fetch(`http://localhost:8080/rest/sport_field_by_owner/${dataOwner.ownerId}`);
+    //         if (!responseSport.ok) {
+    //             throw new Error('Error fetching data');
+    //         }
+    //         const dataSport = await responseSport.json() as SportField[];
+    //         setDataSport(dataSport);
+    //     }
+    // }
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const { data: owner } =
+        useSWR<Owner>(user ? `http://localhost:8080/rest/owner/${user.username}` : null, fetcher, {
+            revalidateIfStale: false,
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+        });
+
+    mutate(owner ? `http://localhost:8080/rest/sport_field_by_owner/${owner.ownerId}` : null);
+
+    const { data: dataSport } =
+        useSWR<SportField[]>(owner ? `http://localhost:8080/rest/sport_field_by_owner/${owner.ownerId}` : null, fetcher, {
+            revalidateIfStale: false,
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+        });
 
     useEffect(() => {
         if (dataSport && dataSport.length > selectSport) {
@@ -155,43 +172,45 @@ export default function BookingSport() {
             }
         }
 
-        const index = newData.indexOf(dataSport[selectSport]?.opening);
-        if (index !== -1) {
-            newData.splice(0, index);  // Xóa từ vị trí 0 đến index-1
-        }
-
-        if (newData.length > 0) {
-            const newBookingsOnDay = { ...bookingsOnDay };
-            const newBookingsOnWeek = { ...bookingsOnWeek };
-
-            const validTimes = newData
-                .filter(time => time !== "undefinedh00" && time !== null)
-                .slice(0, -1);
-
-            validTimes.forEach((time) => {
-                if (!newBookingsOnDay[time]) {
-                    newBookingsOnDay[time] = [];
-                }
-            });
-
-            setBookingsOnDay(newBookingsOnDay);
-            const sportDetails = dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails;
-            if (sportDetails) {
-                sportDetails.forEach((item) => {
-                    validTimes.forEach((time) => {
-                        if (!newBookingsOnWeek[time]) {
-                            newBookingsOnWeek[time] = {};
-                        }
-                        if (!newBookingsOnWeek[time][item.name]) {
-                            newBookingsOnWeek[time][item.name] = [];
-                        }
-                    });
-                });
-                setBookingsOnWeek(newBookingsOnWeek);
+        if (dataSport) {
+            const index = newData.indexOf(dataSport[selectSport]?.opening);
+            if (index !== -1) {
+                newData.splice(0, index);  // Xóa từ vị trí 0 đến index-1
             }
-            setCheckDataBookingConfirm(prev => !prev)
+
+            if (newData.length > 0) {
+                const newBookingsOnDay = { ...bookingsOnDay };
+                const newBookingsOnWeek = { ...bookingsOnWeek };
+
+                const validTimes = newData
+                    .filter(time => time !== "undefinedh00" && time !== null)
+                    .slice(0, -1);
+
+                validTimes.forEach((time) => {
+                    if (!newBookingsOnDay[time]) {
+                        newBookingsOnDay[time] = [];
+                    }
+                });
+
+                setBookingsOnDay(newBookingsOnDay);
+                const sportDetails = dataSport && dataSport.length > selectSport && dataSport[selectSport].sportFielDetails;
+                if (sportDetails) {
+                    sportDetails.forEach((item) => {
+                        validTimes.forEach((time) => {
+                            if (!newBookingsOnWeek[time]) {
+                                newBookingsOnWeek[time] = {};
+                            }
+                            if (!newBookingsOnWeek[time][item.name]) {
+                                newBookingsOnWeek[time][item.name] = [];
+                            }
+                        });
+                    });
+                    setBookingsOnWeek(newBookingsOnWeek);
+                }
+                setCheckDataBookingConfirm(prev => !prev)
+            }
+            setDataTimeSport((prevData) => [...prevData, ...newData]);
         }
-        setDataTimeSport((prevData) => [...prevData, ...newData]);
 
     }, [operatingTime])
 
@@ -265,7 +284,7 @@ export default function BookingSport() {
 
         if (selectDate === 0) {
             const updatedBookingsOnDay = { ...bookingsOnDay };
-            Object.entries(updatedBookingsOnDay).forEach(([time, _statuses]) => {
+            Object.entries(updatedBookingsOnDay).forEach(([time,]) => {
                 updatedBookingsOnDay[time] = [];
             });
             setBookingsOnDay(updatedBookingsOnDay);
@@ -621,7 +640,7 @@ export default function BookingSport() {
                                 );
 
                                 Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                                    Object.entries(sportData).forEach(([sport, _statuses]) => {
+                                    Object.entries(sportData).forEach(([sport,]) => {
                                         if (sport === sportDetails[index].name && timeStringH.includes(time)) {
                                             sportData[sport][dayIndex] = {
                                                 status: i.statusName === "Hoạt động" ? "Còn trống" : i.statusName,
@@ -635,7 +654,7 @@ export default function BookingSport() {
                                 });
                             } else if (i && sportDetails) {
                                 Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                                    Object.entries(sportData).forEach(([sport, _statuses]) => {
+                                    Object.entries(sportData).forEach(([sport,]) => {
                                         if (new Date(i.startDate).toISOString().split("T")[0] === dayYear) {
                                             let hourStart;
                                             let minuteStart;
@@ -858,7 +877,7 @@ export default function BookingSport() {
         const bookingCounts: any = {};
         const displayedBookingIds = new Set();
 
-        Object.entries(bookingsOnDay).map(([_time, statuses]) => (
+        Object.entries(bookingsOnDay).map(([, statuses]) => (
             statuses.map((status) => {
                 const bookingId = status.bookingId;
                 if (bookingId && bookingId !== 0) {
@@ -937,11 +956,11 @@ export default function BookingSport() {
     };
 
     const renderTableRowsByWeek = () => {
-        const bookingCounts: any = {};
+        const bookingCounts: Record<number, number> = {};
         const displayedBookingIds = new Set();
 
-        Object.entries(bookingsOnWeek).forEach(([_time, sportData]) => {
-            const sportFielDetails = dataSport[selectSport]?.sportFielDetails || [];
+        Object.entries(bookingsOnWeek).forEach(([, sportData]) => {
+            const sportFielDetails = dataSport && dataSport[selectSport].sportFielDetails || [];
             sportFielDetails.forEach(item => {
                 const bookingData = sportData[item.name] || [];
                 bookingData.forEach(dayBookingData => {
@@ -957,7 +976,7 @@ export default function BookingSport() {
                 <thead className="tb-head">
                     <tr>
                         <th style={{ zIndex: '1002' }} rowSpan={2}>Giờ </th>
-                        {days?.map((day, index) => (
+                        {dataSport && days?.map((day, index) => (
                             <th colSpan={dataSport[selectSport]?.sportFielDetails?.length || 1} key={index}>{day}</th>
                         ))}
                     </tr>
@@ -1089,7 +1108,7 @@ export default function BookingSport() {
 
     // Notification
     useEffect(() => {
-        if (owner && checkUsername === decodeString(String(localStorage.getItem('username')))) {
+        if (dataSport && owner && checkUsername === decodeString(String(localStorage.getItem('username')))) {
             const now = new Date();
             const currentMinutes = now.getMinutes();
 
@@ -1112,7 +1131,7 @@ export default function BookingSport() {
             getFindBookingSport();
             refreshStatusBooking();
         }
-    }, [selectDate, selectSport, dataSport, checkNotification, checkUsername]);
+    }, [selectDate, selectSport, dataSport, checkNotification, checkUsername, owner]);
 
     const [sportDetail, setSportDetail] = useState<SportFieldDetail>();
     const [startTime, setStartTime] = useState("");
@@ -1126,7 +1145,7 @@ export default function BookingSport() {
         const timeData = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = new Date(onDay);
 
-        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
+        const selectedSportDetail = dataSport && dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
 
         if (sportDetailId && timeData && dayStartBooking) {
             setSportDetail(selectedSportDetail);
@@ -1142,7 +1161,7 @@ export default function BookingSport() {
         const timeData = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = new Date(onDay).toLocaleDateString('en-CA');
 
-        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
+        const selectedSportDetail = dataSport && dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
 
 
 
@@ -1169,7 +1188,7 @@ export default function BookingSport() {
         const timeData = event.currentTarget.getAttribute("time-data");
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
 
-        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
+        const selectedSportDetail = dataSport && dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
 
         if (sportDetailId && timeData && dayStartBooking) {
             setSportDetail(selectedSportDetail);
@@ -1186,7 +1205,7 @@ export default function BookingSport() {
         const dayStartBooking = event.currentTarget.getAttribute("day-data");
 
 
-        const selectedSportDetail = dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
+        const selectedSportDetail = dataSport && dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
 
         if (sportDetailId && timeData && dayStartBooking && selectedSportDetail) {
             const responseBookingDetail = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${timeData}/${selectedSportDetail.sportFielDetailId}/${dayStartBooking}`);
@@ -1243,21 +1262,6 @@ export default function BookingSport() {
         setBookingsOnWeek({});
     }
 
-    const [_isFullScreen, setIsFullScreen] = useState(false);
-
-    const toggleFullScreen = () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            setIsFullScreen(true);
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-                setIsFullScreen(false);
-            }
-
-        };
-    }
-
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -1297,10 +1301,16 @@ export default function BookingSport() {
         )
     }
 
+    if (!dataSport) return <div style={{ height: 'calc(100vh - 160px)' }} className="d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-danger" role="status">
+            <span className="visually-hidden">Loading...</span>
+        </div>
+    </div>;
+
     return (
         <>
             <div className="d-flex align-items-center justify-content-between">
-                <i onClick={toggleFullScreen} className="bi bi-fullscreen fs-5"></i>
+                <i className="bi bi-fullscreen fs-5"></i>
                 <h3 className="text-danger fw-bold" style={{ fontSize: '20px' }}> LỊCH ĐẶT SÂN</h3>
                 <a href="#701">
                     <i className="bi bi-question-circle fs-5"></i>
