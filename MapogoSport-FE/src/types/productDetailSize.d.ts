@@ -1,7 +1,7 @@
 interface ProductDetailSize {
   productDetailSizeId: number;
-  productDetail: ProductDetail | { productDetailId: number };
-  size: Size | {sizeId: number};
+  productDetail: ProductDetail;
+  size: Size;
   price: number;
   quantity: number;
 }
