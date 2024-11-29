@@ -28,7 +28,7 @@ const ProductDetail = () => {
     const increaseQuantity = () => {
         if (quantity < selectedSizeQuantity) {
             setQuantity(quantity + 1);
-        } else {z
+        } else {
             toast.info("Số lượng vượt quá giới hạn.");
         }
     };
