@@ -94,7 +94,9 @@ export default function Owner() {
                 const data = await res.text();
                 if (data === "ok") {
                     toast.success('Nâng cấp gói thành công');
+
                     mutate(`http://localhost:8080/rest/user/subscription/${userData?.username}`);
+                    mutate(`http://localhost:8080/rest/wallet/transaction/${userData?.wallet.walletId}`);
                     handleCloseModal();
                 } else {
                     toast.error(data);

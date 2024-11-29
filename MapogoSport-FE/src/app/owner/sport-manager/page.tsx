@@ -30,7 +30,11 @@ const SportFieldList = () => {
     };
 
     const reachedLimit = sportField && userSubscription ? sportField.length >= userSubscription.accountPackage.limitSportFields : false;
-
+    if (!sportField && !userSubscription) return <div style={{ height: 'calc(100vh - 160px)' }} className="d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-danger" role="status">
+            <span className="visually-hidden">Loading...</span>
+        </div>
+    </div>;
     if (sportFieldError || userSubscriptionError) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
     return (
