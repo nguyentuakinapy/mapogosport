@@ -2,6 +2,7 @@ package mapogo.service;
 
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,8 @@ public interface UserService {
 	User findByEmail(String email);
 	
 	UserSubscription saveUserSubcription(Map<String, Object> data);
+	
+	UserSubscription updateUserSubcription(Integer id, Date endDate);
 	
 	UserSubscription findUserSubscriptionByUser(String username);
 	

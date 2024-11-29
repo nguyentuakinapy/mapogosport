@@ -55,8 +55,10 @@ export default function Owner() {
         };
         getOwner();
     }, [userData])
+    const [updateOrExtend, setUpdateOrExtend] = useState<boolean>();
 
-    const handleOpenModal = (ap: AccountPackage) => {
+    const handleOpenModal = (ap: AccountPackage, updateOrExtend: boolean) => {
+        setUpdateOrExtend(updateOrExtend);
         setSelectedAccountPackage(ap);
         setShowModal(true);
     };
@@ -140,6 +142,46 @@ export default function Owner() {
         }
     }
 
+    const handleExtendSubscription = (ap?: AccountPackage) => {
+        const endDate = new Date(userSubscription!.endDay);
+
+        const futureDate = new Date(endDate);
+        futureDate.setDate(endDate.getDate() + 30);
+
+
+        if (selectedPaymentMethod === "Thanh toán ví") {
+            if (userData!.wallet.balance > ap!.price) {
+                fetch(`http://localhost:8080/rest/user/subscription/extend/${userSubscription?.userSubscriptionId}/${futureDate}`, {
+                    method: 'PUT',
+                    headers: {
+                        Accept: 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json',
+                    },
+                }).then(async (res) => {
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
+                        return;
+                    }
+
+                    toast.success('Gia hạn thành công');
+                    handleCloseModal();
+
+                    mutate(`http://localhost:8080/rest/user/subscription/${userData!.username}`);
+                    mutate(`http://localhost:8080/rest/wallet/transaction/${userData!.wallet.walletId}`);
+
+                }).catch((error) => {
+                    toast.error(`Đã xảy ra lỗi: ${error.message}`);
+                });
+            } else {
+                toast.error('Số dư tài khoản không đủ, vui lòng thanh toán bằng phương thức khác hoặc nạp thêm tiền!');
+                handleCloseModal();
+            }
+        } else {
+
+        }
+    }
+
     useEffect(() => {
         const username = localStorage.getItem('username');
         if (username) {
@@ -189,11 +231,21 @@ export default function Owner() {
                                             {isOwned ? "Đã sở hữu" : "Nâng cấp ngay"}
                                         </Button> */}
                                         {userSubscription && ap.accountPackageId <= userSubscription?.accountPackage?.accountPackageId ? (
-                                            <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={true}>
-                                                Đã sở hữu
-                                            </Button>
+                                            userSubscription.accountPackage.accountPackageId === ap.accountPackageId ?
+                                                userSubscription.accountPackage.packageName === "Gói miễn phí" ?
+                                                    <Button className='btn-sub' disabled={true}>
+                                                        Đã sở hữu
+                                                    </Button>
+                                                    :
+                                                    <Button className='btn-sub' onClick={() => handleOpenModal(ap, false)}>
+                                                        Gia hạn ngay
+                                                    </Button>
+                                                :
+                                                <Button className='btn-sub' disabled={true}>
+                                                    Đã sở hữu
+                                                </Button>
                                         ) : (
-                                            <Button className='btn-sub' onClick={() => handleOpenModal(ap)} disabled={isOwned}>
+                                            <Button className='btn-sub' onClick={() => handleOpenModal(ap, true)} disabled={isOwned}>
                                                 Nâng cấp ngay
                                             </Button>
                                         )}
@@ -294,7 +346,7 @@ export default function Owner() {
                     </Button>
                     <Button
                         variant="primary"
-                        onClick={() => handleUpdateSubscription(selectedAccountPackage || undefined)}
+                        onClick={() => updateOrExtend ? handleUpdateSubscription(selectedAccountPackage || undefined) : handleExtendSubscription(selectedAccountPackage || undefined)}
                         disabled={!selectedPaymentMethod}
                     >
                         Thanh toán
@@ -315,11 +367,16 @@ export default function Owner() {
                             <p>Chào mừng bạn đến với hệ thống quản lý dành cho chủ sân của MapogoSport</p>
                             <div className="stats">
                                 <span>0 Bài Viết</span>
-                                <span>{dataSport && dataSport.length}/{userSubscription?.accountPackage.limitSportFields}</span>
+                                <span>{dataSport && dataSport.length}/{userSubscription?.accountPackage.limitSportFields} khu vực</span>
                                 <span>0 Được thích</span>
                                 <span>
                                     {userSubscription && userSubscription.accountPackage ? userSubscription.accountPackage.packageName : 'Không có gói nào'}
+                                    <em> (Còn {
+                                        userSubscription?.endDay ?
+                                            Math.floor((new Date(userSubscription.endDay).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 'Không xác định'
+                                    } ngày)</em>
                                 </span>
+
                             </div>
                         </div>
                     </div>

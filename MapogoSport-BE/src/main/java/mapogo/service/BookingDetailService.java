@@ -22,6 +22,8 @@ public interface BookingDetailService {
 	List<BookingDetail> findByDateAndTime(LocalDate date, String time, Integer sportFieldId);
 
 	BookingDetail createBookingDetail(Map<String, Object> bd);
+	
+	void createBookingDetailPeriod(List<Map<String, Object>> bd);
 
 	BookingDetail findBookingDetailByStartTimeDateAndSportDetailId(String startTime, Integer sportFieldDetailId,
 			LocalDate date);

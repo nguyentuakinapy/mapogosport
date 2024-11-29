@@ -63,7 +63,7 @@ const ProductDetail = () => {
         if (imageGallery) {
             setSelectedSize(imageGallery[0].detailSizes.length > 0 ? imageGallery[0].detailSizes[0].detailSizeId : 0);
             setSelectedSizeQuantity(imageGallery[0].detailSizes.length > 0 ? imageGallery[0].detailSizes[0].quantity : 0);
-            setPrice(imageGallery[0].detailSizes[0].price);
+            setPrice(imageGallery[0].detailSizes.length > 0 ? imageGallery[0].detailSizes[0].price : 0);
             setIdSize(imageGallery[0].productDetailId)
         }
     }, [imageGallery])

@@ -8,12 +8,12 @@ import ViewEditBookingModal from "@/components/Owner/modal/view-edit-booking.mod
 import { calculateTimeDifference, createTimeStringH, getSport, isDateInRange } from "@/components/Utils/booking-time";
 import { decodeString, formatDateVN } from "@/components/Utils/Format";
 import { Stomp } from "@stomp/stompjs";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Col, Row, Table } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
 import SockJS from "sockjs-client";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 
 type BookingsTypeOnDay = {
     [time: string]: BookingDetails[];
@@ -32,8 +32,14 @@ type BookingsTypeOnWeek = {
         [sport: string]: BookingDetails[];
     };
 };
-export default function BookingSport() {
 
+type DataReloadBooking = {
+    username: string;
+    bookingId: number;
+};
+export default function BookingSport() {
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const user = useData();
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
     const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
     const [showViewOrEditBookingModal, setShowViewOrEditBookingModal] = useState<boolean>(false);
@@ -42,8 +48,6 @@ export default function BookingSport() {
     const [checkLoadingData, setCheckLoadingData] = useState<boolean>(false);
     const [bookingsOnDay, setBookingsOnDay] = useState<BookingsTypeOnDay>({});
     const [bookingsOnWeek, setBookingsOnWeek] = useState<BookingsTypeOnWeek>({})
-    const user = useData();
-    // const [owner, setOwner] = useState<Owner>();
     const [selectSport, setSelectSport] = useState<number>(0);
     const [checkNotification, setCheckNotification] = useState<number>(1);
     const [checkUsername, setCheckUsername] = useState<string>();
@@ -66,15 +70,22 @@ export default function BookingSport() {
     initialEndWeek.setDate(initialEndWeek.getDate() + 6);
     const [endWeek, setEndWeek] = useState<string>(initialEndWeek.toISOString().split('T')[0]);
 
+    const [focusedId, setFocusedId] = useState<number | null>(null);
+    const tdRefs = useRef<{ [key: number]: HTMLTableCellElement }>({});
+
     useEffect(() => {
         const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
         const stompClient = Stomp.over(socket);
 
         stompClient.connect({}, () => {
-            stompClient.subscribe('/topic/bookingDetail/reload', (message) => {
-                if (message.body === decodeString(String(localStorage.getItem('username')))) {
+            stompClient.subscribe('/topic/bookingDetail/reload', async (dataPush) => {
+                setFocusedId(null);
+                const jsonData = JSON.parse(dataPush.body) as DataReloadBooking;
+
+                if (jsonData.username === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
-                    setCheckUsername(message.body);
+                    setCheckUsername(jsonData.username);
+                    setFocusedId(jsonData.bookingId);
                 }
             });
 
@@ -92,10 +103,6 @@ export default function BookingSport() {
         };
     }, []);
 
-
-
-
-    const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const { data: owner } =
         useSWR<Owner>(user ? `http://localhost:8080/rest/owner/${user.username}` : null, fetcher, {
             revalidateIfStale: false,
@@ -106,7 +113,8 @@ export default function BookingSport() {
     useEffect(() => {
         if (owner) {
             const fetchSports = async () => {
-                setDataSport(await getSport(owner));
+                const dataSportFetch = await getSport(owner);
+                setDataSport(dataSportFetch.filter(item => item.status === "Hoạt động"));
             };
             fetchSports();
         }
@@ -528,6 +536,7 @@ export default function BookingSport() {
         }
         setBookingsOnDay(updatedBookingsOnDay);
         setCheckLoadingData(false)
+        setCheckFocus(prev => !prev);
     }
 
     const setStatusOnWeek = async () => {
@@ -539,7 +548,8 @@ export default function BookingSport() {
             const sportFieldId = sportDetails && sportDetails[index].sportFielDetailId;
 
             // Gọi API để lấy danh sách booking
-            const response = await fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${sportFieldId}/${dayYears && dayYears[0]}/${dayYears && dayYears[dayYears.length - 1]}`);
+            const response = await
+                fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${sportFieldId}/${dayYears && dayYears[0]}/${dayYears && dayYears[dayYears.length - 1]}`);
 
             if (!response.ok) {
                 throw new Error('Lỗi khi lấy dữ liệu');
@@ -553,7 +563,7 @@ export default function BookingSport() {
                 const bookingsForDay = dataBooking.filter(item => item.date === dayYear);
 
                 Object.entries(updatedBookingsOnWeek).forEach(([time, sportData]) => {
-                    Object.entries(sportData).forEach(([sport, _statuses]) => {
+                    Object.entries(sportData).forEach(([sport,]) => {
                         if (!sportData[sport][dayIndex] && dayYear) {
                             const [hour, minute] = time.split('h').map(Number);
                             const timeDate1 = new Date(dayYear);
@@ -835,12 +845,13 @@ export default function BookingSport() {
         }
         setBookingsOnWeek(updatedBookingsOnWeek);
         setCheckLoadingData(false)
+        setCheckFocus(prev => !prev);
     };
 
     // LOAD TABLE
     const renderTableRows = () => {
 
-        const bookingCounts: any = {};
+        const bookingCounts: Record<number, number> = {};
         const displayedBookingIds = new Set();
 
         Object.entries(bookingsOnDay).map(([, statuses]) => (
@@ -868,16 +879,21 @@ export default function BookingSport() {
 
                             return (
                                 <td key={index}
+                                    ref={(el) => {
+                                        if (el) tdRefs.current[status.bookingId] = el; // Gán ref cho td dựa vào id
+                                    }}
+                                    tabIndex={-1}
                                     className={`${getBadgeClass(status.status)}`}
                                     rowSpan={bookingCounts[status.bookingId]}
                                     onClick={handleViewDataOnDay}
                                     time-data={time}
                                     style={{
-                                        backgroundColor: status.subscriptionKey && status.subscriptionKey.includes("keybooking")
-                                            ? '#e0ffd7'
-                                            : status.subscriptionKey && status.subscriptionKey.includes("addNew")
-                                                ? '#f5e2ff'
-                                                : '#f3f3f3'
+                                        backgroundColor: focusedId === status.bookingId ? '#8effda' :
+                                            status.subscriptionKey && status.subscriptionKey.includes("keybooking")
+                                                ? '#e0ffd7'
+                                                : status.subscriptionKey && status.subscriptionKey.includes("addNew")
+                                                    ? '#f5e2ff'
+                                                    : '#f3f3f3'
                                     }}
                                     sport-detail={
                                         dataSport &&
@@ -887,6 +903,7 @@ export default function BookingSport() {
                                             dataSport[selectSport].sportFielDetails[index].sportFielDetailId : 'N/A'
                                     }>
                                     <div className={`badge`}>
+                                        <span className="status-label">#{status.bookingId}</span><br />
                                         <span className="status-label">{status.status}</span><br />
                                         <em className="text-danger">{status.statusDtb}</em><br />
                                         <b className="text-success">{status.bookingId == 0 ? "" : status.fullName}</b>
@@ -920,6 +937,13 @@ export default function BookingSport() {
             </tr>
         ));
     };
+    const [checkFocus, setCheckFocus] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (focusedId && tdRefs.current[focusedId]) {
+            tdRefs.current[focusedId].focus();
+        }
+    }, [focusedId, checkFocus])
 
     const renderTableRowsByWeek = () => {
         const bookingCounts: Record<number, number> = {};
@@ -985,7 +1009,11 @@ export default function BookingSport() {
                                                 } else {
                                                     displayedBookingIds.add(bookingId);
                                                     return (
-                                                        <td id={`${bookingId}`}
+                                                        <td
+                                                            ref={(el) => {
+                                                                if (el) tdRefs.current[bookingId] = el; // Gán ref cho td dựa vào id
+                                                            }}
+                                                            tabIndex={-1}
                                                             key={`${time}-${item.sportFielDetailId}-${dayIndex}`}
                                                             rowSpan={bookingCounts[bookingId]} // Gán rowSpan cho ô đầu tiên
                                                             sport-detail={dataSport &&
@@ -1001,14 +1029,17 @@ export default function BookingSport() {
                                                             className={`w-10 ${getBadgeClass(statusItem)}`}
                                                             style={{
                                                                 textAlign: 'center',
-                                                                backgroundColor: dayBookingData.subscriptionKey && dayBookingData.subscriptionKey.includes("keybooking")
-                                                                    ? '#e0ffd7'
-                                                                    : dayBookingData.subscriptionKey && dayBookingData.subscriptionKey.includes("addNew")
-                                                                        ? '#f5e2ff'
-                                                                        : '#f3f3f3'
+                                                                backgroundColor: focusedId === bookingId ? '#8effda'
+                                                                    :
+                                                                    dayBookingData.subscriptionKey && dayBookingData.subscriptionKey.includes("keybooking")
+                                                                        ? '#e0ffd7'
+                                                                        : dayBookingData.subscriptionKey && dayBookingData.subscriptionKey.includes("addNew")
+                                                                            ? '#f5e2ff'
+                                                                            : '#f3f3f3'
                                                             }}
                                                         >
                                                             <div className={`badge`}>
+                                                                <span className="status-label">#{bookingId}</span><br />
                                                                 <span className="status-label">{statusItem}</span><br />
                                                                 <em className="text-danger">{dayBookingData.statusDtb}</em><br />
                                                                 <b className="text-success">{bookingId == 0 ? "" :
@@ -1053,7 +1084,6 @@ export default function BookingSport() {
                 </tbody>
             </Table>
         );
-
     };
 
     const [bookingNotification, setBookingNotification] = useState<BookingDetailFullName[]>();
@@ -1128,8 +1158,6 @@ export default function BookingSport() {
         const dayStartBooking = new Date(onDay).toLocaleDateString('en-CA');
 
         const selectedSportDetail = dataSport && dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
-
-
 
         if (sportDetailId && timeData && dayStartBooking && selectedSportDetail) {
 
@@ -1275,12 +1303,12 @@ export default function BookingSport() {
 
     return (
         <>
+            {/* <input type="text" value={focusedId || ''} onChange={(e) => setFocusedId(Number(e.target.value))} /> */}
+            {/* <button onClick={() => handleClick(focusedId!)}>FOCUS</button> */}
             <div className="d-flex align-items-center justify-content-between">
                 <i className="bi bi-fullscreen fs-5"></i>
                 <h3 className="text-danger fw-bold" style={{ fontSize: '20px' }}> LỊCH ĐẶT SÂN</h3>
-                <a href="#701">
-                    <i className="bi bi-question-circle fs-5"></i>
-                </a>
+                <i onClick={() => setFocusedId(null)} className="bi bi-arrow-counterclockwise fs-5"></i>
             </div>
             <Row className="align-items-center mb-3 text-center">
                 <Col md={4}>
@@ -1421,7 +1449,7 @@ export default function BookingSport() {
                 dataTimeSport={dataTimeSport.filter(time => time !== "undefinedh00" && time !== null)}
                 sportField={dataSport && dataSport[selectSport]}>
             </SearchBookingModal>
-            <NotificationModal textHeadNotification={"Thông báo"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
+            <NotificationModal sizeName={'xl'} textHeadNotification={"Thông báo"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
             </NotificationModal>
         </>
     );

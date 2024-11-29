@@ -15,6 +15,7 @@ import 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import { RobotoBase64 } from '../../../../public/font/Roboto-Regular';
 import { toast } from 'react-toastify';
+import autoTable from 'jspdf-autotable';
 
 type ChartHeader = [string, string, string, string, string];
 type ChartRow = [string, number, string, string, number];
@@ -65,10 +66,6 @@ export default function Home() {
   //Online
   const currentItemsOnline = rankCustomerOnline.slice(indexOfFirstItem, indexOfLastItem);
   const totalPagesOnline = Math.ceil(rankCustomerOnline.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
 
   useEffect(() => {
     setCurrentPage(1)
@@ -150,8 +147,8 @@ export default function Home() {
       const fetchData = async () => {
         try {
           const response = await fetch(`http://localhost:8080/rest/sport_field/${selectedFieldId}`);
-          const data = await response.json();
-          const ids = data.sportFielDetails.map((detail: any) => detail.sportFielDetailId);
+          const data = await response.json() as SportField;
+          const ids = data.sportFielDetails.map((detail: SportFieldDetail) => detail.sportFielDetailId);
           setSportFieldDetailIds(ids);
         } catch (error) {
           console.log("error fetch bookingdetail", error);
@@ -201,7 +198,7 @@ export default function Home() {
           const data = await response.json();
           const formattedData: ChartData = [
             ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
-            ...data.map((item: any) => [String(item[0]), Number(item[1]), String(item[2]), String(item[3]), Number(item[4])])
+            ...data.map((item: ChartData) => [String(item[0]), Number(item[1]), String(item[2]), String(item[3]), Number(item[4])])
           ];
           setChartData(formattedData);
         } catch (error) {
@@ -346,7 +343,7 @@ export default function Home() {
           } else {
             const formattedData: ChartData = [
               ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
-              ...data.map((item: any) => [item[0], item[1], item[2], item[3], item[4]])
+              ...data.map((item: ChartData) => [item[0], item[1], item[2], item[3], item[4]])
             ];
             setChartData(formattedData);
           }
@@ -577,7 +574,7 @@ export default function Home() {
 
   const exportPDF = () => {
     try {
-      const doc: any = new jsPDF();
+      const doc: jsPDF = new jsPDF();
 
       doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
       doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
@@ -598,7 +595,7 @@ export default function Home() {
           `${(row[1] / totalBookingPrice * 100).toFixed(1)}%`,
         ];
         tableRows.push(revenueData);
-        doc.autoTable({
+        autoTable(doc, {
           head: [tableColumn],
           body: tableRows,
           startY: 20,
@@ -617,7 +614,7 @@ export default function Home() {
             4: { halign: 'left' },
             5: { halign: 'left' },
           },
-          didParseCell: (data: any) => {
+          didParseCell: (data) => {
             if (data.cell.text.length > 0) {
               data.cell.text[0] = data.cell.text[0];
             }
@@ -683,7 +680,7 @@ export default function Home() {
 
   const exportPDFCustomer = () => {
     try {
-      const doc: any = new jsPDF();
+      const doc: jsPDF = new jsPDF();
 
       doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
       doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
@@ -697,7 +694,7 @@ export default function Home() {
         return [`#${index + 1}`, month, customer];
       });
 
-      doc.autoTable({
+      autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
         startY: 20,
@@ -713,7 +710,7 @@ export default function Home() {
           1: { halign: 'left' },
           2: { halign: 'center' },
         },
-        didParseCell: (data: any) => {
+        didParseCell: (data) => {
           if (data.cell.text.length > 0) {
             data.cell.text[0] = data.cell.text[0];
           }
