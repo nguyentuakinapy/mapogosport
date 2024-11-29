@@ -71,73 +71,69 @@ const BookingModal = React.memo((props: BookingProps) => {
     }, [dataPaymentMethod]);
 
     useEffect(() => {
+        const checkTimeBooking = async () => {
+            if (!startTime || !dayStartBooking) return;
+
+            const newData = [startTime];
+            for (let i = 0; i < operatingTime * 2; i++) {
+                const getTime = newData[i].match(/\d+/);
+                if (getTime) {
+                    const hour = Number(getTime[0]);
+                    newData.push(newData[i].includes("h30") ? `${hour + 1}h00` : `${hour}h30`);
+                }
+            }
+
+            let count = 0;
+            for (const time of newData) {
+                if (count >= 6) {
+                    setOperatingTimeFetchData(6);
+                    break;
+                }
+
+                try {
+                    const response = await fetch(
+                        `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
+                    );
+
+                    if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+                    const text = await response.text();
+
+                    if (text) {
+                        const dataBooking = JSON.parse(text);
+                        if (dataBooking && Object.keys(dataBooking).length > 0) {
+                            setOperatingTimeFetchData(count);
+                            break;
+                        }
+                    } else {
+                        setOperatingTimeFetchData(count);
+                    }
+                } catch (error) {
+                    console.error("API or JSON parsing error:", error);
+                }
+                count++;
+            }
+        };
+
         checkTimeBooking();
     }, [operatingTime]);
 
-    const checkTimeBooking = async () => {
-        if (!startTime || !dayStartBooking) return;
-
-        const newData = [startTime];
-        for (let i = 0; i < operatingTime * 2; i++) {
-            const getTime = newData[i].match(/\d+/);
-            if (getTime) {
-                const hour = Number(getTime[0]);
-                newData.push(newData[i].includes("h30") ? `${hour + 1}h00` : `${hour}h30`);
-            }
-        }
-
-        let count = 0;
-        for (const time of newData) {
-            if (count >= 6) {
-                setOperatingTimeFetchData(6);
-                break;
-            }
-
-            try {
-                const response = await fetch(
-                    `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
-                );
-
-                if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
-                const text = await response.text();
-
-                if (text) {
-                    const dataBooking = JSON.parse(text);
-                    if (dataBooking && Object.keys(dataBooking).length > 0) {
-                        setOperatingTimeFetchData(count);
-                        break;
-                    }
-                } else {
-                    setOperatingTimeFetchData(count);
-                }
-            } catch (error) {
-                console.error("API or JSON parsing error:", error);
-            }
-            count++;
-        }
-    };
-
     useEffect(() => {
+        const getTime = () => {
+            if (startTime && sport?.closing) {
+                const [openHour, openMinute] = startTime.split("h").map(Number);
+                const [closeHour, closeMinute] = sport.closing.split("h").map(Number);
+                const totalOpenMinutes = openHour * 60 + openMinute;
+                const totalCloseMinutes = closeHour * 60 + closeMinute;
+                setOperatingTime((totalCloseMinutes - totalOpenMinutes) / 60);
+            }
+        };
         getTime();
     }, [startTimeKey, startTime]);
 
-    const getTime = () => {
-        if (startTime && sport?.closing) {
-            const [openHour, openMinute] = startTime.split("h").map(Number);
-            const [closeHour, closeMinute] = sport.closing.split("h").map(Number);
-            const totalOpenMinutes = openHour * 60 + openMinute;
-            const totalCloseMinutes = closeHour * 60 + closeMinute;
-            setOperatingTime((totalCloseMinutes - totalOpenMinutes) / 60);
-        }
-    };
+
 
 
     useEffect(() => {
-        createDataTime();
-    }, [operatingTimeFetchData])
-
-
-    const createDataTime = () => {
         const newData: string[] = [];
 
         const timeIntervals = [];
@@ -167,7 +163,7 @@ const BookingModal = React.memo((props: BookingProps) => {
             console.log(newData.slice(1));
 
         }
-    }
+    }, [operatingTimeFetchData])
 
     useEffect(() => {
         getPriceByTimeBooking(selectTime);
@@ -302,13 +298,6 @@ const BookingModal = React.memo((props: BookingProps) => {
         setSportFieldDuplicate({});
         setWeekDays({});
         setSelectedWeek([]);
-        createTimeByTimeOnStage();
-        if (startDate && endDate && selectTimeOnStage != 'Chọn thời gian') {
-            renderWeekDay();
-        }
-    }, [startDate, endDate, selectTimeOnStage])
-
-    const createTimeByTimeOnStage = () => {
         const getTime = startTime.match(/(\d+)h(\d+)/);
         const startHours = getTime ? Number(getTime[1]) : 0;
         const startMinutes = getTime ? Number(getTime[2]) : 0;
@@ -344,7 +333,10 @@ const BookingModal = React.memo((props: BookingProps) => {
         setDataTime(['1 giờ', '1 giờ 30 phút', '2 giờ', '2 giờ 30 phút', '3 giờ']);
         timeSlots.pop();
         setDataTimeOnStage(timeSlots);
-    };
+        if (startDate && endDate && selectTimeOnStage != 'Chọn thời gian') {
+            renderWeekDay();
+        }
+    }, [startDate, endDate, selectTimeOnStage])
 
     const [selectedWeek, setSelectedWeek] = useState<string[]>([]);
     const [sportFieldDuplicate, setSportFieldDuplicate] = useState<WeekBookingDetail>({});
@@ -615,7 +607,7 @@ const BookingModal = React.memo((props: BookingProps) => {
         setCheckPrepayPrice(event.target.value === 'prepay');
     };
 
-    const calculateBookingPrice = (sportDetail: any, startTime: any, endTime: any) => {
+    const calculateBookingPrice = (sportDetail: SportFieldDetail, startTime: string, endTime: string | undefined) => {
         const { peakHour, peakHourPrices, price } = sportDetail;
 
         const [peakStart, peakEnd] = peakHour.split('-');
