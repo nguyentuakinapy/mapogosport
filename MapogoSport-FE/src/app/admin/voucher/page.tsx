@@ -6,6 +6,7 @@ import "../adminStyle.scss";
 import VoucherAddNew from "@/components/Admin/Modal/voucher.addNew";
 import { useData } from "@/app/context/UserContext";
 import { toast } from "react-toastify";
+import Loading from "@/components/loading";
 
 const VoucherPage = () => {
   const [activeTab, setActiveTab] = useState<string>("all");
@@ -202,7 +203,29 @@ const VoucherPage = () => {
     );
   };
 
-  if (isLoading) return <div>Đang loading dữ liệu voucher</div>;
+  if (isLoading) return   <div className="d-flex justify-content-center align-items-center" style={{ height: '90vh', flexDirection: 'column' }}>
+  <p style={{ fontSize: '1.5rem', fontWeight: '600', color: '#555' }}>Đang tải dữ liệu...</p>
+  <div className="d-flex justify-content-center align-items-center" style={{ marginTop: '20px' }}>
+    <Loading />
+  </div>
+  <style jsx>{`
+    p {
+      animation: fadeIn 1.5s ease-in-out infinite;
+    }
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+  `}</style>
+</div>
+
   if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
   return (
