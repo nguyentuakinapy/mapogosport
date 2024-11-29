@@ -20,6 +20,18 @@ interface ProductReview {
 }
 
 
+interface ProductReviewUser {
+    productReviewId: number;
+    product: {
+        productId: number;
+        productName: string;
+    };
+    fullname: fullname;
+    user: User;
+    comment: string;
+    datedAt: Date;
+}
+
 interface ProductReviewData {
     productReviewId: number;
     product: {

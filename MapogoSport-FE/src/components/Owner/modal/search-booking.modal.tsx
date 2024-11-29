@@ -94,7 +94,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
             const modifiedValidTimes = newData.slice(0, -2);
             setValidTimes(modifiedValidTimes);
         }
-    }, [sportField]);
+    }, [sportField, opening]);
 
     const handleFindField = async () => {
         if (selectedDate && selectedTime && sportField) {

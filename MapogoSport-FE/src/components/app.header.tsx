@@ -235,11 +235,6 @@ const Header = (props: HeaderProps) => {
         })
     }
 
-
-
-
-    //
-
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
             <Navbar expand="lg" style={{
