@@ -5,6 +5,7 @@ import useSWR from 'swr';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import ModalCreateSportField from '@/components/Owner/modal/owner.createSportField';
 import { decodeString } from '@/components/Utils/Format';
+import Image from 'next/image';
 
 const SportFieldList = () => {
     const [showSportFieldModal, setShowSportFieldModal] = useState<boolean>(false)
@@ -54,8 +55,8 @@ const SportFieldList = () => {
                         <div className='d-flex justify-content-between'>
                             <div>
                                 <b className='mx-3'>{index + 1}</b>
-                                <img src={`${sf.image}`}
-                                    className='me-3' style={{ width: '300px' }} alt="cc" />
+                                <Image src={`${sf.image}`} width={300} height={300}
+                                    className='me-3' style={{ width: '300px', height: '225px' }} alt={`${sf.image}`} />
                             </div>
                             <div className='me-auto mt-3'>
                                 <b>Tên sân: {sf.name}</b><br />
