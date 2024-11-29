@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -393,4 +394,9 @@ public class UserRestController {
 	}
 
 	// đến đây
+	
+	@PutMapping("/user/subscription/extend/{idUserSub}/{endDate}")
+	public UserSubscription updateUserSubcription(@PathVariable("idUserSub") Integer id, @PathVariable("endDate") Date endDate) {
+		return userService.updateUserSubcription(id, endDate);
+	}
 }

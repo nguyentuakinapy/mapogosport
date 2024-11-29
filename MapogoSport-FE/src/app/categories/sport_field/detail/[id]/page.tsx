@@ -16,6 +16,8 @@ import { useSearchParams } from 'next/navigation';
 import { createTimeStringH, isDateInRange } from '@/components/Utils/booking-time';
 import Image from 'next/image';
 import Loading from '@/components/loading';
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
 
 type BookingsTypeOnWeek = {
     [time: string]: {
@@ -57,11 +59,22 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     }, [status]);
 
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            setStatusOnWeek();
-        }, 500);
-        return () => clearTimeout(timeoutId);
-    }, [checkDataStatus]);
+        const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            stompClient.subscribe('/topic/bookingDetail/user/reload', (message) => {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
+                    toast.success("Đặt sân thành công!");
+                    setCheckDataStatus(prev => !prev);
+                }
+            });
+        });
+
+        return () => {
+            stompClient.disconnect();
+        };
+    }, []);
 
     const { data: dataReview } = useSWR<FieldReview[]>(`http://localhost:8080/rest/fieldReview/${params.id}`, fetcher, {
         revalidateIfStale: false,
@@ -84,17 +97,16 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     }
 
     useEffect(() => {
+        const getSport = async () => {
+            const responseSport = await fetch(`http://localhost:8080/rest/sport_field/${params.id}`);
+            if (!responseSport.ok) {
+                throw new Error("Error fetching data");
+            }
+            const dataSport = (await responseSport.json()) as SportField;
+            setSportField(dataSport);
+        };
         getSport()
     }, [])
-
-    const getSport = async () => {
-        const responseSport = await fetch(`http://localhost:8080/rest/sport_field/${params.id}`);
-        if (!responseSport.ok) {
-            throw new Error("Error fetching data");
-        }
-        const dataSport = (await responseSport.json()) as SportField;
-        setSportField(dataSport);
-    };
 
     const handleChatMess = () => {
         if (sportField && sportField.owner.user.username) {
@@ -229,7 +241,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         if (dayYears && dayYears.length > 0 && sportFieldDetailId) {
             setStatusOnWeek();
         }
-    }, [dayYears, sportFieldDetailId]);
+    }, [dayYears, sportFieldDetailId, checkDataStatus]);
 
     const setStatusOnWeek = async () => {
         setCheckLoadingData(true)
@@ -825,7 +837,6 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                 <CheckoutModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
                     sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
                     sport={sportField} owner={sportField?.owner}
-                    checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus}
                     startTimeKey={startTimeKey}
                 />
                 <ModalReviewSportField showReviewModal={showReviewModal} setShowReviewModal={setShowReviewModal} fieldId={params.id} dataReview={dataReview!} />

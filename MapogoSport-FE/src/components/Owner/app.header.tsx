@@ -1,11 +1,12 @@
 import { useData } from '@/app/context/UserContext';
 import { Stomp } from '@stomp/stompjs';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
 import { decodeString } from '../Utils/Format';
 import { usePathname } from 'next/navigation';
+import NotificationModal from './modal/notification.modal';
 interface HeaderProps {
     isAniActive: boolean;
     toggleAni: () => void;
@@ -39,6 +40,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     const [notification, setNotification] = useState<NotificationUser[]>();
     const userData = useData();
     const [checkNotification, setCheckNotification] = useState<number>(1);
+    const [showNotificationModal, setNotificationModal] = useState<boolean>(false);
     const path = usePathname();
 
     useEffect(() => {
@@ -269,12 +271,15 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                                         <div className="d-flex justify-content-between align-items-center">
                                                             <Link
                                                                 onClick={() => handleIsReadNotification(item.notificationId)}
-                                                                href={`${path.includes("owner") && item.bookingId ? `/owner/booking-bill/detail/${item.bookingId}` : item.orderId ? `/admin/order/${item.orderId}` : ''}`}
+                                                                href={`${path.includes("owner") && item.bookingId ? `/owner/booking-bill/detail/${item.bookingId}`
+                                                                    : item.orderId ? `/admin/order/${item.orderId}` : ''}`}
                                                                 className="box-comment" style={{
                                                                     fontSize: '15px',
                                                                     color: item.isRead ? 'black' : undefined
                                                                 }}>
-                                                                <b>{item.title}</b>
+                                                                <b>{item.type === "notifyMess" ?
+                                                                    item.title.split('từ')[0] : item.title
+                                                                }</b>
                                                                 <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
                                                                     <div className=''>{item.message}</div>
                                                                     <div className='ms-auto'>{new Date(item.createdAt).toLocaleDateString()}</div>

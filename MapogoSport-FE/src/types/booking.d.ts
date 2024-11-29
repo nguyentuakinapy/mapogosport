@@ -161,3 +161,13 @@ interface BookingDetailMap {
     statusBooking: string
 }
 
+
+interface BookingDetailPeriod {
+    startTime: string;
+    endTime: string;
+    sportFieldDetailId: number;
+    price: number;
+    date: string;
+    booking: number;
+    subscriptionKey: string;
+}

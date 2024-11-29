@@ -189,6 +189,7 @@ const BookingModal = (props: OwnerProps) => {
 
         const timeClose = sport && sport.closing.match(/(\d+)h(\d+)/);
         const minuteClose = timeClose ? Number(timeClose[2]) : 0;
+        const hourClose = timeClose ? Number(timeClose[1]) : 0;
 
         const checkDay = dateBooking && new Date().setHours(0, 0, 0, 0) === new Date(dateBooking).setHours(0, 0, 0, 0);
 
@@ -200,15 +201,15 @@ const BookingModal = (props: OwnerProps) => {
 
             if (checkTime) {
                 if (newTimeBookingStart && newTimeBookingEnd &&
-                    (Number(newTimeBookingStart[1]) * 60 + Number(newTimeBookingStart[2]) + 30)
-                    == (Number(newTimeBookingEnd[1]) * 60 + Number(newTimeBookingEnd[2]))) {
+                    (Number(newTimeBookingStart[1]) * 60 + Number(newTimeBookingStart[2]))
+                    == (Number(newTimeBookingEnd[1]) * 60 + Number(newTimeBookingEnd[2]) - 30)) {
                     toast.success("Thời gian đặt cách nhau tối thiểu 30 phút!")
                 } else {
                     setNewEndTimeBooking(reduceTime(time))
                 }
             } else {
                 if (newTimeBookingEnd &&
-                    sport?.closing === newTimeBookingEnd[1].toString() + "h" && minuteClose === Number(newTimeBookingEnd[2])) {
+                    hourClose === Number(newTimeBookingEnd[1]) && minuteClose === Number(newTimeBookingEnd[2])) {
                     toast.success("Vượt quá thời gian đóng cửa!")
                 } else if (endTimeBooking && newEndTimeBooking &&
                     calculateTimeDifference(endTimeBooking, newEndTimeBooking) / 30 >= 6) {
@@ -1259,7 +1260,7 @@ const BookingModal = (props: OwnerProps) => {
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
                                                 value={bookingDetailData && bookingDetailData.totalAmount <= 0 ?
-                                                    price!.toLocaleString() + ' đ'
+                                                    bookingDetailData.price.toLocaleString() + ' đ'
                                                     :
                                                     bookingDetailData?.totalAmount.toLocaleString() + ' đ'
                                                 }
@@ -1510,7 +1511,7 @@ const BookingModal = (props: OwnerProps) => {
                     </Button>
                 </Modal.Footer>
             </Modal >
-            <NotificationModal size={undefined} textHeadNotification={"Lý do hủy sân"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
+            <NotificationModal sizeName={undefined} textHeadNotification={"Lý do hủy sân"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
             </NotificationModal>
         </>
     )

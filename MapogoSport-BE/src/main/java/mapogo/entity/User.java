@@ -99,9 +99,9 @@ public class User implements Serializable {
 	@JsonIgnore
 	private List<Booking> bookings;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore
-	private List<Owner> owners;
+	private Owner owner;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonIgnore

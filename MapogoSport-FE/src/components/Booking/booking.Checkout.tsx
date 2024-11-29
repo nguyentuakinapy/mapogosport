@@ -14,8 +14,6 @@ interface BookingProps {
     dayStartBooking: string;
     sport?: SportField | null;
     owner?: Owner;
-    checkDataStatus: boolean;
-    setCheckDataStatus: (v: boolean) => void;
     startTimeKey: boolean;
 }
 
@@ -35,7 +33,7 @@ type WeekBookingDetail = {
 
 const BookingModal = React.memo((props: BookingProps) => {
     const { showBookingModal, setShowBookingModal, sportDetail, startTime,
-        dayStartBooking, sport, owner, checkDataStatus, setCheckDataStatus, startTimeKey } = props;
+        dayStartBooking, sport, owner, startTimeKey } = props;
     const [selectTime, setSelectTime] = useState<string>('Chọn thời gian');
     const [selectTimeOnStage, setSelectTimeOnStage] = useState<string>('Chọn thời gian');
     const [activeTab, setActiveTab] = useState<string>('byDay');
@@ -242,7 +240,6 @@ const BookingModal = React.memo((props: BookingProps) => {
     const handleSave = () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
         createBooking(paymentMethod as PaymentMethod);
-        setCheckDataStatus(!checkDataStatus);
         handleClose();
     }
 
@@ -422,7 +419,6 @@ const BookingModal = React.memo((props: BookingProps) => {
     const handleSaveByPeriod = async () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
         createBookingByPeriod(paymentMethod as PaymentMethod);
-        setCheckDataStatus(!checkDataStatus);
         handleClose();
     }
 
@@ -562,30 +558,36 @@ const BookingModal = React.memo((props: BookingProps) => {
             })
         }
 
+        let listAddBookingDetail: BookingDetailPeriod[] = [];
+
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
             for (const [, bookings] of Object.entries(dateWeek)) {
                 bookings.map(async b => {
-                    await fetch('http://localhost:8080/rest/booking/detail', {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json, text/plain, */*',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            startTime,
-                            endTime,
-                            sportFieldDetailId: sportDetail?.sportFielDetailId,
-                            price,
-                            date: b.date,
-                            booking: resBooking.bookingId,
-                            subscriptionKey: activeTab !== 'byDay' ? `keybooking${resBooking.bookingId}` : ""
-                        })
-                    });
+                    const bookingDetail: BookingDetailPeriod = {
+                        startTime: startTime,
+                        endTime: endTime!,
+                        sportFieldDetailId: sportDetail!.sportFielDetailId,
+                        price: price!,
+                        date: b.date,
+                        booking: resBooking.bookingId,
+                        subscriptionKey: activeTab !== 'byDay' ? `keybooking${resBooking.bookingId}` : "",
+                    };
+
+                    listAddBookingDetail.push(bookingDetail);
                 })
             }
         }
-        toast.success("Đặt sân thành công!");
+        if (listAddBookingDetail.length > 0) {
+            await fetch('http://localhost:8080/rest/booking/detail/create/period', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(listAddBookingDetail)
+            });
+        }
     }
 
     const handleClose = () => {

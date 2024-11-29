@@ -188,7 +188,7 @@ function Categories() {
                                                     <p>Không tìm thấy sản phẩm.</p>
                                                 </div>
                                             ) : null}
-                                            {currentItems && currentItems.map((field: SportField) => {
+                                            {currentItems && currentItems.filter(item => item.status === "Hoạt động").map((field: SportField) => {
                                                 // Access the reviews for this sport field
                                                 const reviews = field.fieldReviews || []; // Assuming field has a 'reviews' property
                                                 const reviewCount = reviews.length; // Total number of reviews
