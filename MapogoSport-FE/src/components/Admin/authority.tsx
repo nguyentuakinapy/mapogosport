@@ -63,13 +63,12 @@ function AuthorityComponent() {
     };
     return (
         <>
-            <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>PHÂN QUYỀN NGƯỜI DÙNG</h3>
             <div className="d-flex align-items-center mb-3">
                 <i className="bi bi-funnel me-2 fs-4"></i>
                 <select className="form-select" style={{ width: "auto" }}
                     value={selectedRole}
                     onChange={handleRoleChange}>
-                    <option selected>Vai trò</option>
+                    <option value="">Vai trò</option>
                     <option value="ROLE_USER">Khách hàng</option>
                     <option value="ROLE_OWNER">Chủ sân</option>
                     <option value="ROLE_STAFF">Nhân viên</option>
@@ -94,6 +93,7 @@ function AuthorityComponent() {
                         <th rowSpan={2}>Tài khoản</th>
                         <th rowSpan={2}>Họ và tên</th>
                         <th colSpan={4}>Vai trò</th>
+                        <th rowSpan={2}>Hoạt động</th>
                     </tr>
                     <tr>
                         <th>Khách hàng</th>
@@ -141,11 +141,22 @@ function AuthorityComponent() {
                                         checked={user.authorities.some(auth => auth.role.name === "ROLE_ADMIN")}
                                     />
                                 </td>
+                                <td>
+                                    <input
+                                        readOnly
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        checked={!!user.enabled}
+                                    />
+                                </td>
                             </tr>
                         ))
                     ) : (
-                        <li>Không có người dùng với này</li>
-                    )}
+                        <tr>
+                            <td colSpan={8} className="text-center">
+                                Không có người dùng nào phù hợp
+                            </td>
+                        </tr>)}
                 </tbody>
             </Table>
 

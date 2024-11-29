@@ -101,8 +101,8 @@ const CheckoutPage = () => {
     revalidateOnReconnect: false
   });
 
-  const [districts, setDistricts] = useState<any[]>([]);
-  const [wards, setWards] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<string[]>([]);
+  const [wards, setWards] = useState<string[]>([]);
   const [selectedProvince, setSelectedProvince] = useState<string>('');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [selectedWard, setSelectedWard] = useState<string>('');
@@ -113,7 +113,7 @@ const CheckoutPage = () => {
   const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const provinceName = e.target.value;
     setSelectedProvince(provinceName);
-    const selectedProvinceData = apiAddress.find((province: any) => province.Name === provinceName);
+    const selectedProvinceData = apiAddress.find((province: string) => province.Name === provinceName);
     setDistricts(selectedProvinceData?.Districts || []);
     setWards([]);
     setSelectedDistrict('');
@@ -123,7 +123,7 @@ const CheckoutPage = () => {
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const districtName = e.target.value;
     setSelectedDistrict(districtName);
-    const selectedDistrictData = districts.find((district: any) => district.Name === districtName);
+    const selectedDistrictData = districts.find((district: string) => district.Name === districtName);
     setWards(selectedDistrictData?.Wards || []);
     setSelectedWard('');
   };
@@ -140,9 +140,9 @@ const CheckoutPage = () => {
       setSelectedWard(addressSelected?.address?.ward);
       setAddressDetail(addressSelected?.addressDetail);
 
-      const selectedProvinceData = apiAddress?.find((province: any) => province.Name === addressSelected?.address?.province);
+      const selectedProvinceData = apiAddress?.find((province: string) => province.Name === addressSelected?.address?.province);
       setDistricts(selectedProvinceData?.Districts || []);
-      const selectedDistrictData = selectedProvinceData?.Districts.find((district: any) => district.Name === addressSelected?.address?.district);
+      const selectedDistrictData = selectedProvinceData?.Districts.find((district: string) => district.Name === addressSelected?.address?.district);
       setWards(selectedDistrictData?.Wards || []);
     } else {
       setSelectedProvince('');
@@ -445,7 +445,7 @@ const CheckoutPage = () => {
                   <FloatingLabel controlId="city" label={<span>Tỉnh/Thành <b className="text-danger">*</b></span>}>
                     <Form.Select onChange={handleProvinceChange} value={selectedProvince ?? ''} >
                       <option>-- Nhấn để chọn --</option>
-                      {apiAddress?.map((province: any) => (
+                      {apiAddress?.map((province: string) => (
                         <option key={province.Id} value={province.Name}>{province.Name}</option>
                       ))}
                     </Form.Select>
