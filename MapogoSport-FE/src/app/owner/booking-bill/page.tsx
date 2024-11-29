@@ -13,12 +13,12 @@ import { saveAs } from 'file-saver';
 import { debounce } from "lodash";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
-import CancelBookingModal from "@/components/Owner/modal/cancelBooking";
 import autoTable from "jspdf-autotable";
+import CancelBookingModal from "@/components/Owner/modal/booking.cancelBooking";
+import { decodeString } from "@/components/Utils/Format";
 
 const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
-    const [bookingData, setBookingData] = useState<BookingFindAll[]>([]);
     const [activeTab, setActiveTab] = useState<string>('all');
     const [username, setUsername] = useState<string | null>(null);
     const [startDate, setStartDate] = useState<Date | null>(null);
@@ -37,25 +37,16 @@ const OwnerBookingBill = () => {
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
-        setUsername(storedUsername);
+        if (storedUsername) {
+            setUsername(decodeString(storedUsername));
+        }
     }, []);
 
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/owner/booking/findAll/${username}`, fetcher, {
+    const { data: bookingData, error, isLoading } = useSWR<BookingFindAll[]>(`http://localhost:8080/rest/owner/booking/findAll/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
-
-    useEffect(() => {
-        if (data) {
-            const sortedData = data.sort((a: BookingFindAll, b: BookingFindAll) => b.bookingId - a.bookingId);
-            setBookingData(sortedData);
-        }
-    }, [data]);
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [activeTab, searchTerm]);
 
     const handleSearch = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value.toLowerCase());
@@ -71,7 +62,7 @@ const OwnerBookingBill = () => {
     };
 
     const handleStatusChange = (bookingId: number, newStatus: string) => {
-        const booking = bookingData.find(item => item.bookingId === bookingId);
+        const booking = bookingData?.find(item => item.bookingId === bookingId);
         if (!booking) {
             console.error("Không tìm thấy booking");
             return;
@@ -114,7 +105,7 @@ const OwnerBookingBill = () => {
         );
     };
 
-    const renderTable = (filteredBookings: BookingFindAll[]) => {
+    const renderTable = (filteredBookings: BookingFindAll[] = []) => {
         return (
             <div className="box-table-border mb-4">
                 <Table striped className="mb-0">
@@ -168,7 +159,7 @@ const OwnerBookingBill = () => {
         );
     };
 
-    const filteredBookings = bookingData.filter(booking => {
+    const filteredBookings = bookingData?.filter(booking => {
         const fullName = booking.user.username === 'sportoffline' ? (booking.bookingUserFullname || 'Người đặt tại sân') : booking.user.fullname;
         return (
             (fullName && fullName.toLowerCase().includes(searchTerm)) ||
@@ -194,7 +185,7 @@ const OwnerBookingBill = () => {
     const renderContent = () => {
         const indexOfLastItem = currentPage * itemsPerPage;
         const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-        const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
+        const currentItems = filteredBookings?.slice(indexOfFirstItem, indexOfLastItem);
         return renderTable(currentItems);
     };
 
@@ -205,21 +196,23 @@ const OwnerBookingBill = () => {
     };
 
     const handleNextPage = () => {
-        const totalPages = Math.ceil(bookingData.length / itemsPerPage);
-        if (currentPage < totalPages) {
+        const totalPages = bookingData && Math.ceil(bookingData.length / itemsPerPage);
+        if (totalPages && currentPage < totalPages) {
             setCurrentPage(currentPage + 1);
         }
     };
 
     const renderPagination = () => {
-        const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+        const totalPages = filteredBookings && Math.ceil(filteredBookings.length / itemsPerPage);
         const pages = [];
-        if (totalPages <= 1) return null;
+        if (!filteredBookings || filteredBookings.length === 0 || totalPages && totalPages === 1) return null;
 
-        for (let i = 1; i <= totalPages; i++) {
-            pages.push(
-                <Pagination.Item key={i} active={currentPage === i} onClick={() => setCurrentPage(i)}>{i}</Pagination.Item>
-            );
+        if (totalPages) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(
+                    <Pagination.Item key={i} active={currentPage === i} onClick={() => setCurrentPage(i)}>{i}</Pagination.Item>
+                );
+            }
         }
 
         return (
@@ -244,7 +237,7 @@ const OwnerBookingBill = () => {
             const tableColumn = ["STT", "Tên sân", "Họ và tên", "Ngày đặt", "Tổng tiền", "Số điện thoại", "Trạng thái"];
             const tableRows: string[][] = [];
 
-            filteredBookings.forEach((booking, index) => {
+            filteredBookings?.forEach((booking, index) => {
                 const orderData = [
                     `#${index + 1}`,
                     booking.sportFieldName,
@@ -313,7 +306,7 @@ const OwnerBookingBill = () => {
                 { header: 'Trạng thái', key: 'status', width: 15 },
             ];
 
-            filteredBookings.forEach((booking, index) => {
+            filteredBookings?.forEach((booking, index) => {
                 worksheet.addRow({
                     orderId: `#${index + 1}`,
                     sportFieldName: booking.sportFieldName,

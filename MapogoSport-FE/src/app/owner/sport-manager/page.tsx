@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import ModalCreateSportField from '@/components/Owner/modal/owner.createSportField';
+import { decodeString } from '@/components/Utils/Format';
 
 const SportFieldList = () => {
     const [showSportFieldModal, setShowSportFieldModal] = useState<boolean>(false)
@@ -13,7 +14,9 @@ const SportFieldList = () => {
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
-        setUsername(storedUsername);
+        if (storedUsername) {
+            setUsername(decodeString(storedUsername));
+        }
     }, []);
 
     const { data: sportField, error: sportFieldError } = useSWR<SportField[]>(username && `http://localhost:8080/rest/sportfields/lists/${username}`, fetcher);

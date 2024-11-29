@@ -1,3 +1,4 @@
+import { decodeString } from "@/components/Utils/Format";
 import { useState } from "react";
 import { Button, Form, InputGroup, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -32,7 +33,7 @@ const ModalUpdateEmail = (props: UserProps) => {
             toast.warning("Vui lòng nhập đúng định dạng email!")
             return;
         }
-        const username = localStorage.getItem('username');
+        const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
             fetch(`http://localhost:8080/rest/user/${username}`, {
                 method: 'PUT',

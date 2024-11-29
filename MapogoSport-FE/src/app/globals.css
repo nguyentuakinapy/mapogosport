@@ -571,7 +571,7 @@ table th {
   letter-spacing: 0.5px;
   margin: 0px 10px;
   font-weight: 600 !important;
-  color: rgb(255, 255, 255) !important;
+  color: rgb(255, 255, 255);
   font-size: 16px;
 }
 
@@ -1025,4 +1025,8 @@ table th {
 .voucher-item:last-child {
   margin-right: 0;
   /* Bỏ margin-right cho phần tử cuối cùng */
+}
+
+.active-chat {
+  background-color: #66c7ff !important;
 }

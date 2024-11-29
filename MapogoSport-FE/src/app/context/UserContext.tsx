@@ -1,3 +1,4 @@
+import { decodeString, encodeJson } from '@/components/Utils/Format';
 import { Stomp } from '@stomp/stompjs';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import SockJS from 'sockjs-client';
@@ -35,8 +36,8 @@ export function UserProvider({ children, refreshKey }: UserProviderProps) {
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
         if (storedUsername) {
-            setUsername(storedUsername);
-            mutate(`http://localhost:8080/rest/user/${storedUsername}`)
+            setUsername(decodeString(storedUsername));
+            mutate(`http://localhost:8080/rest/user/${decodeString(storedUsername)}`)
         }
     }, [refreshKey]);
 
@@ -57,7 +58,7 @@ export function UserProvider({ children, refreshKey }: UserProviderProps) {
     useEffect(() => {
         if (data) {
             setUserData(data);
-            sessionStorage.setItem('user', JSON.stringify(data));
+            sessionStorage.setItem('user', JSON.stringify(encodeJson(data)));
         }
     }, [data]);
 

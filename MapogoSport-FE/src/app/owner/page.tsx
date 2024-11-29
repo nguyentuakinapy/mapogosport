@@ -1,5 +1,5 @@
 'use client'
-import { formatPrice } from "@/components/Utils/Format";
+import { decodeString, formatPrice } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
 import { Button, Col, Modal, Nav, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -9,19 +9,32 @@ import ProfileContent from "@/components/User/modal/user.profile";
 import BlogManager from "@/components/blog/blog-manager";
 import Wallet from "@/components/User/modal/wallet";
 import Image from "next/image";
+import Loading from "@/components/loading";
 
 export default function Owner() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [activeTab, setActiveTab] = useState<string>('profile');
-    const [accountPackages, setAccountPackages] = useState<AccountPackage[]>();
-    const [userSubscription, setUserSubscription] = useState<UserSubscription>();
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
     const userData = useData();
-    const [dataSport, setDataSport] = useState<SportField[]>([]);
+    const [dataSport, setDataSport] = useState<SportField[]>();
 
     const [showModal, setShowModal] = useState(false);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
     const [selectedAccountPackage, setSelectedAccountPackage] = useState<AccountPackage | null>(null);
+
+    const { data: accountPackages } = useSWR<AccountPackage[]>(
+        `http://localhost:8080/rest/accountpackage`, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
+
+    const { data: userSubscription } = useSWR<UserSubscription>(
+        `http://localhost:8080/rest/user/subscription/${userData?.username}`, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
 
     useEffect(() => {
         const getOwner = async () => {
@@ -42,28 +55,6 @@ export default function Owner() {
         };
         getOwner();
     }, [userData])
-
-    const { data: ap } = useSWR(
-        `http://localhost:8080/rest/accountpackage`, fetcher, {
-        revalidateIfStale: false,
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-    });
-
-    useEffect(() => {
-        setAccountPackages(ap);
-    }, [ap])
-
-    const { data: userSub } = useSWR(
-        `http://localhost:8080/rest/user/subscription/${userData?.username}`, fetcher, {
-        revalidateIfStale: false,
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-    });
-
-    useEffect(() => {
-        setUserSubscription(userSub);
-    }, [userSub])
 
     const handleOpenModal = (ap: AccountPackage) => {
         setSelectedAccountPackage(ap);
@@ -114,7 +105,7 @@ export default function Owner() {
     useEffect(() => {
         const username = localStorage.getItem('username');
         if (username) {
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${username}`);
+            setUsernameFetchApi(`http://localhost:8080/rest/user/${decodeString(username)}`);
         }
     }, []);
 
@@ -133,33 +124,7 @@ export default function Owner() {
             case 'bank':
                 return (
                     <div className="font-14">
-                        {/* <Form.Group className="mb-3">
-                            <Form.Floating className="mb-3">
-                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
-                                />
-                                <Form.Label>Bank Account</Form.Label>
-                            </Form.Floating>
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Floating className="mb-3">
-                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
-                                />
-                                <Form.Label>Momo Account</Form.Label>
-                            </Form.Floating>
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Floating className="mb-3">
-                                <Form.Control size="sm" type="text" placeholder="Ngày sinh"
-                                />
-                                <Form.Label>VNPay Account</Form.Label>
-                            </Form.Floating>
-                        </Form.Group>
-                        <div className="d-flex justify-content-end">
-                            <Button className='btn btn-profile'>
-                                <i className="bi bi-floppy2"></i> Lưu
-                            </Button>
-                        </div> */}
-                        <Wallet></Wallet>
+                        <Wallet />
                     </div>
                 )
             case 'package':
@@ -211,9 +176,11 @@ export default function Owner() {
                 );
         }
     };
+
+
+
     return (
         <>
-            {/* Modal chọn phương thức thanh toán */}
             <Modal show={showModal} onHide={handleCloseModal} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Chọn phương thức thanh toán</Modal.Title>
@@ -275,39 +242,49 @@ export default function Owner() {
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <div className="profile-header">
-                <div className="profile-info">
-                    <h2>{userData?.fullname}</h2>
-                    <p>Chào mừng bạn đến với hệ thống quản lý dành cho chủ sân của MapogoSport</p>
-                    <div className="stats">
-                        <span>0 Bài Viết</span>
-                        <span>{dataSport && dataSport.length}/{userSubscription?.accountPackage.limitSportFields}</span>
-                        <span>0 Được thích</span>
-                        <span>
-                            {userSubscription && userSubscription.accountPackage ? userSubscription.accountPackage.packageName : 'Không có gói nào'}
-                        </span>
+            {!dataSport ?
+                <div className="d-flex align-items-center justify-content-center" style={{
+                    height: 'calc(100vh - 165px)'
+                }}>
+                    <Loading></Loading>
+                </div>
+                :
+                <>
+                    <div className="profile-header">
+                        <div className="profile-info">
+                            <h2>{userData?.fullname}</h2>
+                            <p>Chào mừng bạn đến với hệ thống quản lý dành cho chủ sân của MapogoSport</p>
+                            <div className="stats">
+                                <span>0 Bài Viết</span>
+                                <span>{dataSport && dataSport.length}/{userSubscription?.accountPackage.limitSportFields}</span>
+                                <span>0 Được thích</span>
+                                <span>
+                                    {userSubscription && userSubscription.accountPackage ? userSubscription.accountPackage.packageName : 'Không có gói nào'}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div className="font-14">
-                <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
-                    <Nav.Item>
-                        <Nav.Link eventKey="profile" className="tab-link">Thông tin cá nhân</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link eventKey="post" className="tab-link">Bài viết</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link eventKey="bank" className="tab-link">Ví & Tài khoản ngân hàng</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link eventKey="package" className="tab-link">Gói nâng cấp</Nav.Link>
-                    </Nav.Item>
-                </Nav>
-                <div className="mt-3">
-                    {renderContent()}
-                </div>
-            </div>
+                    <div className="font-14">
+                        <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
+                            <Nav.Item>
+                                <Nav.Link eventKey="profile" className="tab-link">Thông tin cá nhân</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="post" className="tab-link">Bài viết</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="bank" className="tab-link">Ví & Tài khoản ngân hàng</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="package" className="tab-link">Gói nâng cấp</Nav.Link>
+                            </Nav.Item>
+                        </Nav>
+                        <div className="mt-3">
+                            {renderContent()}
+                        </div>
+                    </div>
+                </>
+            }
 
         </>
     )

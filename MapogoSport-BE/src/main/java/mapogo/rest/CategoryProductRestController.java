@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@RequestMapping("/rest")
+@RequestMapping("/rest/category_product")
 @CrossOrigin("*")
 @RestController
 public class CategoryProductRestController {

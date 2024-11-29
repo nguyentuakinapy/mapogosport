@@ -6,6 +6,7 @@ import { Col, Container, Nav, Row, Image } from "react-bootstrap";
 import "./profile.scss"
 import useSWR from "swr";
 import Link from "next/link";
+import { toast } from "react-toastify";
 
 const ProfileOwnerOrAdmin = () => {
     const { id } = useParams();
@@ -140,7 +141,9 @@ const ProfileOwnerOrAdmin = () => {
         }
     };
     if (isLoading) return <>Vui lòng đợi trong giây lát</>
-    if (error) return <>Lỗi</>
+    if (error) {
+        window.location.href = "/"
+    }
 
     return (
         <HomeLayout>

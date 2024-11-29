@@ -1,3 +1,4 @@
+import { decodeString } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -72,7 +73,7 @@ const ModalAddAddress = (props: UserProps) => {
             toast.error("Hãy điền đầy đủ thông tin!");
             return;
         }
-        const username = localStorage.getItem('username');
+        const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
             fetch(`http://localhost:8080/rest/user/address/${addressUser.addressUserId}`, {
                 method: 'PUT',

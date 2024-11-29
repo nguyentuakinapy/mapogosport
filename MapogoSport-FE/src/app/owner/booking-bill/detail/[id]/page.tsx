@@ -1,5 +1,5 @@
 'use client';
-import CancelBookingDetailModal from "@/components/Owner/modal/CancelBookingDetail";
+import CancelBookingDetailModal from "@/components/Owner/modal/booking.cancelBookingDetail";
 import { useEffect, useState } from "react";
 import { Dropdown, Table } from "react-bootstrap";
 import { toast } from "react-toastify";

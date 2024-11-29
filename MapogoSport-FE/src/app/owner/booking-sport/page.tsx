@@ -6,7 +6,7 @@ import NotificationModal from "@/components/Owner/modal/notification.modal";
 import SearchBookingModal from "@/components/Owner/modal/search-booking.modal";
 import ViewEditBookingModal from "@/components/Owner/modal/view-edit-booking.modal";
 import { calculateTimeDifference, createTimeStringH, isDateInRange } from "@/components/Utils/booking-time";
-import { formatDateVN } from "@/components/Utils/Format";
+import { decodeString, formatDateVN } from "@/components/Utils/Format";
 import { Stomp } from "@stomp/stompjs";
 import { useEffect, useRef, useState } from "react";
 import { Col, Row, Table } from "react-bootstrap";
@@ -71,14 +71,14 @@ export default function BookingSport() {
 
         stompClient.connect({}, () => {
             stompClient.subscribe('/topic/bookingDetail/reload', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
                     setCheckUsername(message.body);
                 }
             });
 
             stompClient.subscribe('/topic/bookingDetail/notification/reload', (message) => {
-                if (message.body === localStorage.getItem('username')) {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     setCheckNotification(prev => prev + 1);
                     setCheckUsername(message.body);
                     // refreshStatusBooking();
@@ -1089,7 +1089,7 @@ export default function BookingSport() {
 
     // Notification
     useEffect(() => {
-        if (owner && checkUsername === localStorage.getItem('username')) {
+        if (owner && checkUsername === decodeString(String(localStorage.getItem('username')))) {
             const now = new Date();
             const currentMinutes = now.getMinutes();
 

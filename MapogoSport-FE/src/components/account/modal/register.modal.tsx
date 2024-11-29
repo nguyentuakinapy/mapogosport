@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "react-bootstrap"
 import { toast } from "react-toastify";
 import "./account.scss"
-import { hashPassword } from "@/components/Utils/Format";
+import { encodeJson, encodeString, hashPassword } from "@/components/Utils/Format";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 
@@ -221,11 +221,28 @@ export default function Register(props: RegisterProps) {
                 if (parseInt(dataUser.password) === 123) {
 
                     const usernameLocal = dataUser.username.replace(/['"]+/g, '');
-                    localStorage.setItem('username', usernameLocal);
-                    // localStorage.setItem('username', dataUser.username);
-                    sessionStorage.setItem('user', JSON.stringify(dataUser));
+                    localStorage.setItem('username', encodeString(usernameLocal));
+                    sessionStorage.setItem('user', JSON.stringify(encodeJson(dataUser)));
                     setRefreshKey(refreshKey + 1);
                     toast.success("Đăng nhập thành công!");
+                    await fetch('/api/auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(dataUser),
+
+                    }).then(async (response) => {
+                        const payload = await response.json();
+                        const data = {
+                            status: response.status,
+                            payload
+                        }
+                        if (!response.ok) {
+                            throw data
+                        }
+                        return data
+                    })
                     handleClose();
                 } else {
                     toast.error("Đăng nhập không thành công!");
@@ -275,9 +292,27 @@ export default function Register(props: RegisterProps) {
                     if (resAuth && resUser) {
                         toast.success("Đăng ký thành công!...");
                         const usernameLocal = resUser.username.replace(/['"]+/g, '');
-                        localStorage.setItem('username', usernameLocal);
-                        sessionStorage.setItem('user', JSON.stringify(resUser));
+                        localStorage.setItem('username', encodeString(usernameLocal));
+                        sessionStorage.setItem('user', JSON.stringify(encodeJson(resUser)));
                         setRefreshKey(refreshKey + 1);
+                        await fetch('/api/auth', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(resUser),
+
+                        }).then(async (response) => {
+                            const payload = await response.json();
+                            const data = {
+                                status: response.status,
+                                payload
+                            }
+                            if (!response.ok) {
+                                throw data
+                            }
+                            return data
+                        })
                         handleClose();
                     }
 

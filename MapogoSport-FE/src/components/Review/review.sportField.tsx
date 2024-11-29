@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal, Image, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { mutate } from "swr";
+import { decodeString } from "../Utils/Format";
 
 interface ReviewProps {
     showReviewModal: boolean;
@@ -15,7 +16,7 @@ const ModalReviewSportField = (props: ReviewProps) => {
 
     const [rating, setRating] = useState(0); // Trạng thái cho rating
     const [comment, setComment] = useState(""); // Trạng thái cho bình luận
-    const username = localStorage.getItem("username");
+    const username = decodeString(String(localStorage.getItem("username")));
 
     // Kiểm tra nếu người dùng đã đánh giá
     const hasReviewed = dataReview?.some(

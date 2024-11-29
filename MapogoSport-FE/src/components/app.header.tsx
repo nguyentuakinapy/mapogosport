@@ -13,8 +13,14 @@ import ForgotPassword from './account/modal/forgotPassword.modal';
 import ChangePasswordNew from './account/modal/change-password-new.modal';
 import { useData } from '@/app/context/UserContext';
 import { logOut } from '@/app/utils/Log-Out';
+import { decodeString, formatTimeNoDate } from './Utils/Format';
+import './userStyle.scss'
+import { toast } from 'react-toastify';
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
 import Image from 'next/image';
-
+import { Form } from 'react-bootstrap';
+import { usePathname } from 'next/navigation';
 
 
 
@@ -39,7 +45,7 @@ const CartBadge = ({ username }: { username: string }) => {
 
 
     return (
-        <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
+        <span className="position-absolute  top-1 start-100 translate-middle badge rounded-pill bg-danger">
             {cartCount}
             <span className="visually-hidden">items in cart</span>
         </span>
@@ -52,6 +58,8 @@ interface HeaderProps {
 }
 
 const Header = (props: HeaderProps) => {
+    const path = usePathname();
+
     const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
     const [showForgotPassword, setShowForgotPassword] = useState<boolean>(false);
@@ -87,6 +95,152 @@ const Header = (props: HeaderProps) => {
         };
     }, []); // Chạy một lần khi component được mount
 
+    // Của QA 26/11
+    const [hideNotification, setHideNotification] = useState<boolean>(false);
+    const [notification, setNotification] = useState<NotificationUser[]>();
+    const [checkNotification, setCheckNotification] = useState<number>(1);
+    useEffect(() => {
+        if (userData) {
+            getNotification(userData.username)
+        }
+    }, [userData, checkNotification]);
+
+    const getNotification = async (username: string) => {
+        const response = await fetch(`http://localhost:8080/rest/user/findByUser_UsernameContainingAndTypeContaining/${username}/notifyMess`);
+        if (!response.ok) return;
+        const notification = await response.json() as NotificationUser[];
+        setNotification(notification);
+    }
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            // stompClient.subscribe('/topic/notification/username', (message) => {
+            //     toast.success("Bạn vừa có thông báo mơí!")
+            //     setCheckNotification(prev => prev + 1);
+            // });
+
+            // chạy được chức năng đã đọc cập nhật lại liền được
+            stompClient.subscribe('/topic/notification/isRead', (message) => {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
+                    setCheckNotification(prev => prev + 1);
+                    getNotification(message.body);
+                }
+            });
+
+            // stompClient.subscribe('/topic/username', (message) => {
+            //     if (message.body === decodeString(String(localStorage.getItem('username')))) {
+            //         toast.success("Bạn vừa có thông báo mơí!")
+            //     }
+            //     getNotification(message.body);
+            // });
+
+
+
+            stompClient.subscribe('/topic/notification/username', (message) => {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
+                    // toast.success("Bạn vừa có thông báo mới! nè cậu");
+                    setCheckNotification(prev => prev + 1);
+                    getNotification(message.body);
+                }
+            });
+
+            // chạy được chức năng đã đọc all cập nhật lại liền được
+            stompClient.subscribe('/topic/notification/isReadAll/username', (message) => {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
+                    setCheckNotification(prev => prev + 1);
+                    getNotification(message.body);
+                }
+            });
+            // đccc
+            stompClient.subscribe('/topic/notification/delete/username', (message) => {
+                if (message.body === decodeString(String(localStorage.getItem('username')))) {
+                    setCheckNotification(prev => prev + 1);
+                    getNotification(message.body);
+                }
+            });
+        });
+
+        return () => {
+            stompClient.disconnect();
+        };
+    }, []);
+
+    const handleIsReadNotification = (notificationId: number) => {
+        fetch(`http://localhost:8080/rest/user/notification/is/read/${notificationId}`, {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return
+            }
+        })
+    }
+    const handleReadedNotifi = (notificationId: number, titleNotifi: string)=>{
+        handleIsReadNotification(notificationId);
+        let temp : string;
+        let afterSlash : string
+        temp= titleNotifi
+          if(titleNotifi && titleNotifi.includes('/')){
+             afterSlash = titleNotifi.split('/').pop()  ?? ''; // "SENDER-teonv"
+            // Lấy phần sau dấu `-`
+            temp = afterSlash.split('-').pop() ?? ''; // "teonv"
+          }else{
+            temp = ''
+          }
+            console.log('temp=>>>>>>>>>>>>>>>> ',temp);
+            if(temp !== ''){
+                const usernameSenderNotifi = temp;
+                const encodedUsername = btoa(usernameSenderNotifi);
+                    window.history.pushState({}, "", `?status=${encodedUsername}`);
+            }
+        }
+
+
+    const handleViewNotification = (username: string) => {
+        fetch(`http://localhost:8080/rest/user/notification/setViewNotificationTypeNotifyMess/${username}`, {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return;
+            }
+
+        }).catch((error) => {
+            toast.error(`Đã xảy ra lỗi khi cập nhật thông báo: ${error.message}`);
+        });
+    }
+
+    const handleDeleteNotification = (username: string) => {
+        fetch(`http://localhost:8080/rest/user/notification/deleteNotificationHaveTypeNotifyMess/${username}`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+        }).then(async (res) => {
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+                return
+            }
+            toast.success('Cập nhật thành công!');
+        })
+    }
+
+
+
+
+    //
+
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
             <Navbar expand="lg" style={{
@@ -96,23 +250,22 @@ const Header = (props: HeaderProps) => {
                     <Navbar><Link href={'/'} ><Image src="/images/logo-black.png" width={100} height={60} alt="" /></Link></Navbar>
                     <Navbar.Toggle aria-controls="navbarScroll" />
                     <Navbar.Collapse id="navbarScroll">
-                        {/* <Form className="d-flex m-auto">
-                            <div className="input-group">
-                                <input type="search" className='form-control border border-white ' placeholder="Tìm kiếm sân hoặc sản phẩm..." aria-label="Search"
-                                    style={{ width: '300px' }} />
-                                <Button variant="outline-light"><i className="bi bi-search"></i></Button>
-                            </div>
-                        </Form> */}
+                        {/* <Nav className="ms-auto my-2 my-lg-0 d-flex justify-content-center align-items-center nav-home">
+
+                        </Nav> */}
                         <Nav
                             className="ms-auto my-2 my-lg-0 d-flex justify-content-center align-items-center nav-home"
                             style={{ maxHeight: '100px' }}
                             navbarScroll
                         >
-                            <Link href="/blog" className='head-hv-nav text-decoration-none'><i className="bi bi-book-fill me-2"></i>Bài viết</Link>
-                            <Link href="/categories/products" className='head-hv-nav text-decoration-none'><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
-                            <Link href="/categories/sport_field" className='head-hv-nav text-decoration-none'><i className="bi bi-trophy-fill me-2"></i>Sân thể thao</Link>
+                            <Link href="/policy" className={`head-hv-nav text-decoration-none ${path.includes("policy") && `active-link`}`}><i className="bi bi-filter-square-fill me-2"></i>Chính sách</Link>
+                            <Link href="/blog" className={`head-hv-nav text-decoration-none ${path.includes("blog") && `active-link`}`}><i className="bi bi-book-fill me-2"></i>Bài viết</Link>
+                            <Link href="/categories/products" className={`head-hv-nav text-decoration-none ${path.includes("categories/products") && `active-link`}`}><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
+                            <Link href="/categories/sport_field" className={`head-hv-nav text-decoration-none ${path.includes("categories/sport_field") && `active-link`}`}><i className="bi bi-trophy-fill me-2"></i>Sân thể thao</Link>
+
+
                             <div className="dropdown">
-                                <span className="dropdown-toggle head-hv-nav text-decoration-none demo" style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
+                                <span className={`dropdown-toggle head-hv-nav text-decoration-none demo ${path.includes("/user") && `active-link`}`} style={{ cursor: 'pointer' }} data-bs-toggle="dropdown" aria-expanded="false">
                                     <i className="bi bi-person-fill me-2"></i>{userData ? userData?.fullname : 'Tài khoản'}
                                 </span>
                                 <ul className="dropdown-menu">
@@ -147,13 +300,95 @@ const Header = (props: HeaderProps) => {
                                     <a className={`dropdown-item ${userData ? '' : 'd-none'}`} onClick={() => logOut()} style={{ cursor: 'pointer' }}>Đăng xuất</a>
                                 </ul>
                             </div>
-                            <Nav className='position-relative'>
-                                <Link href="/cart" className='head-hv-nav text-decoration-none'><i className="bi bi-cart me-2"></i>Giỏ hàng</Link>
-                                <span className="position-absolute ms-1 top-1 start-100 translate-middle badge rounded-pill bg-danger">
-                                    0
-                                    <span className="visually-hidden">unread messages</span>
-                                </span>
+                            <Nav className='position-relative me-2'>
+                                <Link href="/cart" className={`head-hv-nav text-decoration-none ${path.includes("/cart") && `active-link`}`}>
+                                    <i className="bi bi-cart-fill"></i></Link>
                                 {userData && <CartBadge username={userData.username} />}
+                            </Nav>
+                            <Nav className="d-flex align-items-center">
+
+                                <Nav.Item className="position-relative">
+
+                                    <span onClick={(e) => {
+                                        e.preventDefault(); // Ngừng hành động mặc định của thẻ <a>
+                                        setHideNotification(!hideNotification);
+                                    }}
+                                        className='fw-bold text-light'>
+                                        <i className={`bi bi-bell-fill head-hv-nav ${hideNotification && 'active-link'}`} style={{ cursor: 'pointer' }} />
+                                    </span>
+
+                                    <span onClick={() => setHideNotification(!hideNotification)}
+                                        className="position-absolute translate-middle badge rounded-pill bg-danger">
+                                        {/* {notification ? notification.filter(item => !item.isRead).length : 0} */}
+                                        {notification ? notification.filter(item => item.isRead === false).length > 5 ? '5+' :
+                                        notification.filter(item => item.isRead === false).length : 0}
+                                        <span className="visually-hidden">unread messages</span>
+                                    </span>
+
+                                    <div className={`notification ${hideNotification ? 'd-block' : 'd-none'}`}>
+                                        <div className="d-flex align-items-center">
+                                            <h4 className="fw-bold text-danger">Thông báo</h4>
+                                            <i
+                                                onClick={() => {
+                                                    userData && handleDeleteNotification(userData.username);
+                                                }}
+                                                style={{ cursor: 'pointer', fontSize: '28px' }}
+                                                className="ms-auto bi bi-trash3-fill"
+                                            ></i>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                userData && handleViewNotification(userData.username);
+                                            }}
+                                            style={{ backgroundColor: '#142239' }}
+                                            className="btn w-100 ms-auto mb-2"
+                                        >
+                                            Đánh dấu tất cả là đã đọc
+                                        </button>
+
+                                        {notification && notification.length > 0 ? (
+                                            notification
+                                                .sort((a, b) => b.notificationId - a.notificationId)
+                                                .map((item) => (
+                                                    <div
+                                                        key={item.notificationId}
+                                                        className="box-comment-container mb-2"
+                                                        style={{
+                                                            backgroundColor: item.isRead ? '#f5f5f5' : '#142239',
+                                                        }}
+                                                    >
+                                                        <div className="d-flex justify-content-between align-items-center">
+                                                            <Link
+                                                                // onClick={() => handleIsReadNotification(item.notificationId)}
+                                                                onClick={() => handleReadedNotifi(item.notificationId, item.title)}
+                                                                href='#'
+                                                                className="box-comment"
+                                                                style={{
+                                                                    fontSize: '15px',
+                                                                    color: item.isRead ? 'black' : undefined,
+                                                                }}
+                                                            >
+                                                                {/* <b>{item.title}</b> */}
+                                                                <b>
+                                                                {item.title.includes('/')
+                                                                    ? item.title.substring(0, item.title.lastIndexOf('/'))
+                                                                    : item.title}
+                                                                </b>
+                                                                <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
+                                                                    <div>{item.message}</div>
+                                                                    <div className="ms-auto">{formatTimeNoDate(new Date(item.createdAt))}</div>
+                                                                </div>
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                        ) : (
+                                            <div className="my-5 text-center">
+                                                <b>BẠN CHƯA CÓ THÔNG BÁO NÀO</b>
+                                            </div>
+                                        )}
+                                    </div>
+                                </Nav.Item>
                             </Nav>
                         </Nav>
                     </Navbar.Collapse>

@@ -1,4 +1,3 @@
-import { formatDateNotime, formatPrice } from "@/components/Utils/Format";
 import React, { useEffect, useMemo, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, Nav } from "react-bootstrap";
 import DatePicker from "react-datepicker";
@@ -360,10 +359,10 @@ const BookingModal = React.memo((props: BookingProps) => {
                 })
             }
         }
-        if (price) {
+        if (price && activeTab !== 'byDay') {
             setTotalAmount(price * index);
         }
-    }, [selectedWeek])
+    }, [selectedWeek, price])
 
     const getWeekDate = async (weekDate: string) => {
         const dateWeek = weekDays[weekDate];

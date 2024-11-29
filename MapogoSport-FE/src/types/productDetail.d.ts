@@ -6,4 +6,20 @@ interface ProductDetail {
   product: Product;
   productDetailSizes: ProductDetailSize[]
 }
-z
+
+interface ProductDetailAndDetailSize {
+  name: string;
+  color: string;
+  productDetailId: number;
+  detailSizes: DetailSize[]
+  galleries: Gallery[];
+  image: string;
+  product: Product;
+}
+
+interface DetailSize {
+  quantity: number
+  size: string
+  price: number
+  detailSizeId: number
+}

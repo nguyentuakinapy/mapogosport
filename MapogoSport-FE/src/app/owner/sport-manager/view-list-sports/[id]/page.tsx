@@ -1,5 +1,6 @@
 'use client'
 import ModalCreateSportFieldDetail from '@/components/Owner/modal/owner.createSportFieldDetail';
+import { decodeString } from '@/components/Utils/Format';
 import axios from 'axios';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -16,7 +17,9 @@ const SportFieldDetailList = () => {
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
-        setUsername(storedUsername);
+        if (storedUsername) {
+            setUsername(decodeString(storedUsername));
+        }
     }, []);
 
     const { data: owner, error: ownerError, isLoading: ownerLoading } = useSWR<Owner>(username && `http://localhost:8080/rest/owner/${username}`, fetcher);

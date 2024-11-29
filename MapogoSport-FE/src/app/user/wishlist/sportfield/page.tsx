@@ -5,18 +5,19 @@ import { Col, Row } from "react-bootstrap";
 import '../../types/user.scss'
 import { useEffect, useState } from "react";
 import useSWR from "swr";
+import { decodeString } from "@/components/Utils/Format";
 
 const WishListSportField = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
 
     useEffect(() => {
-        const user = sessionStorage.getItem('user');
-        if (user) {
-            const parsedUserData = JSON.parse(user) as User;
-            setUsernameFetchApi(`http://localhost:8080/rest/user/favoriteField/${parsedUserData.username}`);
+        const storedUsername = localStorage.getItem('username');
+        if (storedUsername) {
+            setUsernameFetchApi(`http://localhost:8080/rest/user/favoriteField/${decodeString(storedUsername)}`);
         }
     }, []);
+
     const { data, error, isLoading } = useSWR(usernameFetchApi ? usernameFetchApi : null, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
