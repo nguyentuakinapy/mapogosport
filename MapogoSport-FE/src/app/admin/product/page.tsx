@@ -84,7 +84,7 @@ const AdminProduct = () => {
                   <td className="text-center align-middle">
                     <Link href="#">
                       <Image onClick={() => handleEditClick(product)} src={`${product.image}`} width={110} height={110}
-                        alt={`${product.image}`} style={{ height: '180px', width: '200px', objectFit: 'cover' }} />
+                        alt={`${product.name}`} style={{ height: '180px', width: '200px', objectFit: 'cover' }} />
                     </Link>
                   </td>
                   <td className="text-start align-middle">
@@ -246,7 +246,7 @@ const AdminProduct = () => {
       {renderContent()}
       {renderPagination()}
       <ProductAddNew showAddProduct={showModal} setShowAddProduct={setShowModal} currentProduct={currentProduct}
-        categoryProducts={categoryProducts} onFetch={mutate}  />
+        categoryProducts={categoryProducts} onFetch={mutate} />
     </div>
   )
 }

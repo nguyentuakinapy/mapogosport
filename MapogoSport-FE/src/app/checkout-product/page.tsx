@@ -579,7 +579,7 @@ const CheckoutPage = () => {
                         </span>
                       </div>
                       <div>
-                        <p className="mb-0">{cart.productDetailSize.productDetail.product.name}</p>
+                        <p className="mb-0">{cart.productDetailSize.productDetail.product!.name}</p>
                         <small>({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})</small>
                       </div>
                       <span className="ms-auto fw-bold ">{formatPrice(cart.productDetailSize.price * cart.quantity)}</span>

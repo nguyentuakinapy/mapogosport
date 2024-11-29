@@ -1,7 +1,7 @@
 interface ProductDetailSize {
   productDetailSizeId: number;
-  productDetail: ProductDetail;
-  size: Size;
+  productDetail: Partial<ProductDetail>;
+  size: Partial<Size>;
   price: number;
   quantity: number;
 }
