@@ -92,7 +92,8 @@ public class SportFieldImpl implements SportFieldService{
 		sportField.setClosing(sportFieldDTO.getClosing());
 		CategoryField cate = cateService.findById(sportFieldDTO.getCategoriesField());
 		sportField.setCategoriesField(cate);
-		sportField.setQuantity(0);
+		int quan = sportField.getSportFielDetails().size();
+		sportField.setQuantity(quan);
 		sportField.setStatus(sportFieldDTO.getStatus());
 		
 	    if (avatar != null && !avatar.isEmpty()) {

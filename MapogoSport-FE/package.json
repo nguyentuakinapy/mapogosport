@@ -53,6 +53,7 @@
     "exceljs": "4.4.0",
     "file-saver": "2.0.5",
     "immer": "^10.1.1",
+    "http-proxy-middleware": "^3.0.3",
     "js-cookie": "3.0.5",
     "jspdf": "2.5.2",
     "jspdf-autotable": "3.8.4",

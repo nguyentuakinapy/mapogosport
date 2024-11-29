@@ -49,4 +49,14 @@ const isDateInRange = (dateToCheck: string, startDate: Date, endDate?: Date): bo
     return date >= start && date <= end;
 };
 
-export { createTimeStringH, calculateTimeDifference, convertToMinutes, isDateInRange };
+
+const getSport = async (owner: Owner): Promise<SportField[]> => {
+    const responseSport = await fetch(`http://localhost:8080/rest/sport_field_by_owner/${owner.ownerId}`);
+    if (!responseSport.ok) {
+        throw new Error("Error fetching data");
+    }
+    const dataSport = (await responseSport.json()) as SportField[];
+    return dataSport || [];
+};
+
+export { createTimeStringH, calculateTimeDifference, convertToMinutes, isDateInRange, getSport };

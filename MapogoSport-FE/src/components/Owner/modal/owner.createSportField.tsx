@@ -363,7 +363,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                 rows={5}
                                 placeholder="Mô tả"
                                 value={description}
-                                style={{ resize: "none" }}
+                                style={{ resize: "none", height: "auto" }}
                                 onChange={(e) => setDescription(e.target.value)}
                             />
                         </FloatingLabel>

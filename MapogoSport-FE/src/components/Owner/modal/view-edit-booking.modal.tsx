@@ -1258,7 +1258,11 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={bookingDetailData?.totalAmount.toLocaleString() + ' đ'}
+                                                value={bookingDetailData && bookingDetailData.totalAmount <= 0 ?
+                                                    price!.toLocaleString() + ' đ'
+                                                    :
+                                                    bookingDetailData?.totalAmount.toLocaleString() + ' đ'
+                                                }
                                                 disabled={editBooking}
                                             />
                                         </FloatingLabel>
@@ -1368,7 +1372,11 @@ const BookingModal = (props: OwnerProps) => {
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
-                                                value={bookingDetailData?.totalAmount.toLocaleString() + ' đ'}
+                                                value={bookingDetailData && bookingDetailData.totalAmount <= 0 ?
+                                                    price!.toLocaleString() + ' đ'
+                                                    :
+                                                    bookingDetailData?.totalAmount.toLocaleString() + ' đ'
+                                                }
                                                 disabled={editBooking}
                                             />
                                         </FloatingLabel>

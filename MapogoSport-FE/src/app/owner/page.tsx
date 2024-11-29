@@ -3,7 +3,7 @@ import { decodeString, formatPrice } from "@/components/Utils/Format";
 import { useEffect, useState } from "react";
 import { Button, Col, Modal, Nav, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { useData } from "../context/UserContext";
 import ProfileContent from "@/components/User/modal/user.profile";
 import BlogManager from "@/components/blog/blog-manager";
@@ -71,35 +71,73 @@ export default function Owner() {
     };
 
     const handleUpdateSubscription = (ap?: AccountPackage) => {
-        fetch(`http://localhost:8080/rest/user/subscription/${userSubscription?.userSubscriptionId}`, {
-            method: 'PUT',
-            headers: {
-                Accept: 'application/json, text/plain, */*',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                userSubscriptionId: userSubscription?.userSubscriptionId,
-                accountPackageId: ap?.accountPackageId,
-                paymentMethod: selectedPaymentMethod
-            }),
-        }).then(async (res) => {
-            if (!res.ok) {
-                const errorText = await res.text();
-                toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
-                return;
-            }
+        if (selectedPaymentMethod === "Thanh toán ví") {
+            fetch(`http://localhost:8080/rest/user/subscription/updateUserSubscriptionByWallet/${userSubscription?.userSubscriptionId}`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userSubscriptionId: userSubscription?.userSubscriptionId,
+                    accountPackageId: ap?.accountPackageId,
+                    paymentMethod: selectedPaymentMethod
+                }),
+            }).then(async (res) => {
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
+                    console.log(errorText);
+                    handleCloseModal();
+                }
 
-            const data = await res.json();
-            if (data.status === "ok" && data.url) {
-                window.location.href = data.url;
-            } else {
-                console.error();
+                const data = await res.text();
+                if (data === "ok") {
+                    toast.success('Nâng cấp gói thành công');
 
-                toast.error("Có lỗi xảy ra trong quá trình tạo thanh toán.");
-            }
-        }).catch((error) => {
-            toast.error(`Đã xảy ra lỗi: ${error.message}`);
-        });
+                    mutate(`http://localhost:8080/rest/user/subscription/${userData?.username}`);
+                    mutate(`http://localhost:8080/rest/wallet/transaction/${userData?.wallet.walletId}`);
+                    handleCloseModal();
+                } else {
+                    toast.error(data);
+                    handleCloseModal();
+                }
+            }).catch((error) => {
+                toast.error(`Đã xảy ra lỗi: ${error.message}`);
+                console.log(error);
+                handleCloseModal();
+            });
+        } else {
+            fetch(`http://localhost:8080/rest/user/subscription/${userSubscription?.userSubscriptionId}`, {
+                method: 'PUT',
+                headers: {
+                    Accept: 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userSubscriptionId: userSubscription?.userSubscriptionId,
+                    accountPackageId: ap?.accountPackageId,
+                    paymentMethod: selectedPaymentMethod
+                }),
+            }).then(async (res) => {
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.status === "ok" && data.url) {
+                    window.location.href = data.url;
+                } else {
+                    console.error();
+
+                    toast.error("Có lỗi xảy ra trong quá trình tạo thanh toán.");
+                }
+            }).catch((error) => {
+                toast.error(`Đã xảy ra lỗi: ${error.message}`);
+            });
+        }
     }
 
     useEffect(() => {
@@ -187,6 +225,27 @@ export default function Owner() {
                 </Modal.Header>
                 <Modal.Body>
                     <div className="list-group">
+                        <div className="card-body d-flex list-group-item align-items-center">
+                            <div className="form-check flex-grow-1">
+                                <input
+                                    className="form-check-input"
+                                    type="radio"
+                                    name="paymentMethod"
+                                    id="vnpay"
+                                    value="Thanh toán ví"
+                                    onChange={handlePaymentMethodChange}
+                                />
+                                <label className="form-check-label" htmlFor="">
+                                    Thanh toán bằng ví
+                                </label>
+                            </div>
+
+                            <Image
+                                src='/images/wallet icon.png'
+                                alt=""
+                                width={50} height={50}
+                            />
+                        </div>
                         <div className="card-body d-flex list-group-item align-items-center">
                             <div className="form-check flex-grow-1">
                                 <input

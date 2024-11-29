@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
 import '@/app/user/types/user.scss';
-import { fetchCoordinates } from "../../../app/utils/geocode";
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { fetchLocationCurrent } from "../../../app/utils/LocationCurrent"
 import useSWR from "swr";
 import Loading from "@/components/loading";
 
@@ -65,7 +65,8 @@ function Categories() {
                 try {
                     const updatedCategoriesField = await Promise.all(
                         sportFields.map(async (sport_field) => {
-                            const coords = await fetchCoordinates(sport_field.address);
+                            const coords = await fetchLocationCurrent(sport_field.address);
+                            console.log("hiener thị vị trí hiện tại", coords);
                             const distance = coords ? calculateDistance(currentLocation.lat, currentLocation.lng, coords.lat, coords.lon) : 0;
                             return { ...sport_field, coordinates: coords, distance: distance };
                         })
@@ -80,9 +81,10 @@ function Categories() {
         }
     }, [sportFields, currentLocation]);
 
+
     useEffect(() => {
         getCurrentLocation();
-    }, []);
+    }, [sportFields]);
 
     useEffect(() => {
         const storedFilters = sessionStorage.getItem('searchFilters');
@@ -159,6 +161,7 @@ function Categories() {
                                 </label>
 
                             </div>
+
 
                             <div className="mt-3">
                                 <div style={{ fontSize: '15px' }}><i className="bi bi-pin-map-fill me-2"></i>Bật vị trí lên để sắp xếp sân gần nhất!</div>
@@ -245,6 +248,9 @@ function Categories() {
                                                                 </div>
                                                                 <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
                                                             </div>
+                                                            {/* <div className="distance mt-1">
+                                                                <span>Khoảng cách: {field.distance ? `${field.distance.toFixed(2)} km` : 'N/A'}</span>
+                                                            </div> */}
                                                         </div>
                                                     </Col>
                                                 );
@@ -315,13 +321,6 @@ function Categories() {
                                             </ul>
                                         </nav>
                                     )}
-                                    {/* <div>
-                                    {currentLocation && (
-                                        <div>
-                                            Current Location: Latitude {currentLocation.lat}, Longitude {currentLocation.lng}
-                                        </div>
-                                    )}
-                                </div> */}
                                 </>
                             </Row>
                         </Col>

@@ -245,7 +245,7 @@ const BookingModal = (props: BookingProps) => {
 
     useEffect(() => {
         getPriceByTimeBooking(selectTime);
-    }, [selectTime, sportDetail]);
+    }, [selectTime, sportDetail, selectTimeOnStage]);
 
     useEffect(() => {
         getPriceByTimeBooking(selectTimeOnStage);
@@ -476,7 +476,7 @@ const BookingModal = (props: BookingProps) => {
         let index = 0;
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
-            for (const [_weekIndex, bookings] of Object.entries(dateWeek)) {
+            for (const [, bookings] of Object.entries(dateWeek)) {
                 bookings.forEach(() => {
                     index = index + 1;
                 })

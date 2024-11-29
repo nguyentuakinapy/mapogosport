@@ -1,5 +1,7 @@
 package mapogo.service;
 
+import java.math.BigDecimal;
+
 import mapogo.entity.User;
 import mapogo.entity.Wallet;
 
@@ -8,6 +10,8 @@ public interface WalletService {
 	Wallet findByUsername(User user);
 
 	Wallet update(Wallet wallet);
+	
+	Wallet addFundsToAdminWallet(BigDecimal amount, String description);
 	// đến đây
 
 	Wallet create(String username);

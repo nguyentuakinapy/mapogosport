@@ -8,7 +8,7 @@ interface ReviewProps {
     showReviewModal: boolean;
     setShowReviewModal: (v: boolean) => void;
     fieldId: number;
-    dataReview: any[];
+    dataReview: FieldReview[];
 }
 
 const ModalReviewSportField = (props: ReviewProps) => {
@@ -20,7 +20,7 @@ const ModalReviewSportField = (props: ReviewProps) => {
 
     // Kiểm tra nếu người dùng đã đánh giá
     const hasReviewed = dataReview?.some(
-        (review: any) => review.user.username === username
+        (review: FieldReview) => review.user.username === username
     );
 
     const handleClose = () => {

@@ -271,7 +271,7 @@ const OwnerBookingBill = () => {
                     5: { halign: 'left' },
                     6: { halign: 'center' },
                 },
-                didParseCell: (data: any) => {
+                didParseCell: (data) => {
                     if (data.cell.text.length > 0) {
                         data.cell.text[0] = data.cell.text[0];
                     }
