@@ -16,6 +16,7 @@ const Authority = (props: UserProps) => {
     const { showEditRole, setShowEditRole, user } = props;
 
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+    const [enabled, setEnabled] = useState<boolean>(!!user?.enabled);
 
     const roles = [
         { value: "ROLE_USER", label: "Khách hàng" },
@@ -26,6 +27,8 @@ const Authority = (props: UserProps) => {
 
     useEffect(() => {
         if (user) {
+            console.log(user);
+
             const userRoles = user.authorities.map(auth => auth.role.name);
             setSelectedRoles(userRoles);
         }
@@ -50,9 +53,11 @@ const Authority = (props: UserProps) => {
     const handleSave = async () => {
         if (!user) return;
         console.log("trước:", selectedRoles);
+        console.log("enabled: ", enabled);
 
         try {
-            await axios.post(`http://localhost:8080/rest/update-user-authority/${user?.username}`, selectedRoles);
+            await axios.post(`http://localhost:8080/rest/update-user-authority/${user?.username}`,
+                { selectedRoles, enabled });
             mutate(`http://localhost:8080/rest/list-users`)
             toast.success(`Cập nhật vai trò của "${user.username}" thành công!`);
         } catch (error) {
@@ -137,8 +142,20 @@ const Authority = (props: UserProps) => {
                                                 value={role.value}
                                                 checked={selectedRoles.includes(role.value)}
                                                 onChange={handleCheckboxChange}
+                                                disabled={role.value === "ROLE_USER" || role.value === "ROLE_OWNER"}
                                             />
                                         ))}
+                                    </Form.Group>
+                                </Row>
+                                <Row>
+                                    <Form.Group className="mt-2 fs-5 fw-bold">
+                                        <Form.Check
+                                            inline
+                                            type="checkbox"
+                                            label="Hoạt động"
+                                            value="true"
+                                            checked={enabled}
+                                            onChange={(e) => setEnabled(e.target.checked)} />
                                     </Form.Group>
                                 </Row>
                             </Col>
