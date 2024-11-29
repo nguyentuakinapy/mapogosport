@@ -46,7 +46,6 @@ const ProductAddNew = (props: UserProps) => {
   const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetail>();
   const [selectedProductDetailSize, setSelectedProductDetailSize] = useState<ProductDetailSize[]>([]);
   const [galleries, setGalleries] = useState<Gallery[]>([]);
-  const [modalTypeProductDetail, setModalTypeProductDetail] = useState<"add" | "edit">("add"); // 'add' hoặc 'edit'
   const [currentProductDetailSize, setCurrentProductDetailSize] = useState<ProductDetailSize | null>(null);
   const [isShowAddNewSize, setIsShowAddNewSize] = useState<boolean>(false);
   const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);
@@ -60,9 +59,7 @@ const ProductAddNew = (props: UserProps) => {
 
   useEffect(() => {
     if (productDetailGallery) {
-      setGalleries(productDetailGallery)
-      console.log('productDetailGallery ', productDetailGallery);
-      
+      setGalleries(productDetailGallery);
     }
   }, [productDetailGallery]);
 
@@ -87,11 +84,9 @@ const ProductAddNew = (props: UserProps) => {
     id: number; // ID của sản phẩm
     formData: FormData; // FormData chứa dữ liệu sản phẩm
   };
-  
+
   const mutation = useMutation({
     mutationFn: (putData: PutDataMutationAndMutationAddProductDetail) => {
-      console.log("=======putData", putData);
-
       return axios.put(
         `http://localhost:8080/rest/products/admin/${putData.id}`,
         putData.formData,
@@ -120,7 +115,7 @@ const ProductAddNew = (props: UserProps) => {
     const requiredFields: (keyof Product)[] = [
       "name",
       "brand",
-       
+
       "country",
       "price",
       "description",
@@ -132,8 +127,7 @@ const ProductAddNew = (props: UserProps) => {
       return; // Dừng hàm nếu có trường chưa nhập
     }
     setSelectedProductDetail(detailDemo);
-    console.log('detailDemo==== ',detailDemo);
-    
+
   };
 
   const [formValues, setFormValues] = useState<Product | null>(null);
@@ -171,8 +165,6 @@ const ProductAddNew = (props: UserProps) => {
   ) => {
     const { name, value } = e.target;
     setFormValues({ ...formValues!, [name]: value });
-
-    console.log("selected Input change value: ", value);
   };
 
   const [displayPrice, setDisplayPrice] = useState<string>("");
@@ -231,12 +223,10 @@ const ProductAddNew = (props: UserProps) => {
 
   const handleSelect = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  // >
+    // >
   ) => {
     const { value } = event.target;
     setFormValues((prevValues) => ({ ...prevValues!, status: value }));
-
-    console.log("selected value: ", value);
   };
 
   const handleSelectColor = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -244,8 +234,6 @@ const ProductAddNew = (props: UserProps) => {
 
     if (value === "" || value === "Chọn màu sắc --") {
       toast.warning("Vui lòng chọn màu sắc"); // Hiển thị thông báo khi không chọn màu
-    } else {
-      console.log("Selected color value: ", value);
     }
     setNewColor(value);
     // setSelectedProductDetail((prevValues) =>  ({ ...prevValues, color: value }));
@@ -274,14 +262,13 @@ const ProductAddNew = (props: UserProps) => {
           productDetailSizes: [], // Mảng trống cho productDetailSizes
         };
       }
-    
+
       // Nếu prevValues đã tồn tại, chỉ cần cập nhật trường color
-      return { 
-        ...prevValues, 
-        color: value 
+      return {
+        ...prevValues,
+        color: value
       };
     });
-        console.log("selected  color value: ", value);
   };
 
   const handleCategorySelect = (
@@ -289,14 +276,13 @@ const ProductAddNew = (props: UserProps) => {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const selectedId = event.target.value; // Lấy ID của loại sản phẩm đã chọn
-      if(selectedId ==="")
-        {
-          toast.warning("Vui lòng chọn loại sản phẩm");
-          return
-        } 
-        const selectedCategory = categoryProducts?.find(
-        (cat) => cat.categoryProductId === Number(selectedId)
-      );
+    if (selectedId === "") {
+      toast.warning("Vui lòng chọn loại sản phẩm");
+      return
+    }
+    const selectedCategory = categoryProducts?.find(
+      (cat) => cat.categoryProductId === Number(selectedId)
+    );
 
     setFormValues((prevValues) => ({
       ...prevValues!,
@@ -364,8 +350,6 @@ const ProductAddNew = (props: UserProps) => {
     // Chế độ thêm: chỉ hiển thị ảnh xem trước của tệp đã chọn
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // setNewColorImageProductColor(file);
-      console.log("file ", file);
 
       setPreviewImageProductColor(URL.createObjectURL(file)); // Tạo URL xem trước
 
@@ -375,7 +359,7 @@ const ProductAddNew = (props: UserProps) => {
   };
   // Hàm để kiểm tra các trường bắt buộc
   // const [errorFields, setErrorFields] = useState({});
-  const [errorFields, setErrorFields] = useState<Record<string,boolean>>({});
+  const [errorFields, setErrorFields] = useState<Record<string, boolean>>({});
 
 
   const validateFormFields = (formValues: Product | null, requiredFields: (keyof Product)[]): boolean => {
@@ -383,14 +367,14 @@ const ProductAddNew = (props: UserProps) => {
       toast.warning("Vui lòng nhập đầy đủ thông tin.");
       return false;
     }
-  
+
     // Lọc các trường còn thiếu
     const missingFields = requiredFields.filter((field) => !formValues[field]);
-  
+
     if (missingFields.length > 0) {
       if (!previewImage)
         toast.warning("Vui lòng chọn hình đại diện của sản phẩm.");
-  
+
       // Hiển thị thông báo lỗi cho từng trường còn thiếu
       missingFields.forEach((field) => {
         switch (field) {
@@ -419,27 +403,27 @@ const ProductAddNew = (props: UserProps) => {
             toast.warning(`Vui lòng nhập trường: ${field}`);
         }
       });
-  
+
       // Cập nhật trạng thái các trường lỗi
       const newErrorFields: Record<string, boolean> = {};
       missingFields.forEach((field) => {
         newErrorFields[field as string] = true;
       });
       setErrorFields(newErrorFields);
-  
+
       // Focus vào trường đầu tiên gặp lỗi
       const firstMissingField = missingFields[0];
       document.getElementById(firstMissingField)?.focus();
-  
+
       return false; // Trả về false nếu có trường còn thiếu
     }
-  
+
     // Xóa lỗi nếu tất cả các trường đều hợp lệ
     setErrorFields({});
     return true;
   };
 
-  
+
   const validateForm = () => {
     let isValid = true;
 
@@ -502,10 +486,6 @@ const ProductAddNew = (props: UserProps) => {
           const fileName = `${file.name.replace(/\s+/g, "_")}`;
           imageUrl = fileName; // Cập nhật tên file hình ảnh
           formData.append("fileimage", file); // Thêm file hình ảnh vào FormData
-          console.log("image u: ", imageUrl);
-          console.log("form value image: ", formValues?.image);
-        } else {
-          console.error("file không phải là một đối tượng File:", file);
         }
       }
 
@@ -537,18 +517,12 @@ const ProductAddNew = (props: UserProps) => {
         await mutationAddProdcut.mutateAsync(
           { formData: formData },
           {
-            onError(error, variables) {
-              console.log("variables========", variables);
-              toast.error("Lỗi thêm sản phẩm");
-            },
-            onSuccess(data, variables) {
-              console.log("variables======== add success", variables);
-              console.log("variables======== add data", data);
+            onError: () => { toast.error("Lỗi thêm sản phẩm") },
+            onSuccess(data) {
               if (data) {
                 // Lấy ID từ backend trả về thành công
                 if (selectedProductDetail) {
                   ProductWasCreated = data.data;
-                  console.log("new Id: ", ProductWasCreated);
                   toast.success("Thêm sản phẩm thành công");
                   handleAddNewProductDetail(ProductWasCreated);
                   // handleAddNewSize;
@@ -556,7 +530,7 @@ const ProductAddNew = (props: UserProps) => {
                   handleClose();
                 }
               }
-              
+
             },
           }
         );
@@ -599,12 +573,8 @@ const ProductAddNew = (props: UserProps) => {
         await mutation.mutateAsync(
           { formData: formData, id: currentProduct.productId },
           {
-            onError(error) {
-              console.log("Error updating product:", error);
-              toast.error("Lỗi khi cập nhật sản phẩm");
-            },
-            onSuccess(data, variables) {
-              console.log("Cập nhật sản phẩm thành công", variables);
+            onError: () => { toast.error("Lỗi khi cập nhật sản phẩm") },
+            onSuccess: () => {
 
               // Kiểm tra nếu `ProductDetail` trống và yêu cầu nhập thông tin ProductDetail
               if (!productDetails || productDetails.length === 0) {
@@ -628,15 +598,11 @@ const ProductAddNew = (props: UserProps) => {
 
               // Nếu `ProductDetail` đã có đầy đủ, thực hiện cập nhật `ProductDetail` hoặc thêm mới nếu cần
               if (selectedProductDetail?.productDetailId) {
-                console.log(
-                  "Cập nhật chi tiết sản phẩm với selectedProductDetail"
-                );
                 handleUpdateProductDetail(
                   selectedProductDetail.productDetailId
                 );
                 mutateProductDetails();
               } else if (newColor !== "") {
-                console.log("Thêm ProductDetail mới do có thay đổi màu sắc");
                 handleAddNewProductDetail(currentProduct?.productId);
               }
 
@@ -652,10 +618,9 @@ const ProductAddNew = (props: UserProps) => {
       }
     } catch (error) {
       toast.error(`Lỗi khi lưu sản phẩm: ${error}`);
-      console.error("Lỗi khi lưu sản phẩm:", error);
     }
-     onFetch();
-     mutateProductDetails();
+    onFetch();
+    mutateProductDetails();
     handleClose();
   };
 
@@ -687,7 +652,7 @@ const ProductAddNew = (props: UserProps) => {
 
   useEffect(() => {
     if (formValues?.image) {
-      if(typeof formValues.image === "string"){
+      if (typeof formValues.image === "string") {
 
         // Kiểm tra nếu ảnh có thể tải được
         fetch(formValues.image)
@@ -699,9 +664,8 @@ const ProductAddNew = (props: UserProps) => {
             }
           })
           .catch(() => setIsImageValid(false)); // Nếu có lỗi khi tải ảnh
-      }else{
-        console.warn("Image is a File object, cannot fetch.");
-        setIsImageValid(false); 
+      } else {
+        setIsImageValid(false);
       }
     }
   }, [formValues?.image]);
@@ -720,7 +684,7 @@ const ProductAddNew = (props: UserProps) => {
 
   const handleTabClick = (tab: string) => {
 
-    const requiredFields: (keyof Product)[]= [
+    const requiredFields: (keyof Product)[] = [
       "name",
       "brand",
       "country",
@@ -736,20 +700,19 @@ const ProductAddNew = (props: UserProps) => {
 
 
     setActiveTab(tab); // Chuyển tab nếu đã chọn màu hoặc là tab khác
-    console.log(tab);
     setSelectedProductDetail(undefined);
     setNewColor("");
     setPreviewImageProductColor(null);
     setGalleries([]);
     setSelectedGalleryFiles([]);
-    console.log("form trống hoàn toàn");
   };
+
   const handleOpenTabColor = (tab: string) => {
     // Kiểm tra các trường bắt buộc
-    const requiredFields: (keyof Product)[]= [
+    const requiredFields: (keyof Product)[] = [
       "name",
       "brand",
-       
+
       "country",
       "price",
       "description",
@@ -761,61 +724,30 @@ const ProductAddNew = (props: UserProps) => {
     }
 
     setActiveTab(tab); // Chuyển tab nếu đã chọn màu hoặc là tab khác
-    console.log(tab);
 
     if (tab === "edit") {
       // Kiểm tra nếu `selectedProductDetail` đã được chọn
-      console.log(
-        "selectedProductDetail có null ko",
-        selectedProductDetail?.productDetailId
-      );
-
-      if (
-        selectedProductDetail &&
-        selectedProductDetail.productDetailId != null
-      ) {
+      if (selectedProductDetail && selectedProductDetail.productDetailId != null) {
         // Nếu đã có `selectedProductDetail`, giữ nguyên và hiển thị các thông tin hiện tại
-        console.log(
-          "Chuyển tab, giữ nguyên ProductDetail đã chọn với ID:",
-          selectedProductDetail.productDetailId
-        );
         handleSelectedColor(selectedProductDetail);
       } else {
-        console.log("new cloeeeeeeeee", newColor);
-
-        if (
-          newColor != null ||
-          previewImageProductColor != null ||
-          selectedGalleryFiles != null
-        ) {
-          console.log("giữu nguyên");
-        } else {
+        if (newColor === null || previewImageProductColor === null || selectedGalleryFiles === null) {
           setSelectedProductDetail(undefined);
           setNewColor("");
           setPreviewImageProductColor(null);
           setGalleries([]);
           setSelectedGalleryFiles([]);
-          // console.log("form trống hoàn toàn");
         }
       }
     } else {
       // Nếu không có giá trị nào, để form trống hoàn toàn
       if (!selectedProductDetail) {
-        console.log("new cloeeeeeeeee", newColor);
-
-        if (
-          newColor != null ||
-          previewImageProductColor != null ||
-          selectedGalleryFiles != null
-        ) {
-          console.log("giữu nguyên");
-        } else {
+        if (newColor === null || previewImageProductColor === null || selectedGalleryFiles === null) {
           setSelectedProductDetail(undefined);
           setNewColor("");
           setPreviewImageProductColor(null);
           setGalleries([]);
           setSelectedGalleryFiles([]);
-          // console.log("form trống hoàn toàn");
         }
       } else {
         handleSelectedColor(selectedProductDetail);
@@ -830,25 +762,17 @@ const ProductAddNew = (props: UserProps) => {
     const files = event.target.files;
     if (files) {
       const newFiles = Array.from(files); // Convert FileList to Array
-      console.log("tên ảnh: ", newFiles);
-
       setSelectedGalleryFiles((prevFiles) => [...prevFiles, ...newFiles]); // Thêm ảnh mới vào mảng
-      console.log("SelectedGalleryFiles", selectedGalleryFiles);
     }
   };
 
   const handleAddNewSize = () => {
-    setModalTypeProductDetail("add");
     setCurrentProductDetailSize(null);
     setIsShowAddNewSize(true); // Hiển thị modal
   };
 
   const handleEditClickProductSize = (sizeDetail: ProductDetailSize) => {
-    console.log("productDetail edit size ", sizeDetail);
     setCurrentProductDetailSize(sizeDetail);
-    console.log("currentProductDetailSize ", currentProductDetailSize);
-    setModalTypeProductDetail("edit");
-
     setIsShowAddNewSize(true); // Hiển thị modal
   };
 
@@ -861,19 +785,12 @@ const ProductAddNew = (props: UserProps) => {
       return; // Nếu người dùng không xác nhận, thoát khỏi hàm
     }
 
-    console.log("productDetailSizeId ", productDetailSizeId);
-
     try {
-      const response = await axios.delete(
-        `http://localhost:8080/rest/product-detail-size/delete/${productDetailSizeId}`
-      );
-      toast.success("xóa thành công");
-      console.log(response.data);
+      await axios.delete(`http://localhost:8080/rest/product-detail-size/delete/${productDetailSizeId}`);
+      toast.success("Xóa thành công!");
       mutate();
     } catch (error) {
-      toast.error("xóa không thành công");
-      console.error("Error deleting ProductDetailSize:", error);
-      // Hiển thị thông báo lỗi cho người dùng nếu cần
+      toast.error("Xóa không thành công!");
     }
   };
 
@@ -883,8 +800,6 @@ const ProductAddNew = (props: UserProps) => {
       return; // Ngừng xử lý nếu form không hợp lệ
     }
     try {
-      console.log("currentProduct Id: ", currentProductID);
-
       const formData = new FormData();
       let imageUrl = selectedProductDetail?.image;
 
@@ -896,10 +811,6 @@ const ProductAddNew = (props: UserProps) => {
           const fileName = `${file.name.replace(/\s+/g, "_")}`;
           imageUrl = fileName; // Cập nhật tên file hình ảnh
           formData.append("fileimage", file); // Thêm file hình ảnh vào FormData
-          console.log("image u: ", imageUrl);
-          console.log("form value image: ", imageProductDetail);
-        } else {
-          console.error("file không phải là một đối tượng File:", file);
         }
       }
 
@@ -920,9 +831,6 @@ const ProductAddNew = (props: UserProps) => {
       // Kiểm tra và thêm các file gallery đã được chọn vào FormData
       if (selectedGalleryFiles.length > 0) {
         selectedGalleryFiles.forEach((file, index) => {
-          console.log("tên file thứ: ", index + 1);
-          console.log("tên file: ", file.name);
-
           formData.append(`galleryFiles`, file); // Thêm từng file gallery vào FormData
         });
       }
@@ -930,19 +838,11 @@ const ProductAddNew = (props: UserProps) => {
       await mutationAddProductDetail.mutateAsync(
         { formData: formData, id: currentProductID },
         {
-          onError(error, variables) {
-            console.log("variables========", variables);
-            toast.error("Lỗi thêm sản phẩm chi tiết");
-          },
+          onError: () => { toast.error("Lỗi thêm sản phẩm chi tiết") },
           onSuccess(data) {
             if (data) {
-              console.log("data", data.data);
-
               setProductDetailWasCreated(data.data); // Đảm bảo bạn lấy giá trị từ data đúng cách
-
-              console.log("ProductDetailWasCreated: ", productDetailWasCreated); // sẽ hiển thị ID
             }
-
             toast.success("Thêm sản phẩm chi tiết thành công");
             mutateProductDetails();
           },
@@ -955,18 +855,14 @@ const ProductAddNew = (props: UserProps) => {
 
   const handleUpdateProductDetail = async (productDetailId: number) => {
     try {
-      console.log("Bắt đầu cập nhật");
-
       const formData = new FormData();
-      const  imageUrl = selectedProductDetail?.image;
+      const imageUrl = selectedProductDetail?.image;
       // let imageUrl = selectedProductDetail?.image;
 
       // Nếu có ảnh mới, thêm vào formData
       if (previewImageProductColor && imageProductDetail instanceof File) {
         formData.append("fileimage", imageProductDetail);
       }
-
-      console.log("newColor đầu", newColor);
 
       // Gán lại giá trị cho `newColor` nếu chưa có
       if (newColor === "") {
@@ -976,8 +872,6 @@ const ProductAddNew = (props: UserProps) => {
           setNewColor(selectedProductDetail?.color ?? "");
         }
       }
-      console.log("newColor lúc sau ", newColor);
-      console.log("newColor ", imageUrl);
 
       // Thêm màu và thông tin cập nhật khác
       const productDetailData = {
@@ -992,9 +886,7 @@ const ProductAddNew = (props: UserProps) => {
           formData.append("galleryFiles", file);
         });
       } else {
-        console.log("Không thêm `galleryFiles` vì mảng rỗng");
         formData.append("galleryFiles", JSON.stringify([]));
-        console.log("Gửi galleryFiles rỗng");
       }
 
       // Gọi API
@@ -1010,7 +902,6 @@ const ProductAddNew = (props: UserProps) => {
       onFetch();
       mutateProductDetails()
     } catch (error) {
-      console.error("Error updating product detail:", error);
       toast.error("Lỗi cập nhật sản phẩm chi tiết");
     }
   };
@@ -1031,7 +922,6 @@ const ProductAddNew = (props: UserProps) => {
       mutateProductDetails();
     } catch (error) {
       toast.error("Xóa sản phẩm chi tiết không thành công");
-      console.error("Error deleting product:", error);
     }
   };
   const handleDeleteProductDetailGallery = async (
@@ -1050,9 +940,9 @@ const ProductAddNew = (props: UserProps) => {
       toast.success("Xóa Gallery chi tiết thành công");
     } catch (error) {
       toast.error("Xóa Gallery không thành công");
-      console.error("Error deleting product:", error);
     }
   };
+
   const formatCurrency = (value: number) => {
     if (value === null || value === undefined) return "";
     return value.toLocaleString("vi-VN", {
@@ -1060,13 +950,6 @@ const ProductAddNew = (props: UserProps) => {
       currency: "VND",
     });
   };
-
-  // useEffect(() => {
-  //   console.log(
-  //     "ProductDetailWasCreated đã thay đổi: ",
-  //     productDetailWasCreated
-  //   );
-  // }, [productDetailWasCreated]);
 
   return (
     <>
@@ -1192,9 +1075,9 @@ const ProductAddNew = (props: UserProps) => {
                             value={formValues?.categoryProduct?.categoryProductId}
                             onChange={handleCategorySelect}
                           >
-                          <option value="">Chọn loại sản phẩm---</option>
+                            <option value="">Chọn loại sản phẩm---</option>
                             {categoryProducts?.map((category) => (
-                           <option
+                              <option
                                 key={category.categoryProductId}
                                 value={category.categoryProductId}
                               >
@@ -1475,304 +1358,303 @@ const ProductAddNew = (props: UserProps) => {
 
           {activeTab === "add-details" &&
             // selectedProductDetail chứa dữ liệu truyền vào
-              <Form>
-                <Row>
+            <Form>
+              <Row>
 
-                  <Col>
-                    {/* Kiểm tra nếu chưa chọn ảnh và không có ảnh preview, hiển thị thông báo */}
-                    {!selectedProductDetail?.image && !previewImageProductColor && (
-                      <p className="text-danger">Vui lòng chọn ảnh.</p>
-                    )}
+                <Col>
+                  {/* Kiểm tra nếu chưa chọn ảnh và không có ảnh preview, hiển thị thông báo */}
+                  {!selectedProductDetail?.image && !previewImageProductColor && (
+                    <p className="text-danger">Vui lòng chọn ảnh.</p>
+                  )}
 
-                    {/* ẢNH CHÍNH CỦA MÀU */}
-                    <Form.Group id="formImage d-flex">
-                      <Form.Label className="fw-bold">Hình ảnh:</Form.Label>
+                  {/* ẢNH CHÍNH CỦA MÀU */}
+                  <Form.Group id="formImage d-flex">
+                    <Form.Label className="fw-bold">Hình ảnh:</Form.Label>
 
-                      {/* Hình ảnh hiển thị */}
-                      <div className="d-flex align-items-center">
-                        <div className="image-container-new">
-                          {/* Nếu chưa có ảnh, hiển thị ảnh mặc định */}
-                          <img
-                            src={selectedProductDetail?.image || previewImageProductColor || "/images/logo.png"}
-                            alt="Product image"
-                            className="img-thumbnail shadow-sm" // Thêm bóng đổ
-                          />
+                    {/* Hình ảnh hiển thị */}
+                    <div className="d-flex align-items-center">
+                      <div className="image-container-new">
+                        {/* Nếu chưa có ảnh, hiển thị ảnh mặc định */}
+                        <Image
+                          src={selectedProductDetail?.image || previewImageProductColor || "/images/logo.png"}
+                          alt="Product image"
+                          className="img-thumbnail shadow-sm" // Thêm bóng đổ
+                        />
 
-                          {/* Input để chọn ảnh, được ẩn đi */}
-                          <Form.Control
-                            id="file"
-                            className="file-input"
-                            type="file"
-                            name="image"
-                            onChange={handleImageChangeProductColor}
-                            accept="image/png, image/jpeg, image/jpg"
-                            style={{ display: "none" }} // Ẩn input file
-                          />
-
-                          {/* Nút tải ảnh */}
-                          <label htmlFor="file" className="upload-icon-new">
-                            <i className="bi bi-camera-fill"></i>
-                          </label>
-                        </div>
-                      </div>
-                    </Form.Group>
-                  </Col>
-
-                  <Col>
-                    <Form.Group className="mb-3">
-                      <Form.Floating>
+                        {/* Input để chọn ảnh, được ẩn đi */}
                         <Form.Control
-                          as="select"
-                          name="color"
-                          value={
-                            selectedProductDetail
-                              ? selectedProductDetail.color
-                              : ""
-                          }
-                          onChange={handleSelectColor}
-                        >
-                          <option>Chọn màu sắc --</option>
-                          {optionColor.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </Form.Control>
-                        <Form.Label htmlFor="status">
-                          Màu sắc <b className="text-danger">*</b>
-                        </Form.Label>
-                      </Form.Floating>
-                    </Form.Group>
-                    {/* Bảng Gallery mẫu */}
-                    <Form.Group className="mb-4">
-                      <Form.Label className="fs-6">Chọn thêm ảnh:</Form.Label>
+                          id="file"
+                          className="file-input"
+                          type="file"
+                          name="image"
+                          onChange={handleImageChangeProductColor}
+                          accept="image/png, image/jpeg, image/jpg"
+                          style={{ display: "none" }} // Ẩn input file
+                        />
 
-                      {/* Custom File Input */}
+                        {/* Nút tải ảnh */}
+                        <label htmlFor="file" className="upload-icon-new">
+                          <i className="bi bi-camera-fill"></i>
+                        </label>
+                      </div>
+                    </div>
+                  </Form.Group>
+                </Col>
+
+                <Col>
+                  <Form.Group className="mb-3">
+                    <Form.Floating>
                       <Form.Control
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleImageChangeProductGallery}
-                        className="d-none" // Hide default file input
-                        id="galleryInput"
-                      />
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        className="mx-2"
-                        onClick={() =>
-                          document.getElementById("galleryInput")!.click()
+                        as="select"
+                        name="color"
+                        value={
+                          selectedProductDetail
+                            ? selectedProductDetail.color
+                            : ""
                         }
+                        onChange={handleSelectColor}
                       >
-                        <i className="bi bi-plus-circle mx-1"></i>
-                      </Button>
+                        <option>Chọn màu sắc --</option>
+                        {optionColor.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </Form.Control>
+                      <Form.Label htmlFor="status">
+                        Màu sắc <b className="text-danger">*</b>
+                      </Form.Label>
+                    </Form.Floating>
+                  </Form.Group>
+                  {/* Bảng Gallery mẫu */}
+                  <Form.Group className="mb-4">
+                    <Form.Label className="fs-6">Chọn thêm ảnh:</Form.Label>
 
-                      {/* Display Selected Images */}
-                      <div className="mt-3 d-flex flex-wrap gap-2">
-                        {selectedGalleryFiles.length > 0 ? (
-                          selectedGalleryFiles.map((file, index) => (
-                            <div key={index} className="position-relative">
-                              <img
-                                src={URL.createObjectURL(file)}
-                                alt={`gallery-${index}`}
-                                className="border img-thumbnail"
-                                style={{
-                                  objectFit: "cover",
-                                  height: "70px",
-                                  width: "70px",
-                                  borderRadius: "5px",
-                                  border: "1px solid #ddd",
-                                }}
-                              />
-                              {/* Nút xóa ảnh */}
+                    {/* Custom File Input */}
+                    <Form.Control
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageChangeProductGallery}
+                      className="d-none" // Hide default file input
+                      id="galleryInput"
+                    />
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      className="mx-2"
+                      onClick={() =>
+                        document.getElementById("galleryInput")!.click()
+                      }
+                    >
+                      <i className="bi bi-plus-circle mx-1"></i>
+                    </Button>
+
+                    {/* Display Selected Images */}
+                    <div className="mt-3 d-flex flex-wrap gap-2">
+                      {selectedGalleryFiles.length > 0 ? (
+                        selectedGalleryFiles.map((file, index) => (
+                          <div key={index} className="position-relative">
+                            <Image
+                              src={URL.createObjectURL(file)}
+                              alt={`gallery-${index}`}
+                              className="border img-thumbnail"
+                              style={{
+                                objectFit: "cover",
+                                height: "70px",
+                                width: "70px",
+                                borderRadius: "5px",
+                                border: "1px solid #ddd",
+                              }}
+                            />
+                            {/* Nút xóa ảnh */}
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              className="position-absolute rounded-circle top-0 end-0"
+                              style={{ transform: "translate(25%, -25%)" }}
+                              onClick={() => handleRemoveImage(index)}
+                            >
+                              <i className="bi bi-x-circle"></i>
+                            </Button>
+                          </div>
+                        ))
+                      ) : galleries.length === 0 ? (
+                        <p className=" text-danger">
+                          Chưa có ảnh trong thư viện ảnh.
+                        </p>
+                      ) : null}
+                    </div>
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              {/* Bảng gallery demo*/}
+              {galleries.length > 0 && (
+                <Form.Group id="formGallery">
+                  <div className="mb-3">
+                    <label className="form-label fw-bold">
+                      Thư viện ảnh của sản phẩm:
+                    </label>
+
+                    <div className="d-flex flex-wrap align-items-center">
+                      {galleries.length > 0 ? (
+                        galleries.map((gallery) => (
+                          <div
+                            key={gallery.galleryId}
+                            className="position-relative me-3 mb-3 gallery-image-container" // Thêm lớp cho các hình ảnh trong gallery
+                          >
+                            <Image
+                              src={gallery.name} // Đường dẫn ảnh từ gallery.name
+                              alt={`Gallery ${gallery.galleryId}`}
+                              width={70} // Chiều rộng ảnh, có thể tùy chỉnh
+                              height={70} // Chiều cao ảnh, có thể tùy chỉnh
+                              className="border"
+                              style={{
+                                objectFit: "cover",
+                                borderRadius: "8px",
+                                border: "1px solid #ddd",
+                                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                              }}
+                            />
+                            <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
                               <Button
                                 variant="danger"
-                                size="sm"
-                                className="position-absolute rounded-circle top-0 end-0"
-                                style={{ transform: "translate(25%, -25%)" }}
-                                onClick={() => handleRemoveImage(index)}
-                              >
-                                <i className="bi bi-x-circle"></i>
-                              </Button>
-                            </div>
-                          ))
-                        ) : galleries.length === 0 ? (
-                          <p className=" text-danger">
-                            Chưa có ảnh trong thư viện ảnh.
-                          </p>
-                        ) : null}
-                      </div>
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                {/* Bảng gallery demo*/}
-                {galleries.length > 0 && (
-                  <Form.Group id="formGallery">
-                    <div className="mb-3">
-                      <label className="form-label fw-bold">
-                        Thư viện ảnh của sản phẩm:
-                      </label>
-
-                      <div className="d-flex flex-wrap align-items-center">
-                        {galleries.length > 0 ? (
-                          galleries.map((gallery) => (
-                            <div
-                              key={gallery.galleryId}
-                              className="position-relative me-3 mb-3 gallery-image-container" // Thêm lớp cho các hình ảnh trong gallery
-                            >
-                              <Image
-                                src={gallery.name} // Đường dẫn ảnh từ gallery.name
-                                alt={`Gallery ${gallery.galleryId}`}
-                                width={70} // Chiều rộng ảnh, có thể tùy chỉnh
-                                height={70} // Chiều cao ảnh, có thể tùy chỉnh
-                                className="border"
+                                className="btn-sm position-absolute"
                                 style={{
-                                  objectFit: "cover",
-                                  borderRadius: "8px",
-                                  border: "1px solid #ddd",
-                                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                  top: "-8px",
+                                  right: "-8px",
+                                  width: "24px",
+                                  height: "24px",
+                                  borderRadius: "50%",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  padding: "0",
+                                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                                 }}
-                              />
-                              <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
-                                <Button
-                                  variant="danger"
-                                  className="btn-sm position-absolute"
-                                  style={{
-                                    top: "-8px",
-                                    right: "-8px",
-                                    width: "24px",
-                                    height: "24px",
-                                    borderRadius: "50%",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    padding: "0",
-                                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                                  }}
-                                  onClick={(event) => {
-                                    event.stopPropagation(); // Ngăn sự kiện chọn màu chạy
-                                    handleDeleteProductDetailGallery(
-                                      gallery.galleryId
-                                    );
-                                  }}
-                                >
-                                  <i className="bi bi-x fs-6"></i>
-                                </Button>
-                              </OverlayTrigger>
-                            </div>
-                          ))
-                        ) : (
-                          <span className="text-muted">Chưa có gallery</span>
-                        )}
-                      </div>
+                                onClick={(event) => {
+                                  event.stopPropagation(); // Ngăn sự kiện chọn màu chạy
+                                  handleDeleteProductDetailGallery(
+                                    gallery.galleryId
+                                  );
+                                }}
+                              >
+                                <i className="bi bi-x fs-6"></i>
+                              </Button>
+                            </OverlayTrigger>
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-muted">Chưa có gallery</span>
+                      )}
                     </div>
-                  </Form.Group>
-                )}
+                  </div>
+                </Form.Group>
+              )}
 
-                {/* Bảng Kích cỡ */}
-                {selectedProductDetail?.productDetailId && (
-                  <Form.Group id="formSize">
-                    {/* Khối chứa nút thêm kích cỡ */}
-                    <div className="d-flex justify-content-between align-items-center">
-                      <Form.Label className="fw-bold">Kích cỡ:</Form.Label>
-                    </div>
-                    {/* <span>
+              {/* Bảng Kích cỡ */}
+              {selectedProductDetail?.productDetailId && (
+                <Form.Group id="formSize">
+                  {/* Khối chứa nút thêm kích cỡ */}
+                  <div className="d-flex justify-content-between align-items-center">
+                    <Form.Label className="fw-bold">Kích cỡ:</Form.Label>
+                  </div>
+                  {/* <span>
                       ProductDetail Id from backend {productDetailWasCreated}
                     </span> */}
-                    {isShowAddNewSize && (
-                      <ModalProductAddNewSize
-                        setIsShowAddNewSize={setIsShowAddNewSize}
-                        isShowAddNewSize={isShowAddNewSize}
-                        ProductDetailWasCreated={productDetailWasCreated ?? null }
-                        onFetchProductDetailSize={mutate}
-                        currentProductDetailSize={currentProductDetailSize}
-                        modalTypeProductDetail={modalTypeProductDetail}
-                        selectedProductDetail={selectedProductDetail}
-                      />
-                    )}
-                    <Table striped bordered hover>
-                      <thead>
-                        <tr>
-                          <th>Stt</th>
-                          <th>Tên Kích cỡ</th>
-                          <th>Giá</th>
-                          <th>Số lượng</th>
-                          <th>Hành động</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {selectedProductDetailSize.length > 0 ? (
-                          selectedProductDetailSize.map((sizeDetail, index) => (
-                            <tr key={sizeDetail.productDetailSizeId}>
-                              <td>{index + 1}</td>
-                              <td>
-                                {(sizeDetail.size as Size).sizeName ||"Không có kích cỡ"}
-                                  {/* {(sizeDetail.size && 'sizeName' in sizeDetail.size ? sizeDetail.size.sizeName : "Không có kích cỡ")} */}
+                  {isShowAddNewSize && (
+                    <ModalProductAddNewSize
+                      setIsShowAddNewSize={setIsShowAddNewSize}
+                      isShowAddNewSize={isShowAddNewSize}
+                      ProductDetailWasCreated={productDetailWasCreated ?? null}
+                      onFetchProductDetailSize={mutate}
+                      currentProductDetailSize={currentProductDetailSize}
+                      selectedProductDetail={selectedProductDetail}
+                    />
+                  )}
+                  <Table striped bordered hover>
+                    <thead>
+                      <tr>
+                        <th>Stt</th>
+                        <th>Tên Kích cỡ</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedProductDetailSize.length > 0 ? (
+                        selectedProductDetailSize.map((sizeDetail, index) => (
+                          <tr key={sizeDetail.productDetailSizeId}>
+                            <td>{index + 1}</td>
+                            <td>
+                              {(sizeDetail.size as Size).sizeName || "Không có kích cỡ"}
+                              {/* {(sizeDetail.size && 'sizeName' in sizeDetail.size ? sizeDetail.size.sizeName : "Không có kích cỡ")} */}
 
-                              </td>
-                              <td>{formatCurrency(sizeDetail.price)}</td>
-                              <td>{sizeDetail.quantity}</td>
-                              <td className="text-center align-middle">
-                                <OverlayTrigger
-                                  overlay={<Tooltip>Sửa</Tooltip>}
+                            </td>
+                            <td>{formatCurrency(sizeDetail.price)}</td>
+                            <td>{sizeDetail.quantity}</td>
+                            <td className="text-center align-middle">
+                              <OverlayTrigger
+                                overlay={<Tooltip>Sửa</Tooltip>}
+                              >
+                                <Button
+                                  variant="warning"
+                                  className="m-1"
+                                  onClick={() =>
+                                    handleEditClickProductSize(sizeDetail)
+                                  }
                                 >
-                                  <Button
-                                    variant="warning"
-                                    className="m-1"
-                                    onClick={() =>
-                                      handleEditClickProductSize(sizeDetail)
-                                    }
-                                  >
-                                    <i className="bi bi-pencil-fill"></i>
-                                  </Button>
-                                </OverlayTrigger>
-                                <OverlayTrigger
-                                  overlay={<Tooltip>Xóa</Tooltip>}
+                                  <i className="bi bi-pencil-fill"></i>
+                                </Button>
+                              </OverlayTrigger>
+                              <OverlayTrigger
+                                overlay={<Tooltip>Xóa</Tooltip>}
+                              >
+                                <Button
+                                  variant="danger"
+                                  className="m-1"
+                                  onClick={() =>
+                                    deleteProductDetailSize(
+                                      sizeDetail.productDetailSizeId
+                                    )
+                                  }
                                 >
-                                  <Button
-                                    variant="danger"
-                                    className="m-1"
-                                    onClick={() =>
-                                      deleteProductDetailSize(
-                                        sizeDetail.productDetailSizeId
-                                      )
-                                    }
-                                  >
-                                    <i className="bi bi-trash3-fill"></i>
-                                  </Button>
-                                </OverlayTrigger>
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={5}>Chưa lấy được kích cỡ</td>
+                                  <i className="bi bi-trash3-fill"></i>
+                                </Button>
+                              </OverlayTrigger>
+                            </td>
                           </tr>
-                        )}
+                        ))
+                      ) : (
                         <tr>
-                          <td colSpan={5}>
-                            <Button
-                              size="sm"
-                              className="mx-2"
-                              variant="outline-primary"
-                              onClick={handleAddNewSize}
-                              style={{
-                                fontWeight: "bold",
-                                borderRadius: "5px",
-                              }} // Tăng độ nổi bật
-                            >
-                              Thêm kích cỡ{" "}
-                              <i className="bi bi-plus-circle mx-1"></i>
-                            </Button>
-                          </td>
+                          <td colSpan={5}>Chưa lấy được kích cỡ</td>
                         </tr>
-                      </tbody>
-                    </Table>
-                  </Form.Group>
-                )}
-              </Form>
-           }
+                      )}
+                      <tr>
+                        <td colSpan={5}>
+                          <Button
+                            size="sm"
+                            className="mx-2"
+                            variant="outline-primary"
+                            onClick={handleAddNewSize}
+                            style={{
+                              fontWeight: "bold",
+                              borderRadius: "5px",
+                            }} // Tăng độ nổi bật
+                          >
+                            Thêm kích cỡ{" "}
+                            <i className="bi bi-plus-circle mx-1"></i>
+                          </Button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </Table>
+                </Form.Group>
+              )}
+            </Form>
+          }
 
           {/* Table hiển thị danh sách ProductDetail */}
         </Modal.Body>
