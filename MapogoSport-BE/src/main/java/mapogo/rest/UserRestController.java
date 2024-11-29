@@ -2,6 +2,7 @@ package mapogo.rest;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import jakarta.servlet.http.HttpServletRequest;
 import mapogo.dao.AuthorityDAO;
+import mapogo.dao.NotificationDAO;
 import mapogo.dao.OwnerDAO;
 import mapogo.dao.SubsciptionPaymentDAO;
 import mapogo.dao.UserSubscriptionDAO;
@@ -34,12 +36,15 @@ import mapogo.entity.Authority;
 import mapogo.entity.Notification;
 import mapogo.entity.Owner;
 import mapogo.entity.SubscriptionPayment;
+import mapogo.entity.Transaction;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
+import mapogo.entity.Wallet;
 import mapogo.service.AccountPackageService;
 import mapogo.service.EmailService;
 import mapogo.service.OwnerService;
 import mapogo.service.PaymentMethodService;
+import mapogo.service.TransactionService;
 import mapogo.service.UserService;
 import mapogo.service.UserSubscriptionService;
 import mapogo.service.WalletService;
@@ -57,6 +62,9 @@ public class UserRestController {
 
 	@Autowired
 	UserVoucherDAO userVoucherRepository;
+
+	@Autowired
+	NotificationDAO notificationDAO;
 
 	@GetMapping("/user/{username}")
 	public User findUseLoginUser(@PathVariable("username") String username) {
@@ -93,7 +101,7 @@ public class UserRestController {
 	@PostMapping("/user/sendMail")
 	public String sendMail(@RequestBody String email) {
 		String otp = RandomUtils.generateOTP();
-		emailService.sendEmail(email, "MapogoSport", "Bạn đã yêu cầu gửi mã xác nhận mới! Mã của bạn là: " + otp);
+		emailService.sendEmail(email, "MapogoSport", otp);
 		return otp;
 	}
 
@@ -150,8 +158,44 @@ public class UserRestController {
 
 	@Autowired
 	AuthorityDAO authorityDAO;
+	
+	@Autowired
+	TransactionService transactionService;
 
 	// Gia hạn
+	@PostMapping("/user/subscription/updateUserSubscriptionByWallet/{userSubscriptionId}")
+	public ResponseEntity<?> updateUserSubscriptionByWallet(
+			@PathVariable("userSubscriptionId") Integer userSubscriptionId,
+			@RequestBody Map<String, Object> requestBody, HttpServletRequest req) {
+		UserSubscription uS = userSubscriptionDAO.findById(userSubscriptionId).get();
+		User user = uS.getUser();
+		Wallet wallet = walletService.findByUsername(user);
+		int accountPackageId = (int) requestBody.get("accountPackageId");
+		AccountPackage ap = accountPackageService.findById(accountPackageId);
+		if (wallet.getBalance().compareTo(BigDecimal.valueOf(ap.getPrice())) >= 0) {
+			wallet.setBalance(wallet.getBalance().subtract(BigDecimal.valueOf(ap.getPrice())));
+			walletService.update(wallet);
+			Transaction tran = new Transaction();
+			tran.setWallet(wallet);
+			tran.setAmount(BigDecimal.valueOf(ap.getPrice()));
+			tran.setCreatedAt(LocalDateTime.now());
+			tran.setDescription("Thanh toán gia hạn gói tài khoản: "+ap.getPackageName());
+			tran.setTransactionType("-" + ap.getPrice());
+			transactionService.create(tran);		
+			//walletAdmin
+			walletService.addFundsToAdminWallet(BigDecimal.valueOf(ap.getPrice()), 
+					user.getUsername()+" thanh toán gói "+ap.getPackageName());
+			userService.updateUserSubscription(accountPackageId, userSubscriptionId);
+			return ResponseEntity.status(HttpStatus.SC_OK).body("ok");
+
+		} else {
+			return ResponseEntity.status(HttpStatus.SC_OK).body("Số dư trong ví không đủ vui lòng phương thức "
+					+ "hoặc nạp thêm tiền vào ví!");
+
+		}
+
+	}
+
 	@PutMapping("/user/subscription/{userSubscriptionId}")
 	public ResponseEntity<?> updateUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId,
 			@RequestBody Map<String, Object> requestBody, HttpServletRequest req) throws UnsupportedEncodingException {
@@ -275,9 +319,21 @@ public class UserRestController {
 		return userService.findNotificationByUsername(username);
 	}
 
+	@GetMapping("/user/findByUser_UsernameContainingAndTypeContaining/{username}/{type}")
+	public List<Notification> findByUser_UsernameContainingAndTypeContaining(@PathVariable("username") String username,
+			@PathVariable("type") String type) {
+		return userService.findByUser_UsernameContainingAndTypeContaining(username, type);
+	}
+
 	@PutMapping("/user/notification/{username}")
 	public void setViewNotification(@PathVariable("username") String username) {
 		userService.setViewNotification(username);
+	}
+
+	@PutMapping("/user/notification/setViewNotificationTypeNotifyMess/{username}")
+	public void setViewNotificationTypeNotifyMess(@PathVariable("username") String username) {
+		System.err.println("API request received with username: " + username); // Log thêm thông tin
+		userService.setViewNotificationTypeNotifyMess(username);
 	}
 
 	@PutMapping("/user/notification/is/read/{notificationId}")
@@ -290,13 +346,18 @@ public class UserRestController {
 		userService.deleteNotification(username);
 	}
 
+	@DeleteMapping("/user/notification/deleteNotificationHaveTypeNotifyMess/{username}")
+	public void deleteNotificationHaveTypeNotifyMess(@PathVariable("username") String username) {
+		userService.deleteNotificationHaveTypeNotifyMess(username);
+	}
+
 	@Autowired
 	WalletService walletService;
 
 	// của Mỵ từ đây
 	@PostMapping("/wallet/createpaymentrecharge")
-	public ResponseEntity<?> createPaymentRecharge(@RequestBody Map<String, Object> requestBody,
-			HttpServletRequest req) throws UnsupportedEncodingException {
+	public ResponseEntity<?> createPaymentRecharge(@RequestBody Map<String, Object> requestBody, HttpServletRequest req)
+			throws UnsupportedEncodingException {
 		PaymentDTO paymentDTO = userSubService.createPaymentRecharge(requestBody, req);
 		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
@@ -312,10 +373,10 @@ public class UserRestController {
 			walletService.addMoney(username, money);
 
 		}
-			return new RedirectView("http://localhost:3000/user/wallet");
+		return new RedirectView("http://localhost:3000/user/wallet");
 
 	}
-	
+
 	@GetMapping("/wallet/createpaymentrecharge/infoMomo")
 	public RedirectView getInfoMomo(@RequestParam(value = "resultCode") String responseCode,
 			@RequestParam(value = "extraData") String data) {
@@ -326,7 +387,7 @@ public class UserRestController {
 		if (responseCode.equals("0")) {
 			walletService.addMoney(username, money);
 
-		}		
+		}
 		return new RedirectView("http://localhost:3000/user/wallet");
 
 	}

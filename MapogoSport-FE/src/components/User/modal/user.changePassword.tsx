@@ -1,4 +1,4 @@
-import { hashPassword } from "@/components/Utils/Format";
+import { decodeString, hashPassword } from "@/components/Utils/Format";
 import { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -49,7 +49,7 @@ const ModalChangePassword = (props: UserProps) => {
             toast.error("Mật khẩu mới và xác nhận mật khẩu không khớp!");
             return;
         }
-        const username = localStorage.getItem('username');
+        const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
             const hashNewPass = hashPassword(newPassword);
             fetch(`http://localhost:8080/rest/user/${username}`, {

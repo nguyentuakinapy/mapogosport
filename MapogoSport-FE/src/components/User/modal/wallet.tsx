@@ -63,9 +63,9 @@ const WalletPage = () => {
                                     <b>Nội dung: {item.description}</b>
                                     <div>Ngày giao dịch: {new Date(item.createdAt).toLocaleDateString('en-Gb')}</div>
                                 </div>
-                                <div className={`${item.transactionType.slice(0, 1) == "+" ? 'text-success' : 'text-danger'}`}>
+                                <div className={`${item.transactionType.slice(0, 1) == "+" || item.amount === 0 ? 'text-success' : 'text-danger'}`}>
                                     <b>{Number(item.transactionType) < 0 ? Number(item.transactionType).toLocaleString()
-                                        : `+${Number(item.transactionType).toLocaleString()}`} ₫</b>
+                                        : item.amount === 0 ? 'Miễn phí' : `+${Number(item.transactionType).toLocaleString()} ₫`} </b>
                                 </div>
                             </div>
                         </div>
@@ -278,7 +278,11 @@ const WalletPage = () => {
         )
     }
 
-    if (isLoading) return <UserLayout>Đang tải...</UserLayout>;
+    if (isLoading) return <div className="d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-danger" role="status">
+            <span className="visually-hidden">Loading...</span>
+        </div>
+    </div>;
     if (error) return <UserLayout>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</UserLayout>;
 
     return (

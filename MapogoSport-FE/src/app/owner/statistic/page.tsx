@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { InputGroup, Nav, Table } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { formatPrice } from "@/components/Utils/Format"
+import { decodeString, formatPrice } from "@/components/Utils/Format"
 import ModalTableDetail from '@/components/Owner/modal/tableDetailStatictis.modal';
 import CustomerLineChart from '@/components/Owner/Statistic/CustomerLineChart';
 import ModalTableDetailCustomer from '@/components/Owner/modal/tableDetailCustomer.modal';
@@ -74,11 +74,10 @@ export default function Home() {
 
   // Definition getOwner function
   const getOwner = async () => {
-    const user = sessionStorage.getItem('user');
+    const storedUsername = localStorage.getItem('username');
 
-    if (user) {
-      const parsedUserData = JSON.parse(user) as User;
-      const responseOwner = await fetch(`http://localhost:8080/rest/owner/${parsedUserData.username}`);
+    if (storedUsername) {
+      const responseOwner = await fetch(`http://localhost:8080/rest/owner/${decodeString(storedUsername)}`);
       if (!responseOwner.ok) {
         throw new Error('Error fetching data');
       }

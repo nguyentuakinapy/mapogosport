@@ -140,7 +140,9 @@ const ProfileOwnerOrAdmin = () => {
         }
     };
     if (isLoading) return <>Vui lòng đợi trong giây lát</>
-    if (error) return <>Lỗi</>
+    if (error) {
+        window.location.href = "/"
+    }
 
     return (
         <HomeLayout>

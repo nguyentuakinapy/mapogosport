@@ -26,14 +26,4 @@ public class SportFieldDetailRestController {
 		return sportFieldDetailService.findAll();	
 	}
 	
-//	@RequestMapping("/sport_field_detail/size/{sportFieldId}")
-//	public List<String> getSizeSportField(@PathVariable Integer sportFieldId){
-//		return sportFieldDetailService.findSizeBySportFieldId(sportFieldId);
-//	}
-	
-//	@RequestMapping("/sport_field_detail/price/{sportFieldId}/{size}")
-//	public List<Object[]> getPriceBySize(@PathVariable Integer sportFieldId, @PathVariable String size){
-//		return sportFieldDetailService.findPriceBySize(sportFieldId, size);
-//	}
-	
 }

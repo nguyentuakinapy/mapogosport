@@ -13,6 +13,11 @@ const nextConfig = {
                 hostname: 'developers.momo.vn',
                 pathname: '/**',
             },
+            {
+                protocol: 'https',
+                hostname: 'res.cloudinary.com',
+                pathname: '/**',
+            },
         ],
     },
 };

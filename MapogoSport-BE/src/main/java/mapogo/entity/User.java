@@ -49,7 +49,7 @@ public class User implements Serializable {
 	private String email;
 	
 	@Column(name = "Avatar", nullable = true)
-	private String avatar = "avatar-init.gif";
+	private String avatar;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL) 
 	@JsonManagedReference

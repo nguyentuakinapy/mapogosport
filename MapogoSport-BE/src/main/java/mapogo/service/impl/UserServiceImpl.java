@@ -188,6 +188,21 @@ public class UserServiceImpl implements UserService {
 		});
 		return notifications;
 	}
+	@Override
+	public List<Notification> findByUser_UsernameContainingAndTypeContaining(String username, String type) {
+	    User user = userDAO.findById(username).orElseThrow(() -> 
+	        new RuntimeException("User not found with username: " + username));
+	    List<Notification> filteredNotifications = user.getNotifications().stream()
+	        .filter(notification -> notification.getType() != null && notification.getType().contains(type))
+	        .toList();
+	    filteredNotifications.forEach(notification -> {
+	        if (notification.getUser() != null) {
+	            notification.setUsername(notification.getUser().getUsername()); // set thủ công username
+	        }
+	    });
+
+	    return filteredNotifications;
+	}
 
 	@Override
 	public void setViewNotification(String username) {
@@ -199,11 +214,32 @@ public class UserServiceImpl implements UserService {
 
 		messagingTemplate.convertAndSend("/topic/notification/isReadAll/username", u.getUsername());
 	}
+	
+	@Override
+	public void setViewNotificationTypeNotifyMess(String username) {
+		User u = userDAO.findById(username).get();
+		System.err.println("user name "+ u.getUsername());
+		u.getNotifications().forEach(item -> {
+			if("notifyMess".equals(item.getType())) {
+				item.setIsRead(true);
+				notificationDAO.save(item);
+			}
+			
+		});
+		messagingTemplate.convertAndSend("/topic/notification/isReadAll/username", u.getUsername());
+
+	}
 
 	@Override
 	public void deleteNotification(String username) {
 		notificationDAO.deleteByUsername(username);
 
+		messagingTemplate.convertAndSend("/topic/notification/delete/username", username);
+	}
+	@Override
+	public void deleteNotificationHaveTypeNotifyMess(String username) {
+		notificationDAO.deleteByUsernameAndType(username, "notifyMess");
+					
 		messagingTemplate.convertAndSend("/topic/notification/delete/username", username);
 	}
 
@@ -216,4 +252,6 @@ public class UserServiceImpl implements UserService {
 
 		messagingTemplate.convertAndSend("/topic/notification/isRead", n.getUser().getUsername());
 	}
+
+	
 }

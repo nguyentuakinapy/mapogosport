@@ -1,7 +1,7 @@
 // code mowis nah
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { Form, Button, ListGroup } from "react-bootstrap";
+import {  Button, ListGroup } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css"; // Đảm bảo đã cài đặt Bootstrap Icons
 import axios from "axios";
 import useSWR from "swr";
@@ -11,11 +11,13 @@ import SockJS from "sockjs-client";
 import { useData } from "@/app/context/UserContext";
 import { useSearchParams } from "next/navigation";
 import { IFrame } from "@stomp/stompjs";
+import { removeVietnameseTones } from './Utils/Format';
+
 import { toast } from "react-toastify";
-import Image from "next/image";
+import InputChat from "./InputChat/InputChat";
+import { isString } from "lodash";
 
 export default function ChatBox() {
-
   interface Message {
     messageId: number;
     sender: User;
@@ -32,7 +34,7 @@ export default function ChatBox() {
   const [isMaximized, setIsMaximized] = useState(false); // quản lý trạng thái phóng to của chat form
   // const [selectedChat, setSelectedChat] = useState<User>(null); // Quản lý cuộc trò chuyện đang được chọn
   const [selectedChat, setSelectedChat] = useState<User>(); // Quản lý cuộc trò chuyện đang được chọn
-  const [inputMessage, setInputMessage] = useState(""); // lưu trữ nội dung người dùng đang nhập vào ô chat
+  // const [inputMessage, setInputMessage] = useState(""); // lưu trữ nội dung người dùng đang nhập vào ô chat
 
   const [chatListRealTime, setChatListRealTime] = useState<Message[]>([]);
   // const [chatListCurrentUser, setChatListCurrentUser] = useState<Message[]>([]);
@@ -50,8 +52,10 @@ export default function ChatBox() {
 
   const [adminDefault, setAdminDefault] = useState<User | undefined>();
 
-  const [usernameFormUrl, setUsernameFormUrl] = useState<string>("");
+  // const [adminDefaultNew, setAdminDefaultNew] = useState<User | undefined>();
 
+  const [usernameFormUrl, setUsernameFormUrl] = useState<string>("");
+  
   const [ownerCurrent, setOwnerCurrent] = useState<User | undefined | null>();
 
   const [isConnected, setIsConnected] = useState(false); // Thêm trạng thái theo dõi kết nối STOMP
@@ -65,12 +69,9 @@ export default function ChatBox() {
 
   useEffect(() => {
     const encodedStatus = path.get("status");
-    console.log("ccccccccccccccc encodedStatus", encodedStatus);
-    // toast.info('sâsas '+encodedStatus)
     if (encodedStatus) {
       if (encodedStatus === "default") {
         // nếu là default thì mở sẳn admin có sẵn
-        // toast.info('admi '+ adminDefault?.username)
         if (adminDefault) {
           handleSelectChat(adminDefault);
           const newParams = new URLSearchParams(path);
@@ -88,6 +89,7 @@ export default function ChatBox() {
           // Giải mã username từ Base64 và cập nhật state
           const decodedUsername = atob(encodedStatus);
           setUsernameFormUrl(decodedUsername);
+          toast.success('ssasa '+decodedUsername )
         } catch (error) {
           console.error("Lỗi khi giải mã username:", error);
           setUsernameFormUrl(""); // Reset nếu giải mã thất bại
@@ -97,9 +99,7 @@ export default function ChatBox() {
       setUsernameFormUrl(""); // Reset nếu không có tham số
     }
   }, [path]); // Chạy lại mỗi khi searchParams thay đổi
-  useEffect(() => {
-    console.log("use name form url ", usernameFormUrl);
-  }, [usernameFormUrl]);
+  
 
   ////
   const rolePriority = ["ROLE_ADMIN", "ROLE_STAFF", "ROLE_OWNER", "ROLE_USER"];
@@ -111,8 +111,6 @@ export default function ChatBox() {
     )[0];
   };
   const [isExitingMy, setIsExitingMy] = useState<boolean>(true);
-  const [isExitingMyIfAdminDefault, setIsExitingMyAdminDefault] =
-    useState<boolean>(false);
 
   // Cập nhật selectedChat khi adminDefault có sẵn
   useEffect(() => {
@@ -122,12 +120,11 @@ export default function ChatBox() {
       chatListCurrentUserByDMM.length === 0 &&
       selectedChat
       //  && selectedChat === ""
-
     ) {
       console.log("Đã kết nối, gọi handleSelectChat với adminDefault...");
       handleSelectChat(adminDefault); // Chỉ gọi khi isConnected là true
     } else if (ownerCurrent) {
-      // ownerCurrent là kiểu user
+      toast.success('ownerCurrent chạy bào dây '+ ownerCurrent?.username)
       handleSelectChat(ownerCurrent);
     }
   }, [
@@ -230,48 +227,9 @@ export default function ChatBox() {
           console.log("selcect ed chat ", receiver);
           console.log("selcect ed chat ", selectedChat);
 
-          // setChatListCurrentUserByDMM((prevChats) => {
-          //   const isChatExists = prevChats.some(
-          //     (item) => item.user.username === parsedMessage.sender
-          //   );
-
-          //   if (!isChatExists) {
-          //     //  toast.success("có chạy vào không");
-          //     const newUser: User = {
-          //       username: parsedMessage.sender || "Unknown",
-          //       fullname: parsedMessage.senderFullName || "Anonymous",
-          //     };
-          //     console.log("Thêm người gửi mới:", newUser);
-          //     return [
-          //       {
-          //         user: newUser,
-          //         content: parsedMessage.message || "",
-          //         timestamp: new Date().toISOString(),
-          //       },
-          //       ...prevChats,
-          //     ];
-          //   }else{
-          //     // toast.success(" ko có chạy vào không");
-          //     const newUser: User = {
-          //       username: parsedMessage.sender || "Unknown",
-          //       fullname: parsedMessage.senderFullName || "Anonymous",
-          //     };
-          //     return [
-          //       {
-          //         user: newUser,
-          //         content: parsedMessage.message || "",
-          //         timestamp: new Date().toISOString(),
-          //       },
-          //       ...prevChats,
-          //     ];
-
-          //   }
-          //   return prevChats; // Không thay đổi nếu đã tồn tại
-          // });
-
           setChatListCurrentUserByDMM((prevChats) => {
             const existingChatIndex = prevChats.findIndex(
-              (item) => item.user.username === parsedMessage.sender
+              (item) => item?.user?.username === parsedMessage.sender
             );
             console.log('existingChatIndex =>>>' + existingChatIndex);
 
@@ -341,13 +299,20 @@ export default function ChatBox() {
     return isLogin;
   };
 
-  const handleKeyEnter = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter") {
-      handleSendMessage();
+  const handleKeyEnter = (event: React.KeyboardEvent, content:string) => {
+    // console.log('content=========>', content);
+    
+    if (!isString(content)||!content) {
+      return;
     }
+    // if (event.key === "Enter") {
+    // console.log('content=========>', content);
+
+      handleSendMessage(content);
+    // }
 
     // khong lien quan den fect
-    mutate();
+    mutate(); // 
     mutateByReceiverUsernameOrCurrentUser();
   };
 
@@ -372,17 +337,31 @@ export default function ChatBox() {
     }
   }, [chatListRealTime]); // Theo dõi sự thay đổi của danh sách tin nhắn
 
+  const handleSendMessage = (_content: string) => {
+    // console.log("content ++++++ ",inputRef.current);
+    // console.log("_content ++++++>>>>>>>> ",_content);
 
-  const handleSendMessage = () => {
+    let contentStr: string = _content;
+    if( !_content ||!isString(_content)){
+      if (inputRef.current) {
+        contentStr = inputRef.current.value
+      }
+      
+    }
+
+    console.log("_content ++++++>>>>>>>> ",_content);
+    console.log("contentStr ++++++>>>>>>>> ",contentStr);
+    console.log("isString(_content) ++++++>>>>>>>> ",isString(_content));
+
     if (
-      inputMessage.trim() !== "" &&
+      contentStr.trim() !== "" &&
       stompClient.current &&
       stompClient.current.connected
     ) {
       const newMessage = {
         sender: currentUser?.username, // Tên người gửi
         receiver: receiver, // Tên người nhận
-        content: `${inputMessage}/SENDER=${currentUser?.username}-RECEIVER=${receiver}`,
+        content: `${contentStr}/SENDER=${currentUser?.username}-RECEIVER=${receiver}`,
         createdAt: new Date(),
       };
       console.log("Đang gửi tin nhắn");
@@ -408,7 +387,7 @@ export default function ChatBox() {
       // Cập nhật danh sách tin nhắn
       console.log("chat list mớ: ", chatListRealTime);
 
-      setInputMessage(""); // Xóa input sau khi gửi
+      // setInputMessage(""); // Xóa input sau khi gửi
 
       if (inputRef.current) {
         inputRef.current.focus();
@@ -419,136 +398,213 @@ export default function ChatBox() {
     }
   };
 
+  // const handleSelectChat = (chat: User) => {
+  //   if (!checkLogin()) {
+  //     return;
+  //   }
+
+  //   if (messageListRef.current) {
+  //     messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+  //   }
+  //   if (ownerCurrent) {
+  //     setOwnerCurrent(null);
+  //     // setOwnerCurrent(undefined);
+  //   }
+  //   console.log("Đã vào với: ", chat?.username || "Không có tên");
+
+  //   setReceiver(chat?.username);
+  //   console.log("Người nhận là ", chat?.username);
+
+  //   setSelectedChat(chat);
+
+  //     setChatListCurrentUserByDMM((prevChats) => {
+  //       const isChatExists = prevChats.some(
+  //         (item) => item?.user?.username === chat.username);
+  //       if (!isChatExists) {
+  //         return [
+  //           ...prevChats,
+  //           {
+  //             user: chat,
+  //             content: "Chat để được hỗ trợ",
+  //             timestamp: new Date().toISOString(),
+  //           }
+  //         ];
+  //       }
+  //       return prevChats;
+  //     });
+
+  //   if (chatListCurrentUserByDMM.length === 0 && adminDefault) {
+  //     setShowChat(true);
+  //   } else if (chatListCurrentUserByDMM.length === 0) {
+  //     setShowChat(false);
+  //   } else {
+  //     setShowChat(true);
+  //   }
+  //   console.log("ownerCurrent", ownerCurrent);
+  //   if (ownerCurrent) {
+  //     console.log("ownerCurrent dddddd", ownerCurrent);
+
+  //     setShowChat(true);
+
+  //     // // Tạo một bản sao để chỉnh sửa
+  //     const newParams = new URLSearchParams(path);
+  //     newParams.delete("status");
+
+  //     // Cập nhật URL bằng cách sử dụng `replaceState`
+  //     window.history.replaceState(
+  //       {},
+  //       "",
+  //       `${window.location.pathname}?${newParams.toString()}`
+  //     );
+  //   }
+
+  //   const sortedUsers = [currentUser?.username, chat.username].sort();
+  //   const topic = `/topic/public/${sortedUsers[0]}-${sortedUsers[1]}`;
+  //   setCurrentTopic(`${sortedUsers[0]}-${sortedUsers[1]}`);
+
+  //   if (!subscribedTopics.includes(topic)) {
+  //     stompClient.current?.subscribe(topic, (message) => {
+  //       const receivedMessage = JSON.parse(message.body);
+  //       console.log("Received message: ", receivedMessage);
+
+  //       let msgTopic: string = "";
+  //       const arrDestination = message.headers.destination.split("/");
+  //       if (arrDestination.length > 0) {
+  //         msgTopic = arrDestination[arrDestination.length - 1];
+  //       }
+
+  //       receivedMessage["topic"] = msgTopic;
+
+  //       (receivedMessage["tempReceiver"] = receivedMessage.receiver),
+  //         (receivedMessage["tempSender"] = receivedMessage.sender);
+
+  //       console.log("currentUser message: ", currentUser);
+  //       console.log("receiver message: ", receiver);
+  //       console.log("selectedChat message: ", selectedChat);
+  //       console.log("chat?.username message: ", chat?.username);
+
+  //       if (
+  //         (receivedMessage.receiver === currentUser?.username &&
+  //           receivedMessage.sender === chat?.username) ||
+  //         (receivedMessage.receiver === chat?.username &&
+  //           receivedMessage.sender === currentUser?.username)
+  //       ) {
+  //         setChatListRealTime((prevMessages) => [
+  //           ...prevMessages,
+  //           receivedMessage,
+  //         ]);
+
+  //         setDataMessageTemporary({
+  //           content: receivedMessage.content,
+  //           username: chat?.username,
+  //         });
+  //       }
+  //     });
+  //     // toast.warning('sleceffff '+ selectedChat?.username)
+
+  //     // Cập nhật trạng thái đã đăng ký topic
+  //     setSubscribedTopics((prevTopics) => [...prevTopics, topic]);
+  //   }
+  // };
+
+  // Hàm fetch dữ liệu messages
+  
   const handleSelectChat = (chat: User) => {
     if (!checkLogin()) {
       return;
     }
-
+  
     if (messageListRef.current) {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
     }
-    if (ownerCurrent) {
-      setOwnerCurrent(null);
-      // setOwnerCurrent(undefined);
-    }
+  
     console.log("Đã vào với: ", chat?.username || "Không có tên");
-
+  
     setReceiver(chat?.username);
     console.log("Người nhận là ", chat?.username);
-
+  
     setSelectedChat(chat);
-    // mới thêm 19/11
-    // Kiểm tra nếu chat chưa tồn tại trong chatListCurrentUserByDMM, thì thêm mới
+  
     setChatListCurrentUserByDMM((prevChats) => {
       const isChatExists = prevChats.some(
-        (item) => item.user.username === chat.username);
+        (item) => item?.user?.username === chat.username
+      );
       if (!isChatExists) {
         return [
           ...prevChats,
           {
             user: chat,
-            content: "Chat với chủ sân nhé em ơi",
+            content: "Chat để được hỗ trợ",
             timestamp: new Date().toISOString(),
           },
         ];
-
       }
-
       return prevChats;
     });
-    // mới thêm 19/11
-
     if (chatListCurrentUserByDMM.length === 0 && adminDefault) {
-      // toast.success("dang false");
       setShowChat(true);
-      // setShowChat(false);
     } else if (chatListCurrentUserByDMM.length === 0) {
-      // toast.success("chat dang null");
       setShowChat(false);
     } else {
-      // toast.success("dang true");
-
       setShowChat(true);
     }
-
-    console.log("ownerCurrent", ownerCurrent);
-
+  
     if (ownerCurrent) {
       console.log("ownerCurrent dddddd", ownerCurrent);
-
+  
       setShowChat(true);
-
-      // // Tạo một bản sao để chỉnh sửa
+  
       const newParams = new URLSearchParams(path);
       newParams.delete("status");
-
-      // Cập nhật URL bằng cách sử dụng `replaceState`
+  
       window.history.replaceState(
         {},
         "",
         `${window.location.pathname}?${newParams.toString()}`
       );
     }
-
-    // Tạo topic dựa trên người gửi và người nhận
+  
     const sortedUsers = [currentUser?.username, chat.username].sort();
     const topic = `/topic/public/${sortedUsers[0]}-${sortedUsers[1]}`;
     setCurrentTopic(`${sortedUsers[0]}-${sortedUsers[1]}`);
-
-    // Kiểm tra xem topic đã đăng ký chưa
+  
     if (!subscribedTopics.includes(topic)) {
-      // Nếu chưa đăng ký, thì tiến hành đăng ký
       stompClient.current?.subscribe(topic, (message) => {
-        // let receivedMessage = JSON.parse(message.body);
         const receivedMessage = JSON.parse(message.body);
         console.log("Received message: ", receivedMessage);
-
-        let msgTopic: string = "";
+  
+        let msgTopic = "";
         const arrDestination = message.headers.destination.split("/");
         if (arrDestination.length > 0) {
           msgTopic = arrDestination[arrDestination.length - 1];
         }
-
+  
         receivedMessage["topic"] = msgTopic;
-
-        (receivedMessage["tempReceiver"] = receivedMessage.receiver),
-          (receivedMessage["tempSender"] = receivedMessage.sender);
-
-        console.log("currentUser message: ", currentUser);
-        console.log("receiver message: ", receiver);
-        console.log("selectedChat message: ", selectedChat);
-        console.log("chat?.username message: ", chat?.username);
-
+        receivedMessage["tempReceiver"] = receivedMessage.receiver;
+        receivedMessage["tempSender"] = receivedMessage.sender;
+  
         if (
           (receivedMessage.receiver === currentUser?.username &&
             receivedMessage.sender === chat?.username) ||
           (receivedMessage.receiver === chat?.username &&
             receivedMessage.sender === currentUser?.username)
         ) {
-          setChatListRealTime((prevMessages) => [
-            ...prevMessages,
-            receivedMessage,
-          ]);
-
+          setChatListRealTime((prevMessages) => [...prevMessages, receivedMessage]);
           setDataMessageTemporary({
             content: receivedMessage.content,
             username: chat?.username,
           });
         }
       });
-      // toast.warning('sleceffff '+ selectedChat?.username)
-
-      // Cập nhật trạng thái đã đăng ký topic
+  
       setSubscribedTopics((prevTopics) => [...prevTopics, topic]);
     }
+  
+    if (ownerCurrent) {
+      setOwnerCurrent(null); // Reset sau khi tất cả các logic được xử lý
+    }
   };
-  useEffect(() => {
-    console.log("currentUser sau khi set: ", currentUser); // Chạy khi currentUser thay đổi
-    // mutate();
-    // mutateByReceiverUsernameOrCurrentUser();
-  }, [currentUser]);
 
-  // Hàm fetch dữ liệu messages
   const fetchMessages = async (url: string) => {
     const response = await axios.get(url);
     return response.data;
@@ -562,22 +618,127 @@ export default function ChatBox() {
     fetchMessages
   );
 
+
+
   // get data dataByReceiverUsernameOrCurrentUser
   const {
     data: dataByReceiverUsernameOrCurrentUser,
     mutate: mutateByReceiverUsernameOrCurrentUser,
+    
   } = useSWR(
     currentUser
       ? `http://localhost:8080/api/messages/receiver/${currentUser.username}`
       : null,
-    fetchMessages
+    fetchMessages,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
   );
+
+
+  // mới chua
+  // useEffect(() => {
+  //   if (dataByReceiverUsernameOrCurrentUser) {
+  //     let foundMyntd = false;
+  //     let tempAdminDefault = null;
+
+  //     const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
+  //       (acc, message) => {
+  //         const username =
+  //           message.receiver.username === currentUser?.username
+  //             ? message.sender.username
+  //             : message.receiver.username;
+
+  //         // Kiểm tra nếu liên quan đến admin (myntd)
+  //         if (
+  //           message.sender.username === dataAdmin ||
+  //           message.receiver.username === dataAdmin
+  //         ) {
+  //           foundMyntd = true; // Đánh dấu admin đã xuất hiện
+  //           toast.success("my xua hien ")
+  //         } else if (!tempAdminDefault) {
+  //           tempAdminDefault = dataAdmin; // Lưu giá trị admin mặc định tạm thời
+  //         }
+
+  //         // Xử lý nhóm tin nhắn
+  //         if (!acc[username]) {
+  //           acc[username] = {
+  //             user:
+  //               message.receiver.username === currentUser?.username
+  //                 ? message.sender
+  //                 : message.receiver,
+  //             content: message.content,
+  //             timestamp: message.createdAt,
+  //           };
+  //         } else if (
+  //           new Date(message.createdAt) > new Date(acc[username].timestamp)
+  //         ) {
+  //           acc[username].content = message.content;
+  //           acc[username].timestamp = message.createdAt;
+  //         }
+
+  //         return acc;
+  //       },
+  //       {}
+  //     );
+
+  //     const groupedMessagesArray = Object.values(groupedMessages);
+
+  //     // Cập nhật danh sách chat
+  //     setChatListCurrentUserByDMM((prevChats) => {
+  //       const isAdminExists = [...prevChats, ...groupedMessagesArray].some(
+  //         (item) => item?.user?.username === dataAdmin
+  //       );
+
+  //       const updatedChats = isAdminExists
+  //         ? [...groupedMessagesArray]
+  //         : [
+  //             ...groupedMessagesArray,
+  //             {
+  //               user: dataAdmin,
+  //               content: "Chat admin nhé bạn ơi",
+  //               timestamp: new Date().toISOString(),
+  //             },
+  //           ];
+
+  //       console.log("groupedMessagesArray:", JSON.stringify(groupedMessagesArray, null, 2));
+  //       console.log("updatedChats:", JSON.stringify(updatedChats, null, 2));
+  //       return updatedChats;
+  //     });
+
+  //     // Đảm bảo ownerCurrent tồn tại trong danh sách chat
+  //     if (
+  //       ownerCurrent &&
+  //       !groupedMessagesArray.some(
+  //         (item) => item?.user?.username === ownerCurrent.username
+  //       )
+  //     ) {
+  //       setChatListCurrentUserByDMM((prevChats) => [
+  //         ...prevChats,
+  //         {
+  //           user: ownerCurrent,
+  //           content: "",
+  //           timestamp: new Date().toISOString(),
+  //         },
+  //       ]);
+  //     }
+
+  //     console.log("Danh sách chat real-time đã nhóm: ", groupedMessagesArray);
+  //     console.log(
+  //       "Danh sách setChatListCurrentUserByDMM: ",
+  //       chatListCurrentUserByDMM
+  //     );
+  //   }
+  // }, [dataByReceiverUsernameOrCurrentUser, dataAdmin, ownerCurrent]);
 
   useEffect(() => {
     if (dataByReceiverUsernameOrCurrentUser) {
       // Nhóm các tin nhắn theo người gửi hoặc người nhận
       let foundMyntd = false;
       let tempAdminDefault = null;
+
 
       const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
         (acc, message) => {
@@ -605,9 +766,20 @@ export default function ChatBox() {
             // toast.info('sdsddd '+adminDefault )
           }
           if (!foundMyntd) {
-            setIsExitingMy(true);
+            // setIsExitingMy(true);
             setAdminDefault(tempAdminDefault);
-            setIsExitingMyAdminDefault(true); // Chỉ hiển thị admin nếu không có "myntd"
+            // setIsExitingMyAdminDefault(true); // Chỉ hiển thị admin nếu không có "myntd"
+            setChatListCurrentUserByDMM((prevChats) => {    
+                return [
+                  ...prevChats,
+                  {
+                    user: dataAdmin,
+                    content: "Chat admin nhé dddd em",
+                    timestamp: new Date().toISOString(),
+                  },
+                ];
+
+            });
           }
           if (!acc[username]) {
             acc[username] = {
@@ -632,12 +804,37 @@ export default function ChatBox() {
       );
 
       const groupedMessagesArray = Object.values(groupedMessages);
+      
+      // setChatListCurrentUserByDMM(groupedMessagesArray);
 
-      setChatListCurrentUserByDMM(groupedMessagesArray);
-      // setChatListCurrentUserByDMM(groupedMessagesArray as Message[]);
+      // const isFound = chatListCurrentUserByDMM.find((item)=>item?.user?.username === dataAdmin)
+
+      console.log('chatlissttttttttttt', chatListCurrentUserByDMM)
+      console.log('groupedMessagesArray=============', groupedMessagesArray)
+      console.log('dataAdmin=============', dataAdmin)
+
+            setChatListCurrentUserByDMM((prevChats) => {
+        const isAdminExists = [...prevChats, ...groupedMessagesArray].some(
+
+          (item) => item?.user?.username === dataAdmin?.username  // myntd
+        ); 
+  
+        const updatedChats = isAdminExists ? [...groupedMessagesArray]: 
+        [
+              ...groupedMessagesArray,
+              {
+                user: dataAdmin,
+                content: "Chat admin nhé bạn ơi",
+                timestamp: new Date().toISOString(),
+              },
+            ];
+  
+        console.log("groupedMessagesArray:", JSON.stringify(groupedMessagesArray, null, 2));
+        console.log("updatedChats:", JSON.stringify(updatedChats, null, 2));
+        return updatedChats;
+      });
 
       // mới thêm 19/11
-
       if (
         ownerCurrent &&
         !groupedMessagesArray.some(
@@ -662,6 +859,100 @@ export default function ChatBox() {
       );
     }
   }, [dataByReceiverUsernameOrCurrentUser]);
+  
+   // cũ
+  // useEffect(() => {
+  //   if (dataByReceiverUsernameOrCurrentUser) {
+  //     let foundMyntd = false;
+  //     let tempAdminDefault = null;
+
+
+  //     const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
+  //       (acc, message) => {
+  //         const username =
+  //           message.receiver.username === currentUser?.username
+  //             ? message.sender.username
+  //             : message.receiver.username;
+  //         if (
+  //           message.sender.username === "myntd" ||
+  //           message.receiver.username === "myntd"
+  //         ) {
+  //           foundMyntd = true;
+  //           setIsExitingMy(false);
+  //         } else if (!tempAdminDefault) {
+  //           tempAdminDefault = dataAdmin;
+  //         }
+  //         if (!acc[username]) {
+  //           acc[username] = {
+  //             user:
+  //               message.receiver.username === currentUser?.username
+  //                 ? message.sender
+  //                 : message.receiver,
+  //             content: message.content,
+  //             timestamp: message.createdAt,
+  //           };
+  //         } else if (
+  //           new Date(message.createdAt) > new Date(acc[username].timestamp)
+  //         ) {
+  //           // Nếu đã có tin nhắn từ người dùng này, chỉ cập nhật nếu tin nhắn mới hơn
+  //           acc[username].content = message.content;
+  //           acc[username].timestamp = message.createdAt;
+  //         }
+
+  //         return acc;
+  //       },
+  //       {}
+  //     );
+
+  //     const groupedMessagesArray = Object.values(groupedMessages);
+
+  //     setChatListCurrentUserByDMM((prevChats) => {
+  //       const isAdminExists = [...prevChats, ...groupedMessagesArray].some(
+  //         (item) => item?.user?.username === tempAdminDefault?.username
+  //       );
+
+  //       const updatedChats = isAdminExists
+  //         ? [...groupedMessagesArray]
+  //         : [
+  //             ...groupedMessagesArray,
+  //             {
+  //               user: tempAdminDefault,
+  //               content: "Chat admin nhé bạn ơi",
+  //               timestamp: new Date().toISOString(),
+  //             },
+  //           ];
+
+  //       console.log("groupedMessagesArray:", JSON.stringify(groupedMessagesArray, null, 2));
+  //       console.log("updatedChats:", JSON.stringify(updatedChats, null, 2));
+  //       return updatedChats;
+  //     });
+
+
+  //     // mới thêm 19/11
+  //     if (
+  //       ownerCurrent &&
+  //       !groupedMessagesArray.some(
+  //         (item) => item?.user?.username === ownerCurrent.username
+  //       )
+  //     ) {
+  //       setChatListCurrentUserByDMM((prevChats) => [
+  //         ...prevChats,
+  //         {
+  //           user: ownerCurrent,
+  //           content: "",
+  //           timestamp: new Date().toISOString(),
+  //         },
+  //       ]);
+  //     }
+  //     // mới thêm 19/11
+
+  //     console.log("Danh sách chat real-time đã nhóm: ", groupedMessagesArray);
+  //     console.log(
+  //       "Danh sách setChatListCurrentUserByDMM: ",
+  //       chatListCurrentUserByDMM
+  //     );
+  //   }
+  // }, [dataByReceiverUsernameOrCurrentUser, dataAdmin,ownerCurrent]);
 
   const formatTime = (createAt: Date | string) => {
     const date = createAt instanceof Date ? createAt : new Date(createAt);
@@ -682,11 +973,6 @@ export default function ChatBox() {
   }, [chatListCurrentUserByDMM, adminDefault, isExitingMy]);
 
   useEffect(() => {
-    // if (data) {
-    //   setChatListRealTime(data);
-    //   console.log("chat list: ", chatListRealTime);
-    // }                    cũ
-
     if (data) {
       const tempData = data.map((item) => {
         const sortedUsers = [
@@ -696,9 +982,6 @@ export default function ChatBox() {
         return {
           ...item,
           topic: `${sortedUsers[0]}-${sortedUsers[1]}`,
-
-          //   tempReceiver: item.receiver.username,
-          // tempSender: item.sender.username
         };
       });
       setChatListRealTime(tempData);
@@ -706,30 +989,22 @@ export default function ChatBox() {
     } //               mới
   }, [data]);
 
-  useEffect(() => {
-    // Lấy URL từ phía client khi component đã được mount
-    // setUrl(window.location.href);
-    const currentPath = window.location.pathname;
 
-    // Kiểm tra nếu đường dẫn là /chat_page thì ẩn icon chat
+  useEffect(() => {
+    const currentPath = window.location.pathname;
     if (currentPath === "/chat_page") {
-      setShowChatIcon(false); // đg ở trạng hiện chat page cần ẩn
+      setShowChatIcon(false);
     } else {
-      setShowChatIcon(true); // đg ở trang chủ cần hiện
+      setShowChatIcon(true);
     }
   }, []);
 
   useEffect(() => {
     console.log("setSelectedChat: ", selectedChat);
-    // toast.info("đã đổi chat ");
   }, [selectedChat]);
 
   const handleChatToggle = () => {
-    // toast.success('show chat hien jtai là'+ showChat)
-    // toast.success('show chat hien jtai '+ adminDefault)
-
-    setShowChat(!showChat); //nếu true thì thực hiện mở form chat
-
+    setShowChat(!showChat);
     if (adminDefault) {
       handleSelectChat(adminDefault);
     }
@@ -740,10 +1015,8 @@ export default function ChatBox() {
   };
 
   const handleChatAutoTrue = (chat: User) => {
-    // toast.success(chat?.username);
     setShowChat(true); //nếu true thì thực hiện mở form chat
     handleSelectChat(chat);
-    // toast.success(chat?.email);
   };
 
   const handleChatListToggle = () => {
@@ -761,11 +1034,13 @@ export default function ChatBox() {
   const handleMinimizeToggle = () => {
     setIsMinimized(!isMinimized); // nếu true thì thực hiện phóng to
   };
+
   const [searchKeyword, setSearchKeyword] = useState<string>("");
-  // Lọc danh sách người dùng dựa trên từ khóa tìm kiếm
   const filteredChatList = chatListCurrentUserByDMM.filter((chatGroup) =>
-    chatGroup.user?.username.toLowerCase().includes(searchKeyword.toLowerCase())
-  );
+    // chatGroup?.user?.username.toLowerCase().includes(searchKeyword.toLowerCase())
+  removeVietnameseTones(chatGroup?.user?.username.toLowerCase()).includes(
+    removeVietnameseTones(searchKeyword.toLowerCase())
+  ));
   console.log("receiver====>", receiver);
   console.log("current topic====>", currentTopic);
 
@@ -794,12 +1069,10 @@ export default function ChatBox() {
               onClick={handleChatListToggle}
             // Khi click vào icon sẽ mở form chat nhấn vào sẽ thành TRUE
             >
-              <Image
+              <img
                 src="/images/mail_giphy.webp"
-                alt="message"
-                width={40}
-                height={40}
-                style={{ cursor: "pointer" }}
+                alt="Messenger"
+                style={{ width: "40px", cursor: "pointer" }}
               />
             </div>
           </>
@@ -846,36 +1119,36 @@ export default function ChatBox() {
                   {chatListCurrentUserByDMM.length > 0 ? (
                     filteredChatList.map((chatGroup, index) => {
                       const chatUser =
-                        chatGroup.user?.username !== currentUser?.username ? chatGroup.user : null;
+                        chatGroup.user?.username !== currentUser?.username  ? chatGroup.user : null;
+                        const isActive = selectedChat?.username === chatUser?.username;
 
                       if (!chatUser) return null;
-
                       // console.log('sssssssss ',chatUser);
                       // console.log('chat group time ', formatTime(chatGroup.timestamp));
                       return (
                         <ListGroup.Item
                           key={chatUser?.username || index}
                           onClick={() => handleSelectChat(chatUser)}
-                          className="d-flex flex-column"
+                          // className="d-flex flex-column"
+                          className={`d-flex flex-column ${isActive ? 'active-chat' : ''}`}  // Thêm class 'active-chat' nếu mục được chọn
+
                         >
                           <div className="d-flex align-items-center ">
-                            <Image
+                          {/* <div className={`d-flex align-items-center  ${isActive ? 'active-link' : ''}`}> */}
+                            <img
                               src={
                                 chatUser?.avatar
                                   ? chatUser.avatar
                                   : "/chat_page/assets/images/users/user-5.png"
                               }
                               alt={chatUser?.username || "Không có tên"}
-                              width={40}
-                              height={40}
                               style={{
-                                // width: "40px",
-                                // height: "40px",
+                                width: "40px",
+                                height: "40px",
                                 borderRadius: "50%",
                                 marginRight: "10px",
                               }}
                               onError={(e) => {
-
                                 e.currentTarget.src =
                                   "/chat_page/assets/images/users/user-8.png"; // Ảnh mặc định
                               }}
@@ -889,11 +1162,8 @@ export default function ChatBox() {
                           <div className=" mt-1 row">
                             <p className=" col text-start">
                               {dataMessageTemporary === null
-                                ? chatGroup.content
-                                : chatUser.username ===
-                                  dataMessageTemporary.username
-                                  ? dataMessageTemporary.content
-                                  : chatGroup.content}
+                                ? chatGroup.content : chatUser.username === dataMessageTemporary.username
+                                  ? dataMessageTemporary.content : chatGroup.content}
                               {/* {chatGroup.content || "Không có nội dung"} */}
                             </p>
                             {/* <p className="col text-end"> {formatTime(chatGroup.timestamp)}</p> */}
@@ -901,84 +1171,9 @@ export default function ChatBox() {
                         </ListGroup.Item>
                       );
                     })
-                  ) : (
-                    <div className="text-center ">
-                      <ListGroup.Item
-                        onClick={() => handleChatToggle()}
-                        // onClick={() => handleChatAutoTrue(adminDefault)}
-                        className="d-flex flex-column rounded"
-                      >
-                        <div className="d-flex align-items-center">
-                          <Image
-                            src={
-                              adminDefault?.avatar
-                                ? adminDefault?.avatar
-                                : "/chat_page/assets/images/users/user-5.png"
-                            }
-                            alt={adminDefault?.username || "Không có tên"}
-                            width={40}
-                            height={40}
-                            style={{
-                              // width: "40px",
-                              // height: "40px",
-                              borderRadius: "50%",
-                              marginRight: "10px",
-                            }}
-                          />
-                          <strong>
-                            {adminDefault?.fullname
-                              ? adminDefault?.fullname
-                              : "Không có tên"}
-                            s
-                          </strong>
-                        </div>
-                        <div>
-                          <p className="mb-1 r-100">Chat với admin</p>
-                        </div>
-                      </ListGroup.Item>
-                      {/* <i className="bi bi-emoji-frown h1 "></i>
-                      <p className="text-center h6 mt-2">Chưa có danh sách chat</p>
-                       */}
-                    </div>
-                  )}
-                  {/* sdsds */}
-                  {isExitingMyIfAdminDefault && isExitingMy && adminDefault ? (
-                    <div className="text-center ">
-                      <ListGroup.Item
-                        onClick={() => handleChatAutoTrue(adminDefault)}
-                        className="d-flex flex-column rounded"
-                      >
-                        <div className="d-flex align-items-center">
-                          <Image
-                            src={
-                              adminDefault?.avatar
-                                ? adminDefault?.avatar
-                                : "/chat_page/assets/images/users/user-5.png"
-                            }
-                            alt={adminDefault?.username || "Không có tên"}
-                            width={40}
-                            height={40}
-                            style={{
-                              // width: "40px",
-                              // height: "40px",
-                              borderRadius: "50%",
-                              marginRight: "10px",
-                            }}
-                          />
-                          <strong>
-                            {adminDefault?.fullname
-                              ? "Admin Mapogo"
-                              : "Không có tên"
-                            }
-                            g
-                          </strong>
-                        </div>
-                        <div>
-                          <p className="mb-1 r-100">Chat với admin</p>
-                        </div>
-                      </ListGroup.Item>
-                    </div>
-                  ) : null}
+                  ) :
+                  null
+                  }
                 </ListGroup>
               </div>
             </div>
@@ -997,13 +1192,11 @@ export default function ChatBox() {
               }}
             >
               <div className="card-header d-flex align-items-center bg-light">
-                <Image
+                <img
                   src="/images/logo.png"
                   alt="Chat Logo"
                   className="me-2"
-                  // style={{ width: "30px" }}
-                  width={30}
-                  height={30}
+                  style={{ width: "30px" }}
                 />
                 <h6 className="mb-0 title">{selectedChat?.fullname}</h6>
                 <div className="ms-auto">
@@ -1026,10 +1219,9 @@ export default function ChatBox() {
                   >
                     <i
                       className={`h6 bi ${isMaximized
-                        ? "bi-arrows-angle-contract"
-                        : "bi-arrows-fullscreen"
+                          ? "bi-arrows-angle-contract"
+                          : "bi-arrows-fullscreen"
                         }`}
-
                     ></i>
                   </Button>
                   <Button
@@ -1074,26 +1266,16 @@ export default function ChatBox() {
                           <div
                             key={msg.messageId || index}
                             className={`d-flex ${msg.sender.username === currentUser?.username ||
-                              msg.sender === currentUser?.username
-                              ? "justify-content-end"
-                              : "justify-content-start"
-                              }`}
-                          >
-                            {/* <div
-                              className={`p-2 rounded mb-2 ${
-                                msg.sender.username === currentUser?.username ||
                                 msg.sender === currentUser?.username
-                                  ? "bg-primary text-white"
-                                  : "bg-light text-dark"
+                                ? "justify-content-end"
+                                : "justify-content-start"
                               }`}
                           >
-
                             <div
                               className={`p-2 rounded mb-2`}
                               style={{
                                 maxWidth: "80%",
                                 backgroundColor:
-
                                   msg.sender.username ===
                                     currentUser?.username ||
                                     msg.sender === currentUser?.username
@@ -1103,32 +1285,33 @@ export default function ChatBox() {
                                   msg.sender.username ===
                                     currentUser?.username ||
                                     msg.sender === currentUser?.username
-
                                     ? "black" // Màu chữ cho tin nhắn gửi đi
                                     : "black", // Màu chữ cho tin nhắn nhận được
                               }}
                             >
                               {msg.content}
                               {/* Hiển thị thời gian nếu tồn tại */}
-                            <em
-                              className="mt-2"
-                              style={{
-                                display: "block",
-                                fontSize: "0.8em",
-                                color: "black",
-                              }}
-                            >
-                              {msg.createdAt
-                                ? formatTime(msg.createdAt)
-                                : "Không có thời gian"}
-                            </em>
+                              <em
+                                className="mt-2"
+                                style={{
+                                  display: "block",
+                                  fontSize: "0.8em",
+                                  color: "black",
+                                }}
+                              >
+                                {msg.createdAt
+                                  ? formatTime(msg.createdAt)
+                                  : "Không có thời gian"}
+                              </em>
+                            </div>
                           </div>
                         );
                       })}
                   </div>
+
                   {/* Phần nhập liệu và nút gửi */}
                   <div className="card-footer d-flex p-2">
-                    <Form.Control
+                    {/* <Form.Control
                       ref={inputRef}
                       type="text"
                       placeholder="Nhập câu hỏi tiếp theo của bạn"
@@ -1136,6 +1319,11 @@ export default function ChatBox() {
                       onChange={(e) => setInputMessage(e.target.value)}
                       onKeyDown={handleKeyEnter} // sự kiện key down
                       className="me-2"
+                    /> */}
+                   
+                    <InputChat  
+                    inputRef={inputRef}
+                    handleKeyEnter={handleKeyEnter}
                     />
                     <Button
                       variant="warning"
@@ -1150,7 +1338,7 @@ export default function ChatBox() {
             </div>
           )}
         </div>
-      </div >
+      </div>
     </>
   );
 }

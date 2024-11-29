@@ -20,6 +20,17 @@ const formatDateNotime = (dateString: Date) => {
   });
 };
 
+const formatTimeNoDate = (dateString: Date) => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true, // Đảm bảo rằng thời gian sử dụng định dạng 12 giờ (AM/PM)
+  });
+};
+
+
 const formatDateForApi = (date: Date | null) => {
   if (!date) return '';
 
@@ -28,9 +39,6 @@ const formatDateForApi = (date: Date | null) => {
 
   return localDate.toISOString().split('.')[0];
 };
-
-
-
 
 const formatPrice = (price: number) => {
   // Kiểm tra nếu price không hợp lệ hoặc không phải là số
@@ -59,6 +67,34 @@ const hashPassword = (password: string): string => {
   return hash;
 };
 
-export { formatDate, formatPrice, hashPassword, formatDateForApi, formatDateNotime, formatDateVN };
+const encodeJson = (data: object): string => {
+  const jsonString = JSON.stringify(data);
+  return Buffer.from(jsonString).toString('base64');
+}
+
+const decodeJson = (encodedData: string): string => {
+  const jsonString = Buffer.from(encodedData, 'base64').toString('utf-8');
+  return jsonString;
+}
+
+const encodeString = (data: string): string => {
+  return Buffer.from(data).toString('base64');
+}
+
+const decodeString = (encodedData: string): string => {
+  return Buffer.from(encodedData, 'base64').toString('utf-8');
+}
+
+const removeVietnameseTones = (str: string) => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
+};
+export {
+  formatDate, formatPrice, hashPassword, encodeJson, decodeJson, encodeString, decodeString,
+  formatDateForApi, formatDateNotime, formatDateVN, formatTimeNoDate,removeVietnameseTones
+};
 
 

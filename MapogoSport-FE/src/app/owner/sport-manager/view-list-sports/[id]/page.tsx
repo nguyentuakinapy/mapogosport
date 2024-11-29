@@ -1,68 +1,46 @@
 'use client'
 import ModalCreateSportFieldDetail from '@/components/Owner/modal/owner.createSportFieldDetail';
+import { decodeString } from '@/components/Utils/Format';
 import axios from 'axios';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Button, OverlayTrigger, Table, Tooltip } from 'react-bootstrap';
-import useSWR, { mutate } from 'swr';
+import useSWR from 'swr';
 
 const SportFieldDetailList = () => {
-    // const [sportFieldDetail, setSportFieldDetail] = useState([]);
     const [showSportFieldDetailModal, setShowSportFieldDetailModal] = useState<boolean>(false)
-    const [selectedSportFieldDetail, setSelectedSportFieldDetail] = useState(null);
-
-
+    const [selectedSportFieldDetail, setSelectedSportFieldDetail] = useState<SportFieldDetail | null>(null);
     const { id } = useParams();
-    const fetcher = (url: string) => axios.get(url).then(res => res.data);
+    const [username, setUsername] = useState<string | null>(null);
+    const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
     useEffect(() => {
-        getOwner();
-    }, [])
-
-    const [owner, setOwner] = useState<Owner>();
-
-    const getOwner = async () => {
-        const userSession = sessionStorage.getItem('user');
-        const user = userSession ? JSON.parse(userSession) : null;
-        if (user) {
-            const responseOwner = await fetch(`http://localhost:8080/rest/owner/${user.username}`);
-            if (!responseOwner.ok) {
-                throw new Error('Error fetching data');
-            }
-            const dataOwner = await responseOwner.json() as Owner;
-            setOwner(dataOwner);
+        const storedUsername = localStorage.getItem('username');
+        if (storedUsername) {
+            setUsername(decodeString(storedUsername));
         }
-    }
+    }, []);
+
+    const { data: owner, error: ownerError, isLoading: ownerLoading } = useSWR<Owner>(username && `http://localhost:8080/rest/owner/${username}`, fetcher);
+
     // Hook cho sportFieldDetail
-    const { data: sportFieldDetail, error: errorDetail } = useSWR(
-        id ? `http://localhost:8080/rest/sportfielddetail/lists/${id}` : null,
-        fetcher
-    );
+    const { data: sportFieldDetail, error: detailError, isLoading: detailLoading } = useSWR<SportFieldDetail[]>(id && `http://localhost:8080/rest/sportfielddetail/lists/${id}`, fetcher);
 
     // Hook cho sportFieldName
-    const { data: sportFieldName, error: errorName } = useSWR(
-        id ? `http://localhost:8080/rest/sportfielddetail/sportFieldName/${id}` : null,
-        fetcher
-    );
+    const { data: sportFieldName, error: nameError, isLoading: nameLoading } = useSWR(id && `http://localhost:8080/rest/sportfielddetail/sportFieldName/${id}`, fetcher);
 
-    // Xử lý lỗi và trạng thái tải cho sportFieldDetail
-    if (errorDetail) return <div>Error fetching sport field details: {errorDetail.message}</div>;
-    if (!sportFieldDetail) return <div>Loading sport field details...</div>;
-
-    // Xử lý lỗi và trạng thái tải cho sportFieldName
-    if (errorName) return <div>Error fetching sport field name: {errorName.message}</div>;
-    if (!sportFieldName) return <div>Loading sport field name...</div>;
-
-    const handleEditSportFieldDetail = (sportFieldDetail) => {
+    const handleEditSportFieldDetail = (sportFieldDetail: SportFieldDetail | null) => {
         setSelectedSportFieldDetail(sportFieldDetail);
         setShowSportFieldDetailModal(true);
     };
 
+    if (ownerLoading || detailLoading || nameLoading) return <div>Đang tải...</div>
+    if (ownerError || detailError || nameError) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
+
     return (
         <>
-            <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>DANH SÁCH SÂN "{typeof sportFieldName === 'string' ? sportFieldName.toUpperCase() : ''}"</h3>
+            <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>{sportFieldName.toUpperCase()}</h3>
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -79,7 +57,7 @@ const SportFieldDetailList = () => {
                 </thead>
                 <tbody>
                     {sportFieldDetail && sportFieldDetail.map((sfd, index: number) => (
-                        <tr key={sfd.id || index}>
+                        <tr key={sfd.sportFielDetailId}>
                             <td>{index + 1}</td>
                             <td>{sfd.name}</td>
                             <td>{sfd.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
@@ -111,20 +89,17 @@ const SportFieldDetailList = () => {
                     ))}
                 </tbody>
             </Table >
-            <Button style={{ width: "100%" }} variant='danger' onClick={() => handleEditSportFieldDetail(null)}>
-                <i className="bi bi-plus-circle"></i> Thêm sân mới
-            </Button>
-            <Link href={'/owner/sport-manager'} className='btn btn-success btn-hv mt-3'>Quay lại</Link>
+            <div className='d-flex justify-content-between align-items-center'>
+                <Button style={{ width: "93%" }} variant='danger' onClick={() => handleEditSportFieldDetail(null)}>
+                    <i className="bi bi-plus-circle"></i> Thêm sân mới
+                </Button>
+                <Link href={'/owner/sport-manager'} className='btn btn-secondary btn-hv'>Quay lại</Link>
+            </div>
 
-            <ModalCreateSportFieldDetail
-                showSportFieldDetailModal={showSportFieldDetailModal}
-                setShowSportFieldDetailModal={setShowSportFieldDetailModal}
-                selectedSportFieldDetail={selectedSportFieldDetail}
-                setSelectedSportFieldDetail={setSelectedSportFieldDetail}
-                id={id} owner={owner} // Truyền id vào Modal
+            <ModalCreateSportFieldDetail showSportFieldDetailModal={showSportFieldDetailModal} setShowSportFieldDetailModal={setShowSportFieldDetailModal}
+                selectedSportFieldDetail={selectedSportFieldDetail} id={id} owner={owner}
             />
         </>
-
     )
 };
 
