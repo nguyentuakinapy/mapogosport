@@ -1,20 +1,22 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "../admin.scss";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 // Interfaces
 interface IProps {
   isShowAddNewSize: boolean;
-  ProductDetailWasCreated: number;
-  setIsShowAddNewSize: any;
+  ProductDetailWasCreated: number | null;
+  setIsShowAddNewSize: Dispatch<SetStateAction<boolean>>;
   modalTypeProductDetail: "add" | "edit";
   currentProductDetailSize: ProductDetailSize | null;
   selectedProductDetail: ProductDetail | null;
-  onFetchProductDetailSize: any;
+  // onFetchProductDetailSize: any;
+  onFetchProductDetailSize: (data?: ProductDetailSize[] | undefined) => void; // Hàm có thể nhận tham số hoặc không
+
 }
 
 const ModalProductAddNewSize = ({
@@ -49,7 +51,8 @@ const ModalProductAddNewSize = ({
       return;
     }
     try {
-      const response = await axios.post(
+      // const response = await axios.post(
+     await axios.post(
         "http://localhost:8080/rest/size/create",
         { sizeName: newSizeName }
       );
@@ -78,7 +81,7 @@ const ModalProductAddNewSize = ({
     queryKey: ["getDataSize"],
   });
 
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
   const [sizes, setSizes] = useState<Size[]>([]); // Save list of sizes from API
 
   // Cập nhật danh sách kích cỡ khi có dữ liệu từ API
@@ -123,31 +126,12 @@ const ModalProductAddNewSize = ({
     }
   }, [currentProductDetailSize]);
 
-  // Handle form input changes
-  // const handleInputChange = (
-  //   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  // ) => {
-  //   const { name, value } = e.target;
-  //   const numericValue = Number(value);
-
-  //   if (value === "" || value === "Chọn kích cỡ --") {
-  //     toast.warning("Vui lòng chọn kích cỡ"); // Hiển thị thông báo khi không chọn màu
-  //   } else {
-  //     console.log("Selected size value: ", value);
-  //   }
-  //   // Check if the value is a number and not negative
-  //   if (!isNaN(numericValue) && numericValue >= 0) {
-  //     setFormValues((prevValues) => ({
-  //       ...prevValues,
-  //       [name]: numericValue,
-  //     }));
-  //   } else {
-  //     toast.error("Vui lòng nhập đúng định dạng");
-  //   }
-  // };
-
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    // e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  //  e: React.ChangeEvent<Form.Control>
+  e: React.ChangeEvent<
+  HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+>
   ) => {
     const { name, value } = e.target;
 
@@ -219,7 +203,8 @@ const ModalProductAddNewSize = ({
     // Thêm productDetailSize vào FormData
     formData.append("productDetailSize", JSON.stringify(productDetailSize)); // Chuyển đổi đối tượng thành JSON
 
-    const response = await axios.post(
+    // const response = await axios.post(
+    await axios.post(
       `http://localhost:8080/rest/product-detail-size/create/${productDetailId}`,
       formData, // Gửi FormData
       {
@@ -264,7 +249,7 @@ const ModalProductAddNewSize = ({
     onSuccess: () => {
       toast.success("Kích cỡ đã được lưu thành công!");
       onFetchProductDetailSize(); // Gọi mutate để refetch dữ liệu
-      queryClient.invalidateQueries(["getDataSize"]); // Tải lại dữ liệu sau khi cập nhật
+      // queryClient.invalidateQueries(["getDataSize"]); // Tải lại dữ liệu sau khi cập nhật
       handleCloseModal(); // Đóng modal sau khi lưu
     },
     onError: (error) => {
@@ -281,18 +266,31 @@ const ModalProductAddNewSize = ({
       return; // Stop if no size selected
     }
 
-    const sizeData: ProductDetailSize = {
-      // productDetail: selectedProductDetail? { productDetailId: selectedProductDetail.productDetailId }: ProductDetailWasCreated,
-      productDetail:
-        selectedProductDetail !== null
-          ? { productDetailId: selectedProductDetail.productDetailId }
-          : ProductDetailWasCreated,
+    // const sizeData: ProductDetailSize = {
+    //   productDetail:
+    //     selectedProductDetail !== null
+    //       ? { productDetailId: selectedProductDetail.productDetailId }
+    //       : ProductDetailWasCreated,
 
-      size: { sizeId: sizeId } || 0,
-      price: Number(price),
-      quantity: Number(quantity),
-    };
+    //   size: { sizeId: sizeId } || 0,
+    //   price: Number(price),
+    //   quantity: Number(quantity),
+    // };
 
+  const sizeData: ProductDetailSize = {
+    productDetail:
+      selectedProductDetail !== null
+        ? { productDetailId: selectedProductDetail.productDetailId }
+        : ProductDetailWasCreated !== null
+        ? { productDetailId: ProductDetailWasCreated }
+        : { productDetailId: 0 },  // Gán giá trị mặc định nếu null
+
+    size: { sizeId: sizeId ?? 0},
+    price: Number(price),
+    quantity: Number(quantity),
+
+    productDetailSizeId: 0,
+  };
     // Log the sizeData to see what is being sent
     console.log("sizeData: ", sizeData);
 
@@ -328,11 +326,7 @@ const ModalProductAddNewSize = ({
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Row>
-              {/* <span>
-                Id productDetail: {selectedProductDetail?.productDetailId} <br />
-                Id productDetail ProductDetailWasCreated: ${ProductDetailWasCreated}
-              </span> */}
+            <Row>          
               <Col>
                 <Form.Group className="mt-3">
                   <Form.Label>Kích cỡ</Form.Label>
