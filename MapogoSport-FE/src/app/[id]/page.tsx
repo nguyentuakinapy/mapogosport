@@ -6,7 +6,6 @@ import { Col, Container, Nav, Row, Image } from "react-bootstrap";
 import "./profile.scss"
 import useSWR from "swr";
 import Link from "next/link";
-import { toast } from "react-toastify";
 
 const ProfileOwnerOrAdmin = () => {
     const { id } = useParams();

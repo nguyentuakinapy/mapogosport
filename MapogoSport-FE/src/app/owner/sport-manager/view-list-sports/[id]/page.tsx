@@ -40,7 +40,7 @@ const SportFieldDetailList = () => {
 
     return (
         <>
-            <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>DANH SÁCH SÂN "{sportFieldName.toUpperCase()}"</h3>
+            <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>{sportFieldName.toUpperCase()}</h3>
             <Table striped bordered hover>
                 <thead>
                     <tr>
