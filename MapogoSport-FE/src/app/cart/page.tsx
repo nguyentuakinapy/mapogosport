@@ -257,7 +257,7 @@ const Cart = () => {
                             <td>
                               <Link
                                 style={{ textDecoration: 'none', color: '#333' }}
-                                href={`/product-detail/${cart.productDetailSize.productDetail.product.productId}`}
+                                href={`/categories/products/detail/${cart.productDetailSize.productDetail.product.productId}`}
                               >
                                 <p className="mb-0">
                                   {cart.productDetailSize.productDetail.product.name}
