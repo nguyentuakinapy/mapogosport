@@ -19,8 +19,20 @@ const AdminProduct = () => {
   const [itemsPerPage] = useState(8);
   const BASE_URL = "http://localhost:8080";
 
-  const { data: categoryProducts } = useSWR<CategoryProduct[]>(`${BASE_URL}/rest/category_product/category-products`, fetcher);
-  const { data: products, mutate } = useSWR<Product[]>(`${BASE_URL}/rest/products`, fetcher);
+  const { data: categoryProducts } = useSWR<CategoryProduct[]>(`${BASE_URL}/rest/category_product/category-products`, fetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  );
+  const { data: products, mutate } = useSWR<Product[]>(`${BASE_URL}/rest/products`, fetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  );
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value.toLowerCase());
@@ -218,7 +230,7 @@ const AdminProduct = () => {
             ))}
           </Form.Control>
         </div>
-        <Form.Control type="text" placeholder="Tìm theo tên và địa chỉ..." onChange={handleSearch} />
+        <Form.Control type="text" placeholder="Tìm theo tên ..." onChange={handleSearch} />
       </div>
       <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
         <Nav.Item>
@@ -234,7 +246,7 @@ const AdminProduct = () => {
       {renderContent()}
       {renderPagination()}
       <ProductAddNew showAddProduct={showModal} setShowAddProduct={setShowModal} currentProduct={currentProduct}
-        categoryProducts={categoryProducts} />
+        categoryProducts={categoryProducts} onFetch={mutate}  />
     </div>
   )
 }
