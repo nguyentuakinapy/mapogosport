@@ -248,10 +248,9 @@ function Categories() {
                                                                 </div>
                                                                 <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
                                                             </div>
-                                                            <div className="distance mt-1">
+                                                            {/* <div className="distance mt-1">
                                                                 <span>Khoảng cách: {field.distance ? `${field.distance.toFixed(2)} km` : 'N/A'}</span>
-                                                            </div>
-                                                            <Link href={`/categories/sport_field/detail/${field.sportFieldId}`} className="btn btn-user mt-2">Đặt sân</Link>
+                                                            </div> */}
                                                         </div>
                                                     </Col>
                                                 );
