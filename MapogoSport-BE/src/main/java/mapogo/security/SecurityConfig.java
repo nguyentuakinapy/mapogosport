@@ -77,7 +77,8 @@ public PasswordEncoder passwordEncoder() {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:3000")); // Ngu?n ???c phép
+                    config.setAllowedOrigins(List.of("http://26.102.221.2:3000")); // Ngu?n ???c phép
+//                    config.setAllowedOrigins(List.of("http://localhost:3000")); // Ngu?n ???c phép
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Ph??ng th?c HTTP ???c phép
                     config.setAllowedHeaders(List.of("*")); // Header ???c phép
                     config.setAllowCredentials(true); // Cho phép g?i cookie
