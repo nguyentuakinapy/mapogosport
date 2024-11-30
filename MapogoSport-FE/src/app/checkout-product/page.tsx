@@ -14,6 +14,8 @@ import Image from 'next/image';
 
 const CheckoutPage = () => {
   const fetcher = (url: string) => fetch(url).then(res => res.json());
+  const BASE_URL = 'http://localhost:8080/rest/';
+
   const [open_1, setOpen_1] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -33,13 +35,13 @@ const CheckoutPage = () => {
     }
   }, []);
 
-  const { data } = useSWR(cartIds && `http://localhost:8080/rest/checkout_product/${cartIds.join(",")}`, fetcher, {
+  const { data } = useSWR(cartIds && `${BASE_URL}checkout_product/${cartIds.join(",")}`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   })
 
-  const { data: userVoucher } = useSWR(username && `http://localhost:8080/rest/user/voucher/${username}`, fetcher, {
+  const { data: userVoucher } = useSWR(username && `${BASE_URL}user/voucher/${username}`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -60,7 +62,7 @@ const CheckoutPage = () => {
     }
   }, [cartData]);
 
-  const { data: userData } = useSWR(username && `http://localhost:8080/rest/user/${username}`, fetcher, {
+  const { data: userData } = useSWR(username && `${BASE_URL}user/${username}`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false
@@ -257,7 +259,7 @@ const CheckoutPage = () => {
     console.log(orderData);
 
     try {
-      const response = await axios.post('http://localhost:8080/rest/create_order', orderData, {
+      const response = await axios.post(`${BASE_URL}create_order`, orderData, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -296,7 +298,7 @@ const CheckoutPage = () => {
 
         try {
           await axios.post(
-            `http://localhost:8080/rest/create_orderDetail`,
+            `${BASE_URL}create_orderDetail`,
             listCartCheckout,
             {
               params: { orderId: order.orderId }, // truyền orderId qua params

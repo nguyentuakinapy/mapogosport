@@ -8,6 +8,7 @@ import useSWR from "swr";
 import Link from "next/link";
 
 const ProfileOwnerOrAdmin = () => {
+    const BASE_URL = 'http://localhost:8080/rest/';
     const { id } = useParams();
     const [activeTab, setActiveTab] = useState<string>('blog');
     const [userData, setUserData] = useState<User>();
@@ -15,7 +16,7 @@ const ProfileOwnerOrAdmin = () => {
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-    const { data, isLoading, error } = useSWR(`http://localhost:8080/rest/user/${id}`,
+    const { data, isLoading, error } = useSWR(`${BASE_URL}user/${id}`,
         fetcher,
         {
             revalidateIfStale: false,
@@ -31,7 +32,7 @@ const ProfileOwnerOrAdmin = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const fieldResp = await fetch('http://localhost:8080/rest/sport_field');
+                const fieldResp = await fetch(`${BASE_URL}sport_field`);
                 const fields = await fieldResp.json();
                 setSportFields(fields);
             } catch (error) {

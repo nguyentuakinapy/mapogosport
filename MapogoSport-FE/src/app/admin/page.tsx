@@ -8,13 +8,15 @@ import Wallet from "@/components/User/modal/wallet";
 import AuthorityComponent from "@/components/Admin/authority";
 
 export default function Owner() {
+    const BASE_URL = 'http://localhost:8080/rest/';
+
     const [activeTab, setActiveTab] = useState<string>('all');
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
     const userData = useData();
 
     useEffect(() => {
         if (userData) {
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${userData.username}`);
+            setUsernameFetchApi(`${BASE_URL}user/${userData.username}`);
         }
     }, [userData]);
 

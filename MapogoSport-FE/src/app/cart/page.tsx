@@ -13,6 +13,8 @@ import { useRouter } from 'next/navigation';
 
 const Cart = () => {
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
+  const BASE_URL = 'http://localhost:8080/rest/';
+
   const [quantities, setQuantities] = useState<number[]>([]);
   const [dataCart, setDataCart] = useState<Cart[]>([]);
   const [username, setUsername] = useState<string>("");
@@ -28,7 +30,7 @@ const Cart = () => {
     }
   }, []);
 
-  const { data, error } = useSWR(username && `http://localhost:8080/rest/cart/${username}`, fetcher);
+  const { data, error } = useSWR(username && `${BASE_URL}cart/${username}`, fetcher);
 
   useEffect(() => {
     if (data) {
@@ -76,7 +78,7 @@ const Cart = () => {
   // Hàm cập nhật số lượng lên server
   const updateQuantityOnServer = async (index: number, newQuantity: number) => {
     const cartItemId = dataCart[index].cartId;
-    await fetch(`http://localhost:8080/rest/cart/update/${cartItemId}`, {
+    await fetch(`${BASE_URL}cart/update/${cartItemId}`, {
       method: 'PUT',
       headers: {
         'Accept': 'application/json, text/plain, */*',
@@ -171,7 +173,7 @@ const Cart = () => {
 
   const handleDeleCartItem = async (index: number) => {
     const cartItemId = dataCart[index].cartId;
-    await fetch(`http://localhost:8080/rest/cart/delete/${cartItemId}`, {
+    await fetch(`${BASE_URL}cart/delete/${cartItemId}`, {
       method: 'DELETE',
       headers: {
         'Accept': 'application/json, text/plain, */*',
@@ -199,7 +201,7 @@ const Cart = () => {
         setTotalPrice(total); // Cập nhật tổng tiền
       }
 
-      mutate(`http://localhost:8080/rest/cart/count/${username}`); // Tái tải dữ liệu
+      mutate(`${BASE_URL}cart/count/${username}`); // Tái tải dữ liệu
       toast.success("Xóa thành công !");
     })
   };
@@ -207,7 +209,7 @@ const Cart = () => {
   const handleDeleteAll = async () => {
     try {
       const deleteRequests = dataCart.map(cartItem =>
-        fetch(`http://localhost:8080/rest/cart/delete/${cartItem.cartId}`, {
+        fetch(`${BASE_URL}cart/delete/${cartItem.cartId}`, {
           method: 'DELETE',
           headers: {
             'Accept': 'application/json, text/plain, */*',
@@ -229,7 +231,7 @@ const Cart = () => {
       setQuantities([]);
       setTotalPrice(0);
 
-      mutate(`http://localhost:8080/rest/cart/count/${username}`); // Refresh the cart count
+      mutate(`${BASE_URL}cart/count/${username}`); // Refresh the cart count
       toast.success("Đã xóa các sản phẩm được chọn!");
     } catch (error) {
       toast.error("Có lỗi xảy ra khi xóa các sản phẩm được chọn!");

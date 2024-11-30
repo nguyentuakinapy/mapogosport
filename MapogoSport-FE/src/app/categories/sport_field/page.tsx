@@ -19,14 +19,16 @@ function Categories() {
     };
 
     const fetcher = (url: string) => fetch(url).then(res => res.json());
+    const BASE_URL = 'http://localhost:8080/rest/';
+
     const [selectedCategoryField, setSelectedCategoryField] = useState<number[]>([]);
     const [updatedSportFields, setUpdatedSportFields] = useState<SportField[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [currentLocation, setCurrentLocation] = useState<{ lat: number, lng: number } | null>(null);
 
-    const { data: categoriesField } = useSWR<CategoryField[]>("http://localhost:8080/rest/category_field", fetcher);
-    const { data: sportFields } = useSWR<SportField[]>("http://localhost:8080/rest/sport_field", fetcher);
+    const { data: categoriesField } = useSWR<CategoryField[]>(`${BASE_URL}category_field`, fetcher);
+    const { data: sportFields } = useSWR<SportField[]>(`${BASE_URL}sport_field`, fetcher);
 
     const getCurrentLocation = () => {
         if (navigator.geolocation) {
