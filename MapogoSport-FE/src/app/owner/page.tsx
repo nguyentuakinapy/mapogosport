@@ -148,7 +148,6 @@ export default function Owner() {
         const futureDate = new Date(endDate);
         futureDate.setDate(endDate.getDate() + 30);
 
-
         if (selectedPaymentMethod === "Thanh toán ví") {
             if (userData!.wallet.balance > ap!.price) {
                 fetch(`http://localhost:8080/rest/user/subscription/extend/${userSubscription?.userSubscriptionId}/${futureDate}`, {

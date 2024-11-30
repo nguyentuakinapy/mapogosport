@@ -27,6 +27,8 @@ type BookingsTypeOnWeek = {
 
 const SportDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = 'http://localhost:8080/rest/';
+
     const [selectedSize, setSelectedSize] = useState<string>('');
     const [priceBySizeSp, setPriceBySizeSp] = useState<{ price: number, peakHourPrices: number }>({ price: 0, peakHourPrices: 0 });
     const [sportFieldDetailId, setSportFieldDetailId] = useState<number>(0);
@@ -76,13 +78,13 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         };
     }, []);
 
-    const { data: dataReview } = useSWR<FieldReview[]>(`http://localhost:8080/rest/fieldReview/${params.id}`, fetcher, {
+    const { data: dataReview } = useSWR<FieldReview[]>(`${BASE_URL}fieldReview/${params.id}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
 
-    const { data: gallery } = useSWR<GalleryField[]>(`http://localhost:8080/rest/sportfield/gallery/${params.id}`, fetcher, {
+    const { data: gallery } = useSWR<GalleryField[]>(`${BASE_URL}sportfield/gallery/${params.id}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -98,7 +100,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
 
     useEffect(() => {
         const getSport = async () => {
-            const responseSport = await fetch(`http://localhost:8080/rest/sport_field/${params.id}`);
+            const responseSport = await fetch(`${BASE_URL}sport_field/${params.id}`);
             if (!responseSport.ok) {
                 throw new Error("Error fetching data");
             }
@@ -252,7 +254,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
 
         if (dayYears && sportFieldDetail) {
             try {
-                const response = await fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${sportFieldDetailId}/${dayYears[0]}/${dayYears[dayYears.length - 1]}`);
+                const response = await fetch(`${BASE_URL}user/booking/detail/getnextweek/${sportFieldDetailId}/${dayYears[0]}/${dayYears[dayYears.length - 1]}`);
                 if (!response.ok) {
                     throw new Error('Error fetching data');
                 }
@@ -549,7 +551,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
         }
         setSelectedRatingFilter(value);
         const fetchData = async () => {
-            const response = await fetch(`http://localhost:8080/rest/find-fielreview-by-rating/${params.id}/${value}`);
+            const response = await fetch(`${BASE_URL}find-fielreview-by-rating/${params.id}/${value}`);
             const data = await response.json();
             setFilteredData(data);
         };
