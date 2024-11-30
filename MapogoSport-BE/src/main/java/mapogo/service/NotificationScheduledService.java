@@ -63,7 +63,6 @@ public class NotificationScheduledService {
 		int currentHour = now.getHour();
 		int currentMinute = now.getMinute();
 
-		Integer check = 0;
 
 		sportFields.forEach(spf -> {
 
@@ -106,10 +105,12 @@ public class NotificationScheduledService {
 				// Tìm các booking sẽ bắt đầu sau 30 phút
 				List<BookingDetail> bds = bookingDetailDAO.findByDateAndTime(LocalDate.now(), bookingTime,
 						spf.getSportFieldId());
+				boolean check = false;
 
 				if (!bds.isEmpty()) {
 					for (BookingDetail bd : bds) {
 						if (!bd.getStatus().equals("Đã hủy")) {
+							check = true;
 							// Tạo thông báo cho người dùng
 							Notification n = new Notification();
 							n.setUser(bd.getBooking().getOwner().getUser());
@@ -122,10 +123,12 @@ public class NotificationScheduledService {
 							notificationDAO.save(n);							
 						}
 					}
-					messagingTemplate.convertAndSend("/topic/bookingDetail/notification",
-							spf.getOwner().getUser().getUsername());
-					messagingTemplate.convertAndSend("/topic/bookingDetail/notification/reload",
-							spf.getOwner().getUser().getUsername());
+					if (check) {
+						messagingTemplate.convertAndSend("/topic/bookingDetail/notification",
+								spf.getOwner().getUser().getUsername());
+						messagingTemplate.convertAndSend("/topic/bookingDetail/notification/reload",
+								spf.getOwner().getUser().getUsername());
+					}
 				}
 			}
 		});
