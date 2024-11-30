@@ -1374,7 +1374,7 @@ const BookingModal = (props: OwnerProps) => {
                                                 type="text"
                                                 placeholder="Giờ kết thúc!"
                                                 value={bookingDetailData && bookingDetailData.totalAmount <= 0 ?
-                                                    price!.toLocaleString() + ' đ'
+                                                    bookingDetailData.price.toLocaleString() + ' đ'
                                                     :
                                                     bookingDetailData?.totalAmount.toLocaleString() + ' đ'
                                                 }
