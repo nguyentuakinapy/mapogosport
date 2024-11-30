@@ -126,7 +126,7 @@ const OwnerBookingBill = () => {
                     </thead>
                     <tbody>
                         {filteredBookings.length > 0 ?
-                            filteredBookings.map(booking => (
+                            filteredBookings.sort((a, b) => b.bookingId - a.bookingId).map(booking => (
                                 <tr key={booking.bookingId}>
                                     <td className="text-start title">
                                         <Link href={`/owner/booking-bill/detail/${booking.bookingId}`}>#{booking.bookingId}</Link>

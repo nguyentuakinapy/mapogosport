@@ -225,10 +225,7 @@ export default function Owner() {
                                                 </div>
                                             ))}
                                         </div>
-                                        <b className="text-danger ms-3">{ap.price == 0 ? 'Miễn phí' : formatPrice(ap.price)} / Tháng</b>
-                                        {/* <Button className='btn-sub' onClick={() => handleUpdateSubscription(ap)} disabled={isOwned}>
-                                            {isOwned ? "Đã sở hữu" : "Nâng cấp ngay"}
-                                        </Button> */}
+                                        <b className="text-danger ms-3">{ap.price == 0 ? 'Miễn phí' : formatPrice(ap.price) + " / tháng"}</b>
                                         {userSubscription && ap.accountPackageId <= userSubscription?.accountPackage?.accountPackageId ? (
                                             userSubscription.accountPackage.accountPackageId === ap.accountPackageId ?
                                                 userSubscription.accountPackage.packageName === "Gói miễn phí" ?
