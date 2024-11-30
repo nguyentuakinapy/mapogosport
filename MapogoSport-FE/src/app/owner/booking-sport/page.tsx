@@ -134,6 +134,10 @@ export default function BookingSport() {
         }
     }, [dataSport, selectSport])
 
+    // SET STATUS
+    const [checkDataBooking, setCheckDataBooking] = useState<boolean>(false);
+    const [checkDataBookingConfirm, setCheckDataBookingConfirm] = useState<boolean>(false);
+
     useEffect(() => {
         const newData: string[] = [];
 
@@ -193,24 +197,22 @@ export default function BookingSport() {
                     });
                     setBookingsOnWeek(newBookingsOnWeek);
                 }
-                setCheckDataBookingConfirm(prev => !prev)
+                setCheckDataBookingConfirm(prev => !prev);
             }
             setDataTimeSport((prevData) => [...prevData, ...newData]);
         }
-    }, [operatingTime])
-
-    // SET STATUS
-    const [checkDataBooking, setCheckDataBooking] = useState<boolean>(false);
-    const [checkDataBookingConfirm, setCheckDataBookingConfirm] = useState<boolean>(false);
+    }, [operatingTime]);
 
     useEffect(() => {
+        setCheckLoadingData(true);
         setCheckDataBooking(prev => !prev);
     }, [checkDataBookingConfirm]);
 
     useEffect(() => {
-        setCheckLoadingData(true)
+        setCheckLoadingData(true);
         refreshStatusBooking();
     }, [onDay, startWeek, endWeek, selectDate, checkDataBooking, selectSport]);
+
 
     const setDayOnWeek = () => {
         const today = new Date(startWeek);

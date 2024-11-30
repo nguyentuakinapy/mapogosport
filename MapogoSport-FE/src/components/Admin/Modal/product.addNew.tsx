@@ -830,7 +830,7 @@ const ProductAddNew = (props: UserProps) => {
 
       // Kiểm tra và thêm các file gallery đã được chọn vào FormData
       if (selectedGalleryFiles.length > 0) {
-        selectedGalleryFiles.forEach((file, index) => {
+        selectedGalleryFiles.forEach((file, ) => {
           formData.append(`galleryFiles`, file); // Thêm từng file gallery vào FormData
         });
       }

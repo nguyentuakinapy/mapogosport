@@ -1,12 +1,19 @@
 'use client'
 import UserLayout from "@/components/User/UserLayout";
 import Link from "next/link";
-import { Table, Image, Row, Col, Button, Modal, Form } from "react-bootstrap";
+import { Table, Image, Row, Col, Button } from "react-bootstrap";
 import '../../../types/user.scss';
 import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import CancelOrderModal from "../../CancelOrderModal";
 import { toast } from "react-toastify";
+
+type OrderInfo = {
+    fullname: string,
+    phoneNumber: string,
+    address: string,
+    status: string
+}
 
 const OrdersDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -18,7 +25,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
     });
 
     const [orderDetail, setOrderDetail] = useState<OrderDetailMap[]>([]);
-    const [orderInfo, setOrderInfo] = useState<any>(null);
+    const [orderInfo, setOrderInfo] = useState<OrderInfo | null>(null);
     const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
 
     useEffect(() => {
@@ -33,23 +40,23 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
         }
     }, [data]);
 
-    const handleStatusChange = () => {
-        fetch(`http://localhost:8080/rest/admin/order/update`, {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ orderId: Number(params.id), status: "Đã hủy" }),
-        }).then(async (res) => {
-            if (!res.ok) {
-                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                return;
-            }
-            mutate(`http://localhost:8080/rest/user/orders/detail/${params.id}`);
-            toast.success('Cập nhật thành công!');
-        });
-    };
+    // const handleStatusChange = () => {
+    //     fetch(`http://localhost:8080/rest/admin/order/update`, {
+    //         method: 'PUT',
+    //         headers: {
+    //             'Accept': 'application/json, text/plain, */*',
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({ orderId: Number(params.id), status: "Đã hủy" }),
+    //     }).then(async (res) => {
+    //         if (!res.ok) {
+    //             toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+    //             return;
+    //         }
+    //         mutate(`http://localhost:8080/rest/user/orders/detail/${params.id}`);
+    //         toast.success('Cập nhật thành công!');
+    //     });
+    // };
 
     const totalAmount = orderDetail.reduce((sum: number, order: any) => {
         return sum + (order.productPrice * order.quantity);

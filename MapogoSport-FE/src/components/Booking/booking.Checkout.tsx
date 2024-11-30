@@ -558,7 +558,7 @@ const BookingModal = React.memo((props: BookingProps) => {
             })
         }
 
-        let listAddBookingDetail: BookingDetailPeriod[] = [];
+        const listAddBookingDetail: BookingDetailPeriod[] = [];
 
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];

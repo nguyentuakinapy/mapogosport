@@ -700,7 +700,7 @@ const BookingModal = (props: BookingProps) => {
 
         const resBooking = await responseBooking.json() as Booking;
 
-        let listAddBookingDetail: BookingDetailPeriod[] = [];
+        const listAddBookingDetail: BookingDetailPeriod[] = [];
 
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
