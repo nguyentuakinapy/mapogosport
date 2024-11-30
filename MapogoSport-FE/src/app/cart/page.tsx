@@ -259,7 +259,19 @@ const Cart = () => {
     }
   };
 
-
+  if (!username) return <HomeLayout>
+    <div className="d-flex justify-content-center align-items-center" style={{ height: 'calc(100vh - 90px)' }}>
+      <div className="text-center">
+        <i className="bi bi-bag-plus-fill" style={{ fontSize: '100px' }}></i>
+        <p className="text-muted fs-5">Bạn chưa đăng nhập
+          <br /> Vui lòng <strong>&ldquo;đăng nhập&rdquo;</strong> để xem giỏ hàng của bạn!</p>
+        <Link className='btn btn-dark text-white mb-5'
+          style={{ textDecoration: 'none', color: '#333' }}
+          href="/categories/products"
+        > Đăng nhập ngay</Link>
+      </div>
+    </div>
+  </HomeLayout>
   if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
   if (!data) return <HomeLayout><div className='d-flex justify-content-center align-items-center' style={{ height: '90vh' }}><Loading></Loading></div></HomeLayout>
   return (

@@ -13,6 +13,7 @@ import mapogo.dao.WalletDAO;
 import mapogo.entity.Transaction;
 import mapogo.entity.User;
 import mapogo.entity.Wallet;
+import mapogo.service.TransactionService;
 import mapogo.service.WalletService;
 @Service
 public class WalletServiceImpl implements WalletService {
@@ -62,6 +63,10 @@ public class WalletServiceImpl implements WalletService {
 		transaction.setWallet(w);
 		transactionDAO.save(transaction);
 		walletDAO.save(w);
+		
+		//Mỵ
+		this.addFundsToAdminWallet(BigDecimal.valueOf(price), 
+				username +" đăng ký trở thành chủ sân");
 		return w;
 	}
 
@@ -81,6 +86,26 @@ public class WalletServiceImpl implements WalletService {
 		
 		messagingTemplate.convertAndSend("/topic/wallet/username", u.getUsername());
 		
+	}
+	
+	@Autowired
+	TransactionService transactionService;
+
+	@Override
+	public Wallet addFundsToAdminWallet(BigDecimal amount, String description) {
+		User user = userDAO.findById("myntd").get();
+		Wallet walletAdmin = walletDAO.findByUser(user);
+		walletAdmin.setBalance(walletAdmin.getBalance().add(amount));
+		walletDAO.save(walletAdmin);
+		//transaction
+		Transaction tran = new Transaction();
+		tran.setWallet(walletAdmin);
+		tran.setAmount(amount);
+		tran.setCreatedAt(LocalDateTime.now());
+		tran.setDescription(description);
+		tran.setTransactionType("+" + amount);
+		transactionService.create(tran);				
+		return null;
 	}
 	
 }

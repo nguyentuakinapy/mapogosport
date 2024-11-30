@@ -95,14 +95,14 @@ const CheckoutPage = () => {
     }
   }, [userData]);
 
-  const { data: apiAddress } = useSWR("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
+  const { data: apiAddress } = useSWR<ApiAddressResponse>("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false
   });
 
-  const [districts, setDistricts] = useState<any[]>([]);
-  const [wards, setWards] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [wards, setWards] = useState<Ward[]>([]);
   const [selectedProvince, setSelectedProvince] = useState<string>('');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [selectedWard, setSelectedWard] = useState<string>('');
@@ -113,7 +113,9 @@ const CheckoutPage = () => {
   const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const provinceName = e.target.value;
     setSelectedProvince(provinceName);
-    const selectedProvinceData = apiAddress.find((province: any) => province.Name === provinceName);
+    const selectedProvinceData = apiAddress?.find(
+      (province: Province) => province.Name === provinceName
+    );
     setDistricts(selectedProvinceData?.Districts || []);
     setWards([]);
     setSelectedDistrict('');
@@ -123,7 +125,7 @@ const CheckoutPage = () => {
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const districtName = e.target.value;
     setSelectedDistrict(districtName);
-    const selectedDistrictData = districts.find((district: any) => district.Name === districtName);
+    const selectedDistrictData = districts.find((district: District) => district.Name === districtName);
     setWards(selectedDistrictData?.Wards || []);
     setSelectedWard('');
   };
@@ -140,9 +142,9 @@ const CheckoutPage = () => {
       setSelectedWard(addressSelected?.address?.ward);
       setAddressDetail(addressSelected?.addressDetail);
 
-      const selectedProvinceData = apiAddress?.find((province: any) => province.Name === addressSelected?.address?.province);
+      const selectedProvinceData = apiAddress?.find((province: Province) => province.Name === addressSelected?.address?.province);
       setDistricts(selectedProvinceData?.Districts || []);
-      const selectedDistrictData = selectedProvinceData?.Districts.find((district: any) => district.Name === addressSelected?.address?.district);
+      const selectedDistrictData = selectedProvinceData?.Districts.find((district: District) => district.Name === addressSelected?.address?.district);
       setWards(selectedDistrictData?.Wards || []);
     } else {
       setSelectedProvince('');
@@ -445,7 +447,7 @@ const CheckoutPage = () => {
                   <FloatingLabel controlId="city" label={<span>Tỉnh/Thành <b className="text-danger">*</b></span>}>
                     <Form.Select onChange={handleProvinceChange} value={selectedProvince ?? ''} >
                       <option>-- Nhấn để chọn --</option>
-                      {apiAddress?.map((province: any) => (
+                      {apiAddress?.map((province: Province) => (
                         <option key={province.Id} value={province.Name}>{province.Name}</option>
                       ))}
                     </Form.Select>

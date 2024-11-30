@@ -54,7 +54,7 @@ export default function Owner() {
             <div className="profile-header">
                 <div className="profile-info">
                     <h2>{userData?.fullname}</h2>
-                    <p>Thằng nào có tiền thì nạp vào DONATE cho tao</p>
+                    {/* <p>Thằng nào có tiền thì nạp vào DONATE cho tao</p> */}
                     <div className="stats">
                         <span>0 Bài Viết</span>
                         <span>0 Sân</span>

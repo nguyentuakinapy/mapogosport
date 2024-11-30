@@ -8,7 +8,7 @@ interface ReviewProps {
     showReviewModal: boolean;
     setShowReviewModal: (v: boolean) => void;
     idProduct: number;
-    data: any[];
+    data: ProductReviewUser[];
 }
 
 interface StarRating {
@@ -54,7 +54,7 @@ const ModalReviewProductField = (props: ReviewProps) => {
     const user = useData();
     const [rating, setRating] = useState<number>(0); // Trạng thái cho rating
     const [comment, setComment] = useState(''); // Trạng thái cho bình luận
-    const hasReviewed = data?.some(review => review.user.username === user?.username);
+    const hasReviewed = data?.some((review: ProductReviewUser) => review.user.username === user?.username);
 
     const handleRatingSubmit = async () => {
         if (!user || !user.username) {

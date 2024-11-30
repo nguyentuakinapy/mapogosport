@@ -13,3 +13,5 @@ export const fetchCoordinates = async (address: string) => {
     }
     return result;
 };
+
+

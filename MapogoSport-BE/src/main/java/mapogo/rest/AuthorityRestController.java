@@ -1,8 +1,7 @@
 package mapogo.rest;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,10 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import mapogo.dao.AuthorityDAO;
-import mapogo.dao.ProductDAO;
+import mapogo.dao.UserDAO;
 import mapogo.entity.Authority;
-import mapogo.entity.Product;
 import mapogo.entity.Role;
 import mapogo.entity.User;
 import mapogo.service.AuthorityService;
@@ -44,6 +41,9 @@ public class AuthorityRestController {
 	// của Mỵ từ đây
 	@Autowired
 	UserService userService;
+	
+	@Autowired
+	UserDAO userDao;
 
 	@Autowired
 	RoleService roleService;
@@ -54,7 +54,12 @@ public class AuthorityRestController {
 	}
 
 	@PostMapping("/update-user-authority/{username}")
-	public String updateAuthority(@PathVariable String username, @RequestBody List<String> selectedRoles) {
+	public String updateAuthority(@PathVariable String username,
+			@RequestBody Map<String, Object> requestBody) {
+
+	    // Lấy các giá trị từ map
+	    List<String> selectedRoles = (List<String>) requestBody.get("selectedRoles");
+	    boolean enabled = (Boolean) requestBody.get("enabled");
 
 		User user = userService.findByUsername(username);
 
@@ -70,7 +75,9 @@ public class AuthorityRestController {
 			authority.setRole(role);
 			authorityService.createAuthority(authority);
 		}
-
+		
+		user.setEnabled(enabled);
+		userDao.save(user);
 		return "";
 	}
 

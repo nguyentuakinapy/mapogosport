@@ -107,6 +107,7 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
             },
         }).then(() => {
             mutate(`http://localhost:8080/rest/sportfielddetail/lists/${id}`);
+            mutate(`http://localhost:8080/rest/sport_field_by_owner/${owner?.ownerId}`);
             handleClose();
             toast.success("Cập nhật thành công!");
         }).catch(error => {
