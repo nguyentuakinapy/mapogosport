@@ -15,11 +15,11 @@ export default function Address() {
     const [addressUsers, setAddressUsers] = useState<AddressUsers[]>([]);
     const [showAddAddress, setShowAddAddress] = useState<boolean>(false);
     const [showUpdateAddress, setShowUpdateAddress] = useState<boolean>(false);
-    const [selectedAddressUser, setSelectedAddressUser] = useState<any>(null);
+    const [selectedAddressUser, setSelectedAddressUser] = useState<AddressUsers>();
 
-    const removePrefix = (name: string) => {
-        return name.replace(/^(Tỉnh|Thành phố|Quận|Huyện|Phường|Xã)\s*/, '').trim();
-    };
+    // const removePrefix = (name: string) => {
+    //     return name.replace(/^(Tỉnh|Thành phố|Quận|Huyện|Phường|Xã)\s*/, '').trim();
+    // };
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
@@ -36,12 +36,14 @@ export default function Address() {
 
     useEffect(() => {
         if (data && data.addressUsers) {
-            const sortedAddresses = data.addressUsers.sort((a: any, b: any) => b.active - a.active);
+            const sortedAddresses = data.addressUsers.sort(
+                (a: AddressUsers, b: AddressUsers) => (b.active === a.active ? 0 : b.active ? 1 : -1)
+            );
             setAddressUsers(sortedAddresses);
         }
     }, [data]);
 
-    const handleEdit = (addressUser: any) => {
+    const handleEdit = (addressUser: AddressUsers) => {
         setSelectedAddressUser(addressUser);
         setShowUpdateAddress(true);
     };
@@ -98,7 +100,7 @@ export default function Address() {
                     <div className='text-danger'>Có lỗi xảy ra khi tải dữ liệu</div>
                 ) : (
                     addressUsers.length > 0 ? (
-                        addressUsers.map(addressUser => (
+                        addressUsers.map((addressUser: AddressUsers) => (
                             <div key={addressUser.addressUserId} className='item-address'>
                                 <div className="item-left">
                                     <b>Địa chỉ: </b>

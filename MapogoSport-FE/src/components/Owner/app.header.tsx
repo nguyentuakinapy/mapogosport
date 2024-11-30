@@ -1,12 +1,12 @@
 import { useData } from '@/app/context/UserContext';
 import { Stomp } from '@stomp/stompjs';
 import Link from 'next/link';
-import { ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
 import { decodeString } from '../Utils/Format';
 import { usePathname } from 'next/navigation';
-import NotificationModal from './modal/notification.modal';
+
 interface HeaderProps {
     isAniActive: boolean;
     toggleAni: () => void;
@@ -40,7 +40,6 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     const [notification, setNotification] = useState<NotificationUser[]>();
     const userData = useData();
     const [checkNotification, setCheckNotification] = useState<number>(1);
-    const [showNotificationModal, setNotificationModal] = useState<boolean>(false);
     const path = usePathname();
 
     useEffect(() => {

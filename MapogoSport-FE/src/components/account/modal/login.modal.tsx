@@ -4,8 +4,8 @@ import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
 import { decodeJson, encodeJson, encodeString, hashPassword } from "@/components/Utils/Format";
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'; // Để kiểm tra đường dẫn
+import { CredentialResponse, GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { useRouter, useSearchParams } from 'next/navigation'; // Để kiểm tra đường dẫn
 
 
 interface LoginProps {
@@ -95,7 +95,7 @@ export default function Login(props: LoginProps) {
                 } else {
                     toast.error("Thông tin đăng nhập không đúng!");
                 }
-            } catch (error: any) {
+            } catch (error) {
                 toast.error("Thông tin đăng nhập không đúng! ");
             }
         }
@@ -152,7 +152,7 @@ export default function Login(props: LoginProps) {
         console.log("Client-side code running");
     }, []);
 
-    const decodeJWT = (token: any) => {
+    const decodeJWT = (token: string) => {
         try {
             const base64Url = token.split(".")[1];
             const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -169,11 +169,11 @@ export default function Login(props: LoginProps) {
         }
     };
 
-    const handleLoginSuccess = async (response: any) => {
+    const handleLoginSuccess = async (response: CredentialResponse) => {
         const token = response.credential;
         console.log("Token received:", token);
 
-        const user = decodeJWT(token) as JwtGoogleAccount;
+        const user = decodeJWT(token!) as JwtGoogleAccount;
         if (user) {
             console.log("User Info:", user);
             try {

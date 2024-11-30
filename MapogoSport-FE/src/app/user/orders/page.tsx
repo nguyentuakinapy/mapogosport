@@ -68,8 +68,7 @@ const Orders = () => {
     };
 
     const handleRefresh = () => {
-        let filtered = orderUsers;
-        setFilteredOrders(filtered);
+        setFilteredOrders(orderUsers);
         setCurrentPage(1);
         setStartDate(null);
         setEndDate(null);

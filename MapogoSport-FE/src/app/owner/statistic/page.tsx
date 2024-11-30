@@ -732,7 +732,7 @@ export default function Home() {
 
   };
 
-  const renderPagination = (totalPages: number, currentPage: number, handlePageChange: (page: number) => void) => {
+  const renderPagination = (totalPages: number, currentPage: number) => {
     const handlePreviousPage = () => {
       if (currentPage > 1) {
         setCurrentPage(currentPage - 1);
@@ -1029,7 +1029,7 @@ export default function Home() {
                         ))}
                       </tbody>
                     </Table>
-                    {renderPagination(totalPages, currentPage, (page) => setCurrentPage(page))}
+                    {renderPagination(totalPages, currentPage)}
                   </div>
                 )}
                 {activeTabCustomer === "online" && (
@@ -1062,7 +1062,7 @@ export default function Home() {
                         ))}
                       </tbody>
                     </Table>
-                    {renderPagination(totalPagesOnline, currentPage, (page) => setCurrentPage(page))}
+                    {renderPagination(totalPagesOnline, currentPage)}
                   </div>
                 )}
               </div>

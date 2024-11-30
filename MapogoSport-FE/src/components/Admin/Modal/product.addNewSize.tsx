@@ -1,6 +1,6 @@
 "use client";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Button, Col, FloatingLabel, Form, InputGroup, Modal, Row } from "react-bootstrap";
+import { Button, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "../admin.scss";

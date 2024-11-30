@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
-import { decodeString, formatDateNotime } from '../Utils/Format';
+import { decodeString } from '../Utils/Format';
 import { usePathname } from 'next/navigation';
 
 interface HeaderProps {

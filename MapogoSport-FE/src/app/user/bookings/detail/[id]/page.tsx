@@ -12,7 +12,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
     const [bookingDetail, setBookingDetail] = useState<BookingDetailMap[]>([]);
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
 
-    const { data, isLoading, error } = useSWR(`http://localhost:8080/rest/user/booking/detail/${params.id}`, fetcher, {
+    const { data, isLoading, error } = useSWR<BookingDetailMap[]>(`http://localhost:8080/rest/user/booking/detail/${params.id}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -20,7 +20,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
 
     useEffect(() => {
         if (data) {
-            const sortedData = data.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            const sortedData = data.sort((a: BookingDetailMap, b: BookingDetailMap) => new Date(a.date).getTime() - new Date(b.date).getTime());
             setBookingDetail(sortedData);
             const address = data[0].address;
             if (address) {

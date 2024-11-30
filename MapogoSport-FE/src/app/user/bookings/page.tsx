@@ -22,7 +22,7 @@ const Bookings = () => {
     const [itemsPerPage] = useState(8);
     const userData = useData();
 
-    const { data, error, isLoading } = useSWR(userData && `http://localhost:8080/rest/user/booking/${userData.username}`, fetcher, {
+    const { data, error, isLoading } = useSWR<BookingByUserMap[]>(userData && `http://localhost:8080/rest/user/booking/${userData.username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -30,7 +30,7 @@ const Bookings = () => {
 
     useEffect(() => {
         if (data) {
-            const sortedData = data.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            const sortedData = data.sort((a: BookingByUserMap, b: BookingByUserMap) => new Date(b.date).getTime() - new Date(a.date).getTime());
             setBookingUser(sortedData);
             setFilteredBookings(sortedData);
         }
@@ -100,8 +100,7 @@ const Bookings = () => {
     };
 
     const handleRefresh = () => {
-        let filtered = bookingUser;
-        setFilteredBookings(filtered);
+        setFilteredBookings(bookingUser);
         setCurrentPage(1);
         setStartDate(null);
         setEndDate(null);

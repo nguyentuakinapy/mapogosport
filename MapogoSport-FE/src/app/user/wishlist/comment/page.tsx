@@ -1,12 +1,12 @@
 'use client'
 import UserLayout from "@/components/User/UserLayout";
 import { useEffect, useState } from "react";
-import { Col, Form, InputGroup, Row, Pagination, Button } from "react-bootstrap";
+import { Col, Form, InputGroup, Row, Pagination } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../types/user.scss';
 import Link from "next/link";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { toast } from "react-toastify";
 import { decodeString } from "@/components/Utils/Format";
 
@@ -32,7 +32,7 @@ const CommentPage = () => {
 
     const apiFilter = selectedOption === '1' ? fieldFetchAPI : productFetchAPI;
 
-    const { data, error, isLoading } = useSWR(apiFilter ? apiFilter : null, fetcher, {
+    const { data, error, isLoading } = useSWR<(FieldReview | ProductReview)[]>(apiFilter ? apiFilter : null, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -40,7 +40,7 @@ const CommentPage = () => {
 
     useEffect(() => {
         if (data) {
-            const sortedData = data.sort((a: any, b: any) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime());
+            const sortedData = data.sort((a: FieldReview | ProductReview, b: FieldReview | ProductReview) => new Date(b.datedAt).getTime() - new Date(a.datedAt).getTime());
             setReviews(sortedData);
             setFilteredRiviews(sortedData);
         }
@@ -120,8 +120,7 @@ const CommentPage = () => {
     }
 
     const handleRefresh = () => {
-        let filtered = reviews;
-        setFilteredRiviews(filtered);
+        setFilteredRiviews(reviews);
         setCurrentPage(1);
         setStartDate(null);
         setEndDate(null);
@@ -170,7 +169,8 @@ const CommentPage = () => {
                         return (
                             <div className="box-comment-container mb-2" key={key}>
                                 <div className="d-flex justify-content-between align-items-center">
-                                    <Link href={`/categories/sport_field/detail/${fieldReview.sportField.sportFieldId}`}
+                                    {/* <Link href={`/categories/sport_field/detail/${fieldReview.sportField.sportFieldId}`} */}
+                                    <Link href={`/categories/sport_field/detail/`}
                                         className="box-comment" style={{ fontSize: '15px' }}>
                                         <b>{fieldReview.user.fullname}</b> đã đánh giá sân <b>{fieldReview.sportField?.name}</b>.
                                         <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>

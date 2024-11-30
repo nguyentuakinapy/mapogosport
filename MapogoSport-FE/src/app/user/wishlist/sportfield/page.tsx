@@ -24,9 +24,7 @@ const WishListSportField = () => {
         revalidateOnReconnect: false,
     });
 
-    const [rating, setRating] = useState<number>(1.5);
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const itemsPerPage = 6; //Số lượng sân mỗi trang
+    const rating = 1.5;
     const [favoriteField, setFavoriteField] = useState<FavoriteField[]>([]);
 
     useEffect(() => {
