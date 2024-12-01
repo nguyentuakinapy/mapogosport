@@ -7,7 +7,6 @@ import { decodeJson, encodeJson, encodeString, hashPassword } from "@/components
 import { CredentialResponse, GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { useRouter, useSearchParams } from 'next/navigation'; // Để kiểm tra đường dẫn
 
-
 interface LoginProps {
     showLoginModal: boolean;
     setShowLoginModal: (v: boolean) => void;
@@ -20,13 +19,11 @@ interface LoginProps {
 }
 
 export default function Login(props: LoginProps) {
-
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [checkRememberMe, setCheckRememberMe] = useState<boolean>(false);
     const { setRefreshKey, refreshKey } = props;
     const { showLoginModal, setShowLoginModal, setShowRegisterModal, setShowForgotPassword } = props;
-
     const searchParams = useSearchParams();
     const router = useRouter();
 

@@ -12,7 +12,6 @@ import MapComponent from "../../../../utils/MapComponent";
 import { fetchCoordinates } from "../../../../utils/geocode";
 import SearchSportField from '@/components/Booking/booking.Search';
 import { useSearchParams } from 'next/navigation';
-
 import { createTimeStringH, isDateInRange } from '@/components/Utils/booking-time';
 import Image from 'next/image';
 import Loading from '@/components/loading';
@@ -28,7 +27,6 @@ type BookingsTypeOnWeek = {
 const SportDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const BASE_URL = 'http://localhost:8080/rest/';
-
     const [selectedSize, setSelectedSize] = useState<string>('');
     const [priceBySizeSp, setPriceBySizeSp] = useState<{ price: number, peakHourPrices: number }>({ price: 0, peakHourPrices: 0 });
     const [sportFieldDetailId, setSportFieldDetailId] = useState<number>(0);
@@ -49,16 +47,18 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
-
     const searchParams = useSearchParams();
-    const status = searchParams.get('status');
+
     useEffect(() => {
-        if (status === 'success') {
-            toast.success("Đặt sân thành công!");
-        } else if (status === 'fail') {
-            toast.warn("Đã xảy ra lỗi trong quá trình đặt sân, vui lòng thử lại sau!");
+        if (typeof window !== "undefined") {
+            const statusParam = searchParams.get('status');
+            if (statusParam === 'success') {
+                toast.success("Đặt sân thành công!");
+            } else if (statusParam === 'fail') {
+                toast.warn("Đã xảy ra lỗi trong quá trình đặt sân, vui lòng thử lại sau!");
+            }
         }
-    }, [status]);
+    }, [searchParams]);
 
     useEffect(() => {
         const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket

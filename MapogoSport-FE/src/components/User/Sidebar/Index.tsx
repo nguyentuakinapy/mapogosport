@@ -3,7 +3,7 @@ import { usePathname } from 'next/navigation';
 import '../types/user.scss'
 import useLocalStorage from "../useLocalStorage";
 import SidebarItem from "./SideBarItem";
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useData } from '@/app/context/UserContext';
 import { toast } from 'react-toastify';
 import { mutate } from 'swr';
@@ -64,8 +64,8 @@ const Sidebar = () => {
         }
     }, [userData]);
 
-    const handleAvatarChange = async (event: any) => {
-        const file = event.target.files[0];
+    const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
         if (file) {
             const formData = new FormData();
             formData.append("avatar", file);

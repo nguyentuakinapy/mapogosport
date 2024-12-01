@@ -31,7 +31,7 @@ type WeekBookingDetail = {
     [week: string]: BookingDetail[];
 }
 
-const BookingModal = React.memo((props: BookingProps) => {
+const BookingModal = (props: BookingProps) => {
     const { showBookingModal, setShowBookingModal, sportDetail, startTime,
         dayStartBooking, sport, owner, startTimeKey } = props;
     const [selectTime, setSelectTime] = useState<string>('Chọn thời gian');
@@ -868,6 +868,6 @@ const BookingModal = React.memo((props: BookingProps) => {
             </Modal >
         </>
     )
-})
+}
 
 export default BookingModal;

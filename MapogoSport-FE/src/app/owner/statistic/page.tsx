@@ -1,6 +1,6 @@
 'use client'
 import RevenueChart from '@/components/Owner/Statistic/RevenuaChart';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { InputGroup, Nav, Pagination, Table } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -1073,7 +1073,7 @@ export default function Home() {
   };
 
   return (
-    <>
+    <Suspense fallback={<div>Đang tải...</div>}>
       <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>THỐNG KÊ</h3>
       <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
         <Nav.Item>
@@ -1086,7 +1086,6 @@ export default function Home() {
       <div className="mt-3">
         {renderContent()}
       </div>
-    </>
-
+    </Suspense>
   );
 }

@@ -8,7 +8,7 @@ import ViewEditBookingModal from "@/components/Owner/modal/view-edit-booking.mod
 import { calculateTimeDifference, createTimeStringH, getSport, isDateInRange } from "@/components/Utils/booking-time";
 import { decodeString, formatDateVN } from "@/components/Utils/Format";
 import { Stomp } from "@stomp/stompjs";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Col, Row, Table } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
@@ -1304,7 +1304,7 @@ export default function BookingSport() {
     </div>;
 
     return (
-        <>
+        <Suspense fallback={<div>Đang tải...</div>}>
             {/* <input type="text" value={focusedId || ''} onChange={(e) => setFocusedId(Number(e.target.value))} /> */}
             {/* <button onClick={() => handleClick(focusedId!)}>FOCUS</button> */}
             <div className="d-flex align-items-center justify-content-between">
@@ -1453,6 +1453,6 @@ export default function BookingSport() {
             </SearchBookingModal>
             <NotificationModal sizeName={'xl'} textHeadNotification={"Thông báo"} renderNotification={renderNotification} showNotificationModal={showNotificationModal} setNotificationModal={setNotificationModal}>
             </NotificationModal>
-        </>
+        </Suspense>
     );
 }

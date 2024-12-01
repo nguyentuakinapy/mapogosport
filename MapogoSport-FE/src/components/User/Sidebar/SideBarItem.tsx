@@ -4,7 +4,19 @@ import Link from "next/link";
 import { ListGroup } from "react-bootstrap";
 import SidebarDropdown from "./SideBarDropdown";
 
-const SidebarItem = ({ item, pageName, setPageName }: any) => {
+type MenuItem = {
+    label: string;
+    route: string;
+    children?: MenuItem[];
+};
+
+interface SidebarItemProps {
+    item: MenuItem;
+    pageName: string;
+    setPageName: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const SidebarItem = ({ item, pageName, setPageName }: SidebarItemProps) => {
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {

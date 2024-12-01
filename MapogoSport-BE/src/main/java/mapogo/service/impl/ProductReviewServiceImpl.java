@@ -1,7 +1,10 @@
 package mapogo.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -56,8 +59,25 @@ public class ProductReviewServiceImpl implements ProductReviewService {
 	}
 
 	@Override
-	public List<ProductReview> findByUser_Username(String username) {
-		return proReviewDao.findByUser_Username(username);
+	public List<Map<String, Object>> findByUser_Username(String username) {
+		List<ProductReview> productReviews = proReviewDao.findByUser_Username(username);
+		List<Map<String, Object>> result = new ArrayList<>();
+		for (ProductReview review : productReviews) {
+			Map<String, Object> reviewMap = new HashMap<>();
+			reviewMap.put("productReviewId", review.getProductReviewId());
+			reviewMap.put("fullname", review.getUser().getFullname());
+			reviewMap.put("rating", review.getRating());
+			reviewMap.put("comment", review.getComment());
+			reviewMap.put("datedAt", review.getDatedAt());
+
+			Map<String, Object> productMap = new HashMap<>();
+			productMap.put("productName", review.getProduct().getName());
+			productMap.put("productId", review.getProduct().getProductId());
+
+			reviewMap.put("product", productMap);
+			result.add(reviewMap);
+		}
+		return result;
 	}
 
 	@Override
