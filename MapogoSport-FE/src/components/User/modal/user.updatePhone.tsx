@@ -147,7 +147,7 @@ const ModalUpdatePhone = (props: UserProps) => {
                             <i className="bi bi-plus-circle"></i> Thêm số điện thoại
                         </Button>
                         {userData && userData.phoneNumberUsers.length > 0 ?
-                            userData.phoneNumberUsers.sort((a: any, b: any) => b.active - a.active)
+                            userData.phoneNumberUsers.sort((a: PhoneNumberUsers, b: PhoneNumberUsers) => (b.active === a.active ? 0 : b.active ? 1 : -1))
                                 .map(item => (
                                     <div key={item.phoneNumberUserId} className="item-address" >
                                         <div className="item-left">

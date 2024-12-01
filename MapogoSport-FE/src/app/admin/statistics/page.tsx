@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { Button, Pagination, Form, Container } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -559,7 +559,7 @@ const Admin = () => {
 
 
     return (
-        <>
+        <Suspense fallback={<div>Đang tải...</div>}>
             <Container>
                 <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12 mt-3">
                     <div className="white-box">
@@ -655,7 +655,7 @@ const Admin = () => {
                 ) : null}
 
             </Container>
-        </>
+        </Suspense>
 
     );
 };

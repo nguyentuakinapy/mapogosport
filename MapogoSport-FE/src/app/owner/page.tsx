@@ -1,6 +1,6 @@
 'use client'
 import { decodeString, formatPrice } from "@/components/Utils/Format";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Button, Col, Modal, Nav, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
@@ -266,7 +266,7 @@ export default function Owner() {
 
 
     return (
-        <>
+        <Suspense fallback={<div>Đang tải...</div>}>
             <Modal show={showModal} onHide={handleCloseModal} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Chọn phương thức thanh toán</Modal.Title>
@@ -397,8 +397,7 @@ export default function Owner() {
                     </div>
                 </>
             }
-
-        </>
+        </Suspense>
     )
 }
 

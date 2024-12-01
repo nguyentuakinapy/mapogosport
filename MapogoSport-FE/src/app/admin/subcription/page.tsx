@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { Button, Col, Row } from 'react-bootstrap';
 import useSWR from 'swr';
 import { formatPrice } from '@/components/Utils/Format';
@@ -78,7 +78,7 @@ const SubcriptionPage = () => {
     };
 
     return (
-        <>
+        <Suspense fallback={<div>Đang tải...</div>}>
             <div className="box-ultil">
                 <b className="text-danger" style={{ fontSize: '20px' }}>Quản Lý Gói Đăng Ký</b>
                 <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={() => setShowCreateSub(true)}>
@@ -116,7 +116,7 @@ const SubcriptionPage = () => {
 
             <ModalUpdateSubcription showUpdateSub={showUpdateSub} setShowUpdateSub={setShowUpdateSub} selectedPackage={selectedPackage} />
             <ModalCreateSubcription showCreateSub={showCreateSub} setShowCreateSub={setShowCreateSub} />
-        </>
+        </Suspense>
     );
 };
 

@@ -1,6 +1,6 @@
 'use client'
 import ProfileContent from "@/components/User/modal/user.profile";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { useData } from "../context/UserContext";
 import BlogManager from "@/components/blog/blog-manager";
@@ -52,7 +52,7 @@ export default function Owner() {
         }
     };
     return (
-        <>
+        <Suspense fallback={<div>Đang tải...</div>}>
             <div className="profile-header">
                 <div className="profile-info">
                     <h2>{userData?.fullname}</h2>
@@ -87,6 +87,6 @@ export default function Owner() {
                     {renderContent()}
                 </div>
             </div>
-        </>
+        </Suspense>
     )
 }

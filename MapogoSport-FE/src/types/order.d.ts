@@ -53,6 +53,7 @@ interface OrderMap {
 interface OrderDetailMap {
     productImage: string;
     quantity: number;
+    productId: number;
     productColor: string;
     orderDetailId: number;
     productName: string;

@@ -86,15 +86,12 @@ const decodeString = (encodedData: string): string => {
 }
 
 const removeVietnameseTones = (str: string) => {
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D");
+  if (!str) return "";
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
 };
 export {
   formatDate, formatPrice, hashPassword, encodeJson, decodeJson, encodeString, decodeString,
-  formatDateForApi, formatDateNotime, formatDateVN, formatTimeNoDate,removeVietnameseTones
+  formatDateForApi, formatDateNotime, formatDateVN, formatTimeNoDate, removeVietnameseTones
 };
 
 

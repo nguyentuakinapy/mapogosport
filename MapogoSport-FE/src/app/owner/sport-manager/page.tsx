@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import ModalCreateSportField from '@/components/Owner/modal/owner.createSportField';
@@ -38,7 +38,7 @@ const SportFieldList = () => {
     if (sportFieldError || userSubscriptionError) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
     return (
-        <>
+        <Suspense fallback={<div>Đang tải...</div>}>
             <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>QUẢN LÝ SÂN</h3>
             <div className='card p-2'>
                 <div className='d-flex justify-content-between'>
@@ -93,8 +93,7 @@ const SportFieldList = () => {
             </Button>
             <ModalCreateSportField showSportFieldModal={showSportFieldModal} setShowSportFieldModal={setShowSportFieldModal}
                 selectedSportField={selectedSportField} username={username} />
-
-        </>
+        </Suspense>
     );
 };
 

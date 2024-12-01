@@ -1,17 +1,14 @@
 import React from "react";
 import { Chart } from "react-google-charts";
 
-export const options = {
-  hAxis: {
-    title: 'Tháng',
-  },
-  vAxis: {
-    title: 'Số lượng khách hàng',
-  },
-};
+export const options = { hAxis: { title: 'Tháng', }, vAxis: { title: 'Số lượng khách hàng', }, };
+
+type CustomerChartHeader = ['Month', 'Customers'];
+type CustomerChartRow = [number, number];
+type CustomerChartData = [CustomerChartHeader, ...CustomerChartRow[]];
 
 interface CustomerLineChart {
-  data: any[]
+  data: CustomerChartData
 }
 
 export default function CustomerLineChart({ data }: CustomerLineChart) {

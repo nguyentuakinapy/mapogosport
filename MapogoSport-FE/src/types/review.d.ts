@@ -7,6 +7,15 @@ interface FieldReview {
     datedAt: Date;
 }
 
+interface FieldReviewUser {
+    fieldReviewId: number;
+    sportFieldId: number;
+    sportFieldName: string;
+    fullname: string;
+    comment: string;
+    datedAt: Date;
+}
+
 interface ProductReview {
     productReviewId: number;
     product: {
@@ -18,7 +27,6 @@ interface ProductReview {
     comment: string;
     datedAt: Date;
 }
-
 
 interface ProductReviewUser {
     productReviewId: number;

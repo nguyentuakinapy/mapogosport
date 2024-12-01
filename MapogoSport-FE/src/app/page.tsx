@@ -13,6 +13,7 @@ import { Stomp } from "@stomp/stompjs";
 import { decodeJson, decodeString, formatPrice } from "@/components/Utils/Format";
 import useSWR, { mutate } from "swr";
 import Loading from "../components/loading";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const rating = 1.5;
@@ -20,8 +21,9 @@ export default function Home() {
   const [pageProduct, setPageProduct] = useState<number>(1);
   const [pageVoucher, setPageVoucher] = useState<number>(1);
   const [showCreateOwnerModal, setShowCreateOwnerModal] = useState<boolean>(false);
-  const [typeFilter, setTypeFilter] = useState<any>(null);
-  const [nameFilter, setNameFilter] = useState<any>(null);
+  const [typeFilter, setTypeFilter] = useState<number>(0);
+  const [nameFilter, setNameFilter] = useState<string>("");
+  const router = useRouter();
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -116,9 +118,8 @@ export default function Home() {
       type: typeFilter,
     };
     sessionStorage.setItem('searchFilters', JSON.stringify(searchData));
-    window.location.href = "/categories/sport_field";
+    router.push("/categories/sport_field");
   };
-
 
   const handelSubmitGetVoucher = async (voucherId: number) => {
 
@@ -190,7 +191,7 @@ export default function Home() {
           </div>
           <div className="d-flex justify-content-center mt-4">
             <div className="input-group" style={{ width: '70%', backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: '8px', padding: '10px' }}>
-              <Form.Select onChange={(e) => setTypeFilter(e.target.value)} style={{ borderWidth: '0 1px 0 0', borderStyle: 'solid', borderColor: 'black' }}>
+              <Form.Select onChange={(e) => setTypeFilter(Number(e.target.value))} style={{ borderWidth: '0 1px 0 0', borderStyle: 'solid', borderColor: 'black' }}>
                 <option value={'0'}>Lọc theo loại sân</option>
                 {categoryFields && categoryFields.map(item => (
                   <option key={item.categoriesFieldId} value={item.categoriesFieldId}>{item.name}</option>
