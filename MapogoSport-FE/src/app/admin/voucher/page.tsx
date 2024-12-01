@@ -1,11 +1,12 @@
 "use client";
 import useSWR from "swr";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Badge, Button, Form, Nav, OverlayTrigger, Pagination, Table, Tooltip } from "react-bootstrap";
 import "../adminStyle.scss";
 import VoucherAddNew from "@/components/Admin/Modal/voucher.addNew";
 import { useData } from "@/app/context/UserContext";
 import { toast } from "react-toastify";
+import Loading from "@/components/loading";
 
 const VoucherPage = () => {
   const [activeTab, setActiveTab] = useState<string>("all");
@@ -202,43 +203,67 @@ const VoucherPage = () => {
     );
   };
 
-  if (isLoading) return <div>Đang loading dữ liệu voucher</div>;
+  if (isLoading) return <div className="d-flex justify-content-center align-items-center" style={{ height: '90vh', flexDirection: 'column' }}>
+    <p style={{ fontSize: '1.5rem', fontWeight: '600', color: '#555' }}>Đang tải dữ liệu...</p>
+    <div className="d-flex justify-content-center align-items-center" style={{ marginTop: '20px' }}>
+      <Loading />
+    </div>
+    <style jsx>{`
+    p {
+      animation: fadeIn 1.5s ease-in-out infinite;
+    }
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+  `}</style>
+  </div>
+
   if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
   return (
-    <div style={{ fontSize: "14px" }}>
-      <div className="box-ultil">
-        <b className="text-danger" style={{ fontSize: "20px" }}>
-          Quản lý mã giảm giá/ Tổng: {vouchers?.length || 0} mã giảm giá
-        </b>
-        <div>
-          <Form.Control type="text" placeholder="Tìm theo tên và địa chỉ..." onChange={handleSearchChange} />
+    <Suspense fallback={<div>Đang tải...</div>}>
+      <div style={{ fontSize: "14px" }}>
+        <div className="box-ultil">
+          <b className="text-danger" style={{ fontSize: "20px" }}>
+            Quản lý mã giảm giá/ Tổng: {vouchers?.length || 0} mã giảm giá
+          </b>
+          <div>
+            <Form.Control type="text" placeholder="Tìm theo tên và địa chỉ..." onChange={handleSearchChange} />
+          </div>
+          <Button className="btn-sd-admin" style={{ fontSize: "15px" }}
+            onClick={() => {
+              setEditingVoucher(null);
+              setShowAddVoucher(true);
+            }}
+          >
+            <i className="bi bi-plus-circle me-2"></i>Tạo mã giảm giá
+          </Button>
         </div>
-        <Button className="btn-sd-admin" style={{ fontSize: "15px" }}
-          onClick={() => {
-            setEditingVoucher(null);
-            setShowAddVoucher(true);
-          }}
-        >
-          <i className="bi bi-plus-circle me-2"></i>Tạo mã giảm giá
-        </Button>
+        <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
+          <Nav.Item>
+            <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="valid" className="tab-link">Còn hiệu lực</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="inactive" className="tab-link">Hết hiệu lực</Nav.Link>
+          </Nav.Item>
+        </Nav>
+        {renderContent()}
+        {renderPagination()}
+        <VoucherAddNew currentUser={currentUser} showAddVoucher={showAddVoucher} setShowAddVoucher={setShowAddVoucher}
+          voucher={editingVoucher} onFetch={mutate} />
       </div>
-      <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
-        <Nav.Item>
-          <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="valid" className="tab-link">Còn hiệu lực</Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="inactive" className="tab-link">Hết hiệu lực</Nav.Link>
-        </Nav.Item>
-      </Nav>
-      {renderContent()}
-      {renderPagination()}
-      <VoucherAddNew currentUser={currentUser} showAddVoucher={showAddVoucher} setShowAddVoucher={setShowAddVoucher}
-        voucher={editingVoucher} onFetch={mutate} />
-    </div>
+    </Suspense>
   );
 };
 

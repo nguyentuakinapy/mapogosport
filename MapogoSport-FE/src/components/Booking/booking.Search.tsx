@@ -26,7 +26,6 @@ const SearchSportField = (props: SearchBookingProps) => {
     const [validTimes, setValidTimes] = useState<string[]>([]);
     const [opening, setOpening] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);
-    const [checkDataStatus, setCheckDataStatus] = useState<boolean>(true);
 
     useEffect(() => {
         if (sportField && sportField.sportFielDetails) {
@@ -55,12 +54,6 @@ const SearchSportField = (props: SearchBookingProps) => {
 
     useEffect(() => {
         if (sportField) {
-            getTime()
-        };
-    }, [sportField]);
-
-    const getTime = () => {
-        if (sportField) {
             const open = sportField?.opening;
             const close = sportField?.closing;
             if (open && typeof open === 'string' && close && typeof close === 'string') {
@@ -71,8 +64,8 @@ const SearchSportField = (props: SearchBookingProps) => {
                     setOperatingTime(Number(numberClose[0]) - Number(numberOpen[0]));
                 }
             }
-        }
-    }
+        };
+    }, [sportField]);
 
     useEffect(() => {
         const newData: string[] = [];
@@ -112,10 +105,6 @@ const SearchSportField = (props: SearchBookingProps) => {
             let isBooked = false;
             const selectedSportDetail = sportField?.sportFielDetails.find(detail => detail.sportFielDetailId === selectedSportType);
 
-            // if (selectedSportDetail && selectedSportDetail.status === "Tạm đóng") {
-            //     toast.warning("Không tìm thấy sân phù hợp theo nhu cầu!");
-            //     return;
-            // }
             if (selectedSportDetail) {
                 for (const s of selectedSportDetail.statusSportFieldDetails) {
                     let hourStart;
@@ -189,7 +178,6 @@ const SearchSportField = (props: SearchBookingProps) => {
                                     sportField.opening,
                                     sportField.closing
                                 );
-                                // toast.success(s.statusName + "NGos ccasasdasdasdasdasdsa")
 
                                 const result = timeStringH.includes(selectedTime);
                                 if (result) {
@@ -288,10 +276,7 @@ const SearchSportField = (props: SearchBookingProps) => {
             </Modal >
             <CheckoutModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
                 sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
-                sport={sportField} owner={sportField?.owner}
-                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus}
-                startTimeKey={startTimeKey}
-            />
+                sport={sportField} owner={sportField?.owner} startTimeKey={startTimeKey} />
         </>
     )
 }

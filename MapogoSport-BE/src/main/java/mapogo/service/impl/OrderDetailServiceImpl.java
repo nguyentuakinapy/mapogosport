@@ -51,6 +51,7 @@ public class OrderDetailServiceImpl implements OrderDetailService{
 	    for (OrderDetail orderDetail : orderDetails) {
 	        Map<String, Object> orderDetailData = new HashMap<>();
 	        orderDetailData.put("orderDetailId", orderDetail.getOrderDetailId());
+	        orderDetailData.put("productId", orderDetail.getProductDetailSize().getProductDetail().getProduct().getProductId());
 	        orderDetailData.put("productImage", orderDetail.getProductDetailSize().getProductDetail().getImage());
 	        orderDetailData.put("productName", orderDetail.getProductDetailSize().getProductDetail().getProduct().getName());
 	        orderDetailData.put("productColor", orderDetail.getProductDetailSize().getProductDetail().getColor());

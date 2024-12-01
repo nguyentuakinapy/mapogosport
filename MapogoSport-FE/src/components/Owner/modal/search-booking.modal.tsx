@@ -9,7 +9,7 @@ interface SearchBookingProps {
     showSearchBookingModal: boolean;
     setSearchShowBookingModal: (v: boolean) => void;
     dataTimeSport: string[];
-    sportField: SportField;
+    sportField?: SportField;
 }
 
 const SearchBookingModal = (props: SearchBookingProps) => {
@@ -94,7 +94,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
             const modifiedValidTimes = newData.slice(0, -2);
             setValidTimes(modifiedValidTimes);
         }
-    }, [sportField]);
+    }, [sportField, opening]);
 
     const handleFindField = async () => {
         if (selectedDate && selectedTime && sportField) {

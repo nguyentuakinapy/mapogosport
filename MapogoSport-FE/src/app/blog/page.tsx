@@ -1,11 +1,9 @@
 import HomeLayout from "@/components/HomeLayout"
+import { Suspense } from "react";
 import { Col, Container, Row, Image } from "react-bootstrap";
 
 
 const Blog = () => {
-
-
-
     const renderBlog = () => {
         return (
             <>
@@ -78,15 +76,17 @@ const Blog = () => {
     }
 
     return (
-        <HomeLayout>
-            <Container>
-                <Row className="mt-5">
-                    <Col md={3}>SẢN PHẨM Ở ĐÂY</Col>
-                    <Col md={6}>{renderBlog()}</Col>
-                    <Col md={3}>SÂN BÓNG Ở ĐÂY</Col>
-                </Row>
-            </Container>
-        </HomeLayout>
+        <Suspense fallback={<div>Đang tải...</div>}>
+            <HomeLayout>
+                <Container>
+                    <Row className="mt-5">
+                        <Col md={3}>SẢN PHẨM Ở ĐÂY</Col>
+                        <Col md={6}>{renderBlog()}</Col>
+                        <Col md={3}>SÂN BÓNG Ở ĐÂY</Col>
+                    </Row>
+                </Container>
+            </HomeLayout>
+        </Suspense>
     )
 }
 

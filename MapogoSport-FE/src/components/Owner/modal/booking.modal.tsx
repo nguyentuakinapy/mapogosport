@@ -245,7 +245,7 @@ const BookingModal = (props: BookingProps) => {
 
     useEffect(() => {
         getPriceByTimeBooking(selectTime);
-    }, [selectTime, sportDetail]);
+    }, [selectTime, sportDetail, selectTimeOnStage]);
 
     useEffect(() => {
         getPriceByTimeBooking(selectTimeOnStage);
@@ -476,7 +476,7 @@ const BookingModal = (props: BookingProps) => {
         let index = 0;
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
-            for (const [_weekIndex, bookings] of Object.entries(dateWeek)) {
+            for (const [, bookings] of Object.entries(dateWeek)) {
                 bookings.forEach(() => {
                     index = index + 1;
                 })
@@ -700,29 +700,35 @@ const BookingModal = (props: BookingProps) => {
 
         const resBooking = await responseBooking.json() as Booking;
 
+        const listAddBookingDetail: BookingDetailPeriod[] = [];
+
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
-            for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
+            for (const [, bookings] of Object.entries(dateWeek)) {
                 bookings.map(async b => {
-                    await fetch('http://localhost:8080/rest/booking/detail', {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json, text/plain, */*',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            startTime,
-                            endTime,
-                            sportFieldDetailId: sportDetail.sportFielDetailId,
-                            price,
-                            date: b.date,
-                            booking: resBooking.bookingId,
-                            subscriptionKey: activeTab !== 'all' ? `keybooking${resBooking.bookingId}` : "",
-                            weekIndex
-                        })
-                    });
+                    const bookingDetail: BookingDetailPeriod = {
+                        startTime: startTime,
+                        endTime: endTime!,
+                        sportFieldDetailId: sportDetail.sportFielDetailId,
+                        price: price!,
+                        date: b.date,
+                        booking: resBooking.bookingId,
+                        subscriptionKey: activeTab !== 'all' ? `keybooking${resBooking.bookingId}` : "",
+                    };
+
+                    listAddBookingDetail.push(bookingDetail);
                 })
             }
+        }
+        if (listAddBookingDetail.length > 0) {
+            await fetch('http://localhost:8080/rest/booking/detail/create/period', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(listAddBookingDetail)
+            });
         }
         toast.success("Đặt sân thành công!");
     }

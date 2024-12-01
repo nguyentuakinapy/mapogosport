@@ -16,13 +16,11 @@ const CategoryFieldAddNew = (props: CategoryFieldProps) => {
     const [fieldImage, setFieldImage] = useState<File | string>("/images/logo.png");
 
     useEffect(() => {
-        if (!currentCategory) {
-            setFieldName("");
-        } else {
+        if (showAddCategory && currentCategory) {
             setFieldName(currentCategory.name);
             setFieldImage(currentCategory.image);
         }
-    }, [currentCategory]);
+    }, [showAddCategory, currentCategory]);
 
     const handleClose = () => {
         setShowAddCategory(false);

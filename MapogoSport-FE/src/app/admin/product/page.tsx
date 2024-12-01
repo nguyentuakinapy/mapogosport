@@ -1,243 +1,70 @@
-"use client";
-import Link from "next/link";
-import { Button, Table, Badge, Image, OverlayTrigger, Tooltip, Nav, Form } from "react-bootstrap";
-import "../product/adminStyleProduct.scss";
-import React, { useState, useEffect } from "react";
+'use client'
 import ProductAddNew from "@/components/Admin/Modal/product.addNew";
-import axios from "axios";
+import { formatPrice } from "@/components/Utils/Format";
+import Image from "next/image";
+import Link from "next/link";
+import { Suspense, useState } from "react";
+import { Badge, Button, Form, Nav, OverlayTrigger, Pagination, Table, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
-import { useQuery } from "@tanstack/react-query";
+import useSWR from "swr";
 
 const AdminProduct = () => {
+  const fetcher = (url: string) => fetch(url).then((res) => res.json());
   const [activeTab, setActiveTab] = useState<string>("all");
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [modalType, setModalType] = useState<"add" | "edit">("add"); // 'add' hoặc 'edit'
-  const [currentProduct, setCurrentProduct] = useState<Product>(); // Sản phẩm hiện tại
-
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isNeedScroll, setIsNeedScroll] = useState<boolean>(false);
-  const [categoryProducts, setCategoryProducts] = useState<CategoryProduct[]>(
-    []
-  );
-
+  const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [selectedType, setSelectedType] = useState<number>();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(8);
   const BASE_URL = "http://localhost:8080";
 
-  const getDatas = async () => {
-    const apiProducts = "http://localhost:8080/rest/products";
-
-    const apiCategoriesProducts = "http://localhost:8080/rest/category_product/category-products";
-    const [productsRes, categoriesRes] = await Promise.all([
-      axios.get(apiProducts),
-      axios.get(apiCategoriesProducts),
-    ]);
-    return {
-      productsRes,
-      categoriesRes,
-    };
-  };
-
-  const getDatas_DEMO = async () => {
-    const url_getProduct = "http://localhost:8080/rest/products";
-
-    const apiDemo = axios.get(url_getProduct);
-    return apiDemo;
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const apiProducts = "http://localhost:8080/rest/products";
-
-        const apiCategoriesProducts =
-          "http://localhost:8080/rest/category_product/category-products";
-
-        // Gọi cả hai API cùng lúc
-        const [productsRes, categoriesRes] = await Promise.all([
-          axios.get(apiProducts),
-          axios.get(apiCategoriesProducts),
-        ]);
-
-        // Lưu dữ liệu vào state
-        setProducts(productsRes.data); // Dữ liệu từ API products
-        setCategoryProducts(categoriesRes.data); // Dữ liệu từ API category_products
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const { data, isLoading, refetch } = useQuery({
-    queryFn: async () => await getDatas(),
-    queryKey: ["product_category"], //Array according to Documentation
-  });
-
-  const queryDemo = useQuery({
-    queryFn: async () => await getDatas_DEMO(),
-    queryKey: ["getDatas_DEMO"], //Array according to Documentation
-  });
-
-  useEffect(() => {
-    if (!isNeedScroll) return;
-    if (products.length > 0) {
-
-      const ele = document.getElementById(
-        products[products.length - 1].productId.toString()
-      );
-      if (ele) {
-        ele.scrollIntoView();
-        setIsNeedScroll(false);
-      }
+  const { data: categoryProducts } = useSWR<CategoryProduct[]>(`${BASE_URL}/rest/category_product/category-products`, fetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
     }
-  }, [isNeedScroll, products]);
-
-  // load lại data
-  useEffect(() => {
-    if (data) {
-      setProducts(data.productsRes?.data || []);
-      setCategoryProducts(data.categoriesRes?.data || []);
-    }
-  }, [data]);
-
-  const handleEditClick = (product: Product) => {
-    console.log("product ht ", product);
-
-    setCurrentProduct(product)
-    setModalType("edit"); // Đặt loại modal thành 'edit'
-    setShowModal(true); // Hiển thị modal
-  };
-
-  const handleCreateClick = () => {
-    setCurrentProduct(undefined); // Đặt sản phẩm hiện tại là null để tạo mới
-    setModalType("add"); // Đặt loại modal thành 'add'
-    setShowModal(true); // Hiển thị modal
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false); // Đóng modal
-    setCurrentProduct(undefined); // Reset sản phẩm hiện tại
-  };
-
-  // Tìm kiếm
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<number>(); // Giá trị mặc định là rỗng
-
-
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
-
-  // Xử lý khi thay đổi tab
-  const handleTabSelect = (tab: string) => {
-    setActiveTab(tab);
-  };
-  // Hàm loại bỏ dấu tiếng Việt
-  const removeVietnameseTones = (str: string) => {
-    return str
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/đ/g, "d")
-      .replace(/Đ/g, "D");
-  };
-
-  // Hàm lọc sản phẩm đã cập nhật
-  const getFilteredProducts = () => {
-    // Bước 1: Lọc theo trạng thái
-    let filtered = products;
-    if (activeTab === "inStock") {
-      filtered = products.filter((product) => product.status === "Còn hàng");
-    } else if (activeTab === "outStock") {
-      filtered = products.filter((product) => product.status === "Hết hàng");
-    }
-
-    // Bước 2: Lọc theo từ khóa tìm kiếm không dấu
-    if (searchTerm) {
-      const normalizedSearchTerm = removeVietnameseTones(searchTerm).toLowerCase();
-      filtered = filtered.filter((product) =>
-        removeVietnameseTones(product.name).toLowerCase().includes(normalizedSearchTerm)
-      );
-    }
-    if (selectedType) {
-      filtered = filtered.filter((product) => product.categoryProduct.categoryProductId === selectedType)
-
-      // console.log("ssssssssssss " + products[0].categoryProduct.categoryProductId);
-
-    }
-
-    return filtered;
-  };
-
-  const filteredProducts = getFilteredProducts();
-
-
-  // Phần phân trang
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3; // số item trên mỗi trang
-
-  // Tính toán dữ liệu cho trang hiện tại
-  const startIndex = (currentPage - 1) * itemsPerPage;
-
-  const currentItems = filteredProducts.slice(
-    startIndex,
-    startIndex + itemsPerPage
   );
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-
-  // Xử lý khi bấm vào trang mới
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-  // Xử lý khi bấm nút "Lùi"
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+  const { data: products, mutate } = useSWR<Product[]>(`${BASE_URL}/rest/products`, fetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
     }
+  );
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value.toLowerCase());
   };
 
-  // Xử lý khi bấm nút "Tới"
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+  const filteredProducts = products?.filter(p => {
+    return (
+      p.name.toLowerCase().includes(searchTerm)
+    )
+  }).filter(p => {
+    switch (activeTab) {
+      case 'inStock': return p.status === "Còn hàng";
+      case 'outStock': return p.status === "Hết hàng";
+      default: return true;
     }
-  };
-
-  const formatCurrency = (value: number) => {
-    if (value === null || value === undefined) return "";
-    return value.toLocaleString("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    });
-  };
-
-  // Hàm để cập nhật trạng thái sản phẩm thành "Hết hàng"
-  const markProductAsOutOfStock = async (productId: number) => {
-    console.log("productId ", productId);
-
-    const confirmed = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
-
-    if (!confirmed) {
-      return; // Nếu người dùng không xác nhận, thoát khỏi hàm
+  }).filter(p => {
+    if (selectedType) {
+      return p.categoryProduct.categoryProductId == selectedType;
     }
-    try {
-      const response = await axios.put(
-        `${BASE_URL}/rest/products/${productId}/mark-as-out-of-stock`
-      );
-      toast.success("Cập nhật trạng thái sản phẩm thành công");
-
-      // Sử dụng mutate để cập nhật lại dữ liệu sản phẩm
-      // mutate(`${BASE_URL}/rest/products`);
-      refetch();
-
-      return response.data;
-    } catch (error) {
-      console.error("Lỗi khi cập nhật trạng thái sản phẩm:", error);
-      toast.error("Lỗi khi cập nhật trạng thái sản phẩm");
-      throw error;
-    }
-  };
+    return true;
+  });
 
   const renderContent = () => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredProducts?.slice(indexOfFirstItem, indexOfLastItem);
+    return renderTable(currentItems);
+  };
+
+  const renderTable = (filteredProducts: Product[] = []) => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     return (
       <div className="box-table-border mb-4">
         <Table striped className="mb-0">
@@ -250,46 +77,32 @@ const AdminProduct = () => {
             </tr>
           </thead>
           <tbody>
-            {currentItems && currentItems.length > 0 ?
-              currentItems.map((product, index) => (
+            {filteredProducts && filteredProducts.length > 0 ?
+              filteredProducts.map((product, index) => (
                 <tr key={product.productId} id={product.productId.toString()}>
-                  <td className="text-center align-middle">{index + 1}</td>
+                  <td className="text-center align-middle">{indexOfFirstItem + index + 1}</td>
                   <td className="text-center align-middle">
                     <Link href="#">
-                      <Image
-                        loading="lazy"
-                        onClick={() => handleEditClick(product)}
-                        src={`${product.image}`}
-                        style={{ width: "150px", height: "auto" }}
-                        className="mx-2"
-                        alt={`product.image`}
-                        onError={(e) => {
-                          e.currentTarget.src = "/images/logo.png"; // Ảnh mặc định
-                        }}
-                      />
+                      <Image onClick={() => handleEditClick(product)} src={`${product.image}`} width={110} height={110}
+                        alt={`${product.name}`} style={{ height: '180px', width: '200px', objectFit: 'cover' }} />
                     </Link>
                   </td>
                   <td className="text-start align-middle">
                     <div>
-                      <span>Tên sản phẩm: </span>{" "}
+                      <span>Tên sản phẩm: </span>
                       <strong className="text-dark">{product.name}</strong>
                     </div>
                     <div>
                       <span>Ngày tạo:</span>{" "}
-                      <strong>
-                        {new Date(product.createDate).toLocaleDateString()}
-                      </strong>
+                      <strong>{new Date(product.createDate).toLocaleDateString('vi-GB')}</strong>
                     </div>
                     <div>
                       <span>Danh mục:</span>{" "}
-                      <strong>
-                        {product.categoryProduct.name || "Không xác định"}
-                      </strong>
+                      <strong>{product.categoryProduct.name || "Không xác định"}</strong>
                     </div>
                     <div>
-                      {/* <span>Giá:</span> <strong>{product.price}</strong> */}
                       <span>Giá:</span>{" "}
-                      <strong>{formatCurrency(product.price)}</strong>
+                      <strong>{formatPrice(product.price)}</strong>
                     </div>
                     <div>
                       <span>Hãng:</span> <strong>{product.brand}</strong>
@@ -299,15 +112,11 @@ const AdminProduct = () => {
                     </div>
                     <div>
                       <span>Trạng thái:</span>
-                      <Badge bg={product.status === "Còn hàng" ? "success" : "danger"}>
-                        {product.status}
-                      </Badge>
+                      <Badge bg={product.status === "Còn hàng" ? "success" : "danger"}>{product.status}</Badge>
                     </div>
                     <div>
                       <span>Số lượng:</span>
-                      <Badge bg={product.stock >= 1 ? "primary" : "danger"}>
-                        {product.stock}
-                      </Badge>
+                      <Badge bg={product.stock >= 1 ? "primary" : "danger"}>{product.stock}</Badge>
                     </div>
                   </td>
                   <td className="text-center align-middle">
@@ -334,165 +143,114 @@ const AdminProduct = () => {
           </tbody>
         </Table>
       </div>
+    )
+  }
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    const totalPages = products && Math.ceil(products.length / itemsPerPage);
+    if (totalPages && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const renderPagination = () => {
+    const totalPages = filteredProducts && Math.ceil(filteredProducts.length / itemsPerPage);
+    const pages = [];
+
+    if (filteredProducts && filteredProducts.length < 1 || totalPages && totalPages === 1) return null;
+
+    if (totalPages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(
+          <Pagination.Item key={i} active={currentPage === i} onClick={() => setCurrentPage(i)}>{i}</Pagination.Item>
+        );
+      }
+    }
+
+    return (
+      <Pagination>
+        <Pagination.Prev onClick={handlePreviousPage} disabled={currentPage === 1} />
+        {pages}
+        <Pagination.Next onClick={handleNextPage} disabled={currentPage === totalPages} />
+      </Pagination>
     );
   };
 
-  if (queryDemo.isPending) return <div>Đang tải...</div>;
+  const markProductAsOutOfStock = async (productId: number) => {
+    if (window.confirm('Bạn có chắc muốn xóa loại sân này?')) {
+      await fetch(`${BASE_URL}/rest/products/${productId}/mark-as-out-of-stock`, {
+        method: 'PUT',
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Content-Type': 'application/json',
+        }
+      }).then((res) => {
+        if (!res.ok) {
+          toast.error('Cập nhật trạng thái sản phẩm thất bại!');
+          return;
+        }
+        mutate();
+        toast.success("Cập nhật trạng thái sản phẩm thành công");
+      });
+    }
+  };
 
-  if (isLoading) return <div>Đang tải...</div>;
+  const handleEditClick = (product: Product) => {
+    setCurrentProduct(product)
+    setShowModal(true);
+  };
+
+  const handleCreateClick = () => {
+    setCurrentProduct(null);
+    setShowModal(true);
+  };
 
   return (
-    <div style={{ fontSize: "14px" }}>
-      <div className="box-ultil d-flex flex-wrap align-items-center justify-content-between gap-3">
-        {/* Tổng số sản phẩm */}
-        <b className="text-danger flex-grow-1" style={{ fontSize: "20px" }}>
-          Quản lý sản phẩm/ Tổng: {products?.length || 0} sản phẩm
-        </b>
-
-        {/* Dropdown chọn loại sản phẩm */}
-        <div className="d-flex align-items-center" style={{ gap: "10px" }}>
-          <i className="bi bi-funnel fs-4"></i>
-          <Form.Control as="select" name="categoryProduct"
-            value={selectedType}
-            onChange={(e) => setSelectedType(Number(e.target.value))}
-            style={{ minWidth: "200px" }}
-          >
-            <option value="">Tất cả loại sản phẩm</option>
-            {categoryProducts.map((category) => (
-              <option key={category.categoryProductId} value={category.categoryProductId}>
-                {category.name}
-              </option>
-            ))}
-          </Form.Control>
-        </div>
-
-        {/* Input tìm kiếm sản phẩm */}
-        <input
-          type="text"
-          placeholder="Tìm kiếm sản phẩm..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          style={{
-            padding: "5px 10px",
-            fontSize: "14px",
-            borderRadius: "5px",
-            border: "1px solid #ddd",
-            width: "200px",
-            flexShrink: 0,
-          }}
-        />
-
-        {/* Nút thêm sản phẩm */}
-        <Button
-          className="btn-sd-admin"
-          style={{ fontSize: "15px", whiteSpace: "nowrap" }}
-          onClick={handleCreateClick}
-        >
-          <i className="bi bi-plus-circle me-2"></i>Thêm Sản Phẩm
-        </Button>
-      </div>
-
-      <Nav
-        variant="pills"
-        activeKey={activeTab}
-        // onSelect={(selectedKey) => setActiveTab(selectedKey as string)}
-        onSelect={(selectedKey) => handleTabSelect(selectedKey ? selectedKey : '')}
-        className="custom-tabs my-3"
-      >
-        <Nav.Item>
-          <Nav.Link eventKey="all" className="tab-link">
-            Toàn bộ
-          </Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="inStock" className="tab-link">
-            Còn hàng
-          </Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="outStock" className="tab-link">
-            Hết hàng
-          </Nav.Link>
-        </Nav.Item>
-      </Nav>
-
-      <div className="mt-3">
-        {renderContent()}
-
-        {currentItems.length > 0 ? (
-          <div className="pagination">
-            {/* Nút "Đầu tiên" 
-            <div className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-              <div
-                className="page-link text-light"
-                style={{ backgroundColor: "#132239" }}
-                aria-label="First"
-                onClick={() => handlePageChange(1)}
-                title="Go to first page"
-              >
-                <span aria-hidden="true">&laquo;</span>
-              </div>
-            </div>*/}
-            {/* Nút "Lùi" */}
-            <button
-              className="btn mx-1 text-light"
-              style={{ backgroundColor: "#132239" }}
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-            >
-              &lt;
-            </button>
-            {/* Các nút số trang */}
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                className={`btn mx-1 text-light ${currentPage === index + 1 ? "active" : ""
-                  }`}
-                style={{
-                  backgroundColor: currentPage === index + 1 ? "grey" : "#132239",
-                  border: currentPage === index + 1 ? "2px solid white" : "none",
-                }}
-                key={index + 1}
-                onClick={() => handlePageChange(index + 1)}
-                disabled={currentPage === index + 1}
-              >
-                {index + 1}
-              </button>
-            ))}
-            {/* Nút "Tới" */}
-            <button
-              className="btn mx-1 text-light"
-              style={{ backgroundColor: "#132239" }}
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-            >
-              &gt;
-            </button>
-            {/* Nút "Trang cuối" 
-            <button
-              className="btn mx-1 text-light"
-              style={{ backgroundColor: "#132239" }}
-              onClick={handleLastPage}
-              disabled={currentPage === totalPages}
-            >
-              &raquo;
-            </button>*/}
+    <Suspense fallback={<div>Đang tải...</div>}>
+      <div style={{ fontSize: "14px" }}>
+        <div className="box-ultil d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <b className="text-danger flex-grow-1" style={{ fontSize: "20px" }}>Quản lý sản phẩm/ Tổng: {products?.length || 0} sản phẩm</b>
+          <Button className="btn-sd-admin" style={{ fontSize: "15px", whiteSpace: "nowrap" }} onClick={handleCreateClick}>
+            <i className="bi bi-plus-circle me-2"></i>Thêm Sản Phẩm
+          </Button>
+          <div className="d-flex align-items-center" style={{ gap: "10px" }}>
+            <i className="bi bi-funnel fs-4"></i>
+            <Form.Control as="select" name="categoryProduct" value={selectedType} onChange={(e) => setSelectedType(Number(e.target.value))}
+              style={{ minWidth: "200px" }}>
+              <option value="">Tất cả loại sản phẩm</option>
+              {categoryProducts?.map((category) => (
+                <option key={category.categoryProductId} value={category.categoryProductId}>
+                  {category.name}
+                </option>
+              ))}
+            </Form.Control>
           </div>
-        ) : null}
-
-
+          <Form.Control type="text" placeholder="Tìm theo tên ..." onChange={handleSearch} />
+        </div>
+        <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
+          <Nav.Item>
+            <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="inStock" className="tab-link">Còn hàng</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="outStock" className="tab-link">Hết hàng</Nav.Link>
+          </Nav.Item>
+        </Nav>
+        {renderContent()}
+        {renderPagination()}
+        <ProductAddNew showAddProduct={showModal} setShowAddProduct={setShowModal} currentProduct={currentProduct}
+          categoryProducts={categoryProducts} onFetch={mutate} />
       </div>
-
-      <ProductAddNew
-        showAddProduct={showModal}
-        setShowAddProduct={handleCloseModal}
-        currentProduct={currentProduct}
-        modalType={modalType}
-        categoryProducts={categoryProducts}
-        onFetch={refetch}
-        setIsNeedScroll={setIsNeedScroll}
-      />
-    </div>
-  );
-};
+    </Suspense>
+  )
+}
 
 export default AdminProduct;

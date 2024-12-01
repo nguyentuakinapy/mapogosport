@@ -12,6 +12,12 @@ interface UserProps {
 const ModalAddAddress = (props: UserProps) => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
     const { showAddAddress, setShowAddAddress } = props;
+    const [districts, setDistricts] = useState<District[]>([]);
+    const [wards, setWards] = useState<Ward[]>([]);
+    const [selectedProvince, setSelectedProvince] = useState<string>('');
+    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+    const [selectedWard, setSelectedWard] = useState<string>('');
+    const [addressDetail, setAddressDetail] = useState<string>('');
 
     const { data, error } = useSWR("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
         revalidateIfStale: false,
@@ -19,17 +25,10 @@ const ModalAddAddress = (props: UserProps) => {
         revalidateOnReconnect: false
     });
 
-    const [districts, setDistricts] = useState<any[]>([]);
-    const [wards, setWards] = useState<any[]>([]);
-    const [selectedProvince, setSelectedProvince] = useState<string>('');
-    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
-    const [selectedWard, setSelectedWard] = useState<string>('');
-    const [addressDetail, setAddressDetail] = useState<string>('');
-
     const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const provinceName = e.target.value;
         setSelectedProvince(provinceName);
-        const selectedProvinceData = data.find((province: any) => province.Name === provinceName);
+        const selectedProvinceData = data.find((province: Province) => province.Name === provinceName);
         setDistricts(selectedProvinceData?.Districts || []);
         setWards([]);
         setSelectedDistrict('');
@@ -39,7 +38,7 @@ const ModalAddAddress = (props: UserProps) => {
     const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const districtName = e.target.value;
         setSelectedDistrict(districtName);
-        const selectedDistrictData = districts.find((district: any) => district.Name === districtName);
+        const selectedDistrictData = districts.find((district: District) => district.Name === districtName);
         setWards(selectedDistrictData?.Wards || []);
         setSelectedWard('');
     };
@@ -120,7 +119,7 @@ const ModalAddAddress = (props: UserProps) => {
                                     <Form.Select aria-label="Floating label select example"
                                         onChange={handleProvinceChange} value={selectedProvince}>
                                         <option>-- Nhấn để chọn --</option>
-                                        {data?.map((province: any) => (
+                                        {data?.map((province: Province) => (
                                             <option key={province.Id} value={province.Name}>{province.Name}</option>
                                         ))}
                                     </Form.Select>

@@ -1,22 +1,27 @@
 "use client";
 import HomeLayout from '@/components/HomeLayout';
-import React, { useState, useEffect } from 'react';
-import { Col, Button, ButtonGroup, Form, Image } from 'react-bootstrap';
-import './style.css';
+import React, { useState, useEffect, Suspense } from 'react';
+import { Col, Button, ButtonGroup, Form, Table, Row, Container } from 'react-bootstrap';
+import './style.scss';
 import { decodeString, formatPrice } from '@/components/Utils/Format';
 import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';
 import Link from 'next/link';
 import Loading from '@/components/loading';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 const Cart = () => {
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
+  const BASE_URL = 'http://localhost:8080/rest/';
+
   const [quantities, setQuantities] = useState<number[]>([]);
   const [dataCart, setDataCart] = useState<Cart[]>([]);
   const [username, setUsername] = useState<string>("");
   const [selectAll, setSelectAll] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<boolean[]>([]);
   const [totalPrice, setTotalPrice] = useState(0); // Khởi tạo state để lưu tổng tiền
+  const router = useRouter()
 
   useEffect(() => {
     const username = localStorage.getItem('username');
@@ -25,7 +30,7 @@ const Cart = () => {
     }
   }, []);
 
-  const { data, error } = useSWR(username && `http://localhost:8080/rest/cart/${username}`, fetcher);
+  const { data, error } = useSWR(username && `${BASE_URL}cart/${username}`, fetcher);
 
   useEffect(() => {
     if (data) {
@@ -73,7 +78,7 @@ const Cart = () => {
   // Hàm cập nhật số lượng lên server
   const updateQuantityOnServer = async (index: number, newQuantity: number) => {
     const cartItemId = dataCart[index].cartId;
-    await fetch(`http://localhost:8080/rest/cart/update/${cartItemId}`, {
+    await fetch(`${BASE_URL}cart/update/${cartItemId}`, {
       method: 'PUT',
       headers: {
         'Accept': 'application/json, text/plain, */*',
@@ -138,7 +143,7 @@ const Cart = () => {
 
         if (requestedQuantity > availableQuantity) {
           // Nếu không đủ tồn kho, thêm vào danh sách không khả dụng và trả về false
-          unavailableItems.push(cartItem.productDetailSize.productDetail.product.name);
+          unavailableItems.push(cartItem.productDetailSize.productDetail.product!.name);
           return false;
         }
       }
@@ -159,21 +164,16 @@ const Cart = () => {
     } else {
       try {
         localStorage.setItem('CartIds', JSON.stringify(cartIds));
-        window.location.href = "/checkout-product";
+        router.push("/checkout-product");
       } catch (error) {
         console.error("Error saving to localStorage:", error);
       }
     }
-
   };
 
   const handleDeleCartItem = async (index: number) => {
-    if (!username) {
-      console.log("Người dùng chưa đăng nhập.");
-      return;
-    }
     const cartItemId = dataCart[index].cartId;
-    await fetch(`http://localhost:8080/rest/cart/delete/${cartItemId}`, {
+    await fetch(`${BASE_URL}cart/delete/${cartItemId}`, {
       method: 'DELETE',
       headers: {
         'Accept': 'application/json, text/plain, */*',
@@ -190,7 +190,6 @@ const Cart = () => {
       setSelectedProducts(updatedSelectedProducts);
       const updatedQuantities = updatedDataCart.map(item => item.quantity);
       setQuantities(updatedQuantities);
-      console.log();
 
       if (selectedProducts[index]) {
         const total = updatedSelectedProducts.reduce((sum, selected, idx) => {
@@ -202,27 +201,15 @@ const Cart = () => {
         setTotalPrice(total); // Cập nhật tổng tiền
       }
 
-      mutate(`http://localhost:8080/rest/cart/count/${username}`); // Tái tải dữ liệu
+      mutate(`${BASE_URL}cart/count/${username}`); // Tái tải dữ liệu
       toast.success("Xóa thành công !");
     })
   };
 
   const handleDeleteAll = async () => {
-    if (!username) {
-      console.log("Người dùng chưa đăng nhập.");
-      return;
-    }
-
-    // Get the selected products' cart IDs
-    const selectedCartItems = dataCart.filter((_, index) => selectedProducts[index]);
-    if (selectedCartItems.length === 0) {
-      toast.warning("Vui lòng chọn ít nhất một sản phẩm để xóa!");
-      return;
-    }
-
     try {
-      const deleteRequests = selectedCartItems.map(cartItem =>
-        fetch(`http://localhost:8080/rest/cart/delete/${cartItem.cartId}`, {
+      const deleteRequests = dataCart.map(cartItem =>
+        fetch(`${BASE_URL}cart/delete/${cartItem.cartId}`, {
           method: 'DELETE',
           headers: {
             'Accept': 'application/json, text/plain, */*',
@@ -239,183 +226,130 @@ const Cart = () => {
         return;
       }
 
-      // Update the cart data by removing deleted items
-      const updatedDataCart = dataCart.filter((_, index) => !selectedProducts[index]);
-      setDataCart(updatedDataCart);
-
-      // Update the selected products and quantities
-      const updatedSelectedProducts = updatedDataCart.map(() => false);
-      setSelectedProducts(updatedSelectedProducts);
-      setQuantities(updatedDataCart.map(item => item.quantity));
-
-      // Update the total price
+      setDataCart([]);
+      setSelectedProducts([]);
+      setQuantities([]);
       setTotalPrice(0);
 
-      mutate(`http://localhost:8080/rest/cart/count/${username}`); // Refresh the cart count
+      mutate(`${BASE_URL}cart/count/${username}`); // Refresh the cart count
       toast.success("Đã xóa các sản phẩm được chọn!");
     } catch (error) {
-      console.error("Lỗi khi xóa các sản phẩm được chọn:", error);
       toast.error("Có lỗi xảy ra khi xóa các sản phẩm được chọn!");
     }
   };
 
-
+  if (!username) return <HomeLayout>
+    <div className="d-flex justify-content-center align-items-center" style={{ height: 'calc(100vh - 90px)' }}>
+      <div className="text-center">
+        <i className="bi bi-bag-plus-fill" style={{ fontSize: '100px' }}></i>
+        <p className="text-muted fs-5">Bạn chưa đăng nhập
+          <br /> Vui lòng <strong>&ldquo;đăng nhập&rdquo;</strong> để xem giỏ hàng của bạn!</p>
+        <Link className='btn btn-dark text-white mb-5' style={{ textDecoration: 'none', color: '#333' }}
+          href="/categories/products"> Đăng nhập ngay</Link>
+      </div>
+    </div>
+  </HomeLayout>
   if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
   if (!data) return <HomeLayout><div className='d-flex justify-content-center align-items-center' style={{ height: '90vh' }}><Loading></Loading></div></HomeLayout>
   return (
-    <HomeLayout>
-      <h1 className="text-center pt-4 mb-">Giỏ hàng</h1>
-      <div className="container" >
-        <div className="d-flex">
-          <Col className={`${dataCart && dataCart.length > 0 ? 'col-md-8' : 'col-md-12'}   p-3 mb-5 rounded ${username ? 'shadow bg-body' : ' '}`}>
-            {username && (
-              <>
-                <div className="table-responsive">
-                  {dataCart && dataCart.length > 0 ? (
-                    <table className="table table-hover">
-                      <thead>
-                        <tr>
-                          <th scope="col" style={{ width: '5%' }}>
-                            <input
-                              className="me-2"
-                              type="checkbox"
-                              checked={selectAll}
-                              onChange={handleSelectAll}
-                            />
-                          </th>
-                          <th scope="col" className="col-2"></th>
-                          <th scope="col">Thông tin</th>
-                          <th scope="col">Đơn Giá</th>
-                          <th scope="col">Số lượng</th>
-                          <th scope="col" style={{ width: '10%' }}>Xóa</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dataCart.map((cart, index: number) => (
-                          <>
-                            <tr key={index}>
-                              <td>
-                                <input
-                                  type="checkbox"
-                                  checked={selectedProducts[index]}
-                                  onChange={() => handleProductSelect(index)}
-                                />
-                              </td>
-                              <td>
-                                <Image
-                                  src={`${cart.productDetailSize.productDetail.image}`}
-                                  className="img-fluid me-5 rounded-circle"
-                                  style={{ width: '80px', height: '80px' }}
-                                  alt=""
-                                />
-                              </td>
-                              <td>
-                                <Link
-                                  style={{ textDecoration: 'none', color: '#333' }}
-                                  href={`/product-detail/${cart.productDetailSize.productDetail.product.productId}`}
-                                >
-                                  <p className="mb-0">
-                                    {cart.productDetailSize.productDetail.product.name}
-                                    <br />({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})
-                                  </p>
-                                </Link>
-                              </td>
-                              <td>
-                                <p className="mb-0">{formatPrice(cart.productDetailSize.price)}</p>
-                              </td>
-                              <td>
-                                <div className="d-flex mb-0">
-                                  <ButtonGroup className="ms-3">
-                                    <Button variant="outline-secondary" onClick={() => decreaseQuantity(index)}>-</Button>
-                                    <Form.Control
-                                      type="text"
-                                      value={quantities[index]} // Hiển thị số lượng
-                                      readOnly
-                                      className="text-center"
-                                      style={{ maxWidth: '50px' }}
-                                    />
-                                    <Button variant="outline-secondary" onClick={() => increaseQuantity(index)}>+</Button>
-                                  </ButtonGroup>
-                                </div>
-                              </td>
-                              <td>
-                                <button
-                                  className="btn btn-md rounded-circle bg-light border"
-                                  style={{ width: '35px', height: '35px', padding: 0 }}
-                                  onClick={() => handleDeleCartItem(index)}
-                                >
-                                  <i className="text-danger bi bi-x"></i>
-                                </button>
-                              </td>
-                            </tr>
-
-                          </>
-
-                        ))}
-
-                      </tbody>
-
-                    </table>
-                  ) : (
-                    <div className="text-center">
-                      <i className="bi bi-bag-plus-fill" style={{ fontSize: '100px' }}></i>
-                      <p className="text-muted fs-5">Bạn cần thêm một sản phẩm vào giỏ hàng của mình
-                        <br /> Vui lòng quay lại <strong>&ldquo;Trang sản phẩm&rdquo;</strong> và tìm sản phẩm của bạn  </p>
-                      <Link className='btn btn-dark text-white mb-5'
-                        style={{ textDecoration: 'none', color: '#333' }}
-                        href="/categories/products"
-                      > Trang Sản Phẩm</Link>
-                    </div>
-                  )}
-
-                </div>
-                {dataCart?.length <= 1 ? (
-                  null
-                ) : (
-                  <div className="d-flex justify-content-end mt-4">
-                    <button
-                      className="btn btn-dark px-3 me-3 py-3 text-light"
-                      onClick={handleDeleteAll}
-                    >
-                      Xóa Tất Cả
-                    </button>
-                  </div>
-                )}
-
-              </>
-            )}
-          </Col>
+    <Suspense fallback={<div>Đang tải...</div>}>
+      <HomeLayout>
+        <Container>
+          <div style={{ fontSize: '20px' }} className="text-center text-danger text-uppercase py-4"><b>Giỏ hàng</b></div>
           {dataCart && dataCart.length > 0 ? (
-            <Col className="col-md-4 ms-3 shadow bg-body p-3 mb-5 rounded" >
-              <div className="rounded">
-                <div className="p-4">
-                  <h1 className="display-6 mb-4">Tổng tiền</h1>
+            <Row>
+              <Col xs={9}>
+                <div className={`cart-inner ${username ? 'shadow bg-white' : ''}`} style={{ minHeight: '100%' }}>
+                  {username && (
+                    <>
+                      <div className="table-cart">
+                        <Table hover>
+                          <thead>
+                            <tr>
+                              <th style={{ width: '50px' }}>
+                                <Form.Check type="checkbox" checked={selectAll} onChange={handleSelectAll} />
+                              </th>
+                              <th style={{ width: '50px' }}></th>
+                              <th style={{ width: '300px' }}>Thông tin</th>
+                              <th style={{ width: '100px' }}>Đơn Giá</th>
+                              <th style={{ width: '100px' }}>Số lượng</th>
+                              <th style={{ width: '50px' }}>Xóa</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dataCart.map((cart, index) => (
+                              <tr key={index}>
+                                <td>
+                                  <Form.Check type="checkbox" checked={selectedProducts[index]} onChange={() => handleProductSelect(index)} />
+                                </td>
+                                <td>
+                                  <Link href={`/categories/products/detail/${cart.productDetailSize.productDetail.product!.productId}`}>
+                                    <Image src={`${cart.productDetailSize.productDetail.image}`} width={80} height={80} alt={`${cart.productDetailSize.productDetail.product?.name}`} />
+                                  </Link>
+                                </td>
+                                <td>
+                                  <Link href={`/categories/products/detail/${cart.productDetailSize.productDetail.product!.productId}`}>
+                                    <div>
+                                      <div className="product-name">{cart.productDetailSize.productDetail.product!.name}</div>
+                                      <div>({cart.productDetailSize.productDetail.color}, {cart.productDetailSize.size.sizeName})</div>
+                                    </div>
+                                  </Link>
+                                </td>
+                                <td>{formatPrice(cart.productDetailSize.price)}</td>
+                                <td>
+                                  <div className="d-flex justify-content-center">
+                                    <ButtonGroup>
+                                      <Button variant="outline-secondary" onClick={() => decreaseQuantity(index)}>-</Button>
+                                      <Form.Control type="text" value={quantities[index]} readOnly className="text-center" style={{ maxWidth: '50px' }} />
+                                      <Button variant="outline-secondary" onClick={() => increaseQuantity(index)}>+</Button>
+                                    </ButtonGroup>
+                                  </div>
+                                </td>
+                                <td>
+                                  <Button className="btn btn-md" onClick={() => handleDeleCartItem(index)}>
+                                    <i className="text-danger bi bi-x"></i>
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </Table>
+                      </div>
+                      {dataCart?.length <= 1 ? null : (
+                        <div className="d-flex justify-content-end mt-3">
+                          <Button className="btn btn-delete" onClick={handleDeleteAll}>Xóa Tất Cả</Button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
-                <div className="py-4 mb-4 border-top border-bottom border-dark d-flex justify-content-between">
-                  <h5 className="mb-0 mx-4">Tổng cộng</h5>
-                  <p className="mb-0 mx-4 text-danger fw-bold">{formatPrice(totalPrice)}</p> {/* Hiển thị tổng tiền */}
+              </Col>
+              <Col xs={3}>
+                <div className="shadow bg-white p-2 rounded" style={{ fontSize: '15px', minHeight: '100%' }}>
+                  <div className="text-center text-danger text-uppercase mt-3 mb-2"><b>Tổng tiền</b></div>
+                  <div className="py-4 mb-4 border-top border-bottom border-dark d-flex justify-content-between">
+                    <div className="ms-4 fw-bold">Tổng cộng:</div>
+                    <div className="me-4 text-danger fw-bold">{formatPrice(totalPrice)}</div> {/* Hiển thị tổng tiền */}
+                  </div>
+                  <Button className="btn btn-checkout" type="button" onClick={() => saveCartIdsToLocalStorage()}>Thanh Toán Ngay</Button>
+                  <Link href="/categories/products" className="btn btn-continue">Tiếp Tục Mua hàng</Link>
                 </div>
-
-                <div className="text-center d-flex ms-4">
-                  <button className="btn btn-outline-secondary px-3 me-3 py-3 text-dark mb-4" type="button">
-                    Tiếp Tục Mua hàng
-                  </button>
-                  <Button
-                    className="btn btn-dark px-3 me-3 py-3 text-light mb-4"
-                    type="button"
-                    onClick={() => saveCartIdsToLocalStorage()}
-                  > Thanh Toán Ngay</Button>
-                </div>
-              </div>
-            </Col>
+              </Col>
+            </Row>
           ) : (
-            <></>
-          )
-          }
-
-        </div>
-      </div >
-    </HomeLayout >
+            <div className="d-flex justify-content-center align-items-center bg-white shadow" style={{ minHeight: '60vh' }}>
+              <div className="text-center">
+                <i className="bi bi-bag-plus-fill" style={{ fontSize: '100px' }}></i>
+                <p className="text-muted fs-5">Bạn cần thêm một sản phẩm vào giỏ hàng của mình
+                  <br /> Vui lòng quay lại <strong>&ldquo;Trang sản phẩm&rdquo;</strong> và tìm sản phẩm của bạn  </p>
+                <Link className='btn btn-dark text-white mb-5' style={{ textDecoration: 'none', color: '#333' }}
+                  href="/categories/products"> Trang Sản Phẩm</Link>
+              </div>
+            </div>
+          )}
+        </Container>
+      </HomeLayout >
+    </Suspense>
   );
 };
 

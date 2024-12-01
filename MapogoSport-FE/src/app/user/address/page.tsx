@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Button, OverlayTrigger, Tooltip, Form } from 'react-bootstrap'
 import UserLayout from '@/components/User/UserLayout'
 import ModalAddAddress from '@/components/User/modal/user.addNewAddress'
@@ -15,11 +15,11 @@ export default function Address() {
     const [addressUsers, setAddressUsers] = useState<AddressUsers[]>([]);
     const [showAddAddress, setShowAddAddress] = useState<boolean>(false);
     const [showUpdateAddress, setShowUpdateAddress] = useState<boolean>(false);
-    const [selectedAddressUser, setSelectedAddressUser] = useState<any>(null);
+    const [selectedAddressUser, setSelectedAddressUser] = useState<AddressUsers>();
 
-    const removePrefix = (name: string) => {
-        return name.replace(/^(Tỉnh|Thành phố|Quận|Huyện|Phường|Xã)\s*/, '').trim();
-    };
+    // const removePrefix = (name: string) => {
+    //     return name.replace(/^(Tỉnh|Thành phố|Quận|Huyện|Phường|Xã)\s*/, '').trim();
+    // };
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
@@ -36,12 +36,14 @@ export default function Address() {
 
     useEffect(() => {
         if (data && data.addressUsers) {
-            const sortedAddresses = data.addressUsers.sort((a: any, b: any) => b.active - a.active);
+            const sortedAddresses = data.addressUsers.sort(
+                (a: AddressUsers, b: AddressUsers) => (b.active === a.active ? 0 : b.active ? 1 : -1)
+            );
             setAddressUsers(sortedAddresses);
         }
     }, [data]);
 
-    const handleEdit = (addressUser: any) => {
+    const handleEdit = (addressUser: AddressUsers) => {
         setSelectedAddressUser(addressUser);
         setShowUpdateAddress(true);
     };
@@ -86,48 +88,50 @@ export default function Address() {
     };
 
     return (
-        <UserLayout>
-            <div className='mb-3 text-danger' style={{ fontSize: '20px' }}><b>Quản lý địa chỉ</b></div>
-            <Button style={{ width: "100%" }} variant='danger' onClick={() => setShowAddAddress(true)}>
-                <i className="bi bi-plus-circle"></i> Thêm địa chỉ
-            </Button>
-            <div className='mt-4'>
-                {isLoading ? (
-                    <div>Đang tải...</div>
-                ) : error ? (
-                    <div className='text-danger'>Có lỗi xảy ra khi tải dữ liệu</div>
-                ) : (
-                    addressUsers.length > 0 ? (
-                        addressUsers.map(addressUser => (
-                            <div key={addressUser.addressUserId} className='item-address'>
-                                <div className="item-left">
-                                    <b>Địa chỉ: </b>
-                                    {addressUser.addressDetail}, {addressUser.address.ward}, {addressUser.address.district}, {addressUser.address.province}
-                                </div>
-                                <div className="item-right">
-                                    <div className="d-flex align-items-center">
-                                        <OverlayTrigger overlay={<Tooltip>Chọn làm số mặc định?</Tooltip>}>
-                                            <Form.Check type="switch" checked={addressUser.active}
-                                                onChange={() => handleUpdateActive(addressUser.addressUserId, !addressUser.active)}
-                                            />
-                                        </OverlayTrigger>
-                                        <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
-                                            <div className='btn-address mx-3' onClick={() => handleEdit(addressUser)}><i className="bi bi-pencil-square"></i></div>
-                                        </OverlayTrigger>
-                                        <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
-                                            <div className='btn-address' onClick={() => handleDelete(addressUser.addressUserId)}><i className='bi bi-trash3-fill'></i></div>
-                                        </OverlayTrigger>
+        <Suspense fallback={<div>Đang tải...</div>}>
+            <UserLayout>
+                <div className='mb-3 text-danger' style={{ fontSize: '20px' }}><b>Quản lý địa chỉ</b></div>
+                <Button style={{ width: "100%" }} variant='danger' onClick={() => setShowAddAddress(true)}>
+                    <i className="bi bi-plus-circle"></i> Thêm địa chỉ
+                </Button>
+                <div className='mt-4'>
+                    {isLoading ? (
+                        <div>Đang tải...</div>
+                    ) : error ? (
+                        <div className='text-danger'>Có lỗi xảy ra khi tải dữ liệu</div>
+                    ) : (
+                        addressUsers.length > 0 ? (
+                            addressUsers.map((addressUser: AddressUsers) => (
+                                <div key={addressUser.addressUserId} className='item-address'>
+                                    <div className="item-left">
+                                        <b>Địa chỉ: </b>
+                                        {addressUser.addressDetail}, {addressUser.address.ward}, {addressUser.address.district}, {addressUser.address.province}
+                                    </div>
+                                    <div className="item-right">
+                                        <div className="d-flex align-items-center">
+                                            <OverlayTrigger overlay={<Tooltip>Chọn làm số mặc định?</Tooltip>}>
+                                                <Form.Check type="switch" checked={addressUser.active}
+                                                    onChange={() => handleUpdateActive(addressUser.addressUserId, !addressUser.active)}
+                                                />
+                                            </OverlayTrigger>
+                                            <OverlayTrigger overlay={<Tooltip>Sửa</Tooltip>}>
+                                                <div className='btn-address mx-3' onClick={() => handleEdit(addressUser)}><i className="bi bi-pencil-square"></i></div>
+                                            </OverlayTrigger>
+                                            <OverlayTrigger overlay={<Tooltip>Xóa</Tooltip>}>
+                                                <div className='btn-address' onClick={() => handleDelete(addressUser.addressUserId)}><i className='bi bi-trash3-fill'></i></div>
+                                            </OverlayTrigger>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className='item-address'>Không có địa chỉ nào</div>
-                    )
-                )}
-            </div>
-            <ModalAddAddress showAddAddress={showAddAddress} setShowAddAddress={setShowAddAddress} />
-            <ModalUpdateAddress showUpdateAddress={showUpdateAddress} setShowUpdateAddress={setShowUpdateAddress} addressUser={selectedAddressUser} />
-        </UserLayout >
+                            ))
+                        ) : (
+                            <div className='item-address'>Không có địa chỉ nào</div>
+                        )
+                    )}
+                </div>
+                <ModalAddAddress showAddAddress={showAddAddress} setShowAddAddress={setShowAddAddress} />
+                <ModalUpdateAddress showUpdateAddress={showUpdateAddress} setShowUpdateAddress={setShowUpdateAddress} addressUser={selectedAddressUser} />
+            </UserLayout >
+        </Suspense>
     )
 }

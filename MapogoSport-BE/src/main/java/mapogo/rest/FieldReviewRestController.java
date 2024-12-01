@@ -1,7 +1,7 @@
 package mapogo.rest;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import mapogo.dto.FieldReviewDTO;
 import mapogo.entity.FieldReview;
-import mapogo.entity.ProductReview;
 import mapogo.service.FieldReviewService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +28,7 @@ public class FieldReviewRestController {
 	FieldReviewService fieldReviewService;
 	
 	@GetMapping("/user/fieldReview/{username}")
-	public List<FieldReview> getByUser(@PathVariable("username") String username) {
+	public List<Map<String, Object>> getByUser(@PathVariable("username") String username) {
 		return fieldReviewService.findByUser_Username(username);
 	}
 	@GetMapping("/fieldReview/{sportFieldId}")

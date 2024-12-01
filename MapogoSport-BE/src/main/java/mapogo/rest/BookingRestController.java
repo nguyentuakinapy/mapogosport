@@ -118,6 +118,11 @@ public class BookingRestController {
 		return bookingDetailService.createBookingDetail(bd);
 	}
 
+	@PostMapping("/booking/detail/create/period")
+	public void saveBookingDetailPeriod(@RequestBody List<Map<String, Object>> bd) {
+		bookingDetailService.createBookingDetailPeriod(bd);
+	}
+	
 	@PostMapping("/booking/payment")
 	public ResponseEntity<?> createPayment(@RequestBody Map<String, Object> data, HttpServletRequest req)
 			throws UnsupportedEncodingException {

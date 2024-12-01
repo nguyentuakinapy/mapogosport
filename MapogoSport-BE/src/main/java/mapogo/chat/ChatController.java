@@ -106,7 +106,7 @@ public class ChatController {
 
      Notification n = new Notification();
 		n.setUser(receiverUser);
-		n.setTitle("Thông báo tin nhắn mới");
+		n.setTitle("Thông báo tin nhắn mới từ/SENDER-"+ senderUser.getUsername());
 		n.setMessage(senderUser.getFullname() + " vừa gửi tin cho bạn");
 		n.setType("notifyMess");
 		n.setBooking(null);

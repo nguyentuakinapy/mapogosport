@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { Form, Button, Table, Nav, Pagination, Dropdown, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import '../owner.scss'
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -126,7 +126,7 @@ const OwnerBookingBill = () => {
                     </thead>
                     <tbody>
                         {filteredBookings.length > 0 ?
-                            filteredBookings.map(booking => (
+                            filteredBookings.sort((a, b) => b.bookingId - a.bookingId).map(booking => (
                                 <tr key={booking.bookingId}>
                                     <td className="text-start title">
                                         <Link href={`/owner/booking-bill/detail/${booking.bookingId}`}>#{booking.bookingId}</Link>
@@ -271,7 +271,7 @@ const OwnerBookingBill = () => {
                     5: { halign: 'left' },
                     6: { halign: 'center' },
                 },
-                didParseCell: (data: any) => {
+                didParseCell: (data) => {
                     if (data.cell.text.length > 0) {
                         data.cell.text[0] = data.cell.text[0];
                     }
@@ -351,49 +351,51 @@ const OwnerBookingBill = () => {
     if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
     return (
-        <div style={{ fontSize: '14px' }}>
-            <div className="box-ultil">
-                <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Hóa Đơn</b>
-                <div>
-                    <Form.Control type="text" placeholder="Tìm theo tên và SĐT..." onChange={handleSearch} />
+        <Suspense fallback={<div>Đang tải...</div>}>
+            <div style={{ fontSize: '14px' }}>
+                <div className="box-ultil">
+                    <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Hóa Đơn</b>
+                    <div>
+                        <Form.Control type="text" placeholder="Tìm theo tên và SĐT..." onChange={handleSearch} />
+                    </div>
+                    <div>
+                        <InputGroup className="search-date-booking">
+                            <DatePicker selected={startDate || undefined} onChange={(date) => setStartDate(date)}
+                                selectsStart startDate={startDate || undefined} endDate={endDate || undefined}
+                                placeholderText="Từ ngày" className="form-control start" dateFormat="dd/MM/yyyy"
+                            />
+                            <InputGroup.Text><i className="bi bi-three-dots"></i></InputGroup.Text>
+                            <DatePicker selected={endDate || undefined} onChange={(date) => setEndDate(date)}
+                                selectsEnd startDate={startDate || undefined} endDate={endDate || undefined}
+                                minDate={startDate || undefined} placeholderText="Đến ngày" className="form-control end"
+                                dateFormat="dd/MM/yyyy"
+                            />
+                        </InputGroup>
+                    </div>
+                    <div>
+                        <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={exportPDF}>Xuất File PDF</Button>
+                        <Button className="btn-sd-admin ms-2" style={{ fontSize: '15px' }} onClick={exportExcel}>Xuất File Excel</Button>
+                    </div>
                 </div>
-                <div>
-                    <InputGroup className="search-date-booking">
-                        <DatePicker selected={startDate || undefined} onChange={(date) => setStartDate(date)}
-                            selectsStart startDate={startDate || undefined} endDate={endDate || undefined}
-                            placeholderText="Từ ngày" className="form-control start" dateFormat="dd/MM/yyyy"
-                        />
-                        <InputGroup.Text><i className="bi bi-three-dots"></i></InputGroup.Text>
-                        <DatePicker selected={endDate || undefined} onChange={(date) => setEndDate(date)}
-                            selectsEnd startDate={startDate || undefined} endDate={endDate || undefined}
-                            minDate={startDate || undefined} placeholderText="Đến ngày" className="form-control end"
-                            dateFormat="dd/MM/yyyy"
-                        />
-                    </InputGroup>
-                </div>
-                <div>
-                    <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={exportPDF}>Xuất File PDF</Button>
-                    <Button className="btn-sd-admin ms-2" style={{ fontSize: '15px' }} onClick={exportExcel}>Xuất File Excel</Button>
-                </div>
+                <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
+                    <Nav.Item>
+                        <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link eventKey="unpaid" className="tab-link">Chờ thanh toán</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link eventKey="cancel" className="tab-link">Đã hủy</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link eventKey="complete" className="tab-link">Đã thanh toán</Nav.Link>
+                    </Nav.Item>
+                </Nav>
+                {renderContent()}
+                {renderPagination()}
+                <CancelBookingModal showCancelBooking={showCancelBooking} setShowCancelBooking={setShowCancelBooking} booking={booking} />
             </div>
-            <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
-                <Nav.Item>
-                    <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="unpaid" className="tab-link">Chờ thanh toán</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="cancel" className="tab-link">Đã hủy</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="complete" className="tab-link">Đã thanh toán</Nav.Link>
-                </Nav.Item>
-            </Nav>
-            {renderContent()}
-            {renderPagination()}
-            <CancelBookingModal showCancelBooking={showCancelBooking} setShowCancelBooking={setShowCancelBooking} booking={booking} />
-        </div>
+        </Suspense>
     );
 };
 

@@ -1,8 +1,7 @@
 'use client'
-import BookingChart from '@/components/Owner/Statistic/BookingChart';
 import RevenueChart from '@/components/Owner/Statistic/RevenuaChart';
-import { useEffect, useState } from 'react';
-import { InputGroup, Nav, Table } from 'react-bootstrap';
+import { Suspense, useEffect, useState } from 'react';
+import { InputGroup, Nav, Pagination, Table } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { decodeString, formatPrice } from "@/components/Utils/Format"
@@ -16,8 +15,17 @@ import 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import { RobotoBase64 } from '../../../../public/font/Roboto-Regular';
 import { toast } from 'react-toastify';
+import autoTable from 'jspdf-autotable';
 
+type ChartHeader = [string, string, string, string, string];
+type ChartRow = [string, number, string, string, number];
+type ChartData = [ChartHeader, ...ChartRow[]];
 
+type CustomerChartHeader = ['Month', 'Customers'];
+type CustomerChartRow = [number, number];
+type CustomerChartData = [CustomerChartHeader, ...CustomerChartRow[]];
+
+type CustomerRank = [number, string, string];
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<string>('all');
@@ -29,28 +37,23 @@ export default function Home() {
   const [bookingdetailBySportField, setBookingdetailBySportField] = useState<BookingDetail[]>([])
   const [owner, setOwner] = useState<Owner>();
   const [selectedFieldId, setSelectedFieldId] = useState<number | null>(null);
-  // const [selectSportFieldDetail, setSelectSportFieldDetail] = useState<any>([]);
   const [sportFieldDetailIds, setSportFieldDetailIds] = useState<number[]>([]);
-  // const [revenueBySportFieldDetail, setRevenueBySportFieldDetail] = useState<any>([])
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartData>([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
   const [showModal, setShowModal] = useState(false);
-  // const [idSportFieldDetailTable, setIdSportFieldDetailTable] = useState<number | null>(null);
   const [bookingDetailBySpFDetail, setBookingDetailBySpFDetail] = useState<BookingDetail[]>([]);
-  // by Date
   const [bookingSuccessByDate, setBookingSuccessByDate] = useState<Booking[]>([]);
   const [bookingdetailBySportFieldByDate, setBookingdetailBySportFieldByDate] = useState<BookingDetail[]>([])
-  //chart customer
   const [totalCustomer, setTotalCustomer] = useState<number | null>(null);
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [customerData, setCustomerData] = useState<any[]>([]);
-  const [rankCustomerOffline, setRankCustomerOffline] = useState<any[]>([])
-  const [rankCustomerOnline, setRankCustomerOnline] = useState<any[]>([])
-  // const [selectedUsername, setSelectedUsername] = useState<string | null>(null)
+  const [customerData, setCustomerData] = useState<CustomerChartData>([['Month', 'Customers']]);
+  const [rankCustomerOffline, setRankCustomerOffline] = useState<CustomerRank[]>([]);
+  const [rankCustomerOnline, setRankCustomerOnline] = useState<CustomerRank[]>([]);
   const [showModalRank, setShowModalRank] = useState(false);
   const [showModalRankOffline, setShowModalRankOffline] = useState(false);
-  const [bookingByUsernameModal, setBookingByUsernameModal] = useState<Booking[]>([])
-  const [bookingByFullNameOffline, setBookingByFullNameOffline] = useState<Booking[]>([])
+  const [bookingByUsernameModal, setBookingByUsernameModal] = useState<Booking[]>([]);
+  const [bookingByFullNameOffline, setBookingByFullNameOffline] = useState<Booking[]>([]);
+  const years = Array.from(new Array(10), (index) => currentYear - index);
   // Pagination
   const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,14 +66,10 @@ export default function Home() {
   //Online
   const currentItemsOnline = rankCustomerOnline.slice(indexOfFirstItem, indexOfLastItem);
   const totalPagesOnline = Math.ceil(rankCustomerOnline.length / itemsPerPage);
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
 
   useEffect(() => {
     setCurrentPage(1)
   }, [activeTabCustomer])
-  const years = Array.from(new Array(10), (val, index) => currentYear - index);
 
   // Definition getOwner function
   const getOwner = async () => {
@@ -90,9 +89,6 @@ export default function Home() {
     getOwner(); // Call  getOwner function in useEffect
   }, []);
 
-  console.log(owner?.ownerId);
-
-
   // Fetch success booking revenue 
   useEffect(() => {
     if (owner?.ownerId) {
@@ -104,7 +100,6 @@ export default function Home() {
           }
           const data = await response.json();
           setBookingSuccess(data);
-          console.log("Booking Success Data:", data);
         } catch (error) {
           console.log("Error fetching revenue", error);
         }
@@ -115,8 +110,6 @@ export default function Home() {
 
   const bookingIds = bookingSuccess.map(booking => booking.bookingId);
   const bookingIdsString = bookingIds.join(',');
-  console.log("id Booking theo owner", bookingIdsString)
-
 
   // Fetch sportField by Owner
   useEffect(() => {
@@ -154,27 +147,19 @@ export default function Home() {
       const fetchData = async () => {
         try {
           const response = await fetch(`http://localhost:8080/rest/sport_field/${selectedFieldId}`);
-          const data = await response.json();
-          // setSelectSportFieldDetail(data);
-          console.log("sportFieldDetail", data);
-          // Get array sportFielDetailId and save in state sportFieldDetailIds
-          const ids = data.sportFielDetails.map((detail: any) => detail.sportFielDetailId);
-          setSportFieldDetailIds(ids); // Save ID in sportFieldDetailIds
-          console.log("sportFieldDetailIds:", ids);
+          const data = await response.json() as SportField;
+          const ids = data.sportFielDetails.map((detail: SportFieldDetail) => detail.sportFielDetailId);
+          setSportFieldDetailIds(ids);
         } catch (error) {
           console.log("error fetch bookingdetail", error);
-          // setSelectSportFieldDetail([]);
           setSportFieldDetailIds([]);
         }
       };
       fetchData();
     } else {
-      // setSelectSportFieldDetail([]);
       setSportFieldDetailIds([]);
     }
   }, [selectedFieldId]);
-
-  console.log("hiiiiiiiiiiiiiiii", sportFieldDetailIds);
 
   //Fetch bookingdetail by sportField and ownerId
   useEffect(() => {
@@ -185,7 +170,6 @@ export default function Home() {
           const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportField/byowner/${idsString}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
           const data = await response.json();
           setBookingdetailBySportField(data);
-          console.log("bookingDetail", data);
         } catch (error) {
           console.log("error fetch bookingdetail", error);
           setBookingdetailBySportField([]);
@@ -212,12 +196,11 @@ export default function Home() {
           const idsString = sportFieldDetailIds.join(',');
           const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportFieldDetail/${idsString}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
           const data = await response.json();
-          const formattedData = [
+          const formattedData: ChartData = [
             ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
-            ...data.map((item: any) => [item[0], item[1], item[2], item[3], item[4]])
+            ...data.map((item: ChartData) => [String(item[0]), Number(item[1]), String(item[2]), String(item[3]), Number(item[4])])
           ];
           setChartData(formattedData);
-          console.log("revenuedata oooooooooooooooooooo", data);
         } catch (error) {
           console.log("error fetch ", error);
           setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
@@ -228,8 +211,6 @@ export default function Home() {
       setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
     }
   }, [sportFieldDetailIds, bookingIdsString]);
-
-
 
   //Calculate total totalAmount from booking
   const totalAmountBooking = bookingSuccess.reduce((totalAmount, booking) => {
@@ -264,11 +245,9 @@ export default function Home() {
 
           const data = await response.json();
           if (!data || data.length === 0) {
-            console.log("No booking success data available");
             setBookingSuccessByDate([]);
           } else {
             setBookingSuccessByDate(data);
-            console.log("Booking Success Data By Date:", data);
           }
         } catch (error) {
           console.log("Error fetching revenue", error);
@@ -283,14 +262,12 @@ export default function Home() {
 
   const bookingIdsDate = bookingSuccessByDate.map(booking => booking.bookingId);
   const bookingIdsStringDate = bookingIdsDate.join(',');
-  console.log("id Booking theo owner by Date", bookingIdsStringDate)
 
   //Calculate total totalAmount from booking
   const totalAmountBookingByDate = bookingSuccessByDate.reduce((totalAmount, booking) => {
     return totalAmount + booking.totalAmount
   }, 0)
 
-  console.log(totalAmountBookingByDate)
   // Fetch bookingdetail by sportField and ownerId by Date
   useEffect(() => {
     if (owner?.ownerId && sportFieldDetailIds.length > 0 && bookingIdsStringDate) {
@@ -320,11 +297,9 @@ export default function Home() {
 
           const data = await response.json();
           if (!data || data.length === 0) {
-            console.log("No booking details available");
             setBookingdetailBySportFieldByDate([]);
           } else {
             setBookingdetailBySportFieldByDate(data);
-            console.log("Booking Detail by Date:", data);
           }
         } catch (error) {
           console.error("Error fetching booking details:", error);
@@ -364,18 +339,15 @@ export default function Home() {
           const data = await response.json();
 
           if (!data || data.length === 0) {
-            console.log("No data available");
             setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
           } else {
-            const formattedData = [
+            const formattedData: ChartData = [
               ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
-              ...data.map((item: any) => [item[0], item[1], item[2], item[3], item[4]])
+              ...data.map((item: ChartData) => [item[0], item[1], item[2], item[3], item[4]])
             ];
             setChartData(formattedData);
-            console.log("revenuedata oooooooooooooooooooo", data);
           }
         } catch (error) {
-          console.log("error fetch ", error);
           setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
         }
       };
@@ -389,10 +361,6 @@ export default function Home() {
 
   const handleOpenModal = (id: number) => {
     setShowModal(true);
-    console.log('chartData:', chartData);
-    console.log('totalBookingPrice:', totalBookingPrice);
-    console.log("idSportFieldDetailTable", id);
-
     if (startDate || endDate) {
       // Fetch modal data based on the provided id and date range
       const fetchModalDataByDate = async () => {
@@ -409,7 +377,6 @@ export default function Home() {
           );
           const data = await response.json();
           setBookingDetailBySpFDetail(data); // Store modal-specific data
-          console.log("Booking Detail by SportFieldDetail for Modal by Date", data);
         } catch (error) {
           console.log("Error fetching modal booking details by date", error);
         }
@@ -422,8 +389,7 @@ export default function Home() {
         try {
           const response = await fetch(`http://localhost:8080/rest/bookingdetail/bysportFieldDetail/${id}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
           const data = await response.json();
-          setBookingDetailBySpFDetail(data); // Store modal-specific data
-          console.log("Booking Detail by SportFieldDetail for Modal", data);
+          setBookingDetailBySpFDetail(data);
         } catch (error) {
           console.log("Error fetching modal booking details", error);
         }
@@ -438,13 +404,6 @@ export default function Home() {
     setBookingDetailBySpFDetail([]);
   }
 
-  console.log("id spf", selectedFieldId)
-
-
-  console.log('sate', startDate);
-
-  //char Customer
-
   //Fetch totalCustomer by OwnerId from Booking
   useEffect(() => {
     if (owner?.ownerId) {
@@ -453,7 +412,6 @@ export default function Home() {
           const response = await fetch(`http://localhost:8080/rest/booking/byOwnerId/totalCustomer/${owner?.ownerId}`)
           const data = await response.json();
           setTotalCustomer(data);
-          console.log("Tổng khách hàng", data)
         } catch (error) {
           console.log("Lỗi khi lấy data totalCustomer", error)
         }
@@ -475,12 +433,9 @@ export default function Home() {
         try {
           const response = await fetch(`http://localhost:8080/rest/booking/customerByMonth/byOwnerId/${selectedYear}/${owner.ownerId}`)
           const data = await response.json();
-          const formattedData = [
-            ['Month', 'Customers'], // Header for the chart
-            ...Object.entries(data).map(([month, count]) => [parseInt(month), count])
-          ];
+          const formattedData: CustomerChartData = [['Month', 'Customers'],
+          ...Object.entries(data).map(([month, count]) => [parseInt(month), Number(count)] as CustomerChartRow)];
           setCustomerData(formattedData)
-          console.log("cusssssssssssssssssssssssssss", formattedData)
         } catch (error) {
           console.log("Lỗi fetch data của customer by month", error)
         }
@@ -496,7 +451,14 @@ export default function Home() {
         try {
           const response = await fetch(`http://localhost:8080/rest/booking/customer/byOwner/byUsernameOffline/${owner?.ownerId}`)
           const data = await response.json()
-          setRankCustomerOffline(data)
+          const convertedData = data.map((item: RankCustomer[]) => ({
+            rank: item[0],
+            username: item[1],
+            fullName: item[2]
+          }));
+          setRankCustomerOnline(convertedData);
+
+          setRankCustomerOffline(data);
         } catch (error) {
           console.log("Error fetch data rank customer", error)
         }
@@ -513,6 +475,7 @@ export default function Home() {
           const response = await fetch(`http://localhost:8080/rest/booking/rank/customer/online/byOwerId/${owner?.ownerId}`)
           const data = await response.json()
           setRankCustomerOnline(data)
+          console.log(data);
 
         } catch (error) {
           console.log("Error fetch data rank customer", error)
@@ -524,15 +487,13 @@ export default function Home() {
 
   // Detail modal rank by username
   const handleOpenModalRank = (username: string) => {
-    console.log("username", username)
     setShowModalRank(true);
     // Fetch modal data based on the provided username
     const fetchModalData = async () => {
       try {
         const response = await fetch(`http://localhost:8080/rest/booking/rank/customer/online/${username}`);
         const data = await response.json();
-        setBookingByUsernameModal(data); // Store modal-specific data
-        console.log("Booking Detail Customer", data);
+        setBookingByUsernameModal(data);
       } catch (error) {
         console.log("Error fetching modal booking details", error);
       }
@@ -547,15 +508,13 @@ export default function Home() {
 
   //Detail modal rank by fullname
   const handleOpenModalRankOffline = (fullname: string) => {
-    console.log("fullName", fullname)
     setShowModalRankOffline(true);
     // Fetch modal data based on the provided username
     const fetchModalData = async () => {
       try {
         const response = await fetch(`http://localhost:8080/rest/booking/detail/tableCustomer/byFullname/${fullname}`);
         const data = await response.json();
-        setBookingByFullNameOffline(data); // Store modal-specific data
-        console.log("Booking Detail Customer Rank Offline", data);
+        setBookingByFullNameOffline(data);
       } catch (error) {
         console.log("Error fetching modal booking details", error);
       }
@@ -583,13 +542,14 @@ export default function Home() {
       ];
 
       chartData.slice(1).forEach((field, index) => {
+        const row = field as ChartRow;
         worksheet.addRow({
           stt: `#${index + 1}`,
-          time: `${new Date(field[2]).toLocaleDateString('en-GB')} / ${new Date(field[3]).toLocaleDateString('en-GB')}`,
-          name: field[0],
+          time: `${new Date(row[2]).toLocaleDateString('en-GB')} / ${new Date(row[3]).toLocaleDateString('en-GB')}`,
+          name: row[0],
           totalRevenue: formatPrice(totalBookingPrice),
-          revenue: formatPrice(field[1]),
-          rate: `${(field[1] / totalBookingPrice * 100).toFixed(1)}%`,
+          revenue: formatPrice(row[1]),
+          rate: `${(row[1] / totalBookingPrice * 100).toFixed(1)}%`,
         });
       });
 
@@ -614,7 +574,7 @@ export default function Home() {
 
   const exportPDF = () => {
     try {
-      const doc: any = new jsPDF();
+      const doc: jsPDF = new jsPDF();
 
       doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
       doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
@@ -625,16 +585,17 @@ export default function Home() {
       const tableRows: string[][] = [];
 
       chartData.slice(1).forEach((field, index) => {
+        const row = field as ChartRow;
         const revenueData = [
           `#${index + 1}`,
-          `${new Date(field[2]).toLocaleDateString('en-GB')} / ${new Date(field[3]).toLocaleDateString('en-GB')}`,
-          field[0],
+          `${new Date(row[2]).toLocaleDateString('en-GB')} / ${new Date(row[3]).toLocaleDateString('en-GB')}`,
+          row[0],
           formatPrice(totalBookingPrice),
-          formatPrice(field[1]),
-          `${(field[1] / totalBookingPrice * 100).toFixed(1)}%`,
+          formatPrice(row[1]),
+          `${(row[1] / totalBookingPrice * 100).toFixed(1)}%`,
         ];
         tableRows.push(revenueData);
-        doc.autoTable({
+        autoTable(doc, {
           head: [tableColumn],
           body: tableRows,
           startY: 20,
@@ -653,7 +614,7 @@ export default function Home() {
             4: { halign: 'left' },
             5: { halign: 'left' },
           },
-          didParseCell: (data: any) => {
+          didParseCell: (data) => {
             if (data.cell.text.length > 0) {
               data.cell.text[0] = data.cell.text[0];
             }
@@ -719,7 +680,7 @@ export default function Home() {
 
   const exportPDFCustomer = () => {
     try {
-      const doc: any = new jsPDF();
+      const doc: jsPDF = new jsPDF();
 
       doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
       doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
@@ -727,40 +688,34 @@ export default function Home() {
 
       doc.text("Danh Sách Customer", 14, 16);
       const tableColumn = ["Số thứ tự", "Tháng", "Số lượng khách hàng"];
-      const tableRows: string[][] = [];
-
-      customerData.slice(1).forEach((field, index) => {
-        const revenueData = [
-          `#${index + 1}`,
-          field[0],
-          field[1],
-        ];
-        tableRows.push(revenueData);
-        doc.autoTable({
-          head: [tableColumn],
-          body: tableRows,
-          startY: 20,
-          theme: 'grid',
-          styles: {
-            font: 'Roboto',
-            fontSize: 10,
-            cellPadding: 2,
-            valign: 'middle',
-          },
-          columnStyles: {
-            0: { halign: 'left' },
-            1: { halign: 'left' },
-            2: { halign: 'center' },
-          },
-          didParseCell: (data: any) => {
-            if (data.cell.text.length > 0) {
-              data.cell.text[0] = data.cell.text[0];
-            }
-          }
-        });
+      const tableRows: string[][] = customerData.slice(1).map((field, index) => {
+        const month = field[0].toString();
+        const customer = field[1].toString();
+        return [`#${index + 1}`, month, customer];
       });
 
-
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 20,
+        theme: 'grid',
+        styles: {
+          font: 'Roboto',
+          fontSize: 10,
+          cellPadding: 2,
+          valign: 'middle',
+        },
+        columnStyles: {
+          0: { halign: 'left' },
+          1: { halign: 'left' },
+          2: { halign: 'center' },
+        },
+        didParseCell: (data) => {
+          if (data.cell.text.length > 0) {
+            data.cell.text[0] = data.cell.text[0];
+          }
+        }
+      });
 
       const today = new Date();
       const month = today.getMonth() + 1;
@@ -775,6 +730,36 @@ export default function Home() {
       console.log(error)
     }
 
+  };
+
+  const renderPagination = (totalPages: number, currentPage: number) => {
+    const handlePreviousPage = () => {
+      if (currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    };
+
+    const handleNextPage = () => {
+      if (totalPages && currentPage < totalPages) {
+        setCurrentPage(currentPage + 1);
+      }
+    };
+    const pages = [];
+    if (totalPages <= 1) return null;
+
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(
+        <Pagination.Item key={i} active={currentPage === i} onClick={() => setCurrentPage(i)}>{i}</Pagination.Item>
+      );
+    }
+
+    return (
+      <Pagination>
+        <Pagination.Prev onClick={handlePreviousPage} disabled={currentPage === 1} />
+        {pages}
+        <Pagination.Next onClick={handleNextPage} disabled={currentPage === totalPages} />
+      </Pagination>
+    );
   };
 
   const renderContent = () => {
@@ -793,10 +778,7 @@ export default function Home() {
                       name="sportField"
                       id="sportField"
                       style={{ padding: '5px 7px 7px 7px', borderRadius: '5px', marginLeft: '10px', fontWeight: 'bold' }}
-                      onChange={(e) => {
-                        setSelectedFieldId(Number(e.target.value));
-                        console.log('Selected Sport Field ID:', selectedFieldId);
-                      }}
+                      onChange={(e) => setSelectedFieldId(Number(e.target.value))}
                       value={selectedFieldId || ''}
                     >
                       {sportFieldByOwner.map((field, index) => (
@@ -863,12 +845,8 @@ export default function Home() {
                       <option value="pdf">PDF</option>
                       <option value="excel">Excel</option>
                     </select>
-                    {/* <Button variant="outline-dark">Export</Button> */}
                   </div>
-
-
                 </div>
-
               </div>
             </div>
             <RevenueChart data={chartData} />
@@ -887,12 +865,13 @@ export default function Home() {
                 </thead>
                 <tbody>
                   {chartData.slice(1).map((field, index) => {
+                    const row = field as ChartRow;
                     const isDateSelected = startDate || endDate;
                     const displayDate = startDate || endDate
                       ? `${startDate ? new Date(startDate).toLocaleDateString('en-GB') : ''} / ${endDate ? new Date(endDate).toLocaleDateString('en-GB') : ''}`
-                      : `${new Date(field[2]).toLocaleDateString('en-GB')} / ${new Date(field[3]).toLocaleDateString('en-GB')}`;
+                      : `${new Date(row[2]).toLocaleDateString('en-GB')} / ${new Date(row[3]).toLocaleDateString('en-GB')}`;
                     const displayTotalBookingPrice = isDateSelected ? totalBookingDetailPriceByDate : totalBookingPrice;
-                    const displayFieldRevenue = isDateSelected ? field[1] : field[1];
+                    const displayFieldRevenue = isDateSelected ? row[1] : row[1];
                     return (
 
                       <tr key={index}>
@@ -900,7 +879,7 @@ export default function Home() {
                         <td>
                           {displayDate}
                         </td>
-                        <td>{field[0]}</td>
+                        <td>{row[0]}</td>
                         <td>{formatPrice(displayTotalBookingPrice)}</td>
                         <td>{formatPrice(displayFieldRevenue)}</td>
                         <td>{(displayFieldRevenue / displayTotalBookingPrice * 100).toFixed(1)}%</td>
@@ -910,7 +889,7 @@ export default function Home() {
                             className="bg-success border-0"
                             onClick={
                               () => {
-                                handleOpenModal(field[4])
+                                handleOpenModal(row[4])
                               }
                             }
                           >
@@ -925,17 +904,9 @@ export default function Home() {
             </div>
           </>
         );
-      case 'deposit':
-        return (
-          <>
-            <BookingChart />
-          </>
-
-        );
       case 'withdraw':
         return (
           <>
-            {/* Nội dung chính của switch 'withdraw' */}
             <ModalTableDetailCustomer showModal={showModalRank} onClose={handleCloseModalRank} data={bookingByUsernameModal} />
             <ModalTableDetailCustomerByFullName showModal={showModalRankOffline} onClose={handleCloseModalRankOffline} data={bookingByFullNameOffline} />
             <div className="card mb-3">
@@ -1058,38 +1029,7 @@ export default function Home() {
                         ))}
                       </tbody>
                     </Table>
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                      <nav aria-label="Page navigation example">
-                        <ul className="pagination justify-content-center">
-                          {/* First Page */}
-                          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                            <a className="page-link" style={{ cursor: 'pointer' }} aria-label="First" onClick={() => handlePageChange(1)} title="Go to first page">
-                              <span aria-hidden="true">&laquo;</span>
-                            </a>
-                          </li>
-
-                          {/* Page Numbers */}
-                          {Array.from({ length: totalPages }, (_, index) => {
-                            const pageNumber = index + 1;
-                            return (
-                              pageNumber >= Math.max(1, currentPage - 2) && pageNumber <= Math.min(totalPages, currentPage + 2) && (
-                                <li key={pageNumber} className={`page-item ${currentPage === pageNumber ? 'active' : ''}`}>
-                                  <a className="page-link" style={{ cursor: 'pointer' }} onClick={() => handlePageChange(pageNumber)}>{pageNumber}</a>
-                                </li>
-                              )
-                            );
-                          })}
-
-                          {/* Last Page */}
-                          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                            <a className="page-link" style={{ cursor: 'pointer' }} aria-label="Last" onClick={() => handlePageChange(totalPages)} title="Go to last page">
-                              <span aria-hidden="true">&raquo;</span>
-                            </a>
-                          </li>
-                        </ul>
-                      </nav>
-                    )}
+                    {renderPagination(totalPages, currentPage)}
                   </div>
                 )}
                 {activeTabCustomer === "online" && (
@@ -1122,62 +1062,22 @@ export default function Home() {
                         ))}
                       </tbody>
                     </Table>
-                    {/* Pagination */}
-                    {totalPagesOnline > 1 && (
-                      <nav aria-label="Page navigation example">
-                        <ul className="pagination justify-content-center">
-                          {/* First Page */}
-                          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                            <a className="page-link" style={{ cursor: 'pointer' }} aria-label="First" onClick={() => handlePageChange(1)} title="Go to first page">
-                              <span aria-hidden="true">&laquo;</span>
-                            </a>
-                          </li>
-
-                          {/* Page Numbers */}
-                          {Array.from({ length: totalPages }, (_, index) => {
-                            const pageNumber = index + 1;
-                            return (
-                              pageNumber >= Math.max(1, currentPage - 2) && pageNumber <= Math.min(totalPagesOnline, currentPage + 2) && (
-                                <li key={pageNumber} className={`page-item ${currentPage === pageNumber ? 'active' : ''}`}>
-                                  <a className="page-link" style={{ cursor: 'pointer' }} onClick={() => handlePageChange(pageNumber)}>{pageNumber}</a>
-                                </li>
-                              )
-                            );
-                          })}
-
-                          {/* Last Page */}
-                          <li className={`page-item ${currentPage === totalPagesOnline ? 'disabled' : ''}`}>
-                            <a className="page-link" style={{ cursor: 'pointer' }} aria-label="Last" onClick={() => handlePageChange(totalPagesOnline)} title="Go to last page">
-                              <span aria-hidden="true">&raquo;</span>
-                            </a>
-                          </li>
-                        </ul>
-                      </nav>
-                    )}
+                    {renderPagination(totalPagesOnline, currentPage)}
                   </div>
                 )}
               </div>
             </div>
           </>
         );
-      default:
-        return (
-          <div className="font-14">
-            Loading...
-          </div>
-        );
     }
   };
 
   return (
-    <>
+    <Suspense fallback={<div>Đang tải...</div>}>
       <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>THỐNG KÊ</h3>
       <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
         <Nav.Item>
           <Nav.Link eventKey="all" className="tab-link">Doanh thu</Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="deposit" className="tab-link">Tỉ lệ sử dụng sân</Nav.Link>
         </Nav.Item>
         <Nav.Item>
           <Nav.Link eventKey="withdraw" className="tab-link">Tương tác với khách hàng</Nav.Link>
@@ -1186,43 +1086,6 @@ export default function Home() {
       <div className="mt-3">
         {renderContent()}
       </div>
-    </>
-
+    </Suspense>
   );
 }
-
-//Fetch sum revenue by Date
-// useEffect(() => {
-//   if (startDate) {
-//     const fetchData = async () => {
-//       try {
-
-//         const response = await fetch(
-//           `http://localhost:8080/rest/booking/success/revenue/byDate/2/2/${startDate.toISOString().split('T')[0]}${endDate ? '/' + endDate.toISOString().split('T')[0] : ''}`
-//         );
-
-//         if (!response.ok) {
-//           throw new Error(`HTTP error! status: ${response.status}`);
-//         }
-
-//         const text = await response.text();
-//         console.log('Raw Response:', text);
-
-//         // Check if the response is empty
-//         if (text.trim() === '') {
-//           console.warn('Empty response received');
-//           setRevenueByDate(null); // or set a default value if needed
-//         } else {
-//           const data = JSON.parse(text);
-//           setRevenueByDate(data);
-//           console.log('Revenue By Date:', data);
-//         }
-//       } catch (error) {
-//         console.error('Error fetching revenue by date:', error);
-//       }
-//     };
-//     fetchData();
-//   }
-// }, [startDate, endDate]);
-
-//Fetch sportField by Owner

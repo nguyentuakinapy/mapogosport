@@ -1,7 +1,11 @@
 package mapogo.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +28,23 @@ public class FieldReviewServiceImpl implements FieldReviewService {
 	SportFieldDAO sportFiledDao;
 
 	@Override
-	public List<FieldReview> findByUser_Username(String username) {
-		return fieldReviewDAO.findByUser_Username(username);
+	public List<Map<String, Object>> findByUser_Username(String username) {
+		List<FieldReview> fieldReviews = fieldReviewDAO.findByUser_Username(username);
+		List<Map<String, Object>> result = new ArrayList<>();
+		
+		for (FieldReview fieldReview: fieldReviews) {
+			Map<String, Object> fieldReviewData = new HashMap<>();
+			fieldReviewData.put("fullname", fieldReview.getUser().getFullname());
+			fieldReviewData.put("fieldReviewId", fieldReview.getFieldReviewId());
+			fieldReviewData.put("sportFieldName", fieldReview.getSportField().getName());
+			fieldReviewData.put("sportFieldId", fieldReview.getSportField().getSportFieldId());
+			fieldReviewData.put("comment", fieldReview.getComment());
+			fieldReviewData.put("datedAt", fieldReview.getDatedAt());
+			
+			result.add(fieldReviewData);
+		}
+		
+		return result;
 	}
 
 	@Override

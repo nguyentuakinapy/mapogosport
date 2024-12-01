@@ -6,8 +6,12 @@ export const options = {
   is3D: true,
 };
 
+type ChartHeader = [string, string, string, string, string];
+type ChartRow = [string, number, string, string, number];
+type ChartData = [ChartHeader, ...ChartRow[]];
+
 interface RevenueChartProps {
-  data: any[];
+  data: ChartData;
 }
 
 export default function RevenueChart({ data }: RevenueChartProps) {

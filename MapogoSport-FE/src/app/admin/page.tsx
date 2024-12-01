@@ -1,24 +1,24 @@
 'use client'
 import ProfileContent from "@/components/User/modal/user.profile";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { useData } from "../context/UserContext";
 import BlogManager from "@/components/blog/blog-manager";
 import Wallet from "@/components/User/modal/wallet";
 import AuthorityComponent from "@/components/Admin/authority";
-import { decodeString } from "@/components/Utils/Format";
 
 export default function Owner() {
+    const BASE_URL = 'http://localhost:8080/rest/';
+
     const [activeTab, setActiveTab] = useState<string>('all');
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
     const userData = useData();
 
     useEffect(() => {
-        const username = localStorage.getItem('username');
-        if (username) {
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${decodeString(username)}`);
+        if (userData) {
+            setUsernameFetchApi(`${BASE_URL}user/${userData.username}`);
         }
-    }, []);
+    }, [userData]);
 
 
     const renderContent = () => {
@@ -52,11 +52,11 @@ export default function Owner() {
         }
     };
     return (
-        <>
+        <Suspense fallback={<div>Đang tải...</div>}>
             <div className="profile-header">
                 <div className="profile-info">
                     <h2>{userData?.fullname}</h2>
-                    <p>Thằng nào có tiền thì nạp vào DONATE cho tao</p>
+                    {/* <p>Thằng nào có tiền thì nạp vào DONATE cho tao</p> */}
                     <div className="stats">
                         <span>0 Bài Viết</span>
                         <span>0 Sân</span>
@@ -87,6 +87,6 @@ export default function Owner() {
                     {renderContent()}
                 </div>
             </div>
-        </>
+        </Suspense>
     )
 }

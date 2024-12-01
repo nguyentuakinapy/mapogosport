@@ -19,7 +19,6 @@ import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import Image from 'next/image';
-import { Form } from 'react-bootstrap';
 import { usePathname } from 'next/navigation';
 
 
@@ -181,6 +180,25 @@ const Header = (props: HeaderProps) => {
             }
         })
     }
+    const handleReadedNotifi = (notificationId: number, titleNotifi: string) => {
+        handleIsReadNotification(notificationId);
+        let temp: string;
+        let afterSlash: string
+        temp = titleNotifi
+        if (titleNotifi && titleNotifi.includes('/')) {
+            afterSlash = titleNotifi.split('/').pop() ?? ''; // "SENDER-teonv"
+            // Lấy phần sau dấu `-`
+            temp = afterSlash.split('-').pop() ?? ''; // "teonv"
+        } else {
+            temp = ''
+        }
+        console.log('temp=>>>>>>>>>>>>>>>> ', temp);
+        if (temp !== '') {
+            const usernameSenderNotifi = temp;
+            const encodedUsername = btoa(usernameSenderNotifi);
+            window.history.pushState({}, "", `?status=${encodedUsername}`);
+        }
+    }
 
 
     const handleViewNotification = (username: string) => {
@@ -216,11 +234,6 @@ const Header = (props: HeaderProps) => {
             toast.success('Cập nhật thành công!');
         })
     }
-
-
-
-
-    //
 
     return (
         <main className='header-area' style={{ position: 'sticky', zIndex: '1001' }}>
@@ -284,7 +297,11 @@ const Header = (props: HeaderProps) => {
                             <Nav className='position-relative me-2'>
                                 <Link href="/cart" className={`head-hv-nav text-decoration-none ${path.includes("/cart") && `active-link`}`}>
                                     <i className="bi bi-cart-fill"></i></Link>
-                                {userData && <CartBadge username={userData.username} />}
+                                {userData ? <CartBadge username={userData.username} /> :
+                                    <span className="position-absolute  top-1 start-100 translate-middle badge rounded-pill bg-danger">
+                                        0
+                                        <span className="visually-hidden">items in cart</span>
+                                    </span>}
                             </Nav>
                             <Nav className="d-flex align-items-center">
 
@@ -300,7 +317,9 @@ const Header = (props: HeaderProps) => {
 
                                     <span onClick={() => setHideNotification(!hideNotification)}
                                         className="position-absolute translate-middle badge rounded-pill bg-danger">
-                                        {notification ? notification.filter(item => !item.isRead).length : 0}
+                                        {/* {notification ? notification.filter(item => !item.isRead).length : 0} */}
+                                        {notification ? notification.filter(item => item.isRead === false).length > 5 ? '5+' :
+                                            notification.filter(item => item.isRead === false).length : 0}
                                         <span className="visually-hidden">unread messages</span>
                                     </span>
 
@@ -338,7 +357,8 @@ const Header = (props: HeaderProps) => {
                                                     >
                                                         <div className="d-flex justify-content-between align-items-center">
                                                             <Link
-                                                                onClick={() => handleIsReadNotification(item.notificationId)}
+                                                                // onClick={() => handleIsReadNotification(item.notificationId)}
+                                                                onClick={() => handleReadedNotifi(item.notificationId, item.title)}
                                                                 href='#'
                                                                 className="box-comment"
                                                                 style={{
@@ -346,7 +366,12 @@ const Header = (props: HeaderProps) => {
                                                                     color: item.isRead ? 'black' : undefined,
                                                                 }}
                                                             >
-                                                                <b>{item.title}</b>
+                                                                {/* <b>{item.title}</b> */}
+                                                                <b>
+                                                                    {item.title.includes('/')
+                                                                        ? item.title.substring(0, item.title.lastIndexOf('/'))
+                                                                        : item.title}
+                                                                </b>
                                                                 <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
                                                                     <div>{item.message}</div>
                                                                     <div className="ms-auto">{formatTimeNoDate(new Date(item.createdAt))}</div>

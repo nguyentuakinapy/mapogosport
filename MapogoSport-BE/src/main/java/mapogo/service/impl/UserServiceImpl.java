@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -14,11 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import mapogo.dao.AccountPackageDAO;
 import mapogo.dao.NotificationDAO;
+import mapogo.dao.TransactionDAO;
 import mapogo.dao.UserDAO;
 import mapogo.dao.UserSubscriptionDAO;
 import mapogo.dao.WalletDAO;
 import mapogo.entity.AccountPackage;
 import mapogo.entity.Notification;
+import mapogo.entity.Transaction;
 import mapogo.entity.User;
 import mapogo.entity.UserSubscription;
 import mapogo.entity.UserVoucher;
@@ -40,6 +46,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	NotificationDAO notificationDAO;
+
+	@Autowired
+	TransactionDAO transactionDAO;
 
 	@Autowired
 	CloudinaryUtils cloudinaryUtils;
@@ -188,20 +197,21 @@ public class UserServiceImpl implements UserService {
 		});
 		return notifications;
 	}
+
 	@Override
 	public List<Notification> findByUser_UsernameContainingAndTypeContaining(String username, String type) {
-	    User user = userDAO.findById(username).orElseThrow(() -> 
-	        new RuntimeException("User not found with username: " + username));
-	    List<Notification> filteredNotifications = user.getNotifications().stream()
-	        .filter(notification -> notification.getType() != null && notification.getType().contains(type))
-	        .toList();
-	    filteredNotifications.forEach(notification -> {
-	        if (notification.getUser() != null) {
-	            notification.setUsername(notification.getUser().getUsername()); // set thủ công username
-	        }
-	    });
+		User user = userDAO.findById(username)
+				.orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+		List<Notification> filteredNotifications = user.getNotifications().stream()
+				.filter(notification -> notification.getType() != null && notification.getType().contains(type))
+				.toList();
+		filteredNotifications.forEach(notification -> {
+			if (notification.getUser() != null) {
+				notification.setUsername(notification.getUser().getUsername()); // set thủ công username
+			}
+		});
 
-	    return filteredNotifications;
+		return filteredNotifications;
 	}
 
 	@Override
@@ -214,17 +224,17 @@ public class UserServiceImpl implements UserService {
 
 		messagingTemplate.convertAndSend("/topic/notification/isReadAll/username", u.getUsername());
 	}
-	
+
 	@Override
 	public void setViewNotificationTypeNotifyMess(String username) {
 		User u = userDAO.findById(username).get();
-		System.err.println("user name "+ u.getUsername());
+		System.err.println("user name " + u.getUsername());
 		u.getNotifications().forEach(item -> {
-			if("notifyMess".equals(item.getType())) {
+			if ("notifyMess".equals(item.getType())) {
 				item.setIsRead(true);
 				notificationDAO.save(item);
 			}
-			
+
 		});
 		messagingTemplate.convertAndSend("/topic/notification/isReadAll/username", u.getUsername());
 
@@ -236,10 +246,11 @@ public class UserServiceImpl implements UserService {
 
 		messagingTemplate.convertAndSend("/topic/notification/delete/username", username);
 	}
+
 	@Override
 	public void deleteNotificationHaveTypeNotifyMess(String username) {
 		notificationDAO.deleteByUsernameAndType(username, "notifyMess");
-					
+
 		messagingTemplate.convertAndSend("/topic/notification/delete/username", username);
 	}
 
@@ -253,5 +264,35 @@ public class UserServiceImpl implements UserService {
 		messagingTemplate.convertAndSend("/topic/notification/isRead", n.getUser().getUsername());
 	}
 
-	
+	@Override
+	public UserSubscription updateUserSubcription(Integer id, Date endDate) {
+		UserSubscription uS = userSubscriptionDAO.findById(id).get();
+		uS.setEndDay(endDate);
+		userSubscriptionDAO.save(uS);
+
+		Wallet w = uS.getUser().getWallet();
+		w.setBalance(w.getBalance().subtract(BigDecimal.valueOf(uS.getAccountPackage().getPrice())));
+		walletDAO.save(w);
+
+		Transaction transaction = new Transaction();
+		transaction.setAmount(BigDecimal.valueOf(uS.getAccountPackage().getPrice()));
+		transaction.setCreatedAt(LocalDateTime.now());
+		transaction.setDescription("Gia hạn gói đăng ký!");
+		transaction.setTransactionType('-' + String.valueOf(uS.getAccountPackage().getPrice()));
+		transaction.setWallet(w);
+		transactionDAO.save(transaction);
+		
+		Notification n = new Notification();
+		n.setUser(uS.getUser());
+		n.setTitle("Gia hạn gói tài khoản");
+		n.setMessage(uS.getAccountPackage().getPackageName() + " đã gia hạn thành công!");
+		n.setType("userSub");
+		// Lưu và gửi thông báo
+		notificationDAO.save(n);
+
+		messagingTemplate.convertAndSend("/topic/notification/username",
+				uS.getUser().getUsername());
+		return uS;
+	}
+
 }

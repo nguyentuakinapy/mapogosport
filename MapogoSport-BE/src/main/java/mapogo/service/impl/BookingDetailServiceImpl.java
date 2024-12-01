@@ -193,7 +193,15 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		bookingDetail.setBooking(b);
 		bookingDetail.setSubscriptionKey((String) bd.get("subscriptionKey"));
 
-		return bookingDetailDAO.save(bookingDetail);
+		bookingDetailDAO.save(bookingDetail);
+		
+		Map<String, Object> dataPush = new HashMap<String, Object>();
+		dataPush.put("username", b.getOwner().getUser().getUsername());
+		dataPush.put("bookingId", bookingDetail.getBookingDetailId());
+
+		messagingTemplate.convertAndSend("/topic/bookingDetail/user/reload", b.getUser().getUsername());
+		messagingTemplate.convertAndSend("/topic/bookingDetail/reload", dataPush);
+		return bookingDetail;
 //		return null;
 	}
 
@@ -303,6 +311,12 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		b.setOldTotalAmount(b.getTotalAmount());
 		b.setTotalAmount(totalPriceTemporary);
 		bookingDAO.save(b);
+		
+		Map<String, Object> dataPush = new HashMap<String, Object>();
+		dataPush.put("username", b.getOwner().getUser().getUsername());
+		dataPush.put("bookingId", bd.getBookingDetailId());
+
+		messagingTemplate.convertAndSend("/topic/bookingDetail/reload", dataPush);
 	}
 
 	@Override
@@ -346,6 +360,12 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		b.setOldTotalAmount(b.getTotalAmount());
 		b.setTotalAmount(totalPriceTemporary);
 		bookingDAO.save(b);
+		
+		Map<String, Object> dataPush = new HashMap<String, Object>();
+		dataPush.put("username", b.getOwner().getUser().getUsername());
+		dataPush.put("bookingId", newBd.getBookingDetailId());
+
+		messagingTemplate.convertAndSend("/topic/bookingDetail/reload", dataPush);
 	}
 
 	@Override
@@ -389,5 +409,48 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			}
 		});
 		return bookingDetails;
+	}
+
+	@Override
+	public void createBookingDetailPeriod(List<Map<String, Object>> bd) {
+		bd.forEach(item -> {
+			System.err.println(item);
+			BookingDetail bookingDetail = new BookingDetail();
+
+			SportFieldDetail spd = sportFieldDAO.findById((Integer) item.get("sportFieldDetailId")).get();
+			Booking b = bookingDAO.findById((Integer) item.get("booking")).get();
+
+			Object priceObj = item.get("price");
+			Double price;
+
+			if (priceObj instanceof String) {
+				price = Double.valueOf((String) priceObj);
+			} else if (priceObj instanceof Number) {
+				price = ((Number) priceObj).doubleValue();
+			} else {
+				throw new IllegalArgumentException("totalAmount must be a String or Number");
+			}
+
+			bookingDetail.setStartTime((String) item.get("startTime"));
+			bookingDetail.setEndTime((String) item.get("endTime"));
+			bookingDetail.setSportFieldDetail(spd);
+			bookingDetail.setPrice(price);
+			bookingDetail.setDate(LocalDate.parse((String) item.get("date")));
+			bookingDetail.setBooking(b);
+			bookingDetail.setSubscriptionKey((String) item.get("subscriptionKey"));
+
+			bookingDetailDAO.save(bookingDetail);
+		});
+		
+		Booking b = bookingDAO.findById((Integer) bd.get(0).get("booking")).get();
+		
+		messagingTemplate.convertAndSend("/topic/bookingDetail/user/reload", b.getUser().getUsername());
+		
+		Map<String, Object> dataPush = new HashMap<String, Object>();
+		dataPush.put("username", b.getOwner().getUser().getUsername());
+		dataPush.put("bookingId", b.getBookingDetails().get(0).getBookingDetailId());
+
+		messagingTemplate.convertAndSend("/topic/bookingDetail/user/reload", b.getUser().getUsername());
+		messagingTemplate.convertAndSend("/topic/bookingDetail/reload", dataPush);
 	}
 }

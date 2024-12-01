@@ -26,7 +26,7 @@ public class Owner implements Serializable {
 	@Column(name = "OwnerId", nullable = false, unique = true)
 	private Integer ownerId;
 
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name = "Username", nullable = false)
 	private User user;
 

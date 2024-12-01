@@ -16,13 +16,11 @@ const CategoryAddNew = (props: CategoryProductProps) => {
     const [productImage, setProductImage] = useState<File | string>("/images/logo.png");
 
     useEffect(() => {
-        if (!currentCategory) {
-            setProductName("");
-        } else {
+        if (showAddCategory && currentCategory) {
             setProductName(currentCategory.name);
             setProductImage(currentCategory.image);
         }
-    }, [currentCategory]);
+    }, [currentCategory, showAddCategory]);
 
     const handleClose = () => {
         setShowAddCategory(false);
