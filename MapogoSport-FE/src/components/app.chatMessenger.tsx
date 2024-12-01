@@ -8,7 +8,6 @@ import "../app/globals.css";
 import { CompatClient, Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useData } from "@/app/context/UserContext";
-import { useSearchParams } from "next/navigation";
 import { removeVietnameseTones } from './Utils/Format';
 import { toast } from "react-toastify";
 import InputChat from "./InputChat/InputChat";
@@ -70,40 +69,50 @@ export default function ChatBox() {
 
   const stompClient = useRef<CompatClient | null>(null); // Khai báo đúng kiểu
 
-  const path = useSearchParams();
+  let path;
+
+  if (typeof window !== 'undefined') {
+    path = window.location.href
+  }
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const encodedStatus = path.get("status");
-      if (encodedStatus) {
-        if (encodedStatus === "default") {
-          // nếu là default thì mở sẳn admin có sẵn
-          if (adminDefault) {
-            handleSelectChat(adminDefault);
-            const newParams = new URLSearchParams(path);
-            newParams.delete("status");
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
 
-            // Cập nhật URL bằng cách sử dụng `replaceState`
-            window.history.replaceState(
-              {},
-              "",
-              `${window.location.pathname}?${newParams.toString()}`
-            );
+      if (typeof window !== "undefined" && params) {
+        const encodedStatus = params.get("status");
+
+        if (encodedStatus) {
+          if (encodedStatus === "default") {
+            // nếu là default thì mở sẳn admin có sẵn
+            if (adminDefault) {
+              handleSelectChat(adminDefault);
+              params.delete("status");
+
+              const newParams = new URLSearchParams(window.location.search);
+              newParams.delete("status");
+              window.history.replaceState(
+                {},
+                "",
+                `${window.location.pathname}`
+              );
+            }
+          } else {
+            try {
+              const decodedUsername = atob(encodedStatus);
+              setUsernameFormUrl(decodedUsername);
+            } catch (error) {
+              setUsernameFormUrl(""); // Reset nếu giải mã thất bại
+            }
           }
         } else {
-          try {
-            // Giải mã username từ Base64 và cập nhật state
-            const decodedUsername = atob(encodedStatus);
-            setUsernameFormUrl(decodedUsername);
-          } catch (error) {
-            setUsernameFormUrl(""); // Reset nếu giải mã thất bại
-          }
+          setUsernameFormUrl(""); // Reset nếu không có tham số
         }
-      } else {
-        setUsernameFormUrl(""); // Reset nếu không có tham số
       }
     }
+
   }, [path]); // Chạy lại mỗi khi searchParams thay đổi
+
 
   const rolePriority = ["ROLE_ADMIN", "ROLE_STAFF", "ROLE_OWNER", "ROLE_USER"];
   const getHighestRole = (user: User) => {
@@ -364,13 +373,10 @@ export default function ChatBox() {
     if (ownerCurrent) {
       setShowChat(true);
 
-      const newParams = new URLSearchParams(path);
-      newParams.delete("status");
-
       window.history.replaceState(
         {},
         "",
-        `${window.location.pathname}?${newParams.toString()}`
+        `${window.location.pathname}`
       );
     }
 

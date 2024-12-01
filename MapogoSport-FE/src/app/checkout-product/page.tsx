@@ -7,7 +7,6 @@ import { Button, FloatingLabel, Form, Collapse } from 'react-bootstrap';
 import { decodeString, formatPrice } from '@/components/Utils/Format';
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
-import { useSearchParams } from 'next/navigation';
 import ModalOrderSuccess from '@/components/ModalOrder/modal.Success';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -272,21 +271,30 @@ const CheckoutPage = () => {
     }
   };
 
-  const searchParams = useSearchParams();
+  let path;
+
+  if (typeof window !== 'undefined') {
+    path = window.location.href
+  }
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const status = searchParams.get('status');
-      const orderId1: string | null = searchParams.get('orderId');
+    if (typeof window !== 'undefined') {
 
-      if (status === 'success') {
-        if (orderId1 !== null) {
-          setOrderId(Number(orderId1));
+      const params = new URLSearchParams(window.location.search);
+
+      if (typeof window !== "undefined" && params) {
+        const status = params.get('status');
+        const orderId1: string | null = params.get('orderId');
+
+        if (status === 'success') {
+          if (orderId1 !== null) {
+            setOrderId(Number(orderId1));
+          }
+          setShowOrderSuccessModal(true);
         }
-        setShowOrderSuccessModal(true);
       }
     }
-  }, [searchParams]);
+  }, [path]);
 
   const [orderId, setOrderId] = useState<number | undefined>(undefined);
 
