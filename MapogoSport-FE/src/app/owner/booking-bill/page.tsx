@@ -19,6 +19,8 @@ import { decodeString } from "@/components/Utils/Format";
 
 const OwnerBookingBill = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [activeTab, setActiveTab] = useState<string>('all');
     const [username, setUsername] = useState<string | null>(null);
     const [startDate, setStartDate] = useState<Date | null>(null);
@@ -42,7 +44,7 @@ const OwnerBookingBill = () => {
         }
     }, []);
 
-    const { data: bookingData, error, isLoading } = useSWR<BookingFindAll[]>(`http://localhost:8080/rest/owner/booking/findAll/${username}`, fetcher, {
+    const { data: bookingData, error, isLoading } = useSWR<BookingFindAll[]>(`${BASE_URL}rest/owner/booking/findAll/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -71,7 +73,7 @@ const OwnerBookingBill = () => {
             setShowCancelBooking(true);
             setBooking(booking);
         } else {
-            fetch(`http://localhost:8080/rest/owner/booking/update`, {
+            fetch(`${BASE_URL}rest/owner/booking/update`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -83,8 +85,8 @@ const OwnerBookingBill = () => {
                     toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                     return;
                 }
-                mutate(`http://localhost:8080/rest/owner/booking/findAll/${username}`);
-                mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
+                mutate(`${BASE_URL}rest/owner/booking/findAll/${username}`);
+                mutate(`${BASE_URL}rest/user/booking/detail/${bookingId}`);
                 toast.success('Cập nhật thành công!');
             });
         }

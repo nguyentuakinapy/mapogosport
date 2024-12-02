@@ -15,7 +15,7 @@ interface UserProps {
   categoryProducts?: CategoryProduct[];
   onFetch: (data?: Product[] | Promise<Product[]> | undefined, shouldRevalidate?: boolean) => Promise<Product[] | undefined>;
 }
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 let ProductWasCreated: number;
 let canProceed = false;
@@ -53,9 +53,9 @@ const ProductAddNew = (props: UserProps) => {
   const [newColor, setNewColor] = useState<string>("");
 
   const { data: productDetails, error: errorProductDetails, mutate: mutateProductDetails, isLoading: productDetailsLoading } =
-    useSWR<ProductDetail[]>(currentProduct && `${BASE_URL}/rest/product-detail/${currentProduct?.productId}`, fetcher);
+    useSWR<ProductDetail[]>(currentProduct && `${BASE_URL}rest/product-detail/${currentProduct?.productId}`, fetcher);
 
-  const { data: productDetailGallery } = useSWR(selectedProductDetail && `${BASE_URL}/rest/gallery/${selectedProductDetail?.productDetailId}`, fetcher);
+  const { data: productDetailGallery } = useSWR(selectedProductDetail && `${BASE_URL}rest/gallery/${selectedProductDetail?.productDetailId}`, fetcher);
 
   useEffect(() => {
     if (productDetailGallery) {
@@ -631,7 +631,7 @@ const ProductAddNew = (props: UserProps) => {
     mutate,
   } = useSWR<ProductDetailSize[]>(
     selectedProductDetail?.productDetailId
-      ? `${BASE_URL}/rest/product-detail-size/${selectedProductDetail?.productDetailId}`
+      ? `${BASE_URL}rest/product-detail-size/${selectedProductDetail?.productDetailId}`
       : null,
     fetcher,
     {
@@ -830,7 +830,7 @@ const ProductAddNew = (props: UserProps) => {
 
       // Kiểm tra và thêm các file gallery đã được chọn vào FormData
       if (selectedGalleryFiles.length > 0) {
-        selectedGalleryFiles.forEach((file, ) => {
+        selectedGalleryFiles.forEach((file,) => {
           formData.append(`galleryFiles`, file); // Thêm từng file gallery vào FormData
         });
       }
@@ -891,7 +891,7 @@ const ProductAddNew = (props: UserProps) => {
 
       // Gọi API
       await axios.put(
-        `${BASE_URL}/rest/product-detail/update/${productDetailId}`,
+        `${BASE_URL}rest/product-detail/update/${productDetailId}`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -914,7 +914,7 @@ const ProductAddNew = (props: UserProps) => {
     }
     try {
       await axios.delete(
-        `${BASE_URL}/rest/product-detail/delete/${currentProductDetailID}`
+        `${BASE_URL}rest/product-detail/delete/${currentProductDetailID}`
       );
 
       toast.success("Xóa sản phẩm chi tiết thành công");
@@ -934,7 +934,7 @@ const ProductAddNew = (props: UserProps) => {
     }
     try {
       await axios.delete(
-        `${BASE_URL}/rest/gallery/delete/${currentProductDetailGalleryID}`
+        `${BASE_URL}rest/gallery/delete/${currentProductDetailGalleryID}`
       );
 
       toast.success("Xóa Gallery chi tiết thành công");

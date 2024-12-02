@@ -11,7 +11,6 @@ import { Stomp } from "@stomp/stompjs";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Col, Row, Table } from "react-bootstrap";
 import DatePicker from "react-datepicker";
-import { toast } from "react-toastify";
 import SockJS from "sockjs-client";
 import useSWR from "swr";
 
@@ -39,6 +38,8 @@ type DataReloadBooking = {
 };
 export default function BookingSport() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const user = useData();
     const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
     const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
@@ -74,23 +75,23 @@ export default function BookingSport() {
     const tdRefs = useRef<{ [key: number]: HTMLTableCellElement }>({});
 
     useEffect(() => {
-        const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+        const socket = new SockJS(`${BASE_URL}ws`); // Địa chỉ endpoint WebSocket
         const stompClient = Stomp.over(socket);
 
         stompClient.connect({}, () => {
-            stompClient.subscribe('/topic/bookingDetail/reload', async (dataPush) => {
+            stompClient.subscribe(`/topic/bookingDetail/reload`, async (dataPush) => {
                 setFocusedId(null);
                 const jsonData = JSON.parse(dataPush.body) as DataReloadBooking;
 
-                if (jsonData.username === decodeString(String(localStorage.getItem('username')))) {
+                if (jsonData.username === decodeString(String(localStorage.getItem(`username`)))) {
                     setCheckNotification(prev => prev + 1);
                     setCheckUsername(jsonData.username);
                     setFocusedId(jsonData.bookingId);
                 }
             });
 
-            stompClient.subscribe('/topic/bookingDetail/notification/reload', (message) => {
-                if (message.body === decodeString(String(localStorage.getItem('username')))) {
+            stompClient.subscribe(`/topic/bookingDetail/notification/reload`, (message) => {
+                if (message.body === decodeString(String(localStorage.getItem(`username`)))) {
                     setCheckNotification(prev => prev + 1);
                     setCheckUsername(message.body);
                     // refreshStatusBooking();
@@ -104,7 +105,7 @@ export default function BookingSport() {
     }, []);
 
     const { data: owner } =
-        useSWR<Owner>(user ? `http://localhost:8080/rest/owner/${user.username}` : null, fetcher, {
+        useSWR<Owner>(user ? `${BASE_URL}rest/owner/${user.username}` : null, fetcher, {
             revalidateIfStale: false,
             revalidateOnFocus: false,
             revalidateOnReconnect: false,
@@ -314,7 +315,7 @@ export default function BookingSport() {
         for (let index = 0; index < numFields; index++) {
 
             const response = await
-                fetch(`http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetails && sportDetails[index].sportFielDetailId}/${onDay}`);
+                fetch(`${BASE_URL}rest/user/booking/detail/getbyday/${sportDetails && sportDetails[index].sportFielDetailId}/${onDay}`);
 
             if (!response.ok) {
                 throw new Error('Error fetching data');
@@ -483,7 +484,7 @@ export default function BookingSport() {
                             let check = true;
 
                             if (timeIndex >= 0 && item.status == "Chưa bắt đầu" && timeDate < currentDateTime) {
-                                fetch(`http://localhost:8080/rest/booking/detail/change/status/${item.bookingDetailId}`, {
+                                fetch(`${BASE_URL}rest/booking/detail/change/status/${item.bookingDetailId}`, {
                                     method: 'PUT',
                                     headers: {
                                         'Accept': 'application/json, text/plain, */*',
@@ -551,11 +552,9 @@ export default function BookingSport() {
 
             // Gọi API để lấy danh sách booking
             const response = await
-                fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${sportFieldId}/${dayYears && dayYears[0]}/${dayYears && dayYears[dayYears.length - 1]}`);
+                fetch(`${BASE_URL}rest/user/booking/detail/getnextweek/${sportFieldId}/${dayYears && dayYears[0]}/${dayYears && dayYears[dayYears.length - 1]}`);
 
-            if (!response.ok) {
-                throw new Error('Lỗi khi lấy dữ liệu');
-            }
+            if (!response.ok) return
 
             const dataBooking = await response.json() as BookingDetailFullName[];
 
@@ -758,7 +757,7 @@ export default function BookingSport() {
                                     let check = true;
 
                                     if (timeIndex >= 0 && item.status == "Chưa bắt đầu" && timeDate < currentDateTime) {
-                                        fetch(`http://localhost:8080/rest/booking/detail/change/status/${item.bookingDetailId}`, {
+                                        fetch(`${BASE_URL}rest/booking/detail/change/status/${item.bookingDetailId}`, {
                                             method: 'PUT',
                                             headers: {
                                                 'Accept': 'application/json, text/plain, */*',
@@ -1092,7 +1091,7 @@ export default function BookingSport() {
 
     const fetchBookingNotification = async (date: string, time: string, sportFieldId: number) => {
         try {
-            const response = await fetch(`http://localhost:8080/rest/booking/detail/find/date/and/time/${date}/${time}/${sportFieldId}`);
+            const response = await fetch(`${BASE_URL}rest/booking/detail/find/date/and/time/${date}/${time}/${sportFieldId}`);
             if (!response.ok) throw new Error("Không tìm thấy sân sắp tới");
 
             const bookingNotification = await response.json() as BookingDetailFullName[];
@@ -1100,7 +1099,7 @@ export default function BookingSport() {
                 setBookingNotification(bookingNotification);
             }
         } catch (error) {
-            toast.error("Lỗi");
+            // toast.error("Lỗi");
         }
     };
 
@@ -1163,7 +1162,7 @@ export default function BookingSport() {
 
         if (sportDetailId && timeData && dayStartBooking && selectedSportDetail) {
 
-            const responseBookingDetail = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${timeData}/${selectedSportDetail?.sportFielDetailId}/${dayStartBooking}`);
+            const responseBookingDetail = await fetch(`${BASE_URL}rest/booking/detail/findbystarttime/sportfielddetail/${timeData}/${selectedSportDetail?.sportFielDetailId}/${dayStartBooking}`);
             if (!responseBookingDetail.ok) {
                 throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
             }
@@ -1204,7 +1203,7 @@ export default function BookingSport() {
         const selectedSportDetail = dataSport && dataSport[selectSport].sportFielDetails.find(item => item.sportFielDetailId === Number(sportDetailId));
 
         if (sportDetailId && timeData && dayStartBooking && selectedSportDetail) {
-            const responseBookingDetail = await fetch(`http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${timeData}/${selectedSportDetail.sportFielDetailId}/${dayStartBooking}`);
+            const responseBookingDetail = await fetch(`${BASE_URL}rest/booking/detail/findbystarttime/sportfielddetail/${timeData}/${selectedSportDetail.sportFielDetailId}/${dayStartBooking}`);
             if (!responseBookingDetail.ok) {
                 throw new Error(`Error fetching data: ${responseBookingDetail.statusText}`);
             }
@@ -1218,7 +1217,7 @@ export default function BookingSport() {
             setStartTimeKey(startTimeKey + 1);
 
             const responseBookingSubscriptionKey = await fetch(
-                `http://localhost:8080/rest/user/booking/detail/getbyday/subscriptionkey/${bkDData.subscriptionKey}`
+                `${BASE_URL}rest/user/booking/detail/getbyday/subscriptionkey/${bkDData.subscriptionKey}`
             );
 
             if (!responseBookingSubscriptionKey.ok) {

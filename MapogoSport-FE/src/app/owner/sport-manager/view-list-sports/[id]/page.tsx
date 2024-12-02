@@ -14,6 +14,7 @@ const SportFieldDetailList = () => {
     const { id } = useParams();
     const [username, setUsername] = useState<string | null>(null);
     const fetcher = (url: string) => axios.get(url).then((res) => res.data);
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
@@ -22,13 +23,13 @@ const SportFieldDetailList = () => {
         }
     }, []);
 
-    const { data: owner, error: ownerError, isLoading: ownerLoading } = useSWR<Owner>(username && `http://localhost:8080/rest/owner/${username}`, fetcher);
+    const { data: owner, error: ownerError, isLoading: ownerLoading } = useSWR<Owner>(username && `${BASE_URL}rest/owner/${username}`, fetcher);
 
     // Hook cho sportFieldDetail
-    const { data: sportFieldDetail, error: detailError, isLoading: detailLoading } = useSWR<SportFieldDetail[]>(id && `http://localhost:8080/rest/sportfielddetail/lists/${id}`, fetcher);
+    const { data: sportFieldDetail, error: detailError, isLoading: detailLoading } = useSWR<SportFieldDetail[]>(id && `${BASE_URL}rest/sportfielddetail/lists/${id}`, fetcher);
 
     // Hook cho sportFieldName
-    const { data: sportFieldName, error: nameError, isLoading: nameLoading } = useSWR(id && `http://localhost:8080/rest/sportfielddetail/sportFieldName/${id}`, fetcher);
+    const { data: sportFieldName, error: nameError, isLoading: nameLoading } = useSWR(id && `${BASE_URL}rest/sportfielddetail/sportFieldName/${id}`, fetcher);
 
     const handleEditSportFieldDetail = (sportFieldDetail: SportFieldDetail | null) => {
         setSelectedSportFieldDetail(sportFieldDetail);

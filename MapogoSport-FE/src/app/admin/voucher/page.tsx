@@ -12,7 +12,8 @@ const VoucherPage = () => {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [showAddVoucher, setShowAddVoucher] = useState<boolean>(false);
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
-  const BASE_URL = "http://localhost:8080";
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -21,7 +22,7 @@ const VoucherPage = () => {
   const currentUser = useData();
   const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
-  const { data, isLoading, error, mutate } = useSWR(`${BASE_URL}/rest/voucher/findAll`, fetcher);
+  const { data, isLoading, error, mutate } = useSWR(`${BASE_URL}rest/voucher/findAll`, fetcher);
 
   useEffect(() => {
     if (data) {
@@ -78,7 +79,7 @@ const VoucherPage = () => {
 
   const handleDelete = async (voucherId: number) => {
     if (window.confirm('Bạn có chắc muốn xóa địa chỉ này?')) {
-      fetch(`${BASE_URL}/rest/delete/voucher/${voucherId}`, {
+      fetch(`${BASE_URL}rest/delete/voucher/${voucherId}`, {
         method: 'PUT',
         headers: {
           'Accept': 'application/json, text/plain, */*',

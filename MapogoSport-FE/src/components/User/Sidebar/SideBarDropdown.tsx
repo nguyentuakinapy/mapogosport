@@ -18,12 +18,13 @@ interface SidebarDropdownProps {
 const SidebarDropdown = ({ item }: SidebarDropdownProps) => {
     const pathname = usePathname();
     const userData = useData();
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const handleClick = () => {
         if (userData) {
-            mutate(`http://localhost:8080/rest/user/${userData.username}`);
-            mutate(`http://localhost:8080/rest/user/voucher/${userData.username}`);
-            mutate(`http://localhost:8080/rest/wallet/transaction/${userData.wallet.walletId}`)
+            mutate(`${BASE_URL}rest/user/${userData.username}`);
+            mutate(`${BASE_URL}rest/user/voucher/${userData.username}`);
+            mutate(`${BASE_URL}rest/wallet/transaction/${userData.wallet.walletId}`)
         }
     }
 

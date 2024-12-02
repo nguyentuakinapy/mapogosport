@@ -9,6 +9,8 @@ import { decodeString } from "@/components/Utils/Format";
 
 const CouponPage = () => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [username, setUsername] = useState<string | null>(null);
     const [voucherData, setVoucherData] = useState<UserVoucher[]>([]);
 
@@ -19,7 +21,7 @@ const CouponPage = () => {
         }
     }, []);
 
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/voucher/${username}`, fetcher, {
+    const { data, error, isLoading } = useSWR(`${BASE_URL}rest/user/voucher/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,

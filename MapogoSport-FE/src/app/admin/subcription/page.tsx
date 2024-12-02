@@ -9,13 +9,13 @@ import ModalCreateSubcription from '@/components/Admin/Modal/modal.CreateSubcrip
 
 const SubcriptionPage = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
-    const BASE_URL = 'http://localhost:8080/rest/';
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [showUpdateSub, setShowUpdateSub] = useState(false);
     const [showCreateSub, setShowCreateSub] = useState(false);
     const [selectedPackage, setSelectedPackage] = useState<AccountPackage>();
 
-    const { data, mutate } = useSWR(`${BASE_URL}accountpackage`, fetcher, {
+    const { data, mutate } = useSWR(`${BASE_URL}rest/accountpackage`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -52,7 +52,7 @@ const SubcriptionPage = () => {
 
             // Gửi yêu cầu cập nhật lên API
             const response = await fetch(
-                `${BASE_URL}updateAccountPackage/${pkg.accountPackageId}`,
+                `${BASE_URL}rest/updateAccountPackage/${pkg.accountPackageId}`,
                 {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },

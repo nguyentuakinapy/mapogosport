@@ -16,7 +16,7 @@ import autoTable from "jspdf-autotable";
 
 const AdminOrder = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
-    const BASE_URL = 'http://localhost:8080/rest/';
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [orderData, setOrderData] = useState<OrderMap[]>([]);
     const [activeTab, setActiveTab] = useState<string>('all');
@@ -33,7 +33,7 @@ const AdminOrder = () => {
         'Đã hoàn thành'
     ];
 
-    const { data, error, isLoading } = useSWR(`${BASE_URL}admin/order/findAll`, fetcher, {
+    const { data, error, isLoading } = useSWR(`${BASE_URL}rest/admin/order/findAll`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -61,7 +61,7 @@ const AdminOrder = () => {
     };
 
     const handleStatusChange = (orderId: number, newStatus: string) => {
-        fetch(`${BASE_URL}admin/order/update`, {
+        fetch(`${BASE_URL}rest/admin/order/update`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -73,7 +73,7 @@ const AdminOrder = () => {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return;
             }
-            mutate(`${BASE_URL}admin/order/findAll`);
+            mutate(`${BASE_URL}rest/admin/order/findAll`);
             toast.success('Cập nhật thành công!');
         });
     };

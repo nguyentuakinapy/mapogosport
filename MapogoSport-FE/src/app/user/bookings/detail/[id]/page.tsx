@@ -9,10 +9,12 @@ import { fetchCoordinates } from "../../../../utils/geocode";
 
 const BookingsDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [bookingDetail, setBookingDetail] = useState<BookingDetailMap[]>([]);
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
 
-    const { data, isLoading, error } = useSWR<BookingDetailMap[]>(`http://localhost:8080/rest/user/booking/detail/${params.id}`, fetcher, {
+    const { data, isLoading, error } = useSWR<BookingDetailMap[]>(`${BASE_URL}rest/user/booking/detail/${params.id}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,

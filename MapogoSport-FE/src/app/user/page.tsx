@@ -7,10 +7,12 @@ import { useData } from '../context/UserContext';
 
 export default function RootLayout() {
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const user = useData();
     useEffect(() => {
         if (user) {
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${user.username}`);
+            setUsernameFetchApi(`${BASE_URL}rest/user/${user.username}`);
         }
     }, [user]);
 
