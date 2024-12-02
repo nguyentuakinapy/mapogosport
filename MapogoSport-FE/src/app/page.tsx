@@ -338,7 +338,7 @@ export default function Home() {
             ))}
           {sportFields && (
             <div className="d-flex justify-content-between">
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', right: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageSportField === 1) {
                   setPageSportField(sportFields.length - 3);
                 } else {
@@ -348,7 +348,7 @@ export default function Home() {
                 <i className="bi bi-arrow-left-short"></i>
               </button>
               <span className="text-danger fw-bold">{pageSportField}/{sportFields.length - 3}</span>
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', left: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageSportField === sportFields.length - 3) {
                   setPageSportField(1);
                 } else {
@@ -397,7 +397,7 @@ export default function Home() {
           </div>
           {voucher && (
             <div className="d-flex justify-content-between">
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '100px', right: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageVoucher === 1) {
                   setPageVoucher(filteredVouchers.length - 2);
                 } else {
@@ -407,7 +407,7 @@ export default function Home() {
                 <i className="bi bi-arrow-left-short"></i>
               </button>
               <span className="text-danger fw-bold">{pageVoucher}/{filteredVouchers.length - 2}</span>
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '100px', left: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageVoucher === filteredVouchers.length - 2) {
                   setPageVoucher(1);
                 } else {
@@ -459,7 +459,7 @@ export default function Home() {
                         </div>
                       </div>
                       <div className='product-card-action px-1'>
-                        <Link className='button-ajax' href={`/categories/products/detail/${product.productId}`}>Xem</Link>
+                        <Button className='button-ajax'>Xem</Button>
                       </div>
                     </Link>
                   </div>
@@ -468,7 +468,7 @@ export default function Home() {
             })}
           {products && (
             <div className="d-flex justify-content-between">
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', right: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageProduct === 1) {
                   setPageProduct(products.length - 3);
                 } else {
@@ -478,7 +478,7 @@ export default function Home() {
                 <i className="bi bi-arrow-left-short"></i>
               </button>
               <span className="text-danger fw-bold">{pageProduct}/{products.length - 3}</span>
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', left: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageProduct === products.length - 3) {
                   setPageProduct(1);
                 } else {
