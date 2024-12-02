@@ -10,6 +10,7 @@ import BlogManager from "@/components/blog/blog-manager";
 import Wallet from "@/components/User/modal/wallet";
 import Image from "next/image";
 import Loading from "@/components/loading";
+import { logOut } from "../utils/Log-Out";
 
 export default function Owner() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -41,18 +42,22 @@ export default function Owner() {
     useEffect(() => {
         const getOwner = async () => {
             if (userData) {
-                const responseOwner = await fetch(`${BASE_URL}rest/owner/${userData.username}`);
-                if (!responseOwner.ok) {
-                    throw new Error('Error fetching data');
-                }
-                const dataOwner = await responseOwner.json() as Owner;
+                if (userData.authorities.find(item => item.role.name === "ROLE_OWNER")) {
+                    const responseOwner = await fetch(`${BASE_URL}rest/owner/${userData.username}`);
+                    if (!responseOwner.ok) {
+                        throw new Error('Error fetching data');
+                    }
+                    const owner = await responseOwner.json() as Owner;
 
-                const response = await fetch(`${BASE_URL}rest/sport_field_by_owner/${dataOwner.ownerId}`);
-                if (!response.ok) {
-                    throw new Error('Error fetching data');
+                    const response = await fetch(`${BASE_URL}rest/sport_field_by_owner/${owner.ownerId}`);
+                    if (!response.ok) {
+                        throw new Error('Error fetching data');
+                    }
+                    const dataS = await response.json() as SportField[];
+                    setDataSport(dataS);
+                } else {
+                    logOut();
                 }
-                const dataS = await response.json() as SportField[];
-                setDataSport(dataS);
             }
         };
         getOwner();
@@ -149,8 +154,9 @@ export default function Owner() {
         const endDate = new Date(userSubscription!.endDay);
 
         const futureDate = new Date(endDate);
-        futureDate.setDate(endDate.getDate() + ap?.durationDays!);
-
+        if (ap) {
+            futureDate.setDate(endDate.getDate() + ap.durationDays);
+        }
         if (selectedPaymentMethod === "Thanh toán ví") {
             if (userData!.wallet.balance > ap!.price) {
                 fetch(`${BASE_URL}rest/user/subscription/extend/${userSubscription?.userSubscriptionId}/${futureDate}`, {

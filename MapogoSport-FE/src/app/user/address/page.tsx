@@ -8,6 +8,7 @@ import useSWR, { mutate } from 'swr'
 import { toast } from 'react-toastify'
 import ModalUpdateAddress from '@/components/User/modal/user.updateAddress'
 import { decodeString } from '@/components/Utils/Format'
+import Loading from '@/components/loading'
 
 export default function Address() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -98,7 +99,9 @@ export default function Address() {
                 </Button>
                 <div className='mt-4'>
                     {isLoading ? (
-                        <div>Đang tải...</div>
+                        <div className="d-flex align-items-center justify-content-center" style={{ height: '50vh' }}>
+                            <Loading></Loading>
+                        </div>
                     ) : error ? (
                         <div className='text-danger'>Có lỗi xảy ra khi tải dữ liệu</div>
                     ) : (

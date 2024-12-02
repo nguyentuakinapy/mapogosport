@@ -47,11 +47,11 @@ export default function Register(props: RegisterProps) {
         }
 
         try {
-            await fetch(`${BASE_URL}rest/user/${username}`);
-            toast.warning("Tên đăng nhập đã tồn tại!");
+            const responseAuth = await fetch(`${BASE_URL}rest/user/${username}`);
+            const data = await responseAuth.json() as User;
+            toast.warning("Tên dang nhập đã tồn tại!");
             return;
         } catch (error) {
-
         }
 
 
