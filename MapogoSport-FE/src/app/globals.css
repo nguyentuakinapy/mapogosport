@@ -1030,3 +1030,7 @@ table th {
 .active-chat {
   background-color: #66c7ff !important;
 }
+
+.hover-chat:hover{
+background-color: #e9f3ff;
+}

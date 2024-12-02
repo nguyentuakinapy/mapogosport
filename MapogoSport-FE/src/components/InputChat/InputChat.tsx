@@ -13,7 +13,7 @@ const InputChat: React.FC<InputChatProps> = ({ inputRef, handleKeyEnter }) => {
   const [inputMessage, setInputMessage] = useState(""); // lưu trữ nội dung người dùng đang nhập vào ô chat
 
   return (
-    <div className="card-footer d-flex p-2">
+    <div className=" d-flex p-2">
       <Form.Control
         ref={inputRef}
         type="text"
@@ -28,7 +28,7 @@ const InputChat: React.FC<InputChatProps> = ({ inputRef, handleKeyEnter }) => {
 
 
         }} // sự kiện key down
-        className="me-2"
+         className="rounded-3 w-100"
       />
     </div>
   )
