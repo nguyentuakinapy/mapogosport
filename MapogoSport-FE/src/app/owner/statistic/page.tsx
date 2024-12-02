@@ -1073,7 +1073,7 @@ export default function Home() {
         );
     }
   };
-  if (bookingSuccess.length === 0) return <>Loading</>;
+  // if (bookingSuccess.length === 0) return <>Loading</>;
   
   if (typeof window !== 'undefined') {
     return (
