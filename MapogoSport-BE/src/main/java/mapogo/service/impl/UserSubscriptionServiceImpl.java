@@ -382,4 +382,15 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 		return paymentDTO;
 	}
 
+	@Override
+	public List<UserSubscription> findAll() {
+		return userSubDao.findAll();
+	}
+
+	@Override
+	public List<UserSubscription> findByAccountPackageId(int id) {
+		
+		return userSubDao.findByAccPgkId(id);
+	}
+
 }
