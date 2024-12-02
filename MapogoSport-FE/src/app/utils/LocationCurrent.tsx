@@ -1,6 +1,6 @@
 export const fetchLocationCurrent = async (address: string) => {
-    try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json`);
+    const searchAddress = async (query: string) => {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -19,10 +19,26 @@ export const fetchLocationCurrent = async (address: string) => {
             return { lat: parseFloat(lat), lon: parseFloat(lon) };
         }
 
-        console.warn('No location data found for the provided address.');
         return null;
-    } catch (error) {
-        console.error('Error fetching location:', error);
-        return null;
+    };
+
+    let location = await searchAddress(address);
+    if (location) {
+        return location;
     }
+
+    // if api search address undefined
+    const keywords = ["phường", "xã", "thị trấn"];
+    const lowerCaseAddress = address.toLowerCase();
+    for (const keyword of keywords) {
+        const index = lowerCaseAddress.indexOf(keyword);
+        if(index !==-1){
+            const locationAddress = address.slice(index).trim();
+            location = await searchAddress(locationAddress);
+            if (location) {
+                return location;
+            }
+        }
+    }
+    return null;
 };
