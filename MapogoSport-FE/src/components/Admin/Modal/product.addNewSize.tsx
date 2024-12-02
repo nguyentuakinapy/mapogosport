@@ -25,9 +25,10 @@ const ModalProductAddNewSize = (props: IProps) => {
   const [sizes, setSizes] = useState<Size[]>([]); // Save list of sizes from API
   const [displayPrice, setDisplayPrice] = useState<number>(0);
   const [formValues, setFormValues] = useState<{ sizeId: number; price: number; quantity: number; }>({ sizeId: 0, price: 0, quantity: 0 });
-  const BASE_URL = "http://localhost:8080";
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const { data: sizeData, isLoading, mutate: refetch } = useSWR(`${BASE_URL}/rest/size`, fetcher);
+
+  const { data: sizeData, isLoading, mutate: refetch } = useSWR(`${BASE_URL}rest/size`, fetcher);
 
   // Cập nhật danh sách kích cỡ khi có dữ liệu từ API
   useEffect(() => {
@@ -63,7 +64,7 @@ const ModalProductAddNewSize = (props: IProps) => {
       return;
     }
     try {
-      await axios.post(`${BASE_URL}/rest/size/create`, { sizeName: newSizeName });
+      await axios.post(`${BASE_URL}rest/size/create`, { sizeName: newSizeName });
       toast.success("Thêm kích cỡ mới thành công!");
       refetch(); // Tải lại danh sách kích cỡ
       setIsShowAddSizeModal(false); // Đóng modal thêm kích cỡ mới
@@ -106,7 +107,7 @@ const ModalProductAddNewSize = (props: IProps) => {
     formData.append("productDetailSize", JSON.stringify(productDetailSize)); // Chuyển đổi đối tượng thành JSON
 
     // const response = await axios.post(
-    await axios.post(`${BASE_URL}/rest/product-detail-size/create/${productDetailId}`, formData, // Gửi FormData
+    await axios.post(`${BASE_URL}rest/product-detail-size/create/${productDetailId}`, formData, // Gửi FormData
       {
         headers: {
           "Content-Type": "multipart/form-data", // Đặt Content-Type cho FormData
@@ -120,7 +121,7 @@ const ModalProductAddNewSize = (props: IProps) => {
     const formData = new FormData();
     formData.append("productDetailSize", JSON.stringify(productDetailSize));
 
-    const response = await axios.put(`${BASE_URL}/rest/product-detail-size/update/${productDetailSizeId}`, formData,
+    const response = await axios.put(`${BASE_URL}rest/product-detail-size/update/${productDetailSizeId}`, formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
     return response.data;

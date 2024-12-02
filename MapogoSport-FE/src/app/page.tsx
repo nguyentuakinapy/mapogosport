@@ -16,6 +16,8 @@ import Loading from "../components/loading";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   const rating = 1.5;
   const [pageSportField, setPageSportField] = useState<number>(1);
   const [pageProduct, setPageProduct] = useState<number>(1);
@@ -44,25 +46,25 @@ export default function Home() {
 
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-  const { data: sportFields } = useSWR<SportField[]>(`http://localhost:8080/rest/sport_field`, fetcher, {
+  const { data: sportFields } = useSWR<SportField[]>(`${BASE_URL}rest/sport_field`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  const { data: products } = useSWR<Product[]>(`http://localhost:8080/rest/products`, fetcher, {
+  const { data: products } = useSWR<Product[]>(`${BASE_URL}rest/products`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  const { data: categoryFields } = useSWR<CategoryField[]>(`http://localhost:8080/rest/category_field`, fetcher, {
+  const { data: categoryFields } = useSWR<CategoryField[]>(`${BASE_URL}rest/category_field`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  const { data: voucher } = useSWR<Voucher[]>(`http://localhost:8080/rest/voucher/findAll`, fetcher, {
+  const { data: voucher } = useSWR<Voucher[]>(`${BASE_URL}rest/voucher/findAll`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -95,7 +97,7 @@ export default function Home() {
   }, [userData]);
 
   useEffect(() => {
-    const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+    const socket = new SockJS('${BASE_URL}ws'); // Địa chỉ endpoint WebSocket
     const stompClient = Stomp.over(socket);
 
     stompClient.connect({}, () => {
@@ -130,7 +132,7 @@ export default function Home() {
       return;
     }
 
-    const checkResponse = await fetch(`http://localhost:8080/rest/userVoucher/check/${username}/${voucherId}`);
+    const checkResponse = await fetch(`${BASE_URL}rest/userVoucher/check/${username}/${voucherId}`);
     const alreadyHasVoucher = await checkResponse.json();
 
     if (alreadyHasVoucher) {
@@ -150,13 +152,13 @@ export default function Home() {
 
 
     try {
-      await fetch(`http://localhost:8080/rest/userVoucher/create/${UserVoucher.voucher.voucherId}/${username}`, {
+      await fetch(`${BASE_URL}rest/userVoucher/create/${UserVoucher.voucher.voucherId}/${username}`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
         },
       });
-      mutate(`http://localhost:8080/rest/voucher/findAll`);
+      mutate(`${BASE_URL}rest/voucher/findAll`);
       toast.success("Nhận Voucher giá thành công!");
     } catch (error) {
       console.error("Lỗi khi nhận Voucher:", error);
@@ -338,7 +340,7 @@ export default function Home() {
             ))}
           {sportFields && (
             <div className="d-flex justify-content-between">
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', right: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageSportField === 1) {
                   setPageSportField(sportFields.length - 3);
                 } else {
@@ -348,7 +350,7 @@ export default function Home() {
                 <i className="bi bi-arrow-left-short"></i>
               </button>
               <span className="text-danger fw-bold">{pageSportField}/{sportFields.length - 3}</span>
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', left: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageSportField === sportFields.length - 3) {
                   setPageSportField(1);
                 } else {
@@ -397,7 +399,7 @@ export default function Home() {
           </div>
           {voucher && (
             <div className="d-flex justify-content-between">
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '100px', right: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageVoucher === 1) {
                   setPageVoucher(filteredVouchers.length - 2);
                 } else {
@@ -407,7 +409,7 @@ export default function Home() {
                 <i className="bi bi-arrow-left-short"></i>
               </button>
               <span className="text-danger fw-bold">{pageVoucher}/{filteredVouchers.length - 2}</span>
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '100px', left: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageVoucher === filteredVouchers.length - 2) {
                   setPageVoucher(1);
                 } else {
@@ -459,7 +461,7 @@ export default function Home() {
                         </div>
                       </div>
                       <div className='product-card-action px-1'>
-                        <Link className='button-ajax' href={`/categories/products/detail/${product.productId}`}>Xem</Link>
+                        <Button className='button-ajax'>Xem</Button>
                       </div>
                     </Link>
                   </div>
@@ -468,7 +470,7 @@ export default function Home() {
             })}
           {products && (
             <div className="d-flex justify-content-between">
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', right: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageProduct === 1) {
                   setPageProduct(products.length - 3);
                 } else {
@@ -478,7 +480,7 @@ export default function Home() {
                 <i className="bi bi-arrow-left-short"></i>
               </button>
               <span className="text-danger fw-bold">{pageProduct}/{products.length - 3}</span>
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', left: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageProduct === products.length - 3) {
                   setPageProduct(1);
                 } else {

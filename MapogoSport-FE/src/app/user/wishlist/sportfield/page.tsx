@@ -9,12 +9,13 @@ import { decodeString } from "@/components/Utils/Format";
 
 const WishListSportField = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
         if (storedUsername) {
-            setUsernameFetchApi(`http://localhost:8080/rest/user/favoriteField/${decodeString(storedUsername)}`);
+            setUsernameFetchApi(`${BASE_URL}rest/user/favoriteField/${decodeString(storedUsername)}`);
         }
     }, []);
 

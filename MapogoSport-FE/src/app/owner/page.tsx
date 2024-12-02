@@ -13,6 +13,8 @@ import Loading from "@/components/loading";
 
 export default function Owner() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [activeTab, setActiveTab] = useState<string>('profile');
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
     const userData = useData();
@@ -23,14 +25,14 @@ export default function Owner() {
     const [selectedAccountPackage, setSelectedAccountPackage] = useState<AccountPackage | null>(null);
 
     const { data: accountPackages } = useSWR<AccountPackage[]>(
-        `http://localhost:8080/rest/accountpackage`, fetcher, {
+        `${BASE_URL}rest/accountpackage`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
 
     const { data: userSubscription } = useSWR<UserSubscription>(
-        `http://localhost:8080/rest/user/subscription/${userData?.username}`, fetcher, {
+        `${BASE_URL}rest/user/subscription/${userData?.username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -39,13 +41,13 @@ export default function Owner() {
     useEffect(() => {
         const getOwner = async () => {
             if (userData) {
-                const responseOwner = await fetch(`http://localhost:8080/rest/owner/${userData.username}`);
+                const responseOwner = await fetch(`${BASE_URL}rest/owner/${userData.username}`);
                 if (!responseOwner.ok) {
                     throw new Error('Error fetching data');
                 }
                 const dataOwner = await responseOwner.json() as Owner;
 
-                const response = await fetch(`http://localhost:8080/rest/sport_field_by_owner/${dataOwner.ownerId}`);
+                const response = await fetch(`${BASE_URL}rest/sport_field_by_owner/${dataOwner.ownerId}`);
                 if (!response.ok) {
                     throw new Error('Error fetching data');
                 }
@@ -74,7 +76,7 @@ export default function Owner() {
 
     const handleUpdateSubscription = (ap?: AccountPackage) => {
         if (selectedPaymentMethod === "Thanh toán ví") {
-            fetch(`http://localhost:8080/rest/user/subscription/updateUserSubscriptionByWallet/${userSubscription?.userSubscriptionId}`, {
+            fetch(`${BASE_URL}rest/user/subscription/updateUserSubscriptionByWallet/${userSubscription?.userSubscriptionId}`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json, text/plain, */*',
@@ -97,8 +99,8 @@ export default function Owner() {
                 if (data === "ok") {
                     toast.success('Nâng cấp gói thành công');
 
-                    mutate(`http://localhost:8080/rest/user/subscription/${userData?.username}`);
-                    mutate(`http://localhost:8080/rest/wallet/transaction/${userData?.wallet.walletId}`);
+                    mutate(`${BASE_URL}rest/user/subscription/${userData?.username}`);
+                    mutate(`${BASE_URL}rest/wallet/transaction/${userData?.wallet.walletId}`);
                     handleCloseModal();
                 } else {
                     toast.error(data);
@@ -110,7 +112,7 @@ export default function Owner() {
                 handleCloseModal();
             });
         } else {
-            fetch(`http://localhost:8080/rest/user/subscription/${userSubscription?.userSubscriptionId}`, {
+            fetch(`${BASE_URL}rest/user/subscription/${userSubscription?.userSubscriptionId}`, {
                 method: 'PUT',
                 headers: {
                     Accept: 'application/json, text/plain, */*',
@@ -150,7 +152,7 @@ export default function Owner() {
 
         if (selectedPaymentMethod === "Thanh toán ví") {
             if (userData!.wallet.balance > ap!.price) {
-                fetch(`http://localhost:8080/rest/user/subscription/extend/${userSubscription?.userSubscriptionId}/${futureDate}`, {
+                fetch(`${BASE_URL}rest/user/subscription/extend/${userSubscription?.userSubscriptionId}/${futureDate}`, {
                     method: 'PUT',
                     headers: {
                         Accept: 'application/json, text/plain, */*',
@@ -166,8 +168,8 @@ export default function Owner() {
                     toast.success('Gia hạn thành công');
                     handleCloseModal();
 
-                    mutate(`http://localhost:8080/rest/user/subscription/${userData!.username}`);
-                    mutate(`http://localhost:8080/rest/wallet/transaction/${userData!.wallet.walletId}`);
+                    mutate(`${BASE_URL}rest/user/subscription/${userData!.username}`);
+                    mutate(`${BASE_URL}rest/wallet/transaction/${userData!.wallet.walletId}`);
 
                 }).catch((error) => {
                     toast.error(`Đã xảy ra lỗi: ${error.message}`);
@@ -184,7 +186,7 @@ export default function Owner() {
     useEffect(() => {
         const username = localStorage.getItem('username');
         if (username) {
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${decodeString(username)}`);
+            setUsernameFetchApi(`${BASE_URL}rest/user/${decodeString(username)}`);
         }
     }, []);
 

@@ -12,10 +12,11 @@ function AuthorityComponent() {
     const [selectedRole, setSelectedRole] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
-    const { data, error } = useSWR('http://localhost:8080/rest/list-users', fetcher);
+    const { data, error } = useSWR(`${BASE_URL}rest/list-users`, fetcher);
 
     useEffect(() => {
         if (data) {

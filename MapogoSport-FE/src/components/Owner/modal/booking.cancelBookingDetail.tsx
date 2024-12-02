@@ -13,6 +13,7 @@ interface CancelBookingDetail {
 const CancelBookingDetailModal = (props: CancelBookingDetail) => {
     const { showCancelBooking, setShowCancelBooking, aBookingDetail, bookingId } = props;
     const [reason, setReason] = useState<string>("");
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const handleClose = () => {
         setShowCancelBooking(false);
@@ -54,7 +55,7 @@ const CancelBookingDetailModal = (props: CancelBookingDetail) => {
             }
         }
 
-        await fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
+        await fetch(`${BASE_URL}rest/owner/bookingDetail/update`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -66,8 +67,8 @@ const CancelBookingDetailModal = (props: CancelBookingDetail) => {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return;
             }
-            mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
-            mutate(`http://localhost:8080/rest/user/booking/${bookingId}`);
+            mutate(`${BASE_URL}rest/user/booking/detail/${bookingId}`);
+            mutate(`${BASE_URL}rest/user/booking/${bookingId}`);
             toast.success('Cập nhật thành công!');
             handleClose();
         });

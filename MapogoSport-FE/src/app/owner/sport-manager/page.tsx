@@ -12,6 +12,7 @@ const SportFieldList = () => {
     const [username, setUsername] = useState<string | null>(null);
     const [selectedSportField, setSelectedSportField] = useState<SportField | null>(null);
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
@@ -20,9 +21,9 @@ const SportFieldList = () => {
         }
     }, []);
 
-    const { data: sportField, error: sportFieldError } = useSWR<SportField[]>(username && `http://localhost:8080/rest/sportfields/lists/${username}`, fetcher);
+    const { data: sportField, error: sportFieldError } = useSWR<SportField[]>(username && `${BASE_URL}rest/sportfields/lists/${username}`, fetcher);
 
-    const { data: userSubscription, error: userSubscriptionError } = useSWR<UserSubscription>(username && `http://localhost:8080/rest/user/subscription/${username}`, fetcher);
+    const { data: userSubscription, error: userSubscriptionError } = useSWR<UserSubscription>(username && `${BASE_URL}rest/user/subscription/${username}`, fetcher);
 
     const handleEditSportField = (sportField: SportField | null) => {
         setSelectedSportField(sportField);

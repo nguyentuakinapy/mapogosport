@@ -7,12 +7,14 @@ import useSWR, { mutate } from "swr";
 
 const BookingsDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [bookingDetail, setBookingDetail] = useState<BookingDetailMap[]>([]);
     const [showCancelBooking, setShowCancelBooking] = useState(false);
     const [aBookingDetail, setABookingDetail] = useState<BookingDetailMap | null>(null);
     const [bookingId, setBookingId] = useState<number>();
 
-    const { data, isLoading, error } = useSWR(`http://localhost:8080/rest/user/booking/detail/${params.id}`, fetcher, {
+    const { data, isLoading, error } = useSWR(`${BASE_URL}rest/user/booking/detail/${params.id}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -63,7 +65,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
             setShowCancelBooking(true);
             setBookingId(params.id);
         } else {
-            await fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
+            await fetch(`${BASE_URL}rest/owner/bookingDetail/update`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -75,7 +77,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                     toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                     return;
                 }
-                mutate(`http://localhost:8080/rest/user/booking/detail/${params.id}`);
+                mutate(`${BASE_URL}rest/user/booking/detail/${params.id}`);
                 toast.success('Cập nhật thành công!');
             });
         }

@@ -12,8 +12,9 @@ interface OrderProps {
 
 const MyVerticallyCenteredModal = ({ showModal, orderId, onHide }: OrderProps) => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-    const { data } = useSWR<OrderDetail[]>(`http://localhost:8080/rest/order-detail-by-order/${orderId}`, fetcher);
+    const { data } = useSWR<OrderDetail[]>(`${BASE_URL}rest/order-detail-by-order/${orderId}`, fetcher);
 
     return (
         <Modal

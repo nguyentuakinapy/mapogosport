@@ -18,8 +18,9 @@ type OrderInfo = {
 
 const OrdersDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/orders/detail/${params.id}`, fetcher, {
+    const { data, error, isLoading } = useSWR(`${BASE_URL}rest/user/orders/detail/${params.id}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -51,7 +52,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
 
     const handleCancelOrder = (reason: string) => {
         console.log("Lý do hủy:", reason);
-        fetch(`http://localhost:8080/rest/order/cancel`, {
+        fetch(`${BASE_URL}rest/order/cancel`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -63,7 +64,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                 toast.error(`Hủy đơn hàng không thành công! Vui lòng thử lại sau!`);
                 return;
             }
-            mutate(`http://localhost:8080/rest/user/orders/detail/${params.id}`);
+            mutate(`${BASE_URL}rest/user/orders/detail/${params.id}`);
             toast.success('Hủy đơn hàng thành công!');
 
         });

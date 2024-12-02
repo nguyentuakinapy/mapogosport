@@ -51,7 +51,9 @@ const isDateInRange = (dateToCheck: string, startDate: Date, endDate?: Date): bo
 
 
 const getSport = async (owner: Owner): Promise<SportField[]> => {
-    const responseSport = await fetch(`http://localhost:8080/rest/sport_field_by_owner/${owner.ownerId}`);
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    const responseSport = await fetch(`${BASE_URL}rest/sport_field_by_owner/${owner.ownerId}`);
     if (!responseSport.ok) {
         throw new Error("Error fetching data");
     }

@@ -17,6 +17,8 @@ const ModalChangePassword = (props: UserProps) => {
     const [newPassword, setNewPassword] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState<string>('');
 
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const handleClose = () => {
         setCurrentPassword('');
         setNewPassword('');
@@ -52,7 +54,7 @@ const ModalChangePassword = (props: UserProps) => {
         const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
             const hashNewPass = hashPassword(newPassword);
-            fetch(`http://localhost:8080/rest/user/${username}`, {
+            fetch(`${BASE_URL}rest/user/${username}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -68,9 +70,9 @@ const ModalChangePassword = (props: UserProps) => {
                     return
                 }
                 handleClose();
-                mutate(`http://localhost:8080/rest/user/${username}`);
+                mutate(`${BASE_URL}rest/user/${username}`);
                 toast.success('Cập nhật mật khẩu thành công!');
-                fetch('http://localhost:8080/rest/user/changePassword/sendMail', {
+                fetch('${BASE_URL}rest/user/changePassword/sendMail', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',

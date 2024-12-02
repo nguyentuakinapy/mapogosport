@@ -13,6 +13,8 @@ interface SportFieldProps {
 
 const ModalCreateSportField = (props: SportFieldProps) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const { showSportFieldModal, setShowSportFieldModal, selectedSportField, username } = props;
     const [fieldName, setFieldName] = useState("");
     const [openTime, setOpenTime] = useState<string | null>(null);
@@ -61,10 +63,10 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     }, [selectedSportField]);
 
 
-    const { data: fieldTypes } = useSWR<CategoryField[]>("http://localhost:8080/rest/category_field", fetcher);
+    const { data: fieldTypes } = useSWR<CategoryField[]>(`${BASE_URL}rest/category_field`, fetcher);
 
     const { data } = useSWR(selectedSportField &&
-        `http://localhost:8080/rest/sportfield/gallery/${selectedSportField.sportFieldId}`, fetcher);
+        `${BASE_URL}rest/sportfield/gallery/${selectedSportField.sportFieldId}`, fetcher);
 
     useEffect(() => {
         if (data) {
@@ -150,14 +152,14 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             });
         }
 
-        axios.post("http://localhost:8080/rest/sportfield/update", formData, {
+        axios.post(`${BASE_URL}rest/sportfield/update`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         })
             .then(response => {
                 console.log("Thông tin sân đã được lưu thay đổi:", response.data);
-                mutate(`http://localhost:8080/rest/sportfields/lists/${username}`);
+                mutate(`${BASE_URL}rest/sportfields/lists/${username}`);
                 handleClose();
             })
             .catch(error => {
@@ -201,14 +203,14 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             });
         }
 
-        axios.post("http://localhost:8080/rest/sportfield/create", formData, {
+        axios.post(`${BASE_URL}rest/sportfield/create`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         })
             .then(response => {
                 console.log("Thông tin sân đã được lưu:", response.data);
-                mutate(`http://localhost:8080/rest/sportfields/lists/${username}`);
+                mutate(`${BASE_URL}rest/sportfields/lists/${username}`);
                 handleClose();
             })
             .catch(error => {
@@ -225,7 +227,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         }
         try {
             await axios.delete(
-                `http://localhost:8080/rest/gallerySportField/delete/${gallerySportFieldId}`
+                `${BASE_URL}rest/gallerySportField/delete/${gallerySportFieldId}`
             );
 
             setGalleryImages(prevImages => prevImages.filter(image => image.gallerySportFieldId !== gallerySportFieldId));

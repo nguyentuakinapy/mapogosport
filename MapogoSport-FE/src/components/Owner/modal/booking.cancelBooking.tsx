@@ -14,6 +14,7 @@ const CancelBookingModal = (props: CancelBooking) => {
     const { showCancelBooking, setShowCancelBooking, booking } = props;
     const [reason, setReason] = useState<string>("");
     const user = useData();
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const handleClose = () => {
         setShowCancelBooking(false);
@@ -60,7 +61,7 @@ const CancelBookingModal = (props: CancelBooking) => {
             }
         }
 
-        fetch(`http://localhost:8080/rest/owner/booking/update`, {
+        fetch(`${BASE_URL}rest/owner/booking/update`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -72,8 +73,8 @@ const CancelBookingModal = (props: CancelBooking) => {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return;
             }
-            mutate(`http://localhost:8080/rest/owner/booking/findAll/${user?.username}`);
-            mutate(`http://localhost:8080/rest/user/booking/detail/${booking.bookingId}`);
+            mutate(`${BASE_URL}rest/owner/booking/findAll/${user?.username}`);
+            mutate(`${BASE_URL}rest/user/booking/detail/${booking.bookingId}`);
             toast.success('Cập nhật thành công!');
             handleClose();
         });
