@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
 import { decodeJson, encodeJson, encodeString, hashPassword } from "@/components/Utils/Format";
 import { CredentialResponse, GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { useRouter, useSearchParams } from 'next/navigation'; // Để kiểm tra đường dẫn
+import { useRouter } from 'next/navigation'; // Để kiểm tra đường dẫn
 
 interface LoginProps {
     showLoginModal: boolean;
@@ -24,8 +24,8 @@ export default function Login(props: LoginProps) {
     const [checkRememberMe, setCheckRememberMe] = useState<boolean>(false);
     const { setRefreshKey, refreshKey } = props;
     const { showLoginModal, setShowLoginModal, setShowRegisterModal, setShowForgotPassword } = props;
-    const searchParams = useSearchParams();
     const router = useRouter();
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         const userCookie = Cookies.get('user');
@@ -43,7 +43,7 @@ export default function Login(props: LoginProps) {
             return;
         } else {
             try {
-                const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
+                const responseUser = await fetch(`${BASE_URL}rest/user/${username}`);
                 if (!responseUser.ok) {
                     throw new Error('Error fetching data');
                 }
@@ -98,36 +98,45 @@ export default function Login(props: LoginProps) {
         }
     }
 
+    let path;
+    if (typeof window !== 'undefined') {
+        path = window.location.href
+    }
+
+
     useEffect(() => {
-        const notLoggedIn = searchParams.get('notLoggedIn');
-        const noRights = searchParams.get('noRights');
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
 
-        // Check if the 'notLoggedIn' query parameter exists and equals 'true'
-        if (notLoggedIn === 'true') {
-            setShowLoginModal(true);
-            toast.error("Bạn chưa đăng nhập!");
+            const notLoggedIn = params.get('notLoggedIn');
+            const noRights = params.get('noRights');
 
-            // Update the URL by removing the query parameter without reloading the page
-            const newUrl = new URL(window.location.href);
-            newUrl.searchParams.delete('notLoggedIn');
+            // Check if the 'notLoggedIn' query parameter exists and equals 'true'
+            if (notLoggedIn === 'true') {
+                setShowLoginModal(true);
+                toast.error("Bạn chưa đăng nhập!");
 
-            // Corrected usage of router.replace
-            router.replace(newUrl.toString());
+                // Update the URL by removing the query parameter without reloading the page
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.delete('notLoggedIn');
+
+                // Corrected usage of router.replace
+                router.replace(newUrl.toString());
+            }
+
+            if (noRights === 'true') {
+                setShowLoginModal(true);
+                toast.error("Bạn không có quyền truy cập!");
+
+                // Update the URL by removing the query parameter without reloading the page
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.delete('noRights');
+
+                // Corrected usage of router.replace
+                router.replace(newUrl.toString());
+            }
         }
-
-        if (noRights === 'true') {
-            setShowLoginModal(true);
-            toast.error("Bạn không có quyền truy cập!");
-
-            // Update the URL by removing the query parameter without reloading the page
-            const newUrl = new URL(window.location.href);
-            newUrl.searchParams.delete('noRights');
-
-            // Corrected usage of router.replace
-            router.replace(newUrl.toString());
-        }
-    }, [searchParams, router, setShowLoginModal]); // Add router as a dependency
-
+    }, [path, router, setShowLoginModal]);
 
     const handleClose = () => {
         setShowLoginModal(false);
@@ -174,7 +183,7 @@ export default function Login(props: LoginProps) {
         if (user) {
             console.log("User Info:", user);
             try {
-                const responseUser = await fetch(`http://localhost:8080/rest/user/${user.sub}`);
+                const responseUser = await fetch(`${BASE_URL}rest/user/${user.sub}`);
                 if (!responseUser.ok) {
                     throw new Error('Error fetching data');
                 }

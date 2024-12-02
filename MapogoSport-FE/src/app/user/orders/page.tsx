@@ -11,6 +11,8 @@ import { useData } from "@/app/context/UserContext";
 
 const Orders = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [orderUsers, setOrderUsers] = useState<OrderMap[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<OrderMap[]>([]);
     const [startDate, setStartDate] = useState<Date | null>(null);
@@ -22,7 +24,7 @@ const Orders = () => {
 
     const user = useData();
 
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/order/${user?.username}`, fetcher, {
+    const { data, error, isLoading } = useSWR(`${BASE_URL}rest/user/order/${user?.username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,

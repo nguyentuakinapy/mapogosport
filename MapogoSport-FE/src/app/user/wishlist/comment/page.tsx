@@ -12,6 +12,8 @@ import { decodeString } from "@/components/Utils/Format";
 
 const CommentPage = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [fieldFetchAPI, setFieldFetchAPI] = useState<string>('');
     const [productFetchAPI, setProductFetchAPI] = useState<string>('');
     const [selectedOption, setSelectedOption] = useState<string>('1');
@@ -25,8 +27,8 @@ const CommentPage = () => {
     useEffect(() => {
         const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
-            setFieldFetchAPI(`http://localhost:8080/rest/user/fieldReview/${username}`);
-            setProductFetchAPI(`http://localhost:8080/rest/user/productReview/by${username}`);
+            setFieldFetchAPI(`${BASE_URL}rest/user/fieldReview/${username}`);
+            setProductFetchAPI(`${BASE_URL}rest/user/productReview/by${username}`);
         }
     }, []);
 
@@ -54,8 +56,8 @@ const CommentPage = () => {
         if (window.confirm('Bạn có chắc muốn xóa bình luận này?')) {
             const username = localStorage.getItem('username');
             if (username) {
-                const url = isFieldReview ? `http://localhost:8080/rest/user/fieldReview/${id}`
-                    : `http://localhost:8080/rest/user/productReview/${id}`;
+                const url = isFieldReview ? `${BASE_URL}rest/user/fieldReview/${id}`
+                    : `${BASE_URL}rest/user/productReview/${id}`;
                 fetch(url, {
                     method: 'DELETE',
                     headers: {

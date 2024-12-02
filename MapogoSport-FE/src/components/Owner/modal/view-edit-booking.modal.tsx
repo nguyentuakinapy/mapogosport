@@ -186,6 +186,7 @@ const BookingModal = (props: OwnerProps) => {
 
         const timeOpen = sport && sport.opening.match(/(\d+)h(\d+)/);
         const minuteOpen = timeOpen ? Number(timeOpen[2]) : 0;
+        const hourOpen = timeOpen ? Number(timeOpen[1]) : 0;
 
         const timeClose = sport && sport.closing.match(/(\d+)h(\d+)/);
         const minuteClose = timeClose ? Number(timeClose[2]) : 0;
@@ -229,7 +230,7 @@ const BookingModal = (props: OwnerProps) => {
                 }
             } else {
                 if (timeBookingEnd &&
-                    sport?.closing === timeBookingEnd[1].toString() + "h" && minuteClose === Number(timeBookingEnd[2])) {
+                    hourClose === Number(timeBookingEnd[1]) && minuteClose === Number(timeBookingEnd[2])) {
                     toast.success("Vượt quá thời gian đóng cửa!")
                 } else if (startTimeBooking && endTimeBooking &&
                     calculateTimeDifference(startTimeBooking, endTimeBooking) / 30 >= 6) {
@@ -246,7 +247,7 @@ const BookingModal = (props: OwnerProps) => {
                 } else if (startTimeBooking && endTimeBooking &&
                     calculateTimeDifference(startTimeBooking, endTimeBooking) / 30 >= 6) {
                     toast.success("Chỉ được đặt tối đa 3 tiếng!")
-                } else if (sport?.opening === startHours.toString() + "h" && minuteOpen === startMinutes) {
+                } else if (hourOpen === startHours && minuteOpen === startMinutes) {
                     toast.success("Vượt quá thời gian mở cửa!")
                 } else {
                     setStartTimeBooking(reduceTime(time))

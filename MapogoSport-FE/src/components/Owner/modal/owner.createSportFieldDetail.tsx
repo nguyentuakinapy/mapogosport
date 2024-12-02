@@ -21,6 +21,7 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
     const [status, setStatus] = useState("");
     const [percentDeposit, setPercentDeposit] = useState<number>(0);
     const [peakHour, setPeakHour] = useState("");
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         if (showSportFieldDetailModal) {
@@ -73,13 +74,13 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
             price: price
         };
 
-        axios.post("http://localhost:8080/rest/sportFieldDetail/create", SportFieldDetailData, {
+        axios.post(`${BASE_URL}rest/sportFieldDetail/create`, SportFieldDetailData, {
             headers: {
                 'Content-Type': 'application/json',
             },
         }).then(() => {
-            mutate(`http://localhost:8080/rest/sportfielddetail/lists/${id}`);
-            mutate(`http://localhost:8080/rest/sport_field_by_owner/${owner?.ownerId}`);
+            mutate(`${BASE_URL}rest/sportfielddetail/lists/${id}`);
+            mutate(`${BASE_URL}rest/sport_field_by_owner/${owner?.ownerId}`);
             handleClose();
             toast.success("Thêm sân thành công!");
         }).catch(error => {
@@ -101,13 +102,13 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
             peakHourPrices: peakHourPrices,
             price: price
         };
-        axios.post("http://localhost:8080/rest/SportFieldDetail/update", SportFieldDetailData, {
+        axios.post(`${BASE_URL}rest/SportFieldDetail/update`, SportFieldDetailData, {
             headers: {
                 'Content-Type': 'application/json',
             },
         }).then(() => {
-            mutate(`http://localhost:8080/rest/sportfielddetail/lists/${id}`);
-            mutate(`http://localhost:8080/rest/sport_field_by_owner/${owner?.ownerId}`);
+            mutate(`${BASE_URL}rest/sportfielddetail/lists/${id}`);
+            mutate(`${BASE_URL}rest/sport_field_by_owner/${owner?.ownerId}`);
             handleClose();
             toast.success("Cập nhật thành công!");
         }).catch(error => {

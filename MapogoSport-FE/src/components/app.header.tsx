@@ -27,10 +27,11 @@ const CartBadge = ({ username }: { username: string }) => {
     const [cartCount, setCartCount] = useState(0); // Initialize cart count to 0
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 
     const { data } = useSWR(
-        username == "" ? null : `http://localhost:8080/rest/cart/count/${username}`, fetcher, {
+        username == "" ? null : `${BASE_URL}rest/cart/count/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -58,6 +59,7 @@ interface HeaderProps {
 
 const Header = (props: HeaderProps) => {
     const path = usePathname();
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
     const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
@@ -105,13 +107,13 @@ const Header = (props: HeaderProps) => {
     }, [userData, checkNotification]);
 
     const getNotification = async (username: string) => {
-        const response = await fetch(`http://localhost:8080/rest/user/findByUser_UsernameContainingAndTypeContaining/${username}/notifyMess`);
+        const response = await fetch(`${BASE_URL}rest/user/findByUser_UsernameContainingAndTypeContaining/${username}/notifyMess`);
         if (!response.ok) return;
         const notification = await response.json() as NotificationUser[];
         setNotification(notification);
     }
     useEffect(() => {
-        const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+        const socket = new SockJS(`${BASE_URL}ws`); // Địa chỉ endpoint WebSocket
         const stompClient = Stomp.over(socket);
 
         stompClient.connect({}, () => {
@@ -167,7 +169,7 @@ const Header = (props: HeaderProps) => {
     }, []);
 
     const handleIsReadNotification = (notificationId: number) => {
-        fetch(`http://localhost:8080/rest/user/notification/is/read/${notificationId}`, {
+        fetch(`${BASE_URL}rest/user/notification/is/read/${notificationId}`, {
             method: 'PUT',
             headers: {
                 Accept: 'application/json, text/plain, */*',
@@ -202,7 +204,7 @@ const Header = (props: HeaderProps) => {
 
 
     const handleViewNotification = (username: string) => {
-        fetch(`http://localhost:8080/rest/user/notification/setViewNotificationTypeNotifyMess/${username}`, {
+        fetch(`${BASE_URL}rest/user/notification/setViewNotificationTypeNotifyMess/${username}`, {
             method: 'PUT',
             headers: {
                 Accept: 'application/json, text/plain, */*',
@@ -220,7 +222,7 @@ const Header = (props: HeaderProps) => {
     }
 
     const handleDeleteNotification = (username: string) => {
-        fetch(`http://localhost:8080/rest/user/notification/deleteNotificationHaveTypeNotifyMess/${username}`, {
+        fetch(`${BASE_URL}rest/user/notification/deleteNotificationHaveTypeNotifyMess/${username}`, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json, text/plain, */*',

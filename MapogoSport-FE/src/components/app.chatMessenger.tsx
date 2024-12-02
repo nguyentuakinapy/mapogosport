@@ -8,7 +8,6 @@ import "../app/globals.css";
 import { CompatClient, Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useData } from "@/app/context/UserContext";
-import { useSearchParams } from "next/navigation";
 import { removeVietnameseTones } from './Utils/Format';
 import { toast } from "react-toastify";
 import InputChat from "./InputChat/InputChat";
@@ -67,43 +66,54 @@ export default function ChatBox() {
   const [isConnected, setIsConnected] = useState(false); // Thêm trạng thái theo dõi kết nối STOMP
   const [currentTopic, setCurrentTopic] = useState(""); // lưu trữ nội dung người dùng đang nhập vào ô chat
   const [dataMessageTemporary, setDataMessageTemporary] = useState<dataMess | null>(null);
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const stompClient = useRef<CompatClient | null>(null); // Khai báo đúng kiểu
 
-  const path = useSearchParams();
+  let path;
+
+  if (typeof window !== 'undefined') {
+    path = window.location.href
+  }
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const encodedStatus = path.get("status");
-      if (encodedStatus) {
-        if (encodedStatus === "default") {
-          // nếu là default thì mở sẳn admin có sẵn
-          if (adminDefault) {
-            handleSelectChat(adminDefault);
-            const newParams = new URLSearchParams(path);
-            newParams.delete("status");
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
 
-            // Cập nhật URL bằng cách sử dụng `replaceState`
-            window.history.replaceState(
-              {},
-              "",
-              `${window.location.pathname}?${newParams.toString()}`
-            );
+      if (typeof window !== "undefined" && params) {
+        const encodedStatus = params.get("status");
+
+        if (encodedStatus) {
+          if (encodedStatus === "default") {
+            // nếu là default thì mở sẳn admin có sẵn
+            if (adminDefault) {
+              handleSelectChat(adminDefault);
+              params.delete("status");
+
+              const newParams = new URLSearchParams(window.location.search);
+              newParams.delete("status");
+              window.history.replaceState(
+                {},
+                "",
+                `${window.location.pathname}`
+              );
+            }
+          } else {
+            try {
+              const decodedUsername = atob(encodedStatus);
+              setUsernameFormUrl(decodedUsername);
+            } catch (error) {
+              setUsernameFormUrl(""); // Reset nếu giải mã thất bại
+            }
           }
         } else {
-          try {
-            // Giải mã username từ Base64 và cập nhật state
-            const decodedUsername = atob(encodedStatus);
-            setUsernameFormUrl(decodedUsername);
-          } catch (error) {
-            setUsernameFormUrl(""); // Reset nếu giải mã thất bại
-          }
+          setUsernameFormUrl(""); // Reset nếu không có tham số
         }
-      } else {
-        setUsernameFormUrl(""); // Reset nếu không có tham số
       }
     }
+
   }, [path]); // Chạy lại mỗi khi searchParams thay đổi
+
 
   const rolePriority = ["ROLE_ADMIN", "ROLE_STAFF", "ROLE_OWNER", "ROLE_USER"];
   const getHighestRole = (user: User) => {
@@ -139,19 +149,19 @@ export default function ChatBox() {
   }, [currentUser, chatListCurrentUserByDMM, username]);
 
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
-  const { data: dataFindById } = useSWR<User>(username && `http://localhost:8080/rest/user/${username}`, fetcher, {
+  const { data: dataFindById } = useSWR<User>(username && `${BASE_URL}rest/user/${username}`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  const { data: dataAdmin } = useSWR<User>(`http://localhost:8080/rest/user/myntd`, fetcher, {
+  const { data: dataAdmin } = useSWR<User>(`${BASE_URL}rest/user/myntd`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  const { data: dataFindByIdOwner } = useSWR<User>(usernameFormUrl ? `http://localhost:8080/rest/user/${usernameFormUrl}` : null, fetcher, {
+  const { data: dataFindByIdOwner } = useSWR<User>(usernameFormUrl ? `${BASE_URL}rest/user/${usernameFormUrl}` : null, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -189,7 +199,7 @@ export default function ChatBox() {
   useEffect(() => {
     if (!currentUser) return;
     // Khởi tạo kết nối STOMP với WebSocket server
-    const socket = new SockJS(`http://localhost:8080/ws`); // 1. kết nối server
+    const socket = new SockJS(`${BASE_URL}ws`); // 1. kết nối server
     stompClient.current = Stomp.over(socket);
 
     // Kết nối tới server STOMP
@@ -364,13 +374,10 @@ export default function ChatBox() {
     if (ownerCurrent) {
       setShowChat(true);
 
-      const newParams = new URLSearchParams(path);
-      newParams.delete("status");
-
       window.history.replaceState(
         {},
         "",
-        `${window.location.pathname}?${newParams.toString()}`
+        `${window.location.pathname}`
       );
     }
 
@@ -435,7 +442,7 @@ export default function ChatBox() {
   // Sử dụng useSWR để fetch messages
   const { data, isLoading, error, mutate } = useSWR<Message[]>(
     currentUser && receiver
-      ? `http://localhost:8080/api/messages/${currentUser.username}/${receiver}`
+      ? `${BASE_URL}api/messages/${currentUser.username}/${receiver}`
       : null,
     fetchMessages
   );
@@ -447,7 +454,7 @@ export default function ChatBox() {
 
   } = useSWR(
     currentUser
-      ? `http://localhost:8080/api/messages/receiver/${currentUser.username}`
+      ? `${BASE_URL}api/messages/receiver/${currentUser.username}`
       : null,
     fetchMessages,
     {

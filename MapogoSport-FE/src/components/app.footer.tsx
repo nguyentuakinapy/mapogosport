@@ -1,65 +1,77 @@
 'use client'
 
 import Image from "next/image";
+import Link from "next/link";
+import { Button } from "react-bootstrap";
 
 const Footer = () => {
     return (
-        <>
-            <section>
-                <footer className="bg-white">
-                    <div className="container p-4">
-                        <div className="row">
-                            <div className="col-lg-6 col-md-12 mb-4 mb-md-0">
-                                <h5 className="text-uppercase">Chính sách</h5>
-                                <p>
-                                    ...
-                                </p>
+        <footer className="footer-section">
+            <div className="container">
+                <div className="footer-content pt-5 pb-5">
+                    <div className="row">
+                        <div className="col-xl-4 col-lg-4 mb-50 footer-widget">
+                            <div className="footer-widget-heading">
+                                <h3>Mapogo</h3>
                             </div>
-                            <div className="col-lg-3 col-md-6 mb-4 mb-md-0">
-                                <h5 className="text-uppercase">Liên hệ</h5>
-
-                                <ul className="list-unstyled mb-0">
-                                    <li>
-                                        <a href="#!" className="text-body">...</a>
-                                    </li>
-                                    {/* <li>
-                                        <a href="#!" className="text-body">Zalo</a>
-                                    </li>
-                                    <li>
-                                        <a href="#!" className="text-body">Email</a>
-                                    </li>
-                                    <li>
-                                        <a href="#!" className="text-body">Link 4</a>
-                                    </li> */}
-                                </ul>
+                            <div className="footer-text">
+                                <p>© 2024 Mapogo.
+                                    Chúng tôi luôn đồng hành cùng bạn trên mọi bước đường thể thao!</p>
                             </div>
-                            <div className="col-lg-3 col-md-6 mb-4 mb-md-0">
-                                <h5 className="text-uppercase mb-0">Thông tin</h5>
-
-                                <ul className="list-unstyled">
-                                    <li>
-                                        <a href="#!" className="text-body">...</a>
-                                    </li>
-                                    {/* <li>
-                                        <a href="#!" className="text-body">Link 2</a>
-                                    </li>
-                                    <li>
-                                        <a href="#!" className="text-body">Link 3</a>
-                                    </li>
-                                    <li>
-                                        <a href="#!" className="text-body">Link 4</a>
-                                    </li> */}
+                            <div className="footer-social-icon ">
+                                <span>Theo dõi chúng tôi</span>
+                                <Link href={""}><i className="bi bi-facebook"></i></Link>
+                                <Link href={""}><i className="bi bi-instagram"></i> </Link>
+                                <Link href={""}><i className="bi bi-messenger"></i> </Link>
+                            </div>
+                        </div>
+                        <div className="col-xl-4 col-lg-4 col-md-6 mb-30">
+                            <div className="footer-widget">
+                                <div className="footer-widget-heading">
+                                    <h3>Thông Tin</h3>
+                                </div>
+                                <ul>
+                                    <li className="text-white">
+                                        <i className="bi bi-envelope-at-fill "></i>
+                                        <a href="#" className="ms-2">mapogo@gmail.com </a></li>
+                                    <li className="text-white">
+                                        <i className="bi bi-telephone-fill"></i>
+                                        <a href="#" className="ms-2">0398917439 </a></li>
+                                    <li className="text-white">
+                                        <i className="bi bi-geo-alt-fill"></i>
+                                        <a href="#" className="ms-2">0398917439 </a></li>
                                 </ul>
                             </div>
                         </div>
+                        <div className="col-xl-4 col-lg-4 col-md-6 mb-50">
+                            <div className="footer-widget">
+                                <div className="footer-widget-heading">
+                                    <h3>Đăng ký</h3>
+                                </div>
+                                <div className="footer-text mb-25">
+                                    <p>Đừng bỏ lỡ việc đăng ký nhận thông tin mới của chúng tôi bằng cách điền vào biểu mẫu bên dưới.</p>
+                                </div>
+                                <div className="subscribe-form">
+                                    <form action="#">
+                                        <input type="text" placeholder="Email Address" />
+                                        <Button><i className="bi bi-send-check-fill"></i></Button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </footer>
-                <div className="text-center p-3" style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)' }}>
-                    <Image src="/images/logo.png" width={80} height={40} alt="" />
-                    <a className="text-body text-decoration-none" href="#">MapogoSport</a>
                 </div>
-            </section >
-        </>
-    )
+            </div>
+            <div className="copyright-area d-flex align-items-center justify-content-center">
+                <Image src="/images/logo-black.png" width={70} height={50} alt="" />
+                <Link className=" text-decoration-none fw-bold ms-2"
+                    style={{
+                        color: 'white',
+                    }}
+                    href={"/"}>MapogoSport</Link>
+            </div>
+        </footer>
+    );
 }
+
 export default Footer;

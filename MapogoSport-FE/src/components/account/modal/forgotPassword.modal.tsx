@@ -91,6 +91,8 @@ interface ForgotPasswordProps {
 }
 
 export default function ForgotPassword(props: ForgotPasswordProps) {
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const { showForgotPassword, setShowForgotPassword } = props;
     const { setShowChangePasswordNew } = props;
 
@@ -105,7 +107,7 @@ export default function ForgotPassword(props: ForgotPasswordProps) {
             toast.warning("Vui lòng nhập email")!
         } else {
             try {
-                const response = await fetch(`http://localhost:8080/rest/user/getbyemail/${email}`);
+                const response = await fetch(`${BASE_URL}rest/user/getbyemail/${email}`);
                 if (!response.ok) {
                     toast.warning("Email bạn nhập không đúng!")!
                 }
@@ -128,7 +130,7 @@ export default function ForgotPassword(props: ForgotPasswordProps) {
                     }, 1000);
                     if (dataUser.email) {
                         toast.success("Mã xác nhận đang được gửi về email!");
-                        const response = await fetch('http://localhost:8080/rest/user/sendMail', {
+                        const response = await fetch(`${BASE_URL}rest/user/sendMail`, {
                             method: 'POST',
                             headers: {
                                 'Accept': 'application/json, text/plain, */*',
@@ -149,30 +151,6 @@ export default function ForgotPassword(props: ForgotPasswordProps) {
             }
         }
     }
-
-    // useEffect(() => {
-    //     console.log(codeOtp);
-
-    // }, [codeOtp])
-    // const checkEmail = async () => {
-    //     if (emailFetch) {
-
-    //         const response = await fetch('http://localhost:8080/rest/user/sendMail', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Accept': 'application/json, text/plain, */*',
-    //                 'Content-Type': 'application/json'
-    //             },
-    //             body: JSON.stringify(emailFetch)
-    //         });
-    //         if (!response.ok) {
-    //             throw new Error('Network response was not ok');
-    //         }
-
-    //         const res = await response.text(); // Bạn đang trả về chuỗi OTP từ backend
-    //         setOtp(res);
-    //     }
-    // }
 
     const handleCodeChange = (code: string) => {
         setCodeOtp(code); // Cập nhật giá trị mã xác nhận

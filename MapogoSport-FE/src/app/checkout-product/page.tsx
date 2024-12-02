@@ -7,14 +7,13 @@ import { Button, FloatingLabel, Form, Collapse } from 'react-bootstrap';
 import { decodeString, formatPrice } from '@/components/Utils/Format';
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
-import { useSearchParams } from 'next/navigation';
 import ModalOrderSuccess from '@/components/ModalOrder/modal.Success';
 import Link from 'next/link';
 import Image from 'next/image';
 
 const CheckoutPage = () => {
   const fetcher = (url: string) => fetch(url).then(res => res.json());
-  const BASE_URL = 'http://localhost:8080/rest/';
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const [open_1, setOpen_1] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -35,13 +34,13 @@ const CheckoutPage = () => {
     }
   }, []);
 
-  const { data } = useSWR(cartIds && `${BASE_URL}checkout_product/${cartIds.join(",")}`, fetcher, {
+  const { data } = useSWR(cartIds && `${BASE_URL}rest/checkout_product/${cartIds.join(",")}`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   })
 
-  const { data: userVoucher } = useSWR(username && `${BASE_URL}user/voucher/${username}`, fetcher, {
+  const { data: userVoucher } = useSWR(username && `${BASE_URL}rest/user/voucher/${username}`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -62,7 +61,7 @@ const CheckoutPage = () => {
     }
   }, [cartData]);
 
-  const { data: userData } = useSWR(username && `${BASE_URL}user/${username}`, fetcher, {
+  const { data: userData } = useSWR(username && `${BASE_URL}rest/user/${username}`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false
@@ -259,7 +258,7 @@ const CheckoutPage = () => {
     console.log(orderData);
 
     try {
-      const response = await axios.post(`${BASE_URL}create_order`, orderData, {
+      const response = await axios.post(`${BASE_URL}rest/create_order`, orderData, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -272,21 +271,30 @@ const CheckoutPage = () => {
     }
   };
 
-  const searchParams = useSearchParams();
+  let path;
+
+  if (typeof window !== 'undefined') {
+    path = window.location.href
+  }
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const status = searchParams.get('status');
-      const orderId1: string | null = searchParams.get('orderId');
+    if (typeof window !== 'undefined') {
 
-      if (status === 'success') {
-        if (orderId1 !== null) {
-          setOrderId(Number(orderId1));
+      const params = new URLSearchParams(window.location.search);
+
+      if (typeof window !== "undefined" && params) {
+        const status = params.get('status');
+        const orderId1: string | null = params.get('orderId');
+
+        if (status === 'success') {
+          if (orderId1 !== null) {
+            setOrderId(Number(orderId1));
+          }
+          setShowOrderSuccessModal(true);
         }
-        setShowOrderSuccessModal(true);
       }
     }
-  }, [searchParams]);
+  }, [path]);
 
   const [orderId, setOrderId] = useState<number | undefined>(undefined);
 
@@ -304,7 +312,7 @@ const CheckoutPage = () => {
 
         try {
           await axios.post(
-            `${BASE_URL}create_orderDetail`,
+            `${BASE_URL}rest/create_orderDetail`,
             listCartCheckout,
             {
               params: { orderId: order.orderId }, // truyền orderId qua params

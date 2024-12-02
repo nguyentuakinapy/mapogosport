@@ -14,6 +14,7 @@ interface ChangeNewPasswordProps {
 export default function ChangePasswordNew(props: ChangeNewPasswordProps) {
     const { showChangePasswordNew, setShowChangePasswordNew } = props;
     const { setShowLoginModal } = props;
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [createPassword, setCreatePassword] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
@@ -26,7 +27,7 @@ export default function ChangePasswordNew(props: ChangeNewPasswordProps) {
     const handleSubmit = async () => {
         const username = sessionStorage.getItem('usernameNewPass');
         if (username) {
-            const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
+            const responseUser = await fetch(`${BASE_URL}rest/user/${username}`);
             if (!responseUser.ok) {
                 throw new Error('Error fetching data');
             }
@@ -38,7 +39,7 @@ export default function ChangePasswordNew(props: ChangeNewPasswordProps) {
                 toast.warning(`Vui lòng nhâp lại mật khẩu mới!`);
             } else if (createPassword == newPassword) {
                 dataUser.password = password;
-                fetch(`http://localhost:8080/rest/user/${username}`, {
+                fetch(`${BASE_URL}rest/user/${username}`, {
                     method: 'PUT',
                     headers: {
                         Accept: 'application/json, text/plain, */*',
