@@ -55,37 +55,40 @@ const SportFieldList = () => {
             </div>
             <br />
             {sportField && sportField.map((sf, index: number) => (
-                <div key={sf.sportFieldId}>
-                    <div className='card p-2'>
-                        <div className='d-flex justify-content-between'>
-                            <div>
-                                <b className='mx-3'>{index + 1}</b>
-                                <Image src={`${sf.image}`} width={300} height={300}
-                                    className='me-3' style={{ width: '300px', height: '225px' }} alt={`${sf.image}`} />
-                            </div>
-                            <div className='me-auto mt-3'>
-                                <b>Tên sân: {sf.name}</b><br />
-                                <b className='font-14'>Địa chỉ: {sf.address}</b><br />
-                                <span className='font-14'>Trạng thái: {sf.status}</span><br />
-                                <span className='font-14'>Thời gian mở cửa: {sf.opening} - {sf.closing}</span><br />
-                                <span className='font-14'>Số lượng sân: {sf.quantity}</span>
-                            </div>
-                            <div className='me-3 d-flex align-items-center'>
-                                <div className='btn-group'>
-                                    <OverlayTrigger overlay={<Tooltip>Xem danh sách sân</Tooltip>}>
-                                        <Link href={`/owner/sport-manager/view-list-sports/${sf.sportFieldId}`} className='btn btn-secondary btn-hv'><i className="bi bi-eye"></i></Link>
-                                    </OverlayTrigger>
-                                    <OverlayTrigger overlay={<Tooltip>Chỉnh sửa</Tooltip>}>
-                                        <Button style={{ width: "100%" }} variant='' className='btn btn-warning btn-hv' onClick={() => handleEditSportField(sf)}>
-                                            <i className="bi bi-pencil-square"></i>
-                                        </Button>
-                                    </OverlayTrigger>
+                userSubscription?.accountPackage.limitSportFields === index ?
+                    <></>
+                    :
+                    <div key={sf.sportFieldId}>
+                        <div className='card p-2'>
+                            <div className='d-flex justify-content-between'>
+                                <div>
+                                    <b className='mx-3'>{index + 1}</b>
+                                    <Image src={`${sf.image}`} width={300} height={300}
+                                        className='me-3' style={{ width: '300px', height: '225px' }} alt={`${sf.image}`} />
+                                </div>
+                                <div className='me-auto mt-3'>
+                                    <b>Tên sân: {sf.name}</b><br />
+                                    <b className='font-14'>Địa chỉ: {sf.address}</b><br />
+                                    <span className='font-14'>Trạng thái: {sf.status}</span><br />
+                                    <span className='font-14'>Thời gian mở cửa: {sf.opening} - {sf.closing}</span><br />
+                                    <span className='font-14'>Số lượng sân: {sf.quantity}</span>
+                                </div>
+                                <div className='me-3 d-flex align-items-center'>
+                                    <div className='btn-group'>
+                                        <OverlayTrigger overlay={<Tooltip>Xem danh sách sân</Tooltip>}>
+                                            <Link href={`/owner/sport-manager/view-list-sports/${sf.sportFieldId}`} className='btn btn-secondary btn-hv'><i className="bi bi-eye"></i></Link>
+                                        </OverlayTrigger>
+                                        <OverlayTrigger overlay={<Tooltip>Chỉnh sửa</Tooltip>}>
+                                            <Button style={{ width: "100%" }} variant='' className='btn btn-warning btn-hv' onClick={() => handleEditSportField(sf)}>
+                                                <i className="bi bi-pencil-square"></i>
+                                            </Button>
+                                        </OverlayTrigger>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <br />
                     </div>
-                    <br />
-                </div>
 
             ))}
             <Button disabled={reachedLimit} style={{ width: "100%" }} variant='danger' onClick={() => handleEditSportField(null)}>

@@ -405,10 +405,13 @@ export default function Owner() {
                                 <span>0 Được thích</span>
                                 <span>
                                     {userSubscription && userSubscription.accountPackage ? userSubscription.accountPackage.packageName : 'Không có gói nào'}
-                                    <em> (Còn {
-                                        userSubscription?.endDay ?
-                                            Math.floor((new Date(userSubscription.endDay).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 'Không xác định'
-                                    } ngày)</em>
+                                    {userSubscription?.accountPackage.accountPackageId === 1 ?
+                                        <em> ( Vĩnh viễn )</em>
+                                        :
+                                        <em> (Còn {
+                                            userSubscription?.endDay ?
+                                                Math.floor((new Date(userSubscription.endDay).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) + 1 : 'Không xác định'
+                                        } ngày)</em>}
                                 </span>
 
                             </div>

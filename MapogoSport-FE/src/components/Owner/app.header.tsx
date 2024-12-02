@@ -109,7 +109,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
             stompClient.subscribe('/topic/bookingDetail/notification', (message) => {
                 if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     toast.success("Có sân cần chuẩn bị!")
-                    setCheckNotification(prev => prev + 1);
+                    setCheckNotification(prev => prev + 1)  ;
                 }
             });
 
