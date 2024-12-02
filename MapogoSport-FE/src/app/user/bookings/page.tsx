@@ -12,6 +12,8 @@ import { toast } from "react-toastify";
 
 const Bookings = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [bookingUser, setBookingUser] = useState<BookingByUserMap[]>([]);
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
@@ -22,7 +24,7 @@ const Bookings = () => {
     const [itemsPerPage] = useState(8);
     const userData = useData();
 
-    const { data, error, isLoading } = useSWR<BookingByUserMap[]>(userData && `http://localhost:8080/rest/user/booking/${userData.username}`, fetcher, {
+    const { data, error, isLoading } = useSWR<BookingByUserMap[]>(userData && `${BASE_URL}rest/user/booking/${userData.username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -113,7 +115,7 @@ const Bookings = () => {
     const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
 
     const handleStatusChange = (bookingId: number, refundAmount: number) => {
-        fetch(`http://localhost:8080/rest/owner/booking/update`, {
+        fetch(`${BASE_URL}rest/owner/booking/update`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -125,8 +127,8 @@ const Bookings = () => {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return;
             }
-            mutate(`http://localhost:8080/rest/user/booking/${userData?.username}`);
-            mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
+            mutate(`${BASE_URL}rest/user/booking/${userData?.username}`);
+            mutate(`${BASE_URL}rest/user/booking/detail/${bookingId}`);
             toast.success('Cập nhật thành công!');
         });
     };

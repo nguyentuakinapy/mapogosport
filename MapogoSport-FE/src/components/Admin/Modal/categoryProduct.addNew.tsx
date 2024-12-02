@@ -14,6 +14,7 @@ const CategoryAddNew = (props: CategoryProductProps) => {
     const { showAddCategory, setShowAddCategory, currentCategory } = props;
     const [productName, setProductName] = useState<string>("");
     const [productImage, setProductImage] = useState<File | string>("/images/logo.png");
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         if (showAddCategory && currentCategory) {
@@ -43,7 +44,7 @@ const CategoryAddNew = (props: CategoryProductProps) => {
         if (productImage instanceof File) {
             formData.append("fileImage", productImage);
         }
-        await fetch(`http://localhost:8080/rest/category_product/create`, {
+        await fetch(`${BASE_URL}rest/category_product/create`, {
             method: 'POST',
             body: formData,
         }).then((res) => {
@@ -52,7 +53,7 @@ const CategoryAddNew = (props: CategoryProductProps) => {
                 return;
             }
             toast.success("Thêm loại sản phẩm thành công!");
-            mutate("http://localhost:8080/rest/category_product/category-products");
+            mutate(`${BASE_URL}rest/category_product/category-products`);
             handleClose();
         });
     };
@@ -67,7 +68,7 @@ const CategoryAddNew = (props: CategoryProductProps) => {
         if (productImage instanceof File || productImage !== currentCategory?.image) {
             formData.append("fileImage", productImage);
         }
-        await fetch(`http://localhost:8080/rest/category_product/update/category/product/${currentCategory?.categoryProductId}`, {
+        await fetch(`${BASE_URL}rest/category_product/update/category/product/${currentCategory?.categoryProductId}`, {
             method: 'PUT',
             body: formData,
         }).then((res) => {
@@ -76,7 +77,7 @@ const CategoryAddNew = (props: CategoryProductProps) => {
                 return;
             }
             toast.success("Thêm loại sản phẩm thành công!");
-            mutate("http://localhost:8080/rest/category_product/category-products");
+            mutate(`${BASE_URL}rest/category_product/category-products`);
             handleClose();
         });
     }

@@ -11,15 +11,15 @@ import Loading from '@/components/loading';
 
 const Categories = () => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
-    const BASE_URL = 'http://localhost:8080/rest/';
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
 
-    const { data: categoriesProduct } = useSWR<CategoryProduct[]>(`${BASE_URL}category_product/category-products`, fetcher);
-    const { data: products } = useSWR<Product[]>(`${BASE_URL}products`, fetcher);
+    const { data: categoriesProduct } = useSWR<CategoryProduct[]>(`${BASE_URL}rest/category_product/category-products`, fetcher);
+    const { data: products } = useSWR<Product[]>(`${BASE_URL}rest/products`, fetcher);
 
     const uniqueBrands = [...new Set(products?.map(product => product.brand))];
 

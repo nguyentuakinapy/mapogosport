@@ -17,16 +17,16 @@ const AdminProduct = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(8);
-  const BASE_URL = "http://localhost:8080";
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const { data: categoryProducts } = useSWR<CategoryProduct[]>(`${BASE_URL}/rest/category_product/category-products`, fetcher,
+  const { data: categoryProducts } = useSWR<CategoryProduct[]>(`${BASE_URL}rest/category_product/category-products`, fetcher,
     {
       revalidateIfStale: false,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
     }
   );
-  const { data: products, mutate } = useSWR<Product[]>(`${BASE_URL}/rest/products`, fetcher,
+  const { data: products, mutate } = useSWR<Product[]>(`${BASE_URL}rest/products`, fetcher,
     {
       revalidateIfStale: false,
       revalidateOnFocus: false,
@@ -184,7 +184,7 @@ const AdminProduct = () => {
 
   const markProductAsOutOfStock = async (productId: number) => {
     if (window.confirm('Bạn có chắc muốn xóa loại sân này?')) {
-      await fetch(`${BASE_URL}/rest/products/${productId}/mark-as-out-of-stock`, {
+      await fetch(`${BASE_URL}rest/products/${productId}/mark-as-out-of-stock`, {
         method: 'PUT',
         headers: {
           'Accept': 'application/json, text/plain, */*',

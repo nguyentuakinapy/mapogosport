@@ -12,6 +12,7 @@ interface subscriptionProps {
 const ModalUpdateSubcription = (props: subscriptionProps) => {
     const { showUpdateSub, setShowUpdateSub, selectedPackage } = props;
     const [editedPackage, setEditedPackage] = useState<AccountPackage>();
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         if (selectedPackage) {
@@ -33,7 +34,7 @@ const ModalUpdateSubcription = (props: subscriptionProps) => {
 
     const handleSaveUpdate = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/rest/updateAccountPackage/${editedPackage?.accountPackageId}`, {
+            const response = await fetch(`${BASE_URL}rest/updateAccountPackage/${editedPackage?.accountPackageId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -43,7 +44,7 @@ const ModalUpdateSubcription = (props: subscriptionProps) => {
             if (!response.ok) throw new Error('Failed to update package');
             setShowUpdateSub(false);
             toast.success("cập nhật thành công !");
-            mutate("http://localhost:8080/rest/accountpackage");
+            mutate(`${BASE_URL}rest/accountpackage`);
             handleClose();
         } catch (error) {
             console.error('Error updating package:', error);

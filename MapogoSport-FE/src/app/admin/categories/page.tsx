@@ -15,7 +15,9 @@ import autoTable from 'jspdf-autotable';
 import useSWR from 'swr';
 
 const AdminProduct = () => {
-    const BASE_URL = 'http://localhost:8080/rest/';
+    // const BASE_URL = 'http://localhost:8080/rest/';
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const fetcher = (url: string) => fetch(url).then(res => res.json());
     const [showModal, setShowModal] = useState<boolean>(false);
     const [currentCategoryProduct, setCurrentCategoryProduct] = useState<CategoryProduct | null>(null); // Updated type to allow null
@@ -31,8 +33,8 @@ const AdminProduct = () => {
         setSearchTerm(e.target.value.toLowerCase());
     };
 
-    const { data: cateProductData, mutate: mutateProduct } = useSWR(`${BASE_URL}category_product/category-products`, fetcher);
-    const { data: cateFieldData, mutate: mutateField } = useSWR(`${BASE_URL}category_field`, fetcher);
+    const { data: cateProductData, mutate: mutateProduct } = useSWR(`${BASE_URL}rest/category_product/category-products`, fetcher);
+    const { data: cateFieldData, mutate: mutateField } = useSWR(`${BASE_URL}rest/category_field`, fetcher);
 
     useEffect(() => {
         if (cateProductData && cateFieldData) {
@@ -50,7 +52,7 @@ const AdminProduct = () => {
     const handleDeleteProduct = async (id: number) => {
         if (typeof window !== 'undefined') {
             if (window.confirm('Bạn có chắc muốn xóa loại sản phẩm này?')) {
-                await fetch(`${BASE_URL}category_product/delete/${id}`, {
+                await fetch(`${BASE_URL}rest/category_product/delete/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',
@@ -71,7 +73,7 @@ const AdminProduct = () => {
     const handleDeleteField = async (id: number) => {
         if (typeof window !== 'undefined') {
             if (window.confirm('Bạn có chắc muốn xóa loại sân này?')) {
-                await fetch(`${BASE_URL}category_field/delete/category_field/${id}`, {
+                await fetch(`${BASE_URL}rest/category_field/delete/category_field/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',

@@ -17,14 +17,15 @@ const UserContext = createContext<User | null>(null);
 
 export function UserProvider({ children, refreshKey }: UserProviderProps) {
     const [username, setUsername] = useState<string>("");
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
-        const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+        const socket = new SockJS(`${BASE_URL}ws`); // Địa chỉ endpoint WebSocket
         const stompClient = Stomp.over(socket);
 
         stompClient.connect({}, () => {
-            stompClient.subscribe('/topic/wallet/username', (message) => {
-                mutate(`http://localhost:8080/rest/user/${message.body}`)
+            stompClient.subscribe(`/topic/wallet/username`, (message) => {
+                mutate(`${BASE_URL}rest/user/${message.body}`)
             });
         });
 
@@ -37,14 +38,14 @@ export function UserProvider({ children, refreshKey }: UserProviderProps) {
         const storedUsername = localStorage.getItem('username');
         if (storedUsername) {
             setUsername(decodeString(storedUsername));
-            mutate(`http://localhost:8080/rest/user/${decodeString(storedUsername)}`)
+            mutate(`${BASE_URL}rest/user/${decodeString(storedUsername)}`)
         }
     }, [refreshKey]);
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
     const { data, error } = useSWR(
-        username ? `http://localhost:8080/rest/user/${username}` : null, // Dùng null nếu username chưa có
+        username ? `${BASE_URL}rest/user/${username}` : null, // Dùng null nếu username chưa có
         fetcher,
         {
             revalidateIfStale: false,

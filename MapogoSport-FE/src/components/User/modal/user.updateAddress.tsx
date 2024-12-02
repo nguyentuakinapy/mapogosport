@@ -13,6 +13,7 @@ interface UserProps {
 const ModalUpdateAddress = (props: UserProps) => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
     const { showUpdateAddress, setShowUpdateAddress, addressUser } = props;
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const { data, error } = useSWR("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
         revalidateIfStale: false,
@@ -75,7 +76,7 @@ const ModalUpdateAddress = (props: UserProps) => {
         }
         const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
-            fetch(`http://localhost:8080/rest/user/address/${addressUser?.addressUserId}`, {
+            fetch(`${BASE_URL}rest/user/address/${addressUser?.addressUserId}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -95,7 +96,7 @@ const ModalUpdateAddress = (props: UserProps) => {
                     return
                 }
                 handleClose();
-                mutate(`http://localhost:8080/rest/user/${username}`);
+                mutate(`${BASE_URL}rest/user/${username}`);
                 toast.success('Cập nhật thành công!');
             })
         }

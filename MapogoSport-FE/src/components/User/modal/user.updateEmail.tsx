@@ -18,6 +18,8 @@ const ModalUpdateEmail = (props: UserProps) => {
     const [checkButton, setCheckButton] = useState<boolean>(false);
     const [newEmail, setNewEmail] = useState<string>("");
 
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const handleClose = () => {
         setShowUpdateEmail(false);
         setNewEmail('');
@@ -35,7 +37,7 @@ const ModalUpdateEmail = (props: UserProps) => {
         }
         const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
-            fetch(`http://localhost:8080/rest/user/${username}`, {
+            fetch(`${BASE_URL}rest/user/${username}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -51,9 +53,9 @@ const ModalUpdateEmail = (props: UserProps) => {
                     return
                 }
                 handleClose();
-                mutate(`http://localhost:8080/rest/user/${username}`);
+                mutate(`${BASE_URL}rest/user/${username}`);
                 toast.success('Cập nhật địa chỉ email thành công!');
-                fetch('http://localhost:8080/rest/user/updateEmail/sendMail', {
+                fetch(`${BASE_URL}rest/user/updateEmail/sendMail`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',
@@ -87,7 +89,7 @@ const ModalUpdateEmail = (props: UserProps) => {
             });
         }, 1000);
         toast.success(`Mã xác nhận đang được gửi về email ${newEmail}!`);
-        const response = await fetch('http://localhost:8080/rest/user/sendMail', {
+        const response = await fetch(`${BASE_URL}rest/user/sendMail`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',

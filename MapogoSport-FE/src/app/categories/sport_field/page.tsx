@@ -11,7 +11,8 @@ import Loading from "@/components/loading";
 import Image from 'next/image';
 
 function Categories() {
-    const BASE_URL = 'http://localhost:8080/rest/';
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const fetcher = (url: string) => fetch(url).then(res => res.json());
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
@@ -20,8 +21,8 @@ function Categories() {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentLocation, setCurrentLocation] = useState<{ lat: number, lng: number } | null>(null);
 
-    const { data: categoriesField } = useSWR<CategoryField[]>(`${BASE_URL}category_field`, fetcher);
-    const { data: sportFields } = useSWR<SportField[]>(`${BASE_URL}sport_field`, fetcher);
+    const { data: categoriesField } = useSWR<CategoryField[]>(`${BASE_URL}rest/category_field`, fetcher);
+    const { data: sportFields } = useSWR<SportField[]>(`${BASE_URL}rest/sport_field`, fetcher);
 
     const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
         const toRad = (value: number) => (value * Math.PI) / 180;
@@ -113,7 +114,7 @@ function Categories() {
             return (
                 <div className='text-center' style={{ marginTop: "15%" }}>
                     <h1 className='text-center'><i className="bi bi-bag-x"></i></h1>
-                    <p>Không tìm thấy sản phẩm.</p>
+                    <p>Không tìm thấy khu vực sân.</p>
                 </div>
             );
         }
@@ -227,6 +228,12 @@ function Categories() {
                                 </div>
                             </Col>
                             <Col lg={10} md={9} sm={12}>
+                                <h3 className="title-section mb-4">
+                                    <span className="icon">
+                                        <Image className="img-fluid" alt="Flash Sale" width={40} height={40} src="/img/philcorbett-football.gif" unoptimized />
+                                    </span>
+                                    Danh sách khu vực sân
+                                </h3>
                                 <Row>
                                     <div className="section-header mb-4">
                                         <Image className="icon-sf" src={"/img/football-ground.png"} alt={"Icon SportField"} width={32} height={32} />

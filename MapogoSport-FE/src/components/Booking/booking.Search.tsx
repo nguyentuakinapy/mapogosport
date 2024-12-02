@@ -26,6 +26,7 @@ const SearchSportField = (props: SearchBookingProps) => {
     const [validTimes, setValidTimes] = useState<string[]>([]);
     const [opening, setOpening] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         if (sportField && sportField.sportFielDetails) {
@@ -100,7 +101,7 @@ const SearchSportField = (props: SearchBookingProps) => {
 
     const handleFindField = async () => {
         if (selectedDate && selectedTime) {
-            const response = await fetch(`http://localhost:8080/rest/user/booking/detail/getnextweek/${selectedSportType}/${selectedDate}/${selectedDate}`);
+            const response = await fetch(`${BASE_URL}rest/user/booking/detail/getnextweek/${selectedSportType}/${selectedDate}/${selectedDate}`);
             const bookingsFromAPI: BookingDetail[] = await response.json();
             let isBooked = false;
             const selectedSportDetail = sportField?.sportFielDetails.find(detail => detail.sportFielDetailId === selectedSportType);

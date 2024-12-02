@@ -25,7 +25,7 @@ interface UserProps {
   onFetch: (data?: MutatorCallback<Voucher[]> | Voucher[], opts?: boolean | MutatorOptions) => Promise<Voucher[] | undefined>;
 }
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser, onFetch }: UserProps) => {
   const [formValue, setFormValue] = useState<Voucher>({
@@ -94,7 +94,7 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
 
   const handleUpdateVoucher = async () => {
     try {
-      await axios.put(`${BASE_URL}/rest/update/voucher/${voucher?.voucherId}`,
+      await axios.put(`${BASE_URL}rest/update/voucher/${voucher?.voucherId}`,
         JSON.stringify({
           name: formValue.name,
           discountPercent: formValue.discountPercent,
@@ -121,7 +121,7 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
 
   const handleCreateVoucher = async () => {
     try {
-      await axios.post(`${BASE_URL}/rest/create/voucher`, // URL của API bạn đã tạo ở backend
+      await axios.post(`${BASE_URL}rest/create/voucher`, // URL của API bạn đã tạo ở backend
         JSON.stringify({
           name: formValue.name,
           discountPercent: formValue.discountPercent,
