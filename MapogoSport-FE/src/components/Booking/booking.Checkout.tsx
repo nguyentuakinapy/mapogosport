@@ -430,7 +430,8 @@ const BookingModal = (props: BookingProps) => {
                 return;
             }
             const amountToPay = checkPrepayPrice && prepayPrice !== undefined ? prepayPrice : totalAmount;
-            if (!userData?.wallet?.balance || userData.wallet.balance < amountToPay && paymentMethod.name !== 'Thanh toán ví') {
+            if (!userData?.wallet?.balance && paymentMethod.name === 'Thanh toán ví' ||
+                paymentMethod.name === 'Thanh toán ví' && userData && userData.wallet.balance < amountToPay && paymentMethod.name !== 'Thanh toán ví') {
                 toast.error("Số dư trong ví của bạn không đủ để đặt sân! Vui lòng nạp tiền vào ví!");
                 return;
             }

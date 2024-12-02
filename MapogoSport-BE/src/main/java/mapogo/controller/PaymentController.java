@@ -274,7 +274,7 @@ public class PaymentController {
 
 			orderDetailService.create(orderDetail);
 		}
-		return paymentService.createMoMoPayment(amount,orderId,null,"http://localhost:8080/rest/payment/momo");
+		return paymentService.createMoMoPayment(amount,orderId,null,"http://localhost:8083/rest/payment/momo");
 	}
 
 	// @GetMapping("/momo")
