@@ -6,8 +6,10 @@ import useSWR from "swr";
 
 const OrderDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/orders/detail/${params.id}`, fetcher, {
+
+    const { data, error, isLoading } = useSWR(`${BASE_URL}rest/user/orders/detail/${params.id}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,

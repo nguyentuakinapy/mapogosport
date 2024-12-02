@@ -21,9 +21,10 @@ const WalletPage = () => {
     const [itemsPerPage] = useState(8);
     const userData = useData();
     const [showNotificationModal, setNotificationModal] = useState<boolean>(false);
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const { data, error, isLoading } = useSWR(userData &&
-        `http://localhost:8080/rest/wallet/transaction/${userData?.wallet.walletId}`, fetcher, {
+        `${BASE_URL}rest/wallet/transaction/${userData?.wallet.walletId}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -185,7 +186,7 @@ const WalletPage = () => {
     };
     const addMoneyToWallet = async () => {
         try {
-            const responsePayment = await fetch(`http://localhost:8080/rest/wallet/createpaymentrecharge`, {
+            const responsePayment = await fetch(`${BASE_URL}rest/wallet/createpaymentrecharge`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',

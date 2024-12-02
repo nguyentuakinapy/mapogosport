@@ -5,13 +5,15 @@ import '../types/user.scss';
 import { Badge, Button, Col, Form, InputGroup, Nav, NavDropdown, OverlayTrigger, Pagination, Row, Table, Tooltip } from "react-bootstrap";
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from "react-datepicker";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import { useData } from "@/app/context/UserContext";
 import { toast } from "react-toastify";
 
 const Bookings = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [bookingUser, setBookingUser] = useState<BookingByUserMap[]>([]);
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
@@ -22,7 +24,7 @@ const Bookings = () => {
     const [itemsPerPage] = useState(8);
     const userData = useData();
 
-    const { data, error, isLoading } = useSWR(userData && `http://localhost:8080/rest/user/booking/${userData.username}`, fetcher, {
+    const { data, error, isLoading } = useSWR<BookingByUserMap[]>(userData && `${BASE_URL}rest/user/booking/${userData.username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -30,7 +32,7 @@ const Bookings = () => {
 
     useEffect(() => {
         if (data) {
-            const sortedData = data.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            const sortedData = data.sort((a: BookingByUserMap, b: BookingByUserMap) => new Date(b.date).getTime() - new Date(a.date).getTime());
             setBookingUser(sortedData);
             setFilteredBookings(sortedData);
         }
@@ -100,8 +102,7 @@ const Bookings = () => {
     };
 
     const handleRefresh = () => {
-        let filtered = bookingUser;
-        setFilteredBookings(filtered);
+        setFilteredBookings(bookingUser);
         setCurrentPage(1);
         setStartDate(null);
         setEndDate(null);
@@ -114,7 +115,7 @@ const Bookings = () => {
     const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
 
     const handleStatusChange = (bookingId: number, refundAmount: number) => {
-        fetch(`http://localhost:8080/rest/owner/booking/update`, {
+        fetch(`${BASE_URL}rest/owner/booking/update`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -126,8 +127,8 @@ const Bookings = () => {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return;
             }
-            mutate(`http://localhost:8080/rest/user/booking/${userData?.username}`);
-            mutate(`http://localhost:8080/rest/user/booking/detail/${bookingId}`);
+            mutate(`${BASE_URL}rest/user/booking/${userData?.username}`);
+            mutate(`${BASE_URL}rest/user/booking/detail/${bookingId}`);
             toast.success('Cập nhật thành công!');
         });
     };
@@ -136,139 +137,141 @@ const Bookings = () => {
     if (error) return <UserLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></UserLayout>;
 
     return (
-        <UserLayout>
-            <b className='text-danger' style={{ fontSize: '20px' }}>Danh sách đặt sân</b>
-            <div className="my-3">
-                <Row className="d-flex justify-content-between align-items-center">
-                    <Col xs={12} md={4}>
-                        <Form.Control value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="input-search-user" type="text" placeholder="Tìm kiếm..." />
-                    </Col>
-                    <Col xs={12} md={4}>
-                        <InputGroup className="search-date">
-                            <DatePicker selected={startDate || undefined} onChange={(date) => setStartDate(date)}
-                                selectsStart startDate={startDate || undefined} endDate={endDate || undefined}
-                                placeholderText="Từ ngày" className="form-control start" dateFormat="dd/MM/yyyy"
-                            />
-                            <InputGroup.Text><i className="bi bi-three-dots"></i></InputGroup.Text>
-                            <DatePicker selected={endDate || undefined} onChange={(date) => setEndDate(date)}
-                                selectsEnd startDate={startDate || undefined} endDate={endDate || undefined}
-                                minDate={startDate || undefined} placeholderText="Đến ngày" className="form-control end"
-                                dateFormat="dd/MM/yyyy"
-                            />
-                        </InputGroup>
-                    </Col>
-                    <Col xs={12} md={4}>
-                        <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                            <option value="">-- Trạng thái --</option>
-                            <option value="Đã thanh toán">Đã thanh toán</option>
-                            <option value="Đã hủy">Đã hủy</option>
-                            <option value="Chờ thanh toán">Chờ thanh toán</option>
-                        </Form.Select>
-                    </Col>
-                    <Col xs={12} md={12} className="mt-2">
-                        <Button variant="danger" style={{ width: '87%', marginRight: '9.4px' }} onClick={handleFilter}>
-                            <i className="bi bi-search"></i> Tìm kiếm
-                        </Button>
-                        <Button variant="secondary" style={{ width: '12%', padding: '6px' }} onClick={handleRefresh}>
-                            <i className="bi bi-arrow-clockwise"></i> Làm mới
-                        </Button>
-                    </Col>
-                </Row>
-            </div>
-            <div className="box-table-border mb-4">
-                <Table striped className="mb-0" style={{ fontSize: '15px' }}>
-                    <thead>
-                        <tr>
-                            <th style={{ width: '100px' }}>Mã</th>
-                            <th style={{ width: '220px' }}>Tên sân</th>
-                            <th style={{ width: '100px' }}>Ngày đặt</th>
-                            <th style={{ width: '130px' }}>Tổng tiền</th>
-                            <OverlayTrigger overlay={<Tooltip>Hoàn lại/Trả thêm</Tooltip>}>
-                                <th style={{ width: '130px' }}>Hoàn / Thêm</th>
-                            </OverlayTrigger>
-                            <th style={{ width: '120px' }}>Tình trạng</th>
-                            <th style={{ width: '100px' }}>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentItems.length > 0 ? (
-                            currentItems.map((booking) => (
-                                <tr key={booking.bookingId}>
-                                    <td className="ps-3 text-start">
-                                        <Link href={`/user/bookings/detail/${booking.bookingId}`}>
-                                            #{booking.bookingId}
-                                        </Link>
-                                    </td>
-                                    <td className="title text-start">{booking.sportFieldName}</td>
-                                    <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
-                                    <td>{booking.totalAmount.toLocaleString()} ₫</td>
-                                    {/* <td className={booking.oldTotalAmount > 0 && (booking.oldTotalAmount - booking.totalAmount) <= 0 ? 'text-danger' : 'text-success'}>
+        <Suspense fallback={<div>Đang tải...</div>}>
+            <UserLayout>
+                <b className='text-danger' style={{ fontSize: '20px' }}>Danh sách đặt sân</b>
+                <div className="my-3">
+                    <Row className="d-flex justify-content-between align-items-center">
+                        <Col xs={12} md={4}>
+                            <Form.Control value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="input-search-user" type="text" placeholder="Tìm kiếm..." />
+                        </Col>
+                        <Col xs={12} md={4}>
+                            <InputGroup className="search-date">
+                                <DatePicker selected={startDate || undefined} onChange={(date) => setStartDate(date)}
+                                    selectsStart startDate={startDate || undefined} endDate={endDate || undefined}
+                                    placeholderText="Từ ngày" className="form-control start" dateFormat="dd/MM/yyyy"
+                                />
+                                <InputGroup.Text><i className="bi bi-three-dots"></i></InputGroup.Text>
+                                <DatePicker selected={endDate || undefined} onChange={(date) => setEndDate(date)}
+                                    selectsEnd startDate={startDate || undefined} endDate={endDate || undefined}
+                                    minDate={startDate || undefined} placeholderText="Đến ngày" className="form-control end"
+                                    dateFormat="dd/MM/yyyy"
+                                />
+                            </InputGroup>
+                        </Col>
+                        <Col xs={12} md={4}>
+                            <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                                <option value="">-- Trạng thái --</option>
+                                <option value="Đã thanh toán">Đã thanh toán</option>
+                                <option value="Đã hủy">Đã hủy</option>
+                                <option value="Chờ thanh toán">Chờ thanh toán</option>
+                            </Form.Select>
+                        </Col>
+                        <Col xs={12} md={12} className="mt-2">
+                            <Button variant="danger" style={{ width: '87%', marginRight: '9.4px' }} onClick={handleFilter}>
+                                <i className="bi bi-search"></i> Tìm kiếm
+                            </Button>
+                            <Button variant="secondary" style={{ width: '12%', padding: '6px' }} onClick={handleRefresh}>
+                                <i className="bi bi-arrow-clockwise"></i> Làm mới
+                            </Button>
+                        </Col>
+                    </Row>
+                </div>
+                <div className="box-table-border mb-4">
+                    <Table striped className="mb-0" style={{ fontSize: '15px' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ width: '100px' }}>Mã</th>
+                                <th style={{ width: '220px' }}>Tên sân</th>
+                                <th style={{ width: '100px' }}>Ngày đặt</th>
+                                <th style={{ width: '130px' }}>Tổng tiền</th>
+                                <OverlayTrigger overlay={<Tooltip>Hoàn lại/Trả thêm</Tooltip>}>
+                                    <th style={{ width: '130px' }}>Hoàn / Thêm</th>
+                                </OverlayTrigger>
+                                <th style={{ width: '120px' }}>Tình trạng</th>
+                                <th style={{ width: '100px' }}>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {currentItems.length > 0 ? (
+                                currentItems.map((booking) => (
+                                    <tr key={booking.bookingId}>
+                                        <td className="ps-3 text-start">
+                                            <Link href={`/user/bookings/detail/${booking.bookingId}`}>
+                                                #{booking.bookingId}
+                                            </Link>
+                                        </td>
+                                        <td className="title text-start">{booking.sportFieldName}</td>
+                                        <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
+                                        <td>{booking.totalAmount.toLocaleString()} ₫</td>
+                                        {/* <td className={booking.oldTotalAmount > 0 && (booking.oldTotalAmount - booking.totalAmount) <= 0 ? 'text-danger' : 'text-success'}>
                                         {booking.oldTotalAmount !== 0 ? `${(booking.oldTotalAmount - booking.totalAmount).toLocaleString()} ₫`
                                             : booking.status === 'Đã hủy' || booking.status === 'Đã thanh toán' ? '0'
                                                 : `${(booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString()} ₫`}
                                     </td> */}
-                                    <td className={booking.status === 'Đã thanh toán' && booking.oldTotalAmount !== 0
-                                        && booking.oldTotalAmount - booking.totalAmount <= 0 ? 'text-danger' : 'text-success'}>
-                                        {booking.status === 'Đã thanh toán' ?
-                                            booking.oldTotalAmount !== undefined && booking.oldTotalAmount !== 0 ? (booking.oldTotalAmount - booking.totalAmount).toLocaleString() + ' đ' : "0 đ" :
-                                            booking.status === 'Đã hủy' ? 0 :
-                                                (booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString() + ' đ'}
-                                    </td>
-                                    <td>
-                                        <Badge bg={getStatusVariant(booking.status)}>
-                                            {booking.status}
-                                        </Badge>
-                                    </td>
-                                    <td>
-                                        {booking.status != 'Đã hủy' && booking.bookingDetails.filter(item => item.bookingDetailStatus === "Chưa bắt đầu") ? (
-                                            <Nav>
-                                                <NavDropdown id="nav-dropdown-dark-example" title="Thao tác">
-                                                    <Link href={`/user/bookings/detail/${booking.bookingId}`} className="dropdown-item">
-                                                        Xem
-                                                    </Link>
-                                                    <NavDropdown.Item onClick={() => {
-                                                        const a = booking.bookingDetails.filter(item => item.bookingDetailStatus != "Chưa bắt đầu");
-                                                        const b = booking.bookingDetails.filter(item => item.bookingDetailStatus === "Chưa bắt đầu");
-                                                        const subtract = a.reduce((total, item) => total + item.price, 0);
-                                                        const currentDateTime = new Date();
-                                                        const formattedTime = b[0].startTime.replace('h', ':').padStart(5, '0');
-                                                        const bookingDateTime = new Date(`${b[0].bookingDetailDate}T${formattedTime}:00`);
-                                                        const diffMinutes = (bookingDateTime.getTime() - currentDateTime.getTime()) / (1000 * 60);
-                                                        const refundAmount = (booking.totalAmount * (booking.percentDeposit / 100));
-                                                        if (diffMinutes >= 120) {
-                                                            if (booking.status === "Chờ thanh toán") {
-                                                                handleStatusChange(booking.bookingId, refundAmount - (subtract * (booking.percentDeposit / 100)));
+                                        <td className={booking.status === 'Đã thanh toán' && booking.oldTotalAmount !== 0
+                                            && booking.oldTotalAmount - booking.totalAmount <= 0 ? 'text-danger' : 'text-success'}>
+                                            {booking.status === 'Đã thanh toán' ?
+                                                booking.oldTotalAmount !== undefined && booking.oldTotalAmount !== 0 ? (booking.oldTotalAmount - booking.totalAmount).toLocaleString() + ' đ' : "0 đ" :
+                                                booking.status === 'Đã hủy' ? 0 :
+                                                    (booking.totalAmount - (booking.totalAmount * (booking.percentDeposit / 100))).toLocaleString() + ' đ'}
+                                        </td>
+                                        <td>
+                                            <Badge bg={getStatusVariant(booking.status)}>
+                                                {booking.status}
+                                            </Badge>
+                                        </td>
+                                        <td>
+                                            {booking.status != 'Đã hủy' && booking.bookingDetails.filter(item => item.bookingDetailStatus === "Chưa bắt đầu") ? (
+                                                <Nav>
+                                                    <NavDropdown id="nav-dropdown-dark-example" title="Thao tác">
+                                                        <Link href={`/user/bookings/detail/${booking.bookingId}`} className="dropdown-item">
+                                                            Xem
+                                                        </Link>
+                                                        <NavDropdown.Item onClick={() => {
+                                                            const a = booking.bookingDetails.filter(item => item.bookingDetailStatus != "Chưa bắt đầu");
+                                                            const b = booking.bookingDetails.filter(item => item.bookingDetailStatus === "Chưa bắt đầu");
+                                                            const subtract = a.reduce((total, item) => total + item.price, 0);
+                                                            const currentDateTime = new Date();
+                                                            const formattedTime = b[0].startTime.replace('h', ':').padStart(5, '0');
+                                                            const bookingDateTime = new Date(`${b[0].bookingDetailDate}T${formattedTime}:00`);
+                                                            const diffMinutes = (bookingDateTime.getTime() - currentDateTime.getTime()) / (1000 * 60);
+                                                            const refundAmount = (booking.totalAmount * (booking.percentDeposit / 100));
+                                                            if (diffMinutes >= 120) {
+                                                                if (booking.status === "Chờ thanh toán") {
+                                                                    handleStatusChange(booking.bookingId, refundAmount - (subtract * (booking.percentDeposit / 100)));
+                                                                } else {
+                                                                    handleStatusChange(booking.bookingId, booking.totalAmount - subtract);
+                                                                }
                                                             } else {
-                                                                handleStatusChange(booking.bookingId, booking.totalAmount - subtract);
+                                                                if (booking.status === "Chờ thanh toán") {
+                                                                    handleStatusChange(booking.bookingId, (refundAmount - (subtract * (booking.percentDeposit / 100))) * 0.75);
+                                                                } else {
+                                                                    handleStatusChange(booking.bookingId, (booking.totalAmount - subtract) * 0.75);
+                                                                }
                                                             }
-                                                        } else {
-                                                            if (booking.status === "Chờ thanh toán") {
-                                                                handleStatusChange(booking.bookingId, (refundAmount - (subtract * (booking.percentDeposit / 100))) * 0.75);
-                                                            } else {
-                                                                handleStatusChange(booking.bookingId, (booking.totalAmount - subtract) * 0.75);
-                                                            }
-                                                        }
-                                                    }}>Hủy sân</NavDropdown.Item>
-                                                </NavDropdown>
-                                            </Nav>
-                                        ) : (
-                                            <Link href={`/user/bookings/detail/${booking.bookingId}`}>
-                                                Xem
-                                            </Link>
-                                        )}
-                                    </td>
+                                                        }}>Hủy sân</NavDropdown.Item>
+                                                    </NavDropdown>
+                                                </Nav>
+                                            ) : (
+                                                <Link href={`/user/bookings/detail/${booking.bookingId}`}>
+                                                    Xem
+                                                </Link>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={7} className="text-center">Không có đơn hàng nào.</td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={7} className="text-center">Không có đơn hàng nào.</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </Table>
-            </div>
-            {renderPagination()}
-        </UserLayout>
+                            )}
+                        </tbody>
+                    </Table>
+                </div>
+                {renderPagination()}
+            </UserLayout>
+        </Suspense>
     )
 }
 

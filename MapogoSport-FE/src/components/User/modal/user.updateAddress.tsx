@@ -7,12 +7,13 @@ import useSWR, { mutate } from 'swr';
 interface UserProps {
     showUpdateAddress: boolean;
     setShowUpdateAddress: (v: boolean) => void;
-    addressUser: any;
+    addressUser?: AddressUsers;
 }
 
-const ModalAddAddress = (props: UserProps) => {
+const ModalUpdateAddress = (props: UserProps) => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
     const { showUpdateAddress, setShowUpdateAddress, addressUser } = props;
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const { data, error } = useSWR("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
         revalidateIfStale: false,
@@ -20,8 +21,8 @@ const ModalAddAddress = (props: UserProps) => {
         revalidateOnReconnect: false
     });
 
-    const [districts, setDistricts] = useState<any[]>([]);
-    const [wards, setWards] = useState<any[]>([]);
+    const [districts, setDistricts] = useState<District[]>([]);
+    const [wards, setWards] = useState<Ward[]>([]);
     const [selectedProvince, setSelectedProvince] = useState<string>('');
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [selectedWard, setSelectedWard] = useState<string>('');
@@ -34,9 +35,9 @@ const ModalAddAddress = (props: UserProps) => {
             setSelectedWard(addressUser.address.ward);
             setAddressDetail(addressUser.addressDetail);
 
-            const selectedProvinceData = data?.find((province: any) => province.Name === addressUser.address.province);
+            const selectedProvinceData = data?.find((province: Province) => province.Name === addressUser.address.province);
             setDistricts(selectedProvinceData?.Districts || []);
-            const selectedDistrictData = selectedProvinceData?.Districts.find((district: any) => district.Name === addressUser.address.district);
+            const selectedDistrictData = selectedProvinceData?.Districts.find((district: District) => district.Name === addressUser.address.district);
             setWards(selectedDistrictData?.Wards || []);
         }
     }, [addressUser, data]);
@@ -44,7 +45,7 @@ const ModalAddAddress = (props: UserProps) => {
     const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const provinceName = e.target.value;
         setSelectedProvince(provinceName);
-        const selectedProvinceData = data.find((province: any) => province.Name === provinceName);
+        const selectedProvinceData = data.find((province: Province) => province.Name === provinceName);
         setDistricts(selectedProvinceData?.Districts || []);
         setWards([]);
         setSelectedDistrict('');
@@ -54,7 +55,7 @@ const ModalAddAddress = (props: UserProps) => {
     const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const districtName = e.target.value;
         setSelectedDistrict(districtName);
-        const selectedDistrictData = districts.find((district: any) => district.Name === districtName);
+        const selectedDistrictData = districts.find((district: District) => district.Name === districtName);
         setWards(selectedDistrictData?.Wards || []);
         setSelectedWard('');
     };
@@ -75,7 +76,7 @@ const ModalAddAddress = (props: UserProps) => {
         }
         const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
-            fetch(`http://localhost:8080/rest/user/address/${addressUser.addressUserId}`, {
+            fetch(`${BASE_URL}rest/user/address/${addressUser?.addressUserId}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -95,7 +96,7 @@ const ModalAddAddress = (props: UserProps) => {
                     return
                 }
                 handleClose();
-                mutate(`http://localhost:8080/rest/user/${username}`);
+                mutate(`${BASE_URL}rest/user/${username}`);
                 toast.success('Cập nhật thành công!');
             })
         }
@@ -131,7 +132,7 @@ const ModalAddAddress = (props: UserProps) => {
                                     <Form.Select aria-label="Floating label select example"
                                         onChange={handleProvinceChange} value={selectedProvince}>
                                         <option>-- Nhấn để chọn --</option>
-                                        {data?.map((province: any) => (
+                                        {data?.map((province: Province) => (
                                             <option key={province.Id} value={province.Name}>{province.Name}</option>
                                         ))}
                                     </Form.Select>
@@ -182,4 +183,4 @@ const ModalAddAddress = (props: UserProps) => {
     );
 };
 
-export default ModalAddAddress;
+export default ModalUpdateAddress;

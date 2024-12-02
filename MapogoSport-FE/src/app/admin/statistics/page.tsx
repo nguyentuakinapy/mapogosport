@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { Button, Pagination, Form, Container } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -11,6 +11,8 @@ import { saveAs } from 'file-saver';
 import { formatPrice, formatDate, formatDateForApi, formatDateNotime } from '@/components/Utils/Format';
 
 const Admin = () => {
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [selectedDate, setSelectedDate] = useState<Date | null>(null); // Set Date type or null
     const [selectedDate1, setSelectedDate1] = useState<Date | null>(null); // Set Date type or null
     const [selectedOption, setSelectedOption] = useState('Danh Sách Hóa Đơn');
@@ -52,16 +54,16 @@ const Admin = () => {
         try {
             if (selectedOptionDay === "Một Ngày") {
                 const date = formatDateForApi(selectedDate);
-                const response = await axios.get(`http://localhost:8080/rest/admin/order-between?date=${date}`);
-                const response1 = await axios.get(`http://localhost:8080/rest/admin/category-product-total-between?date=${date}`)
+                const response = await axios.get(`${BASE_URL}rest/admin/order-between?date=${date}`);
+                const response1 = await axios.get(`${BASE_URL}rest/admin/category-product-total-between?date=${date}`)
                 setDataListOther(response.data);
                 setDataColumnnChartOther(response1.data);
 
             } else if (selectedOptionDay === "Nhiều Ngày") {
                 const startDay = formatDateForApi(selectedDate);
                 const endDay = formatDateForApi(selectedDate1);
-                const response = await axios.get(`http://localhost:8080/rest/admin/order-between?startDay=${startDay}&endDay=${endDay}`);
-                const response1 = await axios.get(`http://localhost:8080/rest/admin/category-product-total-between?startDay=${startDay}&endDay=${endDay}`)
+                const response = await axios.get(`${BASE_URL}rest/admin/order-between?startDay=${startDay}&endDay=${endDay}`);
+                const response1 = await axios.get(`${BASE_URL}rest/admin/category-product-total-between?startDay=${startDay}&endDay=${endDay}`)
                 setDataListOther(response.data);
                 setDataColumnnChartOther(response1.data);
             }
@@ -77,10 +79,10 @@ const Admin = () => {
                 try {
 
                     const [todayResp, yesterdayResp, weekResp, monthResp] = await Promise.all([
-                        axios.get('http://localhost:8080/rest/admin/category-product-totals-today'),
-                        axios.get('http://localhost:8080/rest/admin/category-product-totals-yesterday'),
-                        axios.get('http://localhost:8080/rest/admin/category-product-totals-7day'),
-                        axios.get('http://localhost:8080/rest/admin/category-product-totals-one-month'),
+                        axios.get(`${BASE_URL}rest/admin/category-product-totals-today`),
+                        axios.get(`${BASE_URL}rest/admin/category-product-totals-yesterday`),
+                        axios.get(`${BASE_URL}rest/admin/category-product-totals-7day`),
+                        axios.get(`${BASE_URL}rest/admin/category-product-totals-one-month`),
                     ]);
 
                     setDataColumnnChartToday(todayResp.data);
@@ -214,7 +216,7 @@ const Admin = () => {
     useEffect(() => {
         const fetchDataOrderToDay = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/rest/admin/orderToDay`);
+                const response = await axios.get(`${BASE_URL}rest/admin/orderToDay`);
                 setDataOrderToDay(response.data);
             } catch (error) {
                 console.error('Error:', error); // Sử dụng console.error để hiển thị lỗi
@@ -227,7 +229,7 @@ const Admin = () => {
     useEffect(() => {
         const fetchDataOrderYesterday = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/rest/admin/orderYesterday`);
+                const response = await axios.get(`${BASE_URL}rest/admin/orderYesterday`);
                 setDataOrderYesterday(response.data);
             } catch (error) {
                 console.error('Error:', error);
@@ -241,7 +243,7 @@ const Admin = () => {
     useEffect(() => {
         const fetchDataOrder7day = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/rest/admin/order7day`);
+                const response = await axios.get(`${BASE_URL}rest/admin/order7day`);
                 setDataOrder7day(response.data);
             } catch (error) {
                 console.error('Error:', error);
@@ -255,7 +257,7 @@ const Admin = () => {
     useEffect(() => {
         const fetchDataOrderOneMonth = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/rest/admin/orderOneMonth`);
+                const response = await axios.get(`${BASE_URL}rest/admin/orderOneMonth`);
                 setDataOrderOneMonth(response.data);
             } catch (error) {
                 console.error('Error:', error);
@@ -557,7 +559,7 @@ const Admin = () => {
 
 
     return (
-        <>
+        <Suspense fallback={<div>Đang tải...</div>}>
             <Container>
                 <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12 mt-3">
                     <div className="white-box">
@@ -653,7 +655,7 @@ const Admin = () => {
                 ) : null}
 
             </Container>
-        </>
+        </Suspense>
 
     );
 };

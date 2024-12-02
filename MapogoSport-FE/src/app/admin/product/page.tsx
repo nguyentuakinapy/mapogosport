@@ -3,7 +3,7 @@ import ProductAddNew from "@/components/Admin/Modal/product.addNew";
 import { formatPrice } from "@/components/Utils/Format";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Badge, Button, Form, Nav, OverlayTrigger, Pagination, Table, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR from "swr";
@@ -17,16 +17,16 @@ const AdminProduct = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(8);
-  const BASE_URL = "http://localhost:8080";
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const { data: categoryProducts } = useSWR<CategoryProduct[]>(`${BASE_URL}/rest/category_product/category-products`, fetcher,
+  const { data: categoryProducts } = useSWR<CategoryProduct[]>(`${BASE_URL}rest/category_product/category-products`, fetcher,
     {
       revalidateIfStale: false,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
     }
   );
-  const { data: products, mutate } = useSWR<Product[]>(`${BASE_URL}/rest/products`, fetcher,
+  const { data: products, mutate } = useSWR<Product[]>(`${BASE_URL}rest/products`, fetcher,
     {
       revalidateIfStale: false,
       revalidateOnFocus: false,
@@ -184,7 +184,7 @@ const AdminProduct = () => {
 
   const markProductAsOutOfStock = async (productId: number) => {
     if (window.confirm('Bạn có chắc muốn xóa loại sân này?')) {
-      await fetch(`${BASE_URL}/rest/products/${productId}/mark-as-out-of-stock`, {
+      await fetch(`${BASE_URL}rest/products/${productId}/mark-as-out-of-stock`, {
         method: 'PUT',
         headers: {
           'Accept': 'application/json, text/plain, */*',
@@ -212,42 +212,44 @@ const AdminProduct = () => {
   };
 
   return (
-    <div style={{ fontSize: "14px" }}>
-      <div className="box-ultil d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <b className="text-danger flex-grow-1" style={{ fontSize: "20px" }}>Quản lý sản phẩm/ Tổng: {products?.length || 0} sản phẩm</b>
-        <Button className="btn-sd-admin" style={{ fontSize: "15px", whiteSpace: "nowrap" }} onClick={handleCreateClick}>
-          <i className="bi bi-plus-circle me-2"></i>Thêm Sản Phẩm
-        </Button>
-        <div className="d-flex align-items-center" style={{ gap: "10px" }}>
-          <i className="bi bi-funnel fs-4"></i>
-          <Form.Control as="select" name="categoryProduct" value={selectedType} onChange={(e) => setSelectedType(Number(e.target.value))}
-            style={{ minWidth: "200px" }}>
-            <option value="">Tất cả loại sản phẩm</option>
-            {categoryProducts?.map((category) => (
-              <option key={category.categoryProductId} value={category.categoryProductId}>
-                {category.name}
-              </option>
-            ))}
-          </Form.Control>
+    <Suspense fallback={<div>Đang tải...</div>}>
+      <div style={{ fontSize: "14px" }}>
+        <div className="box-ultil d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <b className="text-danger flex-grow-1" style={{ fontSize: "20px" }}>Quản lý sản phẩm/ Tổng: {products?.length || 0} sản phẩm</b>
+          <Button className="btn-sd-admin" style={{ fontSize: "15px", whiteSpace: "nowrap" }} onClick={handleCreateClick}>
+            <i className="bi bi-plus-circle me-2"></i>Thêm Sản Phẩm
+          </Button>
+          <div className="d-flex align-items-center" style={{ gap: "10px" }}>
+            <i className="bi bi-funnel fs-4"></i>
+            <Form.Control as="select" name="categoryProduct" value={selectedType} onChange={(e) => setSelectedType(Number(e.target.value))}
+              style={{ minWidth: "200px" }}>
+              <option value="">Tất cả loại sản phẩm</option>
+              {categoryProducts?.map((category) => (
+                <option key={category.categoryProductId} value={category.categoryProductId}>
+                  {category.name}
+                </option>
+              ))}
+            </Form.Control>
+          </div>
+          <Form.Control type="text" placeholder="Tìm theo tên ..." onChange={handleSearch} />
         </div>
-        <Form.Control type="text" placeholder="Tìm theo tên ..." onChange={handleSearch} />
+        <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
+          <Nav.Item>
+            <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="inStock" className="tab-link">Còn hàng</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="outStock" className="tab-link">Hết hàng</Nav.Link>
+          </Nav.Item>
+        </Nav>
+        {renderContent()}
+        {renderPagination()}
+        <ProductAddNew showAddProduct={showModal} setShowAddProduct={setShowModal} currentProduct={currentProduct}
+          categoryProducts={categoryProducts} onFetch={mutate} />
       </div>
-      <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
-        <Nav.Item>
-          <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="inStock" className="tab-link">Còn hàng</Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="outStock" className="tab-link">Hết hàng</Nav.Link>
-        </Nav.Item>
-      </Nav>
-      {renderContent()}
-      {renderPagination()}
-      <ProductAddNew showAddProduct={showModal} setShowAddProduct={setShowModal} currentProduct={currentProduct}
-        categoryProducts={categoryProducts} onFetch={mutate} />
-    </div>
+    </Suspense>
   )
 }
 

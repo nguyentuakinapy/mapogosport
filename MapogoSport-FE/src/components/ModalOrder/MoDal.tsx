@@ -1,7 +1,7 @@
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import useSWR from 'swr';
 
 interface OrderProps {
     showModal: boolean;
@@ -11,21 +11,10 @@ interface OrderProps {
 }
 
 const MyVerticallyCenteredModal = ({ showModal, orderId, onHide }: OrderProps) => {
-    const [dataOrderDetail, setDataOrderDetail] = useState([]);
+    const fetcher = (url: string) => fetch(url).then(res => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (orderId) { // Call API only when orderId is not null
-                try {
-                    const response = await axios.get(`http://localhost:8080/rest/order-detail-by-order/${orderId}`);
-                    setDataOrderDetail(response.data);
-                } catch (error) {
-                    console.error('Error fetching order details:', error);
-                }
-            }
-        };
-        fetchData();
-    }, [orderId]); // Add orderId to dependency array to re-fetch when it changes
+    const { data } = useSWR<OrderDetail[]>(`${BASE_URL}rest/order-detail-by-order/${orderId}`, fetcher);
 
     return (
         <Modal
@@ -42,9 +31,9 @@ const MyVerticallyCenteredModal = ({ showModal, orderId, onHide }: OrderProps) =
             </Modal.Header>
             <Modal.Body>
                 <h4>Thông tin chi tiết</h4>
-                {dataOrderDetail.length > 0 ? (
+                {data && data.length > 0 ? (
                     <ul>
-                        {dataOrderDetail.map((detail, index) => (
+                        {data.map((detail, index) => (
                             <div key={index}>
                                 <p>Sản phẩm: {detail.productDetailSize.productDetail.product.name}</p>
                                 <p>Số Lượng: {detail.quantity}</p>

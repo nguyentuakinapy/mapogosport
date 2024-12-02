@@ -3,7 +3,7 @@ import { usePathname } from 'next/navigation';
 import '../types/user.scss'
 import useLocalStorage from "../useLocalStorage";
 import SidebarItem from "./SideBarItem";
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useData } from '@/app/context/UserContext';
 import { toast } from 'react-toastify';
 import { mutate } from 'swr';
@@ -47,6 +47,7 @@ const Sidebar = () => {
     const userData = useData();
     const [name, setName] = useState('');
     const [avatar, setAvatar] = useState<string | null>();
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         const activeItem = menuGroups.flatMap(group => group.menuItems)
@@ -64,13 +65,13 @@ const Sidebar = () => {
         }
     }, [userData]);
 
-    const handleAvatarChange = async (event: any) => {
-        const file = event.target.files[0];
+    const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
         if (file) {
             const formData = new FormData();
             formData.append("avatar", file);
             try {
-                const response = await fetch(`http://localhost:8080/rest/user/avatar/${userData?.username}`, {
+                const response = await fetch(`${BASE_URL}rest/user/avatar/${userData?.username}`, {
                     method: 'POST',
                     body: formData,
                 });
@@ -81,7 +82,7 @@ const Sidebar = () => {
                 const newAvatarUrl = await response.text();
                 setAvatar(newAvatarUrl);
                 toast.success("Thêm ảnh thành công!");
-                mutate(`http://localhost:8080/rest/user/avatar/${userData?.username}`);
+                mutate(`${BASE_URL}rest/user/avatar/${userData?.username}`);
             } catch (error) {
                 console.error("Thêm ảnh không thành công: ", error);
             }

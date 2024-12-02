@@ -1,9 +1,8 @@
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
-import { useEffect, useState } from "react";
-import { useData } from "@/app/context/UserContext";
+import { ChangeEvent, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-
+import { MutatorCallback, MutatorOptions } from "swr";
 
 interface Voucher {
   voucherId?: number
@@ -23,20 +22,13 @@ interface UserProps {
   setShowAddVoucher: (v: boolean) => void;
   voucher?: Voucher | null;
   currentUser?: User | null;
-  onFetch: any;
+  onFetch: (data?: MutatorCallback<Voucher[]> | Voucher[], opts?: boolean | MutatorOptions) => Promise<Voucher[] | undefined>;
 }
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-const VoucherAddNew = ({
-  showAddVoucher,
-  setShowAddVoucher,
-  voucher,
-  currentUser,
-  onFetch,
-}: UserProps) => {
+const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser, onFetch }: UserProps) => {
   const [formValue, setFormValue] = useState<Voucher>({
-    // voucherId: 0,
     name: "",
     discountPercent: 0,
     quantity: 0,
@@ -45,14 +37,14 @@ const VoucherAddNew = ({
     status: "inactive", // Default status
     discountCode: "",
     activeDate: new Date(),
-    createdBy: null ,
+    createdBy: null,
   });
 
   useEffect(() => {
     if (currentUser) {
       setFormValue((prevState) => ({
         ...prevState,
-        createdBy: currentUser ,
+        createdBy: currentUser,
       }));
     }
   }, [currentUser]); // Cập nhật createdBy mỗi khi currentUser thay đổi
@@ -64,7 +56,6 @@ const VoucherAddNew = ({
     }
 
     setFormValue({
-      //   voucherId: 0,
       name: "",
       discountPercent: 0,
       quantity: 0,
@@ -78,63 +69,32 @@ const VoucherAddNew = ({
   };
 
   useEffect(() => {
-    if (voucher) {
-      console.log("voucher: ", voucher);
-      console.log("voucher createDate: ", voucher.createDate);
-      console.log("voucher: activeDate ", voucher.activeDate);
-      console.log("voucher: endDate ", voucher.endDate);
-
+    if (voucher && showAddVoucher) {
       setFormValue({
-        // voucherId: voucher.voucherId,
         name: voucher.name,
         discountPercent: voucher.discountPercent,
         quantity: voucher.quantity,
-        createDate: voucher.createDate
-          ? new Date(voucher.createDate)
-          : new Date(), // Đảm bảo tạo Date hợp lệ
+        createDate: voucher.createDate ? new Date(voucher.createDate) : new Date(), // Đảm bảo tạo Date hợp lệ
         endDate: voucher.endDate ? new Date(voucher.endDate) : new Date(), // Đảm bảo tạo Date hợp lệ
         status: voucher.status,
         discountCode: voucher.discountCode,
-        activeDate: voucher.activeDate
-          ? new Date(voucher.activeDate)
-          : new Date(), // Đảm bảo tạo Date hợp lệ
+        activeDate: voucher.activeDate ? new Date(voucher.activeDate) : new Date(), // Đảm bảo tạo Date hợp lệ
         createdBy: voucher.createdBy || currentUser || null,
       });
     } else {
       setFormValueNull();
     }
-  }, [voucher, currentUser]);
-  
+  }, [voucher, currentUser, showAddVoucher]);
+
 
   const handleClose = () => {
-    // setFormValueNull();
+    setFormValueNull();
     setShowAddVoucher(false);
   };
-  
-  useEffect(() => {
-    if (showAddVoucher && voucher) {
-      setFormValue({
-        name: voucher.name,
-        discountPercent: voucher.discountPercent,
-        quantity: voucher.quantity,
-        createDate: voucher.createDate ? new Date(voucher.createDate) : new Date(),
-        endDate: voucher.endDate ? new Date(voucher.endDate) : new Date(),
-        status: voucher.status,
-        discountCode: voucher.discountCode,
-        activeDate: voucher.activeDate ? new Date(voucher.activeDate) : new Date(),
-        createdBy: voucher.createdBy || currentUser || null,
-      });
-    } else if (!voucher) {
-      setFormValueNull();
-    }
-  }, [voucher, showAddVoucher, currentUser]);
-  
 
- 
-const handleUpdateVoucher = async () => {
+  const handleUpdateVoucher = async () => {
     try {
-      const response = await axios.put(
-        `${BASE_URL}/rest/update/voucher/${voucher?.voucherId}`,
+      await axios.put(`${BASE_URL}rest/update/voucher/${voucher?.voucherId}`,
         JSON.stringify({
           name: formValue.name,
           discountPercent: formValue.discountPercent,
@@ -145,199 +105,140 @@ const handleUpdateVoucher = async () => {
           discountCode: formValue.discountCode,
           activeDate: formValue.activeDate.toISOString(),
           createdBy: formValue.createdBy?.username,
-        }),
-        {
-          headers: {
-            Accept: "application/json, text/plain, */*",
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      toast.success("thành công update voucher");
+        }), {
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+      });
+      toast.success("Cập nhật mã giảm giá thành công!");
       onFetch();
-      console.log("Voucher đã được update:", response.data);
     } catch (error) {
       console.error("Lỗi khi tạo update voucher:", error);
     }
   };
-  
+
 
   const handleCreateVoucher = async () => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/rest/create/voucher`, // URL của API bạn đã tạo ở backend
-
+      await axios.post(`${BASE_URL}rest/create/voucher`, // URL của API bạn đã tạo ở backend
         JSON.stringify({
           name: formValue.name,
           discountPercent: formValue.discountPercent,
           quantity: formValue.quantity,
-          createDate: formValue.createDate
-            ? new Date(formValue.createDate)
-            : new Date(), // Đảm bảo tạo Date hợp lệ
+          createDate: formValue.createDate ? new Date(formValue.createDate) : new Date(), // Đảm bảo tạo Date hợp lệ
           endDate: formValue.endDate ? new Date(formValue.endDate) : new Date(), // Đảm bảo tạo Date hợp lệ
           status: formValue.status,
           discountCode: formValue.discountCode,
-          activeDate: formValue.activeDate
-            ? new Date(formValue.activeDate)
-            : new Date(), // Đảm bảo tạo Date hợp lệ
+          activeDate: formValue.activeDate ? new Date(formValue.activeDate) : new Date(), // Đảm bảo tạo Date hợp lệ
           createdBy: formValue.createdBy?.username,
-        }),
-        {
-          headers: {
-            Accept: "application/json, text/plain, */*",
-            "Content-Type": "application/json",
-          },
-        }
-      );
+        }), {
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+      });
       toast.success("thành công tạo voucher");
       onFetch();
-      console.log("Voucher đã được tạo:", response.data);
     } catch (error) {
       console.error("Lỗi khi tạo voucher:", error);
     }
   };
 
   const isValidate = () => {
-    // Kiểm tra tên voucher
-    console.log("form nảm, ", formValue.name);
     if (formValue.discountCode === "") {
-        toast.warning("Vui lòng nhập mã code");
-        return false;
+      toast.warning("Vui lòng nhập mã code");
+      return false;
     }
 
     if (formValue.name === "") {
-        toast.warning("Vui lòng nhập tên voucher");
-        return false;
+      toast.warning("Vui lòng nhập tên voucher");
+      return false;
     }
 
     // Kiểm tra phần trăm giảm giá
     if (!formValue.discountPercent || formValue.discountPercent <= 0) {
-        toast.warning("Vui lòng nhập phần trăm giảm giá hợp lệ");
-        return false;
+      toast.warning("Vui lòng nhập phần trăm giảm giá hợp lệ");
+      return false;
     }
 
     // Kiểm tra số lượng
     if (!formValue.quantity || formValue.quantity <= 0) {
-        toast.warning("Vui lòng nhập số lượng hợp lệ");
-        return false;
+      toast.warning("Vui lòng nhập số lượng hợp lệ");
+      return false;
     }
 
     // Kiểm tra ngày tạo
     if (!formValue.createDate) {
-        toast.warning("Vui lòng chọn ngày tạo");
-        return false;
+      toast.warning("Vui lòng chọn ngày tạo");
+      return false;
     }
 
     // Kiểm tra ngày hết hạn
     if (!formValue.endDate) {
-        toast.warning("Vui lòng chọn ngày hết hạn");
-        return false;
+      toast.warning("Vui lòng chọn ngày hết hạn");
+      return false;
     }
 
     // Kiểm tra ngày hết hạn không trước ngày hiện tại
     if (new Date(formValue.endDate) < new Date()) {
-        toast.warning("Ngày hết hạn không thể là quá khứ trong is validate");
-        return false;
+      toast.warning("Ngày hết hạn không thể là quá khứ trong is validate");
+      return false;
     }
 
     // Kiểm tra ngày hoạt động
     if (!formValue.activeDate) {
-        toast.warning("Vui lòng chọn ngày hoạt động");
-        return false;
+      toast.warning("Vui lòng chọn ngày hoạt động");
+      return false;
     }
-   
+
     const activeDate = new Date(formValue.activeDate);
     const currentDate = new Date();
-
-    // Đặt giờ của cả hai ngày về 00:00 để chỉ so sánh ngày
     activeDate.setHours(0, 0, 0, 0);
     currentDate.setHours(0, 0, 0, 0);
 
     if (activeDate < currentDate) {
-        toast.warning("Ngày kích hoạt không thể là quá khứ");
-        return false;
+      toast.warning("Ngày kích hoạt không thể là quá khứ");
+      return false;
     }
 
     // Kiểm tra trạng thái
     if (!formValue.status) {
-        toast.warning("Vui lòng chọn trạng thái");
-        return false;
+      toast.warning("Vui lòng chọn trạng thái");
+      return false;
     }
 
     return true; // Tất cả các trường hợp đã hợp lệ
-};
+  };
 
   const handleSave = () => {
-  
     if (voucher) {
-
       const endDate = new Date(formValue.endDate);
       const currentDate = new Date();
-  
-      // Đặt giờ của cả hai ngày về 00:00 để chỉ so sánh ngày
       endDate.setHours(0, 0, 0, 0);
       currentDate.setHours(0, 0, 0, 0);
-  
+
       if (endDate < currentDate) {
-          toast.warning("Ngày hết hạn không thể là quá khứ trong handle save");
-          return false;
+        toast.warning("Ngày hết hạn nhỏ hơn ngày hiện tại!");
+        return false;
       }
-        console.log("form value", formValue);
       handleUpdateVoucher();
     } else {
-      if(!isValidate()){
+      if (!isValidate()) {
         return
-    }
-      console.log("form value", formValue);
+      }
       handleCreateVoucher();
     }
-    // Lưu dữ liệu đã chỉnh sửa
-    console.log("Saving voucher:", formValue);
     handleClose();
   };
 
-  const dateFields = ["endDate", "createDate", "activeDate"]; // Các trường cần chuyển đổi thành Date
-
-const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-  
-
-    // Kiểm tra xem tên trường có phải là một trong những trường cần chuyển đổi không
-    if (dateFields.includes(name)) {
-      const selectedDate = new Date(value);
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      const fiveYearsLater = new Date();
-      fiveYearsLater.setFullYear(today.getFullYear() +5 );
-
-      
-      if(name === "activeDate" && selectedDate < today){
-        toast.warning('Ngày hoạt động không thể là quá khứ')
-        return
-      }else if(name === "endDate" && selectedDate < today){
-
-        toast.warning('Ngày hết hạn không thể là quá khứ trong handle Change')
-        console.log('selectedDate '+selectedDate)
-        console.log('today '+today)
-        
-        return
-      }else if(selectedDate > fiveYearsLater){
-        toast.warning('Voucher chỉ khởi tạo trong 5 năm')
-        return
-      }
-
-      setFormValue(prevState => ({
-        ...prevState,
-        [name]: new Date(value), // Chuyển đổi giá trị thành Date
-      }));
-    } else {
-      setFormValue(prevState => ({
-        ...prevState,
-        [name]: value,
-      }));
-    }
+    setFormValue((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
   };
-  
 
   const option = [
     { label: "Chưa hiệu lực", value: "inactive" },
@@ -360,13 +261,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   };
 
   return (
-    <Modal
-      show={showAddVoucher}
-      onHide={handleClose}
-      centered
-      backdrop="static"
-      keyboard={true}
-    >
+    <Modal show={showAddVoucher} onHide={handleClose} centered backdrop="static" keyboard={true}>
       <Modal.Header closeButton>
         <Modal.Title className="text-uppercase text-danger">
           {voucher ? "Chỉnh Sửa mã giảm giá" : "Tạo mã giảm giá"}
@@ -378,13 +273,8 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
             <Col>
               <Form.Group className="mb-3">
                 <Form.Floating>
-                  <Form.Control
-                    type="text"
-                    placeholder="Mã code"
-                    name="discountCode"
-                    value={formValue.discountCode}
-                    onChange={handleChange}
-                  />
+                  <Form.Control type="text" placeholder="Mã code" name="discountCode" value={formValue.discountCode}
+                    onChange={handleChange} />
                   <Form.Label>
                     Mã Code <b className="text-danger">*</b>
                   </Form.Label>
@@ -452,22 +342,22 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
               </Form.Group>
             </Col>
             <Col>
-          
+
               <Form.Group className="mb-3">
                 <Form.Floating>
-               
+
                   <Form.Control
                     type="date"
                     placeholder="Ngày hết hạn"
                     name="endDate"
                     value={
                       formValue.endDate
-                        ? formValue.endDate.toLocaleDateString("en-CA")
+                        ? new Date(formValue.endDate).toLocaleDateString("en-CA")
                         : ""
                     }
                     onChange={handleChange}
                     // min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate() + 1)).toISOString().split("T")[0]}                   />
-                    min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate() )).toISOString().split("T")[0]}                   />
+                    min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate())).toISOString().split("T")[0]} />
                   <Form.Label>
                     Ngày hết hạn <b className="text-danger">*</b>
                   </Form.Label>
@@ -490,7 +380,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
                     disabled={
                       formValue.activeDate &&
                       new Date(formValue.activeDate).getTime() < new Date().setHours(0, 0, 0, 0)
-                    }                  />
+                    } />
                   <Form.Label>
                     Ngày Kích Hoạt <b className="text-danger">*</b>
                   </Form.Label>

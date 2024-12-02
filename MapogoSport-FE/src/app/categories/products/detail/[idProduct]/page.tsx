@@ -23,6 +23,7 @@ const ProductDetail = () => {
     const { idProduct } = useParams();
     const [visibleCount, setVisibleCount] = useState(5);
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [selectedSizeQuantity, setSelectedSizeQuantity] = useState<number>(0);
     const increaseQuantity = () => {
@@ -46,14 +47,14 @@ const ProductDetail = () => {
         setOpen(true);
     }
     const { data: findByIdProduct } = useSWR<Product>(
-        `http://localhost:8080/rest/products/${idProduct}`, fetcher, {
+        `${BASE_URL}rest/products/${idProduct}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
 
     const { data: imageGallery } = useSWR<ProductDetailAndDetailSize[]>(
-        `http://localhost:8080/rest/product-detail/image/gallery/${idProduct}`, fetcher, {
+        `${BASE_URL}rest/product-detail/image/gallery/${idProduct}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -68,7 +69,7 @@ const ProductDetail = () => {
         }
     }, [imageGallery])
 
-    const { data } = useSWR(`http://localhost:8080/rest/user/productReview/${idProduct}`, fetcher, {
+    const { data } = useSWR(`${BASE_URL}rest/user/productReview/${idProduct}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -92,7 +93,7 @@ const ProductDetail = () => {
             };
 
             try {
-                const response = await fetch('http://localhost:8080/rest/cart/add', {
+                const response = await fetch(`${BASE_URL}rest/cart/add`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -107,7 +108,7 @@ const ProductDetail = () => {
 
                 toast.success("Thêm sản phẩm vào giỏ hàng thành công!");
 
-                mutate(`http://localhost:8080/rest/cart/count/${username}`); // Tái tải dữ liệu
+                mutate(`${BASE_URL}rest/cart/count/${username}`); // Tái tải dữ liệu
 
             } catch (error) {
                 console.error("Lỗi khi gửi yêu cầu:", error);
@@ -136,7 +137,7 @@ const ProductDetail = () => {
 
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/rest/user/productReview/find-review-by-rating/${idProduct}/${value}`);
+                const response = await axios.get(`${BASE_URL}rest/user/productReview/find-review-by-rating/${idProduct}/${value}`);
                 if (response.data) {
                     setFilteredData(response.data); // Cập nhật bình luận theo số sao
                     console.log("Filtered reviews by rating:", response.data);
@@ -403,7 +404,7 @@ const ProductDetail = () => {
                         </Container>
                     </div>
                 }
-            </HomeLayout>
+            </HomeLayout >
         </>
     );
 };

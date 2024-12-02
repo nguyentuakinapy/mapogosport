@@ -1,6 +1,6 @@
 'use client'
 import RevenueChart from '@/components/Owner/Statistic/RevenuaChart';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { InputGroup, Nav, Pagination, Table } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -28,6 +28,8 @@ type CustomerChartData = [CustomerChartHeader, ...CustomerChartRow[]];
 type CustomerRank = [number, string, string];
 
 export default function Home() {
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   const [activeTab, setActiveTab] = useState<string>('all');
   const [activeTabCustomer, setActiveTabCustomer] = useState('offline');
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -53,7 +55,7 @@ export default function Home() {
   const [showModalRankOffline, setShowModalRankOffline] = useState(false);
   const [bookingByUsernameModal, setBookingByUsernameModal] = useState<Booking[]>([]);
   const [bookingByFullNameOffline, setBookingByFullNameOffline] = useState<Booking[]>([]);
-  const years = Array.from(new Array(10), (index) => currentYear - index);
+  const years = Array.from(new Array(10), (_,index) => currentYear - index);
   // Pagination
   const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
@@ -76,7 +78,7 @@ export default function Home() {
     const storedUsername = localStorage.getItem('username');
 
     if (storedUsername) {
-      const responseOwner = await fetch(`http://localhost:8080/rest/owner/${decodeString(storedUsername)}`);
+      const responseOwner = await fetch(`${BASE_URL}rest/owner/${decodeString(storedUsername)}`);
       if (!responseOwner.ok) {
         throw new Error('Error fetching data');
       }
@@ -94,7 +96,7 @@ export default function Home() {
     if (owner?.ownerId) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`http://localhost:8080/rest/booking/successful/revenue/Đã thanh toán/${owner.ownerId}`);
+          const response = await fetch(`${BASE_URL}rest/booking/successful/revenue/Đã thanh toán/${owner.ownerId}`);
           if (!response.ok) {
             throw new Error('Error fetching data');
           }
@@ -116,7 +118,7 @@ export default function Home() {
     if (owner?.ownerId) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`http://localhost:8080/rest/sport_field_by_owner/${owner.ownerId}`);
+          const response = await fetch(`${BASE_URL}rest/sport_field_by_owner/${owner.ownerId}`);
           if (!response.ok) {
             throw new Error('Error fetching data');
           }
@@ -146,7 +148,7 @@ export default function Home() {
     if (selectedFieldId) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`http://localhost:8080/rest/sport_field/${selectedFieldId}`);
+          const response = await fetch(`${BASE_URL}rest/sport_field/${selectedFieldId}`);
           const data = await response.json() as SportField;
           const ids = data.sportFielDetails.map((detail: SportFieldDetail) => detail.sportFielDetailId);
           setSportFieldDetailIds(ids);
@@ -167,7 +169,7 @@ export default function Home() {
       const fetchData = async () => {
         try {
           const idsString = sportFieldDetailIds.join(',');
-          const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportField/byowner/${idsString}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
+          const response = await fetch(`${BASE_URL}rest/bookingdetail/booking/bysportField/byowner/${idsString}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
           const data = await response.json();
           setBookingdetailBySportField(data);
         } catch (error) {
@@ -194,7 +196,7 @@ export default function Home() {
       const fetchData = async () => {
         try {
           const idsString = sportFieldDetailIds.join(',');
-          const response = await fetch(`http://localhost:8080/rest/bookingdetail/booking/bysportFieldDetail/${idsString}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
+          const response = await fetch(`${BASE_URL}rest/bookingdetail/booking/bysportFieldDetail/${idsString}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
           const data = await response.json();
           const formattedData: ChartData = [
             ["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"],
@@ -236,7 +238,7 @@ export default function Home() {
           };
 
           const response = await fetch(
-            `http://localhost:8080/rest/booking/success/revenue/byDate/Đã thanh toán/${owner?.ownerId}/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`
+            `${BASE_URL}rest/booking/success/revenue/byDate/Đã thanh toán/${owner?.ownerId}/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`
           );
 
           if (!response.ok) {
@@ -288,7 +290,7 @@ export default function Home() {
 
           // Fetch data from the API
           const response = await fetch(
-            `http://localhost:8080/rest/bookingDetail/byOwner/bySportField/byDate/${idsString}/${bookingIdsStringDate}/Đã hoàn thành,Chưa bắt đầu/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`
+            `${BASE_URL}rest/bookingDetail/byOwner/bySportField/byDate/${idsString}/${bookingIdsStringDate}/Đã hoàn thành,Chưa bắt đầu/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`
           );
 
           if (!response.ok) {
@@ -335,7 +337,7 @@ export default function Home() {
           };
 
           const idsString = sportFieldDetailIds.join(',');
-          const response = await fetch(`http://localhost:8080/rest/bookingDetail/bySportField/byDate/${idsString}/${bookingIdsStringDate}/Đã hoàn thành,Chưa bắt đầu/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`);
+          const response = await fetch(`${BASE_URL}rest/bookingDetail/bySportField/byDate/${idsString}/${bookingIdsStringDate}/Đã hoàn thành,Chưa bắt đầu/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`);
           const data = await response.json();
 
           if (!data || data.length === 0) {
@@ -373,7 +375,7 @@ export default function Home() {
           };
 
           const response = await fetch(
-            `http://localhost:8080/rest/bookingdetail/bysportFieldDetailAndDate/${id}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`
+            `${BASE_URL}rest/bookingdetail/bysportFieldDetailAndDate/${id}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu/${formatDate(startDate)}${effectiveEndDate ? '/' + formatDate(effectiveEndDate) : ''}`
           );
           const data = await response.json();
           setBookingDetailBySpFDetail(data); // Store modal-specific data
@@ -387,7 +389,7 @@ export default function Home() {
       // Fetch modal data based on the provided id
       const fetchModalData = async () => {
         try {
-          const response = await fetch(`http://localhost:8080/rest/bookingdetail/bysportFieldDetail/${id}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
+          const response = await fetch(`${BASE_URL}rest/bookingdetail/bysportFieldDetail/${id}/${bookingIdsString}/Đã hoàn thành,Chưa bắt đầu`);
           const data = await response.json();
           setBookingDetailBySpFDetail(data);
         } catch (error) {
@@ -409,7 +411,7 @@ export default function Home() {
     if (owner?.ownerId) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`http://localhost:8080/rest/booking/byOwnerId/totalCustomer/${owner?.ownerId}`)
+          const response = await fetch(`${BASE_URL}rest/booking/byOwnerId/totalCustomer/${owner?.ownerId}`)
           const data = await response.json();
           setTotalCustomer(data);
         } catch (error) {
@@ -431,7 +433,7 @@ export default function Home() {
     if (owner?.ownerId && selectedYear) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`http://localhost:8080/rest/booking/customerByMonth/byOwnerId/${selectedYear}/${owner.ownerId}`)
+          const response = await fetch(`${BASE_URL}rest/booking/customerByMonth/byOwnerId/${selectedYear}/${owner.ownerId}`)
           const data = await response.json();
           const formattedData: CustomerChartData = [['Month', 'Customers'],
           ...Object.entries(data).map(([month, count]) => [parseInt(month), Number(count)] as CustomerChartRow)];
@@ -449,7 +451,7 @@ export default function Home() {
     if (owner?.ownerId) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`http://localhost:8080/rest/booking/customer/byOwner/byUsernameOffline/${owner?.ownerId}`)
+          const response = await fetch(`${BASE_URL}rest/booking/customer/byOwner/byUsernameOffline/${owner?.ownerId}`)
           const data = await response.json()
           const convertedData = data.map((item: RankCustomer[]) => ({
             rank: item[0],
@@ -472,7 +474,7 @@ export default function Home() {
     if (owner?.ownerId) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`http://localhost:8080/rest/booking/rank/customer/online/byOwerId/${owner?.ownerId}`)
+          const response = await fetch(`${BASE_URL}rest/booking/rank/customer/online/byOwerId/${owner?.ownerId}`)
           const data = await response.json()
           setRankCustomerOnline(data)
           console.log(data);
@@ -491,7 +493,7 @@ export default function Home() {
     // Fetch modal data based on the provided username
     const fetchModalData = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/rest/booking/rank/customer/online/${username}`);
+        const response = await fetch(`${BASE_URL}rest/booking/rank/customer/online/${username}`);
         const data = await response.json();
         setBookingByUsernameModal(data);
       } catch (error) {
@@ -512,7 +514,7 @@ export default function Home() {
     // Fetch modal data based on the provided username
     const fetchModalData = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/rest/booking/detail/tableCustomer/byFullname/${fullname}`);
+        const response = await fetch(`${BASE_URL}rest/booking/detail/tableCustomer/byFullname/${fullname}`);
         const data = await response.json();
         setBookingByFullNameOffline(data);
       } catch (error) {
@@ -732,7 +734,7 @@ export default function Home() {
 
   };
 
-  const renderPagination = (totalPages: number, currentPage: number, handlePageChange: (page: number) => void) => {
+  const renderPagination = (totalPages: number, currentPage: number) => {
     const handlePreviousPage = () => {
       if (currentPage > 1) {
         setCurrentPage(currentPage - 1);
@@ -1029,7 +1031,7 @@ export default function Home() {
                         ))}
                       </tbody>
                     </Table>
-                    {renderPagination(totalPages, currentPage, (page) => setCurrentPage(page))}
+                    {renderPagination(totalPages, currentPage)}
                   </div>
                 )}
                 {activeTabCustomer === "online" && (
@@ -1062,7 +1064,7 @@ export default function Home() {
                         ))}
                       </tbody>
                     </Table>
-                    {renderPagination(totalPagesOnline, currentPage, (page) => setCurrentPage(page))}
+                    {renderPagination(totalPagesOnline, currentPage)}
                   </div>
                 )}
               </div>
@@ -1071,22 +1073,24 @@ export default function Home() {
         );
     }
   };
-
-  return (
-    <>
-      <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>THỐNG KÊ</h3>
-      <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
-        <Nav.Item>
-          <Nav.Link eventKey="all" className="tab-link">Doanh thu</Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="withdraw" className="tab-link">Tương tác với khách hàng</Nav.Link>
-        </Nav.Item>
-      </Nav>
-      <div className="mt-3">
-        {renderContent()}
-      </div>
-    </>
-
-  );
+  if (bookingSuccess.length === 0) return <>Loading</>;
+  
+  if (typeof window !== 'undefined') {
+    return (
+      <Suspense fallback={<div>Đang tải...</div>}>
+        <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>THỐNG KÊ</h3>
+        <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
+          <Nav.Item>
+            <Nav.Link eventKey="all" className="tab-link">Doanh thu</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="withdraw" className="tab-link">Tương tác với khách hàng</Nav.Link>
+          </Nav.Item>
+        </Nav>
+        <div className="mt-3">
+          {renderContent()}
+        </div>
+      </Suspense>
+    );
+  }
 }

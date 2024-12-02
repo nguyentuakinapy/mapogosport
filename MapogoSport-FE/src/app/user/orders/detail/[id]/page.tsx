@@ -1,24 +1,33 @@
 'use client'
 import UserLayout from "@/components/User/UserLayout";
 import Link from "next/link";
-import { Table, Image, Row, Col, Button, Modal, Form } from "react-bootstrap";
+import { Table, Row, Col, Button } from "react-bootstrap";
 import '../../../types/user.scss';
 import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import CancelOrderModal from "../../CancelOrderModal";
 import { toast } from "react-toastify";
+import Image from "next/image";
+
+type OrderInfo = {
+    fullname: string,
+    phoneNumber: string,
+    address: string,
+    status: string
+}
 
 const OrdersDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-    const { data, error, isLoading } = useSWR(`http://localhost:8080/rest/user/orders/detail/${params.id}`, fetcher, {
+    const { data, error, isLoading } = useSWR(`${BASE_URL}rest/user/orders/detail/${params.id}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
 
     const [orderDetail, setOrderDetail] = useState<OrderDetailMap[]>([]);
-    const [orderInfo, setOrderInfo] = useState<any>(null);
+    const [orderInfo, setOrderInfo] = useState<OrderInfo | null>(null);
     const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
 
     useEffect(() => {
@@ -33,25 +42,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
         }
     }, [data]);
 
-    const handleStatusChange = () => {
-        fetch(`http://localhost:8080/rest/admin/order/update`, {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ orderId: Number(params.id), status: "Đã hủy" }),
-        }).then(async (res) => {
-            if (!res.ok) {
-                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                return;
-            }
-            mutate(`http://localhost:8080/rest/user/orders/detail/${params.id}`);
-            toast.success('Cập nhật thành công!');
-        });
-    };
-
-    const totalAmount = orderDetail.reduce((sum: number, order: any) => {
+    const totalAmount = orderDetail.reduce((sum: number, order: OrderDetailMap) => {
         return sum + (order.productPrice * order.quantity);
     }, 0);
 
@@ -61,7 +52,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
 
     const handleCancelOrder = (reason: string) => {
         console.log("Lý do hủy:", reason);
-        fetch(`http://localhost:8080/rest/order/cancel`, {
+        fetch(`${BASE_URL}rest/order/cancel`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -73,7 +64,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                 toast.error(`Hủy đơn hàng không thành công! Vui lòng thử lại sau!`);
                 return;
             }
-            mutate(`http://localhost:8080/rest/user/orders/detail/${params.id}`);
+            mutate(`${BASE_URL}rest/user/orders/detail/${params.id}`);
             toast.success('Hủy đơn hàng thành công!');
 
         });
@@ -99,8 +90,9 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                                 orderDetail.map((detail) => (
                                     <tr key={detail.orderDetailId}>
                                         <td className="text-start title">
-                                            <Link href={"#"}>
-                                                <Image src={`${detail.productImage}`} width={"15%"} className="mx-2"></Image>
+                                            <Link href={`/categories/products/detail/${detail?.productId}`}>
+                                                <Image src={`${detail.productImage}`} alt={`${detail.productName}`}
+                                                    width={50} height={50} className="mx-2" />
                                                 {detail.productName}
                                             </Link>
                                         </td>
@@ -131,10 +123,8 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                     </Col>
                 </Row>
             </div>
-            {orderInfo?.status === 'Đã hoàn thành' ? (
-                <div className="btn-layout"><Button className="btn-buyAgain">Tiếp tục mua hàng</Button></div>
-            ) : orderInfo?.status === 'Đã hủy' ? (
-                <div className="btn-layout"><Button className="btn-buyAgain">Mua lại</Button></div>
+            {orderInfo?.status === 'Đã hoàn thành' || orderInfo?.status === "Đã hủy" ? (
+                <div className="btn-layout"><Link href={"/categories/products"} className="btn btn-buyAgain">Tiếp tục mua hàng</Link></div>
             ) : <div className="btn-layout"><Button className="btn-cancel" disabled={orderInfo?.status === "Đang vận chuyển"}
                 onClick={() => setShowCancelModal(true)} >Hủy đơn hàng</Button></div>}
             <CancelOrderModal

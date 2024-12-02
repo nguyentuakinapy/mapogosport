@@ -4,23 +4,28 @@ import { useEffect, useState } from 'react';
 import HomeLayout from "@/components/HomeLayout";
 import Link from "next/link";
 import './user/types/user.scss'
+import './categories/products/Product.scss'
 import CreateOwnerModal from "@/components/Owner/modal/create-owner.modal";
 import { toast } from "react-toastify";
 import Popup from "@/components/User/modal/popup-voucher.modal";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import { decodeJson, decodeString, formatPrice } from "@/components/Utils/Format";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import Loading from "../components/loading";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   const rating = 1.5;
   const [pageSportField, setPageSportField] = useState<number>(1);
   const [pageProduct, setPageProduct] = useState<number>(1);
   const [pageVoucher, setPageVoucher] = useState<number>(1);
   const [showCreateOwnerModal, setShowCreateOwnerModal] = useState<boolean>(false);
-  const [typeFilter, setTypeFilter] = useState<any>(null);
-  const [nameFilter, setNameFilter] = useState<any>(null);
+  const [typeFilter, setTypeFilter] = useState<number>(0);
+  const [nameFilter, setNameFilter] = useState<string>("");
+  const router = useRouter();
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -41,25 +46,25 @@ export default function Home() {
 
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-  const { data: sportFields } = useSWR<SportField[]>(`http://localhost:8080/rest/sport_field`, fetcher, {
+  const { data: sportFields } = useSWR<SportField[]>(`${BASE_URL}rest/sport_field`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  const { data: products } = useSWR<Product[]>(`http://localhost:8080/rest/products`, fetcher, {
+  const { data: products } = useSWR<Product[]>(`${BASE_URL}rest/products`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  const { data: categoryFields } = useSWR<CategoryField[]>(`http://localhost:8080/rest/category_field`, fetcher, {
+  const { data: categoryFields } = useSWR<CategoryField[]>(`${BASE_URL}rest/category_field`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  const { data: voucher } = useSWR<Voucher[]>(`http://localhost:8080/rest/voucher/findAll`, fetcher, {
+  const { data: voucher } = useSWR<Voucher[]>(`${BASE_URL}rest/voucher/findAll`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -92,7 +97,7 @@ export default function Home() {
   }, [userData]);
 
   useEffect(() => {
-    const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+    const socket = new SockJS('${BASE_URL}ws'); // Địa chỉ endpoint WebSocket
     const stompClient = Stomp.over(socket);
 
     stompClient.connect({}, () => {
@@ -115,8 +120,52 @@ export default function Home() {
       type: typeFilter,
     };
     sessionStorage.setItem('searchFilters', JSON.stringify(searchData));
-    window.location.href = "/categories/sport_field";
+    router.push("/categories/sport_field");
   };
+
+  const handelSubmitGetVoucher = async (voucherId: number) => {
+
+    const username = decodeString(String(localStorage.getItem("username")));
+
+    if (!username) {
+      toast.warning("Bạn chưa đăng nhập!");
+      return;
+    }
+
+    const checkResponse = await fetch(`${BASE_URL}rest/userVoucher/check/${username}/${voucherId}`);
+    const alreadyHasVoucher = await checkResponse.json();
+
+    if (alreadyHasVoucher) {
+      toast.warning("Bạn đã nhận Voucher này rồi!");
+      return;
+    }
+    const UserVoucher = {
+      user: {
+        username: username,
+      },
+      voucher: {
+        voucherId: voucherId
+      },
+      status: 'Đang còn hạn',
+      date: new Date(),
+    };
+
+
+    try {
+      await fetch(`${BASE_URL}rest/userVoucher/create/${UserVoucher.voucher.voucherId}/${username}`, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      mutate(`${BASE_URL}rest/voucher/findAll`);
+      toast.success("Nhận Voucher giá thành công!");
+    } catch (error) {
+      console.error("Lỗi khi nhận Voucher:", error);
+      alert("Có lỗi xảy ra khi nhận Voucher. Vui lòng thử lại sau.");
+    }
+  };
+
 
   //Handel select voucher khi active
   const filterVouchers = (vouchers: Voucher[]) => {
@@ -144,7 +193,7 @@ export default function Home() {
           </div>
           <div className="d-flex justify-content-center mt-4">
             <div className="input-group" style={{ width: '70%', backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: '8px', padding: '10px' }}>
-              <Form.Select onChange={(e) => setTypeFilter(e.target.value)} style={{ borderWidth: '0 1px 0 0', borderStyle: 'solid', borderColor: 'black' }}>
+              <Form.Select onChange={(e) => setTypeFilter(Number(e.target.value))} style={{ borderWidth: '0 1px 0 0', borderStyle: 'solid', borderColor: 'black' }}>
                 <option value={'0'}>Lọc theo loại sân</option>
                 {categoryFields && categoryFields.map(item => (
                   <option key={item.categoriesFieldId} value={item.categoriesFieldId}>{item.name}</option>
@@ -164,17 +213,17 @@ export default function Home() {
       <Container className="mt-3">
         <Row>
           <Col className="text-center">
-            <img className="p-4" src="/images/timsan.png" alt="" />
+            <Image width={134} height={134} className="p-4" src="/images/timsan.png" alt="" />
             <h6 className="fw-bold">Tìm kiếm vị trí sân</h6>
             <p style={{ fontSize: '12px' }}>Dữ liệu sân đấu dồi dào, liên tục cập nhật, giúp bạn dễ dàng tìm kiếm theo khu vực mong muốn</p>
           </Col>
           <Col className="text-center position-relative custom-border">
-            <img className="p-3" src="/images/datsan.png" alt="" />
+            <Image width={134} height={134} className="p-3" src="/images/datsan.png" alt="" />
             <h6 className="fw-bold mt-1">Đặt lịch online</h6>
             <p style={{ fontSize: '12px' }}>Không cần đến trực tiếp, không cần gọi điện đặt lịch, bạn hoàn toàn có thể đặt sân ở bất kì đâu có internet</p>
           </Col>
           <Col className="text-center">
-            <img className="p-4" src="/images/timsan.png" alt="" />
+            <Image width={134} height={134} className="p-4" src="/images/timsan.png" alt="" />
             <h6 className="fw-bold">Đa dạng sản phẩm</h6>
             <p style={{ fontSize: '12px' }}>Tìm kiếm, mua sắn sản phẩm, dụng cụ liên quan đến thể thao, giao hàng toàn quốc đến khu vực bạn mong muốn</p>
           </Col>
@@ -185,7 +234,7 @@ export default function Home() {
         <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">
           <div className="carousel-inner">
             <div className="carousel-item" data-bs-interval="2000">
-              <img src="/images/bannerSport.png" className="d-block w-100" alt="..." />
+              <Image width={1296} height={419} src="/images/bannerSport.png" className="d-block w-100" alt="..." />
               <Link href={'/categories/sport_field'} style={{
                 position: 'absolute',
                 top: '70%',
@@ -200,7 +249,7 @@ export default function Home() {
               </Link>
             </div>
             <div className="carousel-item active" data-bs-interval="2000">
-              <img src="/images/registerowner.png" className="w-100" alt="" />
+              <Image width={1296} height={419} src="/images/registerowner.png" className="w-100" alt="" />
               {hasOwnerRole ? (
                 <a style={{
                   position: 'absolute',
@@ -291,7 +340,7 @@ export default function Home() {
             ))}
           {sportFields && (
             <div className="d-flex justify-content-between">
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', right: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageSportField === 1) {
                   setPageSportField(sportFields.length - 3);
                 } else {
@@ -301,7 +350,7 @@ export default function Home() {
                 <i className="bi bi-arrow-left-short"></i>
               </button>
               <span className="text-danger fw-bold">{pageSportField}/{sportFields.length - 3}</span>
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', left: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageSportField === sportFields.length - 3) {
                   setPageSportField(1);
                 } else {
@@ -341,7 +390,7 @@ export default function Home() {
                   </div>
                   <div className="get col-2 text-center ">
                     <button type="button" className="btn btn-dark text-center "
-                      // onClick={() => handelSubmitGetVoucher(voucher.voucherId)}
+                      onClick={() => handelSubmitGetVoucher(voucher.voucherId)}
                       disabled={voucher.quantity === 0}
                     >Nhận</button>
                   </div>
@@ -350,7 +399,7 @@ export default function Home() {
           </div>
           {voucher && (
             <div className="d-flex justify-content-between">
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '100px', right: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageVoucher === 1) {
                   setPageVoucher(filteredVouchers.length - 2);
                 } else {
@@ -360,7 +409,7 @@ export default function Home() {
                 <i className="bi bi-arrow-left-short"></i>
               </button>
               <span className="text-danger fw-bold">{pageVoucher}/{filteredVouchers.length - 2}</span>
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '100px', left: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageVoucher === filteredVouchers.length - 2) {
                   setPageVoucher(1);
                 } else {
@@ -395,60 +444,33 @@ export default function Home() {
               const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
               return (
-                <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
-                  <div nh-product={product.productId} className="product-item card border">
-                    <div className="inner-image mb-3">
-                      <div className="product-status">
-                        <div className="onsale"></div>
-                      </div>
-                      <Link href={`/product-detail/${product.productId}`}>
-                        <img
-                          className="w-100 h-100 p-1"
-                          style={{
-                            aspectRatio: "1 / 0.8", // Tạo tỷ lệ vuông
-                            maxWidth: "350px",
-                            maxHeight: "250px",
-                            objectFit: "cover",
-                            borderRadius: '10px'
-                          }}
-                          alt={product.name}
-                          src={`${typeof product.image === 'string' ? product.image : ''}`}
-                        />
-
-                      </Link>
-                    </div>
-
-                    <div className="inner-content">
-                      <div className="product-title ms-1" style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '220px' }}>
-                        <Link href={`/product-detail/${product.productId}`}>{product.name}</Link>
-                      </div>
-                      <div className="product-category ms-1">
-                        <Link href={`/product-detail/${product.productId}`}>{product.categoryProduct.name}</Link>
-                      </div>
-                      <div className="price">
-                        <span className="price-amount ms-1">{formatPrice(product.price)}</span>
-                      </div>
-
-                      <div className="star-item star d-flex mt-1 ms-1">
-                        <div className="icon text-warning mb-2">
-                          {[...Array(fullStars)].map((_, i) => (
-                            <i key={`full-${i}`} className="bi bi-star-fill"></i>
-                          ))}
-                          {hasHalfStar && <i className="bi bi-star-half"></i>}
-                          {[...Array(emptyStars)].map((_, i) => (
-                            <i key={`empty-${i}`} className="bi bi-star"></i>
-                          ))}
+                <Col key={product.productId} lg={3} md={4} sm={6} xs={12} >
+                  <div className='product-card bg-light'>
+                    <Link href={`/categories/products/detail/${product.productId}`} >
+                      <div className='product-card-inner'>
+                        <Image className="image-front" alt={product.name} width={300} height={300} src={String(product.image)} />
+                        <h4 className='product-category'>{product.categoryProduct.name}</h4>
+                        <h3 className='product-title'>{product.name}</h3>
+                        <div className='product-price'>{formatPrice(product.price)}</div>
+                        <div className="star-item d-flex mt-1">
+                          <div className="icon text-warning">
+                            {[...Array(fullStars)].map((_, i) => <i key={`full-${i}`} className="bi bi-star-fill"></i>)}
+                            {hasHalfStar && <i className="bi bi-star-half"></i>}
+                            {[...Array(emptyStars)].map((_, i) => <i key={`empty-${i}`} className="bi bi-star"></i>)}
+                          </div>
                         </div>
-                        <div className="number ms-1">({averageRating} sao, {reviewCount} đánh giá)</div>
                       </div>
-                    </div>
+                      <div className='product-card-action px-1'>
+                        <Button className='button-ajax'>Xem</Button>
+                      </div>
+                    </Link>
                   </div>
                 </Col>
               );
             })}
           {products && (
             <div className="d-flex justify-content-between">
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', right: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageProduct === 1) {
                   setPageProduct(products.length - 3);
                 } else {
@@ -458,7 +480,7 @@ export default function Home() {
                 <i className="bi bi-arrow-left-short"></i>
               </button>
               <span className="text-danger fw-bold">{pageProduct}/{products.length - 3}</span>
-              <button className="btn btn-danger" onClick={() => {
+              <button style={{ position: 'relative', bottom: '250px', left: '50px' }} className="btn btn-danger" onClick={() => {
                 if (pageProduct === products.length - 3) {
                   setPageProduct(1);
                 } else {

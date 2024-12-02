@@ -18,7 +18,7 @@ interface SportField {
     latitude: number;
     longitude: number;
     distance: number;
-    fieldReviews: ProductReview[];
+    fieldReviews: FieldReview[];
 }
 
 interface StatusSportFieldDetails {

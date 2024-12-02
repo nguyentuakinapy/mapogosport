@@ -1,6 +1,6 @@
 'use client'
 import ProfileContent from "@/components/User/modal/user.profile";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { useData } from "../context/UserContext";
 import BlogManager from "@/components/blog/blog-manager";
@@ -8,13 +8,15 @@ import Wallet from "@/components/User/modal/wallet";
 import AuthorityComponent from "@/components/Admin/authority";
 
 export default function Owner() {
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [activeTab, setActiveTab] = useState<string>('all');
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
     const userData = useData();
 
     useEffect(() => {
         if (userData) {
-            setUsernameFetchApi(`http://localhost:8080/rest/user/${userData.username}`);
+            setUsernameFetchApi(`${BASE_URL}rest/user/${userData.username}`);
         }
     }, [userData]);
 
@@ -50,7 +52,7 @@ export default function Owner() {
         }
     };
     return (
-        <>
+        <Suspense fallback={<div>Đang tải...</div>}>
             <div className="profile-header">
                 <div className="profile-info">
                     <h2>{userData?.fullname}</h2>
@@ -85,6 +87,6 @@ export default function Owner() {
                     {renderContent()}
                 </div>
             </div>
-        </>
+        </Suspense>
     )
 }

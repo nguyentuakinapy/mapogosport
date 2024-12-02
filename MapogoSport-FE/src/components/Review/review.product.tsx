@@ -25,6 +25,7 @@ const StarRating = ({ setRating }: StarRating) => {
         setRating(starValue); // Gọi hàm từ props để cập nhật rating ở component cha
     };
 
+
     return (
         <div className="d-flex justify-content-between my-3" style={{ paddingLeft: '100px', paddingRight: '100px' }}>
             {['', '', '', '', ''].map((_label, index) => {
@@ -55,6 +56,7 @@ const ModalReviewProductField = (props: ReviewProps) => {
     const [rating, setRating] = useState<number>(0); // Trạng thái cho rating
     const [comment, setComment] = useState(''); // Trạng thái cho bình luận
     const hasReviewed = data?.some((review: ProductReviewUser) => review.user.username === user?.username);
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const handleRatingSubmit = async () => {
         if (!user || !user.username) {
@@ -82,7 +84,7 @@ const ModalReviewProductField = (props: ReviewProps) => {
             };
 
             try {
-                const response = await fetch('http://localhost:8080/rest/user/productReview/save', {
+                const response = await fetch(`${BASE_URL}rest/user/productReview/save`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -95,7 +97,7 @@ const ModalReviewProductField = (props: ReviewProps) => {
                     throw new Error(`Có lỗi xảy ra khi gửi đánh giá: ${errorMessage}`);
                 }
 
-                mutate(`http://localhost:8080/rest/user/productReview/${idProduct}`)
+                mutate(`${BASE_URL}rest/user/productReview/${idProduct}`)
                 console.log("Đánh giá đã được gửi thành công");
                 handleClose();
                 toast.success("Gửi đánh giá thành công!");

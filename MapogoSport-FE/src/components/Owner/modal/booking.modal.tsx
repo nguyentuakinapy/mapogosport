@@ -29,6 +29,7 @@ const BookingModal = (props: BookingProps) => {
     const [totalAmount, setTotalAmount] = useState<number>();
     const [fullName, setFullName] = useState<string>("");
     const [phoneNumber, setPhoneNumber] = useState<string>("");
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     // BOOKING DETAIL
     const [endTime, setEndTime] = useState<string>();
@@ -75,7 +76,7 @@ const BookingModal = (props: BookingProps) => {
 
                 try {
                     const response = await fetch(
-                        `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail.sportFielDetailId}/${dayStartBooking}`
+                        `${BASE_URL}rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail.sportFielDetailId}/${dayStartBooking}`
                     );
 
                     if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
@@ -125,7 +126,7 @@ const BookingModal = (props: BookingProps) => {
                                 }
                                 try {
                                     const response = await fetch(
-                                        `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
+                                        `${BASE_URL}rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
                                     );
 
                                     if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
@@ -174,7 +175,7 @@ const BookingModal = (props: BookingProps) => {
                                     }
                                     try {
                                         const response = await fetch(
-                                            `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
+                                            `${BASE_URL}rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
                                         );
 
                                         if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
@@ -330,14 +331,14 @@ const BookingModal = (props: BookingProps) => {
             return;
         }
 
-        const resUserSubscription = await fetch(`http://localhost:8080/rest/user/subscription/${decodeString(String(localStorage.getItem("username")))}`);
+        const resUserSubscription = await fetch(`${BASE_URL}rest/user/subscription/${decodeString(String(localStorage.getItem("username")))}`);
         if (!resUserSubscription.ok) {
             throw new Error('Error fetching data');
         }
 
         const userSubscription = await resUserSubscription.json() as UserSubscription;
 
-        const resCountBooking = await fetch(`http://localhost:8080/rest/count/booking/${owner?.ownerId}`);
+        const resCountBooking = await fetch(`${BASE_URL}rest/count/booking/${owner?.ownerId}`);
         if (!resCountBooking.ok) {
             throw new Error('Error fetching data');
         }
@@ -348,7 +349,7 @@ const BookingModal = (props: BookingProps) => {
             toast.success("Bạn đã quá số lần đặt sân cho gói miễn phí!"); return
         }
 
-        const responseUser = await fetch(`http://localhost:8080/rest/user/sportoffline`);
+        const responseUser = await fetch(`${BASE_URL}rest/user/sportoffline`);
         if (!responseUser.ok) {
             throw new Error('Error fetching data');
         }
@@ -510,7 +511,7 @@ const BookingModal = (props: BookingProps) => {
                         // }
 
                         const response = await fetch(
-                            `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${booking.date}`
+                            `${BASE_URL}rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${booking.date}`
                         );
 
                         if (!response.ok) throw new Error(`Error fetching data: ${response.statusText} ${weekIndex} `);
@@ -586,14 +587,14 @@ const BookingModal = (props: BookingProps) => {
             return;
         }
 
-        const resUserSubscription = await fetch(`http://localhost:8080/rest/user/subscription/${decodeString(String(localStorage.getItem("username")))}`);
+        const resUserSubscription = await fetch(`${BASE_URL}rest/user/subscription/${decodeString(String(localStorage.getItem("username")))}`);
         if (!resUserSubscription.ok) {
             throw new Error('Error fetching data');
         }
 
         const userSubscription = await resUserSubscription.json() as UserSubscription;
 
-        const resCountBooking = await fetch(`http://localhost:8080/rest/count/booking/${owner?.ownerId}`);
+        const resCountBooking = await fetch(`${BASE_URL}rest/count/booking/${owner?.ownerId}`);
         if (!resCountBooking.ok) {
             throw new Error('Error fetching data');
         }
@@ -604,7 +605,7 @@ const BookingModal = (props: BookingProps) => {
             toast.success("Bạn đã quá số lần đặt sân cho gói miễn phí!"); return
         }
 
-        const responseUser = await fetch(`http://localhost:8080/rest/user/sportoffline`);
+        const responseUser = await fetch(`${BASE_URL}rest/user/sportoffline`);
         if (!responseUser.ok) {
             throw new Error('Error fetching data');
         }
@@ -624,7 +625,7 @@ const BookingModal = (props: BookingProps) => {
             toast.error("Thông tin sân không hợp lệ!");
             return;
         }
-        const responseBooking = await fetch('http://localhost:8080/rest/booking', {
+        const responseBooking = await fetch(`${BASE_URL}rest/booking`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -648,7 +649,7 @@ const BookingModal = (props: BookingProps) => {
 
         const resBooking = await responseBooking.json() as Booking;
 
-        await fetch('http://localhost:8080/rest/booking/detail', {
+        await fetch(`${BASE_URL}rest/booking/detail`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -678,7 +679,7 @@ const BookingModal = (props: BookingProps) => {
             return;
         }
 
-        const responseBooking = await fetch('http://localhost:8080/rest/booking', {
+        const responseBooking = await fetch(`${BASE_URL}rest/booking`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -700,7 +701,7 @@ const BookingModal = (props: BookingProps) => {
 
         const resBooking = await responseBooking.json() as Booking;
 
-        let listAddBookingDetail: BookingDetailPeriod[] = [];
+        const listAddBookingDetail: BookingDetailPeriod[] = [];
 
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
@@ -721,7 +722,7 @@ const BookingModal = (props: BookingProps) => {
             }
         }
         if (listAddBookingDetail.length > 0) {
-            await fetch('http://localhost:8080/rest/booking/detail/create/period', {
+            await fetch(`${BASE_URL}rest/booking/detail/create/period`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',

@@ -31,7 +31,7 @@ type WeekBookingDetail = {
     [week: string]: BookingDetail[];
 }
 
-const BookingModal = React.memo((props: BookingProps) => {
+const BookingModal = (props: BookingProps) => {
     const { showBookingModal, setShowBookingModal, sportDetail, startTime,
         dayStartBooking, sport, owner, startTimeKey } = props;
     const [selectTime, setSelectTime] = useState<string>('Chọn thời gian');
@@ -49,10 +49,11 @@ const BookingModal = React.memo((props: BookingProps) => {
     const [operatingTimeFetchData, setOperatingTimeFetchData] = useState<number>(0);
     const [dataTime, setDataTime] = useState<string[]>();
     const [dataTimeTemporary, setDataTimeTemporary] = useState<string[]>();
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         const fetchPaymentMethods = async () => {
-            const response = await fetch(`http://localhost:8080/rest/paymentMethod`);
+            const response = await fetch(`${BASE_URL}rest/paymentMethod`);
             const data = await response.json();
             if (Array.isArray(data)) {
                 setDataPaymentMethod(data.filter(item => item.name != 'Thanh toán tại sân' && item.name != 'COD'));
@@ -90,7 +91,7 @@ const BookingModal = React.memo((props: BookingProps) => {
 
                 try {
                     const response = await fetch(
-                        `http://localhost:8080/rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
+                        `${BASE_URL}rest/booking/detail/findbystarttime/sportfielddetail/${time}/${sportDetail?.sportFielDetailId}/${dayStartBooking}`
                     );
 
                     if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
@@ -360,7 +361,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                 for (const booking of bookings) {
                     try {
                         const response = await fetch(
-                            `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${booking.date}`
+                            `${BASE_URL}rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${booking.date}`
                         );
 
                         if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
@@ -434,7 +435,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                 return;
             }
 
-            const responseBooking = await fetch('http://localhost:8080/rest/booking', {
+            const responseBooking = await fetch(`${BASE_URL}rest/booking`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -457,7 +458,7 @@ const BookingModal = React.memo((props: BookingProps) => {
             const resBooking = await responseBooking.json() as Booking;
 
             if (paymentMethod.name === 'Thanh toán ví') {
-                await fetch(`http://localhost:8080/rest/payment/process/${resBooking.bookingId}?totalAmount=${amountToPay}`, {
+                await fetch(`${BASE_URL}rest/payment/process/${resBooking.bookingId}?totalAmount=${amountToPay}`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',
@@ -466,7 +467,7 @@ const BookingModal = React.memo((props: BookingProps) => {
                 })
             }
 
-            await fetch('http://localhost:8080/rest/booking/detail', {
+            await fetch(`${BASE_URL}rest/booking/detail`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -485,7 +486,7 @@ const BookingModal = React.memo((props: BookingProps) => {
 
             if (paymentMethod.name === "VNPay" || paymentMethod.name === "MoMo") {
                 try {
-                    const responsePayment = await fetch('http://localhost:8080/rest/booking/payment', {
+                    const responsePayment = await fetch(`${BASE_URL}rest/booking/payment`, {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json, text/plain, */*',
@@ -526,7 +527,7 @@ const BookingModal = React.memo((props: BookingProps) => {
             toast.error("Số dư trong ví của bạn không đủ để đặt sân! Vui lòng nạp tiền vào ví!");
             return;
         }
-        const responseBooking = await fetch('http://localhost:8080/rest/booking', {
+        const responseBooking = await fetch(`${BASE_URL}rest/booking`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -549,7 +550,7 @@ const BookingModal = React.memo((props: BookingProps) => {
         const resBooking = await responseBooking.json() as Booking;
 
         if (paymentMethod.name === 'Thanh toán ví') {
-            await fetch(`http://localhost:8080/rest/payment/process/${resBooking.bookingId}?totalAmount=${amountToPay}`, {
+            await fetch(`${BASE_URL}rest/payment/process/${resBooking.bookingId}?totalAmount=${amountToPay}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -558,7 +559,7 @@ const BookingModal = React.memo((props: BookingProps) => {
             })
         }
 
-        let listAddBookingDetail: BookingDetailPeriod[] = [];
+        const listAddBookingDetail: BookingDetailPeriod[] = [];
 
         for (const week of selectedWeek) {
             const dateWeek = weekDays[week];
@@ -579,7 +580,7 @@ const BookingModal = React.memo((props: BookingProps) => {
             }
         }
         if (listAddBookingDetail.length > 0) {
-            await fetch('http://localhost:8080/rest/booking/detail/create/period', {
+            await fetch(`${BASE_URL}rest/booking/detail/create/period`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -868,6 +869,6 @@ const BookingModal = React.memo((props: BookingProps) => {
             </Modal >
         </>
     )
-})
+}
 
 export default BookingModal;

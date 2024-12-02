@@ -1,11 +1,13 @@
 'use client'
 import HomeLayout from '@/components/HomeLayout';
 import { decodeString } from '@/components/Utils/Format';
-import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import React, { Suspense, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 const PageVoucher = () => {
     const [voucher, setVoucher] = useState<Voucher[]>([])
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const handelSubmitGetVoucher = async (voucherId: number) => {
 
@@ -16,7 +18,7 @@ const PageVoucher = () => {
             return;
         }
 
-        const checkResponse = await fetch(`http://localhost:8080/rest/userVoucher/check/${username}/${voucherId}`);
+        const checkResponse = await fetch(`${BASE_URL}rest/userVoucher/check/${username}/${voucherId}`);
         const alreadyHasVoucher = await checkResponse.json();
 
         if (alreadyHasVoucher) {
@@ -36,7 +38,7 @@ const PageVoucher = () => {
 
 
         try {
-            await fetch(`http://localhost:8080/rest/userVoucher/create/${UserVoucher.voucher.voucherId}/${username}`, {
+            await fetch(`${BASE_URL}rest/userVoucher/create/${UserVoucher.voucher.voucherId}/${username}`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
@@ -59,10 +61,9 @@ const PageVoucher = () => {
 
     const fetchDataVoucher = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/rest/voucher/findAll`);
+            const response = await fetch(`${BASE_URL}rest/voucher/findAll`);
             const data = await response.json();
             setVoucher(data);
-            console.log("Voucher", data)
         } catch (error) {
             console.log("Error fetch voucher data", error)
         }
@@ -79,53 +80,54 @@ const PageVoucher = () => {
     };
 
     const filteredVouchers = filterVouchers(voucher);
-    console.log("hiển thị những voucher filter", filteredVouchers)
     return (
-        <HomeLayout>
-            <div className="container my-5">
-                <div className="voucher-container">
-                    <div className="row align-items-center justify-content-between voucher-banner">
-                        <div className="col-md-8">
-                            <img src="/images/bannervoucher.svg" alt="Voucher Banner" className="img-fluid" />
+        <Suspense fallback={<div>Đang tải...</div>}>
+            <HomeLayout>
+                <div className="container my-5">
+                    <div className="voucher-container">
+                        <div className="row align-items-center justify-content-between voucher-banner">
+                            <div className="col-md-8">
+                                <Image width={829} height={207} src="/images/bannervoucher.svg" alt="Voucher Banner" />
+                            </div>
+                            <div className="col-md-4 text-center">
+                                <Image width={250} height={250} src="/images/QRFB.png" alt="QR Code" />
+                            </div>
                         </div>
-                        <div className="col-md-4 text-center">
-                            <img src="/images/QRFB.png" alt="QR Code" className="img-fluid" style={{ maxHeight: '250px' }} />
+                        <div>
+                            <h2 className="fw-bold voucher-title"><i className="bi bi-ticket-perforated"></i> Mã giảm giá</h2>
                         </div>
-                    </div>
-                    <div>
-                        <h2 className="fw-bold voucher-title"><i className="bi bi-ticket-perforated"></i> Mã giảm giá</h2>
-                    </div>
-                    <div className="card-voucher d-flex flex-wrap justify-content-start align-items-center p-3 border rounded  ">
-                        {filteredVouchers.map((voucher, index) => (
-                            <div key={index} className="voucher-item d-flex col-4 col-md-4 p-2 mb-4">
-                                <div className="voucher-info text-center col-4 border-end">
-                                    <div className="circle">
-                                        <span className="brand-name">Mapogo</span>
+                        <div className="card-voucher d-flex flex-wrap justify-content-start align-items-center p-3 border rounded  ">
+                            {filteredVouchers.map((voucher, index) => (
+                                <div key={index} className="voucher-item d-flex col-4 col-md-4 p-2 mb-4">
+                                    <div className="voucher-info text-center col-4 border-end">
+                                        <div className="circle">
+                                            <span className="brand-name">Mapogo</span>
+                                        </div>
+                                    </div>
+                                    <div className="voucher-discount text-center col-6 ">
+                                        <span className="discount">Giảm giá {voucher.discountPercent} %</span>
+                                        <span className="expiry">HSD: {new Date(voucher.endDate).toLocaleDateString('en-GB')}</span> <br />
+                                        <em className='text-secondary' style={{ fontSize: "12px" }}>Số lượng: {voucher.quantity}</em>
+                                    </div>
+                                    <div className="get col-2 text-center ">
+                                        <button type="button" className="btn btn-dark text-center "
+                                            onClick={() => {
+                                                handelSubmitGetVoucher(voucher.voucherId)
+                                            }
+                                            }
+                                            disabled={voucher.quantity === 0}
+                                        > Nhận</button>
                                     </div>
                                 </div>
-                                <div className="voucher-discount text-center col-6 ">
-                                    <span className="discount">Giảm giá {voucher.discountPercent} %</span>
-                                    <span className="expiry">HSD: {new Date(voucher.endDate).toLocaleDateString('en-GB')}</span> <br />
-                                    <em className='text-secondary' style={{ fontSize: "12px" }}>Số lượng: {voucher.quantity}</em>
-                                </div>
-                                <div className="get col-2 text-center ">
-                                    <button type="button" className="btn btn-dark text-center "
-                                        onClick={() => {
-                                            handelSubmitGetVoucher(voucher.voucherId)
-                                        }
-                                        }
-                                        disabled={voucher.quantity === 0}
-                                    > Nhận</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="text-center mt-3">
-                        <img src="/images/stepGetVoucher.webp" alt="" />
+                            ))}
+                        </div>
+                        <div className="text-center mt-3">
+                            <Image width={1024} height={1793} src="/images/stepGetVoucher.webp" alt="Hướng dẫn sử dụng" />
+                        </div>
                     </div>
                 </div>
-            </div>
-        </HomeLayout>
+            </HomeLayout>
+        </Suspense>
     )
 }
 export default PageVoucher;

@@ -4,9 +4,8 @@ import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
 import { decodeJson, encodeJson, encodeString, hashPassword } from "@/components/Utils/Format";
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'; // Để kiểm tra đường dẫn
-
+import { CredentialResponse, GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { useRouter } from 'next/navigation'; // Để kiểm tra đường dẫn
 
 interface LoginProps {
     showLoginModal: boolean;
@@ -20,15 +19,13 @@ interface LoginProps {
 }
 
 export default function Login(props: LoginProps) {
-
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [checkRememberMe, setCheckRememberMe] = useState<boolean>(false);
     const { setRefreshKey, refreshKey } = props;
     const { showLoginModal, setShowLoginModal, setShowRegisterModal, setShowForgotPassword } = props;
-
-    const searchParams = useSearchParams();
     const router = useRouter();
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         const userCookie = Cookies.get('user');
@@ -46,7 +43,7 @@ export default function Login(props: LoginProps) {
             return;
         } else {
             try {
-                const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
+                const responseUser = await fetch(`${BASE_URL}rest/user/${username}`);
                 if (!responseUser.ok) {
                     throw new Error('Error fetching data');
                 }
@@ -95,42 +92,51 @@ export default function Login(props: LoginProps) {
                 } else {
                     toast.error("Thông tin đăng nhập không đúng!");
                 }
-            } catch (error: any) {
+            } catch (error) {
                 toast.error("Thông tin đăng nhập không đúng! ");
             }
         }
     }
 
+    let path;
+    if (typeof window !== 'undefined') {
+        path = window.location.href
+    }
+
+
     useEffect(() => {
-        const notLoggedIn = searchParams.get('notLoggedIn');
-        const noRights = searchParams.get('noRights');
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
 
-        // Check if the 'notLoggedIn' query parameter exists and equals 'true'
-        if (notLoggedIn === 'true') {
-            setShowLoginModal(true);
-            toast.error("Bạn chưa đăng nhập!");
+            const notLoggedIn = params.get('notLoggedIn');
+            const noRights = params.get('noRights');
 
-            // Update the URL by removing the query parameter without reloading the page
-            const newUrl = new URL(window.location.href);
-            newUrl.searchParams.delete('notLoggedIn');
+            // Check if the 'notLoggedIn' query parameter exists and equals 'true'
+            if (notLoggedIn === 'true') {
+                setShowLoginModal(true);
+                toast.error("Bạn chưa đăng nhập!");
 
-            // Corrected usage of router.replace
-            router.replace(newUrl.toString());
+                // Update the URL by removing the query parameter without reloading the page
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.delete('notLoggedIn');
+
+                // Corrected usage of router.replace
+                router.replace(newUrl.toString());
+            }
+
+            if (noRights === 'true') {
+                setShowLoginModal(true);
+                toast.error("Bạn không có quyền truy cập!");
+
+                // Update the URL by removing the query parameter without reloading the page
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.delete('noRights');
+
+                // Corrected usage of router.replace
+                router.replace(newUrl.toString());
+            }
         }
-
-        if (noRights === 'true') {
-            setShowLoginModal(true);
-            toast.error("Bạn không có quyền truy cập!");
-
-            // Update the URL by removing the query parameter without reloading the page
-            const newUrl = new URL(window.location.href);
-            newUrl.searchParams.delete('noRights');
-
-            // Corrected usage of router.replace
-            router.replace(newUrl.toString());
-        }
-    }, [searchParams, router, setShowLoginModal]); // Add router as a dependency
-
+    }, [path, router, setShowLoginModal]);
 
     const handleClose = () => {
         setShowLoginModal(false);
@@ -152,7 +158,7 @@ export default function Login(props: LoginProps) {
         console.log("Client-side code running");
     }, []);
 
-    const decodeJWT = (token: any) => {
+    const decodeJWT = (token: string) => {
         try {
             const base64Url = token.split(".")[1];
             const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -169,15 +175,15 @@ export default function Login(props: LoginProps) {
         }
     };
 
-    const handleLoginSuccess = async (response: any) => {
+    const handleLoginSuccess = async (response: CredentialResponse) => {
         const token = response.credential;
         console.log("Token received:", token);
 
-        const user = decodeJWT(token) as JwtGoogleAccount;
+        const user = decodeJWT(token!) as JwtGoogleAccount;
         if (user) {
             console.log("User Info:", user);
             try {
-                const responseUser = await fetch(`http://localhost:8080/rest/user/${user.sub}`);
+                const responseUser = await fetch(`${BASE_URL}rest/user/${user.sub}`);
                 if (!responseUser.ok) {
                     throw new Error('Error fetching data');
                 }

@@ -22,6 +22,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
 
     const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
     const [page, setPage] = useState<boolean>(true);
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     // const [bankAccount, setBankAccount] = useState<string>("");
     // const [momoAccount, setMomoAccount] = useState<string>("");
@@ -31,7 +32,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
     const { data: ap } = useSWR(
-        `http://localhost:8080/rest/accountpackage`, fetcher, {
+        `${BASE_URL}rest/accountpackage`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -42,7 +43,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
     }, [ap])
 
     const { data: dataPM } = useSWR(
-        `http://localhost:8080/rest/paymentMethod`, fetcher, {
+        `${BASE_URL}rest/paymentMethod`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -65,7 +66,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
     //Myj
 
     const createOwnerAccount = async () => {
-        const responseUserSubscription = await fetch('http://localhost:8080/rest/user/subscription', {
+        const responseUserSubscription = await fetch(`${BASE_URL}rest/user/subscription`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -88,7 +89,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
         const userSubscriptionId = resSubscription.userSubscriptionId;
         console.log(">>>>resSubscription: ", resSubscription);
 
-        const responseOwner = await fetch('http://localhost:8080/rest/owner', {
+        const responseOwner = await fetch(`${BASE_URL}rest/owner`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -109,7 +110,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
         const resOwner = await responseOwner.json() as Owner;
         const ownerId = resOwner.ownerId;
 
-        const responseAuth = await fetch('http://localhost:8080/rest/authority', {
+        const responseAuth = await fetch(`${BASE_URL}rest/authority`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -133,7 +134,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
         const authorityId = resAuth.authorityId;
 
         if (resSubscription && resOwner && resAuth) {
-            mutate(`http://localhost:8080/rest/user/${userData?.username}`);
+            mutate(`${BASE_URL}rest/user/${userData?.username}`);
 
             // toast.success('Đăng ký trở thành chủ sân thành công! ');
             handleClose();
@@ -151,7 +152,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
         if (checkPaymentMethod) {
             if (userData && accountPackageTemporary && userData.wallet.balance >= accountPackageTemporary.price) {
                 createOwnerAccount();
-                const responseWallet = await fetch(`http://localhost:8080/rest/wallet/create/owner/${userData?.username}/${accountPackageTemporary?.price}`, {
+                const responseWallet = await fetch(`${BASE_URL}rest/wallet/create/owner/${userData?.username}/${accountPackageTemporary?.price}`, {
                     method: 'PUT',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',
@@ -170,7 +171,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
         } else {
             const accountData = await createOwnerAccount();
             try {
-                const responsePayment = await fetch('http://localhost:8080/rest/subscription/payment', {
+                const responsePayment = await fetch(`${BASE_URL}rest/subscription/payment`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',
@@ -366,7 +367,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                     <label>Phương thức thanh toán <b className="text-danger">*</b></label>
                                 </div>
                             }
-                            <b>Giá:</b> <b className="text-danger mb-3">{accountPackageTemporary?.price == 0 ? 'Miễn phí' : formatPrice(accountPackageTemporary?.price)}</b><br />
+                            <b>Giá:</b> <b className="text-danger mb-3">{accountPackageTemporary?.price == 0 ? 'Miễn phí' : accountPackageTemporary?.price.toLocaleString()} đ</b><br />
                             <b className="me-2">Hạn sử dụng:</b>
                             {accountPackageTemporary && accountPackageTemporary.price === 0 ? (
                                 <b className="text-danger mb-3">Không giới hạn</b>

@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Form, Button, Table, Image, Nav, Pagination } from "react-bootstrap";
 import '../adminStyle.scss';
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import CategoryAddNew from "@/components/Admin/Modal/categoryProduct.addNew";
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -15,6 +15,9 @@ import autoTable from 'jspdf-autotable';
 import useSWR from 'swr';
 
 const AdminProduct = () => {
+    // const BASE_URL = 'http://localhost:8080/rest/';
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const fetcher = (url: string) => fetch(url).then(res => res.json());
     const [showModal, setShowModal] = useState<boolean>(false);
     const [currentCategoryProduct, setCurrentCategoryProduct] = useState<CategoryProduct | null>(null); // Updated type to allow null
@@ -30,8 +33,8 @@ const AdminProduct = () => {
         setSearchTerm(e.target.value.toLowerCase());
     };
 
-    const { data: cateProductData, mutate: mutateProduct } = useSWR("http://localhost:8080/rest/category_product/category-products", fetcher);
-    const { data: cateFieldData, mutate: mutateField } = useSWR("http://localhost:8080/rest/category_field", fetcher);
+    const { data: cateProductData, mutate: mutateProduct } = useSWR(`${BASE_URL}rest/category_product/category-products`, fetcher);
+    const { data: cateFieldData, mutate: mutateField } = useSWR(`${BASE_URL}rest/category_field`, fetcher);
 
     useEffect(() => {
         if (cateProductData && cateFieldData) {
@@ -47,40 +50,44 @@ const AdminProduct = () => {
     };
 
     const handleDeleteProduct = async (id: number) => {
-        if (window.confirm('Bạn có chắc muốn xóa địa chỉ này?')) {
-            await fetch(`http://localhost:8080/rest/category_product/delete/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json',
-                }
-            }).then((res) => {
-                if (!res.ok) {
-                    toast.error('Xóa sản phẩm thất bại');
-                    return;
-                }
-                toast.success('Sản phẩm đã được xóa thành công');
-                mutateProduct();
-            });
+        if (typeof window !== 'undefined') {
+            if (window.confirm('Bạn có chắc muốn xóa loại sản phẩm này?')) {
+                await fetch(`${BASE_URL}rest/category_product/delete/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json',
+                    }
+                }).then((res) => {
+                    if (!res.ok) {
+                        toast.error('Xóa sản phẩm thất bại');
+                        return;
+                    }
+                    toast.success('Sản phẩm đã được xóa thành công');
+                    mutateProduct();
+                });
+            }
         }
     };
 
     const handleDeleteField = async (id: number) => {
-        if (window.confirm('Bạn có chắc muốn xóa loại sân này?')) {
-            await fetch(`http://localhost:8080/rest/category_field/delete/category_field/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json',
-                }
-            }).then((res) => {
-                if (!res.ok) {
-                    toast.error('Xóa loại sân thất bại!');
-                    return;
-                }
-                toast.success('Loại sân đã được xóa thành công');
-                mutateField();
-            })
+        if (typeof window !== 'undefined') {
+            if (window.confirm('Bạn có chắc muốn xóa loại sân này?')) {
+                await fetch(`${BASE_URL}rest/category_field/delete/category_field/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json',
+                    }
+                }).then((res) => {
+                    if (!res.ok) {
+                        toast.error('Xóa loại sân thất bại!');
+                        return;
+                    }
+                    toast.success('Loại sân đã được xóa thành công');
+                    mutateField();
+                })
+            }
         }
     };
 
@@ -402,42 +409,45 @@ const AdminProduct = () => {
             </Pagination>
         );
     };
+    if (typeof window !== 'undefined') {
+        return (
+            <Suspense fallback={<div>Đang tải...</div>}>
+                <div style={{ fontSize: '14px' }}>
+                    <div className="box-ultil">
+                        <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Loại</b>
+                        <div>
+                            <Form.Control type="text" placeholder="Tìm theo tên loại..." onChange={handleSearch} />
+                        </div>
+                        <div>
+                            <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={handleCreateClick}>
+                                <i className="bi bi-plus-square-fill"></i><span className='mx-1'>Tạo mới</span>
+                            </Button>
+                            <Button className="btn-sd-admin mx-2" style={{ fontSize: '15px' }} onClick={exportPDF}>
+                                <i className="bi bi-file-earmark-pdf"></i><span className='mx-1'>Export PDF</span>
 
-    return (
-        <div style={{ fontSize: '14px' }}>
-            <div className="box-ultil">
-                <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Loại</b>
-                <div>
-                    <Form.Control type="text" placeholder="Tìm theo tên loại..." onChange={handleSearch} />
+                            </Button>
+                            <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={exportExcel}>
+                                <i className="bi bi-file-earmark-excel"></i><span className='mx-1'>Export Excel</span>
+
+                            </Button>
+                        </div>
+                    </div>
+                    <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
+                        <Nav.Item>
+                            <Nav.Link eventKey="categoriesProduct" className="tab-link">Loại sản phẩm</Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey="categoriesField" className="tab-link">Loại sân</Nav.Link>
+                        </Nav.Item>
+                    </Nav>
+                    <div className="mt-3">
+                        {activeTab === "categoriesField" ? renderContentField() : renderContentProduct()}
+                        {renderPagination()}
+                    </div>
                 </div>
-                <div>
-                    <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={handleCreateClick}>
-                        <i className="bi bi-plus-square-fill"></i><span className='mx-1'>Tạo mới</span>
-                    </Button>
-                    <Button className="btn-sd-admin mx-2" style={{ fontSize: '15px' }} onClick={exportPDF}>
-                        <i className="bi bi-file-earmark-pdf"></i><span className='mx-1'>Export PDF</span>
-
-                    </Button>
-                    <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={exportExcel}>
-                        <i className="bi bi-file-earmark-excel"></i><span className='mx-1'>Export Excel</span>
-
-                    </Button>
-                </div>
-            </div>
-            <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
-                <Nav.Item>
-                    <Nav.Link eventKey="categoriesProduct" className="tab-link">Loại sản phẩm</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="categoriesField" className="tab-link">Loại sân</Nav.Link>
-                </Nav.Item>
-            </Nav>
-            <div className="mt-3">
-                {activeTab === "categoriesField" ? renderContentField() : renderContentProduct()}
-                {renderPagination()}
-            </div>
-        </div>
-    );
+            </Suspense>
+        );
+    }
 }
 
 export default AdminProduct;

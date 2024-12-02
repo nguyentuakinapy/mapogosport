@@ -2,22 +2,24 @@
 import { Container, Row, Col, Pagination } from 'react-bootstrap';
 import "./Product.scss";
 import Link from 'next/link';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import HomeLayout from '@/components/HomeLayout';
-import { formatPrice } from "@/components/Utils/Format"
+import { formatPrice } from "@/components/Utils/Format";
 import Image from 'next/image';
 import useSWR from 'swr';
 import Loading from '@/components/loading';
 
 const Categories = () => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
 
-    const { data: categoriesProduct } = useSWR<CategoryProduct[]>("http://localhost:8080/rest/category_product/category-products", fetcher);
-    const { data: products } = useSWR<Product[]>("http://localhost:8080/rest/products", fetcher);
+    const { data: categoriesProduct } = useSWR<CategoryProduct[]>(`${BASE_URL}rest/category_product/category-products`, fetcher);
+    const { data: products } = useSWR<Product[]>(`${BASE_URL}rest/products`, fetcher);
 
     const uniqueBrands = [...new Set(products?.map(product => product.brand))];
 
@@ -130,73 +132,75 @@ const Categories = () => {
     };
 
     return (
-        <HomeLayout>
-            {!products ?
-                <div className='d-flex justify-content-center align-items-center' style={{ height: '90vh' }}>
-                    <Loading></Loading>
-                </div>
-                :
-                <Container className='pt-5'>
-                    <Row>
-                        <Col lg={2} md={3} sm={12} className="mb-3">
-                            <div className="d-flex mb-3">
-                                <div className="fw-bold text-uppercase filter-panel">
-                                    <i className="bi bi-funnel"></i>
-                                    <span className="ms-2" style={{ fontSize: '1rem' }}>Bộ lọc tìm kiếm</span>
+        <Suspense fallback={<div>Đang tải...</div>}>
+            <HomeLayout>
+                {!products ?
+                    <div className='d-flex justify-content-center align-items-center' style={{ height: '90vh' }}>
+                        <Loading></Loading>
+                    </div>
+                    :
+                    <Container className='pt-5'>
+                        <Row>
+                            <Col lg={2} md={3} sm={12} className="mb-3">
+                                <div className="d-flex mb-3">
+                                    <div className="fw-bold text-uppercase filter-panel">
+                                        <i className="bi bi-funnel"></i>
+                                        <span className="ms-2" style={{ fontSize: '1rem' }}>Bộ lọc tìm kiếm</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="filter-group">
-                                <legend className="fs-6">Theo Danh Mục</legend>
-                                <div className="filter checkbox-filter">
-                                    {categoriesProduct && categoriesProduct.map((category) => (
-                                        <label key={category.categoryProductId} className="checkbox mb-1">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedCategories.includes(category.categoryProductId)}
-                                                onChange={() => handleCategoryChange(category.categoryProductId)}
-                                            />
-                                            <span className="checkbox__label ms-2">
-                                                {category.name}
-                                            </span>
-                                        </label>
-                                    ))}
+                                <div className="filter-group">
+                                    <legend className="fs-6">Theo Danh Mục</legend>
+                                    <div className="filter checkbox-filter">
+                                        {categoriesProduct && categoriesProduct.map((category) => (
+                                            <label key={category.categoryProductId} className="checkbox mb-1">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedCategories.includes(category.categoryProductId)}
+                                                    onChange={() => handleCategoryChange(category.categoryProductId)}
+                                                />
+                                                <span className="checkbox__label ms-2">
+                                                    {category.name}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="filter-group">
-                                <legend className="fs-6">Thương hiệu</legend>
-                                <div className="filter checkbox-filter">
-                                    {uniqueBrands.map((brand) => (
-                                        <label key={brand} className="checkbox mb-1">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedBrands.includes(brand)}
-                                                onChange={() => handleBrandChange(brand)} />
-                                            <span className="checkbox__label ms-2">{brand}</span>
-                                        </label>
-                                    ))}
+                                <div className="filter-group">
+                                    <legend className="fs-6">Thương hiệu</legend>
+                                    <div className="filter checkbox-filter">
+                                        {uniqueBrands.map((brand) => (
+                                            <label key={brand} className="checkbox mb-1">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedBrands.includes(brand)}
+                                                    onChange={() => handleBrandChange(brand)} />
+                                                <span className="checkbox__label ms-2">{brand}</span>
+                                            </label>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        </Col>
+                            </Col>
 
-                        {/* Product list */}
-                        <Col lg={10} md={9} sm={12}>
-                            <h3 className="title-section mb-4">
-                                <span className="icon">
-                                    <Image className="img-fluid" alt="Flash Sale" width={40} height={40} src="/img/sale.gif" />
-                                </span>
-                                Danh sách sản phẩm
-                            </h3>
-                            <Row>
-                                {renderContent()}
-                                {renderPagination()}
-                            </Row>
-                        </Col>
+                            {/* Product list */}
+                            <Col lg={10} md={9} sm={12}>
+                                <h3 className="title-section mb-4">
+                                    <span className="icon">
+                                        <Image className="img-fluid" alt="Flash Sale" width={40} height={40} src="/img/sale.gif" unoptimized />
+                                    </span>
+                                    Danh sách sản phẩm
+                                </h3>
+                                <Row>
+                                    {renderContent()}
+                                    {renderPagination()}
+                                </Row>
+                            </Col>
 
-                    </Row>
-                </Container>
-            }
-        </HomeLayout>
+                        </Row>
+                    </Container>
+                }
+            </HomeLayout>
+        </Suspense>
     );
 };
 

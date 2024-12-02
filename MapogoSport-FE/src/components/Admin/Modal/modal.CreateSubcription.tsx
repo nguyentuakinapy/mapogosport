@@ -10,12 +10,14 @@ interface createSubcription {
 
 const ModalCreateSubcription = (props: createSubcription) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const { showCreateSub, setShowCreateSub } = props;
     const [benefitData, setBenefitData] = useState<string>("");
     const [newPackage, setNewPackage] = useState<AccountPackage>();
     const [benefitSelections, setBenefitSelections] = useState<Benefit[]>([]);
 
-    const { data: dataBenefit, mutate: mutateBenefit } = useSWR<Benefit[]>('http://localhost:8080/rest/admin/find-all-benefit', fetcher, {
+    const { data: dataBenefit, mutate: mutateBenefit } = useSWR<Benefit[]>(`${BASE_URL}rest/admin/find-all-benefit`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -27,7 +29,7 @@ const ModalCreateSubcription = (props: createSubcription) => {
 
     const handleAddBenefit = async () => {
         try {
-            const response = await fetch('http://localhost:8080/rest/add-benefit', {
+            const response = await fetch(`${BASE_URL}rest/add-benefit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -126,7 +128,7 @@ const ModalCreateSubcription = (props: createSubcription) => {
         };
 
         // Step 4: Send data to the backend (using your API endpoint)
-        const response = await fetch('http://localhost:8080/rest/create-account-package', {
+        const response = await fetch(`${BASE_URL}rest/create-account-package`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -139,7 +141,7 @@ const ModalCreateSubcription = (props: createSubcription) => {
             console.error("Lỗi từ API:", errorText);
             throw new Error("Failed to create the subscription package");
         }
-        mutate("http://localhost:8080/rest/accountpackage");
+        mutate(`${BASE_URL}rest/accountpackage`);
         handleClose();
         toast.success("Gói đăng ký đã được tạo thành công!");
     }

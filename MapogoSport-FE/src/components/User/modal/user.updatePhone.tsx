@@ -16,6 +16,7 @@ const ModalUpdatePhone = (props: UserProps) => {
     const [checkButton, setCheckButton] = useState<boolean>(false);
     const [newPhone, setNewPhone] = useState<string>("");
     const [page, setPage] = useState<boolean>(true);
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const coolDownTime = async () => {
         if (!newPhone) {
@@ -41,7 +42,7 @@ const ModalUpdatePhone = (props: UserProps) => {
             });
         }, 1000);
         toast.success(`Mã xác nhận đang được gửi về email ${userData?.email}!`);
-        const response = await fetch('http://localhost:8080/rest/user/sendMail', {
+        const response = await fetch(`${BASE_URL}rest/user/sendMail`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -65,7 +66,7 @@ const ModalUpdatePhone = (props: UserProps) => {
             toast.warning("Vui lòng nhập đầy đủ thông tin!")
             return;
         }
-        fetch(`http://localhost:8080/rest/user/phoneNumber/${userData?.username}`, {
+        fetch(`${BASE_URL}rest/user/phoneNumber/${userData?.username}`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -79,7 +80,7 @@ const ModalUpdatePhone = (props: UserProps) => {
                 toast.error(`Thêm số điện thoại thành không thành công! Vui lòng thử lại sau!`);
                 return
             }
-            mutate(`http://localhost:8080/rest/user/${userData?.username}`);
+            mutate(`${BASE_URL}rest/user/${userData?.username}`);
             toast.success('Thêm số điện thoại thành công!');
             setPage(true);
             setNewPhone('');
@@ -93,7 +94,7 @@ const ModalUpdatePhone = (props: UserProps) => {
             return;
         }
         if (window.confirm('Bạn có chắc muốn xóa số điện thoại này?')) {
-            fetch(`http://localhost:8080/rest/user/phoneNumber/${phoneNumberUserId}`, {
+            fetch(`${BASE_URL}rest/user/phoneNumber/${phoneNumberUserId}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -104,14 +105,14 @@ const ModalUpdatePhone = (props: UserProps) => {
                     toast.error(`Xóa số điện thoại không thành công! Vui lòng thử lại sau!`);
                     return
                 }
-                mutate(`http://localhost:8080/rest/user/${userData?.username}`);
+                mutate(`${BASE_URL}rest/user/${userData?.username}`);
                 toast.success('Xóa số điện thoại thành công!');
             })
         }
     }
 
     const handleUpdateActive = (phoneNumberUserId: number, activeState: boolean) => {
-        fetch(`http://localhost:8080/rest/user/phoneNumber/${phoneNumberUserId}`, {
+        fetch(`${BASE_URL}rest/user/phoneNumber/${phoneNumberUserId}`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -125,7 +126,7 @@ const ModalUpdatePhone = (props: UserProps) => {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return
             }
-            mutate(`http://localhost:8080/rest/user/${userData?.username}`);
+            mutate(`${BASE_URL}rest/user/${userData?.username}`);
             toast.success('Cập nhật thành công!');
         })
     };
@@ -147,7 +148,7 @@ const ModalUpdatePhone = (props: UserProps) => {
                             <i className="bi bi-plus-circle"></i> Thêm số điện thoại
                         </Button>
                         {userData && userData.phoneNumberUsers.length > 0 ?
-                            userData.phoneNumberUsers.sort((a: any, b: any) => b.active - a.active)
+                            userData.phoneNumberUsers.sort((a: PhoneNumberUsers, b: PhoneNumberUsers) => (b.active === a.active ? 0 : b.active ? 1 : -1))
                                 .map(item => (
                                     <div key={item.phoneNumberUserId} className="item-address" >
                                         <div className="item-left">
