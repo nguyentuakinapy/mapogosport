@@ -955,7 +955,7 @@ export default function ChatBox() {
                             </strong>
                           </div>
                           <div className=" mt-1 row">
-                            <p className=" col text-start">
+                            <p className=" col text-start title-content-preview">
                               {dataMessageTemporary === null ? chatGroup.content 
                                 : chatUser.username === dataMessageTemporary.username ? 
                                 dataMessageTemporary.content 
