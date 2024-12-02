@@ -30,9 +30,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "qa": "env-cmd -f .env.qa next dev",
+    "dev:qa": "env-cmd -f .env.qa next dev",
     "build": "next build",
+    "build:qa": "env-cmd -f .env.qa next build",
     "start": "next start",
+    "start:qa": "env-cmd -f .env.qa next start",
     "lint": "next lint"
   },
   "dependencies": {

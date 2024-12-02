@@ -166,6 +166,22 @@ public class NotificationScheduledService {
 				        }
 				    }
 				    sportFieldDAO.saveAll(sportFields);
+				    
+				    Notification n = new Notification();
+					n.setUser(userSubscription.getUser());
+					n.setTitle(userSubscription.getAccountPackage().getPackageName() + " đã hết hạn!");
+					n.setMessage(
+							userSubscription.getAccountPackage().getPackageName() + " đã hết hạn, gói đã quay về gói miễn phí!");
+					n.setType("subscription");
+					// Lưu và gửi thông báo
+					notificationDAO.save(n);
+
+					messagingTemplate.convertAndSend("/topic/notification/username",
+							userSubscription.getUser().getUsername());
+
+					emailService.sendEmail(userSubscription.getUser().getEmail(), "Thông báo hết hạn gói đăng ký.",
+							userSubscription.getAccountPackage().getPackageName().toLowerCase() + " đã hết hạn"
+									+ ". Vui lòng gia hạn hoặc nâng cấp thêm để tiếp tục sử dụng dịch vụ của chúng tôi!");
 				} else if (timeDifference <= 5 * 24 * 60 * 60 * 1000) {
 					Calendar startCalendar = Calendar.getInstance();
 					startCalendar.setTime(today);
@@ -189,7 +205,7 @@ public class NotificationScheduledService {
 
 					Notification n = new Notification();
 					n.setUser(userSubscription.getUser());
-					n.setTitle("Thời hạn gói " + userSubscription.getAccountPackage().getPackageName().toLowerCase());
+					n.setTitle("Thời hạn " + userSubscription.getAccountPackage().getPackageName().toLowerCase());
 					n.setMessage(
 							userSubscription.getAccountPackage().getPackageName() + " còn " + daysRemaining + " ngày.");
 					n.setType("subscription");
@@ -200,7 +216,7 @@ public class NotificationScheduledService {
 							userSubscription.getUser().getUsername());
 
 					emailService.sendEmail(userSubscription.getUser().getEmail(), "Thông báo gia hạn gói đăng ký.",
-							"Gói " + userSubscription.getAccountPackage().getPackageName().toLowerCase() + " còn "
+							userSubscription.getAccountPackage().getPackageName() + " còn "
 									+ daysRemaining
 									+ " ngày. Vui lòng gia hạn thêm để tiếp tục sử dụng dịch vụ của chúng tôi!");
 

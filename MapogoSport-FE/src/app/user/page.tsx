@@ -4,6 +4,7 @@ import UserLayout from '@/components/User/UserLayout';
 import './types/user.scss';
 import ProfileContent from '@/components/User/modal/user.profile';
 import { useData } from '../context/UserContext';
+import Loading from '@/components/loading';
 
 export default function RootLayout() {
     const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
@@ -22,7 +23,12 @@ export default function RootLayout() {
                 <div className='mb-3 text-danger' style={{ fontSize: '20px' }}>
                     <b>Thông tin cá nhân</b>
                 </div>
-                {usernameFetchApi && <ProfileContent usernameFetchApi={usernameFetchApi} />}
+                {!usernameFetchApi ?
+                    <div className="d-flex align-items-center justify-content-center" style={{ height: '50vh' }}>
+                        <Loading></Loading>
+                    </div>
+                    :
+                    <ProfileContent usernameFetchApi={usernameFetchApi} />}
             </UserLayout>
         </Suspense>
     );

@@ -6,6 +6,7 @@ import '../../../types/user.scss';
 import useSWR from "swr";
 import MapComponent from "../../../../utils/MapComponent";
 import { fetchCoordinates } from "../../../../utils/geocode";
+import Loading from "@/components/loading";
 
 const BookingsDetail = ({ params }: { params: { id: number } }) => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -33,7 +34,9 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
         }
     }, [data]);
 
-    if (isLoading) return <UserLayout><div>Đang tải...</div></UserLayout>;
+    if (isLoading) return <UserLayout><div className="d-flex align-items-center justify-content-center" style={{ height: '50vh' }}>
+        <Loading></Loading>
+    </div></UserLayout>;
     if (error) return <UserLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></UserLayout>;
 
     return (

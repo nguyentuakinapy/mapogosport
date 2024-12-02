@@ -9,6 +9,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import { useData } from "@/app/context/UserContext";
 import { toast } from "react-toastify";
+import Loading from "@/components/loading";
 
 const Bookings = () => {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -133,7 +134,9 @@ const Bookings = () => {
         });
     };
 
-    if (isLoading) return <UserLayout><div>Đang tải...</div></UserLayout>;
+    if (isLoading) return <UserLayout><div className="d-flex align-items-center justify-content-center" style={{ height: '50vh' }}>
+        <Loading></Loading>
+    </div></UserLayout>;
     if (error) return <UserLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></UserLayout>;
 
     return (

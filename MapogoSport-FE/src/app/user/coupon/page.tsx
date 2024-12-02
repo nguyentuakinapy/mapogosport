@@ -6,6 +6,7 @@ import useSWR from "swr";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { decodeString } from "@/components/Utils/Format";
+import Loading from "@/components/loading";
 
 const CouponPage = () => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -33,7 +34,9 @@ const CouponPage = () => {
         }
     }, [data]);
 
-    if (isLoading) return <UserLayout><div>Đang tải...</div></UserLayout>;
+    if (isLoading) return <UserLayout><div className="d-flex align-items-center justify-content-center" style={{ height: '50vh' }}>
+        <Loading></Loading>
+    </div></UserLayout>;
     if (error) return <UserLayout><div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div></UserLayout>;
 
     return (
