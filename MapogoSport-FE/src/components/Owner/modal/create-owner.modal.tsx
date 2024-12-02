@@ -367,7 +367,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                     <label>Phương thức thanh toán <b className="text-danger">*</b></label>
                                 </div>
                             }
-                            <b>Giá:</b> <b className="text-danger mb-3">{accountPackageTemporary?.price == 0 ? 'Miễn phí' : accountPackageTemporary?.price.toLocaleString()} đ</b><br />
+                            <b>Giá:</b> <b className="text-danger mb-3">{accountPackageTemporary?.price == 0 ? 'Miễn phí' : accountPackageTemporary?.price.toLocaleString() + " đ"} </b><br />
                             <b className="me-2">Hạn sử dụng:</b>
                             {accountPackageTemporary && accountPackageTemporary.price === 0 ? (
                                 <b className="text-danger mb-3">Không giới hạn</b>
