@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { Button, ListGroup } from "react-bootstrap";
+import { Button, Col, ListGroup, Row } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css"; // Đảm bảo đã cài đặt Bootstrap Icons
 import axios from "axios";
 import useSWR from "swr";
@@ -18,6 +18,15 @@ import Image from "next/image";
 
 
 export default function ChatBox() {
+
+  interface User {
+    username: string;
+    fullname: string;
+    password: string;
+    email: string;
+    avatar: string | null;
+    authorities: Authorities[];
+}
   interface Message {
     messageId: number;
     sender: User |string;
@@ -235,16 +244,9 @@ export default function ChatBox() {
     username: "Unknown",
     fullname: "Anonymous",
     password: "",
-    enabled: 1,
-    createdAt: new Date(),
-    gender: null,
-    birthday: null,
     email: "",
     avatar: null,
     authorities: [],
-    addressUsers: [],
-    phoneNumberUsers: [],
-    wallet: { walletId: 0, balance: 0 },
   };
 
   useEffect(() => {
@@ -551,6 +553,7 @@ export default function ChatBox() {
       }
 
     }
+    
   };
 
   //////
@@ -731,12 +734,47 @@ export default function ChatBox() {
   }, [dataByReceiverUsernameOrCurrentUser]);
   
    
+  // const formatTime = (createdAt: Date | string) => {
+  //   const date = createdAt instanceof Date ? createdAt : new Date(createdAt);
+  //   if (isNaN(date.getTime())) return "Invalid Date";
+  //   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  // };
+  // const formatTime = (createdAt: Date | string) => {
+  //   const date = createdAt instanceof Date ? createdAt : new Date(createdAt);
+  //   if (isNaN(date.getTime())) return "Invalid Date";
+  
+  //   const options: Intl.DateTimeFormatOptions = {
+  //     year: "numeric",
+  //     month: "2-digit",
+  //     day: "2-digit",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //     hour12: false, // Sử dụng định dạng 24 giờ
+  //   };
+  
+  //   return date.toLocaleString("vi-VN", options); // Dùng định dạng cho ngôn ngữ Việt Nam
+  // };
   const formatTime = (createdAt: Date | string) => {
     const date = createdAt instanceof Date ? createdAt : new Date(createdAt);
     if (isNaN(date.getTime())) return "Invalid Date";
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const timeOptions: Intl.DateTimeFormatOptions = {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // Sử dụng định dạng 24 giờ
+    };
+    const dateOptions: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    };
+  
+    const time = date.toLocaleTimeString("vi-VN", timeOptions); // Lấy giờ và phút
+    const day = date.toLocaleDateString("vi-VN", dateOptions); // Lấy ngày, tháng, năm
+  
+    return `${time} - ${day}`; // Ghép giờ và ngày bằng dấu "-"
   };
-
+  
+  
   useEffect(() => {
     if (data) {
       const tempData = data.map((item) => {
@@ -887,7 +925,7 @@ export default function ChatBox() {
                           key={chatUser?.username || index}
                           onClick={() => handleSelectChat(chatUser)}
                           // className="d-flex flex-column"
-                          className={`d-flex flex-column ${isActive ? 'active-chat' : ''}`}  // Thêm class 'active-chat' nếu mục được chọn
+                          className={`d-flex flex-column hover-chat ${isActive ? 'active-chat' : ''}`}  // Thêm class 'active-chat' nếu mục được chọn
 
                         >
                           <div className="d-flex align-items-center ">
@@ -1056,34 +1094,28 @@ export default function ChatBox() {
                     </div>
                   );
                 })}
-                
-
                   </div>
-
                   {/* Phần nhập liệu và nút gửi */}
-                  <div className="card-footer d-flex p-2">
-                    {/* <Form.Control
-                      ref={inputRef}
-                      type="text"
-                      placeholder="Nhập câu hỏi tiếp theo của bạn"
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyDown={handleKeyEnter} // sự kiện key down
-                      className="me-2"
-                    /> */}
-
-                    <InputChat
-                      inputRef={inputRef}
-                      handleKeyEnter={handleKeyEnter}
-                    />
-                    <Button
-                      variant="warning"
-                      className="d-flex align-items-center justify-content-center"
-                      onClick={()=> handleSendMessage}
-                    >
-                      <i className="bi bi-send-fill"></i>
-                    </Button>
+                  <div className="card-footer d-flex align-items-center p-2 bg-transparent">
+                    <Row className="w-100 ">
+                      <Col sm={10} className="p-0">
+                        <InputChat
+                          inputRef={inputRef}
+                          handleKeyEnter={handleKeyEnter}
+                        />
+                      </Col>
+                      <Col sm={2} className="p-0 d-flex justify-content-end">
+                        <Button
+                          variant="light"
+                          className="d-flex align-items-center justify-content-center"
+                          onClick={() => handleSendMessage(inputRef.current?.value || "")}
+                        >
+                          <i className="bi bi-send-fill text-primary"></i>
+                        </Button>
+                      </Col>
+                    </Row>
                   </div>
+
                 </>
               )}
             </div>

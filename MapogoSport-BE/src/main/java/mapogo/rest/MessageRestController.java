@@ -10,6 +10,7 @@ import mapogo.entity.Message;
 import mapogo.service.MessageService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/messages")
@@ -26,11 +27,18 @@ public class MessageRestController {
         return messageService.saveMessage(message);
     }
 
+//    @GetMapping("/{sender}/{receiver}")
+//    public List<Message> getMessagesBetweenUsers(@PathVariable String sender, @PathVariable String receiver) {
+////        return messageService.getMessages(sender, receiver);
+//        return messageDAO.findMessagesBetweenUsers(sender, receiver);
+//    }
+    
     @GetMapping("/{sender}/{receiver}")
-    public List<Message> getMessagesBetweenUsers(@PathVariable String sender, @PathVariable String receiver) {
-//        return messageService.getMessages(sender, receiver);
-        return messageDAO.findMessagesBetweenUsers(sender, receiver);
+    public List<Map<String, Object>> getMessagesBetweenUsers(
+    		@PathVariable String sender,@PathVariable String receiver) {
+        return messageService.findMessagesBetweenUsers(sender, receiver);
     }
+
     
     @GetMapping("/{sender}")
     public List<Message> getMessagesReceverBySender(@PathVariable String sender) {
@@ -39,7 +47,11 @@ public class MessageRestController {
     }
     
     @GetMapping("/receiver/{receiverUsernameOrCurrentUser}")
-    public List<Message> getMessagesForUser(@PathVariable String receiverUsernameOrCurrentUser) {
-        return messageDAO.getMessagesForUser(receiverUsernameOrCurrentUser);
+    public List<Map<String, Object>> getMessagesForUser(@PathVariable String receiverUsernameOrCurrentUser) {
+        return messageService.getMessagesForUser(receiverUsernameOrCurrentUser);
     }
+//    @GetMapping("/receiver/{receiverUsernameOrCurrentUser}")
+//    public List<Message> getMessagesForUser(@PathVariable String receiverUsernameOrCurrentUser) {
+//    	return messageDAO.getMessagesForUser(receiverUsernameOrCurrentUser);
+//    }
    }
