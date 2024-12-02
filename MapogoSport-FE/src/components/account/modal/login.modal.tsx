@@ -25,6 +25,7 @@ export default function Login(props: LoginProps) {
     const { setRefreshKey, refreshKey } = props;
     const { showLoginModal, setShowLoginModal, setShowRegisterModal, setShowForgotPassword } = props;
     const router = useRouter();
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         const userCookie = Cookies.get('user');
@@ -42,7 +43,7 @@ export default function Login(props: LoginProps) {
             return;
         } else {
             try {
-                const responseUser = await fetch(`http://localhost:8080/rest/user/${username}`);
+                const responseUser = await fetch(`${BASE_URL}rest/user/${username}`);
                 if (!responseUser.ok) {
                     throw new Error('Error fetching data');
                 }
@@ -182,7 +183,7 @@ export default function Login(props: LoginProps) {
         if (user) {
             console.log("User Info:", user);
             try {
-                const responseUser = await fetch(`http://localhost:8080/rest/user/${user.sub}`);
+                const responseUser = await fetch(`${BASE_URL}rest/user/${user.sub}`);
                 if (!responseUser.ok) {
                     throw new Error('Error fetching data');
                 }

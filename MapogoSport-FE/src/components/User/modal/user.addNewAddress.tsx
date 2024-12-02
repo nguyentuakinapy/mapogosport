@@ -11,6 +11,8 @@ interface UserProps {
 
 const ModalAddAddress = (props: UserProps) => {
     const fetcher = (url: string) => fetch(url).then(res => res.json());
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const { showAddAddress, setShowAddAddress } = props;
     const [districts, setDistricts] = useState<District[]>([]);
     const [wards, setWards] = useState<Ward[]>([]);
@@ -62,7 +64,7 @@ const ModalAddAddress = (props: UserProps) => {
         }
         const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
-            fetch(`http://localhost:8080/rest/user/address/${username}`, {
+            fetch(`${BASE_URL}rest/user/address/${username}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -80,7 +82,7 @@ const ModalAddAddress = (props: UserProps) => {
                 if (res) {
                     toast.success("Thêm địa chỉ mới thành công!")
                     handleClose();
-                    mutate(`http://localhost:8080/rest/user/${username}`);
+                    mutate(`${BASE_URL}rest/user/${username}`);
                 } else {
                     toast.error("Thêm địa chỉ mới thất bại!")
                 }

@@ -42,6 +42,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     const userData = useData();
     const [checkNotification, setCheckNotification] = useState<number>(1);
     const path = usePathname();
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         if (userData) {
@@ -50,7 +51,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     }, [userData, checkNotification]);
 
     const getNotification = async (username: string) => {
-        const response = await fetch(`http://localhost:8080/rest/user/notification/${username}`);
+        const response = await fetch(`${BASE_URL}rest/user/notification/${username}`);
         if (!response.ok) return;
 
         const notification = await response.json() as NotificationUser[];
@@ -93,7 +94,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     }, []);
 
     useEffect(() => {
-        const socket = new SockJS('http://localhost:8080/ws'); // Địa chỉ endpoint WebSocket
+        const socket = new SockJS(`${BASE_URL}ws`); // Địa chỉ endpoint WebSocket
         const stompClient = Stomp.over(socket);
 
         stompClient.connect({}, () => {
@@ -161,7 +162,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     }, []);
 
     const handleViewNotification = (username: string) => {
-        fetch(`http://localhost:8080/rest/user/notification/${username}`, {
+        fetch(`${BASE_URL}rest/user/notification/${username}`, {
             method: 'PUT',
             headers: {
                 Accept: 'application/json, text/plain, */*',
@@ -177,7 +178,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     }
 
     const handleIsReadNotification = (notificationId: number) => {
-        fetch(`http://localhost:8080/rest/user/notification/is/read/${notificationId}`, {
+        fetch(`${BASE_URL}rest/user/notification/is/read/${notificationId}`, {
             method: 'PUT',
             headers: {
                 Accept: 'application/json, text/plain, */*',
@@ -194,7 +195,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
     }
 
     const handleDeleteNotification = (username: string) => {
-        fetch(`http://localhost:8080/rest/user/notification/${username}`, {
+        fetch(`${BASE_URL}rest/user/notification/${username}`, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json, text/plain, */*',

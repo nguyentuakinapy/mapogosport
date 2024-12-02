@@ -14,6 +14,7 @@ interface UserProps {
 
 const Authority = (props: UserProps) => {
     const { showEditRole, setShowEditRole, user } = props;
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [enabled, setEnabled] = useState<boolean>(!!user?.enabled);
@@ -56,9 +57,9 @@ const Authority = (props: UserProps) => {
         console.log("enabled: ", enabled);
 
         try {
-            await axios.post(`http://localhost:8080/rest/update-user-authority/${user?.username}`,
+            await axios.post(`${BASE_URL}rest/update-user-authority/${user?.username}`,
                 { selectedRoles, enabled });
-            mutate(`http://localhost:8080/rest/list-users`)
+            mutate(`${BASE_URL}rest/list-users`)
             toast.success(`Cập nhật vai trò của "${user.username}" thành công!`);
         } catch (error) {
             console.error("Lỗi khi cập nhật vai trò:", error);

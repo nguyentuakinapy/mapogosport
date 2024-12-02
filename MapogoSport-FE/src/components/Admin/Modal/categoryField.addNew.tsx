@@ -14,6 +14,7 @@ const CategoryFieldAddNew = (props: CategoryFieldProps) => {
     const { showAddCategory, setShowAddCategory, currentCategory } = props;
     const [fieldName, setFieldName] = useState<string>("");
     const [fieldImage, setFieldImage] = useState<File | string>("/images/logo.png");
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         if (showAddCategory && currentCategory) {
@@ -43,7 +44,7 @@ const CategoryFieldAddNew = (props: CategoryFieldProps) => {
         if (fieldImage instanceof File) {
             formData.append("fileImage", fieldImage);
         }
-        await fetch(`http://localhost:8080/rest/category_field/create/category_field`, {
+        await fetch(`${BASE_URL}rest/category_field/create/category_field`, {
             method: 'POST',
             body: formData,
         }).then((res) => {
@@ -52,7 +53,7 @@ const CategoryFieldAddNew = (props: CategoryFieldProps) => {
                 return;
             }
             toast.success("Thêm loại sân thành công!");
-            mutate("http://localhost:8080/rest/category_field");
+            mutate(`${BASE_URL}rest/category_field`);
             handleClose();
         });
     };
@@ -67,7 +68,7 @@ const CategoryFieldAddNew = (props: CategoryFieldProps) => {
         if (fieldImage instanceof File || fieldImage !== currentCategory?.image) {
             formData.append("fileImage", fieldImage);
         }
-        await fetch(`http://localhost:8080/rest/category_field/update/category_field/${currentCategory?.categoriesFieldId}`, {
+        await fetch(`${BASE_URL}rest/category_field/update/category_field/${currentCategory?.categoriesFieldId}`, {
             method: 'PUT',
             body: formData,
         }).then((res) => {
@@ -76,7 +77,7 @@ const CategoryFieldAddNew = (props: CategoryFieldProps) => {
                 return;
             }
             toast.success("Cập nhật loại sân thành công!");
-            mutate("http://localhost:8080/rest/category_field");
+            mutate(`${BASE_URL}rest/category_field`);
             handleClose();
         });
     };

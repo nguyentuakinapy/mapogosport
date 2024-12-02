@@ -66,6 +66,7 @@ export default function ChatBox() {
   const [isConnected, setIsConnected] = useState(false); // Thêm trạng thái theo dõi kết nối STOMP
   const [currentTopic, setCurrentTopic] = useState(""); // lưu trữ nội dung người dùng đang nhập vào ô chat
   const [dataMessageTemporary, setDataMessageTemporary] = useState<dataMess | null>(null);
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const stompClient = useRef<CompatClient | null>(null); // Khai báo đúng kiểu
 
@@ -148,19 +149,19 @@ export default function ChatBox() {
   }, [currentUser, chatListCurrentUserByDMM, username]);
 
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
-  const { data: dataFindById } = useSWR<User>(username && `http://localhost:8080/rest/user/${username}`, fetcher, {
+  const { data: dataFindById } = useSWR<User>(username && `${BASE_URL}rest/user/${username}`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  const { data: dataAdmin } = useSWR<User>(`http://localhost:8080/rest/user/myntd`, fetcher, {
+  const { data: dataAdmin } = useSWR<User>(`${BASE_URL}rest/user/myntd`, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  const { data: dataFindByIdOwner } = useSWR<User>(usernameFormUrl ? `http://localhost:8080/rest/user/${usernameFormUrl}` : null, fetcher, {
+  const { data: dataFindByIdOwner } = useSWR<User>(usernameFormUrl ? `${BASE_URL}rest/user/${usernameFormUrl}` : null, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -198,7 +199,7 @@ export default function ChatBox() {
   useEffect(() => {
     if (!currentUser) return;
     // Khởi tạo kết nối STOMP với WebSocket server
-    const socket = new SockJS(`http://localhost:8080/ws`); // 1. kết nối server
+    const socket = new SockJS(`${BASE_URL}ws`); // 1. kết nối server
     stompClient.current = Stomp.over(socket);
 
     // Kết nối tới server STOMP
@@ -441,7 +442,7 @@ export default function ChatBox() {
   // Sử dụng useSWR để fetch messages
   const { data, isLoading, error, mutate } = useSWR<Message[]>(
     currentUser && receiver
-      ? `http://localhost:8080/api/messages/${currentUser.username}/${receiver}`
+      ? `${BASE_URL}api/messages/${currentUser.username}/${receiver}`
       : null,
     fetchMessages
   );
@@ -453,7 +454,7 @@ export default function ChatBox() {
 
   } = useSWR(
     currentUser
-      ? `http://localhost:8080/api/messages/receiver/${currentUser.username}`
+      ? `${BASE_URL}api/messages/receiver/${currentUser.username}`
       : null,
     fetchMessages,
     {

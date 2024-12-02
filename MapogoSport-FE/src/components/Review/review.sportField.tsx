@@ -18,6 +18,8 @@ const ModalReviewSportField = (props: ReviewProps) => {
     const [comment, setComment] = useState(""); // Trạng thái cho bình luận
     const username = decodeString(String(localStorage.getItem("username")));
 
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     // Kiểm tra nếu người dùng đã đánh giá
     const hasReviewed = dataReview?.some(
         (review: FieldReview) => review.user.username === username
@@ -45,7 +47,7 @@ const ModalReviewSportField = (props: ReviewProps) => {
 
         try {
             const response = await fetch(
-                "http://localhost:8080/rest/fieldReview/save",
+                `${BASE_URL}rest/fieldReview/save`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -62,7 +64,7 @@ const ModalReviewSportField = (props: ReviewProps) => {
             if (response.ok) {
                 toast.success("Gửi đánh giá thành công!");
                 handleClose();
-                mutate(`http://localhost:8080/rest/fieldReview/${fieldId}`);
+                mutate(`${BASE_URL}rest/fieldReview/${fieldId}`);
             } else {
                 toast.error("Gửi đánh giá không thành công!");
             }

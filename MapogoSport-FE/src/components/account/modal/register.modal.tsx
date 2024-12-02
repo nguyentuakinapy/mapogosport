@@ -20,6 +20,7 @@ interface RegisterProps {
 export default function Register(props: RegisterProps) {
     const { showRegisterModal, setShowRegisterModal } = props;
     const { setShowLoginModal, setRefreshKey, refreshKey } = props;
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [username, setUsername] = useState<string>("");
     const [email, setEmail] = useState<string>("");
@@ -46,7 +47,7 @@ export default function Register(props: RegisterProps) {
         }
 
         try {
-            await fetch(`http://localhost:8080/rest/user/${username}`);
+            await fetch(`${BASE_URL}rest/user/${username}`);
             toast.warning("Tên đăng nhập đã tồn tại!");
             return;
         } catch (error) {
@@ -78,7 +79,7 @@ export default function Register(props: RegisterProps) {
         }
         try {
             // Create user
-            const responseUser = await fetch('http://localhost:8080/rest/user', {
+            const responseUser = await fetch(`${BASE_URL}rest/user`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -91,7 +92,7 @@ export default function Register(props: RegisterProps) {
             }
             const resUser = await responseUser.json(); // Đọc responseUser ở đây
 
-            const responseAuth = await fetch('http://localhost:8080/rest/authority', {
+            const responseAuth = await fetch(`${BASE_URL}rest/authority`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -126,7 +127,7 @@ export default function Register(props: RegisterProps) {
     const coolDownTime = async () => {
         if (email) {
             try {
-                const responseEmail = await fetch(`http://localhost:8080/rest/user/getbyemail/${email}`);
+                const responseEmail = await fetch(`${BASE_URL}rest/user/getbyemail/${email}`);
                 const dataUser = await responseEmail.json();
                 if (dataUser.email == email) {
                     toast.warning("Email bạn nhập đã tồn tại!")!
@@ -149,7 +150,7 @@ export default function Register(props: RegisterProps) {
                     });
                 }, 1000);
                 toast.success("Mã xác nhận đang được gửi về email!");
-                const response = await fetch('http://localhost:8080/rest/user/sendMail', {
+                const response = await fetch(`${BASE_URL}rest/user/sendMail`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',
@@ -212,7 +213,7 @@ export default function Register(props: RegisterProps) {
         if (user) {
             // console.log("User Info:", user);
             try {
-                const responseUser = await fetch(`http://localhost:8080/rest/user/${user.sub}`);
+                const responseUser = await fetch(`${BASE_URL}rest/user/${user.sub}`);
                 if (!responseUser.ok) {
                     throw new Error('Error fetching data');
                 }
@@ -250,7 +251,7 @@ export default function Register(props: RegisterProps) {
             } catch (error) {
                 try {
                     // Create user
-                    const responseUser = await fetch('http://localhost:8080/rest/user', {
+                    const responseUser = await fetch(`${BASE_URL}rest/user`, {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json, text/plain, */*',
@@ -269,7 +270,7 @@ export default function Register(props: RegisterProps) {
 
                     const resUser = await responseUser.json(); // Đọc responseUser ở đây
 
-                    const responseAuth = await fetch('http://localhost:8080/rest/authority', {
+                    const responseAuth = await fetch(`${BASE_URL}rest/authority`, {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json, text/plain, */*',

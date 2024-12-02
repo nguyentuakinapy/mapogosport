@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 
 const PageVoucher = () => {
     const [voucher, setVoucher] = useState<Voucher[]>([])
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const handelSubmitGetVoucher = async (voucherId: number) => {
 
@@ -17,7 +18,7 @@ const PageVoucher = () => {
             return;
         }
 
-        const checkResponse = await fetch(`http://localhost:8080/rest/userVoucher/check/${username}/${voucherId}`);
+        const checkResponse = await fetch(`${BASE_URL}rest/userVoucher/check/${username}/${voucherId}`);
         const alreadyHasVoucher = await checkResponse.json();
 
         if (alreadyHasVoucher) {
@@ -37,7 +38,7 @@ const PageVoucher = () => {
 
 
         try {
-            await fetch(`http://localhost:8080/rest/userVoucher/create/${UserVoucher.voucher.voucherId}/${username}`, {
+            await fetch(`${BASE_URL}rest/userVoucher/create/${UserVoucher.voucher.voucherId}/${username}`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
@@ -60,7 +61,7 @@ const PageVoucher = () => {
 
     const fetchDataVoucher = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/rest/voucher/findAll`);
+            const response = await fetch(`${BASE_URL}rest/voucher/findAll`);
             const data = await response.json();
             setVoucher(data);
         } catch (error) {
