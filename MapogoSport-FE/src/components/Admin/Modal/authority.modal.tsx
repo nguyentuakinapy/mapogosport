@@ -17,7 +17,7 @@ const Authority = (props: UserProps) => {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-    const [enabled, setEnabled] = useState<boolean>(!!user?.enabled);
+    const [enabled, setEnabled] = useState<boolean>();
 
     const roles = [
         { value: "ROLE_USER", label: "Khách hàng" },
@@ -29,7 +29,7 @@ const Authority = (props: UserProps) => {
     useEffect(() => {
         if (user) {
             console.log(user);
-
+            setEnabled(!!user.enabled)
             const userRoles = user.authorities.map(auth => auth.role.name);
             setSelectedRoles(userRoles);
         }

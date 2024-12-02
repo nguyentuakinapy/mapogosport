@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
+import org.hibernate.sql.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -77,13 +78,26 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 			vnp_Params.put("vnp_BankCode", "NCB");
 
 			vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-			vnp_Params.put("vnp_OrderInfo",
-					data.get("accountPackageId").toString() + "-" + data.get("userSubscriptionId").toString()); // nội
-																												// dung
-			vnp_Params.put("vnp_OrderType", orderType);
+			if (data.get("status").equals("update")) {
+				vnp_Params.put("vnp_OrderInfo",
+						data.get("accountPackageId").toString() + "_" + data.get("userSubscriptionId").toString()); // nội
+																													// dung
+				vnp_Params.put("vnp_OrderType", orderType);
 
-			vnp_Params.put("vnp_Locale", "vn");
-			vnp_Params.put("vnp_ReturnUrl", "http://localhost:8080/rest/user/subscription/paymentInfo");
+				vnp_Params.put("vnp_Locale", "vn");
+				vnp_Params.put("vnp_ReturnUrl", "http://localhost:8080/rest/user/subscription/paymentInfo/update");
+			
+			}else {
+				vnp_Params.put("vnp_OrderInfo",
+						data.get("accountPackageId").toString() + "_" + data.get("userSubscriptionId").toString()
+						+"_"+data.get("futureDate")); // nội
+																													// dung
+				vnp_Params.put("vnp_OrderType", orderType);
+
+				vnp_Params.put("vnp_Locale", "vn");
+				vnp_Params.put("vnp_ReturnUrl", "http://localhost:8080/rest/user/subscription/paymentInfo/extend");
+			
+			}
 			vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
 			Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
@@ -129,12 +143,20 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 			paymentDTO.setURL(paymentUrl);
 
 		} else if (data.get("paymentMethod").equals("MoMo")) {
-			String info = data.get("accountPackageId") + "0" + data.get("userSubscriptionId");
-			System.out.println(info);
+			
 			long amountBeforeDecimal = (long) Math.floor(accountPackage.getPrice());
-
-			ResponseEntity<String> response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
-					info, "http://localhost:8080/rest/user/subscription/paymentInfo-momo");
+			ResponseEntity<String> response;
+			if (data.get("status").equals("update")) {
+				String info = data.get("accountPackageId") + "_" + data.get("userSubscriptionId");
+				response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
+						info, "http://localhost:8080/rest/user/subscription/paymentInfo-momo/update");
+			} else {
+				String info = data.get("accountPackageId") + "_" + data.get("userSubscriptionId")+"_"+
+						data.get("futureDate");
+				 response= paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
+						info, "http://localhost:8080/rest/user/subscription/paymentInfo-momo/extend");
+			}
+			
 			ObjectMapper objectMapper = new ObjectMapper();
 			MoMoPaymentResponse momoResponse;
 			try {

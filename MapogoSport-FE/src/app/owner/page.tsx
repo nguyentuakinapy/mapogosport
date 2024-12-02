@@ -85,7 +85,7 @@ export default function Owner() {
                 body: JSON.stringify({
                     userSubscriptionId: userSubscription?.userSubscriptionId,
                     accountPackageId: ap?.accountPackageId,
-                    paymentMethod: selectedPaymentMethod
+                    paymentMethod: selectedPaymentMethod,
                 }),
             }).then(async (res) => {
                 if (!res.ok) {
@@ -112,7 +112,7 @@ export default function Owner() {
                 handleCloseModal();
             });
         } else {
-            fetch(`${BASE_URL}rest/user/subscription/${userSubscription?.userSubscriptionId}`, {
+            fetch(`${BASE_URL}rest/user/subscription/update/${userSubscription?.userSubscriptionId}`, {
                 method: 'PUT',
                 headers: {
                     Accept: 'application/json, text/plain, */*',
@@ -121,7 +121,8 @@ export default function Owner() {
                 body: JSON.stringify({
                     userSubscriptionId: userSubscription?.userSubscriptionId,
                     accountPackageId: ap?.accountPackageId,
-                    paymentMethod: selectedPaymentMethod
+                    paymentMethod: selectedPaymentMethod,
+                    status: "update"
                 }),
             }).then(async (res) => {
                 if (!res.ok) {
@@ -148,7 +149,7 @@ export default function Owner() {
         const endDate = new Date(userSubscription!.endDay);
 
         const futureDate = new Date(endDate);
-        futureDate.setDate(endDate.getDate() + 30);
+        futureDate.setDate(endDate.getDate() + ap?.durationDays!);
 
         if (selectedPaymentMethod === "Thanh toán ví") {
             if (userData!.wallet.balance > ap!.price) {
@@ -179,7 +180,37 @@ export default function Owner() {
                 handleCloseModal();
             }
         } else {
+            fetch(`${BASE_URL}rest/user/subscription/extend/${userSubscription?.userSubscriptionId}`, {
+                method: 'PUT',
+                headers: {
+                    Accept: 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userSubscriptionId: userSubscription?.userSubscriptionId,
+                    accountPackageId: ap?.accountPackageId,
+                    paymentMethod: selectedPaymentMethod,
+                    futureDate,
+                    status: "extend"
+                }),
+            }).then(async (res) => {
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
+                    return;
+                }
 
+                const data = await res.json();
+                if (data.status === "ok" && data.url) {
+                    window.location.href = data.url;
+                } else {
+                    console.error();
+
+                    toast.error("Có lỗi xảy ra trong quá trình tạo thanh toán.");
+                }
+            }).catch((error) => {
+                toast.error(`Đã xảy ra lỗi: ${error.message}`);
+            });
         }
     }
 
