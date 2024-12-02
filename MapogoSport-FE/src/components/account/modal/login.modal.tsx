@@ -194,6 +194,7 @@ export default function Login(props: LoginProps) {
                         toast.error("Tài khoản đã vô hiệu hóa!")
                         return;
                     }
+
                     const usernameLocal = dataUser.username.replace(/['"]+/g, '');
                     localStorage.setItem('username', encodeString(usernameLocal));
                     sessionStorage.setItem('user', JSON.stringify(encodeJson(dataUser)));

@@ -266,9 +266,14 @@ export default function Owner() {
                                                         Đã sở hữu
                                                     </Button>
                                                     :
-                                                    <Button className='btn-sub' onClick={() => handleOpenModal(ap, false)}>
+                                                    <Button
+                                                        className="btn-sub"
+                                                        disabled={new Date(userSubscription.endDay).getTime() - new Date().getTime() > 5 * 24 * 60 * 60 * 1000}
+                                                        onClick={() => handleOpenModal(ap, false)}
+                                                    >
                                                         Gia hạn ngay
                                                     </Button>
+
                                                 :
                                                 <Button className='btn-sub' disabled={true}>
                                                     Đã sở hữu
@@ -317,7 +322,7 @@ export default function Owner() {
                                     onChange={handlePaymentMethodChange}
                                 />
                                 <label className="form-check-label" htmlFor="">
-                                    Thanh toán bằng ví
+                                    Thanh toán bằng ví: {userData?.wallet.balance.toLocaleString() + ' đ'}
                                 </label>
                             </div>
 
