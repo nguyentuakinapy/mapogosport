@@ -243,6 +243,7 @@ const CheckoutPage = () => {
     const addressParts = [addressDetail, selectedWard, selectedDistrict, selectedProvince];
     const address1 = addressParts.filter(part => part).join(', ');
     const phoneNumber = phoneNumberSelected === 'other' ? customPhoneNumber : phoneNumberSelected;
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const orderData = {
       username: user1?.username,
@@ -333,7 +334,7 @@ const CheckoutPage = () => {
       try {
         const order = await handleCreateOrder();
         const paymentResponse = await axios.post(
-          `http://localhost:8080/rest/payment/create_payment`,
+          `${BASE_URL}rest/payment/create_payment`,
           listCartCheckout,
           {
             params: { orderId: order.orderId },
@@ -355,7 +356,7 @@ const CheckoutPage = () => {
       try {
         const order = await handleCreateOrder();
         const response = await axios.post(
-          'http://localhost:8080/rest/payment/create-momo-payment',
+          `${BASE_URL}rest/payment/create-momo-payment`,
           listCartCheckout,
           {
             params: { orderId: order.orderId },
@@ -383,7 +384,7 @@ const CheckoutPage = () => {
 
           try {
             await axios.post(
-              `http://localhost:8080/rest/create_orderDetail`,
+              `${BASE_URL}rest/create_orderDetail`,
               listCartCheckout,
               {
                 params: { orderId: order.orderId }, // truyền orderId qua params
