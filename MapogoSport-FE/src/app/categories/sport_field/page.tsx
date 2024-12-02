@@ -118,7 +118,7 @@ function Categories() {
                 </div>
             );
         }
-        return field.map((field) => {
+        return field.filter(item => item.status === "Hoạt động").map((field) => {
             const { fullStars, hasHalfStar, emptyStars } = calculateRating(field.fieldReviews);
             return (
                 <Col key={field.sportFieldId} lg={3} md={4} sm={6} xs={12} className="mb-4">

@@ -3,6 +3,8 @@ package mapogo.rest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -159,7 +161,7 @@ public class UserRestController {
 
 	@Autowired
 	AuthorityDAO authorityDAO;
-	
+
 	@Autowired
 	TransactionService transactionService;
 
@@ -180,54 +182,93 @@ public class UserRestController {
 			tran.setWallet(wallet);
 			tran.setAmount(BigDecimal.valueOf(ap.getPrice()));
 			tran.setCreatedAt(LocalDateTime.now());
-			tran.setDescription("Thanh toán gia hạn gói tài khoản: "+ap.getPackageName());
+			tran.setDescription("Thanh toán gia hạn gói tài khoản: " + ap.getPackageName());
 			tran.setTransactionType("-" + ap.getPrice());
-			transactionService.create(tran);		
-			//walletAdmin
-			walletService.addFundsToAdminWallet(BigDecimal.valueOf(ap.getPrice()), 
-					user.getUsername()+" thanh toán gói "+ap.getPackageName());
+			transactionService.create(tran);
+			// walletAdmin
+			walletService.addFundsToAdminWallet(BigDecimal.valueOf(ap.getPrice()),
+					user.getUsername() + " thanh toán gói " + ap.getPackageName());
 			userService.updateUserSubscription(accountPackageId, userSubscriptionId);
 			return ResponseEntity.status(HttpStatus.SC_OK).body("ok");
 
 		} else {
-			return ResponseEntity.status(HttpStatus.SC_OK).body("Số dư trong ví không đủ vui lòng phương thức "
-					+ "hoặc nạp thêm tiền vào ví!");
+			return ResponseEntity.status(HttpStatus.SC_OK)
+					.body("Số dư trong ví không đủ vui lòng phương thức " + "hoặc nạp thêm tiền vào ví!");
 
 		}
 
 	}
 
-	@PutMapping("/user/subscription/{userSubscriptionId}")
+	@PutMapping("/user/subscription/update/{userSubscriptionId}")
 	public ResponseEntity<?> updateUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId,
 			@RequestBody Map<String, Object> requestBody, HttpServletRequest req) throws UnsupportedEncodingException {
 		PaymentDTO paymentDTO = userSubService.createSubscriptionPayment(requestBody, req);
 		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
-
-	@GetMapping("/user/subscription/paymentInfo")
-	public RedirectView updateUserSubscription2(@RequestParam(value = "vnp_OrderInfo") String data) {
-		String[] parts = data.split("-");
-		int accountPackageId = Integer.parseInt(parts[0]);
-		int userSubscriptionId = Integer.parseInt(parts[1]);
-
-		// SubscriptionPayment
-		createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
-		userService.updateUserSubscription(accountPackageId, userSubscriptionId);
-		return new RedirectView("http://localhost:3000/owner");
+	
+	
+	@PutMapping("/user/subscription/extend/{userSubscriptionId}")
+	public ResponseEntity<?> extendUserSubscription(@PathVariable("userSubscriptionId") Integer userSubscriptionId,
+			@RequestBody Map<String, Object> requestBody, HttpServletRequest req) throws UnsupportedEncodingException {
+		PaymentDTO paymentDTO = userSubService.createSubscriptionPayment(requestBody, req);
+		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
 
-	@GetMapping("/user/subscription/paymentInfo-momo")
-	public RedirectView getPaymentInfo(@RequestParam(value = "resultCode") String resultCode,
+	@GetMapping("/user/subscription/paymentInfo/{status}")
+	public RedirectView updateUserSubscription2(@PathVariable("status") String status,@RequestParam(value = "vnp_OrderInfo") String data) {
+		String[] parts = data.split("_");
+		int accountPackageId = Integer.parseInt(parts[0]);
+		int userSubscriptionId = Integer.parseInt(parts[1]);
+		if (status.equals("extend")) {
+			String date = parts[2];
+			SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
+			Date d;
+			try {
+				d = formatDate.parse(date);
+				// SubscriptionPayment
+				createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
+				userService.updateUserSubcription(userSubscriptionId, d, "VNPay");
+				return new RedirectView("http://localhost:3000/owner");
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}else {
+			createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
+			userService.updateUserSubscription(accountPackageId, userSubscriptionId);
+			return new RedirectView("http://localhost:3000/owner");
+		}
+		return null;
+
+	}
+
+	@GetMapping("/user/subscription/paymentInfo-momo/{status}")
+	public RedirectView getPaymentInfo(@PathVariable("status") String status,
+			@RequestParam(value = "resultCode") String resultCode,
 			@RequestParam(value = "extraData") String data) {
 		if (resultCode.equals("0")) {
-			String[] parts = data.split("0");
+			String[] parts = data.split("_");
 			int accountPackageId = Integer.parseInt(parts[0]);
 			int userSubscriptionId = Integer.parseInt(parts[1]);
-			// SubscriptionPayment
-			createSubcriptionPayment(accountPackageId, userSubscriptionId, "MoMo");
-			userService.updateUserSubscription(accountPackageId, userSubscriptionId);
+			if (status.equals("extend")) {
+				String date = parts[2];
+				SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
+				Date d;
+				try {
+					d = formatDate.parse(date);
+					// SubscriptionPayment
+					createSubcriptionPayment(accountPackageId, userSubscriptionId, "MoMo");
+					userService.updateUserSubcription(userSubscriptionId,d, "MoMo");
+					return new RedirectView("http://localhost:3000/owner");
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			} else {
+				createSubcriptionPayment(accountPackageId, userSubscriptionId, "MoMo");
+				userService.updateUserSubscription(accountPackageId, userSubscriptionId);
+				return new RedirectView("http://localhost:3000/owner");
+			}
 		}
-		return new RedirectView("http://localhost:3000/owner");
+		return null;
 	}
 
 	private void createSubcriptionPayment(int accountPackageId, int userSubscriptionId, String paymentMethod) {
@@ -394,9 +435,10 @@ public class UserRestController {
 	}
 
 	// đến đây
-	
+
 	@PutMapping("/user/subscription/extend/{idUserSub}/{endDate}")
-	public UserSubscription updateUserSubcription(@PathVariable("idUserSub") Integer id, @PathVariable("endDate") Date endDate) {
-		return userService.updateUserSubcription(id, endDate);
+	public UserSubscription updateUserSubcription(@PathVariable("idUserSub") Integer id,
+			@PathVariable("endDate") Date endDate) {
+		return userService.updateUserSubcription(id, endDate, "Thanh toán ví");
 	}
 }

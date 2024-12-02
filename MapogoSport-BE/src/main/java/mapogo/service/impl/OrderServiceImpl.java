@@ -362,7 +362,8 @@ public class OrderServiceImpl implements OrderService {
 				transaction.setDescription("Hoàn trả từ hóa đơn: " + orderId);
 				transaction.setTransactionType("+" + order.getAmount());
 				transactionService.create(transaction);
-			}else if (order.getPaymentMethod().getName().equals("Thanh toán ví")) {
+			}
+			if (order.getPaymentMethod().getName().equals("Thanh toán ví")) {
 				User admin = userService.findByUsername("myntd");
 				Wallet walletAdmin = walletService.findByUsername(admin);
 				walletAdmin.setBalance(walletAdmin.getBalance().subtract(BigDecimal.valueOf(order.getAmount())));

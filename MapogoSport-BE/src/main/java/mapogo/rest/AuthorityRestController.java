@@ -12,12 +12,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import mapogo.dao.SportFieldDAO;
 import mapogo.dao.UserDAO;
 import mapogo.entity.Authority;
 import mapogo.entity.Role;
+import mapogo.entity.SportField;
 import mapogo.entity.User;
 import mapogo.service.AuthorityService;
 import mapogo.service.RoleService;
+import mapogo.service.SportFieldService;
 import mapogo.service.UserService;
 
 @CrossOrigin("*")
@@ -41,12 +44,15 @@ public class AuthorityRestController {
 	// của Mỵ từ đây
 	@Autowired
 	UserService userService;
-	
+
 	@Autowired
 	UserDAO userDao;
 
 	@Autowired
 	RoleService roleService;
+
+	@Autowired
+	SportFieldDAO sportFieldDAO;
 
 	@GetMapping("/list-users")
 	public List<User> findAll() {
@@ -54,12 +60,11 @@ public class AuthorityRestController {
 	}
 
 	@PostMapping("/update-user-authority/{username}")
-	public String updateAuthority(@PathVariable String username,
-			@RequestBody Map<String, Object> requestBody) {
+	public String updateAuthority(@PathVariable String username, @RequestBody Map<String, Object> requestBody) {
 
-	    // Lấy các giá trị từ map
-	    List<String> selectedRoles = (List<String>) requestBody.get("selectedRoles");
-	    boolean enabled = (Boolean) requestBody.get("enabled");
+		// Lấy các giá trị từ map
+		List<String> selectedRoles = (List<String>) requestBody.get("selectedRoles");
+		boolean enabled = (Boolean) requestBody.get("enabled");
 
 		User user = userService.findByUsername(username);
 
@@ -75,9 +80,18 @@ public class AuthorityRestController {
 			authority.setRole(role);
 			authorityService.createAuthority(authority);
 		}
-		
+
 		user.setEnabled(enabled);
 		userDao.save(user);
+		if (enabled==false) {
+			List<SportField> sportFields = user.getOwner().getSportsFields();
+			for (SportField sport : sportFields) {
+				sport.setStatus("Tạm đóng");
+				sportFieldDAO.save(sport);
+			}
+
+		}
+
 		return "";
 	}
 

@@ -333,7 +333,7 @@ const CheckoutPage = () => {
       try {
         const order = await handleCreateOrder();
         const paymentResponse = await axios.post(
-          `http://localhost:8080/api/payment/create_payment`,
+          `http://localhost:8080/rest/payment/create_payment`,
           listCartCheckout,
           {
             params: { orderId: order.orderId },
@@ -342,6 +342,7 @@ const CheckoutPage = () => {
         const paymentUrl = paymentResponse.data.url;
         // chuyển hướng đến URL thanh toán
         window.location.href = paymentUrl;
+
       } catch (error) {
         console.error('Error during payment:', error);
       }
@@ -354,7 +355,7 @@ const CheckoutPage = () => {
       try {
         const order = await handleCreateOrder();
         const response = await axios.post(
-          'http://localhost:8080/api/payment/create-momo-payment',
+          'http://localhost:8080/rest/payment/create-momo-payment',
           listCartCheckout,
           {
             params: { orderId: order.orderId },

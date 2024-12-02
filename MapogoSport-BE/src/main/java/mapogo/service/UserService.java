@@ -28,7 +28,7 @@ public interface UserService {
 	
 	UserSubscription saveUserSubcription(Map<String, Object> data);
 	
-	UserSubscription updateUserSubcription(Integer id, Date endDate);
+	UserSubscription updateUserSubcription(Integer id, Date endDate, String paymentMethodName);
 	
 	UserSubscription findUserSubscriptionByUser(String username);
 	

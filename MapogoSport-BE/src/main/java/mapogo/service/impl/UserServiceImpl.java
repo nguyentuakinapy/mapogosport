@@ -264,24 +264,32 @@ public class UserServiceImpl implements UserService {
 		messagingTemplate.convertAndSend("/topic/notification/isRead", n.getUser().getUsername());
 	}
 
+	@Autowired
+	WalletService walletService;
+	
 	@Override
-	public UserSubscription updateUserSubcription(Integer id, Date endDate) {
+	public UserSubscription updateUserSubcription(Integer id, Date endDate, String paymentMethodName) {
 		UserSubscription uS = userSubscriptionDAO.findById(id).get();
 		uS.setEndDay(endDate);
 		userSubscriptionDAO.save(uS);
+		if (paymentMethodName.equals("Thanh toán ví")) {
 
-		Wallet w = uS.getUser().getWallet();
-		w.setBalance(w.getBalance().subtract(BigDecimal.valueOf(uS.getAccountPackage().getPrice())));
-		walletDAO.save(w);
+			Wallet w = uS.getUser().getWallet();
+			w.setBalance(w.getBalance().subtract(BigDecimal.valueOf(uS.getAccountPackage().getPrice())));
+			walletDAO.save(w);
 
-		Transaction transaction = new Transaction();
-		transaction.setAmount(BigDecimal.valueOf(uS.getAccountPackage().getPrice()));
-		transaction.setCreatedAt(LocalDateTime.now());
-		transaction.setDescription("Gia hạn gói đăng ký!");
-		transaction.setTransactionType('-' + String.valueOf(uS.getAccountPackage().getPrice()));
-		transaction.setWallet(w);
-		transactionDAO.save(transaction);
-		
+			Transaction transaction = new Transaction();
+			transaction.setAmount(BigDecimal.valueOf(uS.getAccountPackage().getPrice()));
+			transaction.setCreatedAt(LocalDateTime.now());
+			transaction.setDescription("Gia hạn gói đăng ký!");
+			transaction.setTransactionType('-' + String.valueOf(uS.getAccountPackage().getPrice()));
+			transaction.setWallet(w);
+			transactionDAO.save(transaction);
+			
+			walletService.addFundsToAdminWallet(BigDecimal.valueOf(uS.getAccountPackage().getPrice()), 
+					"Gia hạn "+ uS.getAccountPackage().getPackageName().toLowerCase()+" từ: "
+					+ uS.getUser().getUsername());
+		}
 		Notification n = new Notification();
 		n.setUser(uS.getUser());
 		n.setTitle("Gia hạn gói tài khoản");
@@ -290,8 +298,8 @@ public class UserServiceImpl implements UserService {
 		// Lưu và gửi thông báo
 		notificationDAO.save(n);
 
-		messagingTemplate.convertAndSend("/topic/notification/username",
-				uS.getUser().getUsername());
+		messagingTemplate.convertAndSend("/topic/notification/username", uS.getUser().getUsername());
+
 		return uS;
 	}
 
