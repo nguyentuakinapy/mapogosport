@@ -62,11 +62,11 @@ const Popup = () => {
           <button
             className="claim-btn"
             onClick={() => {
-              window.location.href = "/voucher";
+              window.location.href = "/categories/products";
               handlePopupClick();
             }}
           >
-            Nhận Voucher ngay
+            Mua sắm ngay!
           </button>
 
           <div className="countdown">{timeDisplay}</div>

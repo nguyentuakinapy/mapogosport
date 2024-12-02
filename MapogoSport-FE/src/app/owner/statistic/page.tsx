@@ -55,7 +55,7 @@ export default function Home() {
   const [showModalRankOffline, setShowModalRankOffline] = useState(false);
   const [bookingByUsernameModal, setBookingByUsernameModal] = useState<Booking[]>([]);
   const [bookingByFullNameOffline, setBookingByFullNameOffline] = useState<Booking[]>([]);
-  const years = Array.from(new Array(10), (index) => currentYear - index);
+  const years = Array.from(new Array(10), (_,index) => currentYear - index);
   // Pagination
   const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
