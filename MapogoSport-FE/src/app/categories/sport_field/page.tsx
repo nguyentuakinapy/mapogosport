@@ -118,7 +118,7 @@ function Categories() {
                 </div>
             );
         }
-        return field.map((field) => {
+        return field.filter(item => item.status === "Hoạt động").map((field) => {
             const { fullStars, hasHalfStar, emptyStars } = calculateRating(field.fieldReviews);
             return (
                 <Col key={field.sportFieldId} lg={3} md={4} sm={6} xs={12} className="mb-4">
@@ -228,12 +228,6 @@ function Categories() {
                                 </div>
                             </Col>
                             <Col lg={10} md={9} sm={12}>
-                                <h3 className="title-section mb-4">
-                                    <span className="icon">
-                                        <Image className="img-fluid" alt="Flash Sale" width={40} height={40} src="/img/philcorbett-football.gif" unoptimized />
-                                    </span>
-                                    Danh sách khu vực sân
-                                </h3>
                                 <Row>
                                     <div className="section-header mb-4">
                                         <Image className="icon-sf" src={"/img/football-ground.png"} alt={"Icon SportField"} width={32} height={32} />

@@ -143,6 +143,16 @@ public class UserServiceImpl implements UserService {
 		UserSubscription uS = userSubscriptionDAO.findById(userSubscriptionId).get();
 		AccountPackage ap = accountPackageDAO.findById(accountPackageId).get();
 		uS.setAccountPackage(ap);
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		
+		LocalDate localDate = LocalDate.now();
+        LocalDate newDate = localDate.plusDays(ap.getDurationDays());
+		try {
+			uS.setStartDay(formatter.parse(String.valueOf(localDate)));
+			uS.setEndDay(formatter.parse(String.valueOf(newDate)));
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 		System.out.println("đã cập nhật");
 		userSubscriptionDAO.save(uS);
 
