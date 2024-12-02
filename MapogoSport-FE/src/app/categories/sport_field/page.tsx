@@ -235,6 +235,28 @@ function Categories() {
                                     Danh sách khu vực sân
                                 </h3>
                                 <Row>
+                                    <div className="section-header mb-4">
+                                        <Image className="icon-sf" src={"/img/football-ground.png"} alt={"Icon SportField"} width={32} height={32} />
+                                        <h1>
+                                            <span>
+                                                <span>
+                                                    <span>
+                                                        <Image width={314} height={2} src={"/img/line.png"} alt={"line"} className="line-left" />
+                                                    </span>
+                                                    <span className="diamond-left"></span>
+                                                </span>
+                                                <span className="title">
+                                                    <span>Danh sách sân</span>
+                                                </span>
+                                                <span>
+                                                    <span className="diamond-right"></span>
+                                                    <span>
+                                                        <Image width={314} height={2} src={"/img/line.png"} alt={"line"} className="line-right" />
+                                                    </span>
+                                                </span>
+                                            </span>
+                                        </h1>
+                                    </div>
                                     {renderContent()}
                                     {renderPagination()}
                                 </Row>
