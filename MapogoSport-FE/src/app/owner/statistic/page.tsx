@@ -1072,20 +1072,22 @@ export default function Home() {
     }
   };
 
-  return (
-    <Suspense fallback={<div>Đang tải...</div>}>
-      <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>THỐNG KÊ</h3>
-      <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
-        <Nav.Item>
-          <Nav.Link eventKey="all" className="tab-link">Doanh thu</Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="withdraw" className="tab-link">Tương tác với khách hàng</Nav.Link>
-        </Nav.Item>
-      </Nav>
-      <div className="mt-3">
-        {renderContent()}
-      </div>
-    </Suspense>
-  );
+  if (typeof window !== 'undefined') {
+    return (
+      <Suspense fallback={<div>Đang tải...</div>}>
+        <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>THỐNG KÊ</h3>
+        <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
+          <Nav.Item>
+            <Nav.Link eventKey="all" className="tab-link">Doanh thu</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="withdraw" className="tab-link">Tương tác với khách hàng</Nav.Link>
+          </Nav.Item>
+        </Nav>
+        <div className="mt-3">
+          {renderContent()}
+        </div>
+      </Suspense>
+    );
+  }
 }
