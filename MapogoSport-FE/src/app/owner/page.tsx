@@ -17,7 +17,6 @@ export default function Owner() {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [activeTab, setActiveTab] = useState<string>('profile');
-    const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
     const userData = useData();
     const [dataSport, setDataSport] = useState<SportField[]>();
 
@@ -220,19 +219,12 @@ export default function Owner() {
         }
     }
 
-    useEffect(() => {
-        const username = localStorage.getItem('username');
-        if (username) {
-            setUsernameFetchApi(`${BASE_URL}rest/user/${decodeString(username)}`);
-        }
-    }, []);
-
     const renderContent = () => {
         switch (activeTab) {
             case 'profile':
                 return (
                     <div>
-                        {usernameFetchApi && <ProfileContent usernameFetchApi={usernameFetchApi} />}
+                        {userData && <ProfileContent user={userData} />}
                     </div>
                 );
             case 'post':

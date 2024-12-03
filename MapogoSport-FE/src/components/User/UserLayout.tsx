@@ -10,7 +10,7 @@ export default function UserLayout({
 }) {
     return (
         <Container>
-            <Row className="py-3">
+            <Row className="pt-5">
                 <Col xs={12} md={3} lg={3}>
                     <Sidebar />
                 </Col>

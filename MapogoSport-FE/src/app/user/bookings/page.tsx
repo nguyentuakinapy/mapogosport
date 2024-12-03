@@ -142,7 +142,7 @@ const Bookings = () => {
     return (
         <Suspense fallback={<div>Đang tải...</div>}>
             <UserLayout>
-                <b className='text-danger' style={{ fontSize: '20px' }}>Danh sách đặt sân</b>
+                <div className='title-header' style={{ fontSize: '20px' }}>Danh sách đặt sân</div>
                 <div className="my-3">
                     <Row className="d-flex justify-content-between align-items-center">
                         <Col xs={12} md={4}>

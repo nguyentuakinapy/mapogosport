@@ -3,6 +3,9 @@
     overflow: hidden;
     margin-bottom: 15px;
     position: relative;
+    border-radius: 8px;
+    box-shadow: 0 4px 4px rgba(10, 10, 10, .15);
+    border: 1px solid black;
     a {
         text-decoration: none;
         color: black;
@@ -33,6 +36,8 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            color: #dc3545;
+            margin: 0 5px;
         }
         .product-price {
             font-size: 12px;
@@ -41,13 +46,11 @@
             line-height: 24px;
         }
     }
-    &:hover .product-card-inner .product-title{
-        opacity: 0;
-        transition: opacity .3s;
-    }
-    &:hover .product-card-inner .star-item{
-        opacity: 0;
-        transition: opacity .3s;
+    &:hover .product-card-inner{
+        .star-item, .product-title {
+            opacity: 0;
+            transition: opacity .3s;
+        }
     }
     .product-card-action {
         margin-top: 15px;
@@ -68,13 +71,78 @@
     .button-ajax {
         height: 55px;
         font-size: 13px;
-        letter-spacing: 1px;
         font-weight: 500;
         flex: 1;
-        padding: 0 10px;
         border: 1px solid;
         background: #fff;
         line-height: 48px;
+        margin-bottom: 10px;
         color: black;
+    }
+}
+
+.section-header {
+    font-weight: 400;
+    position: relative;
+    text-align: center;
+    top: 25px;
+    .icon-sf {
+        position: absolute;
+        top: -40px;
+        right: 535px;
+    }
+    h1 {
+        color: #c4b998;
+        .line-left {
+            padding-left: 70px;
+            vertical-align: middle;
+            width: 30%;
+            transform: rotate(180deg);
+        }
+        .diamond-left {
+            position: relative;
+            background-color: #142239;
+            font-size: 0;
+            &::before {
+                height: 10px;
+                width: 10px;
+                position: absolute;
+                top: -17px;
+                transform: rotate(45deg);
+                border: 1px solid #142239;
+                content: " ";
+                font-size: 0;
+                left: -69px;
+            }
+        }
+        .title {
+            color: #142239;
+            font-size: 24px;
+            letter-spacing: 5px;
+            position: relative;
+            text-transform: uppercase;
+            top: -4px;
+        }
+        .diamond-right {
+            position: relative;
+            background-color: #142239;
+            font-size: 0;
+            &::before {
+                height: 10px;
+                width: 10px;
+                position: absolute;
+                top: -16.7px;
+                transform: rotate(45deg);
+                border: 1px solid #142239;
+                content: " ";
+                font-size: 0;
+                left: 59px;
+            }
+        }
+        .line-right {
+            padding-left: 70px;
+            vertical-align: middle;
+            width: 30%;
+        }
     }
 }

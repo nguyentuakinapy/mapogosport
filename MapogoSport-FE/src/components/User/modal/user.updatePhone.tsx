@@ -61,12 +61,12 @@ const ModalUpdatePhone = (props: UserProps) => {
         setOtpValue('');
     }
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!otpValue || !newPhone) {
             toast.warning("Vui lòng nhập đầy đủ thông tin!")
             return;
         }
-        fetch(`${BASE_URL}rest/user/phoneNumber/${userData?.username}`, {
+        const res = await fetch(`${BASE_URL}rest/user/phoneNumber/${userData?.username}`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -75,44 +75,42 @@ const ModalUpdatePhone = (props: UserProps) => {
             body: JSON.stringify([{
                 phoneNumber: { phoneNumber: newPhone }
             }]),
-        }).then(async (res) => {
-            if (!res.ok) {
-                toast.error(`Thêm số điện thoại thành không thành công! Vui lòng thử lại sau!`);
-                return
-            }
-            mutate(`${BASE_URL}rest/user/${userData?.username}`);
-            toast.success('Thêm số điện thoại thành công!');
-            setPage(true);
-            setNewPhone('');
-            setOtpValue('');
-        })
+        });
+        if (!res.ok) {
+            toast.error(`Thêm số điện thoại thành không thành công! Vui lòng thử lại sau!`);
+            return
+        }
+        mutate(`${BASE_URL}rest/user/${userData?.username}`);
+        toast.success('Thêm số điện thoại thành công!');
+        setPage(true);
+        setNewPhone('');
+        setOtpValue('');
     }
 
-    const handleDelete = (phoneNumberUserId: number) => {
+    const handleDelete = async (phoneNumberUserId: number) => {
         if (userData && userData.phoneNumberUsers.length == 1) {
             toast.warning("Vui lòng thêm số điện thoại mới trước khi xóa số này!");
             return;
         }
         if (window.confirm('Bạn có chắc muốn xóa số điện thoại này?')) {
-            fetch(`${BASE_URL}rest/user/phoneNumber/${phoneNumberUserId}`, {
+            const res = await fetch(`${BASE_URL}rest/user/phoneNumber/${phoneNumberUserId}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
                     'Content-Type': 'application/json',
                 }
-            }).then(async (res) => {
-                if (!res.ok) {
-                    toast.error(`Xóa số điện thoại không thành công! Vui lòng thử lại sau!`);
-                    return
-                }
-                mutate(`${BASE_URL}rest/user/${userData?.username}`);
-                toast.success('Xóa số điện thoại thành công!');
-            })
+            });
+            if (!res.ok) {
+                toast.error(`Xóa số điện thoại không thành công! Vui lòng thử lại sau!`);
+                return
+            }
+            mutate(`${BASE_URL}rest/user/${userData?.username}`);
+            toast.success('Xóa số điện thoại thành công!');
         }
     }
 
-    const handleUpdateActive = (phoneNumberUserId: number, activeState: boolean) => {
-        fetch(`${BASE_URL}rest/user/phoneNumber/${phoneNumberUserId}`, {
+    const handleUpdateActive = async (phoneNumberUserId: number, activeState: boolean) => {
+        const res = await fetch(`${BASE_URL}rest/user/phoneNumber/${phoneNumberUserId}`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -121,14 +119,13 @@ const ModalUpdatePhone = (props: UserProps) => {
             body: JSON.stringify({
                 active: activeState
             }),
-        }).then(async (res) => {
-            if (!res.ok) {
-                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                return
-            }
-            mutate(`${BASE_URL}rest/user/${userData?.username}`);
-            toast.success('Cập nhật thành công!');
-        })
+        });
+        if (!res.ok) {
+            toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+            return
+        }
+        mutate(`${BASE_URL}rest/user/${userData?.username}`);
+        toast.success('Cập nhật thành công!');
     };
 
     const handleClick = () => {
@@ -136,12 +133,11 @@ const ModalUpdatePhone = (props: UserProps) => {
     }
 
     return (
-        <Modal show={showUpdatePhone} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
-            centered backdrop="static" keyboard={false}>
+        <Modal show={showUpdatePhone} centered backdrop="static" keyboard={false}>
             {page ?
                 <>
-                    <Modal.Header closeButton>
-                        <Modal.Title className="text-uppercase text-danger">Danh sách số điện thoại</Modal.Title>
+                    <Modal.Header>
+                        <Modal.Title className="text-uppercase text-danger fw-bold d-flex m-auto">Danh sách số điện thoại</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Button className="btn-profile mb-3 w-100" onClick={() => handleClick()}>
@@ -178,17 +174,17 @@ const ModalUpdatePhone = (props: UserProps) => {
                 </>
                 :
                 <>
-                    <Modal.Header closeButton>
-                        <Modal.Title className="text-uppercase text-danger">Cập nhật số điện thoại</Modal.Title>
+                    <Modal.Header>
+                        <Modal.Title className="text-uppercase text-danger fw-bold d-flex m-auto">Cập nhật số điện thoại</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group>
                             <Form.Label>Số điện thoại: <b className="text-danger">*</b></Form.Label>
-                            <Form.Control type="email" placeholder="Nhập số điện thoại mới"
+                            <Form.Control type="text" placeholder="Nhập số điện thoại mới"
                                 value={newPhone} onChange={(e) => setNewPhone(e.target.value)} />
                         </Form.Group>
                         <InputGroup className="my-3">
-                            <Form.Control type="email" placeholder="Mã OTP ######"
+                            <Form.Control type="text" placeholder="Mã OTP ######"
                                 value={otpValue} onChange={(e) => setOtpValue(e.target.value)} />
                             <Button variant="btn btn-profile" onClick={() => { coolDownTime() }}
                                 disabled={checkButton}>{checkButton ? timeLeft + 's' : 'Gửi mã'}</Button>

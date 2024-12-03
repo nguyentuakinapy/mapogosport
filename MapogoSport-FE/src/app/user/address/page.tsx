@@ -4,74 +4,53 @@ import { Button, OverlayTrigger, Tooltip, Form } from 'react-bootstrap'
 import UserLayout from '@/components/User/UserLayout'
 import ModalAddAddress from '@/components/User/modal/user.addNewAddress'
 import '../types/user.scss'
-import useSWR, { mutate } from 'swr'
+import { mutate } from 'swr'
 import { toast } from 'react-toastify'
 import ModalUpdateAddress from '@/components/User/modal/user.updateAddress'
-import { decodeString } from '@/components/Utils/Format'
-import Loading from '@/components/loading'
+import { useData } from '@/app/context/UserContext'
 
 export default function Address() {
-    const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-    const [username, setUsername] = useState<string | null>(null);
     const [addressUsers, setAddressUsers] = useState<AddressUsers[]>([]);
     const [showAddAddress, setShowAddAddress] = useState<boolean>(false);
     const [showUpdateAddress, setShowUpdateAddress] = useState<boolean>(false);
     const [selectedAddressUser, setSelectedAddressUser] = useState<AddressUsers>();
-
-    // const removePrefix = (name: string) => {
-    //     return name.replace(/^(Tỉnh|Thành phố|Quận|Huyện|Phường|Xã)\s*/, '').trim();
-    // };
+    const user = useData();
 
     useEffect(() => {
-        const storedUsername = localStorage.getItem('username');
-        if (storedUsername) {
-            setUsername(decodeString(storedUsername));
-        }
-    }, []);
-
-    const { data, error, isLoading } = useSWR(`${BASE_URL}rest/user/${username}`, fetcher, {
-        revalidateIfStale: false,
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-    });
-
-    useEffect(() => {
-        if (data && data.addressUsers) {
-            const sortedAddresses = data.addressUsers.sort(
+        if (user && user.addressUsers) {
+            const sortedAddresses = user.addressUsers.sort(
                 (a: AddressUsers, b: AddressUsers) => (b.active === a.active ? 0 : b.active ? 1 : -1)
             );
             setAddressUsers(sortedAddresses);
         }
-    }, [data]);
+    }, [user]);
 
     const handleEdit = (addressUser: AddressUsers) => {
         setSelectedAddressUser(addressUser);
         setShowUpdateAddress(true);
     };
 
-    const handleDelete = (addressUserId: number) => {
+    const handleDelete = async (addressUserId: number) => {
         if (window.confirm('Bạn có chắc muốn xóa địa chỉ này?')) {
-            fetch(`${BASE_URL}rest/user/address/${addressUserId}`, {
+            const res = await fetch(`${BASE_URL}rest/user/address/${addressUserId}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
                     'Content-Type': 'application/json',
                 }
-            }).then((res) => {
-                if (!res.ok) {
-                    toast.error(`Xóa địa chỉ không thành công! Vui lòng thử lại sau!`);
-                    return
-                }
-                mutate(`${BASE_URL}rest/user/${username}`);
-                toast.success('Xóa địa chỉ thành công!');
             })
+            if (!res.ok) {
+                toast.error(`Xóa địa chỉ không thành công! Vui lòng thử lại sau!`);
+                return
+            }
+            mutate(`${BASE_URL}rest/user/${user?.username}`);
+            toast.success('Xóa địa chỉ thành công!');
         }
     }
 
-    const handleUpdateActive = (addressUserId: number, activeState: boolean) => {
-        fetch(`${BASE_URL}rest/user/addressStatus/${addressUserId}`, {
+    const handleUpdateActive = async (addressUserId: number, activeState: boolean) => {
+        const res = await fetch(`${BASE_URL}rest/user/addressStatus/${addressUserId}`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -80,30 +59,25 @@ export default function Address() {
             body: JSON.stringify({
                 active: activeState
             }),
-        }).then(async (res) => {
-            if (!res.ok) {
-                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                return
-            }
-            mutate(`${BASE_URL}rest/user/${username}`);
-            toast.success('Cập nhật thành công!');
-        })
+        });
+        if (!res.ok) {
+            toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+            return
+        }
+        mutate(`${BASE_URL}rest/user/${user?.username}`);
+        toast.success('Cập nhật thành công!');
     };
 
     return (
         <Suspense fallback={<div>Đang tải...</div>}>
             <UserLayout>
-                <div className='mb-3 text-danger' style={{ fontSize: '20px' }}><b>Quản lý địa chỉ</b></div>
+                <div className='title-header' style={{ fontSize: '20px' }}>Quản lý địa chỉ</div>
                 <Button style={{ width: "100%" }} variant='danger' onClick={() => setShowAddAddress(true)}>
                     <i className="bi bi-plus-circle"></i> Thêm địa chỉ
                 </Button>
                 <div className='mt-4'>
-                    {isLoading ? (
-                        <div className="d-flex align-items-center justify-content-center" style={{ height: '50vh' }}>
-                            <Loading></Loading>
-                        </div>
-                    ) : error ? (
-                        <div className='text-danger'>Có lỗi xảy ra khi tải dữ liệu</div>
+                    {!user ? (
+                        <div>Đang tải...</div>
                     ) : (
                         addressUsers.length > 0 ? (
                             addressUsers.map((addressUser: AddressUsers) => (

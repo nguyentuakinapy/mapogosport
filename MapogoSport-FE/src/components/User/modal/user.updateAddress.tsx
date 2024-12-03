@@ -69,14 +69,14 @@ const ModalUpdateAddress = (props: UserProps) => {
         setShowUpdateAddress(false);
     };
 
-    const handleUpdate = () => {
+    const handleUpdate = async () => {
         if (!selectedProvince || !selectedDistrict || !selectedWard || !addressDetail) {
             toast.error("Hãy điền đầy đủ thông tin!");
             return;
         }
         const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
-            fetch(`${BASE_URL}rest/user/address/${addressUser?.addressUserId}`, {
+            const res = await fetch(`${BASE_URL}rest/user/address/${addressUser?.addressUserId}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -90,23 +90,21 @@ const ModalUpdateAddress = (props: UserProps) => {
                     },
                     addressDetail: addressDetail
                 }),
-            }).then(async (res) => {
-                if (!res.ok) {
-                    toast.error(`Cập nhật không thành công! Vui lòng thử lại!`);
-                    return
-                }
-                handleClose();
-                mutate(`${BASE_URL}rest/user/${username}`);
-                toast.success('Cập nhật thành công!');
-            })
+            });
+            if (!res.ok) {
+                toast.error(`Cập nhật không thành công! Vui lòng thử lại!`);
+                return
+            }
+            handleClose();
+            mutate(`${BASE_URL}rest/user/${username}`);
+            toast.success('Cập nhật thành công!');
         }
     };
     if (error) {
         return (
-            <Modal show={showUpdateAddress} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
-                centered backdrop="static" keyboard={false}>
-                <Modal.Header closeButton>
-                    <Modal.Title className="text-uppercase text-danger">Thêm địa chỉ</Modal.Title>
+            <Modal show={showUpdateAddress} centered backdrop="static" keyboard={false}>
+                <Modal.Header>
+                    <Modal.Title className="text-uppercase text-danger fw-bold d-flex m-auto">Cập nhật địa chỉ</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     Đã xảy ra lỗi trong khi tải dữ liệu! Vui lòng thử lại sau hoặc báo cho quản trị viên!
@@ -118,62 +116,59 @@ const ModalUpdateAddress = (props: UserProps) => {
         )
     }
     return (
-        <Modal show={showUpdateAddress} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
-            centered backdrop="static" keyboard={false}>
-            <Modal.Header closeButton>
-                <Modal.Title className="text-uppercase text-danger">Cập nhật địa chỉ</Modal.Title>
+        <Modal show={showUpdateAddress} centered backdrop="static" size="lg" keyboard={false}>
+            <Modal.Header>
+                <Modal.Title className="text-uppercase text-danger fw-bold d-flex m-auto">Cập nhật địa chỉ</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form>
-                    <Row>
-                        <Col>
-                            <Form.Group className="mb-3">
-                                <FloatingLabel controlId="city" label={<span>Tỉnh/Thành <b className="text-danger">*</b></span>}>
-                                    <Form.Select aria-label="Floating label select example"
-                                        onChange={handleProvinceChange} value={selectedProvince}>
-                                        <option>-- Nhấn để chọn --</option>
-                                        {data?.map((province: Province) => (
-                                            <option key={province.Id} value={province.Name}>{province.Name}</option>
-                                        ))}
-                                    </Form.Select>
-                                </FloatingLabel>
-                            </Form.Group>
+                <Row>
+                    <Col>
+                        <Form.Group className="mb-3">
+                            <FloatingLabel controlId="city" label={<span>Tỉnh/Thành <b className="text-danger">*</b></span>}>
+                                <Form.Select aria-label="Floating label select example"
+                                    onChange={handleProvinceChange} value={selectedProvince}>
+                                    <option>-- Nhấn để chọn --</option>
+                                    {data?.map((province: Province) => (
+                                        <option key={province.Id} value={province.Name}>{province.Name}</option>
+                                    ))}
+                                </Form.Select>
+                            </FloatingLabel>
+                        </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <FloatingLabel controlId="ward" label={<span>Phường/Xã <b className="text-danger">*</b></span>}>
-                                    <Form.Select aria-label="Floating label select example" onChange={handleWardChange}
-                                        value={selectedWard} disabled={!selectedDistrict}>
-                                        <option value="">-- Nhấn để chọn --</option>
-                                        {wards.map((ward) => (
-                                            <option key={ward.Id} value={ward.Name}>{ward.Name}</option>
-                                        ))}
-                                    </Form.Select>
-                                </FloatingLabel>
-                            </Form.Group>
-                        </Col>
-                        <Col>
-                            <Form.Group className="mb-3">
-                                <FloatingLabel controlId="district" label={<span>Quận/Huyện <b className="text-danger">*</b></span>}>
-                                    <Form.Select aria-label="Floating label select example" onChange={handleDistrictChange}
-                                        value={selectedDistrict} disabled={!selectedProvince}>
-                                        <option value="">-- Nhấn để chọn --</option>
-                                        {districts.map((district) => (
-                                            <option key={district.Id} value={district.Name}>{district.Name}</option>
-                                        ))}
-                                    </Form.Select>
-                                </FloatingLabel>
-                            </Form.Group>
+                        <Form.Group className="mb-3">
+                            <FloatingLabel controlId="ward" label={<span>Phường/Xã <b className="text-danger">*</b></span>}>
+                                <Form.Select aria-label="Floating label select example" onChange={handleWardChange}
+                                    value={selectedWard} disabled={!selectedDistrict}>
+                                    <option value="">-- Nhấn để chọn --</option>
+                                    {wards.map((ward) => (
+                                        <option key={ward.Id} value={ward.Name}>{ward.Name}</option>
+                                    ))}
+                                </Form.Select>
+                            </FloatingLabel>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group className="mb-3">
+                            <FloatingLabel controlId="district" label={<span>Quận/Huyện <b className="text-danger">*</b></span>}>
+                                <Form.Select aria-label="Floating label select example" onChange={handleDistrictChange}
+                                    value={selectedDistrict} disabled={!selectedProvince}>
+                                    <option value="">-- Nhấn để chọn --</option>
+                                    {districts.map((district) => (
+                                        <option key={district.Id} value={district.Name}>{district.Name}</option>
+                                    ))}
+                                </Form.Select>
+                            </FloatingLabel>
+                        </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Floating>
-                                    <Form.Control size="sm" type="text" placeholder="Địa chỉ chi tiết"
-                                        value={addressDetail} onChange={(e) => setAddressDetail(e.target.value)} />
-                                    <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
-                                </Form.Floating>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                </Form>
+                        <Form.Group className="mb-3">
+                            <Form.Floating>
+                                <Form.Control size="sm" type="text" placeholder="Địa chỉ chi tiết"
+                                    value={addressDetail} onChange={(e) => setAddressDetail(e.target.value)} />
+                                <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
+                            </Form.Floating>
+                        </Form.Group>
+                    </Col>
+                </Row>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={() => handleClose()}>Hủy</Button>

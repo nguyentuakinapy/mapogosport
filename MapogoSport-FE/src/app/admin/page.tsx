@@ -1,6 +1,6 @@
 'use client'
 import ProfileContent from "@/components/User/modal/user.profile";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { useData } from "../context/UserContext";
 import BlogManager from "@/components/blog/blog-manager";
@@ -8,25 +8,15 @@ import Wallet from "@/components/User/modal/wallet";
 import AuthorityComponent from "@/components/Admin/authority";
 
 export default function Owner() {
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
     const [activeTab, setActiveTab] = useState<string>('all');
-    const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
     const userData = useData();
-
-    useEffect(() => {
-        if (userData) {
-            setUsernameFetchApi(`${BASE_URL}rest/user/${userData.username}`);
-        }
-    }, [userData]);
-
 
     const renderContent = () => {
         switch (activeTab) {
             case 'all':
                 return (
                     <div>
-                        {usernameFetchApi && <ProfileContent usernameFetchApi={usernameFetchApi} />}
+                        {userData && <ProfileContent user={userData} />}
                     </div>
                 );
             case 'deposit':

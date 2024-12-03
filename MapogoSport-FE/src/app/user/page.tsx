@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import UserLayout from '@/components/User/UserLayout';
 import './types/user.scss';
 import ProfileContent from '@/components/User/modal/user.profile';
@@ -7,28 +7,16 @@ import { useData } from '../context/UserContext';
 import Loading from '@/components/loading';
 
 export default function RootLayout() {
-    const [usernameFetchApi, setUsernameFetchApi] = useState<string>('');
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
     const user = useData();
-    useEffect(() => {
-        if (user) {
-            setUsernameFetchApi(`${BASE_URL}rest/user/${user.username}`);
-        }
-    }, [user]);
 
     return (
         <Suspense fallback={<div>Đang tải...</div>}>
             <UserLayout>
-                <div className='mb-3 text-danger' style={{ fontSize: '20px' }}>
-                    <b>Thông tin cá nhân</b>
-                </div>
-                {!usernameFetchApi ?
-                    <div className="d-flex align-items-center justify-content-center" style={{ height: '50vh' }}>
+                <div className='title-header' style={{ fontSize: '20px' }}>Thông tin cá nhân</div>
+                {!user ? 
+                  <div className="d-flex align-items-center justify-content-center" style={{ height: '50vh' }}>
                         <Loading></Loading>
-                    </div>
-                    :
-                    <ProfileContent usernameFetchApi={usernameFetchApi} />}
+                  </div> : <ProfileContent user={user} />}
             </UserLayout>
         </Suspense>
     );
