@@ -8,6 +8,10 @@ import useSWR from "swr";
 import "../admin.scss";
 import ModalProductAddNewSize from "./product.addNewSize";
 
+type ProductFormData = {
+  formData: FormData;
+};
+
 interface UserProps {
   showAddProduct: boolean;
   setShowAddProduct: (v: boolean) => void;
@@ -53,9 +57,21 @@ const ProductAddNew = (props: UserProps) => {
   const [newColor, setNewColor] = useState<string>("");
 
   const { data: productDetails, error: errorProductDetails, mutate: mutateProductDetails, isLoading: productDetailsLoading } =
-    useSWR<ProductDetail[]>(currentProduct && `${BASE_URL}rest/product-detail/${currentProduct?.productId}`, fetcher);
+    useSWR<ProductDetail[]>(currentProduct && `${BASE_URL}rest/product-detail/${currentProduct?.productId}`, fetcher,
+      {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+      }
+    );
 
-  const { data: productDetailGallery } = useSWR(selectedProductDetail && `${BASE_URL}rest/gallery/${selectedProductDetail?.productDetailId}`, fetcher);
+  const { data: productDetailGallery, mutate: mutateProductDetailGallery } = useSWR(selectedProductDetail && `${BASE_URL}rest/gallery/${selectedProductDetail?.productDetailId}`, fetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  );
 
   useEffect(() => {
     if (productDetailGallery) {
@@ -63,9 +79,6 @@ const ProductAddNew = (props: UserProps) => {
     }
   }, [productDetailGallery]);
 
-  type ProductFormData = {
-    formData: FormData;
-  };
 
   // fech data product
   const mutationAddProdcut = useMutation({
@@ -350,11 +363,10 @@ const ProductAddNew = (props: UserProps) => {
     // Chế độ thêm: chỉ hiển thị ảnh xem trước của tệp đã chọn
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-
       setPreviewImageProductColor(URL.createObjectURL(file)); // Tạo URL xem trước
-
       setImageProductDetail(file);
-      // setPreviewNewColorImage(null); // Xóa ảnh xem trước
+      console.log('dddd=>>>>>, ', file);
+      
     }
   };
   // Hàm để kiểm tra các trường bắt buộc
@@ -535,9 +547,13 @@ const ProductAddNew = (props: UserProps) => {
           }
         );
       } else if (currentProduct) {
+        console.log('prod₫>>>>>>>>: ', productDetails?.length);
+        
         // Trường hợp sản phẩm chưa có ProductDetail nào
         if (!productDetails || productDetails.length === 0) {
           // Chỉ cho phép nếu có đủ thông tin để tạo ProductDetail mới
+          console.log('pro dang tróng ');
+          
           if (
             newColor !== "" &&
             selectedGalleryFiles.length > 0 &&
@@ -546,22 +562,29 @@ const ProductAddNew = (props: UserProps) => {
             canProceed = true; // Cho phép thêm ProductDetail mới nếu đủ thông tin
           }
         } else {
+          console.log('pro ko tróng ');
+
           // Nếu sản phẩm đã tồn tại ProductDetail
-          if (!selectedProductDetail) {
-            // Nếu `selectedProductDetail` là mảng rỗng, kiểm tra các điều kiện để thêm mới
-            if (
-              newColor !== "" &&
-              selectedGalleryFiles.length > 0 &&
-              previewImageProductColor !== null
-            ) {
-              canProceed = true; // Có đủ thông tin để thêm mới
+          if(productDetails.length<0)
+          {
+
+            if (!selectedProductDetail) {
+              console.log('chưa chọn product detail');
+              
+              // Nếu `selectedProductDetail` là mảng rỗng, kiểm tra các điều kiện để thêm mới
+              if (newColor !== "" &&selectedGalleryFiles.length > 0 &&previewImageProductColor !== null) {
+                canProceed = true; // Có đủ thông tin để thêm mới
+              } else {
+                console.log('chạy vòa can ₫ false');              
+                canProceed = false; // Ngăn việc tạo mới khi thiếu thông tin
+              }
             } else {
-              canProceed = false; // Ngăn việc tạo mới khi thiếu thông tin
+              // Trường hợp có `selectedProductDetail` cụ thể để cập nhật
+              canProceed = true; // Cho phép cập nhật nếu đã chọn `ProductDetail`
             }
-          } else {
-            // Trường hợp có `selectedProductDetail` cụ thể để cập nhật
-            canProceed = true; // Cho phép cập nhật nếu đã chọn `ProductDetail`
-          }
+          }else{
+            canProceed = true;
+          }                                    
         }
 
         // Kiểm tra nếu không đủ điều kiện để tiếp tục, dừng xử lý và cảnh báo
@@ -602,6 +625,7 @@ const ProductAddNew = (props: UserProps) => {
                   selectedProductDetail.productDetailId
                 );
                 mutateProductDetails();
+                mutateProductDetailGallery();
               } else if (newColor !== "") {
                 handleAddNewProductDetail(currentProduct?.productId);
               }
@@ -621,6 +645,7 @@ const ProductAddNew = (props: UserProps) => {
     }
     onFetch();
     mutateProductDetails();
+    mutateProductDetailGallery();
     handleClose();
   };
 
@@ -845,6 +870,7 @@ const ProductAddNew = (props: UserProps) => {
             }
             toast.success("Thêm sản phẩm chi tiết thành công");
             mutateProductDetails();
+            mutateProductDetailGallery();
           },
         }
       );
@@ -901,6 +927,7 @@ const ProductAddNew = (props: UserProps) => {
       toast.success("Cập nhật sản phẩm chi tiết thành công");
       onFetch();
       mutateProductDetails()
+      mutateProductDetailGallery();
     } catch (error) {
       toast.error("Lỗi cập nhật sản phẩm chi tiết");
     }
@@ -919,7 +946,7 @@ const ProductAddNew = (props: UserProps) => {
 
       toast.success("Xóa sản phẩm chi tiết thành công");
       // handleClose();
-      mutateProductDetails();
+      mutateProductDetails();      
     } catch (error) {
       toast.error("Xóa sản phẩm chi tiết không thành công");
     }
@@ -938,6 +965,7 @@ const ProductAddNew = (props: UserProps) => {
       );
 
       toast.success("Xóa Gallery chi tiết thành công");
+      mutateProductDetailGallery();
     } catch (error) {
       toast.error("Xóa Gallery không thành công");
     }
@@ -1310,7 +1338,7 @@ const ProductAddNew = (props: UserProps) => {
                         return (
                           <div
                             key={detailDemo.productDetailId}
-                            className="d-inline-block me-2 position-relative color-wrapper"
+                            className="d-inline-block me-2 position-relative color-wrapper border border-dark rounded-circle"
                             onClick={() => {
                               setActiveTab("add-details");
                               handleSelectedColor(detailDemo);
@@ -1376,7 +1404,7 @@ const ProductAddNew = (props: UserProps) => {
                       <div className="image-container-new">
                         {/* Nếu chưa có ảnh, hiển thị ảnh mặc định */}
                         <Image
-                          src={selectedProductDetail?.image || previewImageProductColor || "/images/logo.png"}
+                          src={ previewImageProductColor || selectedProductDetail?.image || "/images/logo.png"}
                           alt="Product image"
                           className="img-thumbnail shadow-sm" // Thêm bóng đổ
                         />
@@ -1546,7 +1574,7 @@ const ProductAddNew = (props: UserProps) => {
                           </div>
                         ))
                       ) : (
-                        <span className="text-muted">Chưa có gallery</span>
+                        <span className="text-muted">Chưa có thư viện ảnh</span>
                       )}
                     </div>
                   </div>
