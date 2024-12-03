@@ -3,6 +3,8 @@ import React, { Suspense, useState } from 'react';
 import { Button, Col, FormSelect, Pagination, Row, Table } from 'react-bootstrap';
 import useSWR from 'swr';
 import { formatDateVN, formatPrice } from '@/components/Utils/Format';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import { toast } from 'react-toastify';
 import ModalUpdateSubcription from '@/components/Admin/Modal/modal.UpdateSubciption';
 import ModalCreateSubcription from '@/components/Admin/Modal/modal.CreateSubcription';
@@ -35,12 +37,12 @@ const SubcriptionPage = () => {
         revalidateOnReconnect: false,
     });
 
-
-
     const handleEdit = (pkg: AccountPackage) => {
         setSelectedPackage(pkg);
         setShowUpdateSub(true);
+
     };
+
 
     const handleUnActive = async (pkg: AccountPackage) => {
         const confirmed = window.confirm(
@@ -92,21 +94,19 @@ const SubcriptionPage = () => {
 
     const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         setSelectedValue(e.target.value);
+        setCurrentPage(1);  // Reset to the first page when selecting a new package
     };
 
     const itemsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
 
-    // Filter the subscriptions based on the selected package
-    const filteredUserSubs = dataUserSubs?.filter((userSubs: UserSubscription) =>
-        selectedValue ? userSubs.accountPackage.packageName === selectedValue : true
-    );
+    // For dataUserSubs
+    const totalPagesDataUserSubs = dataUserSubs ? Math.ceil((dataUserSubs?.length || 0) / itemsPerPage) : 1;
+    const currentUserSubsDataUserSubs = dataUserSubs?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) || [];
 
-    // Get the total number of pages
-    const totalPages = filteredUserSubs ? Math.ceil(filteredUserSubs.length / itemsPerPage) : 1;
-
-    // Get the current page data
-    const currentUserSubs = filteredUserSubs?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    // For filterDataUserSubs
+    const totalPagesFilterDataUserSubs = filterDataUserSubs ? Math.ceil((filterDataUserSubs?.length || 0) / itemsPerPage) : 1;
+    const currentUserSubsFilterDataUserSubs = filterDataUserSubs?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) || [];
 
     const handlePreviousPage = () => {
         if (currentPage > 1) {
@@ -115,12 +115,14 @@ const SubcriptionPage = () => {
     };
 
     const handleNextPage = () => {
+        const totalPages = selectedValue ? totalPagesFilterDataUserSubs : totalPagesDataUserSubs;
         if (currentPage < totalPages) {
             setCurrentPage(currentPage + 1);
         }
     };
 
     const renderPagination = () => {
+        const totalPages = selectedValue ? totalPagesFilterDataUserSubs : totalPagesDataUserSubs;
         const pages = [];
         for (let i = 1; i <= totalPages; i++) {
             pages.push(
@@ -139,6 +141,63 @@ const SubcriptionPage = () => {
         );
     };
 
+    const [exportOption, setExportOption] = useState(''); // State để điều khiển giá trị của FormSelect
+    const exportToExcel = async () => {
+        try {
+            const getOrderData = () => {
+                return selectedValue ? filterDataUserSubs : dataUserSubs;
+            };
+
+            const workbook = new ExcelJS.Workbook();
+            const worksheet1 = workbook.addWorksheet('Danh sách gói đăng ký');
+
+            // Định dạng các cột
+            worksheet1.columns = [
+                { header: 'STT', key: 'index', width: 5 },
+                { header: 'Tên Khách Hàng', key: 'fullname', width: 25 },
+                { header: 'Tên gói', key: 'packageName', width: 15 },
+                { header: 'Ngày đăng ký', key: 'startDay', width: 15 },
+                { header: 'Ngày hết hạn', key: 'endDay', width: 15 },
+            ];
+
+            const orderData = getOrderData();
+
+            if (!orderData || orderData.length === 0) {
+                toast.warning('Không có dữ liệu để xuất!');
+                return;
+            }
+
+            orderData.forEach((userSubs: UserSubscription, index: number) => {
+                worksheet1.addRow({
+                    index: index + 1,
+                    fullname: userSubs?.user?.fullname || 'Chưa có tên',
+                    packageName: userSubs?.accountPackage?.packageName || 'Chưa có tên gói',
+                    startDay: formatDateVN(userSubs?.startDay),
+                    endDay: userSubs?.accountPackage?.packageName === "Gói miễn phí" ? "Không giới hạn" : formatDateVN(userSubs?.endDay),
+                });
+            });
+
+            // Generate filename
+            const today = new Date();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const day = today.getDate().toString().padStart(2, '0');
+            const filename = `Danh Sách gói đăng ký (${day}/${month}).xlsx`;
+
+            // Save the file
+            const buffer = await workbook.xlsx.writeBuffer();
+            saveAs(new Blob([buffer]), filename);
+            setExportOption(''); // Reset nút về mặc định
+
+            // Success message
+            toast.success('Đã xuất file Excel thành công!');
+        } catch (error) {
+            console.error('Error exporting Excel file:', error);
+            toast.error('Có lỗi xảy ra khi xuất file!');
+        }
+    };
+
+
+
     return (
         <>
             <Suspense fallback={<div>Đang tải...</div>}>
@@ -156,7 +215,7 @@ const SubcriptionPage = () => {
                                 <div className="card packageUpdate">
                                     <b className="ms-3 mt-3 fs-5">{pkg.packageName || "Gói không tên"}</b>
                                     <div className="body-package my-3">
-                                        {pkg.accountPackageBenefits.map((benefitItem, idx) => (
+                                        {pkg.accountPackageBenefits?.map((benefitItem, idx) => (
                                             <div key={idx}>
                                                 <i className="bi bi-check-circle me-2"></i>
                                                 {benefitItem.benefit.description}
@@ -180,33 +239,53 @@ const SubcriptionPage = () => {
                 <ModalCreateSubcription showCreateSub={showCreateSub} setShowCreateSub={setShowCreateSub} />
             </Suspense>
 
-            <FormSelect name="" id="" className='mt-5' style={{ width: '200px', marginLeft: 'auto' }} onChange={handleOnChange}>
-                <option value="">----Chọn gói----</option>
-                {data?.map((pkg: AccountPackage) => (
-                    <option key={pkg.packageName} value={pkg.accountPackageId}>
-                        {pkg.packageName}
-                    </option>
-                ))}
-            </FormSelect>
+            <div className="d-flex">
+                <FormSelect name="" id="" className='mt-5 me-2' style={{ width: '200px', marginLeft: 'auto' }} onChange={handleOnChange}>
+                    <option value="">----Chọn gói----</option>
+                    {data?.map((pkg: AccountPackage) => (
+                        <option key={pkg.packageName} value={pkg.accountPackageId}>
+                            {pkg.packageName}
+                        </option>
+                    ))}
+                </FormSelect>
+                <FormSelect
+                    name=""
+                    id=""
+                    className="mt-5"
+                    style={{ width: '200px' }}
+                    value={exportOption} // Liên kết giá trị với state
+                    onChange={(e) => {
+                        const selectedValue = e.target.value;
+                        setExportOption(selectedValue); // Cập nhật state
+                        if (selectedValue === 'Excel') {
+                            exportToExcel();
+                        }
+                    }}
+                >
+                    <option value="">----Export----</option>
+                    <option value="Excel">Excel</option>
+                </FormSelect>
+            </div>
+
 
             <Table striped bordered hover className='mt-4'>
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Họ và tên</th>
+                        <th>Tên Khách Hàng</th>
                         <th>Tên gói</th>
                         <th>Ngày đăng ký</th>
                         <th>Ngày hết hạn</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {(filterDataUserSubs || currentUserSubs || []).map((userSubs: UserSubscription, index: number) => (
+                    {(selectedValue ? currentUserSubsFilterDataUserSubs : currentUserSubsDataUserSubs).map((userSubs: UserSubscription, index: number) => (
                         <tr key={userSubs.userSubscriptionId}>
                             <td>{index + 1}</td>
                             <td>{userSubs.user.fullname}</td>
                             <td>{userSubs.accountPackage.packageName}</td>
                             <td>{formatDateVN(userSubs.startDay)}</td>
-                            <td>{formatDateVN(userSubs.endDay)}</td>
+                            <td>{userSubs.accountPackage.packageName == "Gói miễn phí" ? "không giới hạn" : userSubs.endDay}</td>
                         </tr>
                     ))}
                 </tbody>
