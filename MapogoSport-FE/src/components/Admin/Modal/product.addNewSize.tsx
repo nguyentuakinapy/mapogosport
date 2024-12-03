@@ -23,7 +23,6 @@ const ModalProductAddNewSize = (props: IProps) => {
   const [isShowAddSizeModal, setIsShowAddSizeModal] = useState(false); // State để mở modal thêm kích cỡ mới
   const [newSizeName, setNewSizeName] = useState(""); // State cho tên kích cỡ mới
   const [sizes, setSizes] = useState<Size[]>([]); // Save list of sizes from API
-  const [displayPrice, setDisplayPrice] = useState<number>(0);
   const [formValues, setFormValues] = useState<{ sizeId: number; price: number; quantity: number; }>({ sizeId: 0, price: 0, quantity: 0 });
   const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -95,7 +94,7 @@ const ModalProductAddNewSize = (props: IProps) => {
     const rawValue = e.target.value.replace(/\D/g, ""); // Loại bỏ tất cả ký tự không phải số
     const numericValue = rawValue === "" ? 0 : Number(rawValue); // Chuyển giá trị thành số
     setFormValues((prevValues) => ({ ...prevValues, price: numericValue }));
-    setDisplayPrice(numericValue);
+    // setDisplayPrice(numericValue);
   };
 
   // API to create a ProductDetailSize
@@ -197,7 +196,7 @@ const ModalProductAddNewSize = (props: IProps) => {
                 <Form.Group className="mt-3">
                   <Form.Label>Giá</Form.Label>
                   <InputGroup>
-                    <Form.Control type="text" placeholder="Nhập giá" value={displayPrice.toLocaleString()}
+                    <Form.Control type="text" placeholder="Nhập giá" value={formValues.price.toLocaleString()} 
                       onChange={handlePriceChange} />
                     <InputGroup.Text style={{ fontSize: '15px', fontWeight: 700, border: '1px solid' }}>VNĐ</InputGroup.Text>
                   </InputGroup>
