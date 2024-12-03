@@ -365,17 +365,7 @@ export default function ChatBox() {
     console.log("contentStr ++++++>>>>>>>> ",contentStr);
     console.log("isString(_content) ++++++>>>>>>>> ",isString(_content));
 
-    if (
-      contentStr.trim() !== "" &&
-      stompClient.current &&
-      stompClient.current.connected
-    ) {
-      // const newMessage = {
-      //   sender: currentUser?.username, // Tên người gửi
-      //   receiver: receiver, // Tên người nhận
-      //   content: `${contentStr}/SENDER=${currentUser?.username}-RECEIVER=${receiver}`,
-      //   createdAt: new Date(),
-      // } ;
+    if ( contentStr.trim() !== "" && stompClient.current && stompClient.current.connected) {
        const newMessage = {
         messageId: 0,
         sender: currentUser?.username ?? "NOOOOO", // Tên người gửi
@@ -384,16 +374,6 @@ export default function ChatBox() {
         createdAt: new Date(),
         isDelete: false,
       };
-
-      // const newMessage: Message = {
-      //   messageId: Date.now(), // Tạm dùng createdAt làm ID duy nhất
-      //   sender: { ...defaultUser, username: currentUser?.username || "Unknown" }, // Cần đảm bảo kiểu `User`
-      //   receiver: { ...defaultUser, username: receiver }, // Cần đảm bảo kiểu `User`
-      //   content: `${contentStr}/SENDER=${currentUser?.username}-RECEIVER=${receiver}`,
-      //   createdAt: new Date(),
-      //   isDelete: false,
-      //   user: { ...defaultUser, username: currentUser?.username || "Unknown" }, // Cần đảm bảo kiểu `User`
-      // };
       
       console.log("Đang gửi tin nhắn");
       console.log("newMessage ", JSON.stringify(newMessage));
@@ -591,33 +571,6 @@ export default function ChatBox() {
   useEffect(() => {
     if (dataByReceiverUsernameOrCurrentUser) {
       // Nhóm các tin nhắn theo người gửi hoặc người nhận
-//    const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
-//   (acc: { [username: string]: GroupedMessage }, message: Message2) => {
-//     // Kiểm tra kiểu của receiver và sender trước khi truy cập username
-//     const username =
-//       typeof message.receiver === "string" || typeof message.sender === "string"
-//         ? message.receiver // Nếu là string, trực tiếp dùng
-//         : message.receiver.username === currentUser?.username
-//         ? message.sender.username
-//         : message.receiver.username;
-
-//     if (!acc[username]) {
-//       acc[username] = {
-//         user:
-//           typeof message.receiver === "string" ? { username: message.receiver } : message.receiver,
-//         content: message.content,
-//         createdAt: message.createdAt,
-//       };
-//     } else if (new Date(message.createdAt) > new Date(acc[username].createdAt)) {
-//       acc[username].content = message.content;
-//       acc[username].createdAt = message.createdAt;
-//     }
-
-//     return acc;
-//   },
-//   {}
-// );
-
       const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
         (acc:  { [username: string]: GroupedMessage2 }, message: Message2) => {
           const username =
@@ -643,38 +596,6 @@ export default function ChatBox() {
         },
         {}
       );
-      
-      // const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
-      //   (acc: Record<string, GroupedMessage>, message: Message) => {
-      //     const sender = typeof message.sender === 'object' ? message.sender : null;
-      //     const receiver = typeof message.receiver === 'object' ? message.receiver : null;
-  
-      //     // Lấy username nếu receiver là User, nếu không sử dụng string
-      //     const username: string =
-      //       receiver && receiver.username === currentUser?.username
-      //         ? (sender?.username ?? "")  // nếu sender là null, sử dụng chuỗi rỗng
-      //         : (receiver ? receiver.username : message.receiver);
-  
-      //     if (!username) return acc; // Nếu không có username hợp lệ, bỏ qua tin nhắn này
-  
-      //     // Cập nhật groupedMessages
-      //     if (!acc[username]) {
-      //       acc[username] = {
-      //         user: receiver && receiver.username === currentUser?.username ? sender ?? undefined : receiver ?? undefined,
-      //         content: message.content,
-      //         createdAt: message.createdAt,
-      //       };
-      //     } else if (new Date(message.createdAt) > new Date(acc[username].createdAt!)) {
-      //       acc[username].content = message.content;
-      //       acc[username].createdAt = message.createdAt;
-      //     }
-  
-      //     return acc;
-      //   },
-      //   {} as Record<string, GroupedMessage>
-      // );
-    
-      
 
       let groupedMessagesArray = Object.values(groupedMessages);
 
@@ -733,27 +654,6 @@ export default function ChatBox() {
     }
   }, [dataByReceiverUsernameOrCurrentUser]);
   
-   
-  // const formatTime = (createdAt: Date | string) => {
-  //   const date = createdAt instanceof Date ? createdAt : new Date(createdAt);
-  //   if (isNaN(date.getTime())) return "Invalid Date";
-  //   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  // };
-  // const formatTime = (createdAt: Date | string) => {
-  //   const date = createdAt instanceof Date ? createdAt : new Date(createdAt);
-  //   if (isNaN(date.getTime())) return "Invalid Date";
-  
-  //   const options: Intl.DateTimeFormatOptions = {
-  //     year: "numeric",
-  //     month: "2-digit",
-  //     day: "2-digit",
-  //     hour: "2-digit",
-  //     minute: "2-digit",
-  //     hour12: false, // Sử dụng định dạng 24 giờ
-  //   };
-  
-  //   return date.toLocaleString("vi-VN", options); // Dùng định dạng cho ngôn ngữ Việt Nam
-  // };
   const formatTime = (createdAt: Date | string) => {
     const date = createdAt instanceof Date ? createdAt : new Date(createdAt);
     if (isNaN(date.getTime())) return "Invalid Date";
@@ -810,6 +710,15 @@ export default function ChatBox() {
       toast.warning("Vui lòng đăng nhập để sử dụng chat");
     } else {
       setShowChatList(!showChatList); //nếu true thì thực hiện mở form chat
+      if(currentUser?.username !== dataAdmin?.username){
+        if(showChatList === false){
+          if(dataAdmin){
+            handleSelectChat(dataAdmin);
+          }
+        }else{
+          setShowChatList(!showChatList); 
+        }
+      }
       mutate(); // 
       mutateByReceiverUsernameOrCurrentUser();
     }
