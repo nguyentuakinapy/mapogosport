@@ -10,6 +10,8 @@ import Link from 'next/link';
 import Loading from '@/components/loading';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
 
 const Cart = () => {
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -28,6 +30,22 @@ const Cart = () => {
     if (username) {
       setUsername(decodeString(username));
     }
+
+    const socket = new SockJS(`${BASE_URL}ws`); // Địa chỉ endpoint WebSocket
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+      stompClient.subscribe('/topic/login', (message) => {
+        const userSession = sessionStorage.getItem('user');
+        if (userSession && message.body == decodeString(String(localStorage.getItem('username')))) {
+          setUsername(message.body);
+        }
+      });
+    });
+
+    return () => {
+      stompClient.disconnect();
+    };
   }, []);
 
   const { data, error } = useSWR(username && `${BASE_URL}rest/cart/${username}`, fetcher);
@@ -239,13 +257,12 @@ const Cart = () => {
   };
 
   if (!username) return <HomeLayout>
-    <div className="d-flex justify-content-center align-items-center" style={{ height: 'calc(100vh - 90px)' }}>
+    <div className="d-flex justify-content-center align-items-center" style={{ height: 'calc(100vh - 100px)' }}>
       <div className="text-center">
         <i className="bi bi-bag-plus-fill" style={{ fontSize: '100px' }}></i>
         <p className="text-muted fs-5">Bạn chưa đăng nhập
           <br /> Vui lòng <strong>&ldquo;đăng nhập&rdquo;</strong> để xem giỏ hàng của bạn!</p>
-        <Link className='btn btn-dark text-white mb-5' style={{ textDecoration: 'none', color: '#333' }}
-          href="/categories/products"> Đăng nhập ngay</Link>
+
       </div>
     </div>
   </HomeLayout>
