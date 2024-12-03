@@ -198,7 +198,7 @@ export default function Login(props: LoginProps) {
                     const usernameLocal = dataUser.username.replace(/['"]+/g, '');
                     localStorage.setItem('username', encodeString(usernameLocal));
                     sessionStorage.setItem('user', JSON.stringify(encodeJson(dataUser)));
-                    setRefreshKey(refreshKey + 1);
+                    setRefreshKey(refreshKey + 999);
 
                     toast.success("Đăng nhập thành công!");
                     await fetch('/api/auth', {

@@ -48,7 +48,7 @@ export default function Register(props: RegisterProps) {
 
         try {
             const responseAuth = await fetch(`${BASE_URL}rest/user/${username}`);
-            const data = await responseAuth.json() as User;
+            await responseAuth.json() as User;
             toast.warning("Tên dang nhập đã tồn tại!");
             return;
         } catch (error) {

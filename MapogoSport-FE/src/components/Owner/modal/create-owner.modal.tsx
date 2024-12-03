@@ -183,7 +183,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
                 window.location.href = '/owner'
             } else {
                 if (userData && accountPackageTemporary && userData.wallet.balance >= accountPackageTemporary.price) {
-                    createOwnerAccount();
+                    await createOwnerAccount();
                     const responseWallet = await fetch(`${BASE_URL}rest/wallet/create/owner/${userData?.username}/${accountPackageTemporary?.price}`, {
                         method: 'PUT',
                         headers: {
@@ -248,7 +248,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
             <Modal.Body>
                 {page ?
                     <Row className="my-3" style={{ fontSize: '15px', height: '100%', display: 'flex' }}>
-                        {accountPackage && accountPackage.map(ap => {
+                        {accountPackage && accountPackage.filter(item => item.status === "active").map(ap => {
                             return (
                                 <Col xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div className="card packageUpdate">

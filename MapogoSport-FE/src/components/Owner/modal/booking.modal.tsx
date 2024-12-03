@@ -312,7 +312,6 @@ const BookingModal = (props: BookingProps) => {
                     }
                 }
                 setPrice(totalAmount);
-                setTotalAmount(totalAmount);
             }
         }
     }
@@ -637,7 +636,7 @@ const BookingModal = (props: BookingProps) => {
                 //  isOffline ? fullName : dataUser.fullname,
                 phoneNumber: phoneNumber,
                 // isOffline ? phoneNumber : dataUser.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
-                totalAmount,
+                totalAmount: price,
                 percentDeposit: sportDetail.percentDeposit,
                 paymentMethodId: paymentMethod,
                 ownerId: owner.ownerId,

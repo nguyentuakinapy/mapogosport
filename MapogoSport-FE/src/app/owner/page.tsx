@@ -10,7 +10,6 @@ import BlogManager from "@/components/blog/blog-manager";
 import Wallet from "@/components/User/modal/wallet";
 import Image from "next/image";
 import Loading from "@/components/loading";
-import { logOut } from "../utils/Log-Out";
 
 export default function Owner() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -55,8 +54,6 @@ export default function Owner() {
                     }
                     const dataS = await response.json() as SportField[];
                     setDataSport(dataS);
-                } else {
-                    logOut();
                 }
             }
         };
@@ -248,7 +245,7 @@ export default function Owner() {
             case 'package':
                 return (
                     <Row className="my-3" style={{ fontSize: '15px', height: '100%', display: 'flex' }}>
-                        {accountPackages && accountPackages.map(ap => {
+                        {accountPackages && accountPackages.filter(item => item.status === "active").map(ap => {
                             const isOwned = ap.accountPackageId ===
                                 userSubscription?.accountPackage?.accountPackageId;
                             return (
