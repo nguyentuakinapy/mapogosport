@@ -524,7 +524,7 @@ public class BookingServiceImpl implements BookingService {
 			vnp_Params.put("vnp_OrderType", orderType);
 
 			vnp_Params.put("vnp_Locale", "vn");
-			vnp_Params.put("vnp_ReturnUrl", "http://localhost:8080/rest/booking/paymentInfo");
+			vnp_Params.put("vnp_ReturnUrl", "http://localhost:8083/rest/booking/paymentInfo");
 			
 			vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
@@ -575,7 +575,7 @@ public class BookingServiceImpl implements BookingService {
 			long amountBeforeDecimal = (long) Math.floor(Amount);
 
 			ResponseEntity<String> response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
-					info, "http://localhost:8080/rest/booking/paymentInfo-momo");
+					info, "http://localhost:8083/rest/booking/paymentInfo-momo");
 			ObjectMapper objectMapper = new ObjectMapper();
 			MoMoPaymentResponse momoResponse;
 			try {

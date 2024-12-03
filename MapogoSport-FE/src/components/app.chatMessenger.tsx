@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { Button, ListGroup } from "react-bootstrap";
+import { Button, Col, ListGroup, Row } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css"; // Đảm bảo đã cài đặt Bootstrap Icons
 import axios from "axios";
 import useSWR from "swr";
@@ -11,52 +11,104 @@ import { useData } from "@/app/context/UserContext";
 import { removeVietnameseTones } from './Utils/Format';
 import { toast } from "react-toastify";
 import InputChat from "./InputChat/InputChat";
-import { isString } from "lodash";
+import { cloneDeep, isString} from "lodash";
 import { useImmer } from "use-immer";
 import Image from "next/image";
 
-interface Message {
-  messageId: number;
-  sender: User;
-  receiver: User;
-  content: string;
-  createdAt: Date;
-  isDelete: boolean;
-  user?: User;
-  tempReceiver?: string
-  tempSender?: string
-  topic?: string
-}
 
-interface Message2 {
-  messageId: number;
-  sender: string;
-  receiver: string;
-  content: string;
-  createdAt: Date;
-  isDelete: boolean;
-  user?: User;
-  tempReceiver?: string
-  tempSender?: string
-  topic?: string
-}
-
-interface GroupedMessage {
-  user?: User;
-  content: string;
-  timestamp: Date;
-}
 
 export default function ChatBox() {
+
+  interface User {
+    username: string;
+    fullname: string;
+    password: string;
+    email: string;
+    avatar: string | null;
+    authorities: Authorities[];
+}
+  interface Message {
+    messageId: number;
+    sender: User |string;
+    receiver: User|string ;
+    content: string;
+    createdAt: Date;
+    isDelete: boolean;
+    user?: User;
+    tempReceiver?:string
+    tempSender?:string
+    topic?:string
+    isAdd?:boolean
+    isOwner?:boolean
+  }
+
+  interface Message2 {
+    messageId: number;
+    sender: User ;
+    receiver: User ;
+    content: string;
+    createdAt: Date;
+    isDelete: boolean;
+    user?: User;
+    tempReceiver?:string
+    tempSender?:string
+    topic?:string
+    isAdd?:boolean
+    isOwner?:boolean
+  }
+
+ 
+
+  interface GroupedMessage {
+    messageId?: number;
+    sender?: User | string;
+    receiver?: User | string;
+    content?: string;
+    createdAt?: Date;
+    isDelete?: boolean;
+    user?: User;
+    tempReceiver?:string
+    tempSender?:string
+    topic?:string
+    isAdd?:boolean
+    isOwner?:boolean
+  }
+
+  interface GroupedMessage2 {
+    user?: User;
+    content: string;
+    createdAt: Date;
+    tempReceiver?:string
+    tempSender?:string
+    topic?:string
+    isAdd?:boolean
+    isOwner?:boolean
+  }
+
+
+
+  
+
   const [showChat, setShowChat] = useState(false); // quản lý việc hiển thị chat form
   const [showChatList, setShowChatList] = useState(false); // quản lý việc hiển thị chat form
   const [showChatIcon, setShowChatIcon] = useState(true); // quản lý việc hiển thị icon chat
   const [isMinimized, setIsMinimized] = useState(false); // quản lý trạng thái thu nhỏ của chat form
   const [isMaximized, setIsMaximized] = useState(false); // quản lý trạng thái phóng to của chat form
   const [selectedChat, setSelectedChat] = useState<User>(); // Quản lý cuộc trò chuyện đang được chọn
-  const [chatListRealTime, setChatListRealTime] = useState<Message2[]>([]);
-  const [chatListCurrentUserByDMM, setChatListCurrentUserByDMM] = useImmer<GroupedMessage[]>([])
+  // const [inputMessage, setInputMessage] = useState(""); // lưu trữ nội dung người dùng đang nhập vào ô chat
+
+  // const [chatListRealTime, setChatListRealTime] = useState<Message2[]>([]);
+  const [chatListRealTime, setChatListRealTime] = useState<Message[]>([]);
+  // const [chatListCurrentUser, setChatListCurrentUser] = useState<Message[]>([]);
+  // const [chatListCurrentUserByDMM, setChatListCurrentUserByDMM] = useState< Message[]>([]);
+
+  // const  [chatListCurrentUserByDMM, setChatListCurrentUserByDMM] = useImmer< Message[]>([])
+  const  [chatListCurrentUserByDMM, setChatListCurrentUserByDMM] = useImmer< GroupedMessage[]>([])
+
   const [subscribedTopics, setSubscribedTopics] = useState<string[]>([]);
+  // const [subscribedTopics, setSubscribedTopics] = useImmer([]);
+
+  // const [currentUser, setCurrentUser] = useState<User | null>();
   const currentUser = useData();
   const [receiver, setReceiver] = useState<string>(""); // Sử dụng useState cho receiver
   const [username, setUsername] = useState<string>("");
@@ -88,6 +140,7 @@ export default function ChatBox() {
             // nếu là default thì mở sẳn admin có sẵn
             if (adminDefault) {
               handleSelectChat(adminDefault);
+              handleChatListToggle()
               params.delete("status");
 
               const newParams = new URLSearchParams(window.location.search);
@@ -127,14 +180,21 @@ export default function ChatBox() {
   // Cập nhật selectedChat khi adminDefault có sẵn
   useEffect(() => {
     if (isConnected && adminDefault && chatListCurrentUserByDMM.length === 0 && selectedChat) {
-      handleSelectChat(adminDefault); // Chỉ gọi khi isConnected là true
+      handleSelectChat(adminDefault); // không chạy được
     } else if (ownerCurrent) {
       handleSelectChat(ownerCurrent);
       setShowChatList(true); //nếu true thì thực hiện mở form chat
       mutate(); // 
       mutateByReceiverUsernameOrCurrentUser();
     }
-  }, [isConnected, adminDefault, chatListCurrentUserByDMM, selectedChat, ownerCurrent, usernameFormUrl]);
+  }, [
+    // isConnected,
+    // adminDefault,
+    // chatListCurrentUserByDMM,
+    // selectedChat,
+    ownerCurrent,
+    usernameFormUrl,
+  ]);
 
   // Xử lý kiểm tra quyền và thiết lập username nếu cần
   useEffect(() => {
@@ -184,16 +244,9 @@ export default function ChatBox() {
     username: "Unknown",
     fullname: "Anonymous",
     password: "",
-    enabled: 1,
-    createdAt: new Date(),
-    gender: null,
-    birthday: null,
     email: "",
     avatar: null,
     authorities: [],
-    addressUsers: [],
-    phoneNumberUsers: [],
-    wallet: { walletId: 0, balance: 0 },
   };
 
   useEffect(() => {
@@ -212,7 +265,6 @@ export default function ChatBox() {
         const topicDefault = `/topic/notify/${currentUser?.username}`;
         stompClient.current?.subscribe(topicDefault, (message) => {
           const parsedMessage = JSON.parse(message.body);
-
           setChatListCurrentUserByDMM((prevChats) => {
             const existingChatIndex = prevChats.findIndex(
               (item) => item.user?.username === parsedMessage.sender
@@ -223,7 +275,8 @@ export default function ChatBox() {
               const updatedChats = [...prevChats];
               updatedChats[existingChatIndex] = {
                 ...updatedChats[existingChatIndex],
-                content: parsedMessage.message || ""
+                content: parsedMessage.message || "",
+                createdAt: new Date(),
               };
               return updatedChats;
             } else {
@@ -241,7 +294,16 @@ export default function ChatBox() {
             }
           });
 
-          toast.info("Bạn nhận được tin nhắn từ " + parsedMessage.senderFullName);
+          console.log('setChatListCurrentUserByDMM =>>>>>>> ', chatListCurrentUserByDMM);
+
+
+          toast.info(
+            "Bạn nhận được tin nhắn từ " + parsedMessage.senderFullName
+          );
+
+          console.log("Sender:", parsedMessage.sender);
+          console.log("Message:", parsedMessage.message);
+          console.log("createdAt:", parsedMessage.createdAt);
         });
       }, () => { setIsConnected(false); });
     // Đóng kết nối khi component bị hủy
@@ -299,24 +361,51 @@ export default function ChatBox() {
       }
     }
 
-    if (currentUser && contentStr.trim() !== "" && stompClient.current && stompClient.current.connected) {
-      const newMessage = {
+    console.log("_content ++++++>>>>>>>> ",_content);
+    console.log("contentStr ++++++>>>>>>>> ",contentStr);
+    console.log("isString(_content) ++++++>>>>>>>> ",isString(_content));
+
+    if (
+      contentStr.trim() !== "" &&
+      stompClient.current &&
+      stompClient.current.connected
+    ) {
+      // const newMessage = {
+      //   sender: currentUser?.username, // Tên người gửi
+      //   receiver: receiver, // Tên người nhận
+      //   content: `${contentStr}/SENDER=${currentUser?.username}-RECEIVER=${receiver}`,
+      //   createdAt: new Date(),
+      // } ;
+       const newMessage = {
         messageId: 0,
-        sender: currentUser.username, // Tên người gửi
+        sender: currentUser?.username ?? "NOOOOO", // Tên người gửi
         receiver: receiver, // Tên người nhận
         content: `${contentStr}/SENDER=${currentUser?.username}-RECEIVER=${receiver}`,
         createdAt: new Date(),
         isDelete: false,
       };
 
+      // const newMessage: Message = {
+      //   messageId: Date.now(), // Tạm dùng createdAt làm ID duy nhất
+      //   sender: { ...defaultUser, username: currentUser?.username || "Unknown" }, // Cần đảm bảo kiểu `User`
+      //   receiver: { ...defaultUser, username: receiver }, // Cần đảm bảo kiểu `User`
+      //   content: `${contentStr}/SENDER=${currentUser?.username}-RECEIVER=${receiver}`,
+      //   createdAt: new Date(),
+      //   isDelete: false,
+      //   user: { ...defaultUser, username: currentUser?.username || "Unknown" }, // Cần đảm bảo kiểu `User`
+      // };
+      
+      console.log("Đang gửi tin nhắn");
+      console.log("newMessage ", JSON.stringify(newMessage));
+
       // Sắp xếp tên người gửi và người nhận theo thứ tự alphabet
-      const sortedUsers = [currentUser.username, receiver].sort();
+      const sortedUsers = [currentUser?.username, receiver].sort();
       const topic = `/app/chat.sendMessage/${sortedUsers[0]}-${sortedUsers[1]}`;
 
       // Gửi tin nhắn đến topic chung
       stompClient.current.send(topic, {}, JSON.stringify(newMessage));
 
-      if (newMessage.receiver !== currentUser.username || newMessage.sender !== currentUser.username) {
+      if (newMessage.receiver !== currentUser?.username || newMessage.sender !== currentUser?.username) {
         setChatListRealTime((prevMessages) => [...prevMessages, newMessage]);
       }
       if (inputRef.current) {
@@ -334,35 +423,67 @@ export default function ChatBox() {
       return;
     }
 
+    setSelectedChat(chat);
+
+  
     if (messageListRef.current) {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
     }
+  
+    console.log("Đã vào với: ", chat?.username || "Không có tên");
+    console.log("chatListCurrentUserByDMM: ", chatListCurrentUserByDMM);
+  
+    // setReceiver(chat?.username);
+    // console.log("Người nhận là ", chat?.username);
+  
+    // setSelectedChat(chat);
 
-    setReceiver(chat?.username);
 
-    setSelectedChat(chat);
+    // const foundMessageInGrouped = dataByReceiverUsernameOrCurrentUser.find((message)=>message.sender.username === "myntd" ||
+    // message.receiver.username === "myntd") 
+
+    // console.log('chatListCurrentUserByDMM+++++++++++++', chatListCurrentUserByDMM);
 
     setChatListCurrentUserByDMM((draft) => {
 
-      //
+      const tempArr = cloneDeep(draft)
 
-      const isChatExists = draft.some(
-        (item) => item?.user?.username === chat.username
-      );
-      if (!isChatExists) {
-        return [
-          ...draft,
-          {
+      const foundMessageInState = draft.find((message)=>message?.user?.username === "myntd") 
+
+      if (!foundMessageInState) {
+        tempArr.push({
+          user: dataAdmin,
+          content: "Chat với admin nhé bạn ơi!",
+          createdAt: new Date(),
+          isAdd: true,
+        })
+      }
+
+      const isChatExists = tempArr.some(
+            (item) => item?.user?.username === chat.username
+          );
+    console.log("isChatExists: ", isChatExists);
+
+          if (!isChatExists) {
+            tempArr.push({
             user: chat,
             content: "Chat để được hỗ trợ",
-            createAt: new Date(),
-          },
-        ];
-      }
-      return draft;
+            createdAt: new Date(),
+            isAdd: true,
+            isOwner: true,
+          }
+          )
+            
+          }
+    console.log("tempArrtempArrtempArrtempArr: ", tempArr);
+
+          return  tempArr
 
     });
 
+    setReceiver(chat?.username);
+    console.log("Người nhận là ", chat?.username);
+  
     if (chatListCurrentUserByDMM.length === 0 && adminDefault) {
       setShowChat(true);
     } else if (chatListCurrentUserByDMM.length === 0) {
@@ -432,7 +553,10 @@ export default function ChatBox() {
       }
 
     }
+    
   };
+
+  //////
 
   const fetchMessages = async (url: string) => {
     const response = await axios.get(url);
@@ -440,7 +564,7 @@ export default function ChatBox() {
   };
 
   // Sử dụng useSWR để fetch messages
-  const { data, isLoading, error, mutate } = useSWR<Message[]>(
+  const { data, isLoading, error, mutate } = useSWR <Message2[]>(
     currentUser && receiver
       ? `${BASE_URL}api/messages/${currentUser.username}/${receiver}`
       : null,
@@ -467,70 +591,204 @@ export default function ChatBox() {
   useEffect(() => {
     if (dataByReceiverUsernameOrCurrentUser) {
       // Nhóm các tin nhắn theo người gửi hoặc người nhận
+//    const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
+//   (acc: { [username: string]: GroupedMessage }, message: Message2) => {
+//     // Kiểm tra kiểu của receiver và sender trước khi truy cập username
+//     const username =
+//       typeof message.receiver === "string" || typeof message.sender === "string"
+//         ? message.receiver // Nếu là string, trực tiếp dùng
+//         : message.receiver.username === currentUser?.username
+//         ? message.sender.username
+//         : message.receiver.username;
+
+//     if (!acc[username]) {
+//       acc[username] = {
+//         user:
+//           typeof message.receiver === "string" ? { username: message.receiver } : message.receiver,
+//         content: message.content,
+//         createdAt: message.createdAt,
+//       };
+//     } else if (new Date(message.createdAt) > new Date(acc[username].createdAt)) {
+//       acc[username].content = message.content;
+//       acc[username].createdAt = message.createdAt;
+//     }
+
+//     return acc;
+//   },
+//   {}
+// );
+
       const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
-        (acc: { [username: string]: GroupedMessage }, message: Message) => {
-          const username = message.receiver.username === currentUser?.username ? message.sender.username : message.receiver.username;
+        (acc:  { [username: string]: GroupedMessage2 }, message: Message2) => {
+          const username =
+            message.receiver.username === currentUser?.username
+              ? message.sender.username
+              : message.receiver.username;
+
+          // Check if username is "myntd" (either sender or receiver)
           if (!acc[username]) {
             acc[username] = {
               user: message.receiver.username === currentUser?.username ? message.sender : message.receiver,
               content: message.content,
-              timestamp: message.createdAt,
+              createdAt: message.createdAt,
             };
-          } else if (new Date(message.createdAt) > new Date(acc[username].timestamp)) {
+          } else if (
+            new Date(message.createdAt) > new Date(acc[username].createdAt)
+          ) {
             // Nếu đã có tin nhắn từ người dùng này, chỉ cập nhật nếu tin nhắn mới hơn
             acc[username].content = message.content;
-            acc[username].timestamp = message.createdAt;
+            acc[username].createdAt = message.createdAt;
           }
           return acc;
         },
         {}
       );
+      
+      // const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
+      //   (acc: Record<string, GroupedMessage>, message: Message) => {
+      //     const sender = typeof message.sender === 'object' ? message.sender : null;
+      //     const receiver = typeof message.receiver === 'object' ? message.receiver : null;
+  
+      //     // Lấy username nếu receiver là User, nếu không sử dụng string
+      //     const username: string =
+      //       receiver && receiver.username === currentUser?.username
+      //         ? (sender?.username ?? "")  // nếu sender là null, sử dụng chuỗi rỗng
+      //         : (receiver ? receiver.username : message.receiver);
+  
+      //     if (!username) return acc; // Nếu không có username hợp lệ, bỏ qua tin nhắn này
+  
+      //     // Cập nhật groupedMessages
+      //     if (!acc[username]) {
+      //       acc[username] = {
+      //         user: receiver && receiver.username === currentUser?.username ? sender ?? undefined : receiver ?? undefined,
+      //         content: message.content,
+      //         createdAt: message.createdAt,
+      //       };
+      //     } else if (new Date(message.createdAt) > new Date(acc[username].createdAt!)) {
+      //       acc[username].content = message.content;
+      //       acc[username].createdAt = message.createdAt;
+      //     }
+  
+      //     return acc;
+      //   },
+      //   {} as Record<string, GroupedMessage>
+      // );
+    
+      
 
-      const foundMessage = dataByReceiverUsernameOrCurrentUser.find((message: Message) => message.sender.username === "myntd" || message.receiver.username === "myntd")
+      let groupedMessagesArray = Object.values(groupedMessages);
 
-      const groupedMessagesArray = Object.values(groupedMessages) as GroupedMessage[];
-
-      if (!foundMessage) {
-        groupedMessagesArray.push({
-          user: dataAdmin,
-          content: "Chat với admin nhé bạn ơi!",
-          timestamp: new Date(),
-        })
+      console.log('chatlissttttttttttt', chatListCurrentUserByDMM)
+      console.log('groupedMessagesArray=============', groupedMessagesArray)
+      console.log('dataAdmin=============', dataAdmin)
+      setChatListCurrentUserByDMM((draft)=>{
+        const tempArr =cloneDeep(draft); // tạo một biến tempArr để lấy giá trị của State gốc chatListCurrentDDM nhưng không lấy địa chỉ
+      const arrIsAdds = cloneDeep(tempArr.filter((item)=>item.isAdd)) 
+      if (groupedMessagesArray.length>0) {
+        if (arrIsAdds.length>0) {
+          for (let k = 0; k < groupedMessagesArray.length; k++) {
+            const mess = groupedMessagesArray[k] as GroupedMessage;
+            for (let i = 0; i < arrIsAdds.length; i++) {
+              const addedItem = arrIsAdds[i];
+              if (addedItem.user?.username === mess.user?.username) {
+                const foundIndex = tempArr.findIndex((message)=>message.user?.username === addedItem.user?.username && message.isAdd)
+                if (foundIndex>=0) {
+                  tempArr.splice(foundIndex,1)
+                  arrIsAdds.splice(i,1)
+                  break;
+                }
+              }
+            }
+          }
+          groupedMessagesArray = [...arrIsAdds,...groupedMessagesArray]
+        }
+      }else{
+        if (tempArr.length>0) {
+          groupedMessagesArray = cloneDeep(tempArr)
+        }else{
+          groupedMessagesArray = [
+            {
+              user: dataAdmin,
+              content: "Chat với admin nhé bạn ơi!",
+              createdAt: new Date().toISOString(),
+              isAdd: true,
+            }
+          ]
+        }
       }
-      setChatListCurrentUserByDMM(groupedMessagesArray);
+      
+        return groupedMessagesArray
+      });
       // mới thêm 19/11
-      if (ownerCurrent && !groupedMessagesArray.some((item) => item.user!.username === ownerCurrent.username)) {
-        setChatListCurrentUserByDMM((prevChats) => [
-          ...prevChats, {
-            user: ownerCurrent,
-            content: "",
-            timestamp: new Date().toISOString(),
-          },
-        ]);
-      }
-      // mới thêm 19/11
+
+      console.log('ownerCurrent=======', ownerCurrent);
+      console.log('groupedMessagesArray=======', groupedMessagesArray);
+    
+
+      console.log("Danh sách chat real-time đã nhóm: ", groupedMessagesArray);
+      console.log(
+        "Danh sách setChatListCurrentUserByDMM: ",
+        chatListCurrentUserByDMM
+      );
     }
   }, [dataByReceiverUsernameOrCurrentUser]);
-
-
-  const formatTime = (createAt: Date | string) => {
-    const date = createAt instanceof Date ? createAt : new Date(createAt);
+  
+   
+  // const formatTime = (createdAt: Date | string) => {
+  //   const date = createdAt instanceof Date ? createdAt : new Date(createdAt);
+  //   if (isNaN(date.getTime())) return "Invalid Date";
+  //   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  // };
+  // const formatTime = (createdAt: Date | string) => {
+  //   const date = createdAt instanceof Date ? createdAt : new Date(createdAt);
+  //   if (isNaN(date.getTime())) return "Invalid Date";
+  
+  //   const options: Intl.DateTimeFormatOptions = {
+  //     year: "numeric",
+  //     month: "2-digit",
+  //     day: "2-digit",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //     hour12: false, // Sử dụng định dạng 24 giờ
+  //   };
+  
+  //   return date.toLocaleString("vi-VN", options); // Dùng định dạng cho ngôn ngữ Việt Nam
+  // };
+  const formatTime = (createdAt: Date | string) => {
+    const date = createdAt instanceof Date ? createdAt : new Date(createdAt);
     if (isNaN(date.getTime())) return "Invalid Date";
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const timeOptions: Intl.DateTimeFormatOptions = {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // Sử dụng định dạng 24 giờ
+    };
+    const dateOptions: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    };
+  
+    const time = date.toLocaleTimeString("vi-VN", timeOptions); // Lấy giờ và phút
+    const day = date.toLocaleDateString("vi-VN", dateOptions); // Lấy ngày, tháng, năm
+  
+    return `${time} - ${day}`; // Ghép giờ và ngày bằng dấu "-"
   };
-
+  
+  
   useEffect(() => {
     if (data) {
       const tempData = data.map((item) => {
-        const sortedUsers = [item.receiver.username, item.sender.username,].sort();
+        const sortedUsers = [
+          item.receiver.username,
+          item.sender.username,
+        ].sort();
         return {
           ...item,
           topic: `${sortedUsers[0]}-${sortedUsers[1]}`,
-          sender: item.sender.username,  // Chuyển sender từ User thành string
-          receiver: item.receiver.username,
         };
       });
-      setChatListRealTime(tempData as Message2[]);
+      setChatListRealTime(tempData);
+      console.error("chat list: ", chatListRealTime);
     } //               mới
   }, [data]);
 
@@ -568,17 +826,25 @@ export default function ChatBox() {
   const [searchKeyword, setSearchKeyword] = useState<string>("");
 
   const filteredChatList = chatListCurrentUserByDMM.filter((chatGroup) => {
-    const username = chatGroup?.user?.username;
-    return username
-      ? removeVietnameseTones(username.toLowerCase()).includes(
-        removeVietnameseTones(searchKeyword.toLowerCase())
-      )
-      : false;
+    if (!chatGroup?.user?.username) {
+      return false; 
+    }
+    console.log('chat group =>>>>> ',chatGroup)
+    const username = chatGroup.user.username;
+    return removeVietnameseTones(username.toLowerCase()).includes(
+      removeVietnameseTones(searchKeyword.toLowerCase())
+    );
   });
+  
+  // console.log("receiver====>", receiver);
+  // console.log("current topic====>", currentTopic);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchKeyword(e.target.value);
   };
+
+  console.log('filteredChatList=======', filteredChatList);
+  
 
   if (isLoading) return <p>Loading messages...</p>;
   if (error) return <p>Error loading messages.</p>;
@@ -652,23 +918,51 @@ export default function ChatBox() {
                       const isActive = selectedChat?.username === chatUser?.username;
 
                       if (!chatUser) return null;
+                      // console.log('sssssssss ',chatUser);
+                      // console.log('chat group time ', formatTime(chatGroup.createdAt));
                       return (
-                        <ListGroup.Item key={chatUser?.username || index} onClick={() => handleSelectChat(chatUser)}
-                          className={`d-flex flex-column ${isActive ? 'active-chat' : ''}`}>
-                          <div className="d-flex align-items-center">
-                            <Image src={chatUser?.avatar ? chatUser.avatar : "/chat_page/assets/images/users/user-5.png"}
-                              alt={chatUser?.username || "Không có tên"} width={40} height={40}
-                              style={{ borderRadius: "50%", marginRight: "10px", objectFit: 'cover' }}
-                              onError={(e) => { e.currentTarget.src = "/chat_page/assets/images/users/user-8.png" }} />
-                            <div className="mt-1">
-                              <strong> {chatUser?.fullname || "Không có tên"}</strong>
-                              <p className="text-start">
-                                {dataMessageTemporary === null ? chatGroup.content
-                                  : chatUser.username === dataMessageTemporary.username ?
-                                    dataMessageTemporary.content
-                                    : chatGroup.content}
-                              </p>
-                            </div>
+                        <ListGroup.Item
+                          key={chatUser?.username || index}
+                          onClick={() => handleSelectChat(chatUser)}
+                          // className="d-flex flex-column"
+                          className={`d-flex flex-column hover-chat ${isActive ? 'active-chat' : ''}`}  // Thêm class 'active-chat' nếu mục được chọn
+
+                        >
+                          <div className="d-flex align-items-center ">
+                          {/* <div className={`d-flex align-items-center  ${isActive ? 'active-link' : ''}`}> */}
+                            <img
+                              src={
+                                chatUser?.avatar
+                                  ? chatUser.avatar
+                                  : "/chat_page/assets/images/users/user-5.png"
+                              }
+                              alt={chatUser?.username || "Không có tên"}
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "50%",
+                                marginRight: "10px",
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.src =
+                                  "/chat_page/assets/images/users/user-8.png"; // Ảnh mặc định
+                              }}
+                            />
+
+                            <strong>
+                              {index + 1} -{" "}
+                              {chatUser?.fullname || "Không có tên"}
+                            </strong>
+                          </div>
+                          <div className=" mt-1 row">
+                            <p className=" col text-start title-content-preview">
+                              {dataMessageTemporary === null ? chatGroup.content 
+                                : chatUser.username === dataMessageTemporary.username ? 
+                                dataMessageTemporary.content 
+                                : chatGroup.content}
+                              {/* {chatGroup.content || "Không có nội dung"} */}
+                            </p>
+                            {/* <p className="col text-end"> {formatTime(chatGroup.createdAt)}</p> */}
                           </div>
                         </ListGroup.Item>
                       );
@@ -735,56 +1029,93 @@ export default function ChatBox() {
               {/* Phần hiển thị tin nhắn nếu không bị thu nhỏ */}
               {!isMinimized && (
                 <>
-                  <div ref={messageListRef} className="card-body overflow-auto" style={{ height: "200px" }}>
-                    {chatListRealTime.filter((itemMessage) =>
-                      (itemMessage.receiver || (itemMessage.tempReceiver === currentUser?.username && itemMessage.sender) ||
-                        itemMessage.tempSender === receiver || itemMessage.receiver ||
-                        (itemMessage.tempReceiver === receiver && itemMessage.sender) ||
-                        itemMessage.tempSender === currentUser?.username) && currentTopic === itemMessage.topic
-                    ).map((msg, index) => {
-                      return (
-                        <div key={msg.messageId || index}
-                          className={`d-flex ${msg.sender === currentUser?.username || msg.sender === currentUser?.username
-                            ? "justify-content-end" : "justify-content-start"}`}>
-                          <div className={`p-2 rounded mb-2`} style={{
-                            maxWidth: "80%",
-                            backgroundColor: msg.sender === currentUser?.username || msg.sender === currentUser?.username ? "#66c7ff" : "#f0f0f0",
-                            color: msg.sender === currentUser?.username || msg.sender === currentUser?.username ? "black" : "black",
-                          }}>
-                            {msg.content}
-                            <div className="mt-2" style={{ display: "block", fontSize: "0.8em", color: "black" }}>
-                              {msg.createdAt ? formatTime(msg.createdAt) : "Không có thời gian"}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <div
+                    ref={messageListRef}
+                    className="card-body overflow-auto"
+                    style={{ height: "200px" }}
+                  >
+                 {chatListRealTime
+                .filter((itemMessage) => {
+                  const senderUsername =
+                    typeof itemMessage.sender === "string"
+                      ? itemMessage.sender
+                      : itemMessage.sender?.username;
 
-                  {/* Phần nhập liệu và nút gửi */}
-                  <div className="card-footer d-flex p-2">
-                    {/* <Form.Control
-                      ref={inputRef}
-                      type="text"
-                      placeholder="Nhập câu hỏi tiếp theo của bạn"
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyDown={handleKeyEnter} // sự kiện key down
-                      className="me-2"
-                    /> */}
+                  const receiverUsername =
+                    typeof itemMessage.receiver === "string"
+                      ? itemMessage.receiver
+                      : itemMessage.receiver?.username;
 
-                    <InputChat
-                      inputRef={inputRef}
-                      handleKeyEnter={handleKeyEnter}
-                    />
-                    <Button
-                      variant="warning"
-                      className="d-flex align-items-center justify-content-center"
-                      onClick={() => handleSendMessage}
+                  return (
+                    (receiverUsername ||
+                      (itemMessage.tempReceiver === currentUser?.username && senderUsername) ||
+                      itemMessage.tempSender === receiver || receiverUsername ||
+                      (itemMessage.tempReceiver === receiver && senderUsername) ||
+                      itemMessage.tempSender === currentUser?.username) &&
+                    currentTopic === itemMessage.topic
+                  );
+                })
+                .map((msg, index) => {
+                  const senderUsername =
+                    typeof msg.sender === "string"
+                      ? msg.sender
+                      : msg.sender?.username;
+
+                  return (
+                    <div
+                      key={msg.messageId || index}
+                      className={`d-flex ${
+                        senderUsername === currentUser?.username ? "justify-content-end" : "justify-content-start"
+                      }`}
                     >
-                      <i className="bi bi-send-fill"></i>
-                    </Button>
+                      <div
+                        className={`p-2 rounded mb-2`}
+                        style={{
+                          maxWidth: "80%",
+                          backgroundColor:
+                            senderUsername === currentUser?.username ? "#66c7ff" : "#f0f0f0",
+                          color: "black",
+                        }}
+                      >
+                        {msg.content}
+                        <em
+                          className="mt-2"
+                          style={{
+                            display: "block",
+                            fontSize: "0.8em",
+                            color: "black",
+                          }}
+                        >
+                          {msg.createdAt
+                            ? formatTime(msg.createdAt)
+                            : "Không có thời gian"}
+                        </em>
+                      </div>
+                    </div>
+                  );
+                })}
                   </div>
+                  {/* Phần nhập liệu và nút gửi */}
+                  <div className="card-footer d-flex align-items-center p-2 bg-transparent">
+                    <Row className="w-100 ">
+                      <Col sm={10} className="p-0">
+                        <InputChat
+                          inputRef={inputRef}
+                          handleKeyEnter={handleKeyEnter}
+                        />
+                      </Col>
+                      <Col sm={2} className="p-0 d-flex justify-content-end">
+                        <Button
+                          variant="light"
+                          className="d-flex align-items-center justify-content-center"
+                          onClick={() => handleSendMessage(inputRef.current?.value || "")}
+                        >
+                          <i className="bi bi-send-fill text-primary"></i>
+                        </Button>
+                      </Col>
+                    </Row>
+                  </div>
+
                 </>
               )}
             </div>

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button, Col, Modal, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR, { mutate } from "swr";
+import Cookies from 'js-cookie';
 
 interface OwnerProps {
     showCreateOwnerModal: boolean;
@@ -136,6 +137,33 @@ const CreateOwnerModal = (props: OwnerProps) => {
         if (resSubscription && resOwner && resAuth) {
             mutate(`${BASE_URL}rest/user/${userData?.username}`);
 
+            try {
+                const responseAuth = await fetch(`${BASE_URL}rest/user/${userData?.username}`);
+                const data = await responseAuth.json() as User;
+
+                Cookies.remove('sessionDataAuth'); // Dành cho cookie không có HttpOnly
+
+                await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+
+                }).then(async (response) => {
+                    const payload = await response.json();
+                    const data = {
+                        status: response.status,
+                        payload
+                    }
+                    if (!response.ok) {
+                        throw data
+                    }
+                    return data
+                })
+            } catch (error) {
+            }
+
             // toast.success('Đăng ký trở thành chủ sân thành công! ');
             handleClose();
 
@@ -150,50 +178,61 @@ const CreateOwnerModal = (props: OwnerProps) => {
 
     const handleSubmit = async () => {
         if (checkPaymentMethod) {
-            if (userData && accountPackageTemporary && userData.wallet.balance >= accountPackageTemporary.price) {
-                createOwnerAccount();
-                const responseWallet = await fetch(`${BASE_URL}rest/wallet/create/owner/${userData?.username}/${accountPackageTemporary?.price}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Accept': 'application/json, text/plain, */*',
-                        'Content-Type': 'application/json'
-                    },
-                });
-
-                if (!responseWallet.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
+            if (accountPackageTemporary?.price === 0) {
+                await createOwnerAccount();
                 window.location.href = '/owner'
             } else {
-                toast.warning("Số dư của bạn không đủ");
+                if (userData && accountPackageTemporary && userData.wallet.balance >= accountPackageTemporary.price) {
+                    createOwnerAccount();
+                    const responseWallet = await fetch(`${BASE_URL}rest/wallet/create/owner/${userData?.username}/${accountPackageTemporary?.price}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json'
+                        },
+                    });
+
+                    if (!responseWallet.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    window.location.href = '/owner'
+                } else {
+                    toast.warning("Số dư của bạn không đủ");
+                }
             }
         } else {
-            const accountData = await createOwnerAccount();
-            try {
-                const responsePayment = await fetch(`${BASE_URL}rest/subscription/payment`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json, text/plain, */*',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        userSubscriptionId: accountData.userSubscriptionId,
-                        ownerId: accountData.ownerId,
-                        authorityId: accountData.authorityId,
-                        paymentMethodId: paymentMethodId,
-                    })
-                });
-                const responseData = await responsePayment.json();
-                const paymentUrl = responseData.url;
-                // chuyển hướng đến URL thanh toán
-                window.location.href = paymentUrl;
-            } catch (error) {
-                console.error('Error during payment:', error);
+            if (paymentMethodId === 0) {
+                toast.warning("Vui lòng chọn phương thức thanh toán!");
+                return;
+            }
+            if (accountPackageTemporary?.price === 0) {
+                await createOwnerAccount();
+            } else {
+                const accountData = await createOwnerAccount();
+                try {
+                    const responsePayment = await fetch(`${BASE_URL}rest/subscription/payment`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userSubscriptionId: accountData.userSubscriptionId,
+                            ownerId: accountData.ownerId,
+                            authorityId: accountData.authorityId,
+                            paymentMethodId: paymentMethodId,
+                        })
+                    });
+                    const responseData = await responsePayment.json();
+                    const paymentUrl = responseData.url;
+                    // chuyển hướng đến URL thanh toán
+                    window.location.href = paymentUrl;
+                } catch (error) {
+                    console.error('Error during payment:', error);
+                }
             }
         }
-
-
     }
 
     const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -367,7 +406,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                     <label>Phương thức thanh toán <b className="text-danger">*</b></label>
                                 </div>
                             }
-                            <b>Giá:</b> <b className="text-danger mb-3">{accountPackageTemporary?.price == 0 ? 'Miễn phí' : accountPackageTemporary?.price.toLocaleString()} đ</b><br />
+                            <b>Giá:</b> <b className="text-danger mb-3">{accountPackageTemporary?.price == 0 ? 'Miễn phí' : accountPackageTemporary?.price.toLocaleString() + " đ"} </b><br />
                             <b className="me-2">Hạn sử dụng:</b>
                             {accountPackageTemporary && accountPackageTemporary.price === 0 ? (
                                 <b className="text-danger mb-3">Không giới hạn</b>

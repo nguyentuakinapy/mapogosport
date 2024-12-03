@@ -149,6 +149,7 @@ public class OrderRestController {
 	@PostMapping("/create_order")
 	public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
 		Order createdOrder = orderService.createOrder(orderDTO);
+		System.err.println(orderDTO.getPaymentMethod());
 		if (orderDTO.getPaymentMethod().equals("Thanh toán ví")) {
 			User user = userService.findByUsername(orderDTO.getUsername());
 			Wallet wallet = walletService.findByUsername(user);
@@ -163,10 +164,7 @@ public class OrderRestController {
 			transactionService.create(transaction);
 			
 			//wallet admin
-			User admin = userService.findByUsername("myntd");
-			Wallet walletAdmin = walletService.findByUsername(admin);
-			walletAdmin.setBalance(walletAdmin.getBalance().add(BigDecimal.valueOf(orderDTO.getAmount())));
-			walletService.update(walletAdmin);
+			walletService.addFundsToAdminWallet(BigDecimal.valueOf(createdOrder.getAmount()), "Từ hóa đơn: "+createdOrder.getOrderId());
 		}
 
 		return ResponseEntity.ok(createdOrder);

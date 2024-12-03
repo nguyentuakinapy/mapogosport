@@ -1,29 +1,28 @@
 package mapogo.service;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-
+import mapogo.dao.AccountPackageDAO;
 import mapogo.dao.AuthorityDAO;
 import mapogo.dao.BookingDetailDAO;
 import mapogo.dao.NotificationDAO;
 import mapogo.dao.SportFieldDAO;
 import mapogo.dao.UserSubscriptionDAO;
-import mapogo.entity.Authority;
 import mapogo.entity.BookingDetail;
 import mapogo.entity.Notification;
+import mapogo.entity.Owner;
 import mapogo.entity.SportField;
 import mapogo.entity.UserSubscription;
 
@@ -44,10 +43,12 @@ public class NotificationScheduledService {
 
 	@Autowired
 	UserSubscriptionDAO userSubscriptionDAO;
-	
+
 	@Autowired
 	AuthorityDAO authorityDAO;
-	
+
+	@Autowired
+	AccountPackageDAO accountPackageDAO;
 
 	@Autowired
 	EmailService emailService;
@@ -62,7 +63,6 @@ public class NotificationScheduledService {
 		// Tính toán giờ hiện tại cộng thêm 30 phút
 		int currentHour = now.getHour();
 		int currentMinute = now.getMinute();
-
 
 		sportFields.forEach(spf -> {
 
@@ -120,7 +120,7 @@ public class NotificationScheduledService {
 							n.setType("info");
 							n.setBooking(bd.getBooking());
 							// Lưu và gửi thông báo
-							notificationDAO.save(n);							
+							notificationDAO.save(n);
 						}
 					}
 					if (check) {
@@ -135,55 +135,94 @@ public class NotificationScheduledService {
 	}
 
 	@Scheduled(cron = "0 0 0 * * *") // Chạy vào lúc 0 giờ mỗi ngày
+//	@Scheduled(cron = "0 * * * * *") // Chạy mỗi phút một lần
 	public void checkUserSubscription() {
-	    LocalDate today = LocalDate.now();
-	    List<UserSubscription> subscriptions = userSubscriptionDAO.findAll();
-	    for (UserSubscription userSubscription : subscriptions) {
-	        Date endDate = userSubscription.getEndDay(); 
+		Date today = new Date();
 
-	        if (endDate != null) {
-	            // Chuyển đổi Date sang LocalDate
-	            LocalDate endLocalDate = endDate.toInstant()
-	                                            .atZone(ZoneId.systemDefault())
-	                                            .toLocalDate();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-	            // Lùi lại 5 ngày từ endDate
-	            LocalDate startDate = endLocalDate.minusDays(5);
+		List<UserSubscription> subscriptions = userSubscriptionDAO.findAll();
+		for (UserSubscription userSubscription : subscriptions) {
+			Date endDate = userSubscription.getEndDay();
 
-	            // Ví dụ kiểm tra: endDate nằm trong khoảng từ startDate đến today
-	            if (!endLocalDate.isBefore(startDate) && !endLocalDate.isAfter(today)) {
-	                if (today == endLocalDate) {
-	                	List<Authority> authorities =userSubscription.getUser().getAuthorities();
-	                	for (Authority authority : authorities) {
-							if (authority.getRole().getName().equals("ROLE_OWNER")) {
-								authorityDAO.delete(authority);
-								break;
-							}
-						}
-	                	List<SportField> sportFields = userSubscription.getUser().getOwner().getSportsFields();
-	                	for (SportField sportField : sportFields) {
-							sportField.setStatus("Tạm đóng");
-							sportFieldDAO.save(sportField);
-						}
-					}else {
-						Notification n = new Notification();
-						n.setUser(userSubscription.getUser());
-						n.setTitle("Thời hạn gói " + userSubscription.getAccountPackage().getPackageName().toLowerCase());
-						n.setMessage(userSubscription.getAccountPackage().getPackageName()
-							    + " còn " + ChronoUnit.DAYS.between(today, endLocalDate) + " ngày.");
-						n.setType("subscription");
-						// Lưu và gửi thông báo
-						notificationDAO.save(n);
-						
-						emailService.sendEmail(userSubscription.getUser().getEmail(), "Thông báo gia hạn gói đăng ký.",
-								"Gói " + userSubscription.getAccountPackage().getPackageName().toLowerCase() 
-							    + " còn " + ChronoUnit.DAYS.between(today, endLocalDate) + " ngày. Vui lòng gia hạn thêm để tiếp tục sử dụng dịch vụ của chúng tôi!");
-						messagingTemplate.convertAndSend("/topic/bookingDetail/notification",
-								userSubscription.getUser().getUsername());
-					}
-	            }
-	        }
-	    }
+			if (endDate != null) {
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(today);
+
+				calendar.add(Calendar.DATE, +99999);
+
+				Date endDay = calendar.getTime();
+
+				long timeDifference = endDate.getTime() - new Date().getTime();
+
+				if (dateFormat.format(today).equals(dateFormat.format(endDate))) {
+					userSubscription.setAccountPackage(accountPackageDAO.findById(1).get());
+					userSubscription.setEndDay(endDay);
+					userSubscriptionDAO.save(userSubscription);
+				    List<SportField> sportFields = sportFieldDAO.findSportFieldByOwner(userSubscription.getUser().getOwner().getOwnerId()); // Đây sẽ không gây lỗi LazyInitializationException
+				    for (SportField sportField : sportFields) {
+				        if (sportField != null) {
+				            sportField.setStatus("Tạm đóng");
+				        }
+				    }
+				    sportFieldDAO.saveAll(sportFields);
+				    
+				    Notification n = new Notification();
+					n.setUser(userSubscription.getUser());
+					n.setTitle(userSubscription.getAccountPackage().getPackageName() + " đã hết hạn!");
+					n.setMessage(
+							userSubscription.getAccountPackage().getPackageName() + " đã hết hạn, gói đã quay về gói miễn phí!");
+					n.setType("subscription");
+					// Lưu và gửi thông báo
+					notificationDAO.save(n);
+
+					messagingTemplate.convertAndSend("/topic/notification/username",
+							userSubscription.getUser().getUsername());
+
+					emailService.sendEmail(userSubscription.getUser().getEmail(), "Thông báo hết hạn gói đăng ký.",
+							userSubscription.getAccountPackage().getPackageName().toLowerCase() + " đã hết hạn"
+									+ ". Vui lòng gia hạn hoặc nâng cấp thêm để tiếp tục sử dụng dịch vụ của chúng tôi!");
+				} else if (timeDifference <= 5 * 24 * 60 * 60 * 1000) {
+					Calendar startCalendar = Calendar.getInstance();
+					startCalendar.setTime(today);
+
+					Calendar endCalendar = Calendar.getInstance();
+					endCalendar.setTime(endDate);
+
+					startCalendar.set(Calendar.HOUR_OF_DAY, 0);
+					startCalendar.set(Calendar.MINUTE, 0);
+					startCalendar.set(Calendar.SECOND, 0);
+					startCalendar.set(Calendar.MILLISECOND, 0);
+
+					endCalendar.set(Calendar.HOUR_OF_DAY, 0);
+					endCalendar.set(Calendar.MINUTE, 0);
+					endCalendar.set(Calendar.SECOND, 0);
+					endCalendar.set(Calendar.MILLISECOND, 0);
+
+					// Tính số ngày giữa hai ngày
+					long millisecondsBetween = endCalendar.getTimeInMillis() - startCalendar.getTimeInMillis();
+					long daysRemaining = millisecondsBetween / (1000 * 60 * 60 * 24);
+
+					Notification n = new Notification();
+					n.setUser(userSubscription.getUser());
+					n.setTitle("Thời hạn " + userSubscription.getAccountPackage().getPackageName().toLowerCase());
+					n.setMessage(
+							userSubscription.getAccountPackage().getPackageName() + " còn " + daysRemaining + " ngày.");
+					n.setType("subscription");
+					// Lưu và gửi thông báo
+					notificationDAO.save(n);
+
+					messagingTemplate.convertAndSend("/topic/notification/username",
+							userSubscription.getUser().getUsername());
+
+					emailService.sendEmail(userSubscription.getUser().getEmail(), "Thông báo gia hạn gói đăng ký.",
+							userSubscription.getAccountPackage().getPackageName() + " còn "
+									+ daysRemaining
+									+ " ngày. Vui lòng gia hạn thêm để tiếp tục sử dụng dịch vụ của chúng tôi!");
+
+				}
+			}
+		}
 	}
 
 }

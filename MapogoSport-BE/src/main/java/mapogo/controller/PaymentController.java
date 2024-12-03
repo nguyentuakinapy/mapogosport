@@ -60,7 +60,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("/api/payment")
+@RequestMapping("/rest/payment")
 public class PaymentController {
 	@Autowired
 	OrderService orderService;
@@ -88,7 +88,6 @@ public class PaymentController {
 	public ResponseEntity<?> createPayment(HttpServletRequest req, @RequestParam("orderId") Integer orderId,
 			@RequestBody List<Map<String, Integer>> data) throws UnsupportedEncodingException {
 		Order order = orderService.findByOrderId(orderId);
-
 		String orderType = "other";
 		long amount = (long) (order.getAmount() * 100);
 		String vnp_TxnRef = orderId.toString();
@@ -275,7 +274,7 @@ public class PaymentController {
 
 			orderDetailService.create(orderDetail);
 		}
-		return paymentService.createMoMoPayment(amount,orderId,null,"http://localhost:8080/api/payment/momo");
+		return paymentService.createMoMoPayment(amount,orderId,null,"http://localhost:8083/rest/payment/momo");
 	}
 
 	// @GetMapping("/momo")

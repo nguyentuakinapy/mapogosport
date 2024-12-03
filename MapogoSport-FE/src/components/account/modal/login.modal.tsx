@@ -190,6 +190,10 @@ export default function Login(props: LoginProps) {
                 const dataUser = await responseUser.json() as User;
 
                 if (parseInt(dataUser.password) === 123) {
+                    if (!dataUser.enabled) {
+                        toast.error("Tài khoản đã vô hiệu hóa!")
+                        return;
+                    }
 
                     const usernameLocal = dataUser.username.replace(/['"]+/g, '');
                     localStorage.setItem('username', encodeString(usernameLocal));

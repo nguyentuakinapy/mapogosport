@@ -10,6 +10,7 @@ import BlogManager from "@/components/blog/blog-manager";
 import Wallet from "@/components/User/modal/wallet";
 import Image from "next/image";
 import Loading from "@/components/loading";
+import { logOut } from "../utils/Log-Out";
 
 export default function Owner() {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -40,18 +41,22 @@ export default function Owner() {
     useEffect(() => {
         const getOwner = async () => {
             if (userData) {
-                const responseOwner = await fetch(`${BASE_URL}rest/owner/${userData.username}`);
-                if (!responseOwner.ok) {
-                    throw new Error('Error fetching data');
-                }
-                const dataOwner = await responseOwner.json() as Owner;
+                if (userData.authorities.find(item => item.role.name === "ROLE_OWNER")) {
+                    const responseOwner = await fetch(`${BASE_URL}rest/owner/${userData.username}`);
+                    if (!responseOwner.ok) {
+                        throw new Error('Error fetching data');
+                    }
+                    const owner = await responseOwner.json() as Owner;
 
-                const response = await fetch(`${BASE_URL}rest/sport_field_by_owner/${dataOwner.ownerId}`);
-                if (!response.ok) {
-                    throw new Error('Error fetching data');
+                    const response = await fetch(`${BASE_URL}rest/sport_field_by_owner/${owner.ownerId}`);
+                    if (!response.ok) {
+                        throw new Error('Error fetching data');
+                    }
+                    const dataS = await response.json() as SportField[];
+                    setDataSport(dataS);
+                } else {
+                    logOut();
                 }
-                const dataS = await response.json() as SportField[];
-                setDataSport(dataS);
             }
         };
         getOwner();
@@ -84,7 +89,7 @@ export default function Owner() {
                 body: JSON.stringify({
                     userSubscriptionId: userSubscription?.userSubscriptionId,
                     accountPackageId: ap?.accountPackageId,
-                    paymentMethod: selectedPaymentMethod
+                    paymentMethod: selectedPaymentMethod,
                 }),
             }).then(async (res) => {
                 if (!res.ok) {
@@ -111,7 +116,7 @@ export default function Owner() {
                 handleCloseModal();
             });
         } else {
-            fetch(`${BASE_URL}rest/user/subscription/${userSubscription?.userSubscriptionId}`, {
+            fetch(`${BASE_URL}rest/user/subscription/update/${userSubscription?.userSubscriptionId}`, {
                 method: 'PUT',
                 headers: {
                     Accept: 'application/json, text/plain, */*',
@@ -120,7 +125,8 @@ export default function Owner() {
                 body: JSON.stringify({
                     userSubscriptionId: userSubscription?.userSubscriptionId,
                     accountPackageId: ap?.accountPackageId,
-                    paymentMethod: selectedPaymentMethod
+                    paymentMethod: selectedPaymentMethod,
+                    status: "update"
                 }),
             }).then(async (res) => {
                 if (!res.ok) {
@@ -147,8 +153,9 @@ export default function Owner() {
         const endDate = new Date(userSubscription!.endDay);
 
         const futureDate = new Date(endDate);
-        futureDate.setDate(endDate.getDate() + 30);
-
+        if (ap) {
+            futureDate.setDate(endDate.getDate() + ap.durationDays);
+        }
         if (selectedPaymentMethod === "Thanh toán ví") {
             if (userData!.wallet.balance > ap!.price) {
                 fetch(`${BASE_URL}rest/user/subscription/extend/${userSubscription?.userSubscriptionId}/${futureDate}`, {
@@ -178,7 +185,37 @@ export default function Owner() {
                 handleCloseModal();
             }
         } else {
+            fetch(`${BASE_URL}rest/user/subscription/extend/${userSubscription?.userSubscriptionId}`, {
+                method: 'PUT',
+                headers: {
+                    Accept: 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userSubscriptionId: userSubscription?.userSubscriptionId,
+                    accountPackageId: ap?.accountPackageId,
+                    paymentMethod: selectedPaymentMethod,
+                    futureDate,
+                    status: "extend"
+                }),
+            }).then(async (res) => {
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
+                    return;
+                }
 
+                const data = await res.json();
+                if (data.status === "ok" && data.url) {
+                    window.location.href = data.url;
+                } else {
+                    console.error();
+
+                    toast.error("Có lỗi xảy ra trong quá trình tạo thanh toán.");
+                }
+            }).catch((error) => {
+                toast.error(`Đã xảy ra lỗi: ${error.message}`);
+            });
         }
     }
 
@@ -227,9 +264,14 @@ export default function Owner() {
                                                         Đã sở hữu
                                                     </Button>
                                                     :
-                                                    <Button className='btn-sub' onClick={() => handleOpenModal(ap, false)}>
+                                                    <Button
+                                                        className="btn-sub"
+                                                        disabled={new Date(userSubscription.endDay).getTime() - new Date().getTime() > 5 * 24 * 60 * 60 * 1000}
+                                                        onClick={() => handleOpenModal(ap, false)}
+                                                    >
                                                         Gia hạn ngay
                                                     </Button>
+
                                                 :
                                                 <Button className='btn-sub' disabled={true}>
                                                     Đã sở hữu
@@ -278,7 +320,7 @@ export default function Owner() {
                                     onChange={handlePaymentMethodChange}
                                 />
                                 <label className="form-check-label" htmlFor="">
-                                    Thanh toán bằng ví
+                                    Thanh toán bằng ví: {userData?.wallet.balance.toLocaleString() + ' đ'}
                                 </label>
                             </div>
 
@@ -361,10 +403,13 @@ export default function Owner() {
                                 <span>0 Được thích</span>
                                 <span>
                                     {userSubscription && userSubscription.accountPackage ? userSubscription.accountPackage.packageName : 'Không có gói nào'}
-                                    <em> (Còn {
-                                        userSubscription?.endDay ?
-                                            Math.floor((new Date(userSubscription.endDay).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 'Không xác định'
-                                    } ngày)</em>
+                                    {userSubscription?.accountPackage.accountPackageId === 1 ?
+                                        <em> ( Vĩnh viễn )</em>
+                                        :
+                                        <em> (Còn {
+                                            userSubscription?.endDay ?
+                                                Math.floor((new Date(userSubscription.endDay).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) + 1 : 'Không xác định'
+                                        } ngày)</em>}
                                 </span>
 
                             </div>

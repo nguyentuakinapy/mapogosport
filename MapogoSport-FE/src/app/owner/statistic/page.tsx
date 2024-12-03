@@ -55,7 +55,7 @@ export default function Home() {
   const [showModalRankOffline, setShowModalRankOffline] = useState(false);
   const [bookingByUsernameModal, setBookingByUsernameModal] = useState<Booking[]>([]);
   const [bookingByFullNameOffline, setBookingByFullNameOffline] = useState<Booking[]>([]);
-  const years = Array.from(new Array(10), (_,index) => currentYear - index);
+  const years = Array.from(new Array(10), (_, index) => currentYear - index);
   // Pagination
   const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
@@ -1073,24 +1073,25 @@ export default function Home() {
         );
     }
   };
-  if (bookingSuccess.length === 0) return <>Loading</>;
-  
-  if (typeof window !== 'undefined') {
-    return (
-      <Suspense fallback={<div>Đang tải...</div>}>
-        <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>THỐNG KÊ</h3>
-        <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
-          <Nav.Item>
-            <Nav.Link eventKey="all" className="tab-link">Doanh thu</Nav.Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Nav.Link eventKey="withdraw" className="tab-link">Tương tác với khách hàng</Nav.Link>
-          </Nav.Item>
-        </Nav>
-        <div className="mt-3">
-          {renderContent()}
-        </div>
-      </Suspense>
-    );
+  if (bookingSuccess.length >= 0) {
+    if (!totalBookingPrice) return <>Loading</>;
+    else if (typeof window !== 'undefined') {
+      return (
+        <Suspense fallback={<div>Đang tải...</div>}>
+          <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>THỐNG KÊ</h3>
+          <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs">
+            <Nav.Item>
+              <Nav.Link eventKey="all" className="tab-link">Doanh thu</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="withdraw" className="tab-link">Tương tác với khách hàng</Nav.Link>
+            </Nav.Item>
+          </Nav>
+          <div className="mt-3">
+            {renderContent()}
+          </div>
+        </Suspense>
+      );
+    }
   }
 }

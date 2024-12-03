@@ -47,11 +47,11 @@ export default function Register(props: RegisterProps) {
         }
 
         try {
-            await fetch(`${BASE_URL}rest/user/${username}`);
-            toast.warning("Tên đăng nhập đã tồn tại!");
+            const responseAuth = await fetch(`${BASE_URL}rest/user/${username}`);
+            const data = await responseAuth.json() as User;
+            toast.warning("Tên dang nhập đã tồn tại!");
             return;
         } catch (error) {
-
         }
 
 
@@ -220,6 +220,10 @@ export default function Register(props: RegisterProps) {
                 const dataUser = await responseUser.json() as User;
 
                 if (parseInt(dataUser.password) === 123) {
+                    if (!dataUser.enabled) {
+                        toast.error("Tài khoản đã vô hiệu hóa!")
+                        return;
+                    }
 
                     const usernameLocal = dataUser.username.replace(/['"]+/g, '');
                     localStorage.setItem('username', encodeString(usernameLocal));
@@ -291,7 +295,7 @@ export default function Register(props: RegisterProps) {
                     const resAuth = await responseAuth.json(); // Sửa lại dòng này
 
                     if (resAuth && resUser) {
-                        toast.success("Đăng ký thành công!...");
+                        toast.success("Đăng ký thành công!");
                         const usernameLocal = resUser.username.replace(/['"]+/g, '');
                         localStorage.setItem('username', encodeString(usernameLocal));
                         sessionStorage.setItem('user', JSON.stringify(encodeJson(resUser)));

@@ -1,6 +1,7 @@
 package mapogo.service;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -17,4 +18,9 @@ public interface UserSubscriptionService {
 	PaymentDTO createPaymentRecharge(Map<String, Object> data, HttpServletRequest req) throws UnsupportedEncodingException;
 
 	//đến đây
+	
+	List<UserSubscription> findAll();
+	List<UserSubscription> findByAccountPackageId(int id);
+
+	
 }
