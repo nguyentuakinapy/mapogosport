@@ -343,19 +343,19 @@ const AdminOrder = () => {
                 </div>
                 <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
                     <Nav.Item>
-                        <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
+                        <Nav.Link eventKey="all" className="tab-link" onClick={() => setCurrentPage(1)}>Toàn bộ</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link eventKey="processing" className="tab-link">Chờ xác nhận</Nav.Link>
+                        <Nav.Link eventKey="processing" className="tab-link" onClick={() => setCurrentPage(1)}>Chờ xác nhận</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link eventKey="shipping" className="tab-link">Đang vận chuyển</Nav.Link>
+                        <Nav.Link eventKey="shipping" className="tab-link" onClick={() => setCurrentPage(1)}>Đang vận chuyển</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link eventKey="complete" className="tab-link">Đã hoàn thành</Nav.Link>
+                        <Nav.Link eventKey="complete" className="tab-link" onClick={() => setCurrentPage(1)}>Đã hoàn thành</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link eventKey="cancel" className="tab-link">Đã hủy</Nav.Link>
+                        <Nav.Link eventKey="cancel" className="tab-link" onClick={() => setCurrentPage(1)}>Đã hủy</Nav.Link>
                     </Nav.Item>
                 </Nav>
                 {renderContent()}

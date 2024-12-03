@@ -228,12 +228,6 @@ function Categories() {
                                 </div>
                             </Col>
                             <Col lg={10} md={9} sm={12}>
-                                <h3 className="title-section mb-4">
-                                    <span className="icon">
-                                        <Image className="img-fluid" alt="Flash Sale" width={40} height={40} src="/img/philcorbett-football.gif" unoptimized />
-                                    </span>
-                                    Danh sách khu vực sân
-                                </h3>
                                 <Row>
                                     <div className="section-header mb-4">
                                         <Image className="icon-sf" src={"/img/football-ground.png"} alt={"Icon SportField"} width={32} height={32} />

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Row, Col, Form, FloatingLabel, Button } from 'react-bootstrap';
 import ModalUpdateEmail from '@/components/User/modal/user.updateEmail';
 import '../types/user.scss';
-import useSWR, { mutate } from 'swr';
+import { mutate } from 'swr';
 import { toast } from 'react-toastify';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -13,12 +13,12 @@ import ModalUpdatePhone from '@/components/User/modal/user.updatePhone';
 import React from 'react';
 
 interface ProfileContentProps {
-    usernameFetchApi: string;
+    user: User;
 }
 
 const ProfileContent = (props: ProfileContentProps) => {
-    const { usernameFetchApi } = props;
-    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    const { user } = props;
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
     const [userData, setUserData] = useState<User | null>(null);
     const [fullName, setFullName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
@@ -28,44 +28,35 @@ const ProfileContent = (props: ProfileContentProps) => {
     const [showChangePassword, setShowChangePassword] = useState<boolean>(false);
     const [showUpdatePhone, setShowUpdatePhone] = useState<boolean>(false);
 
-    const { data, error, isLoading } = useSWR(usernameFetchApi, fetcher, {
-        revalidateIfStale: false,
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-    });
-
     useEffect(() => {
-        if (data) {
-            setFullName(data.fullname);
-            setEmail(data.email);
-            setBirthday(data.birthday ? new Date(data.birthday) : null);
-            setGender(data.gender);
-            setUserData(data);
+        if (user) {
+            setFullName(user.fullname);
+            setEmail(user.email);
+            setBirthday(user.birthday ? new Date(user.birthday) : null);
+            setGender(user.gender);
+            setUserData(user);
         }
-    }, [data]);
+    }, [user]);
 
-
-
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!fullName) {
             toast.error("Bắt buộc phải nhập họ và tên!");
             return
         }
-        fetch(usernameFetchApi, {
+        const res = await fetch(`${BASE_URL}rest/user/${user.username}`, {
             method: 'PUT',
             headers: {
                 Accept: 'application/json, text/plain, */*',
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(userData),
-        }).then(async (res) => {
-            if (!res.ok) {
-                toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
-                return
-            }
-            mutate(usernameFetchApi);
-            toast.success('Cập nhật thành công!');
-        })
+        });
+        if (!res.ok) {
+            toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
+            return
+        }
+        mutate(`${BASE_URL}rest/user/${user.username}`);
+        toast.success('Cập nhật thành công!');
     };
 
     useEffect(() => {
@@ -80,13 +71,6 @@ const ProfileContent = (props: ProfileContentProps) => {
             };
         });
     }, [fullName, email, birthday, gender]);
-
-    if (isLoading) return <div className="d-flex align-items-center justify-content-center">
-        <div className="spinner-border text-danger" role="status">
-            <span className="visually-hidden">Loading...</span>
-        </div>
-    </div>;
-    if (error) return <div>Đã xảy ra lỗi trong quá trình lấy dữ liệu! Vui lòng thử lại sau hoặc liên hệ với quản trị viên</div>;
 
     return (
         <>
@@ -123,9 +107,8 @@ const ProfileContent = (props: ProfileContentProps) => {
 
                     <Col xs={6}>
                         <Form.Group className="mb-3">
-                            <FloatingLabel controlId="district" label="Giới tính">
-                                <Form.Select aria-label="Floating label select example"
-                                    value={gender != null ? gender.toString() : ''}
+                            <FloatingLabel controlId="gender" label="Giới tính">
+                                <Form.Select value={gender != null ? gender.toString() : ''}
                                     onChange={(e) => setGender(e.target.value === '0' ? 0 : e.target.value === '1' ? 1 : e.target.value === '2' ? 2 : null)}>
                                     <option>-- Nhấn để chọn --</option>
                                     <option value="0">Nam</option>

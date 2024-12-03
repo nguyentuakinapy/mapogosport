@@ -1,4 +1,3 @@
-import { decodeString } from "@/components/Utils/Format";
 import { useState } from "react";
 import { Button, Form, InputGroup, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -12,12 +11,10 @@ interface UserProps {
 
 const ModalUpdateEmail = (props: UserProps) => {
     const { showUpdateEmail, setShowUpdateEmail, userData } = props;
-
     const [otpValue, setOtpValue] = useState<string>("");
     const [timeLeft, setTimeLeft] = useState(5);
     const [checkButton, setCheckButton] = useState<boolean>(false);
     const [newEmail, setNewEmail] = useState<string>("");
-
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const handleClose = () => {
@@ -26,7 +23,7 @@ const ModalUpdateEmail = (props: UserProps) => {
         setOtpValue('');
     }
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!otpValue || !newEmail) {
             toast.warning("Vui lòng nhập đầy đủ thông tin!")
             return;
@@ -35,38 +32,34 @@ const ModalUpdateEmail = (props: UserProps) => {
             toast.warning("Vui lòng nhập đúng định dạng email!")
             return;
         }
-        const username = decodeString(String(localStorage.getItem('username')));
-        if (username) {
-            fetch(`${BASE_URL}rest/user/${username}`, {
-                method: 'PUT',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ...userData,
-                    email: newEmail
-                }),
-            }).then(async (res) => {
-                if (!res.ok) {
-                    toast.error(`Cập nhật địa chỉ email không thành công! Vui lòng thử lại sau!`);
-                    return
-                }
-                handleClose();
-                mutate(`${BASE_URL}rest/user/${username}`);
-                toast.success('Cập nhật địa chỉ email thành công!');
-                fetch(`${BASE_URL}rest/user/updateEmail/sendMail`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json, text/plain, */*',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: userData?.email
-                    })
-                });
-            })
+        const res = await fetch(`${BASE_URL}rest/user/${userData?.username}`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...userData,
+                email: newEmail
+            }),
+        });
+        if (!res.ok) {
+            toast.error(`Cập nhật địa chỉ email không thành công! Vui lòng thử lại sau!`);
+            return
         }
+        handleClose();
+        mutate(`${BASE_URL}rest/user/${userData?.username}`);
+        toast.success('Cập nhật địa chỉ email thành công!');
+        await fetch(`${BASE_URL}rest/user/updateEmail/sendMail`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: userData?.email
+            })
+        });
     }
 
     const coolDownTime = async () => {
@@ -103,34 +96,31 @@ const ModalUpdateEmail = (props: UserProps) => {
     }
 
     return (
-        <>
-            <Modal show={showUpdateEmail} onHide={() => handleClose()} aria-labelledby="contained-modal-title-vcenter"
-                centered backdrop="static" keyboard={false}>
-                <Modal.Header closeButton>
-                    <Modal.Title className="text-uppercase text-danger">Cập nhật Email</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group>
-                        <Form.Label>Email mới: <b className="text-danger">*</b></Form.Label>
-                        <Form.Control type="email" placeholder="Nhập địa chỉ email mới"
-                            value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
-                    </Form.Group>
-                    <div className="my-3">
-                        <Form.Label>Mã xác nhận: <b className="text-danger">*</b></Form.Label>
-                        <InputGroup>
-                            <Form.Control type="email" placeholder="Mã OTP ######"
-                                value={otpValue} onChange={(e) => setOtpValue(e.target.value)} />
-                            <Button variant="btn btn-profile" onClick={() => { coolDownTime() }}
-                                disabled={checkButton}>{checkButton ? timeLeft + 's' : 'Gửi mã'}</Button>
-                        </InputGroup>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => handleClose()}>Hủy</Button>
-                    <Button style={{ backgroundColor: "#142239" }} onClick={() => handleSave()}>Xác nhận</Button>
-                </Modal.Footer>
-            </Modal >
-        </>
+        <Modal show={showUpdateEmail} centered backdrop="static" keyboard={false}>
+            <Modal.Header>
+                <Modal.Title className="text-uppercase text-danger fw-bold d-flex m-auto">Cập nhật Email</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form.Group>
+                    <Form.Label>Email mới: <b className="text-danger">*</b></Form.Label>
+                    <Form.Control type="email" placeholder="Nhập địa chỉ email mới"
+                        value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+                </Form.Group>
+                <div className="my-3">
+                    <Form.Label>Mã xác nhận: <b className="text-danger">*</b></Form.Label>
+                    <InputGroup>
+                        <Form.Control type="text" placeholder="Mã OTP ######"
+                            value={otpValue} onChange={(e) => setOtpValue(e.target.value)} />
+                        <Button variant="btn btn-profile" onClick={() => { coolDownTime() }}
+                            disabled={checkButton}>{checkButton ? timeLeft + 's' : 'Gửi mã'}</Button>
+                    </InputGroup>
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => handleClose()}>Hủy</Button>
+                <Button style={{ backgroundColor: "#142239" }} onClick={() => handleSave()}>Xác nhận</Button>
+            </Modal.Footer>
+        </Modal >
     )
 }
 

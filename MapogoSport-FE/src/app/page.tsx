@@ -210,7 +210,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <Container className="mt-3">
+      <Container className="my-3">
         <Row>
           <Col className="text-center">
             <Image width={134} height={134} className="p-4" src="/images/timsan.png" alt="" />
@@ -230,67 +230,55 @@ export default function Home() {
         </Row>
       </Container>
       {/* GIỚI THIỆU VỀ CHỦ SÂN */}
-      <Container className="pt-3">
-        <div id="carouselExampleInterval" className="carousel slide" data-bs-ride="carousel">
-          <div className="carousel-inner">
-            <div className="carousel-item" data-bs-interval="2000">
-              <Image width={1296} height={419} src="/images/bannerSport.png" className="d-block w-100" alt="..." />
-              <Link href={'/categories/sport_field'} style={{
-                position: 'absolute',
-                top: '70%',
-                left: '13%',
-                transform: 'translate(-50%, -50%)',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                borderRadius: '50px',
-                zIndex: '1000'
-              }} className="btn btn-danger">
-                ĐẶT SÂN NGAY
-              </Link>
-            </div>
-            <div className="carousel-item active" data-bs-interval="2000">
-              <Image width={1296} height={419} src="/images/registerowner.png" className="w-100" alt="" />
-              {hasOwnerRole ? (
-                <a style={{
-                  position: 'absolute',
-                  top: '40%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  borderRadius: '50px',
-                }} className="btn btn-danger" href="/owner">
-                  QUẢN LÝ NGAY
-                </a>
-              ) : (
-                <button style={{
-                  position: 'absolute',
-                  top: '40%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  borderRadius: '50px',
-                }} className="btn btn-danger" onClick={() => createOwnerSubmit()}>
-                  ĐĂNG KÝ NGAY
-                </button>
-              )}
+      <section className="backdrop">
+        <div className="owner-content">
+          <div className="img-div">
+            <div className="img-content">
+              <Image src="/img/owner_banner.png" width={1520} height={700} alt="Banner Owner" />
             </div>
           </div>
-          <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleInterval" data-bs-slide="prev">
-            <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span className="visually-hidden">Previous</span>
-          </button>
-          <button className="carousel-control-next" type="button" data-bs-target="#carouselExampleInterval" data-bs-slide="next">
-            <span className="carousel-control-next-icon" aria-hidden="true"></span>
-            <span className="visually-hidden">Next</span>
-          </button>
+          {hasOwnerRole ? (
+            <div className="main-container">
+              <div className="content-container">
+                <div className="mediapromo-heading">
+                  <p className="mediapromo-title">Chủ sân</p>
+                  <p className="mediapromo-subtitle">Chào mừng bạn đến với hệ thống quản lý sân Mapogo Sport!</p>
+                </div>
+                <div className="mediapromo-links">
+                  <Link href={"/owner"} className="btn-dcszsa">
+                    <span>
+                      <div className="cta-content">Quản lý ngay</div>
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="main-container">
+              <div className="content-container">
+                <div className="mediapromo-heading">
+                  <p className="mediapromo-title">Chủ sân</p>
+                  <p className="mediapromo-subtitle">Trở thành chủ sân ngay hôm nay – Tận dụng cơ hội kinh doanh và quản lý sân dễ dàng <br /> với hệ thống Mapogo Sport!</p>
+                </div>
+                <div className="mediapromo-links">
+                  <Link href={""} onClick={() => createOwnerSubmit()} className="btn-dcszsa">
+                    <span>
+                      <div className="cta-content">Đăng ký ngay</div>
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        {/* VOUCHER */}
+      </section>
+      {/* VOUCHER */}
+      <section>
         <div className="App">
           <Popup />
         </div>
-      </Container>
+      </section>
+      {/* VOUCHER */}
       {/* SÂN THỂ THAO MỚI  */}
       <Container className="pt-5">
         <div className="row a-more">

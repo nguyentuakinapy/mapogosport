@@ -30,6 +30,7 @@ const OwnerBookingBill = () => {
     const [itemsPerPage] = useState(8);
     const [showCancelBooking, setShowCancelBooking] = useState(false);
     const [booking, setBooking] = useState<BookingFindAll | null>(null);
+    const [bookingData, setBookingData] = useState<BookingFindAll[]>();
 
     const bookingStatuses = [
         'Chờ thanh toán',
@@ -44,11 +45,18 @@ const OwnerBookingBill = () => {
         }
     }, []);
 
-    const { data: bookingData, error, isLoading } = useSWR<BookingFindAll[]>(`${BASE_URL}rest/owner/booking/findAll/${username}`, fetcher, {
+    const { data, error, isLoading } = useSWR<BookingFindAll[]>(`${BASE_URL}rest/owner/booking/findAll/${username}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
+
+    useEffect(() => {
+        if (data) {
+            const sortedData = data.sort((a: BookingFindAll, b: BookingFindAll) => b.bookingId - a.bookingId);
+            setBookingData(sortedData);
+        }
+    }, [data]);
 
     const handleSearch = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value.toLowerCase());
@@ -381,16 +389,16 @@ const OwnerBookingBill = () => {
                 </div>
                 <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
                     <Nav.Item>
-                        <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
+                        <Nav.Link eventKey="all" className="tab-link" onClick={() => setCurrentPage(1)}>Toàn bộ</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link eventKey="unpaid" className="tab-link">Chờ thanh toán</Nav.Link>
+                        <Nav.Link eventKey="unpaid" className="tab-link" onClick={() => setCurrentPage(1)}>Chờ thanh toán</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link eventKey="cancel" className="tab-link">Đã hủy</Nav.Link>
+                        <Nav.Link eventKey="cancel" className="tab-link" onClick={() => setCurrentPage(1)}>Đã hủy</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link eventKey="complete" className="tab-link">Đã thanh toán</Nav.Link>
+                        <Nav.Link eventKey="complete" className="tab-link" onClick={() => setCurrentPage(1)}>Đã thanh toán</Nav.Link>
                     </Nav.Item>
                 </Nav>
                 {renderContent()}
