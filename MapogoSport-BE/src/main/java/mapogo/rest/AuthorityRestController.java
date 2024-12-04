@@ -19,6 +19,7 @@ import mapogo.entity.Role;
 import mapogo.entity.SportField;
 import mapogo.entity.User;
 import mapogo.service.AuthorityService;
+import mapogo.service.EmailService;
 import mapogo.service.RoleService;
 import mapogo.service.SportFieldService;
 import mapogo.service.UserService;
@@ -54,6 +55,9 @@ public class AuthorityRestController {
 	@Autowired
 	SportFieldDAO sportFieldDAO;
 
+	@Autowired
+	EmailService emailService;
+
 	@GetMapping("/list-users")
 	public List<User> findAll() {
 		return userService.findAll();
@@ -83,13 +87,33 @@ public class AuthorityRestController {
 
 		user.setEnabled(enabled);
 		userDao.save(user);
+		String email = user.getEmail();
+
 		if (enabled==false) {
 			List<SportField> sportFields = user.getOwner().getSportsFields();
 			for (SportField sport : sportFields) {
 				sport.setStatus("Tạm đóng");
 				sportFieldDAO.save(sport);
 			}
+			emailService.sendEmail(email, "MapogoSport", "Chào "+user.getFullname()+",\r\n"
+					+ "\r\n"
+					+ "Chúng tôi xin thông báo rằng tài khoản của bạn trên hệ thống đã bị vô hiệu hóa. "
+					+ "Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua email này.\r\n"
+					+ "\r\n"
+					+ "Trân trọng,\r\n"
+					+ "Đội ngũ hỗ trợ khách hàng\r\n"
+					);
 
+
+		}else {
+			emailService.sendEmail(email, "MapogoSport", "Chào "+user.getFullname()+",\r\n"
+					+ "\r\n"
+					+ "Chúng tôi xin thông báo rằng tài khoản của bạn trên hệ thống đã được kích hoạt. "
+					+ "Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua email này.\r\n"
+					+ "\r\n"
+					+ "Trân trọng,\r\n"
+					+ "Đội ngũ hỗ trợ khách hàng\r\n"
+					);
 		}
 
 		return "";

@@ -123,11 +123,6 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         return addressParts.filter(part => part).join(', ');
     }
 
-
-
-
-
-
     // Đóng modal và reset các trường nhập liệu
     const handleClose = () => {
         setSelectedDistrict("");

@@ -200,9 +200,9 @@ const CheckoutPage = () => {
     if (!user1) {
       errors.push('Người dùng không tồn tại');
     }
-    if (!customPhoneNumber && !phoneNumberSelected) {
+    if (!customPhoneNumber && phoneNumberSelected === "other") {
       errors.push('Vui lòng nhập số điện thoại');
-    } else if (!phoneNumberSelected && !customPhoneNumber) {
+    } else if (!phoneNumberSelected) {
       errors.push('Vui lòng chọn số điện thoại');
     }
 

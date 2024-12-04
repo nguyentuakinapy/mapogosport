@@ -179,7 +179,12 @@ const WalletPage = () => {
 
     const [money, setMoney] = useState<number>();
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
+    const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const rawValue = e.target.value.replace(/\D/g, "");
+        const numericValue = rawValue === "" ? 0 : Number(rawValue);
+        setMoney(numericValue);
 
+    };
 
     const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedPaymentMethod(e.target.value);
@@ -214,11 +219,11 @@ const WalletPage = () => {
             <div className="">
                 <FloatingLabel controlId="floatingTextarea2" label="Số tiền cần nạp!">
                     <Form.Control
-                        type="number"
+                        type="text"
                         placeholder="Leave a comment here"
-                        value={money}
+                        value={money?.toLocaleString()}
                         min={10000} // Thiết lập giá trị tối thiểu
-                        onChange={(e) => setMoney(Number(e.target.value))}
+                        onChange={handlePriceChange}
 
                     />
                     {money !== undefined && money < 10000 && (
