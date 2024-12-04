@@ -752,7 +752,7 @@ export default function ChatBox() {
     setSearchKeyword(e.target.value);
   };
 
-  console.log('filteredChatList=======', filteredChatList);
+  // console.log('filteredChatList=======', filteredChatList);
   
 
   if (isLoading) return <p>Loading messages...</p>;
