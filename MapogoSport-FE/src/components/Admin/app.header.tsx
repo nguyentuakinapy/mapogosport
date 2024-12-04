@@ -98,10 +98,18 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
         const stompClient = Stomp.over(socket);
 
         stompClient.connect({}, () => {
+            // stompClient.subscribe('/topic/notification/username', (message) => {
+            //     if (message.body === decodeString(String(localStorage.getItem('username')))) {
+            //         toast.success("Bạn vừa có thông báo mơí!")
+            //         setCheckNotification(prev => prev + 1);
+            //     }
+            // });
+
             stompClient.subscribe('/topic/notification/username', (message) => {
                 if (message.body === decodeString(String(localStorage.getItem('username')))) {
-                    toast.success("Bạn vừa có thông báo mơí!")
+                    toast.success("Bạn vừa có thông báo mới!");
                     setCheckNotification(prev => prev + 1);
+                    getNotification(message.body);
                 }
             });
 
@@ -129,14 +137,6 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
             stompClient.subscribe('/topic/order/cancel', (message) => {
                 if (message.body === decodeString(String(localStorage.getItem('username')))) {
                     toast.success("Có đơn hàng vừa hủy!")
-                    getNotification(message.body);
-                }
-            });
-
-            stompClient.subscribe('/topic/notification/username', (message) => {
-                if (message.body === decodeString(String(localStorage.getItem('username')))) {
-                    toast.success("Bạn vừa có thông báo mới!");
-                    setCheckNotification(prev => prev + 1);
                     getNotification(message.body);
                 }
             });
@@ -251,7 +251,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                 <span onClick={() => setHideNotification(!hideNotification)} style={{ top: '12%', left: '85%', fontSize: '10px' }}
                                     className="position-absolute translate-middle badge rounded-pill bg-danger">
                                     {/* {notification ? notification.filter(item => item.isRead === false).length : 0} */}
-                                    {notification ? notification.filter(item => item.isRead === false).length > 5 ? '5+' :
+                                    {notification ? notification.filter(item => item.isRead === false).length > 99 ? '99+' :
                                         notification.filter(item => item.isRead === false).length : 0}
                                 </span>
                                 <div className={`notification ${hideNotification ? 'd-block' : 'd-none'}`} >
@@ -281,12 +281,16 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                                                     fontSize: '15px',
                                                                     color: item.isRead ? 'black' : undefined
                                                                 }}>
-                                                                <b>{item.type === "notifyMess" ?
-                                                                    item.title.split('từ')[0] : item.title
-                                                                }</b>
-                                                                <div className="d-flex justify-content-between" style={{ fontSize: '13px' }}>
-                                                                    <div className=''>{item.message}</div>
-                                                                    <div className='ms-auto'>{new Date(item.createdAt).toLocaleDateString()}</div>
+                                                                <div className="d-flex justify-content-between align-items-center" style={{ fontSize: '13px' }}>
+                                                                    <div>
+                                                                        <b style={{ fontSize: '14px' }}>{item.type === "notifyMess" ?
+                                                                            item.title.split('từ')[0] : item.title
+                                                                        }</b>
+                                                                        <div className=''>{item.message}</div>
+                                                                    </div>
+                                                                    <div className=' ms-auto'>{new Date(item.createdAt).toLocaleDateString()} <br />
+                                                                        {item.createdAt.split('T')[1].split('.')[0]}
+                                                                    </div>
                                                                 </div>
                                                             </Link>
                                                         </div>
