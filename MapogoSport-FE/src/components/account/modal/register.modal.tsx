@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { Modal } from "react-bootstrap"
+import { Form, InputGroup, Modal } from "react-bootstrap"
 import { toast } from "react-toastify";
 import "./account.scss"
 import { encodeJson, encodeString, hashPassword } from "@/components/Utils/Format";
@@ -29,6 +29,7 @@ export default function Register(props: RegisterProps) {
     const [newPassword, setNewPassword] = useState<string>("");
     const [createPassword, setCreatePassword] = useState<string>("");
     const authority = 4;
+    const [hidePassword, setHidePassword] = useState<boolean>(true);
 
     const [otp, setOtp] = useState<string>("");
     const [otpValue, setOtpValue] = useState<string>("");
@@ -41,6 +42,8 @@ export default function Register(props: RegisterProps) {
     }, [createPassword])
 
     const handleSubmit = async () => {
+        const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!*@%])[A-Za-z\d!*@%]{6,}$/;
+
         if (!username) {
             toast.warning("Vui lòng nhập tên đăng nhập!")
             return;
@@ -66,6 +69,9 @@ export default function Register(props: RegisterProps) {
             return;
         } else if (!newPassword) {
             toast.warning("Vui lòng xác nhận mật khẩu!")
+            return;
+        } else if (!createPassword.match(regex) || !newPassword.match(regex)) {
+            toast.error("Mật khẩu phải có ít nhất 6 ký tự, đồng thời bao gồm cả chữ số, chữ cái và ký tự đặc biệt (!*@%).")
             return;
         } else if (createPassword != newPassword) {
             toast.warning("Mật khẩu bạn nhập không chính xác!")
@@ -175,6 +181,7 @@ export default function Register(props: RegisterProps) {
 
     const handleClose = () => {
         setShowRegisterModal(false);
+        setHidePassword(true)
         setUsername("");
         setEmail("");
         setPassword("");
@@ -387,15 +394,42 @@ export default function Register(props: RegisterProps) {
                                     </div>
                                 </div>
                                 <div className="row mb-3">
-                                    <div className="form-group col-6">
-                                        <input type="password" className="form-control border border-dark"
-                                            value={createPassword} onChange={(e) => setCreatePassword(e.target.value)}
-                                            placeholder="Mật khẩu *" />
+                                    <div className="col-6">
+                                        <InputGroup style={{
+                                            border: '1px solid', borderRadius: '5px 5px'
+                                        }}>
+                                            <Form.Control style={{
+                                                width: '38%', border: 'none'
+                                            }}
+                                                type={hidePassword ? 'password' : 'text'}
+                                                placeholder="Vui lòng nhập mật khẩu!"
+                                                value={createPassword}
+                                                onChange={(e) => setCreatePassword(e.target.value)}
+                                            />
+                                            <InputGroup.Text className="bg-white" style={{
+                                                border: 'none', cursor: 'pointer'
+                                            }} id="basic-addon1" onClick={() => setHidePassword(prev => !prev)}>
+                                                {hidePassword ? <i className="bi bi-eye"></i> : <i className="bi bi-eye-slash"></i>}
+                                            </InputGroup.Text>
+                                        </InputGroup>
                                     </div>
-                                    <div className="form-group col-6">
-                                        <input type="password" className="form-control border border-dark"
-                                            value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                                            placeholder="Nhập lại mật khẩu *" />
+                                    <div className="col-6">
+                                        <InputGroup style={{
+                                            border: '1px solid', borderRadius: '5px 5px'
+                                        }}>
+                                            <Form.Control style={{
+                                                width: '38%', border: 'none'
+                                            }}
+                                                type={hidePassword ? 'password' : 'text'}
+                                                placeholder="Xác nhận lại mật khẩu!"
+                                                value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                                            />
+                                            <InputGroup.Text className="bg-white" style={{
+                                                border: 'none', cursor: 'pointer'
+                                            }} id="basic-addon1" onClick={() => setHidePassword(prev => !prev)}>
+                                                {hidePassword ? <i className="bi bi-eye"></i> : <i className="bi bi-eye-slash"></i>}
+                                            </InputGroup.Text>
+                                        </InputGroup>
                                     </div>
                                 </div>
                                 <div className="input-group mb-3">

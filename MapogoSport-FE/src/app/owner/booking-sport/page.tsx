@@ -45,7 +45,6 @@ export default function BookingSport() {
     const [showSearchBookingModal, setSearchShowBookingModal] = useState<boolean>(false);
     const [showViewOrEditBookingModal, setShowViewOrEditBookingModal] = useState<boolean>(false);
     const [showNotificationModal, setNotificationModal] = useState<boolean>(false);
-    const [checkDataStatus, setCheckDataStatus] = useState<boolean>(true);
     const [checkLoadingData, setCheckLoadingData] = useState<boolean>(false);
     const [bookingsOnDay, setBookingsOnDay] = useState<BookingsTypeOnDay>({});
     const [bookingsOnWeek, setBookingsOnWeek] = useState<BookingsTypeOnWeek>({})
@@ -265,8 +264,6 @@ export default function BookingSport() {
         }
     }, [dayYears, days]);
 
-    const [isFirstRender, setIsFirstRender] = useState(true);
-
     const refreshStatusBooking = () => {
         setCheckLoadingData(true)
 
@@ -290,19 +287,6 @@ export default function BookingSport() {
             setDayOnWeek();
         }
     }
-
-    useEffect(() => {
-        if (isFirstRender) {
-            setIsFirstRender(false);
-            return;
-        }
-        const timeoutId = setTimeout(() => {
-            refreshStatusBooking();
-        }, 500);
-
-        return () => clearTimeout(timeoutId);
-
-    }, [checkDataStatus]);
 
     const setStatusOnDay = async () => {
 
@@ -1114,7 +1098,7 @@ export default function BookingSport() {
             const selectedSportData = dataSport[selectSport];
 
             if (!selectedSportData) {
-                console.error("Selected sport data is invalid");
+                // console.error("Selected sport data is invalid");
                 return;
             }
             const getFindBookingSport = async () => {
@@ -1438,12 +1422,12 @@ export default function BookingSport() {
             <BookingModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
                 sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
                 sport={dataSport && dataSport[selectSport]} owner={owner}
-                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey + 100}>
+                startTimeKey={startTimeKey + 100}>
             </BookingModal >
             <ViewEditBookingModal bookingBySubscriptionKey={bookingBySubscriptionKey && bookingBySubscriptionKey}
                 showViewOrEditBookingModal={showViewOrEditBookingModal}
                 setShowViewOrEditBookingModal={setShowViewOrEditBookingModal} owner={owner} sport={dataSport && dataSport[selectSport]}
-                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey + 1}
+                startTimeKey={startTimeKey + 1}
                 bookingDetailData={bookingDetailData}>
             </ViewEditBookingModal >
             <SearchBookingModal showSearchBookingModal={showSearchBookingModal} setSearchShowBookingModal={setSearchShowBookingModal}

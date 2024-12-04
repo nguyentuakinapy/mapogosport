@@ -14,14 +14,12 @@ interface BookingProps {
     dayStartBooking: string;
     sport?: SportField;
     owner?: Owner;
-    checkDataStatus: boolean
-    setCheckDataStatus: (v: boolean) => void;
     startTimeKey: number
 }
 
 const BookingModal = (props: BookingProps) => {
     const { showBookingModal, setShowBookingModal, sportDetail, startTime,
-        dayStartBooking, sport, owner, checkDataStatus, setCheckDataStatus, startTimeKey } = props;
+        dayStartBooking, sport, owner, startTimeKey } = props;
     const [selectTime, setSelectTime] = useState<string>('Chọn thời gian');
     const [selectTimeOnStage, setSelectTimeOnStage] = useState<string>('Chọn thời gian');
     const [activeTab, setActiveTab] = useState<string>('all');
@@ -355,7 +353,6 @@ const BookingModal = (props: BookingProps) => {
         const dataUser = await responseUser.json() as User;
         createBooking(6, dataUser);
 
-        setCheckDataStatus(!checkDataStatus);
         handleClose();
     }
 
@@ -611,7 +608,6 @@ const BookingModal = (props: BookingProps) => {
         const dataUser = await responseUser.json() as User;
         createBookingByPeriod(6, dataUser);
 
-        setCheckDataStatus(!checkDataStatus);
         handleClose();
     }
 

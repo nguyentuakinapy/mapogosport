@@ -84,7 +84,7 @@ const ProductAddNew = (props: UserProps) => {
   const mutationAddProdcut = useMutation({
     mutationFn: (putData: ProductFormData) => {
       return axios.post(
-        `http://localhost:8080/rest/products/admin/create`,
+        `${BASE_URL}rest/products/admin/create`,
         putData.formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -101,7 +101,7 @@ const ProductAddNew = (props: UserProps) => {
   const mutation = useMutation({
     mutationFn: (putData: PutDataMutationAndMutationAddProductDetail) => {
       return axios.put(
-        `http://localhost:8080/rest/products/admin/${putData.id}`,
+        `${BASE_URL}rest/products/admin/${putData.id}`,
         putData.formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -113,7 +113,7 @@ const ProductAddNew = (props: UserProps) => {
   const mutationAddProductDetail = useMutation({
     mutationFn: (putData: PutDataMutationAndMutationAddProductDetail) => {
       return axios.post(
-        `http://localhost:8080/rest/product-detail/create/${putData.id}`, // id product
+        `${BASE_URL}rest/product-detail/create/${putData.id}`, // id product
         putData.formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -366,7 +366,7 @@ const ProductAddNew = (props: UserProps) => {
       setPreviewImageProductColor(URL.createObjectURL(file)); // Tạo URL xem trước
       setImageProductDetail(file);
       console.log('dddd=>>>>>, ', file);
-      
+
     }
   };
   // Hàm để kiểm tra các trường bắt buộc
@@ -548,12 +548,12 @@ const ProductAddNew = (props: UserProps) => {
         );
       } else if (currentProduct) {
         console.log('prod₫>>>>>>>>: ', productDetails?.length);
-        
+
         // Trường hợp sản phẩm chưa có ProductDetail nào
         if (!productDetails || productDetails.length === 0) {
           // Chỉ cho phép nếu có đủ thông tin để tạo ProductDetail mới
           console.log('pro dang tróng ');
-          
+
           if (
             newColor !== "" &&
             selectedGalleryFiles.length > 0 &&
@@ -565,26 +565,25 @@ const ProductAddNew = (props: UserProps) => {
           console.log('pro ko tróng ');
 
           // Nếu sản phẩm đã tồn tại ProductDetail
-          if(productDetails.length<0)
-          {
+          if (productDetails.length < 0) {
 
             if (!selectedProductDetail) {
               console.log('chưa chọn product detail');
-              
+
               // Nếu `selectedProductDetail` là mảng rỗng, kiểm tra các điều kiện để thêm mới
-              if (newColor !== "" &&selectedGalleryFiles.length > 0 &&previewImageProductColor !== null) {
+              if (newColor !== "" && selectedGalleryFiles.length > 0 && previewImageProductColor !== null) {
                 canProceed = true; // Có đủ thông tin để thêm mới
               } else {
-                console.log('chạy vòa can ₫ false');              
+                console.log('chạy vòa can ₫ false');
                 canProceed = false; // Ngăn việc tạo mới khi thiếu thông tin
               }
             } else {
               // Trường hợp có `selectedProductDetail` cụ thể để cập nhật
               canProceed = true; // Cho phép cập nhật nếu đã chọn `ProductDetail`
             }
-          }else{
+          } else {
             canProceed = true;
-          }                                    
+          }
         }
 
         // Kiểm tra nếu không đủ điều kiện để tiếp tục, dừng xử lý và cảnh báo
@@ -811,7 +810,7 @@ const ProductAddNew = (props: UserProps) => {
     }
 
     try {
-      await axios.delete(`http://localhost:8080/rest/product-detail-size/delete/${productDetailSizeId}`);
+      await axios.delete(`${BASE_URL}rest/product-detail-size/delete/${productDetailSizeId}`);
       toast.success("Xóa thành công!");
       mutate();
     } catch (error) {
@@ -946,7 +945,7 @@ const ProductAddNew = (props: UserProps) => {
 
       toast.success("Xóa sản phẩm chi tiết thành công");
       // handleClose();
-      mutateProductDetails();      
+      mutateProductDetails();
     } catch (error) {
       toast.error("Xóa sản phẩm chi tiết không thành công");
     }
@@ -1404,7 +1403,7 @@ const ProductAddNew = (props: UserProps) => {
                       <div className="image-container-new">
                         {/* Nếu chưa có ảnh, hiển thị ảnh mặc định */}
                         <Image
-                          src={ previewImageProductColor || selectedProductDetail?.image || "/images/logo.png"}
+                          src={previewImageProductColor || selectedProductDetail?.image || "/images/logo.png"}
                           alt="Product image"
                           className="img-thumbnail shadow-sm" // Thêm bóng đổ
                         />
