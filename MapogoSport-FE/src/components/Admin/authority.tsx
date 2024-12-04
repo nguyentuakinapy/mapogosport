@@ -2,16 +2,19 @@
 import AuthorityModal from "@/components/Admin/Modal/authority.modal";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Table } from "react-bootstrap";
+import { Pagination, Table } from "react-bootstrap";
 import useSWR from "swr";
 
 function AuthorityComponent() {
     const [showEditRole, setShowEditRole] = useState<boolean>(false);
     const [users, setUsers] = useState<User[]>([]);
-    const [displayedUsers, setDisplayedUsers] = useState<User[]>([]); // Danh sách được hiển thị
+    const [displayedUsers, setDisplayedUsers] = useState<User[]>([]);
     const [selectedRole, setSelectedRole] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [itemsPerPage] = useState<number>(10);
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
@@ -20,8 +23,8 @@ function AuthorityComponent() {
 
     useEffect(() => {
         if (data) {
-            setUsers(data); // Giữ nguyên dữ liệu ban đầu
-            setDisplayedUsers(data); // Hiển thị tất cả người dùng ban đầu
+            setUsers(data);
+            setDisplayedUsers(data.slice(0, itemsPerPage));
         }
     }, [data]);
 
@@ -37,30 +40,57 @@ function AuthorityComponent() {
         setSelectedRole(role);
 
         if (role === "Vai trò" || role === "") {
-            // Hiển thị lại tất cả người dùng nếu không có vai trò được chọn
-            setDisplayedUsers(users);
+            setDisplayedUsers(users.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
         } else {
-            // Lọc người dùng theo vai trò đã chọn
             const filteredUsers = users.filter((user) =>
                 user.authorities.some((auth) => auth.role.name === role)
             );
-            setDisplayedUsers(filteredUsers);
+            setDisplayedUsers(filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
         }
     };
-
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
         const filteredUsers = users.filter((user) =>
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.fullname.toLowerCase().includes(searchTerm.toLowerCase())
+            user.username.toLowerCase().includes(e.target.value.toLowerCase()) ||
+            user.fullname.toLowerCase().includes(e.target.value.toLowerCase())
         );
-        setDisplayedUsers(filteredUsers);
+
+        setCurrentPage(1);
+        setDisplayedUsers(filteredUsers.slice(0, itemsPerPage));
     };
 
     const handleRowClick = (user: User) => {
-        setSelectedUser(user); // Cập nhật user được chọn
-        setShowEditRole(true); // Hiển thị modal
+        setSelectedUser(user);
+        setShowEditRole(true);
+    };
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        setDisplayedUsers(users.slice((page - 1) * itemsPerPage, page * itemsPerPage));
+    };
+
+    const renderPagination = () => {
+        const totalPages = Math.ceil(users.length / itemsPerPage);
+        const pages = [];
+
+        if (totalPages <= 1) return null;
+
+        for (let i = 1; i <= totalPages; i++) {
+            pages.push(
+                <Pagination.Item key={i} active={currentPage === i} onClick={() => handlePageChange(i)}>
+                    {i}
+                </Pagination.Item>
+            );
+        }
+
+        return (
+            <Pagination>
+                <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+                {pages}
+                <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
+            </Pagination>
+        );
     };
     return (
         <>
@@ -103,11 +133,11 @@ function AuthorityComponent() {
                         <th>Quản trị viên</th>
                     </tr>
                 </thead>
-                <tbody data-bs-toggle="modal" data-bs-target="#exampleModalToggle">
+                <tbody>
                     {displayedUsers.length > 0 ? (
                         displayedUsers.map((user, index) => (
                             <tr key={index} onClick={() => handleRowClick(user)}>
-                                <td>{index + 1}</td>
+                                <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                 <td>{user.username}</td>
                                 <td>{user.fullname}</td>
                                 <td>
@@ -157,9 +187,12 @@ function AuthorityComponent() {
                             <td colSpan={8} className="text-center">
                                 Không có người dùng nào phù hợp
                             </td>
-                        </tr>)}
+                        </tr>
+                    )}
                 </tbody>
             </Table>
+
+            {renderPagination()}
 
             <AuthorityModal
                 showEditRole={showEditRole}
@@ -168,6 +201,7 @@ function AuthorityComponent() {
             >
             </AuthorityModal>
         </>
-    )
+    );
 }
+
 export default AuthorityComponent;
