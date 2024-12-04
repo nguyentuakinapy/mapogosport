@@ -132,6 +132,13 @@ public class OrderRestController {
 		}
 	}
 	
+@GetMapping("/admin/findAll-order/{productId}")
+public List<Order> getMethodName(@PathVariable("productId") Integer productId) {
+    return orderService.findOrderByProductId(productId);
+}
+
+	
+	
 
 	// của Mỵ từ đây
 	@Autowired

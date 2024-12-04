@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import mapogo.entity.CategoryProduct;
 import mapogo.entity.Order;
+import mapogo.entity.UserSubscription;
 
 public interface OrderDAO extends JpaRepository<Order, Integer> {
 	List<Order> findByUser_Username(String username);
@@ -137,5 +138,14 @@ public interface OrderDAO extends JpaRepository<Order, Integer> {
 			+ "FROM CleanedOrders co " + "GROUP BY co.categoryProductId, co.name, co.image")
 	List<Object[]> findCategoryProductTotalsByBetweenAndStatus(@Param("startDate") LocalDateTime startDate,
 			@Param("endDate") LocalDateTime endDate, @Param("statuses") List<String> statuses);
+	
+	@Query("SELECT o FROM Order o " +
+		       "JOIN o.orderDetails od " +
+		       "JOIN od.productDetailSize pds " +
+		       "JOIN pds.productDetail pd " +
+		       "JOIN pd.product p " +
+		       "WHERE p.productId = ?1")
+		List<Order> findByProductId(Integer id);
+
 
 }

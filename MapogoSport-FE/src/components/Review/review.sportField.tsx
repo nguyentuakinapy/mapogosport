@@ -40,8 +40,8 @@ const ModalReviewSportField = (props: ReviewProps) => {
             toast.warning("Vui lòng đăng nhập để thực hiện chức năng này!");
             return;
         }
-        if (rating === 0 || comment.trim().length < 15) {
-            toast.warning("Vui lòng nhập đánh giá và bình luận (ít nhất 15 ký tự).");
+        if (rating === 0) {
+            toast.warning("Vui lòng chọn sao để đánh giá ");
             return;
         }
 
