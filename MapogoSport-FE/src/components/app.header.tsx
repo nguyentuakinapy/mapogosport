@@ -24,8 +24,6 @@ import { usePathname } from 'next/navigation';
 
 
 const CartBadge = ({ username }: { username: string }) => {
-    const [cartCount, setCartCount] = useState(0); // Initialize cart count to 0
-
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -36,13 +34,6 @@ const CartBadge = ({ username }: { username: string }) => {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
-
-    useEffect(() => {
-        const cartCount = data; // assuming the API returns the count directly
-        setCartCount(cartCount); // Update the cart count in the state
-    }, [data])
-
-
 
     return (
         <span className="position-absolute  top-1 start-100 translate-middle badge rounded-pill bg-danger">
