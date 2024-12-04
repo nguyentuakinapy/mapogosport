@@ -74,6 +74,11 @@ const ProductDetail = () => {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
+    const { data: dataOrder, mutate } = useSWR(`${BASE_URL}rest/admin/findAll-order/${idProduct}`, fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    });
 
     const handleAddToCart = async () => {
         console.log("số lượng size là ", selectedSizeQuantity)
@@ -351,7 +356,7 @@ const ProductDetail = () => {
                             </Row>
                             <br /><br />
                             <ModalReviewProductField showReviewModal={modalShow}
-                                setShowReviewModal={setModalShow} idProduct={Number(idProduct)} data={data} />
+                                setShowReviewModal={setModalShow} idProduct={Number(idProduct)} data={data} dataOrder={dataOrder} />
                             <h5 className='ms-3'>Bình luận</h5>
                             <div className="d-flex ms-4">
                                 {[5, 4, 3, 2, 1].map((value) => (

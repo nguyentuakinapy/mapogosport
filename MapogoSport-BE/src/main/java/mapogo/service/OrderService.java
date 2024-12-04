@@ -53,4 +53,6 @@ public interface OrderService {
 
 	List<Object[]> findCategoryProductTotalsByDateAndStatus(LocalDateTime date);
 	List<Object[]> findCategoryProductTotalsByBetweenDateAndStatus(LocalDateTime startDate, LocalDateTime endDate);
+	
+	List<Order> findOrderByProductId(Integer productId);
 }

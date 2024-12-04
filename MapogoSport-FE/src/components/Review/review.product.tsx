@@ -9,6 +9,7 @@ interface ReviewProps {
     setShowReviewModal: (v: boolean) => void;
     idProduct: number;
     data: ProductReviewUser[];
+    dataOrder: Order[]
 }
 
 interface StarRating {
@@ -51,12 +52,16 @@ const StarRating = ({ setRating }: StarRating) => {
 
 
 const ModalReviewProductField = (props: ReviewProps) => {
-    const { data, showReviewModal, setShowReviewModal, idProduct } = props;
+    const { data, showReviewModal, setShowReviewModal, idProduct, dataOrder } = props;
     const user = useData();
     const [rating, setRating] = useState<number>(0); // Trạng thái cho rating
     const [comment, setComment] = useState(''); // Trạng thái cho bình luận
     const hasReviewed = data?.some((review: ProductReviewUser) => review.user.username === user?.username);
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+
+
+    const userIsOrder = dataOrder?.some((order: Order) => order.user.username === user?.username && order.status === "Đã hoàn thành");
 
     const handleRatingSubmit = async () => {
         if (!user || !user.username) {
@@ -69,7 +74,11 @@ const ModalReviewProductField = (props: ReviewProps) => {
         }
 
         if (hasReviewed) {
-            toast.warning("Bạn không thể đánh giá hai lần!");
+            toast.warning("Bạn đã gửi đánh giá cho sân này rồi");
+            return;
+        }
+        if (!userIsOrder) {
+            toast.warning("Bạn không thể đánh giá khi chưa đặt hàng.");
             return;
         }
 

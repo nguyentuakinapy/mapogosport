@@ -320,6 +320,10 @@ public class OrderServiceImpl implements OrderService {
 	    // Gọi DAO với khoảng thời gian chính xác
 	    return orderDAO.findCategoryProductTotalsByBetweenAndStatus(adjustedStartDay, adjustedEndDay, statuses);
 	}
+	@Override
+	public List<Order> findOrderByProductId(Integer productId) {	
+		return orderDAO.findByProductId(productId);
+	}
 
 
 
@@ -404,4 +408,6 @@ public class OrderServiceImpl implements OrderService {
 
 		return null;
 	}
+
+
 }
