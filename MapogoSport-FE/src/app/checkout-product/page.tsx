@@ -88,6 +88,9 @@ const CheckoutPage = () => {
         setPhoneNumberSelected(activePhone.phoneNumber.phoneNumber);
       }
 
+      if (userData.phoneNumberUsers.length === 0) {
+        setPhoneNumberSelected('other');
+      }
       // Chọn địa chỉ có active là true
       const activeAddress = userData.addressUsers.find((item: AddressUsers) => item.active);
       if (activeAddress) {
@@ -95,6 +98,7 @@ const CheckoutPage = () => {
       }
     }
   }, [userData]);
+  console.log(phoneNumberSelected);
 
   const { data: apiAddress } = useSWR<ApiAddressResponse>("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
     revalidateIfStale: false,
@@ -196,12 +200,12 @@ const CheckoutPage = () => {
     if (!user1) {
       errors.push('Người dùng không tồn tại');
     }
-    if (!phoneNumberSelected) {
+    if (!customPhoneNumber && !phoneNumberSelected) {
+      errors.push('Vui lòng nhập số điện thoại');
+    } else if (!phoneNumberSelected && !customPhoneNumber) {
       errors.push('Vui lòng chọn số điện thoại');
     }
-    if (!customPhoneNumber && phoneNumberSelected === 'other') {
-      errors.push('Vui lòng nhập số điện thoại');
-    }
+
     if (!isValidPhoneNumber(customPhoneNumber) && customPhoneNumber) {
       errors.push('Số điện thoại chưa đúng');
     }
@@ -424,8 +428,7 @@ const CheckoutPage = () => {
                   </Form.Group>
                   <Form.Group className="mb-2">
                     <FloatingLabel controlId="phoneNumber" label="Số điện thoại">
-                      <Form.Select value={phoneNumberSelected ?? ''} onChange={(e) => setPhoneNumberSelected(e.target.value)}>
-                        <option value="">Chọn số điện thoại</option>
+                      <Form.Select value={phoneNumberSelected || (phoneNumbers.length === 0 ? 'other' : '')} onChange={(e) => setPhoneNumberSelected(e.target.value)}>
                         {phoneNumbers.map(phoneNumber => (
                           <option key={phoneNumber.phoneNumberUserId}
                             value={phoneNumber.phoneNumber.phoneNumber}>

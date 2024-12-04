@@ -368,6 +368,14 @@ public class OrderServiceImpl implements OrderService {
 				Wallet walletAdmin = walletService.findByUsername(admin);
 				walletAdmin.setBalance(walletAdmin.getBalance().subtract(BigDecimal.valueOf(order.getAmount())));
 				walletService.update(walletAdmin);
+				
+				Transaction transaction = new Transaction();
+				transaction.setWallet(walletAdmin);
+				transaction.setAmount(new BigDecimal(order.getAmount()));
+				transaction.setCreatedAt(LocalDateTime.now());
+				transaction.setDescription("Hoàn trả cho hóa đơn (khách hủy): " + orderId );
+				transaction.setTransactionType("-" + order.getAmount());
+				transactionService.create(transaction);
 			}
 
 		}

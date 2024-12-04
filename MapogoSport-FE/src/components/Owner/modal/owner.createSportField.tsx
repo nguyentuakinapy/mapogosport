@@ -59,6 +59,13 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             setDescription(selectedSportField.decription);
             setStatus(selectedSportField.status);
             setAvatar(selectedSportField.image || "/images/logo.png");
+
+            const addressArray = selectedSportField.address.split(',');
+
+            setSelectedProvince(addressArray[3]?.trim());
+            setSelectedDistrict(addressArray[2]?.trim());
+            setSelectedWard(addressArray[1]?.trim());
+            setAddressDetail(addressArray[0]?.trim());
         }
     }, [selectedSportField]);
 
@@ -74,9 +81,59 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         }
     }, [data]);
 
+    const [districts, setDistricts] = useState<District[]>([]);
+    const [wards, setWards] = useState<Ward[]>([]);
+    const [selectedProvince, setSelectedProvince] = useState<string>('');
+    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+    const [selectedWard, setSelectedWard] = useState<string>('');
+    const [addressDetail, setAddressDetail] = useState<string>('');
+
+    const { data: apiAddress } = useSWR<ApiAddressResponse>("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false
+    });
+    const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const provinceName = e.target.value;
+        setSelectedProvince(provinceName);
+        const selectedProvinceData = apiAddress?.find(
+            (province: Province) => province.Name === provinceName
+        );
+        setDistricts(selectedProvinceData?.Districts || []);
+        setWards([]);
+        setSelectedDistrict('');
+        setSelectedWard('');
+    };
+
+    const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const districtName = e.target.value;
+        setSelectedDistrict(districtName);
+        const selectedDistrictData = districts.find((district: District) => district.Name === districtName);
+        setWards(selectedDistrictData?.Wards || []);
+        setSelectedWard('');
+    };
+
+    const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const wardName = e.target.value;
+        setSelectedWard(wardName);
+    };
+
+    const getAddress = () => {
+        const addressParts = [addressDetail, selectedWard, selectedDistrict, selectedProvince];
+        return addressParts.filter(part => part).join(', ');
+    }
+
+
+
+
+
+
     // Đóng modal và reset các trường nhập liệu
     const handleClose = () => {
-        setShowSportFieldModal(false);
+        setSelectedDistrict("");
+        setSelectedProvince("");
+        setSelectedWard("");
+        setAddressDetail("");
         setFieldName("");
         setOpenTime(null);
         setCloseTime(null);
@@ -89,6 +146,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         setGalleryImages([]);
         setOpenHour(0);
         setCloseHour(0);
+        setShowSportFieldModal(false);
     };
 
     // Xử lý thay đổi ảnh đại diện (avatar)
@@ -131,7 +189,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             opening: `${openTime}`,
             closing: `${closeTime}`,
             categoriesField: selectedFieldType,
-            address: address,
+            address: getAddress(),
             decription: description,
             status: status,
         };
@@ -181,7 +239,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             opening: `${openTime}`,
             closing: `${closeTime}`,
             categoriesField: selectedFieldType,
-            address: address,
+            address: getAddress(),
             decription: description,
             status: status,
             owner: username
@@ -318,10 +376,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                         ))}
                                     </Form.Select>
                                 </div>
-
                             </Col>
-
-                            {/*  */}
                         </Row>
                         <Row>
                             <Col className="col-6">
@@ -351,14 +406,49 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                 </FloatingLabel>
                             </Col>
                         </Row>
-                        <FloatingLabel controlId="floatingAddress" label="Địa chỉ" className="mb-3">
-                            <Form.Control
-                                type="text"
-                                placeholder="Địa chỉ"
-                                value={address}
-                                onChange={(e) => setAddress(e.target.value)}
-                            />
-                        </FloatingLabel>
+
+
+                        {/* tỉnh */}
+                        <div className="form-floating mb-2">
+                            <FloatingLabel controlId="city" label={<span>Tỉnh/Thành <b className="text-danger">*</b></span>}>
+                                <Form.Select onChange={handleProvinceChange} value={selectedProvince ?? ''} >
+                                    <option>-- Nhấn để chọn --</option>
+                                    {apiAddress?.map((province: Province) => (
+                                        <option key={province.Id} value={province.Name}>{province.Name}</option>
+                                    ))}
+                                </Form.Select>
+                            </FloatingLabel>
+                        </div>
+                        {/* huyện */}
+                        <div className="form-floating mb-2">
+                            <FloatingLabel controlId="district" label={<span>Quận/Huyện <b className="text-danger">*</b></span>}>
+                                <Form.Select onChange={handleDistrictChange} value={selectedDistrict ?? ''} disabled={!selectedProvince}>
+                                    <option value="">-- Nhấn để chọn --</option>
+                                    {districts.map((district) => (
+                                        <option key={district.Id} value={district.Name}>{district.Name}</option>
+                                    ))}
+                                </Form.Select>
+                            </FloatingLabel>
+                        </div>
+                        {/* xã */}
+                        <div className="form-floating mb-2">
+                            <FloatingLabel controlId="ward" label={<span>Phường/Xã <b className="text-danger">*</b></span>}>
+                                <Form.Select onChange={handleWardChange} value={selectedWard ?? ''} disabled={!selectedDistrict}>
+                                    <option value="">-- Nhấn để chọn --</option>
+                                    {wards.map((ward) => (
+                                        <option key={ward.Id} value={ward.Name}>{ward.Name}</option>
+                                    ))}
+                                </Form.Select>
+                            </FloatingLabel>
+                        </div>
+                        {/* Địa chỉ cụ thể */}
+                        <div className="form-floating mb-2">
+                            <Form.Floating>
+                                <Form.Control size="sm" type="text" placeholder="Địa chỉ chi tiết"
+                                    value={addressDetail ?? ''} onChange={(e) => setAddressDetail(e.target.value)} />
+                                <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
+                            </Form.Floating>
+                        </div>
                         <FloatingLabel controlId="floatingDescription" label="Mô tả" className="mb-3">
                             <Form.Control
                                 as="textarea"
