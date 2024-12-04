@@ -14,7 +14,18 @@ const ModalCreateSubcription = (props: createSubcription) => {
 
     const { showCreateSub, setShowCreateSub } = props;
     const [benefitData, setBenefitData] = useState<string>("");
-    const [newPackage, setNewPackage] = useState<AccountPackage>();
+    const [newPackage, setNewPackage] = useState<AccountPackage>({
+        accountPackageId: 0, // Default value
+        packageName: '',
+        price: 0,
+        durationDays: 0,
+        limitBookings: 0,
+        limitSportFields: 0,
+        accountPackageBenefits: [],
+        status: '', // Default value, adjust based on the expected type
+    });
+
+
     const [benefitSelections, setBenefitSelections] = useState<Benefit[]>([]);
 
     const { data: dataBenefit, mutate: mutateBenefit } = useSWR<Benefit[]>(`${BASE_URL}rest/admin/find-all-benefit`, fetcher, {
@@ -25,6 +36,16 @@ const ModalCreateSubcription = (props: createSubcription) => {
 
     const handleClose = () => {
         setShowCreateSub(false);
+        setNewPackage({
+            accountPackageId: 0,
+            packageName: '',
+            price: 0,
+            durationDays: 0,
+            limitBookings: 0,
+            limitSportFields: 0,
+            accountPackageBenefits: [],
+            status: '',
+        })
     };
 
     const handleAddBenefit = async () => {
@@ -84,13 +105,39 @@ const ModalCreateSubcription = (props: createSubcription) => {
 
     const handleNewPackageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setNewPackage((prev) => (prev && {
+
+        // Loại bỏ tất cả các ký tự không phải số
+        const rawValue = value.replace(/\D/g, "");
+
+        // Định dạng giá trị thành số
+        const numericValue = rawValue === "" ? 0 : Number(rawValue);
+
+        // Định dạng số theo kiểu tiền tệ Việt Nam
+        const formattedValue = new Intl.NumberFormat("vi-VN").format(numericValue);
+
+        // Cập nhật state với giá trị đã định dạng
+        setNewPackage((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: name === 'price' ? formattedValue : value,
+        }));
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement, Element>) => {
+        // Khi mất focus, cập nhật lại giá trị gốc (số) trong state
+        const { name, value } = e.target;
+        const rawValue = value.replace(/\D/g, "");
+        const numericValue = rawValue === "" ? 0 : Number(rawValue);
+        setNewPackage((prev) => ({
+            ...prev,
+            [name]: name === 'price' ? numericValue : value,
         }));
     };
 
     const handleCreateSave = async () => {
+
+        // Log dữ liệu nhập vào
+        console.log("Dữ liệu gói đăng ký:", newPackage);
+        console.log("Dữ liệu lợi ích đã chọn:", benefitSelections);
         // Step 1: Validate mandatory fields
         if (!newPackage || !newPackage.packageName || !newPackage.price || !newPackage.durationDays || !newPackage.limitBookings || newPackage.limitSportFields === 0) {
             toast.error("Vui lòng điền đầy đủ thông tin gói đăng ký!");
@@ -119,14 +166,12 @@ const ModalCreateSubcription = (props: createSubcription) => {
             durationDays: newPackage?.durationDays,
             limitBookings: newPackage?.limitBookings,
             limitSportFields: newPackage?.limitSportFields || 0,
-            status: '',
             accountPackageBenefits: uniqueBenefits.map((selection) => ({
                 benefit: {
                     benefitId: selection.benefitId
                 }
             }))
         };
-
         // Step 4: Send data to the backend (using your API endpoint)
         const response = await fetch(`${BASE_URL}rest/create-account-package`, {
             method: 'POST',
@@ -146,6 +191,7 @@ const ModalCreateSubcription = (props: createSubcription) => {
         toast.success("Gói đăng ký đã được tạo thành công!");
     }
 
+
     return (
         <>
             <Modal show={showCreateSub} size="lg" centered backdrop="static" keyboard={false}>
@@ -159,41 +205,77 @@ const ModalCreateSubcription = (props: createSubcription) => {
                         <Col>
                             <Form.Group className="mb-3">
                                 <Form.Floating className="mb-3">
-                                    <Form.Control size="sm" type="text" placeholder="Tên gói"
-                                        value={newPackage?.packageName} onChange={handleNewPackageChange} />
-                                    <Form.Label>Tên gói <b className='text-danger'>*</b></Form.Label>
+                                    <Form.Control
+                                        size="sm"
+                                        type="text"
+                                        placeholder="Tên gói"
+                                        value={newPackage.packageName}
+                                        name="packageName" // Added name to match the state
+                                        onChange={handleNewPackageChange}
+                                    />
+                                    <Form.Label>Tên gói <b className="text-danger">*</b></Form.Label>
                                 </Form.Floating>
                             </Form.Group>
+
                             <Form.Group className="mb-3">
                                 <Form.Floating className="mb-3">
-                                    <Form.Control size="sm" type="text" placeholder="Giá"
-                                        value={newPackage?.price} onChange={handleNewPackageChange} />
-                                    <Form.Label>Giá <b className='text-danger'>*</b></Form.Label>
+                                    <Form.Control
+                                        size="sm"
+                                        type="text"
+                                        placeholder="Giá"
+                                        value={newPackage.price} // Hiển thị giá trị số
+                                        name="price" // Đảm bảo 'name' trùng với trường trong state
+                                        onChange={handleNewPackageChange} // Gọi hàm khi giá trị thay đổi
+                                        onBlur={handleBlur}
+                                    />
+                                    <Form.Label>Giá <b className="text-danger">*</b></Form.Label>
                                 </Form.Floating>
                             </Form.Group>
+
                             <Form.Group className="mb-3">
                                 <Form.Floating className="mb-3">
-                                    <Form.Control size="sm" type="text" placeholder="Số sân tối đa"
-                                        value={newPackage?.limitSportFields} onChange={handleNewPackageChange} />
-                                    <Form.Label>Số sân tối đa <b className='text-danger'>*</b></Form.Label>
+                                    <Form.Control
+                                        size="sm"
+                                        type="text"
+                                        placeholder="Số sân tối đa"
+                                        value={newPackage.limitSportFields}
+                                        name="limitSportFields" // Added name to match the state
+                                        onChange={handleNewPackageChange}
+                                    />
+                                    <Form.Label>Số sân tối đa <b className="text-danger">*</b></Form.Label>
                                 </Form.Floating>
                             </Form.Group>
+
                         </Col>
                         <Col>
                             <Form.Group className="mb-3">
                                 <Form.Floating className="mb-3">
-                                    <Form.Control size="sm" type="text" placeholder="Số sân tối đa"
-                                        value={newPackage?.durationDays} onChange={handleNewPackageChange} />
-                                    <Form.Label>Thời hạn (ngày) <b className='text-danger'>*</b></Form.Label>
+                                    <Form.Control
+                                        size="sm"
+                                        type="text"
+                                        placeholder="Thời hạn (ngày)"
+                                        value={newPackage?.durationDays}
+                                        name="durationDays" // Added name to match the state property
+                                        onChange={handleNewPackageChange}
+                                    />
+                                    <Form.Label>Thời hạn (ngày) <b className="text-danger">*</b></Form.Label>
                                 </Form.Floating>
                             </Form.Group>
+
                             <Form.Group className="mb-3">
                                 <Form.Floating className="mb-3">
-                                    <Form.Control size="sm" type="text" placeholder="Số sân tối đa"
-                                        value={newPackage?.limitBookings} onChange={handleNewPackageChange} />
-                                    <Form.Label>Lượt đặt sân tối đa <b className='text-danger'>*</b></Form.Label>
+                                    <Form.Control
+                                        size="sm"
+                                        type="text"
+                                        placeholder="Lượt đặt sân tối đa"
+                                        value={newPackage?.limitBookings}
+                                        name="limitBookings" // Added name to match the state property
+                                        onChange={handleNewPackageChange}
+                                    />
+                                    <Form.Label>Lượt đặt sân tối đa <b className="text-danger">*</b></Form.Label>
                                 </Form.Floating>
                             </Form.Group>
+
                             <InputGroup className="mb-3">
                                 <Form.Floating className="mb-3 flex-grow-1">
                                     <Form.Control size="sm" type="text"
