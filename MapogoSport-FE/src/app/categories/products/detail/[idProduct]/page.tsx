@@ -74,14 +74,14 @@ const ProductDetail = () => {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
-    const { data: dataOrder, mutate } = useSWR(`${BASE_URL}rest/admin/findAll-order/${idProduct}`, fetcher, {
+    const { data: dataOrder } = useSWR(`${BASE_URL}rest/admin/findAll-order/${idProduct}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
 
     const handleAddToCart = async () => {
-        console.log("số lượng size là ", selectedSizeQuantity)
+        // console.log("số lượng size là ", selectedSizeQuantity)
 
         const username = decodeString(String(localStorage.getItem('username')));
         if (username) {
