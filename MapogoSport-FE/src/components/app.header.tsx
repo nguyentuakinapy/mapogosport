@@ -46,7 +46,7 @@ const CartBadge = ({ username }: { username: string }) => {
 
     return (
         <span className="position-absolute  top-1 start-100 translate-middle badge rounded-pill bg-danger">
-            {cartCount}
+            {data}
             <span className="visually-hidden">items in cart</span>
         </span>
     );

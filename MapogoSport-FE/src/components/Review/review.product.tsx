@@ -61,7 +61,6 @@ const ModalReviewProductField = (props: ReviewProps) => {
 
 
 
-    const userIsOrder = dataOrder?.some((order: Order) => order.user.username === user?.username && order.status === "Đã hoàn thành");
 
     const handleRatingSubmit = async () => {
         if (!user || !user.username) {
@@ -77,9 +76,12 @@ const ModalReviewProductField = (props: ReviewProps) => {
             toast.warning("Bạn đã gửi đánh giá cho sân này rồi");
             return;
         }
-        if (!userIsOrder) {
-            toast.warning("Bạn không thể đánh giá khi chưa đặt hàng.");
-            return;
+        if (dataOrder) {
+            const userIsOrder = dataOrder.some((order: Order) => order.user.username === user?.username && order.status === "Đã hoàn thành");
+            if (!userIsOrder) {
+                toast.warning("Bạn không thể đánh giá khi chưa đặt hàng.");
+                return;
+            }
         }
 
         if (user && user.username) {
