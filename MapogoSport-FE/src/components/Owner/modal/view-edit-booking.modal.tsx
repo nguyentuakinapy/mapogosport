@@ -8,8 +8,6 @@ interface OwnerProps {
     showViewOrEditBookingModal: boolean;
     setShowViewOrEditBookingModal: (v: boolean) => void;
     owner?: Owner;
-    checkDataStatus: boolean
-    setCheckDataStatus: (v: boolean) => void;
     startTimeKey: number;
     bookingDetailData?: BookingDetailFullName;
     sport?: SportField;
@@ -18,7 +16,7 @@ interface OwnerProps {
 
 const BookingModal = (props: OwnerProps) => {
     const { showViewOrEditBookingModal, setShowViewOrEditBookingModal, sport, bookingBySubscriptionKey
-        , checkDataStatus, setCheckDataStatus, bookingDetailData } = props;
+        , bookingDetailData } = props;
 
     const [editBooking, setEditBooking] = useState<boolean>(true);
     const [dateBooking, setDateBooking] = useState<string>();
@@ -36,6 +34,7 @@ const BookingModal = (props: OwnerProps) => {
     const [newPriceBooking, setNewPriceBooking] = useState<number>();
     const [confirmNewData, setConfirmNewData] = useState<boolean>(false);
     const [showNotificationModal, setNotificationModal] = useState<boolean>(false);
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         setDateBooking(bookingDetailData?.date);
@@ -47,7 +46,7 @@ const BookingModal = (props: OwnerProps) => {
     }, [bookingDetailData])
 
     const handleStatusBookingChange = (bookingId: number, refundAmount: number) => {
-        fetch(`http://localhost:8080/rest/owner/booking/update`, {
+        fetch(`${BASE_URL}rest/owner/booking/update`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -64,7 +63,7 @@ const BookingModal = (props: OwnerProps) => {
     };
 
     const handleStatusChange = async (bookingDetailId: number, newStatus: string, totalAmount: number) => {
-        await fetch(`http://localhost:8080/rest/owner/bookingDetail/update`, {
+        await fetch(`${BASE_URL}rest/owner/bookingDetail/update`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -103,12 +102,11 @@ const BookingModal = (props: OwnerProps) => {
                         handleStatusChange(bookingDetailData.bookingDetailId, "Đã hủy", bookingDetailData.price * 0.75);
                     }
                 }
-                setCheckDataStatus(!checkDataStatus);
                 handleClose();
                 setNote("");
                 setNotificationModal(false);
                 // // handleStatusChange(bookingDetailData?.bookingDetailId, "Đã hủy",)
-                // fetch(`http://localhost:8080/rest/booking/update/status/${bookingDetailData?.bookingDetailId}`, {
+                // fetch(`${BASE_URL}rest/booking/update/status/${bookingDetailData?.bookingDetailId}`, {
                 //     method: 'PUT',
                 //     headers: {
                 //         'Accept': 'application/json, text/plain, */*',
@@ -141,12 +139,11 @@ const BookingModal = (props: OwnerProps) => {
                     }
                 }
 
-                setCheckDataStatus(!checkDataStatus);
                 handleClose();
                 setNote("");
                 setNotificationModal(false);
 
-                // fetch(`http://localhost:8080/rest/booking/update/status/by/subcriptionKey/${bookingDetailData?.bookingDetailId}/${bookingDetailData?.subscriptionKey}`, {
+                // fetch(`${BASE_URL}rest/booking/update/status/by/subcriptionKey/${bookingDetailData?.bookingDetailId}/${bookingDetailData?.subscriptionKey}`, {
                 //     method: 'PUT',
                 //     headers: {
                 //         'Accept': 'application/json, text/plain, */*',
@@ -451,7 +448,7 @@ const BookingModal = (props: OwnerProps) => {
             // } else {
             try {
                 const response = await fetch(
-                    `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${dateBooking}`
+                    `${BASE_URL}rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${dateBooking}`
                 );
 
                 if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
@@ -574,7 +571,7 @@ const BookingModal = (props: OwnerProps) => {
 
                     try {
                         const response = await fetch(
-                            `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${year}-${month}-${day}`
+                            `${BASE_URL}rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${year}-${month}-${day}`
                         );
 
                         if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
@@ -614,7 +611,7 @@ const BookingModal = (props: OwnerProps) => {
         setConfirmData(isAvailable);
 
         if (isAvailable) {
-            toast.warning('Sân này còn trống, bạn có thể xác nhận!');
+            toast.success('Sân này còn trống, bạn có thể xác nhận!');
         } else {
             toast.warning('Đã có sân đặt rồi!');
         }
@@ -703,7 +700,7 @@ const BookingModal = (props: OwnerProps) => {
 
     const handleUpdateBooking = async () => {
         if (applyOne) {
-            fetch(`http://localhost:8080/rest/booking/update/booking/detail/${bookingDetailData?.bookingDetailId}`, {
+            fetch(`${BASE_URL}rest/booking/update/booking/detail/${bookingDetailData?.bookingDetailId}`, {
                 method: 'PUT',
                 headers: {
                     Accept: 'application/json, text/plain, */*',
@@ -723,7 +720,6 @@ const BookingModal = (props: OwnerProps) => {
                     return
                 }
                 // mutate(usernameFetchApi);
-                setCheckDataStatus(!checkDataStatus);
                 handleClose();
                 toast.success('Cập nhật thành công!');
             })
@@ -761,7 +757,7 @@ const BookingModal = (props: OwnerProps) => {
 
                     // console.log(`${year}-${month}-${day}`);
 
-                    fetch(`http://localhost:8080/rest/booking/update/booking/detail/${b.bookingDetailId}`, {
+                    fetch(`${BASE_URL}rest/booking/update/booking/detail/${b.bookingDetailId}`, {
                         method: 'PUT',
                         headers: {
                             Accept: 'application/json, text/plain, */*',
@@ -781,7 +777,6 @@ const BookingModal = (props: OwnerProps) => {
                             return
                         }
                         // mutate(usernameFetchApi);
-                        setCheckDataStatus(!checkDataStatus);
                         handleClose();
                     })
                 }
@@ -987,7 +982,7 @@ const BookingModal = (props: OwnerProps) => {
         } else {
             try {
                 const response = await fetch(
-                    `http://localhost:8080/rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${dateBooking}`
+                    `${BASE_URL}rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${dateBooking}`
                 );
 
                 if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
@@ -1056,7 +1051,7 @@ const BookingModal = (props: OwnerProps) => {
     }, [idSportDetail])
 
     const handleUpdateNewBooking = () => {
-        fetch(`http://localhost:8080/rest/booking/detail/add/new`, {
+        fetch(`${BASE_URL}rest/booking/detail/add/new`, {
             method: 'POST',
             headers: {
                 Accept: 'application/json, text/plain, */*',
@@ -1078,7 +1073,6 @@ const BookingModal = (props: OwnerProps) => {
             // mutate(usernameFetchApi);
             setEditBooking(true);
             setIsAddBooking(false);
-            setCheckDataStatus(!checkDataStatus);
             handleClose();
             toast.success('Cập nhật thành công!');
         })

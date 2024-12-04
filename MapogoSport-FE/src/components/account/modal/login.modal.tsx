@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Button, Form, InputGroup, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
 import { decodeJson, encodeJson, encodeString, hashPassword } from "@/components/Utils/Format";
@@ -21,6 +21,7 @@ interface LoginProps {
 export default function Login(props: LoginProps) {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const [hidePassword, setHidePassword] = useState<boolean>(true);
     const [checkRememberMe, setCheckRememberMe] = useState<boolean>(false);
     const { setRefreshKey, refreshKey } = props;
     const { showLoginModal, setShowLoginModal, setShowRegisterModal, setShowForgotPassword } = props;
@@ -142,6 +143,7 @@ export default function Login(props: LoginProps) {
         setShowLoginModal(false);
         setUsername("");
         setPassword("");
+        setHidePassword(true);
         const userCookie = Cookies.get('user');
         if (userCookie) {
             const parsedUserData = JSON.parse(decodeJson(userCookie));
@@ -265,20 +267,30 @@ export default function Login(props: LoginProps) {
                         </div>
                         <Form.Group className="mb-4">
                             <Form.Control
+                                className=" border border-dark"
                                 type="text"
                                 placeholder="Vui long nhập tên đăng nhập!"
                                 value={username} onKeyDown={handleKeyDown}
                                 onChange={(e) => setUsername(e.target.value)}
                             />
                         </Form.Group>
-                        <Form.Group className="mb-4">
-                            <Form.Control
-                                type="password"
+                        <InputGroup className="mb-4" style={{
+                            border: '1px solid', borderRadius: '5px 5px'
+                        }}>
+                            <Form.Control style={{
+                                width: '92%', border: 'none'
+                            }}
+                                type={hidePassword ? 'password' : 'text'}
                                 placeholder="Vui long nhập mật khẩu!"
                                 value={password} onKeyDown={handleKeyDown}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
-                        </Form.Group>
+                            <InputGroup.Text className="bg-white" style={{
+                                width: '8%', border: 'none', cursor: 'pointer'
+                            }} id="basic-addon1" onClick={() => setHidePassword(prev => !prev)}>
+                                {hidePassword ? <i className="bi bi-eye"></i> : <i className="bi bi-eye-slash"></i>}
+                            </InputGroup.Text>
+                        </InputGroup>
                         <div className="d-flex justify-content-between align-items-center mt-3 mb-4">
                             <Form.Check type="checkbox" label="Nhớ mật khẩu" checked={checkRememberMe}
                                 onChange={(e) => setCheckRememberMe(e.target.checked)} />
