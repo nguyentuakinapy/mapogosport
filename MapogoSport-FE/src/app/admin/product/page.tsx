@@ -82,8 +82,8 @@ const AdminProduct = () => {
                 <tr key={product.productId} id={product.productId.toString()}>
                   <td className="text-center align-middle">{indexOfFirstItem + index + 1}</td>
                   <td className="text-center align-middle">
-                    <Link href="#">
-                      <Image onClick={() => handleEditClick(product)} src={`${product.image}`} width={110} height={110}
+                    <Link href={`/categories/products/detail/${product.productId}`}>
+                      <Image src={`${product.image}`} width={110} height={110}
                         alt={`${product.name}`} style={{ height: '180px', width: '200px', objectFit: 'cover' }} />
                     </Link>
                   </td>
