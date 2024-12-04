@@ -28,6 +28,7 @@ const BookingModal = (props: BookingProps) => {
     const [fullName, setFullName] = useState<string>("");
     const [phoneNumber, setPhoneNumber] = useState<string>("");
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const phoneRegex = /^0\d{9}$/;
 
     // BOOKING DETAIL
     const [endTime, setEndTime] = useState<string>();
@@ -315,7 +316,6 @@ const BookingModal = (props: BookingProps) => {
     }
 
     const handleSave = async () => {
-        const phoneRegex = /^0\d{9}$/;
 
         if (!fullName) {
             toast.error("Vui lòng nhập họ và tên!");
@@ -461,13 +461,9 @@ const BookingModal = (props: BookingProps) => {
         [week: string]: BookingDetail[];
     }
 
-    // type NotificationStatusSport = {
-    //     [week: string]: string[];
-    // };
 
     const [selectedWeek, setSelectedWeek] = useState<string[]>([]);
     const [sportFieldDuplicate, setSportFieldDuplicate] = useState<WeekBookingDetail>({});
-    // const [checkSportFieldDuplicate, setCheckSportFieldDuplicate] = useState<NotificationStatusSport>({});
 
     useEffect(() => {
         let index = 0;
@@ -490,22 +486,6 @@ const BookingModal = (props: BookingProps) => {
             for (const [weekIndex, bookings] of Object.entries(dateWeek)) {
                 for (const booking of bookings) {
                     try {
-                        // for (const s of sportDetail.statusSportFieldDetails) {
-                        //     if (isDateInRange(booking.date, s.startDate, s.endDate) && s.statusName !== "Hoạt động") {
-                        //         // const weekDate = booking.date; // Có thể thay thế bằng cách lấy tuần từ ngày, ví dụ: const weekDate = getWeek(booking.date);
-                        //         setCheckSportFieldDuplicate(prevState => ({
-                        //             ...prevState,
-                        //             [weekDate]: prevState[weekDate]
-                        //                 ? prevState[weekDate].some(existingItem => existingItem === `Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`)
-                        //                     ? prevState[weekDate]
-                        //                     : [...prevState[weekDate], `Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`]
-                        //                 : [`Sân ngày ${booking.date} đã ${s.statusName.toLowerCase()} vào khoảng ${s.startDate} đến ${s.endDate}`],
-                        //         }));
-
-                        //         // toast.success(s.statusName + s.endDate)
-                        //     }
-                        // }
-
                         const response = await fetch(
                             `${BASE_URL}rest/user/booking/detail/getbyday/${sportDetail?.sportFielDetailId}/${booking.date}`
                         );
@@ -549,15 +529,6 @@ const BookingModal = (props: BookingProps) => {
                 }
                 return prevSportFieldDuplicate;
             })
-
-            // setCheckSportFieldDuplicate(prev => {
-            //     const newState = { ...prev };
-            //     if (prev[weekDate]) {
-            //         delete newState[weekDate];
-            //         return newState;
-            //     }
-            //     return prev;
-            // })
         }
     }
 
@@ -578,8 +549,8 @@ const BookingModal = (props: BookingProps) => {
         if (!fullName) {
             toast.error("Vui lòng nhập họ và tên!");
             return;
-        } else if (!phoneNumber) {
-            toast.error("Vui lòng nhập số điện thoại!");
+        } else if (phoneNumber.length !== 0 && !phoneRegex.test(phoneNumber)) {
+            toast.error("Số điện thoại phải là 10 số và bắt đầu từ 0!!");
             return;
         }
 
@@ -1053,9 +1024,14 @@ const BookingModal = (props: BookingProps) => {
                             onClick={() => handleSave()}>Xác nhận</Button>
                         :
                         <Button style={{ backgroundColor: "#142239" }}
-                            disabled={Object.keys(sportFieldDuplicate).length === 0
-                                // && selectedWeek.length !== 0 && Object.keys(checkSportFieldDuplicate).length === 0 && selectedWeek.length !== 0
-                                ? false : true
+                            disabled={
+                                selectTimeOnStage === "Chọn thời gian" ?
+                                    true :
+                                    Object.keys(sportFieldDuplicate).length === 0 ?
+                                        selectedWeek.length === 0 ?
+                                            true : false
+                                        : true
+
                             }
                             onClick={() => handleSaveByPeriod()}>Xác nhận</Button>
                     }

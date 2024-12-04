@@ -25,7 +25,6 @@ const SearchBookingModal = (props: SearchBookingProps) => {
     const [validTimes, setValidTimes] = useState<string[]>([]);
     const [opening, setOpening] = useState<number>();
     // const [operatingTime, setOperatingTime] = useState<number>(0);
-    const [checkDataStatus, setCheckDataStatus] = useState<boolean>(true);
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
@@ -277,7 +276,7 @@ const SearchBookingModal = (props: SearchBookingProps) => {
             <BookingModal showBookingModal={showBookingModal} setShowBookingModal={setShowBookingModal}
                 sportDetail={sportDetail} startTime={startTime} dayStartBooking={dayStartBooking}
                 sport={sportField} owner={sportField?.owner}
-                checkDataStatus={checkDataStatus} setCheckDataStatus={setCheckDataStatus} startTimeKey={startTimeKey + 1} />
+                startTimeKey={startTimeKey + 1} />
         </>
     )
 }

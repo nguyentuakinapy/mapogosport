@@ -15,7 +15,6 @@ import autoTable from 'jspdf-autotable';
 import useSWR from 'swr';
 
 const AdminProduct = () => {
-    // const BASE_URL = 'http://localhost:8080/rest/';
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const fetcher = (url: string) => fetch(url).then(res => res.json());
