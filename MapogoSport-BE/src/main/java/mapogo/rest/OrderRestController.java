@@ -149,7 +149,6 @@ public class OrderRestController {
 	@PostMapping("/create_order")
 	public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
 		Order createdOrder = orderService.createOrder(orderDTO);
-		System.err.println(orderDTO.getPaymentMethod());
 		if (orderDTO.getPaymentMethod().equals("Thanh toán ví")) {
 			User user = userService.findByUsername(orderDTO.getUsername());
 			Wallet wallet = walletService.findByUsername(user);

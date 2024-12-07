@@ -31,6 +31,13 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     const [closeHour, setCloseHour] = useState<number>(0);
     const [closeMinute, setCloseMinute] = useState<number>(0);
 
+    const [districts, setDistricts] = useState<District[]>([]);
+    const [wards, setWards] = useState<Ward[]>([]);
+    const [selectedProvince, setSelectedProvince] = useState<string>('');
+    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+    const [selectedWard, setSelectedWard] = useState<string>('');
+    const [addressDetail, setAddressDetail] = useState<string>('');
+
     useEffect(() => {
         if (!selectedSportField) {
             setFieldName("");
@@ -66,8 +73,13 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             setSelectedDistrict(addressArray[2]?.trim());
             setSelectedWard(addressArray[1]?.trim());
             setAddressDetail(addressArray[0]?.trim());
+
+            const selectedProvinceData = apiAddress?.find((province: Province) => province.Name === addressArray[3]?.trim());
+            setDistricts(selectedProvinceData?.Districts || []);
+            const selectedDistrictData = selectedProvinceData?.Districts.find((district: District) => district.Name === addressArray[2]?.trim());
+            setWards(selectedDistrictData?.Wards || []);
         }
-    }, [selectedSportField]);
+    }, [selectedSportField, showSportFieldModal]);
 
 
     const { data: fieldTypes } = useSWR<CategoryField[]>(`${BASE_URL}rest/category_field`, fetcher);
@@ -81,18 +93,12 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         }
     }, [data]);
 
-    const [districts, setDistricts] = useState<District[]>([]);
-    const [wards, setWards] = useState<Ward[]>([]);
-    const [selectedProvince, setSelectedProvince] = useState<string>('');
-    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
-    const [selectedWard, setSelectedWard] = useState<string>('');
-    const [addressDetail, setAddressDetail] = useState<string>('');
-
     const { data: apiAddress } = useSWR<ApiAddressResponse>("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false
     });
+
     const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const provinceName = e.target.value;
         setSelectedProvince(provinceName);
@@ -142,6 +148,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         setOpenHour(0);
         setCloseHour(0);
         setShowSportFieldModal(false);
+
     };
 
     // Xử lý thay đổi ảnh đại diện (avatar)
