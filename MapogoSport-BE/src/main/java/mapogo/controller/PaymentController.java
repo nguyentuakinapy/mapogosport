@@ -58,7 +58,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/rest/payment")
 public class PaymentController {
@@ -207,10 +207,12 @@ public class PaymentController {
 			transaction1.setTransactionType("-" + trimmedAmount);
 			transactionService.create(transaction1);
 			
-			return new RedirectView("http://localhost:3000/checkout-product?status=success");
+			return new RedirectView("http://localhost:3002/checkout-product?status=success");
+//			return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/checkout-product?status=success");
 		} else {
 			// URL chuyển hướng khi có lỗi
-			return new RedirectView("http://localhost:3000/checkout-product?status=fail");
+			return new RedirectView("http://localhost:3002/checkout-product?status=fail");
+//			return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/checkout-product?status=fail");
 		}
 
 	}
@@ -225,6 +227,7 @@ public class PaymentController {
 		String amount =String.valueOf(amountBeforeDecimal);
 		
 		return paymentService.createMoMoPayment(amount,0,(String) data.get("username"),"http://localhost:8083/rest/payment/momo");
+//		return paymentService.createMoMoPayment(amount,0,(String) data.get("username"),"http://fpl-mapogo1.qast.io.vn:8083/rest/payment/momo");
 	}
 
 	// @GetMapping("/momo")
@@ -272,10 +275,12 @@ public class PaymentController {
 
 
 			// URL chuyển hướng khi thành công?status=
-			return new RedirectView("http://localhost:3000/checkout-product?status=success");
+			return new RedirectView("http://localhost:3002/checkout-product?status=success");
+//			return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/checkout-product?status=success");
 		} else {
 			// URL chuyển hướng khi có lỗi
-			return new RedirectView("http://localhost:3000/checkout-product/fail");
+			return new RedirectView("http://localhost:3002/checkout-product/fail");
+//			return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/checkout-product/fail");
 		}
 	}
 

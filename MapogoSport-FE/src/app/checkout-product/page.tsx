@@ -24,7 +24,6 @@ const CheckoutPage = () => {
   const [user1, setUser1] = useState<User>();
   const [showOrderSuccessModal, setShowOrderSuccessModal] = useState(false);
   const [username, setUsername] = useState<string>('');
-  const [order, setOrder] = useState<Order>();
 
 
 
@@ -161,7 +160,7 @@ const CheckoutPage = () => {
     }
   }, [addressSelected, apiAddress]);
 
-  const [orderStatus, setOrderStatus] = useState('Chờ xác nhận');
+  const orderStatus= 'Chờ xác nhận';
   const [paymentMethod, setPaymentMethod] = useState('COD');
 
 
@@ -272,7 +271,6 @@ const CheckoutPage = () => {
         }
       });
       // console.log("Dữ liệu trả về từ API:", response.data);
-      setOrder(response.data);
       localStorage.removeItem('orderData');
       return response.data; // Trả về thông tin đơn hàng
     } catch (error) {

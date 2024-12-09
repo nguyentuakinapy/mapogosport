@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/rest/cart")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin("*")
 public class CartResController {
 	@Autowired
 	CartService cartService;

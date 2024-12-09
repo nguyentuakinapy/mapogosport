@@ -228,14 +228,16 @@ public class UserRestController {
 				// SubscriptionPayment
 				createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
 				userService.updateUserSubcription(userSubscriptionId, d, "VNPay");
-				return new RedirectView("http://localhost:3000/owner");
+				return new RedirectView("http://localhost:3002/owner");
+//				return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/owner");
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
 		}else {
 			createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
 			userService.updateUserSubscription(accountPackageId, userSubscriptionId);
-			return new RedirectView("http://localhost:3000/owner");
+			return new RedirectView("http://localhost:3002/owner");
+//			return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/owner");
 		}
 		return null;
 
@@ -258,14 +260,16 @@ public class UserRestController {
 					// SubscriptionPayment
 					createSubcriptionPayment(accountPackageId, userSubscriptionId, "MoMo");
 					userService.updateUserSubcription(userSubscriptionId,d, "MoMo");
-					return new RedirectView("http://localhost:3000/owner");
+					return new RedirectView("http://localhost:3002/owner");
+//					return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/owner");
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
 			} else {
 				createSubcriptionPayment(accountPackageId, userSubscriptionId, "MoMo");
 				userService.updateUserSubscription(accountPackageId, userSubscriptionId);
-				return new RedirectView("http://localhost:3000/owner");
+				return new RedirectView("http://localhost:3002/owner");
+//				return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/owner");
 			}
 		}
 		return null;
@@ -307,8 +311,8 @@ public class UserRestController {
 			int accountPackageId = userSubscription.getAccountPackage().getAccountPackageId();
 			// SubscriptionPayment
 			createSubcriptionPayment(accountPackageId, userSubscriptionId, "VNPay");
-			return new RedirectView("http://localhost:3000/owner");
-
+			return new RedirectView("http://localhost:3002/owner");
+//			return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/owner");
 		} else {
 			userSubscriptionDAO.delete(userSubscription);
 			Owner owner = ownerDAO.findById(ownerId).get();
@@ -316,8 +320,8 @@ public class UserRestController {
 			Authority auth = authorityDAO.findById(authorityId).get();
 			authorityDAO.delete(auth);
 		}
-
-		return new RedirectView("http://localhost:3000");
+		return new RedirectView("http://localhost:3002");
+//		return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002");
 	}
 
 	@GetMapping("/subscription/paymentInfo-momo")
@@ -333,8 +337,8 @@ public class UserRestController {
 			int accountPackageId = userSubscription.getAccountPackage().getAccountPackageId();
 			// SubscriptionPayment
 			createSubcriptionPayment(accountPackageId, userSubscriptionId, "MoMo");
-			return new RedirectView("http://localhost:3000/owner");
-
+			return new RedirectView("http://localhost:3002/owner");
+//			return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/owner");
 		} else {
 			userSubscriptionDAO.delete(userSubscription);
 			Owner owner = ownerDAO.findById(ownerId).get();
@@ -343,7 +347,8 @@ public class UserRestController {
 			authorityDAO.delete(auth);
 		}
 
-		return new RedirectView("http://localhost:3000");
+		return new RedirectView("http://localhost:3002");
+//		return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002");
 	}
 
 	@GetMapping("/user/subscription/{id}")
@@ -415,8 +420,8 @@ public class UserRestController {
 			walletService.addMoney(username, money);
 
 		}
-		return new RedirectView("http://localhost:3000/user/wallet");
-
+		return new RedirectView("http://localhost:3002/user/wallet");
+//		return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/user/wallet");
 	}
 
 	@GetMapping("/wallet/createpaymentrecharge/infoMomo")
@@ -430,8 +435,8 @@ public class UserRestController {
 			walletService.addMoney(username, money);
 
 		}
-		return new RedirectView("http://localhost:3000/user/wallet");
-
+		return new RedirectView("http://localhost:3002/user/wallet");
+//		return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/user/wallet");
 	}
 
 	// đến đây
