@@ -24,6 +24,7 @@ type BookingDetails = {
     fullName: string;
     statusDtb: string;
     subscriptionKey: string;
+    bookingDetailId: number;
 }
 
 type BookingsTypeOnWeek = {
@@ -58,14 +59,17 @@ export default function BookingSport() {
     const [opening, setOpening] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);
     const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
+
     const [onDay, setOnDay] = useState<string>(() => {
         const today = new Date();
         return new Intl.DateTimeFormat('en-CA').format(today);
     });
+
     const [startWeek, setStartWeek] = useState<string>(() => {
         const today = new Date();
         return new Intl.DateTimeFormat('en-CA').format(today);
     });
+
     const initialEndWeek = new Date();
     initialEndWeek.setDate(initialEndWeek.getDate() + 6);
     const [endWeek, setEndWeek] = useState<string>(initialEndWeek.toISOString().split('T')[0]);
@@ -314,6 +318,7 @@ export default function BookingSport() {
                 statuses[index] = {
                     status: (timeDate < currentDateTime) ? "Quá hạn" : "Còn trống",
                     bookingId: 0,
+                    bookingDetailId: 0,
                     fullName: "",
                     statusDtb: "",
                     subscriptionKey: ""
@@ -361,6 +366,7 @@ export default function BookingSport() {
                                     statuses[index] = {
                                         status: i.statusName === "Hoạt động" ? "Còn trống" : i.statusName,
                                         bookingId: 0,
+                                        bookingDetailId: 0,
                                         fullName: "",
                                         statusDtb: "",
                                         subscriptionKey: "",
@@ -390,6 +396,7 @@ export default function BookingSport() {
                                         statuses[index] = {
                                             status: i.statusName === "Hoạt động" ? "Còn trống" : i.statusName,
                                             bookingId: 0,
+                                            bookingDetailId: 0,
                                             fullName: "",
                                             statusDtb: "",
                                             subscriptionKey: "",
@@ -416,6 +423,7 @@ export default function BookingSport() {
                                         statuses[index] = {
                                             status: i.statusName === "Hoạt động" ? "Còn trống" : i.statusName,
                                             bookingId: 0,
+                                            bookingDetailId: 0,
                                             fullName: "",
                                             statusDtb: "",
                                             subscriptionKey: "",
@@ -425,6 +433,7 @@ export default function BookingSport() {
                                     statuses[index] = {
                                         status: i.statusName === "Hoạt động" ? "Còn trống" : i.statusName,
                                         bookingId: 0,
+                                        bookingDetailId: 0,
                                         fullName: "",
                                         statusDtb: "",
                                         subscriptionKey: "",
@@ -481,7 +490,8 @@ export default function BookingSport() {
                             if (timeIndex >= 0) {
                                 statuses[index] = {
                                     status: "Đã đặt",
-                                    bookingId: item.bookingDetailId,
+                                    bookingId: item.bookingId,
+                                    bookingDetailId: item.bookingDetailId,
                                     fullName: item.fullName,
                                     statusDtb: check ? item.status : "Đã hoàn thành",
                                     subscriptionKey: item.subscriptionKey
@@ -490,6 +500,7 @@ export default function BookingSport() {
                                 statuses[index] = {
                                     status: (timeDate < currentDateTime) ? "Chưa đặt" : "Còn trống",
                                     bookingId: 0,
+                                    bookingDetailId: 0,
                                     fullName: "",
                                     statusDtb: "",
                                     subscriptionKey: ""
@@ -511,6 +522,7 @@ export default function BookingSport() {
                         statuses[index] = {
                             status: (timeDate1 < currentDateTime) ? "Chưa đặt" : "Còn trống",
                             bookingId: 0,
+                            bookingDetailId: 0,
                             fullName: "",
                             statusDtb: "",
                             subscriptionKey: "",
@@ -557,6 +569,7 @@ export default function BookingSport() {
                             sportData[sport][dayIndex] = {
                                 status: (timeDate1 < currentDateTime) ? "Chưa đặt" : "Còn trống",
                                 bookingId: 0,
+                                bookingDetailId: 0,
                                 fullName: "",
                                 statusDtb: "",
                                 subscriptionKey: "",
@@ -606,6 +619,7 @@ export default function BookingSport() {
                                             sportData[sport][dayIndex] = {
                                                 status: i.statusName === "Hoạt động" ? "Còn trống" : i.statusName,
                                                 bookingId: 0,
+                                                bookingDetailId: 0,
                                                 fullName: "",
                                                 statusDtb: "",
                                                 subscriptionKey: "",
@@ -645,6 +659,7 @@ export default function BookingSport() {
                                                 sportData[sport][dayIndex] = {
                                                     status: i.statusName === "Hoạt động" ? "Còn trống" : i.statusName,
                                                     bookingId: 0,
+                                                    bookingDetailId: 0,
                                                     fullName: "",
                                                     statusDtb: "",
                                                     subscriptionKey: "",
@@ -680,6 +695,7 @@ export default function BookingSport() {
                                                 sportData[sport][dayIndex] = {
                                                     status: i.statusName === "Hoạt động" ? "Còn trống" : i.statusName,
                                                     bookingId: 0,
+                                                    bookingDetailId: 0,
                                                     fullName: "",
                                                     statusDtb: "",
                                                     subscriptionKey: "",
@@ -690,6 +706,7 @@ export default function BookingSport() {
                                                 sportData[sport][dayIndex] = {
                                                     status: i.statusName === "Hoạt động" ? "Còn trống" : i.statusName,
                                                     bookingId: 0,
+                                                    bookingDetailId: 0,
                                                     fullName: "",
                                                     statusDtb: "",
                                                     subscriptionKey: "",
@@ -755,7 +772,8 @@ export default function BookingSport() {
                                     if (timeIndex >= 0) {
                                         sportData[sport][dayIndex] = {
                                             status: "Đã đặt",
-                                            bookingId: item.bookingDetailId,
+                                            bookingDetailId: item.bookingDetailId,
+                                            bookingId: item.bookingId,
                                             fullName: item.fullName,
                                             statusDtb: check ? item.status : "Đã hoàn thành",
                                             subscriptionKey: item.subscriptionKey
@@ -764,6 +782,7 @@ export default function BookingSport() {
                                         sportData[sport][dayIndex] = {
                                             status: (timeDate < currentDateTime) ? "Chưa đặt" : "Còn trống",
                                             bookingId: 0,
+                                            bookingDetailId: 0,
                                             fullName: "",
                                             statusDtb: "",
                                             subscriptionKey: ""
@@ -798,6 +817,7 @@ export default function BookingSport() {
                                     sportData[sport][dayIndex] = {
                                         status: (timeDate1 < currentDateTime) ? "Chưa đặt" : "Còn trống",
                                         bookingId: 0,
+                                        bookingDetailId: 0,
                                         fullName: "",
                                         statusDtb: "",
                                         subscriptionKey: "",
@@ -939,9 +959,9 @@ export default function BookingSport() {
             sportFielDetails.forEach(item => {
                 const bookingData = sportData[item.name] || [];
                 bookingData.forEach(dayBookingData => {
-                    const bookingId = dayBookingData?.bookingId;
-                    if (bookingId && bookingId !== 0) {
-                        bookingCounts[bookingId] = (bookingCounts[bookingId] || 0) + 1;
+                    const bookingDetailId = dayBookingData?.bookingDetailId;
+                    if (bookingDetailId && bookingDetailId !== 0) {
+                        bookingCounts[bookingDetailId] = (bookingCounts[bookingDetailId] || 0) + 1;
                     }
                 });
             });
@@ -977,7 +997,7 @@ export default function BookingSport() {
                                             const bookingData = sportData[item.name] || [];
                                             const dayBookingData = bookingData[dayIndex];
 
-                                            const bookingId = dayBookingData ? dayBookingData.bookingId : 0;
+                                            const bookingDetailId = dayBookingData ? dayBookingData.bookingDetailId : 0;
                                             const fullName = dayBookingData ? dayBookingData.fullName : "";
                                             const statusItem = dayBookingData ? dayBookingData.status : "Còn trống";
                                             const isAvailable =
@@ -989,18 +1009,18 @@ export default function BookingSport() {
                                                 statusItem === 'Tạm đóng' ||
                                                 statusItem === "Sửa chữa";
                                             if (statusItem === "Đã đặt") {
-                                                if (displayedBookingIds.has(bookingId)) {
+                                                if (displayedBookingIds.has(bookingDetailId)) {
                                                     return null;
                                                 } else {
-                                                    displayedBookingIds.add(bookingId);
+                                                    displayedBookingIds.add(bookingDetailId);
                                                     return (
                                                         <td
                                                             ref={(el) => {
-                                                                if (el) tdRefs.current[bookingId] = el; // Gán ref cho td dựa vào id
+                                                                if (el) tdRefs.current[bookingDetailId] = el; // Gán ref cho td dựa vào id
                                                             }}
                                                             tabIndex={-1}
                                                             key={`${time}-${item.sportFielDetailId}-${dayIndex}`}
-                                                            rowSpan={bookingCounts[bookingId]} // Gán rowSpan cho ô đầu tiên
+                                                            rowSpan={bookingCounts[bookingDetailId]} // Gán rowSpan cho ô đầu tiên
                                                             sport-detail={dataSport &&
                                                                 dataSport[selectSport] &&
                                                                 dataSport[selectSport].sportFielDetails &&
@@ -1014,7 +1034,7 @@ export default function BookingSport() {
                                                             className={`w-10 ${getBadgeClass(statusItem)}`}
                                                             style={{
                                                                 textAlign: 'center',
-                                                                backgroundColor: focusedId === bookingId ? '#8effda'
+                                                                backgroundColor: focusedId === bookingDetailId ? '#8effda'
                                                                     :
                                                                     dayBookingData.subscriptionKey && dayBookingData.subscriptionKey.includes("keybooking")
                                                                         ? '#e0ffd7'
@@ -1024,10 +1044,10 @@ export default function BookingSport() {
                                                             }}
                                                         >
                                                             <div className={`badge`}>
-                                                                <span className="status-label">#{bookingId}</span><br />
+                                                                <span className="status-label">#{dayBookingData.bookingId}</span><br />
                                                                 <span className="status-label">{statusItem}</span><br />
                                                                 <em className="text-danger">{dayBookingData.statusDtb}</em><br />
-                                                                <b className="text-success">{bookingId == 0 ? "" :
+                                                                <b className="text-success">{bookingDetailId == 0 ? "" :
                                                                     fullName}</b>
                                                             </div>
                                                         </td>
@@ -1054,7 +1074,7 @@ export default function BookingSport() {
                                                                 {/* {statusItem === "Còn trống" ? '' : statusItem} */}
                                                                 {statusItem}
                                                             </span><br />
-                                                            <b className="text-success">{bookingId == 0 ? "" : fullName}</b>
+                                                            <b className="text-success">{bookingDetailId == 0 ? "" : fullName}</b>
                                                         </div>
                                                     </td>
                                                 );

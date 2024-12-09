@@ -405,7 +405,7 @@ const BookingModal = (props: BookingProps) => {
                                 for (const item of dataBooking) {
                                     for (const time of dataTimeOnStage) {
                                         const result = isTimeWithinRange(item.startTime, item.endTime, time);
-                                        if (result) {
+                                        if (result && item.endTime !== startTime) {
                                             setSportFieldDuplicate(prevState => ({
                                                 ...prevState,
                                                 [weekDate]: prevState[weekDate]
