@@ -238,10 +238,43 @@ const BookingModal = (props: BookingProps) => {
         }
     }
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
-        createBooking(paymentMethod as PaymentMethod);
-        handleClose();
+        setData(paymentMethod as PaymentMethod);
+        if (paymentMethod) {
+            if (paymentMethod.name === "VNPay" || paymentMethod.name === "MoMo") {
+                try {
+                    const responsePayment = await fetch(`${BASE_URL}rest/booking/payment`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            sportFielDetailId: sportDetail?.sportFielDetailId,
+                            totalAmount,
+                            percentDeposit: sportDetail?.percentDeposit,
+                            paymentMethodName: paymentMethod.name,
+                            status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
+                            username: userData?.username
+                        })
+                    });
+                    const responseData = await responsePayment.json();
+                    const paymentUrl = responseData.url;
+                    console.log(paymentUrl);
+
+                    // chuyển hướng đến URL thanh toán
+                    window.location.href = paymentUrl;
+                } catch (error) {
+                    console.error('Error during payment:', error);
+                    toast.error('Lỗi thanh toán')
+                }
+            } else {
+                createBooking(paymentMethod as PaymentMethod);
+                handleClose();
+            }
+        }
+
     }
 
     useEffect(() => {
@@ -423,6 +456,105 @@ const BookingModal = (props: BookingProps) => {
         handleClose();
     }
 
+    const setData = (paymentMethod: PaymentMethod) => {
+        const bookingData = {
+            username: userData?.username,
+            fullName: userData?.fullname,
+            phoneNumber: userData?.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
+            totalAmount,
+            percentDeposit: sportDetail?.percentDeposit,
+            paymentMethodId: paymentMethod.paymentMethodId,
+            ownerId: owner?.ownerId,
+            status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
+            voucher: null,
+            checkOwner: "user"
+        }
+
+        const bookingDetailData = {
+            startTime,
+            endTime,
+            sportFieldDetailId: sportDetail?.sportFielDetailId,
+            price,
+            date: dayStartBooking,
+            // booking: resBooking.bookingId,
+            subscriptionKey: activeTab !== 'byDay' ? 'createKey' : null
+        }
+        localStorage.setItem('bookingData', JSON.stringify(bookingData));
+        localStorage.setItem('bookingDetailData', JSON.stringify(bookingDetailData));
+
+    }
+
+    const [bookingProcessed, setBookingProcessed] = useState(false);
+    const [path, setPath] = useState<string | undefined>();
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setPath(window.location.href);
+
+        }
+    }, [bookingProcessed]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && path && !bookingProcessed) {
+            const processOrder = async () => {
+                const params = new URLSearchParams(window.location.search);
+
+                if (params) {
+                    const status = params.get('status');
+
+                    if (status === 'success') {
+                        try {
+                            setBookingProcessed(true);
+                            const booking = await handleCreateBooking();
+
+
+                        } catch (error) {
+                        }
+                    } else if (status === 'fail') {
+                        toast.warn("Lỗi thanh toán!");
+                    }
+                }
+            };
+
+            processOrder();
+        }
+    }, [path, bookingProcessed]);
+
+    const handleCreateBooking = async () => {
+
+        const bookingData = JSON.parse(localStorage.getItem('bookingData') || '{}');
+        localStorage.removeItem('bookingData');
+        const responseBooking = await fetch(`${BASE_URL}rest/booking`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookingData)
+        })
+        if (!responseBooking.ok) {
+            const errorText = await responseBooking.text();
+            console.error(`Error from API: ${errorText}`);
+            toast.error('Lỗi đặt sân, vui lòng thử lại sau!');
+            return;
+        }
+        const resBooking = await responseBooking.json() as Booking;
+
+        const bookingDetailData = JSON.parse(localStorage.getItem('bookingDetailData') || '{}');
+        localStorage.removeItem('bookingDetailData');
+        bookingDetailData.booking = resBooking.bookingId;
+        const responseBookingDetail = await fetch(`${BASE_URL}rest/booking/detail`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookingDetailData)
+        });
+        const resBookingDetail = await responseBookingDetail.json() as BookingDetail;
+
+    }
+
     const createBooking = async (paymentMethod: PaymentMethod) => {
         try {
             if (totalAmount === undefined || totalAmount <= 0) {
@@ -430,33 +562,44 @@ const BookingModal = (props: BookingProps) => {
                 return;
             }
             const amountToPay = checkPrepayPrice && prepayPrice !== undefined ? prepayPrice : totalAmount;
+            console.log("paymentMethod.name", paymentMethod.name);
+
             if (!userData?.wallet?.balance && paymentMethod.name === 'Thanh toán ví' ||
-                paymentMethod.name === 'Thanh toán ví' && userData && userData.wallet.balance < amountToPay && paymentMethod.name !== 'Thanh toán ví') {
+                paymentMethod.name === 'Thanh toán ví' && userData && userData.wallet.balance < amountToPay) {
                 toast.error("Số dư trong ví của bạn không đủ để đặt sân! Vui lòng nạp tiền vào ví!");
                 return;
             }
 
+            const bookingData = JSON.parse(localStorage.getItem('bookingData') || '{}');
             const responseBooking = await fetch(`${BASE_URL}rest/booking`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    username: userData?.username,
-                    fullName: userData?.fullname,
-                    phoneNumber: userData?.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
-                    totalAmount,
-                    percentDeposit: sportDetail?.percentDeposit,
-                    paymentMethodId: paymentMethod.paymentMethodId,
-                    ownerId: owner?.ownerId,
-                    status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
-                    voucher: null,
-                    checkOwner: "user"
-                })
+                body: JSON.stringify(bookingData)
             })
-
+            if (!responseBooking.ok) {
+                const errorText = await responseBooking.text();
+                console.error(`Error from API: ${errorText}`);
+                toast.error('Lỗi đặt sân, vui lòng thử lại sau!');
+                return;
+            }
+            localStorage.removeItem('bookingData');
             const resBooking = await responseBooking.json() as Booking;
+
+            const bookingDetailData = JSON.parse(localStorage.getItem('bookingDetailData') || '{}');
+            bookingDetailData.booking = resBooking.bookingId;
+            const responseBookingDetail = await fetch(`${BASE_URL}rest/booking/detail`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bookingDetailData)
+            });
+            localStorage.removeItem('bookingDetailData');
+            const resBookingDetail = await responseBookingDetail.json() as BookingDetail;
 
             if (paymentMethod.name === 'Thanh toán ví') {
                 await fetch(`${BASE_URL}rest/payment/process/${resBooking.bookingId}?totalAmount=${amountToPay}`, {
@@ -468,55 +611,15 @@ const BookingModal = (props: BookingProps) => {
                 })
             }
 
-            await fetch(`${BASE_URL}rest/booking/detail`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    startTime,
-                    endTime,
-                    sportFieldDetailId: sportDetail?.sportFielDetailId,
-                    price,
-                    date: dayStartBooking,
-                    booking: resBooking.bookingId,
-                    subscriptionKey: activeTab !== 'byDay' ? 'createKey' : null
-                })
-            });
-
-            if (paymentMethod.name === "VNPay" || paymentMethod.name === "MoMo") {
-                try {
-                    const responsePayment = await fetch(`${BASE_URL}rest/booking/payment`, {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json, text/plain, */*',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            bookingId: resBooking.bookingId,
-                            totalAmount,
-                            percentDeposit: sportDetail?.percentDeposit,
-                            paymentMethodName: paymentMethod.name,
-                            status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
-
-                        })
-                    });
-                    const responseData = await responsePayment.json();
-                    const paymentUrl = responseData.url;
-                    console.log(paymentUrl);
-
-                    // chuyển hướng đến URL thanh toán
-                    window.location.href = paymentUrl;
-                } catch (error) {
-                    console.error('Error during payment:', error);
-                }
-            }
         } catch (error) {
             console.log(error);
         }
     }
 
+
+    const setDataPeriod = () => {
+
+    }
     //
     const createBookingByPeriod = async (paymentMethod: PaymentMethod) => {
         if (totalAmount === undefined || totalAmount <= 0) {
@@ -528,24 +631,15 @@ const BookingModal = (props: BookingProps) => {
             toast.error("Số dư trong ví của bạn không đủ để đặt sân! Vui lòng nạp tiền vào ví!");
             return;
         }
+
+        const bookingData = JSON.parse(localStorage.getItem('bookingData') || '{}');
         const responseBooking = await fetch(`${BASE_URL}rest/booking`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                username: userData?.username,
-                fullName: userData?.fullname,
-                phoneNumber: userData?.phoneNumberUsers.find(item => item.active)?.phoneNumber.phoneNumber,
-                totalAmount,
-                percentDeposit: sportDetail?.percentDeposit,
-                paymentMethodId: paymentMethod.paymentMethodId,
-                ownerId: owner?.ownerId,
-                status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
-                voucher: null,
-                checkOwner: "user"
-            })
+            body: JSON.stringify(bookingData)
         })
 
         const resBooking = await responseBooking.json() as Booking;
@@ -559,6 +653,7 @@ const BookingModal = (props: BookingProps) => {
                 },
             })
         }
+
 
         const listAddBookingDetail: BookingDetailPeriod[] = [];
 

@@ -472,7 +472,7 @@ public class BookingServiceImpl implements BookingService {
 	@Autowired
 	private MoMoService paymentService;
 	@Override
-	public PaymentDTO createPaymentVNPay(Map<String, Object> data, HttpServletRequest req)
+	public PaymentDTO createPayment(Map<String, Object> data, HttpServletRequest req)
 			throws UnsupportedEncodingException {
 		PaymentDTO paymentDTO = new PaymentDTO();
 		String status = (String) data.get("status");
@@ -519,7 +519,7 @@ public class BookingServiceImpl implements BookingService {
 			vnp_Params.put("vnp_BankCode", "NCB");
 
 			vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-			vnp_Params.put("vnp_OrderInfo", String.valueOf( data.get("bookingId")));
+			vnp_Params.put("vnp_OrderInfo", String.valueOf( data.get("sportFielDetailId")+"-"+data.get("username")));
 													
 			vnp_Params.put("vnp_OrderType", orderType);
 
@@ -567,11 +567,11 @@ public class BookingServiceImpl implements BookingService {
 
 			// thành công
 			paymentDTO.setStatus("ok");
-			paymentDTO.setMessage("successfully");
+			paymentDTO.setMessage("successfully");	
 			paymentDTO.setURL(paymentUrl);
 
 		} else if (data.get("paymentMethodName").equals("MoMo")){
-			String info = String.valueOf(data.get("bookingId"))	;
+			String info = String.valueOf(data.get("username")+"-"+data.get("sportFielDetailId"))	;
 			long amountBeforeDecimal = (long) Math.floor(Amount);
 
 			ResponseEntity<String> response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,

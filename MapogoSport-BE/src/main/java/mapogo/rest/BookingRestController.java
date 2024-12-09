@@ -29,6 +29,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import jakarta.servlet.http.HttpServletRequest;
 import mapogo.dao.BookingDAO;
 import mapogo.dao.BookingDetailDAO;
+import mapogo.dao.SportFieldDetailDAO;
 import mapogo.dto.PaymentDTO;
 import mapogo.entity.Booking;
 import mapogo.entity.BookingDetail;
@@ -42,6 +43,7 @@ import mapogo.entity.Wallet;
 import mapogo.service.BookingDetailService;
 import mapogo.service.BookingService;
 import mapogo.service.TransactionService;
+import mapogo.service.UserService;
 import mapogo.service.UserSubscriptionService;
 import mapogo.service.WalletService;
 
@@ -126,19 +128,25 @@ public class BookingRestController {
 	@PostMapping("/booking/payment")
 	public ResponseEntity<?> createPayment(@RequestBody Map<String, Object> data, HttpServletRequest req)
 			throws UnsupportedEncodingException {
-		PaymentDTO paymentDTO = bookingService.createPaymentVNPay(data, req);
+		PaymentDTO paymentDTO = bookingService.createPayment(data, req);
 		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 
 	}
 
 	@Autowired
-	BookingDAO bookingDao;
+	SportFieldDetailDAO sportDetailDAO;
 
 	@Autowired
 	BookingDetailDAO bookingDetailDAO;
 
 	@Autowired
 	WalletService walletService;
+	
+	@Autowired
+	UserService userService;
+	
+	@Autowired
+	BookingDAO bookingDao;
 
 	private void createTransaction(User user, String trimmedAmount, Integer bookingId, String paymentMethod) {
 		// update +Balance
@@ -149,7 +157,7 @@ public class BookingRestController {
 		transaction.setWallet(wallet);
 		transaction.setAmount(new BigDecimal(trimmedAmount));
 		transaction.setCreatedAt(LocalDateTime.now());
-		transaction.setDescription("Nạp từ hóa đơn đặt sân: " + bookingId + " (" + paymentMethod + ")");
+		transaction.setDescription("Nạp từ hóa đơn đặt sân: (" + paymentMethod + ")");
 		transaction.setTransactionType("+" + trimmedAmount);
 		transactionService.create(transaction);
 
@@ -160,30 +168,30 @@ public class BookingRestController {
 		transaction1.setWallet(wallet);
 		transaction1.setAmount(new BigDecimal(trimmedAmount));
 		transaction1.setCreatedAt(LocalDateTime.now());
-		transaction1.setDescription("Thanh toán hóa đơn đặt sân: " + bookingId);
+		transaction1.setDescription("Thanh toán hóa đơn đặt sân: (" + paymentMethod + ")");
 		transaction1.setTransactionType("-" + trimmedAmount);
 		transactionService.create(transaction1);
 	}
 
 	@GetMapping("/booking/paymentInfo")
 	public RedirectView updateUserSubscription2(@RequestParam(value = "vnp_ResponseCode") String responseCode,
-			@RequestParam(value = "vnp_OrderInfo") Integer bookingId,
+			@RequestParam(value = "vnp_OrderInfo") String data,
 			@RequestParam(value = "vnp_Amount") String amount) {
-		Booking booking = bookingDao.findById(bookingId).get();
-		Integer sportFieldId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportField().getSportFieldId();
-		User user = booking.getUser();
+		
+		String[] parts = data.split("-");
+		int sportFielDetailId = Integer.parseInt(parts[0]);
+		String username = parts[1];
+		
+		SportFieldDetail sportDetail = sportDetailDAO.findById(sportFielDetailId).get();
+		Integer sportFieldId = sportDetail.getSportField().getSportFieldId();
+		User user = userService.findByUsername(username);
 		String trimmedAmount = amount.substring(0, amount.length() - 2);
 
 		if (responseCode.equals("00")) {
-			createTransaction(user, trimmedAmount, bookingId, "VNPay");
+			createTransaction(user, trimmedAmount, null, "VNPay");
 			return new RedirectView(
 					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=success");
 		} else {
-			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId);
-			for (BookingDetail bookingDetail : bookingDetails) {
-				bookingDetailDAO.delete(bookingDetail);
-			}
-			bookingDao.delete(booking);
 			return new RedirectView(
 					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=fail");
 		}
@@ -191,23 +199,22 @@ public class BookingRestController {
 
 	@GetMapping("/booking/paymentInfo-momo")
 	public RedirectView paymentInfoMomo(@RequestParam(value = "resultCode") String resultCode,
-			@RequestParam(value = "extraData") String bookingId, @RequestParam(value = "amount") String amount) {
-		int bookingId1 = Integer.parseInt(bookingId);
-		Booking booking = bookingDao.findById(bookingId1).get();
-		Integer sportFieldId = booking.getBookingDetails().get(0).getSportFieldDetail().getSportField().getSportFieldId();
-		User user = booking.getUser();
+			@RequestParam(value = "extraData") String data, @RequestParam(value = "amount") String amount) {
+		
+		String[] parts = data.split("-");
+		int sportFielDetailId = Integer.parseInt(parts[1]);
+		String username = parts[0];
+		
+		SportFieldDetail sportDetail = sportDetailDAO.findById(sportFielDetailId).get();
+		Integer sportFieldId = sportDetail.getSportField().getSportFieldId();
+		User user = userService.findByUsername(username);
 
 		if (resultCode.equals("0")) {
-			createTransaction(user, amount, bookingId1, "MoMo");
+			createTransaction(user, amount, null, "MoMo");
 			return new RedirectView(
 					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=success");
 
 		} else {
-			List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId1);
-			for (BookingDetail bookingDetail : bookingDetails) {
-				bookingDetailDAO.delete(bookingDetail);
-			}
-			bookingDao.delete(booking);
 			return new RedirectView(
 					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=fail");
 		}
