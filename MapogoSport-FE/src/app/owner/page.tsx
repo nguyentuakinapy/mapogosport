@@ -395,9 +395,9 @@ export default function Owner() {
                             <h2>{userData?.fullname}</h2>
                             <p>Chào mừng bạn đến với hệ thống quản lý dành cho chủ sân của MapogoSport</p>
                             <div className="stats">
-                                <span>0 Bài Viết</span>
+                                {/* <span>0 Bài Viết</span> */}
                                 <span>{dataSport && dataSport.length}/{userSubscription?.accountPackage.limitSportFields} khu vực</span>
-                                <span>0 Được thích</span>
+                                {/* <span>0 Được thích</span> */}
                                 <span>
                                     {userSubscription && userSubscription.accountPackage ? userSubscription.accountPackage.packageName : 'Không có gói nào'}
                                     {userSubscription?.accountPackage.accountPackageId === 1 ?
@@ -417,9 +417,9 @@ export default function Owner() {
                             <Nav.Item>
                                 <Nav.Link eventKey="profile" className="tab-link">Thông tin cá nhân</Nav.Link>
                             </Nav.Item>
-                            <Nav.Item>
+                            {/* <Nav.Item>
                                 <Nav.Link eventKey="post" className="tab-link">Bài viết</Nav.Link>
-                            </Nav.Item>
+                            </Nav.Item> */}
                             <Nav.Item>
                                 <Nav.Link eventKey="bank" className="tab-link">Ví & Tài khoản ngân hàng</Nav.Link>
                             </Nav.Item>

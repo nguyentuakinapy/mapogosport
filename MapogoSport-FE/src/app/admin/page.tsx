@@ -60,9 +60,9 @@ export default function Owner() {
                     <Nav.Item>
                         <Nav.Link eventKey="all" className="tab-link">Thông tin cá nhân</Nav.Link>
                     </Nav.Item>
-                    <Nav.Item>
+                    {/* <Nav.Item>
                         <Nav.Link eventKey="deposit" className="tab-link">Bài viết</Nav.Link>
-                    </Nav.Item>
+                    </Nav.Item> */}
                     <Nav.Item>
                         <Nav.Link eventKey="wallet" className="tab-link">Ví & Tài khoản ngân hàng</Nav.Link>
                     </Nav.Item>
