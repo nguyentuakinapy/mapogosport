@@ -302,7 +302,7 @@ const CheckoutPage = () => {
   };
 
   const [orderId, setOrderId] = useState<number | undefined>(undefined);
-  const [orderProcessed, setOrderProcessed] = useState(false); // Cờ kiểm tra xem đơn hàng đã được xử lý chưa
+  const [orderProcessed, setOrderProcessed] = useState(false);
   const [path, setPath] = useState<string | undefined>();
 
   useEffect(() => {

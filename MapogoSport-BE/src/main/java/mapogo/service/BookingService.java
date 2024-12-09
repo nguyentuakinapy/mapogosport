@@ -53,7 +53,7 @@ public interface BookingService {
 	Integer getCountBookingByOwnerId(Integer ownerId);
 	
 	//của Mỵ từ đây
-	PaymentDTO createPaymentVNPay(Map<String, Object> data, HttpServletRequest req) throws UnsupportedEncodingException;
+	PaymentDTO createPayment(Map<String, Object> data, HttpServletRequest req) throws UnsupportedEncodingException;
 	
 	
 	
