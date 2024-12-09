@@ -7,12 +7,20 @@ import { toast } from 'react-toastify';
 
 const PageVoucher = () => {
     const [voucher, setVoucher] = useState<Voucher[]>([])
+    const [receivedVoucher, setReceivedVoucher] = useState<UserVoucherReceived[]>([])
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+    
+   
+    useEffect(() => {
+
+        handelReceivedVoucher()
+        fetchDataVoucher()
+    }, [])
 
     const handelSubmitGetVoucher = async (voucherId: number) => {
 
-        const username = decodeString(String(localStorage.getItem("username")));
-
+        const usernameLocal = localStorage.getItem("username")
+        const username = usernameLocal ? decodeString(usernameLocal) : null;
         if (!username) {
             toast.warning("Bạn chưa đăng nhập!");
             return;
@@ -54,11 +62,6 @@ const PageVoucher = () => {
 
     //Fetch findAll voucher
 
-    useEffect(() => {
-
-        fetchDataVoucher()
-    }, [])
-
     const fetchDataVoucher = async () => {
         try {
             const response = await fetch(`${BASE_URL}rest/voucher/findAll`);
@@ -66,6 +69,20 @@ const PageVoucher = () => {
             setVoucher(data);
         } catch (error) {
             console.log("Error fetch voucher data", error)
+        }
+    }
+     
+    const handelReceivedVoucher = async()=>{
+        const usernameLocal = localStorage.getItem("username")
+        const username = usernameLocal ? decodeString(usernameLocal) : null;
+        try {
+            const response = await fetch(`${BASE_URL}rest/user/voucher/${username}`)
+            const data = await response.json();
+            console.log("Voucher user received: ",data)
+            setReceivedVoucher(data)
+           
+        } catch (error) {
+            console.error("Error handelReceived Voucher",error);
         }
     }
     //Handel select voucher khi active
@@ -80,6 +97,11 @@ const PageVoucher = () => {
     };
 
     const filteredVouchers = filterVouchers(voucher);
+
+    const hasReceivedVoucher = (voucherId: number) => {
+        return receivedVoucher.some(v=> v.voucher.voucherId===voucherId);
+    }
+
     return (
         <Suspense fallback={<div>Đang tải...</div>}>
             <HomeLayout>
@@ -115,8 +137,8 @@ const PageVoucher = () => {
                                                 handelSubmitGetVoucher(voucher.voucherId)
                                             }
                                             }
-                                            disabled={voucher.quantity === 0}
-                                        > Nhận</button>
+                                            disabled={voucher.quantity === 0||hasReceivedVoucher(voucher.voucherId)}
+                                        >  {hasReceivedVoucher(voucher.voucherId) ? "Đã nhận" : "Nhận"} </button>
                                     </div>
                                 </div>
                             ))}
