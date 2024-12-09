@@ -47,7 +47,7 @@ import mapogo.service.UserService;
 import mapogo.service.UserSubscriptionService;
 import mapogo.service.WalletService;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/rest")
 public class BookingRestController {
@@ -190,10 +190,14 @@ public class BookingRestController {
 		if (responseCode.equals("00")) {
 			createTransaction(user, trimmedAmount, null, "VNPay");
 			return new RedirectView(
-					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=success");
+					"http://localhost:3002/categories/sport_field/detail/" + sportFieldId + "?status=success");
+//			return new RedirectView(
+//					"http://fpl-mapogo1.qast.io.vn:3002/categories/sport_field/detail/" + sportFieldId + "?status=success");
 		} else {
 			return new RedirectView(
-					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=fail");
+					"http://localhost:3002/categories/sport_field/detail/" + sportFieldId + "?status=fail");
+//			return new RedirectView(
+//					"http://http://fpl-mapogo1.qast.io.vn:3002/categories/sport_field/detail/" + sportFieldId + "?status=fail");
 		}
 	}
 
@@ -212,11 +216,15 @@ public class BookingRestController {
 		if (resultCode.equals("0")) {
 			createTransaction(user, amount, null, "MoMo");
 			return new RedirectView(
-					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=success");
+					"http://localhost:3002/categories/sport_field/detail/" + sportFieldId + "?status=success");
+//			return new RedirectView(
+//					"http://fpl-mapogo1.qast.io.vn:3002/categories/sport_field/detail/" + sportFieldId + "?status=success");
 
 		} else {
 			return new RedirectView(
-					"http://localhost:3000/categories/sport_field/detail/" + sportFieldId + "?status=fail");
+					"http://localhost:3002/categories/sport_field/detail/" + sportFieldId + "?status=fail");
+//			return new RedirectView(
+//					"http://fpl-mapogo1.qast.io.vn:3002/categories/sport_field/detail/" + sportFieldId + "?status=fail");
 		}
 	}
 

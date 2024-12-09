@@ -588,7 +588,7 @@ const BookingModal = (props: BookingProps) => {
         const bookingDetailData = JSON.parse(localStorage.getItem('bookingDetailData') || '{}');
         localStorage.removeItem('bookingDetailData');
         bookingDetailData.booking = resBooking.bookingId;
-        const responseBookingDetail = await fetch(`${BASE_URL}rest/booking/detail`, {
+        await fetch(`${BASE_URL}rest/booking/detail`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -596,7 +596,6 @@ const BookingModal = (props: BookingProps) => {
             },
             body: JSON.stringify(bookingDetailData)
         });
-        const resBookingDetail = await responseBookingDetail.json() as BookingDetail;
 
     }
 
@@ -635,7 +634,7 @@ const BookingModal = (props: BookingProps) => {
 
             const bookingDetailData = JSON.parse(localStorage.getItem('bookingDetailData') || '{}');
             bookingDetailData.booking = resBooking.bookingId;
-            const responseBookingDetail = await fetch(`${BASE_URL}rest/booking/detail`, {
+            await fetch(`${BASE_URL}rest/booking/detail`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -644,7 +643,6 @@ const BookingModal = (props: BookingProps) => {
                 body: JSON.stringify(bookingDetailData)
             });
             localStorage.removeItem('bookingDetailData');
-            const resBookingDetail = await responseBookingDetail.json() as BookingDetail;
 
             if (paymentMethod.name === 'Thanh toán ví') {
                 await fetch(`${BASE_URL}rest/payment/process/${resBooking.bookingId}?totalAmount=${amountToPay}`, {

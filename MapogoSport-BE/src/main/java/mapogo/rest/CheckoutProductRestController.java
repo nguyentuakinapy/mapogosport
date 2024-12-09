@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import mapogo.entity.Cart;
 import mapogo.service.CartService;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin("*")
 @RequestMapping("/rest")
 @RestController
 public class CheckoutProductRestController {
