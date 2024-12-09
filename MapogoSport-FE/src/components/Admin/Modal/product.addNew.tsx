@@ -38,7 +38,8 @@ const optionColor = [
   { label: "Hồng", value: "Hồng", style: "pink" },
   { label: "Đen", value: "Đen", style: "black" },
   { label: "Trắng", value: "Trắng", style: "white" },
-  { label: "Xanh biển", value: "Xanh bi?n", style: "blue" },
+  // { label: "Xanh biển", value: "Xanh bi?n", style: "blue" },
+  { label: "Xanh biển", value: "Xanh biển", style: "blue" },
   { label: "Nâu", value: "Nâu", style: "brown" },
   { label: "Xám", value: "Xám", style: "gray" },
 ];
@@ -1584,7 +1585,7 @@ const ProductAddNew = (props: UserProps) => {
               )}
 
               {/* Bảng Kích cỡ */}
-              {selectedProductDetail?.productDetailId && (
+              {selectedProductDetail?.productDetailId ? (
                 <Form.Group id="formSize">
                   {/* Khối chứa nút thêm kích cỡ */}
                   <div className="d-flex justify-content-between align-items-center">
@@ -1682,7 +1683,7 @@ const ProductAddNew = (props: UserProps) => {
                     </tbody>
                   </Table>
                 </Form.Group>
-              )}
+              ):null}
             </Form>
           }
 
