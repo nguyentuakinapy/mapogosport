@@ -129,9 +129,6 @@ const BookingModal = (props: BookingProps) => {
         getTime();
     }, [startTimeKey, startTime]);
 
-
-
-
     useEffect(() => {
         const newData: string[] = [];
 
@@ -241,6 +238,8 @@ const BookingModal = (props: BookingProps) => {
     const handleSave = async () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
         setData(paymentMethod as PaymentMethod);
+        localStorage.setItem('activeTab', JSON.stringify(activeTab));
+
         if (paymentMethod) {
             if (paymentMethod.name === "VNPay" || paymentMethod.name === "MoMo") {
                 try {
@@ -452,8 +451,42 @@ const BookingModal = (props: BookingProps) => {
 
     const handleSaveByPeriod = async () => {
         const paymentMethod = dataPaymentMethod?.find(method => method.paymentMethodId === paymentMethodId);
-        createBookingByPeriod(paymentMethod as PaymentMethod);
-        handleClose();
+        setData(paymentMethod as PaymentMethod);
+        setDataPeriod(paymentMethod as PaymentMethod);
+        if (paymentMethod) {
+            if (paymentMethod.name === "VNPay" || paymentMethod.name === "MoMo") {
+                localStorage.setItem('activeTab', JSON.stringify(activeTab));
+                try {
+                    const responsePayment = await fetch(`${BASE_URL}rest/booking/payment`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            sportFielDetailId: sportDetail?.sportFielDetailId,
+                            totalAmount,
+                            percentDeposit: sportDetail?.percentDeposit,
+                            paymentMethodName: paymentMethod.name,
+                            status: checkPrepayPrice ? "Chờ thanh toán" : "Đã thanh toán",
+                            username: userData?.username
+                        })
+                    });
+                    const responseData = await responsePayment.json();
+                    const paymentUrl = responseData.url;
+                    console.log(paymentUrl);
+
+                    // chuyển hướng đến URL thanh toán
+                    window.location.href = paymentUrl;
+                } catch (error) {
+                    console.error('Error during payment:', error);
+                    toast.error('Lỗi thanh toán')
+                }
+            } else {
+                createBookingByPeriod(paymentMethod as PaymentMethod);
+                handleClose();
+            }
+        }
     }
 
     const setData = (paymentMethod: PaymentMethod) => {
@@ -503,13 +536,25 @@ const BookingModal = (props: BookingProps) => {
                     const status = params.get('status');
 
                     if (status === 'success') {
-                        try {
-                            setBookingProcessed(true);
-                            const booking = await handleCreateBooking();
+                        const activeTab = JSON.parse(localStorage.getItem('activeTab') || '');
 
+                        if (activeTab === 'byPeriod') {
+                            try {
+                                setBookingProcessed(true);
+                                await handleCreateBookingByPeriod();
+                            } catch (error) {
+                            }
+                        } else {
+                            try {
+                                setBookingProcessed(true);
+                                await handleCreateBooking();
 
-                        } catch (error) {
+                            } catch (error) {
+
+                            }
+
                         }
+
                     } else if (status === 'fail') {
                         toast.warn("Lỗi thanh toán!");
                     }
@@ -617,10 +662,70 @@ const BookingModal = (props: BookingProps) => {
     }
 
 
-    const setDataPeriod = () => {
+    const setDataPeriod = async (paymentMethod: PaymentMethod) => {
+        if (paymentMethod.name === 'VNPay' || paymentMethod.name === 'MoMo') {
 
+            const listAddBookingDetail: BookingDetailPeriod[] = [];
+
+            for (const week of selectedWeek) {
+                const dateWeek = weekDays[week];
+                for (const [, bookings] of Object.entries(dateWeek)) {
+                    bookings.map(async b => {
+                        const bookingDetail: BookingDetailPeriod = {
+                            startTime: startTime,
+                            endTime: endTime!,
+                            sportFieldDetailId: sportDetail!.sportFielDetailId,
+                            price: price!,
+                            date: b.date,
+                            // booking: resBooking.bookingId,
+                            // subscriptionKey: activeTab !== 'byDay' ? `keybooking${resBooking.bookingId}` : "",
+                            booking: -1,
+                            subscriptionKey: ""
+                        };
+
+                        listAddBookingDetail.push(bookingDetail);
+                    })
+                }
+            }
+
+            localStorage.setItem('listAddBookingDetail', JSON.stringify(listAddBookingDetail));
+
+        }
     }
     //
+
+    const handleCreateBookingByPeriod = async () => {
+        const bookingData = JSON.parse(localStorage.getItem('bookingData') || '{}');
+        localStorage.removeItem('bookingData');
+        const responseBooking = await fetch(`${BASE_URL}rest/booking`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookingData)
+        })
+
+        const resBooking = await responseBooking.json() as Booking;
+        const listAddBookingDetail = JSON.parse(localStorage.getItem('listAddBookingDetail') || '{}');
+        localStorage.removeItem('listAddBookingDetail');
+        listAddBookingDetail.forEach((detail: BookingDetailPeriod) => {
+            detail.booking = resBooking.bookingId;
+            detail.subscriptionKey = `keybooking${resBooking.bookingId}`
+        });
+        if (listAddBookingDetail.length > 0) {
+            await fetch(`${BASE_URL}rest/booking/detail/create/period`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(listAddBookingDetail)
+            });
+        }
+
+    }
+
     const createBookingByPeriod = async (paymentMethod: PaymentMethod) => {
         if (totalAmount === undefined || totalAmount <= 0) {
             toast.error("Số tiền thanh toán không hợp lệ!");
@@ -633,6 +738,7 @@ const BookingModal = (props: BookingProps) => {
         }
 
         const bookingData = JSON.parse(localStorage.getItem('bookingData') || '{}');
+        localStorage.removeItem('bookingData');
         const responseBooking = await fetch(`${BASE_URL}rest/booking`, {
             method: 'POST',
             headers: {
@@ -654,36 +760,38 @@ const BookingModal = (props: BookingProps) => {
             })
         }
 
+        if (!["VNPay", "MoMo"].includes(paymentMethod.name)) {
 
-        const listAddBookingDetail: BookingDetailPeriod[] = [];
+            const listAddBookingDetail: BookingDetailPeriod[] = [];
 
-        for (const week of selectedWeek) {
-            const dateWeek = weekDays[week];
-            for (const [, bookings] of Object.entries(dateWeek)) {
-                bookings.map(async b => {
-                    const bookingDetail: BookingDetailPeriod = {
-                        startTime: startTime,
-                        endTime: endTime!,
-                        sportFieldDetailId: sportDetail!.sportFielDetailId,
-                        price: price!,
-                        date: b.date,
-                        booking: resBooking.bookingId,
-                        subscriptionKey: activeTab !== 'byDay' ? `keybooking${resBooking.bookingId}` : "",
-                    };
+            for (const week of selectedWeek) {
+                const dateWeek = weekDays[week];
+                for (const [, bookings] of Object.entries(dateWeek)) {
+                    bookings.map(async b => {
+                        const bookingDetail: BookingDetailPeriod = {
+                            startTime: startTime,
+                            endTime: endTime!,
+                            sportFieldDetailId: sportDetail!.sportFielDetailId,
+                            price: price!,
+                            date: b.date,
+                            booking: resBooking.bookingId,
+                            subscriptionKey: activeTab !== 'byDay' ? `keybooking${resBooking.bookingId}` : "",
+                        };
 
-                    listAddBookingDetail.push(bookingDetail);
-                })
+                        listAddBookingDetail.push(bookingDetail);
+                    })
+                }
             }
-        }
-        if (listAddBookingDetail.length > 0) {
-            await fetch(`${BASE_URL}rest/booking/detail/create/period`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(listAddBookingDetail)
-            });
+            if (listAddBookingDetail.length > 0) {
+                await fetch(`${BASE_URL}rest/booking/detail/create/period`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(listAddBookingDetail)
+                });
+            }
         }
     }
 
