@@ -74,6 +74,7 @@
     "sharp": "0.33.5",
     "socket.io-client": "4.8.1",
     "sockjs-client": "1.6.1",
+    "sweetalert2": "^11.14.5",
     "swr": "2.2.5",
     "use-immer": "0.10.0"
   },

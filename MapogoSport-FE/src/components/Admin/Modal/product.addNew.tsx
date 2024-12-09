@@ -1406,6 +1406,9 @@ const ProductAddNew = (props: UserProps) => {
                           src={previewImageProductColor || selectedProductDetail?.image || "/images/logo.png"}
                           alt="Product image"
                           className="img-thumbnail shadow-sm" // Thêm bóng đổ
+                          onError={(e) =>{
+                            e.currentTarget.src =  "/images/logo.png"
+                          }}
                         />
 
                         {/* Input để chọn ảnh, được ẩn đi */}
