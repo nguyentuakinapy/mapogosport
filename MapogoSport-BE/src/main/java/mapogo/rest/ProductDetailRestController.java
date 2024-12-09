@@ -371,10 +371,23 @@ public class ProductDetailRestController {
 	        if (file != null && !file.isEmpty()) {
 	            System.err.println("Hình ảnh chính được tải lên mới. Đang xử lý cập nhật hình ảnh.");
 	            String oldImagePath = existingProductDetail.getImage();
-	            if (oldImagePath != null && !oldImagePath.isEmpty()) {
-	                String publicId = oldImagePath.substring(oldImagePath.lastIndexOf("/") + 1, oldImagePath.lastIndexOf("."));
-	                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-	                System.err.println("Đã xóa hình ảnh cũ với publicId: " + publicId);
+//	            if (oldImagePath != null && !oldImagePath.isEmpty()) {
+//	                String publicId = oldImagePath.substring(oldImagePath.lastIndexOf("/") + 1, oldImagePath.lastIndexOf("."));
+//	                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+//	                System.err.println("Đã xóa hình ảnh cũ với publicId: " + publicId);
+//	            }
+	            if (oldImagePath != null && oldImagePath.contains("/") && oldImagePath.contains(".")) {
+	                int startIndex = oldImagePath.lastIndexOf("/") + 1;
+	                int endIndex = oldImagePath.lastIndexOf(".");
+	                if (startIndex < endIndex) { // Đảm bảo phạm vi hợp lệ
+	                    String publicId = oldImagePath.substring(startIndex, endIndex);
+	                    cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+	                    System.err.println("Đã xóa hình ảnh cũ với publicId: " + publicId);
+	                } else {
+	                    System.err.println("Không thể xác định publicId do phạm vi không hợp lệ.");
+	                }
+	            } else {
+	                System.err.println("oldImagePath không hợp lệ hoặc không chứa định dạng cần thiết.");
 	            }
 
 	            Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
