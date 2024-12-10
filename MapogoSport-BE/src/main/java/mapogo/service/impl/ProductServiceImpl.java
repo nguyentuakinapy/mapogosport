@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 import mapogo.dao.ProductDAO;
 import mapogo.entity.Product;
 import mapogo.service.ProductService;
@@ -21,8 +23,20 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public List<Product> findAll() {
 		// TODO Auto-generated method stub
-		return productDAO.findAllProductsFromBottom();
+		List<Product> listPro = productDAO.findAllProductsFromBottom();
+		listPro.forEach(product -> {
+			Integer idProduct =  product.getProductId();
+			Integer totalQuantity = productDAO.getTotalQuantityByProductId(idProduct);
+			product.setStock(totalQuantity != null ? totalQuantity: 0);
+			if(product.getStock() == 0) {
+				product.setStatus("Hết hàng");
+			}else {
+				product.setStatus("Còn hàng");
+			}
+		});
+//		return productDAO.findAllProductsFromBottom();
 //		return productDAO.findAll();
+		return listPro;
 	}
 
 	@Override

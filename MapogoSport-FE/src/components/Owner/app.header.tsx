@@ -48,7 +48,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
             getNotification(userData.username)
         }
     }, [userData, checkNotification]);
-
+    
     const getNotification = async (username: string) => {
         const response = await fetch(`${BASE_URL}rest/user/notification/${username}`);
         if (!response.ok) return

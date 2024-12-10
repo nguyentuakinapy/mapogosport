@@ -63,6 +63,7 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
         // }
     }
 
+
     const translate = (word: string): string => {
         return translations[word.toLowerCase()] || word;
     };
