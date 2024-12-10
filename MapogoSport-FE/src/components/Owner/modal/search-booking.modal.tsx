@@ -27,6 +27,11 @@ const SearchBookingModal = (props: SearchBookingProps) => {
     // const [operatingTime, setOperatingTime] = useState<number>(0);
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+    const normalizeTime = (time: string): number => {
+        const [hours, minutes] = time.replace('h', ':').split(':').map(Number);
+        return hours * 60 + minutes;
+    };
+
     useEffect(() => {
         if (sportField && sportField.sportFielDetails) {
             const defaultSportType = sportField.sportFielDetails[0]?.sportFielDetailId || null;
@@ -201,7 +206,10 @@ const SearchBookingModal = (props: SearchBookingProps) => {
             if (Array.isArray(bookingsFromAPI) && bookingsFromAPI.length > 0) {
                 for (const booking of bookingsFromAPI) {
                     const { startTime, endTime, sportFieldDetail } = booking;
-                    if ((startTime <= selectedTime && endTime > selectedTime) &&
+                    const selectedTimeNormalize = normalizeTime(selectedTime);
+                    const startTimeNormalize = normalizeTime(startTime);
+                    const endTimeNormalize = normalizeTime(endTime);
+                    if ((startTimeNormalize <= selectedTimeNormalize && endTimeNormalize > selectedTimeNormalize) &&
                         sportFieldDetail.sportFielDetailId === selectedSportType) {
                         isBooked = true;
                         break;

@@ -45,7 +45,7 @@ import mapogo.service.TransactionService;
 import mapogo.service.UserSubscriptionService;
 import mapogo.service.WalletService;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/rest")
 public class BookingRestController {
@@ -84,7 +84,7 @@ public class BookingRestController {
 	}
 
 	@GetMapping("/user/booking/detail/{bookingId}")
-	public List<Map<String, Object>> getById(@PathVariable("bookingId") Integer bookingId) {
+	public Map<String, Object> getById(@PathVariable("bookingId") Integer bookingId) {
 		return bookingDetailService.findBookingDetailByBookingId(bookingId);
 	}
 

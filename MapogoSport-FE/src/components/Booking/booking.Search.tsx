@@ -9,7 +9,6 @@ import { createTimeStringH, isDateInRange } from "../Utils/booking-time";
 interface SearchBookingProps {
     showSearchBookingModal: boolean;
     setSearchShowBookingModal: (v: boolean) => void;
-    dataTimeSport: string[];
     sportField?: SportField | null;
 }
 
@@ -27,6 +26,11 @@ const SearchSportField = (props: SearchBookingProps) => {
     const [opening, setOpening] = useState<number>();
     const [operatingTime, setOperatingTime] = useState<number>(0);
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    const normalizeTime = (time: string): number => {
+        const [hours, minutes] = time.replace('h', ':').split(':').map(Number);
+        return hours * 60 + minutes;
+    };
 
     useEffect(() => {
         if (sportField && sportField.sportFielDetails) {
@@ -100,6 +104,11 @@ const SearchSportField = (props: SearchBookingProps) => {
     }, [operatingTime, opening, sportField]);
 
     const handleFindField = async () => {
+        const username = localStorage.getItem('username');
+        if (!username) {
+            toast.error("Vui lòng đăng nhập để thực hiện chức năng!");
+            return;
+        }
         if (selectedDate && selectedTime) {
             const response = await fetch(`${BASE_URL}rest/user/booking/detail/getnextweek/${selectedSportType}/${selectedDate}/${selectedDate}`);
             const bookingsFromAPI: BookingDetail[] = await response.json();
@@ -130,7 +139,6 @@ const SearchSportField = (props: SearchBookingProps) => {
                                     hourEnd = new Date(s.endDate).getHours();
                                     minuteEnd = '30';
                                 }
-                                // toast.success(s.statusName + "NGos cc")
 
                                 const timeStringH: string[] = createTimeStringH(
                                     `${hourStart}h${minuteStart}`,
@@ -203,7 +211,10 @@ const SearchSportField = (props: SearchBookingProps) => {
             if (Array.isArray(bookingsFromAPI) && bookingsFromAPI.length > 0) {
                 for (const booking of bookingsFromAPI) {
                     const { startTime, endTime, sportFieldDetail } = booking;
-                    if ((startTime <= selectedTime && endTime > selectedTime) &&
+                    const selectedTimeNormalize = normalizeTime(selectedTime);
+                    const startTimeNormalize = normalizeTime(startTime);
+                    const endTimeNormalize = normalizeTime(endTime);
+                    if ((startTimeNormalize <= selectedTimeNormalize && endTimeNormalize > selectedTimeNormalize) &&
                         sportFieldDetail.sportFielDetailId === selectedSportType) {
                         isBooked = true;
                         break;
@@ -213,6 +224,7 @@ const SearchSportField = (props: SearchBookingProps) => {
 
             if (isBooked) {
                 toast.warning("Đã có sân được đặt trùng với yêu cầu!");
+                return;
             } else {
                 toast.success("Đã tìm thấy sân theo yêu cầu!");
                 const selectedSportDetail = sportField?.sportFielDetails.find(item => item.sportFielDetailId === selectedSportType);

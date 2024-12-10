@@ -154,13 +154,20 @@ interface BookingDetailMap {
     endTime: string;
     price: number;
     status: string;
-    address: string;
-    ownerFullname: string;
-    ownerPhoneNumberUsers: string;
-    deposit: number;
-    statusBooking: string
 }
 
+interface BookingMap {
+    date: string;
+    ownerPhoneNumber: string;
+    userFullname: string;
+    userPhoneNumber: string;
+    sportFieldName: string;
+    address: string;
+    ownerFullname: string;
+    statusBooking: string;
+    bookingId: number;
+    deposit: number;
+}
 
 interface BookingDetailPeriod {
     startTime: string;

@@ -74,7 +74,7 @@ const MapComponent = ({ coordinates }: MapComponentProps) => {
         };
     }, [initializeMap]);
 
-    return <div ref={mapRef} className="map-border" style={{ height: "400px", width: "100%" }}></div>;
+    return <div ref={mapRef} className="map-border" style={{ height: "480px", width: "100%" }}></div>;
 };
 
 export default MapComponent;

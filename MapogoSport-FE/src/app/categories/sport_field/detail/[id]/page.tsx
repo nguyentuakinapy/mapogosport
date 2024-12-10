@@ -32,7 +32,6 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     const [priceBySizeSp, setPriceBySizeSp] = useState<{ price: number, peakHourPrices: number }>({ price: 0, peakHourPrices: 0 });
     const [sportFieldDetailId, setSportFieldDetailId] = useState<number>(0);
     const [bookingsOnWeek, setBookingsOnWeek] = useState<BookingsTypeOnWeek>({})
-    const [dataTimeSport, setDataTimeSport] = useState<string[]>([]);
     const [checkDataBooking, setCheckDataBooking] = useState<boolean>(false);
     const [checkDataBooking1, setCheckDataBooking1] = useState<boolean>(false);
     const [days, setDays] = useState<string[]>();
@@ -175,8 +174,6 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
             if (index !== -1) {
                 newData.splice(0, index);
             }
-
-            setDataTimeSport(newData);
 
             if (newData.length > 0 && sportField.sportFielDetails) {
                 const newBookingsOnWeek = { ...bookingsOnWeek };
@@ -842,8 +839,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
                     startTimeKey={startTimeKey}
                 />
                 <ModalReviewSportField showReviewModal={showReviewModal} setShowReviewModal={setShowReviewModal} fieldId={params.id} dataReview={dataReview!} />
-                <SearchSportField showSearchBookingModal={showSearchBookingModal} setSearchShowBookingModal={setSearchShowBookingModal}
-                    dataTimeSport={dataTimeSport.filter(time => time !== "undefinedh00" && time !== null)} sportField={sportField} />
+                <SearchSportField showSearchBookingModal={showSearchBookingModal} setSearchShowBookingModal={setSearchShowBookingModal} sportField={sportField} />
             </Container>
         </HomeLayout>
     );

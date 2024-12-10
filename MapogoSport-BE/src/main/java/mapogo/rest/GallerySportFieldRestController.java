@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import mapogo.entity.GallerySportField;
 import mapogo.service.GallerySportFieldService;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin("*")
 @RequestMapping("/rest")
 @RestController
 //Mỵ

@@ -13,9 +13,10 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const [bookingDetail, setBookingDetail] = useState<BookingDetailMap[]>([]);
+    const [bookingInfo, setBookingInfo] = useState<BookingMap>();
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
 
-    const { data, isLoading, error } = useSWR<BookingDetailMap[]>(`${BASE_URL}rest/user/booking/detail/${params.id}`, fetcher, {
+    const { data, isLoading, error } = useSWR(`${BASE_URL}rest/user/booking/detail/${params.id}`, fetcher, {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
@@ -23,9 +24,11 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
 
     useEffect(() => {
         if (data) {
-            const sortedData = data.sort((a: BookingDetailMap, b: BookingDetailMap) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            const sortedData = data.bookingDetails.sort((a: BookingDetailMap, b: BookingDetailMap) =>
+                new Date(a.date).getTime() - new Date(b.date).getTime());
             setBookingDetail(sortedData);
-            const address = data[0].address;
+            setBookingInfo(data.booking);
+            const address = data.booking.address;
             if (address) {
                 fetchCoordinates(address).then((coords) => {
                     if (coords) setCoordinates(coords);
@@ -45,6 +48,24 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
             <div style={{ fontSize: '15px' }}>
                 <Row className="my-3 booking-container">
                     <Col className="bill-booking" xs={7}>
+                        <Table className="my-3">
+                            <thead>
+                                <tr>
+                                    <th className="text-secondary">Mã hóa đơn</th>
+                                    <th className="text-secondary">Tên sân</th>
+                                    <th className="text-secondary">Ngày đặt</th>
+                                    <th className="text-secondary">Số điện thoại</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>#{bookingInfo?.bookingId}</b></td>
+                                    <td className="title">{bookingInfo?.sportFieldName}</td>
+                                    <td>{bookingInfo?.date && new Date(bookingInfo.date).toLocaleDateString('en-GB')}</td>
+                                    <td>{bookingInfo?.userPhoneNumber || "Chưa cập nhật số điện thoại"}</td>
+                                </tr>
+                            </tbody>
+                        </Table>
                         <Table className="my-3">
                             <thead>
                                 <tr>
@@ -69,7 +90,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                         </Table>
                         <div>
                             <div className="text-secondary mb-2 fw-bold">Địa chỉ</div>
-                            <b>{bookingDetail[0]?.address}</b>
+                            <b>{bookingInfo?.address}</b>
                             <Table className="my-3">
                                 <thead>
                                     <tr>
@@ -79,8 +100,8 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td className="title">{bookingDetail[0]?.ownerFullname}</td>
-                                        <td>{bookingDetail[0]?.ownerPhoneNumberUsers || "Chưa cập nhật số điện thoại"}</td>
+                                        <td className="title">{bookingInfo?.ownerFullname}</td>
+                                        <td>{bookingInfo?.ownerPhoneNumber || "Chưa cập nhật số điện thoại"}</td>
                                     </tr>
                                 </tbody>
                             </Table>

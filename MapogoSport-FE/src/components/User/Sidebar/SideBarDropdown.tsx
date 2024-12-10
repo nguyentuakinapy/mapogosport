@@ -8,7 +8,6 @@ import { useData } from "@/app/context/UserContext";
 type MenuItem = {
     label: string;
     route: string;
-    children?: MenuItem[];
 };
 
 interface SidebarDropdownProps {
@@ -22,7 +21,7 @@ const SidebarDropdown = ({ item }: SidebarDropdownProps) => {
 
     const handleClick = () => {
         if (userData) {
-            mutate(`${BASE_URL}rest/user/${userData.username}`);
+            mutate(userData);
             mutate(`${BASE_URL}rest/user/voucher/${userData.username}`);
             mutate(`${BASE_URL}rest/wallet/transaction/${userData.wallet.walletId}`)
         }
