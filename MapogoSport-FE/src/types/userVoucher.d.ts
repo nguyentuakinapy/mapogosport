@@ -19,3 +19,10 @@ interface Voucher {
         activeDate: Date
         createdBy: User
 }
+
+interface UserVoucherReceived{
+        date: Date
+        userVoucherId: number
+        voucher: Voucher
+        status: string
+}

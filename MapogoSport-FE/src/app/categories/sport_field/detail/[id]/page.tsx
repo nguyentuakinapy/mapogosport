@@ -52,9 +52,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
     useEffect(() => {
         if (typeof window !== "undefined") {
             const statusParam = searchParams.get('status');
-            if (statusParam === 'success') {
-                toast.success("Đặt sân thành công!");
-            } else if (statusParam === 'fail') {
+            if (statusParam === 'fail') {
                 toast.warn("Đã xảy ra lỗi trong quá trình đặt sân, vui lòng thử lại sau!");
             }
         }

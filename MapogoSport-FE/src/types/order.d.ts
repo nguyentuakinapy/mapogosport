@@ -65,4 +65,5 @@ interface OrderInfo {
     phoneNumber: string;
     fullname: string;
     status: string;
+    note: string;
 }

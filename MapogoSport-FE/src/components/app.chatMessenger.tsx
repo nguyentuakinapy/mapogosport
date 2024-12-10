@@ -860,7 +860,9 @@ export default function ChatBox() {
 
                             <strong>
                               {index + 1} -{" "}
-                              {chatUser?.fullname || "Không có tên"}
+                              {chatUser?.username ==='myntd'? 'Admin Mapogo' 
+                              : chatUser?.username ? chatUser?.fullname 
+                              : "Không có tên"}
                             </strong>
                           </div>
                           <div className=" mt-1 row">
@@ -898,7 +900,12 @@ export default function ChatBox() {
             >
               <div className="card-header d-flex align-items-center bg-light">
                 <Image width={30} height={17} src="/images/logo.png" alt="Chat Logo" className="me-2" />
-                <h6 className="mb-0 title">{selectedChat?.fullname}</h6>
+                <h6 className="mb-0 title">
+                  {/* {selectedChat?.fullname} */}
+                  {selectedChat?.username ==='myntd'? 'Admin Mapogo' 
+                   : selectedChat?.username ? selectedChat?.fullname 
+                   : "Không có tên"}
+                  </h6>
                 <div className="ms-auto">
                   <Button
                     variant="link"

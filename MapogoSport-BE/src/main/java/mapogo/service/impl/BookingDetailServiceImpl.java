@@ -172,6 +172,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			} else {
 				bd.setFullName(u.getFullname());
 			}
+			bd.setBookingId(bd.getBooking().getBookingId());
 		});
 		return bookingDetails;
 	}
@@ -227,6 +228,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			} else {
 				bd.setFullName(u.getFullname());
 			}
+			bd.setBookingId(bd.getBooking().getBookingId());
 		});
 		return bookingDetails;
 	}

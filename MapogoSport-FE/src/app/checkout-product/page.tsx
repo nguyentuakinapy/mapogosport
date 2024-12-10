@@ -25,14 +25,7 @@ const CheckoutPage = () => {
   const [showOrderSuccessModal, setShowOrderSuccessModal] = useState(false);
   const [username, setUsername] = useState<string>('');
 
-  useEffect(() => {
-    const storedCartIds = localStorage.getItem('CartIds');
-    const username = localStorage.getItem('username');
-    if (storedCartIds && username) {
-      setCartIds(JSON.parse(storedCartIds));
-      setUsername(decodeString(username));
-    }
-  }, []);
+
 
   const { data } = useSWR(cartIds && `${BASE_URL}rest/checkout_product/${cartIds.join(",")}`, fetcher, {
     revalidateIfStale: false,
@@ -98,7 +91,15 @@ const CheckoutPage = () => {
       }
     }
   }, [userData]);
-  console.log(phoneNumberSelected);
+
+  useEffect(() => {
+    const storedCartIds = localStorage.getItem('CartIds');
+    const username = localStorage.getItem('username');
+    if (storedCartIds && username) {
+      setCartIds(JSON.parse(storedCartIds));
+      setUsername(decodeString(username));
+    }
+  }, [userData]);
 
   const { data: apiAddress } = useSWR<ApiAddressResponse>("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", fetcher, {
     revalidateIfStale: false,
@@ -159,18 +160,10 @@ const CheckoutPage = () => {
     }
   }, [addressSelected, apiAddress]);
 
-  const [orderStatus, setOrderStatus] = useState('Chờ xác nhận');
+  const orderStatus= 'Chờ xác nhận';
   const [paymentMethod, setPaymentMethod] = useState('COD');
 
-  const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedMethod = e.target.value;
-    if (selectedMethod === 'COD') {
-      setOrderStatus('Chờ xác nhận');
-    } else if (selectedMethod === 'VNPay' || selectedMethod === "MoMo") {
-      setOrderStatus('Chờ thanh toán');
-    }
-    setPaymentMethod(selectedMethod);
-  };
+
 
   const handleVoucherSelectedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedVoucher = vouchers.find(v => v.voucher.voucherId === Number(e.target.value));
@@ -195,7 +188,7 @@ const CheckoutPage = () => {
   const checkForm = () => {
     setLoading(true);
 
-    const errors = []; // Mảng lưu trữ các thông báo lỗi
+    const errors = [];
 
     if (!user1) {
       errors.push('Người dùng không tồn tại');
@@ -229,12 +222,12 @@ const CheckoutPage = () => {
     }
 
     if (errors.length > 0) {
-      alert(errors.join("\n")); // Hiển thị tất cả lỗi trên một alert
+      alert(errors.join("\n"));
       setLoading(false);
-      return false; // Trả về false để biểu thị rằng kiểm tra không thành công
+      return false;
     }
 
-    return true; // Trả về true nếu tất cả các trường hợp đều hợp lệ
+    return true;
   };
 
   //hàn kiểm tra sđt
@@ -243,11 +236,10 @@ const CheckoutPage = () => {
     return phoneRegex.test(phoneNumberSelected);
   }
 
-  const handleCreateOrder = async () => {
+  const setDataOrder = () => {
     const addressParts = [addressDetail, selectedWard, selectedDistrict, selectedProvince];
     const address1 = addressParts.filter(part => part).join(', ');
     const phoneNumber = phoneNumberSelected === 'other' ? customPhoneNumber : phoneNumberSelected;
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const orderData = {
       username: user1?.username,
@@ -258,57 +250,115 @@ const CheckoutPage = () => {
       amount: newTotalPrice,
       paymentMethod: paymentMethod,
       voucherId: voucherSelected?.voucher.voucherId ?? '',
-      shipFee: 0.0,// Hoặc giá trị phí vận chuyển
+      shipFee: 0.0, // Hoặc giá trị phí vận chuyển
     };
-    console.log(orderData);
 
+    const listCartCheckout = cartData.map(item => ({
+      productDetailSizeId: item.productDetailSize.productDetailSizeId,
+      quantity: item.quantity
+    }));
+
+    localStorage.setItem('orderData', JSON.stringify(orderData));
+    localStorage.setItem('listCartCheckout', JSON.stringify(listCartCheckout));
+  };
+
+  const handleCreateOrder = async (orderData: Order) => {
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
     try {
       const response = await axios.post(`${BASE_URL}rest/create_order`, orderData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      console.log("Dữ liệu trả về từ API:", response.data);
-
+      // console.log("Dữ liệu trả về từ API:", response.data);
+      localStorage.removeItem('orderData');
       return response.data; // Trả về thông tin đơn hàng
     } catch (error) {
-      toast.error("Không thể tạo đơn hàng!")
+      toast.error("Không thể tạo đơn hàng!");
     }
   };
 
-  let path;
+  const handleCreateOrderDetail = async (listCartCheckout: Cart, orderId: number) => {
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+    try {
+      const response = await axios.post(
+        `${BASE_URL}rest/create_orderDetail`,
+        listCartCheckout,
+        {
+          params: { orderId: orderId },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log("Dữ liệu trả về từ API ORDERDETAIL:", response.data);
+      localStorage.removeItem('listCartCheckout');
+      return response.data; // Trả về thông tin đơn hàng
+    } catch (error) {
+      toast.error("Không thể tạo đơn hàng!");
+    }
+  };
 
-  if (typeof window !== 'undefined') {
-    path = window.location.href
-  }
+  const [orderId, setOrderId] = useState<number | undefined>(undefined);
+  const [orderProcessed, setOrderProcessed] = useState(false);
+  const [path, setPath] = useState<string | undefined>();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setPath(window.location.href);
 
-      const params = new URLSearchParams(window.location.search);
-
-      if (typeof window !== "undefined" && params) {
-        const status = params.get('status');
-        const orderId1: string | null = params.get('orderId');
-
-        if (status === 'success') {
-          if (orderId1 !== null) {
-            setOrderId(Number(orderId1));
-          }
-          setShowOrderSuccessModal(true);
-        }
-      }
     }
-  }, [path]);
+  }, [orderProcessed]);
 
-  const [orderId, setOrderId] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && path && !orderProcessed) {
+      const processOrder = async () => {
+        const params = new URLSearchParams(window.location.search);
+
+        if (params) {
+          const status = params.get('status');
+
+          if (status === 'success') {
+            try {
+              // Đánh dấu đơn hàng đang xử lý
+              setOrderProcessed(true);
+
+              // Lấy dữ liệu order và cart
+              const orderData = JSON.parse(localStorage.getItem('orderData') || '{}');
+              const listCartCheckout = JSON.parse(localStorage.getItem('listCartCheckout') || '[]');
+
+              // Tạo order
+              const order = await handleCreateOrder(orderData);
+              if (order && order.orderId) {
+                // Tạo orderDetail
+                await handleCreateOrderDetail(listCartCheckout, order.orderId);
+
+                // Cập nhật trạng thái và hiển thị modal
+                setOrderId(order.orderId);
+                setShowOrderSuccessModal(true);
+              }
+            } catch (error) {
+              console.error("Error processing order:", error);
+              toast.error("Đã xảy ra lỗi trong quá trình xử lý đơn hàng.");
+            }
+          } else if (status === 'fail') {
+            toast.warn("Lỗi thanh toán!");
+          }
+        }
+      };
+
+      processOrder();
+    }
+  }, [path, orderProcessed]);
 
   const handlePaymentWithOrder = async () => {
     if (!checkForm()) {
       setLoading(false);
       return;
     } else if (paymentMethod === "COD") {
-      const order = await handleCreateOrder();
+      setDataOrder();
+      const orderData = JSON.parse(localStorage.getItem('orderData') || '{}');
+      const order = await handleCreateOrder(orderData);
       if (order) {
         const listCartCheckout = cartData.map(item => ({
           productDetailSizeId: item.productDetailSize.productDetailSizeId,
@@ -330,56 +380,50 @@ const CheckoutPage = () => {
         }
       }
     } else if (paymentMethod === "VNPay") {
-      const listCartCheckout = cartData.map(item => ({
-        productDetailSizeId: item.productDetailSize.productDetailSizeId,
-        quantity: item.quantity
-      }));
+      setDataOrder();
 
       try {
-        const order = await handleCreateOrder();
         const paymentResponse = await axios.post(
           `${BASE_URL}rest/payment/create_payment`,
-          listCartCheckout,
           {
-            params: { orderId: order.orderId },
+            amount: newTotalPrice,
+            username
           }
         );
+        console.log('Payment Response:', paymentResponse.data);
         const paymentUrl = paymentResponse.data.url;
         // chuyển hướng đến URL thanh toán
         window.location.href = paymentUrl;
 
       } catch (error) {
-        console.error('Error during payment:', error);
+        console.error('Payment Error:', error);
       }
     } else if (paymentMethod === "MoMo") {
+      setDataOrder();
       setLoading(true);
-      const listCartCheckout = cartData.map(item => ({
-        productDetailSizeId: item.productDetailSize.productDetailSizeId,
-        quantity: item.quantity
-      }));
       try {
-        const order = await handleCreateOrder();
-        const response = await axios.post(
+        const paymentResponse = await axios.post(
           `${BASE_URL}rest/payment/create-momo-payment`,
-          listCartCheckout,
           {
-            params: { orderId: order.orderId },
+            amount: newTotalPrice,
+            username
           }
         );
-        const paymentUrl = response.data.payUrl;
+        console.log('Payment Response:', paymentResponse.data);
+        const paymentUrl = paymentResponse.data.payUrl;
         // chuyển hướng đến URL thanh toán
         window.location.href = paymentUrl;
+
       } catch (error) {
-        setLoading(false);
-        console.error('Thanh toán thất bại', error);
+        console.error('Payment Error:', error);
       }
     } else if (paymentMethod === "Thanh toán ví") {
       setLoading(true);
-      console.log(paymentMethod);
-      console.log(user1);
 
       if (user1 && user1?.wallet.balance >= newTotalPrice) {
-        const order = await handleCreateOrder();
+        setDataOrder();
+        const orderData = JSON.parse(localStorage.getItem('orderData') || '{}');
+        const order = await handleCreateOrder(orderData);
         if (order) {
           const listCartCheckout = cartData.map(item => ({
             productDetailSizeId: item.productDetailSize.productDetailSizeId,
@@ -518,7 +562,7 @@ const CheckoutPage = () => {
                     <div className="form-check flex-grow-1">
                       <input className="form-check-input" type="radio"
                         name="paymentMethod" id="cod" checked={paymentMethod === 'COD'}
-                        value={"COD"} onChange={handlePaymentMethodChange} />
+                        value={"COD"} onChange={e => setPaymentMethod(e.target.value)} />
                       <label className="form-check-label" htmlFor="cod">
                         Thanh toán khi nhận hàng (COD)
                       </label>
@@ -530,7 +574,7 @@ const CheckoutPage = () => {
                     <div className="form-check flex-grow-1">
                       <input className="form-check-input" type="radio"
                         name="paymentMethod" id="wallet" value={"Thanh toán ví"}
-                        onChange={handlePaymentMethodChange} />
+                        onChange={e => setPaymentMethod(e.target.value)} />
                       <label className="form-check-label" htmlFor="wallet">
                         Thanh toán bằng ví của bạn
                       </label>
@@ -550,7 +594,7 @@ const CheckoutPage = () => {
                     <div className="form-check flex-grow-1">
                       <input className="form-check-input" type="radio"
                         name="paymentMethod" id="vnpay" value="VNPay"
-                        onChange={handlePaymentMethodChange} />
+                        onChange={e => setPaymentMethod(e.target.value)} />
                       <label className="form-check-label" htmlFor="vnpay">
                         Thanh toán qua ví điện tử VNPay
                       </label>
@@ -566,7 +610,7 @@ const CheckoutPage = () => {
                     <div className="form-check flex-grow-1">
                       <input className="form-check-input" type="radio"
                         name="paymentMethod" id="momo" value="MoMo"
-                        onChange={handlePaymentMethodChange} />
+                        onChange={e => setPaymentMethod(e.target.value)} />
                       <label className="form-check-label" htmlFor="momo">
                         Thanh toán qua ví điện tử MoMo
                       </label>

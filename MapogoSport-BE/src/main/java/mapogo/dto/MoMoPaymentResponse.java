@@ -34,9 +34,8 @@ public class MoMoPaymentResponse {
 	    private String payUrl;
     
 	    @JsonProperty("requestId")
-	    private String requestId; // Add this property
+	    private String requestId; 
 
 	    @JsonProperty("shortLink")
-	    private String shortLink; // Add this property
-
+	    private String shortLink; 
 }

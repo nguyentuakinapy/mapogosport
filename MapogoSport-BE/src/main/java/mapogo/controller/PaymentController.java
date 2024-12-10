@@ -82,15 +82,21 @@ public class PaymentController {
 
 	@Autowired
 	ProductDetailSizeDAO productDetailSizeDAO;
+	
+	@Autowired
+	UserService userService;
 
 //	@PostMapping("/create_payment")
 	@PostMapping("/create_payment")
-	public ResponseEntity<?> createPayment(HttpServletRequest req, @RequestParam("orderId") Integer orderId,
-			@RequestBody List<Map<String, Integer>> data) throws UnsupportedEncodingException {
-		Order order = orderService.findByOrderId(orderId);
+	public ResponseEntity<?> createPayment(HttpServletRequest req,
+			@RequestBody Map<String, Object> data) throws UnsupportedEncodingException {
+//		Order order = orderService.findByOrderId(orderId);
 		String orderType = "other";
-		long amount = (long) (order.getAmount() * 100);
-		String vnp_TxnRef = orderId.toString();
+		Integer a = (Integer) data.get("amount");
+		long amount = (long) (a* 100);
+		long orderId = System.currentTimeMillis();
+
+		String vnp_TxnRef = String.valueOf(orderId);
 		String vnp_IpAddr = Config.getIpAddress(req);
 
 		String vnp_TmnCode = Config.vnp_TmnCode;
@@ -105,7 +111,7 @@ public class PaymentController {
 		vnp_Params.put("vnp_BankCode", "NCB");
 
 		vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-		vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang:" + vnp_TxnRef); // nội dung
+		vnp_Params.put("vnp_OrderInfo", (String) data.get("username")); // nội dung
 		vnp_Params.put("vnp_OrderType", orderType);
 
 		vnp_Params.put("vnp_Locale", "vn");
@@ -155,20 +161,6 @@ public class PaymentController {
 		paymentDTO.setMessage("successfully");
 		paymentDTO.setURL(paymentUrl);
 
-		// create OrderDetail
-		for (Map<String, Integer> item : data) {
-			Integer productDetailSizeId = (Integer) item.get("productDetailSizeId");
-			ProductDetailSize pds = pdsDAO.findByProductDetailSizeId(productDetailSizeId);
-
-			Integer quantity = (Integer) item.get("quantity");
-
-			OrderDetail orderDetail = new OrderDetail();
-			orderDetail.setOrder(order);
-			orderDetail.setProductDetailSize(pds);
-			orderDetail.setQuantity(quantity);
-
-			orderDetailService.create(orderDetail);
-		}
 		return ResponseEntity.status(HttpStatus.SC_OK).body(paymentDTO);
 	}
 
@@ -176,39 +168,34 @@ public class PaymentController {
 	@GetMapping("/payment_info")
 	public RedirectView transaction(@RequestParam(value = "vnp_Amount") String amount,
 			@RequestParam(value = "vnp_ResponseCode") String responseCode,
-			@RequestParam(value = "vnp_TxnRef") String orderId) {
+			@RequestParam(value = "vnp_OrderInfo") String username) {
 
-		OrderPayment orderPayment = new OrderPayment();
-		Order order = orderService.findByOrderId(Integer.parseInt(orderId));
-		order.setStatus("Chờ xác nhận");
-		orderService.update(order);
-
-		User user = order.getUser();
+		User user = userService.findByUsername(username);
 		String trimmedAmount = amount.substring(0, amount.length() - 2);
-		
+
 		if (responseCode.equals("00")) {
 			// update +Balance
 			Wallet wallet = walletService.findByUsername(user);
-//			wallet.setBalance(new BigDecimal(trimmedAmount.trim()));
-//			walletService.update(wallet);
+			
 
 			// create transaction
 			Transaction transaction = new Transaction();
 			transaction.setWallet(wallet);
 			transaction.setAmount(new BigDecimal(trimmedAmount.trim()));
 			transaction.setCreatedAt(LocalDateTime.now());
-			transaction.setDescription("Nạp từ hóa đơn: " + orderId + " (VNPay)");
+			transaction.setDescription("Nạp từ hóa đơn thanh toán bằng " + " (VNPay)");
 			transaction.setTransactionType("+" + trimmedAmount);
 			transactionService.create(transaction);
 
 			// create orderPayment
-			orderPayment.setAmount(Double.valueOf(trimmedAmount));
-			orderPayment.setOrder(order);
-			orderPayment.setStatus("Đã thanh toán");
-			orderPayment.setDate(LocalDateTime.now());
-			orderPayment.setUser(user);
-			orderPayment.setReferenceCode(null);
-			orderPaymentSevice.create(orderPayment);
+//			OrderPayment orderPayment = new OrderPayment();
+//			orderPayment.setAmount(Double.valueOf(trimmedAmount));
+//			orderPayment.setOrder(order);
+//			orderPayment.setStatus("Đã thanh toán");
+//			orderPayment.setDate(LocalDateTime.now());
+//			orderPayment.setUser(user);
+//			orderPayment.setReferenceCode(null);
+//			orderPaymentSevice.create(orderPayment);
 
 			// -balance -> create transaction
 			
@@ -216,36 +203,16 @@ public class PaymentController {
 			transaction1.setWallet(wallet);
 			transaction1.setAmount(new BigDecimal(trimmedAmount.trim()));
 			transaction1.setCreatedAt(LocalDateTime.now());
-			transaction1.setDescription("Thanh toán hóa đơn: " + orderId);
+			transaction1.setDescription("Thanh toán hóa đơn ");
 			transaction1.setTransactionType("-" + trimmedAmount);
 			transactionService.create(transaction1);
-
-			// update ProductDetailSize.Quantity
-			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
-			for (OrderDetail orderDetail : orderDetails) {
-				ProductDetailSize pds = pdsDAO
-						.findByProductDetailSizeId(orderDetail.getProductDetailSize().getProductDetailSizeId());
-				int kho = pds.getQuantity();
-				pds.setQuantity(kho - orderDetail.getQuantity());
-				pdsDAO.save(pds);
-			}
-
-			// URL chuyển hướng khi thành công
-			return new RedirectView("http://localhost:3000/checkout-product?status=success&orderId="+order.getOrderId());
-
+			
+			return new RedirectView("http://localhost:3002/checkout-product?status=success");
+//			return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/checkout-product?status=success");
 		} else {
-			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
-			for (OrderDetail orderDetail : orderDetails) {
-				ProductDetailSize productDetailSize = orderDetail.getProductDetailSize();
-				productDetailSize.setQuantity(productDetailSize.getQuantity()+orderDetail.getQuantity());
-				productDetailSizeDAO.save(productDetailSize);
-				// delete orderDetail
-				orderDetailService.delete(orderDetail);
-			}
-			orderService.delete(order);
-
 			// URL chuyển hướng khi có lỗi
-			return new RedirectView("http://localhost:3000/checkout-product");
+			return new RedirectView("http://localhost:3002/checkout-product?status=fail");
+//			return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/checkout-product?status=fail");
 		}
 
 	}
@@ -255,95 +222,65 @@ public class PaymentController {
 
 	// @PostMapping("/create-momo-payment")
 	@PostMapping("/create-momo-payment")
-	public ResponseEntity<?> createMoMoPayment(@RequestParam("orderId") long orderId,
-			@RequestBody List<Map<String, Integer>> data) throws UnsupportedEncodingException{
-		Order order = orderService.findByOrderId((int)orderId);
-		long amountBeforeDecimal =(long) Math.floor(order.getAmount());
+	public ResponseEntity<?> createMoMoPayment(@RequestBody Map<String, Object> data) throws UnsupportedEncodingException{
+		int amountBeforeDecimal = (Integer) data.get("amount");
 		String amount =String.valueOf(amountBeforeDecimal);
-		// create OrderDetail
-		for (Map<String, Integer> item : data) {
-			Integer productDetailSizeId = (Integer) item.get("productDetailSizeId");
-			ProductDetailSize pds = pdsDAO.findByProductDetailSizeId(productDetailSizeId);
-
-			Integer quantity = (Integer) item.get("quantity");
-
-			OrderDetail orderDetail = new OrderDetail();
-			orderDetail.setOrder(order);
-			orderDetail.setProductDetailSize(pds);
-			orderDetail.setQuantity(quantity);
-
-			orderDetailService.create(orderDetail);
-		}
-		return paymentService.createMoMoPayment(amount,orderId,null,"http://localhost:8083/rest/payment/momo");
+		
+		return paymentService.createMoMoPayment(amount,0,(String) data.get("username"),"http://localhost:8083/rest/payment/momo");
+//		return paymentService.createMoMoPayment(amount,0,(String) data.get("username"),"http://fpl-mapogo1.qast.io.vn:8083/rest/payment/momo");
 	}
 
 	// @GetMapping("/momo")
 	@GetMapping("/momo")
 	public RedirectView transaction_MoMo(@RequestParam(value = "resultCode") String resultCode,
-			@RequestParam(value = "extraData") String orderId) {
+			@RequestParam(value = "extraData") String username,
+			@RequestParam(value = "amount") String amount) {
 
 		OrderPayment orderPayment = new OrderPayment();
-		Order order = orderService.findByOrderId(Integer.parseInt(orderId));
-		order.setStatus("Chờ xác nhận");
-		orderService.update(order);
+		
 
-		User user = order.getUser();
+		User user = userService.findByUsername(username);
 
 		if (resultCode.equals("0")) {
 			// update +Balance
 			Wallet wallet = walletService.findByUsername(user);
-//			wallet.setBalance(new BigDecimal(order.getAmount()));
-//			walletService.update(wallet);
+
 
 			// create transaction
 			Transaction transaction = new Transaction();
 			transaction.setWallet(wallet);
-			transaction.setAmount(new BigDecimal(order.getAmount()));
+			transaction.setAmount(new BigDecimal(amount));
 			transaction.setCreatedAt(LocalDateTime.now());
-			transaction.setDescription("Nạp từ hóa đơn: " + orderId + " (MoMo)");
-			transaction.setTransactionType("+" + order.getAmount());
+			transaction.setDescription("Nạp từ hóa đơn thanh toán bằng:  (MoMo)");
+			transaction.setTransactionType("+" + amount);
 			transactionService.create(transaction);
 
 			// create orderPayment
-			orderPayment.setAmount(order.getAmount());
-			orderPayment.setOrder(order);
-			orderPayment.setStatus("Đã thanh toán");
-			orderPayment.setDate(LocalDateTime.now());
-			orderPayment.setUser(user);
-			orderPayment.setReferenceCode("MoMo");
-			orderPaymentSevice.create(orderPayment);
+//			orderPayment.setAmount(order.getAmount());
+//			orderPayment.setOrder(order);
+//			orderPayment.setStatus("Đã thanh toán");
+//			orderPayment.setDate(LocalDateTime.now());
+//			orderPayment.setUser(user);
+//			orderPayment.setReferenceCode("MoMo");
+//			orderPaymentSevice.create(orderPayment);
 
 			// -balance -> create transaction
 			Transaction transaction1 = new Transaction();
 			transaction1.setWallet(wallet);
-			transaction1.setAmount(new BigDecimal(order.getAmount()));
+			transaction1.setAmount(new BigDecimal(amount));
 			transaction1.setCreatedAt(LocalDateTime.now());
-			transaction1.setDescription("Thanh toán hóa đơn: " + orderId);
-			transaction1.setTransactionType("-" + order.getAmount());
+			transaction1.setDescription("Thanh toán hóa đơn: ");
+			transaction1.setTransactionType("-" + amount);
 			transactionService.create(transaction1);
 
-			// update ProductDetailSize.Quantity
-			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
-			for (OrderDetail orderDetail : orderDetails) {
-				ProductDetailSize pds = pdsDAO
-						.findByProductDetailSizeId(orderDetail.getProductDetailSize().getProductDetailSizeId());
-				int kho = pds.getQuantity();
-				pds.setQuantity(kho - orderDetail.getQuantity());
-				pdsDAO.save(pds);
-			}
 
 			// URL chuyển hướng khi thành công?status=
-			return new RedirectView("http://localhost:3000/checkout-product?status=success&orderId="+order.getOrderId());
+			return new RedirectView("http://localhost:3002/checkout-product?status=success");
+//			return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/checkout-product?status=success");
 		} else {
-			List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
-			for (OrderDetail orderDetail : orderDetails) {
-				// delete orderDetail
-				orderDetailService.delete(orderDetail);
-			}
-			orderService.delete(order);
-
 			// URL chuyển hướng khi có lỗi
-			return new RedirectView("http://localhost:3000/checkout-product/fail");
+			return new RedirectView("http://localhost:3002/checkout-product/fail");
+//			return new RedirectView("http://fpl-mapogo1.qast.io.vn:3002/checkout-product/fail");
 		}
 	}
 

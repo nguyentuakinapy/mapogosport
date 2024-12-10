@@ -29,12 +29,12 @@
   ],
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev:qa": "env-cmd -f .env.qa next dev",
+    "dev": "next dev -p 3002",
+    "dev:qa": "env-cmd -f .env.qa next dev -p 3002",
     "build": "next build",
     "build:qa": "env-cmd -f .env.qa next build",
-    "start": "next start",
-    "start:qa": "env-cmd -f .env.qa next start",
+    "start": "next start -p 3002",
+    "start:qa": "env-cmd -f .env.qa next start -p 3002",
     "lint": "next lint"
   },
   "dependencies": {
@@ -74,6 +74,7 @@
     "sharp": "0.33.5",
     "socket.io-client": "4.8.1",
     "sockjs-client": "1.6.1",
+    "sweetalert2": "^11.14.5",
     "swr": "2.2.5",
     "use-immer": "0.10.0"
   },

@@ -245,8 +245,8 @@ const Header = (props: HeaderProps) => {
                             style={{ maxHeight: '100px' }}
                             navbarScroll
                         >
-                            <Link href="" className={`head-hv-nav text-decoration-none ${path.includes("policy") && `active-link`}`}><i className="bi bi-filter-square-fill me-2"></i>Chính sách</Link>
-                            <Link href="" className={`head-hv-nav text-decoration-none ${path.includes("blog") && `active-link`}`}><i className="bi bi-book-fill me-2"></i>Bài viết</Link>
+                            {/* <Link href="" className={`head-hv-nav text-decoration-none ${path.includes("policy") && `active-link`}`}><i className="bi bi-filter-square-fill me-2"></i>Chính sách</Link>
+                            <Link href="" className={`head-hv-nav text-decoration-none ${path.includes("blog") && `active-link`}`}><i className="bi bi-book-fill me-2"></i>Bài viết</Link> */}
                             <Link href="/categories/products" className={`head-hv-nav text-decoration-none ${path.includes("categories/products") && `active-link`}`}><i className="bi bi-tools me-2"></i>Sản phẩm</Link>
                             <Link href="/categories/sport_field" className={`head-hv-nav text-decoration-none ${path.includes("categories/sport_field") && `active-link`}`}><i className="bi bi-trophy-fill me-2"></i>Sân thể thao</Link>
 

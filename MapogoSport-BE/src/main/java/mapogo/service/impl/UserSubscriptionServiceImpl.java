@@ -86,7 +86,7 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 
 				vnp_Params.put("vnp_Locale", "vn");
 				vnp_Params.put("vnp_ReturnUrl", "http://localhost:8083/rest/user/subscription/paymentInfo/update");
-			
+//				vnp_Params.put("vnp_ReturnUrl", "http://fpl-mapogo1.qast.io.vn:8083/rest/user/subscription/paymentInfo/update");
 			}else {
 				vnp_Params.put("vnp_OrderInfo",
 						data.get("accountPackageId").toString() + "_" + data.get("userSubscriptionId").toString()
@@ -96,7 +96,7 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 
 				vnp_Params.put("vnp_Locale", "vn");
 				vnp_Params.put("vnp_ReturnUrl", "http://localhost:8083/rest/user/subscription/paymentInfo/extend");
-			
+//				vnp_Params.put("vnp_ReturnUrl", "http://fpl-mapogo1.qast.io.vn:8083/rest/user/subscription/paymentInfo/extend");
 			}
 			vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
@@ -150,11 +150,15 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 				String info = data.get("accountPackageId") + "_" + data.get("userSubscriptionId");
 				response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
 						info, "http://localhost:8083/rest/user/subscription/paymentInfo-momo/update");
+//				response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
+//						info, "http://fpl-mapogo1.qast.io.vn:8083/rest/user/subscription/paymentInfo-momo/update");
 			} else {
 				String info = data.get("accountPackageId") + "_" + data.get("userSubscriptionId")+"_"+
 						data.get("futureDate");
 				 response= paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
 						info, "http://localhost:8083/rest/user/subscription/paymentInfo-momo/extend");
+//				 response= paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
+//							info, "http://fpl-mapogo1.qast.io.vn:8083/rest/user/subscription/paymentInfo-momo/extend");
 			}
 			
 			ObjectMapper objectMapper = new ObjectMapper();
@@ -215,6 +219,7 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 
 			vnp_Params.put("vnp_Locale", "vn");
 			vnp_Params.put("vnp_ReturnUrl", "http://localhost:8083/rest/subscription/paymentInfo-Vnpay");
+//			vnp_Params.put("vnp_ReturnUrl", "http://fpl-mapogo1.qast.io.vn:8083/rest/subscription/paymentInfo-Vnpay");
 			vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
 			Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
@@ -268,6 +273,8 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 
 			ResponseEntity<String> response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
 					info, "http://localhost:8083/rest/subscription/paymentInfo-momo");
+//			ResponseEntity<String> response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
+//					info, "http://fpl-mapogo1.qast.io.vn:8083/rest/subscription/paymentInfo-momo");
 			ObjectMapper objectMapper = new ObjectMapper();
 			MoMoPaymentResponse momoResponse;
 			try {
@@ -315,6 +322,7 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 
 			vnp_Params.put("vnp_Locale", "vn");
 			vnp_Params.put("vnp_ReturnUrl", "http://localhost:8083/rest/wallet/createpaymentrecharge/infoVnpay");
+//			vnp_Params.put("vnp_ReturnUrl", "http://fpl-mapogo1.qast.io.vn:8083/rest/wallet/createpaymentrecharge/infoVnpay");
 			vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
 			Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
@@ -366,6 +374,8 @@ public class UserSubscriptionServiceImpl implements UserSubscriptionService {
 
 			ResponseEntity<String> response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
 					info, "http://localhost:8083/rest/wallet/createpaymentrecharge/infoMomo");
+//			ResponseEntity<String> response = paymentService.createMoMoPayment(String.valueOf(amountBeforeDecimal), 0,
+//					info, "http://fpl-mapogo1.qast.io.vn:8083/rest/wallet/createpaymentrecharge/infoMomo");
 			ObjectMapper objectMapper = new ObjectMapper();
 			MoMoPaymentResponse momoResponse;
 			try {

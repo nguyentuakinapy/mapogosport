@@ -27,11 +27,12 @@ const AdminOrder = () => {
     const [itemsPerPage] = useState(8);
 
     const orderStatuses = [
-        'Chờ xác nhận',
-        'Đang vận chuyển',
-        'Đã hủy',
-        'Đã hoàn thành'
+        // { value: 'Chờ xác nhận', label: 'Xác nhận' },
+        { value: 'Đang vận chuyển', label: 'Vận chuyển' },
+        { value: 'Đã hủy', label: 'Hủy' },
+        { value: 'Đã hoàn thành', label: 'Hoàn thành' }
     ];
+
 
     const { data, error, isLoading } = useSWR(`${BASE_URL}rest/admin/order/findAll`, fetcher, {
         revalidateIfStale: false,
@@ -84,8 +85,8 @@ const AdminOrder = () => {
                 <Dropdown.Toggle disabled={order.status == 'Đã hủy'} variant={getStatusVariant(order.status)}>{order.status}</Dropdown.Toggle>
                 <Dropdown.Menu>
                     {orderStatuses.map((status) => (
-                        <Dropdown.Item key={status} eventKey={status}>
-                            {status}
+                        <Dropdown.Item key={status.value} eventKey={status.value}>
+                            {status.label}
                         </Dropdown.Item>
                     ))}
                 </Dropdown.Menu>

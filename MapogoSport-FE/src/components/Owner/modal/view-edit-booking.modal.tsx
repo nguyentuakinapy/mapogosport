@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row, FloatingLabel, InputGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
 import NotificationModal from "./notification.modal";
+import { useRouter } from "next/navigation";
 
 interface OwnerProps {
     showViewOrEditBookingModal: boolean;
@@ -18,6 +19,7 @@ const BookingModal = (props: OwnerProps) => {
     const { showViewOrEditBookingModal, setShowViewOrEditBookingModal, sport, bookingBySubscriptionKey
         , bookingDetailData } = props;
 
+    const router = useRouter();
     const [editBooking, setEditBooking] = useState<boolean>(true);
     const [dateBooking, setDateBooking] = useState<string>();
     const [dateBookingTemporary, setDateBookingTemporary] = useState<string>();
@@ -1503,6 +1505,13 @@ const BookingModal = (props: OwnerProps) => {
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => handleClose()}>
                         Đóng
+                    </Button>
+                    <Button
+                        style={{ backgroundColor: '#142239' }} onClick={() => {
+                            router.push(`/owner/booking-bill/detail/${bookingDetailData?.bookingId}`),
+                                handleClose()
+                        }}>
+                        Xem hóa đơn
                     </Button>
                 </Modal.Footer>
             </Modal >

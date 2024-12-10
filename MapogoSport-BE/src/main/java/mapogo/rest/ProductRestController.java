@@ -37,9 +37,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.StringUtils;
 
 import mapogo.dao.ProductDAO;
+import mapogo.dao.ProductDetailDAO;
 import mapogo.dao.ProductDetailSizeDAO;
 import mapogo.entity.CategoryProduct;
 import mapogo.entity.Product;
+import mapogo.entity.ProductDetail;
+import mapogo.entity.ProductDetailSize;
 import mapogo.service.CategoryProductService;
 import mapogo.service.ProductDetailService;
 import mapogo.service.ProductService;
@@ -65,6 +68,8 @@ public class ProductRestController {
 	ProductDetailSizeDAO productDetailSizeDAO;
 	@Autowired
 	ProductDAO productDAO;
+	@Autowired
+	ProductDetailDAO productDetailDAO;
 
 	@GetMapping()
 	public List<Product> findAll() {
@@ -272,7 +277,27 @@ public class ProductRestController {
 	        }
 
 	        Product product = productOptional.get();
+	        
+	        List<ProductDetail> productDetails = product.getProductDetails();
+
+	        // Kiểm tra nếu không có ProductDetail
+	        if (productDetails.isEmpty()) {
+	            System.err.println("Sản phẩm không có chi tiết sản phẩm.");
+	            throw new RuntimeException("Sản phẩm không có chi tiết sản phẩm.");
+	        }
+
+	        // Duyệt qua từng ProductDetail và cập nhật số lượng của ProductDetailSize
+	        productDetails.forEach(productDetail -> {
+	            List<ProductDetailSize> productDetailSizes = productDetail.getProductDetailSizes();
+	            productDetailSizes.forEach(size -> {
+	                size.setQuantity(0); // Cập nhật số lượng thành 0
+	            });
+	        });
+	        
+	        product.setStock(0);
 	        product.setStatus("Hết hàng"); // Cập nhật trạng thái thành "Hết hàng"
+	        
+	        
 
 	        Product updatedProduct = productService.update(product);
 	        System.err.println("Cập nhật trạng thái sản phẩm thành công: " + updatedProduct);
@@ -284,6 +309,10 @@ public class ProductRestController {
 	    }
 	}
 
+//	   @GetMapping("/jjj/{productId}")
+//	    public List<ProductDetail> getProductDetails(@PathVariable Integer productId) {
+//	        return productDetailDAO.findByProduct_ProductId(productId);
+//	    }
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteProduct(@PathVariable Integer id) {

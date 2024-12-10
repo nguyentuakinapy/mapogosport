@@ -51,6 +51,7 @@ const AdminProduct = () => {
     const handleDeleteProduct = async (id: number) => {
         if (typeof window !== 'undefined') {
             if (window.confirm('Bạn có chắc muốn xóa loại sản phẩm này?')) {
+               try {
                 await fetch(`${BASE_URL}rest/category_product/delete/${id}`, {
                     method: 'DELETE',
                     headers: {
@@ -65,6 +66,11 @@ const AdminProduct = () => {
                     toast.success('Sản phẩm đã được xóa thành công');
                     mutateProduct();
                 });
+               } catch (error) {
+                console.error("Error deleting category product: ", error)
+                toast.error("Không được xóa loại sản phẩm này")
+               }
+                
             }
         }
     };
@@ -72,20 +78,26 @@ const AdminProduct = () => {
     const handleDeleteField = async (id: number) => {
         if (typeof window !== 'undefined') {
             if (window.confirm('Bạn có chắc muốn xóa loại sân này?')) {
-                await fetch(`${BASE_URL}rest/category_field/delete/category_field/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Accept': 'application/json, text/plain, */*',
-                        'Content-Type': 'application/json',
-                    }
-                }).then((res) => {
-                    if (!res.ok) {
-                        toast.error('Xóa loại sân thất bại!');
-                        return;
-                    }
-                    toast.success('Loại sân đã được xóa thành công');
-                    mutateField();
-                })
+                try {
+                    await fetch(`${BASE_URL}rest/category_field/delete/category_field/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json',
+                        }
+                    }).then((res) => {
+                        if (!res.ok) {
+                            toast.error('Xóa loại sân thất bại!');
+                            return;
+                        }
+                        toast.success('Loại sân đã được xóa thành công');
+                        mutateField();
+                    })
+                } catch (error) {
+                    console.log("Error deleting field: ", error)
+                    toast.error("Không được phép xóa loại sân.")
+                }
+                
             }
         }
     };

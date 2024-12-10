@@ -25,7 +25,8 @@ const OrderDetail = ({ params }: { params: { id: number } }) => {
                 fullname: data.fullname,
                 phoneNumber: data.phoneNumber,
                 address: data.address,
-                status: data.status
+                status: data.status,
+                note: data.note
             });
         }
     }, [data]);
@@ -89,6 +90,17 @@ const OrderDetail = ({ params }: { params: { id: number } }) => {
                     </Col>
                 </Row>
             </div>
+            {orderInfo?.status === 'Đã hủy' && (
+                <>
+                    <b className='text-danger' style={{ fontSize: '20px' }}>Lý do hủy</b>
+                    <div className='p-3' style={{ fontSize: '15px' }}>
+                        <Row className='item-address'>
+                            <b>{orderInfo.note}</b>
+                        </Row>
+                    </div>
+                </>
+            )}
+
         </>
     )
 }

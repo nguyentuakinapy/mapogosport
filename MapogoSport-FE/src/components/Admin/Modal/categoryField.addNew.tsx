@@ -43,19 +43,30 @@ const CategoryFieldAddNew = (props: CategoryFieldProps) => {
         formData.append("category", JSON.stringify({ name: fieldName }));
         if (fieldImage instanceof File) {
             formData.append("fileImage", fieldImage);
+        } else {
+            // If productImage is a string (URL), fetch the image and convert it to a File
+            const response = await fetch(fieldImage);
+            const blob = await response.blob();
+            formData.append("fileImage", new File([blob], "/images/logo.png", { type: blob.type }));
         }
-        await fetch(`${BASE_URL}rest/category_field/create/category_field`, {
-            method: 'POST',
-            body: formData,
-        }).then((res) => {
-            if (!res.ok) {
-                toast.error("Thêm loại sân thất bại!");
-                return;
-            }
-            toast.success("Thêm loại sân thành công!");
-            mutate(`${BASE_URL}rest/category_field`);
-            handleClose();
-        });
+        try {
+            await fetch(`${BASE_URL}rest/category_field/create/category_field`, {
+                method: 'POST',
+                body: formData,
+            }).then((res) => {
+                if (!res.ok) {
+                    toast.error("Thêm loại sân thất bại!");
+                    return;
+                }
+                toast.success("Thêm loại sân thành công!");
+                mutate(`${BASE_URL}rest/category_field`);
+                handleClose();
+            });
+        } catch (error) {
+            console.error("Error create category field: ",error)
+            toast.error("Không thể thêm loại sân")
+        }
+
     };
 
     const handleUpdate = async () => {
@@ -68,18 +79,24 @@ const CategoryFieldAddNew = (props: CategoryFieldProps) => {
         if (fieldImage instanceof File || fieldImage !== currentCategory?.image) {
             formData.append("fileImage", fieldImage);
         }
-        await fetch(`${BASE_URL}rest/category_field/update/category_field/${currentCategory?.categoriesFieldId}`, {
-            method: 'PUT',
-            body: formData,
-        }).then((res) => {
-            if (!res.ok) {
-                toast.error("Cập nhật loại sân thất bại!");
-                return;
-            }
-            toast.success("Cập nhật loại sân thành công!");
-            mutate(`${BASE_URL}rest/category_field`);
-            handleClose();
-        });
+        try {
+            await fetch(`${BASE_URL}rest/category_field/update/category_field/${currentCategory?.categoriesFieldId}`, {
+                method: 'PUT',
+                body: formData,
+            }).then((res) => {
+                if (!res.ok) {
+                    toast.error("Cập nhật loại sân thất bại!");
+                    return;
+                }
+                toast.success("Cập nhật loại sân thành công!");
+                mutate(`${BASE_URL}rest/category_field`);
+                handleClose();
+            });
+        } catch (error) {
+            console.error("Error update category field: ",error)
+            toast.error("Không thể cập nhật loại sân")
+        }
+        
     };
 
     return (
