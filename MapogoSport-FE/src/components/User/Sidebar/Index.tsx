@@ -17,8 +17,8 @@ const menuGroups = [
                 children: [
                     { label: "Thông tin tài khoản", route: "/user" },
                     { label: "Địa chỉ", route: "/user/address" },
-                    { label: "Đơn hàng của bạn", route: "/user/orders" },
-                    { label: "Danh sách đặt sân", route: "/user/bookings" },
+                    { label: "Hóa đơn sản phẩm", route: "/user/orders" },
+                    { label: "Hóa đơn đặt sân", route: "/user/bookings" },
                 ],
             },
             {

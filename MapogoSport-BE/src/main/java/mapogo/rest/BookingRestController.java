@@ -86,7 +86,7 @@ public class BookingRestController {
 	}
 
 	@GetMapping("/user/booking/detail/{bookingId}")
-	public List<Map<String, Object>> getById(@PathVariable("bookingId") Integer bookingId) {
+	public Map<String, Object> getById(@PathVariable("bookingId") Integer bookingId) {
 		return bookingDetailService.findBookingDetailByBookingId(bookingId);
 	}
 

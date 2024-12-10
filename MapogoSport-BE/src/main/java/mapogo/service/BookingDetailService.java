@@ -8,7 +8,7 @@ import mapogo.entity.BookingDetail;
 
 public interface BookingDetailService {
 
-	List<Map<String, Object>> findBookingDetailByBookingId(Integer bookingId);
+	Map<String, Object> findBookingDetailByBookingId(Integer bookingId);
 	BookingDetail updateStatusBookingDetail(Map<String, Object> bookingDetailData);
 
 //	List<BookingDetail> findBySportFieldDetailAndToday(Integer sportDetailId);

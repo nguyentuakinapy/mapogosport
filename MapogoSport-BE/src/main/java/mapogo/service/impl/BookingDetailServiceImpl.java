@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -54,35 +55,45 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 	private SimpMessagingTemplate messagingTemplate;
 
 	@Override
-	public List<Map<String, Object>> findBookingDetailByBookingId(Integer bookingId) {
-		List<BookingDetail> bookingDetails = bookingDetailDAO.findByBooking_BookingId(bookingId);
-		List<Map<String, Object>> resultMaps = new ArrayList<>();
-
-		for (BookingDetail bookingDetail : bookingDetails) {
-			Map<String, Object> bookingDetailData = new HashMap<>();
-
-			bookingDetailData.put("bookingDetailId", bookingDetail.getBookingDetailId());
-			bookingDetailData.put("date", bookingDetail.getDate());
-			bookingDetailData.put("sportFieldDetailName", bookingDetail.getSportFieldDetail().getName());
-			bookingDetailData.put("startTime", bookingDetail.getStartTime());
-			bookingDetailData.put("endTime", bookingDetail.getEndTime());
-			bookingDetailData.put("price", bookingDetail.getPrice());
-			bookingDetailData.put("status", bookingDetail.getStatus());
-			bookingDetailData.put("address", bookingDetail.getSportFieldDetail().getSportField().getAddress());
-			bookingDetailData.put("ownerFullname",
-					bookingDetail.getSportFieldDetail().getSportField().getOwner().getUser().getFullname());
-			for (PhoneNumberUser user : bookingDetail.getSportFieldDetail().getSportField().getOwner().getUser()
-					.getPhoneNumberUsers()) {
-				if (user.getActive()) {
-					bookingDetailData.put("ownerPhoneNumberUsers", user.getPhoneNumber().getPhoneNumber());
-				}
-			}
-			bookingDetailData.put("deposit", bookingDetail.getBooking().getPercentDeposit());
-			bookingDetailData.put("statusBooking", bookingDetail.getBooking().getStatus());
-
-			resultMaps.add(bookingDetailData);
+	public Map<String, Object> findBookingDetailByBookingId(Integer bookingId) {
+	    Booking booking = bookingDAO.findByBookingId(bookingId);
+	    Map<String, Object> resultMap = new HashMap<>();
+	    
+        Map<String, Object> bookingInfo = new HashMap<>();
+        bookingInfo.put("bookingId", booking.getBookingId());
+        bookingInfo.put("sportFieldName", booking.getBookingDetails().get(0).getSportFieldDetail()
+        		.getSportField().getName());
+        if (!booking.getUser().getFullname().equals("Offline")) {
+        	bookingInfo.put("userFullname", booking.getUser().getFullname());
+		} else {
+			bookingInfo.put("userFullname", booking.getFullName());
 		}
-		return resultMaps;
+        bookingInfo.put("userPhoneNumber", booking.getPhoneNumber());
+        bookingInfo.put("date", booking.getDate());
+        bookingInfo.put("statusBooking", booking.getStatus());
+        bookingInfo.put("ownerFullname", booking.getOwner().getUser().getFullname());
+        bookingInfo.put("ownerPhoneNumber", booking.getOwner().getUser().getPhoneNumberUsers().stream()
+        		.filter(PhoneNumberUser::getActive).map(phone -> phone.getPhoneNumber().getPhoneNumber()));
+        bookingInfo.put("address", booking.getBookingDetails().get(0).getSportFieldDetail().getSportField()
+        		.getAddress());
+        bookingInfo.put("deposit", booking.getPercentDeposit());
+        resultMap.put("booking", bookingInfo);
+
+        List<Map<String, Object>> bookingDetailsList = new ArrayList<>();
+        for (BookingDetail bookingDetail: booking.getBookingDetails()) {
+        	Map<String, Object> bookingDetails = new HashMap<>();
+        	bookingDetails.put("bookingDetailId", bookingDetail.getBookingDetailId());
+    	    bookingDetails.put("date", bookingDetail.getDate());
+    	    bookingDetails.put("sportFieldDetailName", bookingDetail.getSportFieldDetail().getName());
+    	    bookingDetails.put("startTime", bookingDetail.getStartTime());
+    	    bookingDetails.put("endTime", bookingDetail.getEndTime());
+    	    bookingDetails.put("price", bookingDetail.getPrice());
+    	    bookingDetails.put("status", bookingDetail.getStatus());
+    	    bookingDetailsList.add(bookingDetails);
+        }
+        
+        resultMap.put("bookingDetails", bookingDetailsList);
+	    return resultMap;
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import 'react-datepicker/dist/react-datepicker.css';
 import { useData } from "@/app/context/UserContext";
 import { createTimeStringH } from "../Utils/booking-time";
+import Link from "next/link";
 
 interface BookingProps {
     showBookingModal: boolean;
@@ -866,6 +867,14 @@ const BookingModal = (props: BookingProps) => {
                         <Form.Control type="text" value={userData?.fullname} readOnly />
                     </FloatingLabel>
                 </InputGroup>
+                <InputGroup className="mb-2">
+                    <FloatingLabel controlId="floatingUsername" label="Số điện thoại" className="flex-grow-1">
+                        <Form.Control type="text" value={userData?.phoneNumberUsers?.find(p => p.active)?.phoneNumber?.phoneNumber || "Vui lòng thêm số điện thoại"} readOnly />
+                    </FloatingLabel>
+                    <InputGroup.Text>
+                        <Link href={"/user"} className="text-danger text-decoration-none fw-bold">Thêm số</Link>
+                    </InputGroup.Text>
+                </InputGroup>
                 <FloatingLabel className="mb-2" controlId="floatingPaymentMethod" label={<span>Phương thức thanh toán <span className="text-danger">*</span></span>}>
                     <Form.Select value={paymentMethodId} onChange={(e) => setPaymentMethodId(Number(e.target.value))}>
                         <option value="0">Chọn phương thức thanh toán</option>
@@ -1060,11 +1069,11 @@ const BookingModal = (props: BookingProps) => {
                     </Button>
                     {activeTab === 'byDay' ?
                         <Button style={{ backgroundColor: "#142239" }}
-                            disabled={selectTime !== 'Chọn thời gian' && paymentMethodId !== 0 ? false : true}
+                            disabled={selectTime === 'Chọn thời gian' || paymentMethodId === 0 || !userData?.phoneNumberUsers?.find(p => p.active)?.phoneNumber?.phoneNumber}
                             onClick={() => handleSave()}>Xác nhận</Button>
                         :
                         <Button style={{ backgroundColor: "#142239" }}
-                            disabled={Object.keys(sportFieldDuplicate).length === 0 && selectedWeek.length !== 0 ? false : true}
+                            disabled={Object.keys(sportFieldDuplicate).length === 0 || selectedWeek.length !== 0 || !userData?.phoneNumberUsers?.find(p => p.active)?.phoneNumber?.phoneNumber}
                             onClick={() => handleSaveByPeriod()}>Xác nhận</Button>
                     }
                 </Modal.Footer>

@@ -7,11 +7,11 @@ interface CancelBookingDetail {
     showCancelBooking: boolean;
     setShowCancelBooking: (v: boolean) => void;
     aBookingDetail: BookingDetailMap | null;
-    bookingId?: number;
+    booking?: BookingMap;
 }
 
 const CancelBookingDetailModal = (props: CancelBookingDetail) => {
-    const { showCancelBooking, setShowCancelBooking, aBookingDetail, bookingId } = props;
+    const { showCancelBooking, setShowCancelBooking, aBookingDetail, booking } = props;
     const [reason, setReason] = useState<string>("");
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -33,14 +33,14 @@ const CancelBookingDetailModal = (props: CancelBookingDetail) => {
 
         if (reason === "Hủy bởi yêu cầu của khách hàng") {
             if (diffMinutes >= 120) {
-                if (aBookingDetail.statusBooking === "Chờ thanh toán") {
-                    refundAmount = aBookingDetail.price * (aBookingDetail.deposit / 100);
+                if (booking?.statusBooking === "Chờ thanh toán") {
+                    refundAmount = aBookingDetail.price * (booking.deposit / 100);
                 } else {
                     refundAmount = aBookingDetail.price;
                 }
             } else if (diffMinutes > 0) {
-                if (aBookingDetail.statusBooking === "Chờ thanh toán") {
-                    refundAmount = aBookingDetail.price * (aBookingDetail.deposit / 100) * 0.75;
+                if (booking?.statusBooking === "Chờ thanh toán") {
+                    refundAmount = aBookingDetail.price * (booking.deposit / 100) * 0.75;
                 } else {
                     refundAmount = aBookingDetail.price * 0.75;
                 }
@@ -48,8 +48,8 @@ const CancelBookingDetailModal = (props: CancelBookingDetail) => {
                 refundAmount = 0;
             }
         } else {
-            if (aBookingDetail.statusBooking === "Chờ thanh toán") {
-                refundAmount = aBookingDetail.price * (aBookingDetail.deposit / 100);
+            if (booking?.statusBooking === "Chờ thanh toán") {
+                refundAmount = aBookingDetail.price * (booking.deposit / 100);
             } else {
                 refundAmount = aBookingDetail.price;
             }
@@ -67,8 +67,8 @@ const CancelBookingDetailModal = (props: CancelBookingDetail) => {
                 toast.error(`Cập nhật không thành công! Vui lòng thử lại sau!`);
                 return;
             }
-            mutate(`${BASE_URL}rest/user/booking/detail/${bookingId}`);
-            mutate(`${BASE_URL}rest/user/booking/${bookingId}`);
+            mutate(`${BASE_URL}rest/user/booking/detail/${booking?.bookingId}`);
+            mutate(`${BASE_URL}rest/user/booking/${booking?.bookingId}`);
             toast.success('Cập nhật thành công!');
             handleClose();
         });
