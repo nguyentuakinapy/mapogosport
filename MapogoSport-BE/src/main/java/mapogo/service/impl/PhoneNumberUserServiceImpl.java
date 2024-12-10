@@ -57,8 +57,17 @@ public class PhoneNumberUserServiceImpl implements PhoneNumberUserService{
 		for(PhoneNumberUser phoneNumberUser: newPhoneNumber ) {
 			phoneNumberUser.setUser(user);
 			phoneNumberUser.setActive(!userHasPhoneNumbers);
-			PhoneNumber phoneNumber = phoneNumberDAO.save(phoneNumberUser.getPhoneNumber());
-			phoneNumberUser.setPhoneNumber(phoneNumber);
+			String phoneNumber = phoneNumberUser.getPhoneNumber().getPhoneNumber();
+			PhoneNumber existedNumber = phoneNumberDAO.findByPhoneNumber(phoneNumber);
+			if (existedNumber != null) {
+				phoneNumberUser.setPhoneNumber(existedNumber);
+			} else {
+				PhoneNumber newPhone = new PhoneNumber();
+				newPhone.setPhoneNumber(phoneNumber);
+				phoneNumberDAO.save(newPhone);
+				phoneNumberUser.setPhoneNumber(newPhone);
+			}
+			
 			savePhoneNumberUser.add(phoneNumberUserDAO.save(phoneNumberUser));
 			userHasPhoneNumbers = true;
 		}
