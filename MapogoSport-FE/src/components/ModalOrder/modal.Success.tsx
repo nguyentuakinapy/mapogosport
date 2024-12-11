@@ -11,11 +11,11 @@ const ModalOrderSuccess = (props: OrderProps) => {
 
     function handleClose() {
         setShowOrderSuccessModal(false);
-        window.location.href = "http://localhost:3000";
+        window.location.href = "/";
     }
     function handleChange() {
         setShowOrderSuccessModal(false);
-        window.location.href = `http://localhost:3000/user/orders/detail/${orderId}`;
+        window.location.href = `/user/orders/detail/${orderId}`;
     }
 
     return (

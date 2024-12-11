@@ -130,7 +130,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                     <tbody>
                         {bookingDetail.map((booking) => {
                             const isDropdownDisabled = !bookingStatuses.some(status => canChangeStatus(booking.date, booking.startTime,
-                                booking.status, status, bookingInfo?.statusBooking!));
+                                booking.status, status, bookingInfo!.statusBooking!));
                             return (
                                 <tr key={booking?.bookingDetailId}>
                                     <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
@@ -140,7 +140,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                     <td>
                                         <Dropdown onSelect={(newStatus) => {
                                             if (canChangeStatus(booking.date, booking.startTime, booking.status,
-                                                newStatus || booking.status, bookingInfo?.statusBooking!)) {
+                                                newStatus || booking.status, bookingInfo!.statusBooking!)) {
                                                 handleStatusChange(booking.bookingDetailId, newStatus || booking.status);
                                             }
                                         }}>
@@ -149,7 +149,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                             </Dropdown.Toggle>
                                             <Dropdown.Menu>
                                                 {bookingStatuses.filter((status) => canChangeStatus(booking.date, booking.startTime,
-                                                    booking.status, status, bookingInfo?.statusBooking!))
+                                                    booking.status, status, bookingInfo!.statusBooking!))
                                                     .map((status) => (
                                                         <Dropdown.Item key={status} eventKey={status}>{status}</Dropdown.Item>
                                                     ))}

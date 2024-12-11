@@ -62,7 +62,7 @@ const Cart = () => {
   // Cập nhật hàm tăng số lượng
   const increaseQuantity = (index: number) => {
     const newQuantities = [...quantities]; // Tạo bản sao của mảng quantities
-    newQuantities[index] += 1; // Tăng số lượng sản phẩm tại vị trí index
+    newQuantities[index] = newQuantities[index] >= 10 ? 10 : newQuantities[index] + 1; // Giảm số lượng nhưng lớn hơn 10
     setQuantities(newQuantities); // Cập nhật lại state quantities
     updateQuantityOnServer(index, newQuantities[index]); // Cập nhật số lượng trên server
 
@@ -316,9 +316,9 @@ const Cart = () => {
                                 <td>
                                   <div className="d-flex justify-content-center">
                                     <ButtonGroup>
-                                      <Button variant="outline-secondary" onClick={() => decreaseQuantity(index)}>-</Button>
+                                      <Button variant="outline-secondary" disabled={quantities[index] === 1} onClick={() => decreaseQuantity(index)}>-</Button>
                                       <Form.Control type="text" value={quantities[index]} readOnly className="text-center" style={{ maxWidth: '50px' }} />
-                                      <Button variant="outline-secondary" onClick={() => increaseQuantity(index)}>+</Button>
+                                      <Button variant="outline-secondary" disabled={quantities[index] === 10} onClick={() => increaseQuantity(index)}>+</Button>
                                     </ButtonGroup>
                                   </div>
                                 </td>

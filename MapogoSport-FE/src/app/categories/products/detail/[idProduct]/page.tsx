@@ -27,11 +27,17 @@ const ProductDetail = () => {
 
     const [selectedSizeQuantity, setSelectedSizeQuantity] = useState<number>(0);
     const increaseQuantity = () => {
+        if (quantity >= 10) {
+            toast.info("Số lượng vượt quá giới hạn.");
+            return;
+        }
         if (quantity < selectedSizeQuantity) {
             setQuantity(quantity + 1);
         } else {
             toast.info("Số lượng vượt quá giới hạn.");
         }
+
+
     };
 
     const loadMoreReviews = () => {
@@ -110,6 +116,7 @@ const ProductDetail = () => {
                     const errorMessage = await response.text();
                     throw new Error(`Có lỗi xảy ra khi thêm giỏ hàng: ${errorMessage}`);
                 }
+                
 
                 toast.success("Thêm sản phẩm vào giỏ hàng thành công!");
 
