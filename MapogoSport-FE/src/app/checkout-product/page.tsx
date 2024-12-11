@@ -160,7 +160,7 @@ const CheckoutPage = () => {
     }
   }, [addressSelected, apiAddress]);
 
-  const orderStatus= 'Chờ xác nhận';
+  const orderStatus = 'Chờ xác nhận';
   const [paymentMethod, setPaymentMethod] = useState('COD');
 
 

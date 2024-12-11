@@ -161,7 +161,7 @@ const ModalReviewProductField = (props: ReviewProps) => {
                 <div className="mb-3 mt-3 ms-5 me-5">
                     <textarea
                         className="form-control"
-                        placeholder="Xin mời chia sẻ một số cảm nhận về sản phẩm (nhập tối thiểu 15 ký tự)"
+                        placeholder="Xin mời chia sẻ một số cảm nhận về sản phẩm !"
                         rows={4}
                         cols={40}
                         style={{ borderRadius: '8px' }}

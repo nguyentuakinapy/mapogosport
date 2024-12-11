@@ -11,7 +11,7 @@ import { useData } from "@/app/context/UserContext";
 import { removeVietnameseTones } from './Utils/Format';
 import { toast } from "react-toastify";
 import InputChat from "./InputChat/InputChat";
-import { cloneDeep, isString} from "lodash";
+import { cloneDeep, isString } from "lodash";
 import { useImmer } from "use-immer";
 import Image from "next/image";
 
@@ -26,38 +26,38 @@ export default function ChatBox() {
     email: string;
     avatar: string | null;
     authorities: Authorities[];
-}
+  }
   interface Message {
     messageId: number;
-    sender: User |string;
-    receiver: User|string ;
+    sender: User | string;
+    receiver: User | string;
     content: string;
     createdAt: Date;
     isDelete: boolean;
     user?: User;
-    tempReceiver?:string
-    tempSender?:string
-    topic?:string
-    isAdd?:boolean
-    isOwner?:boolean
+    tempReceiver?: string
+    tempSender?: string
+    topic?: string
+    isAdd?: boolean
+    isOwner?: boolean
   }
 
   interface Message2 {
     messageId: number;
-    sender: User ;
-    receiver: User ;
+    sender: User;
+    receiver: User;
     content: string;
     createdAt: Date;
     isDelete: boolean;
     user?: User;
-    tempReceiver?:string
-    tempSender?:string
-    topic?:string
-    isAdd?:boolean
-    isOwner?:boolean
+    tempReceiver?: string
+    tempSender?: string
+    topic?: string
+    isAdd?: boolean
+    isOwner?: boolean
   }
 
- 
+
 
   interface GroupedMessage {
     messageId?: number;
@@ -67,27 +67,27 @@ export default function ChatBox() {
     createdAt?: Date;
     isDelete?: boolean;
     user?: User;
-    tempReceiver?:string
-    tempSender?:string
-    topic?:string
-    isAdd?:boolean
-    isOwner?:boolean
+    tempReceiver?: string
+    tempSender?: string
+    topic?: string
+    isAdd?: boolean
+    isOwner?: boolean
   }
 
   interface GroupedMessage2 {
     user?: User;
     content: string;
     createdAt: Date;
-    tempReceiver?:string
-    tempSender?:string
-    topic?:string
-    isAdd?:boolean
-    isOwner?:boolean
+    tempReceiver?: string
+    tempSender?: string
+    topic?: string
+    isAdd?: boolean
+    isOwner?: boolean
   }
 
 
 
-  
+
 
   const [showChat, setShowChat] = useState(false); // quản lý việc hiển thị chat form
   const [showChatList, setShowChatList] = useState(false); // quản lý việc hiển thị chat form
@@ -103,7 +103,7 @@ export default function ChatBox() {
   // const [chatListCurrentUserByDMM, setChatListCurrentUserByDMM] = useState< Message[]>([]);
 
   // const  [chatListCurrentUserByDMM, setChatListCurrentUserByDMM] = useImmer< Message[]>([])
-  const  [chatListCurrentUserByDMM, setChatListCurrentUserByDMM] = useImmer< GroupedMessage[]>([])
+  const [chatListCurrentUserByDMM, setChatListCurrentUserByDMM] = useImmer<GroupedMessage[]>([])
 
   const [subscribedTopics, setSubscribedTopics] = useState<string[]>([]);
   // const [subscribedTopics, setSubscribedTopics] = useImmer([]);
@@ -361,12 +361,12 @@ export default function ChatBox() {
       }
     }
 
-    console.log("_content ++++++>>>>>>>> ",_content);
-    console.log("contentStr ++++++>>>>>>>> ",contentStr);
-    console.log("isString(_content) ++++++>>>>>>>> ",isString(_content));
+    console.log("_content ++++++>>>>>>>> ", _content);
+    console.log("contentStr ++++++>>>>>>>> ", contentStr);
+    console.log("isString(_content) ++++++>>>>>>>> ", isString(_content));
 
-    if ( contentStr.trim() !== "" && stompClient.current && stompClient.current.connected) {
-       const newMessage = {
+    if (contentStr.trim() !== "" && stompClient.current && stompClient.current.connected) {
+      const newMessage = {
         messageId: 0,
         sender: currentUser?.username ?? "NOOOOO", // Tên người gửi
         receiver: receiver, // Tên người nhận
@@ -374,7 +374,7 @@ export default function ChatBox() {
         createdAt: new Date(),
         isDelete: false,
       };
-      
+
       console.log("Đang gửi tin nhắn");
       console.log("newMessage ", JSON.stringify(newMessage));
 
@@ -405,17 +405,17 @@ export default function ChatBox() {
 
     setSelectedChat(chat);
 
-  
+
     if (messageListRef.current) {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
     }
-  
+
     console.log("Đã vào với: ", chat?.username || "Không có tên");
     console.log("chatListCurrentUserByDMM: ", chatListCurrentUserByDMM);
-  
+
     // setReceiver(chat?.username);
     // console.log("Người nhận là ", chat?.username);
-  
+
     // setSelectedChat(chat);
 
 
@@ -428,7 +428,7 @@ export default function ChatBox() {
 
       const tempArr = cloneDeep(draft)
 
-      const foundMessageInState = draft.find((message)=>message?.user?.username === "myntd") 
+      const foundMessageInState = draft.find((message) => message?.user?.username === "myntd")
 
       if (!foundMessageInState) {
         tempArr.push({
@@ -440,30 +440,30 @@ export default function ChatBox() {
       }
 
       const isChatExists = tempArr.some(
-            (item) => item?.user?.username === chat.username
-          );
-    console.log("isChatExists: ", isChatExists);
+        (item) => item?.user?.username === chat.username
+      );
+      console.log("isChatExists: ", isChatExists);
 
-          if (!isChatExists) {
-            tempArr.push({
-            user: chat,
-            content: "Chat để được hỗ trợ",
-            createdAt: new Date(),
-            isAdd: true,
-            isOwner: true,
-          }
-          )
-            
-          }
-    console.log("tempArrtempArrtempArrtempArr: ", tempArr);
+      if (!isChatExists) {
+        tempArr.push({
+          user: chat,
+          content: "Chat để được hỗ trợ",
+          createdAt: new Date(),
+          isAdd: true,
+          isOwner: true,
+        }
+        )
 
-          return  tempArr
+      }
+      console.log("tempArrtempArrtempArrtempArr: ", tempArr);
+
+      return tempArr
 
     });
 
     setReceiver(chat?.username);
     console.log("Người nhận là ", chat?.username);
-  
+
     if (chatListCurrentUserByDMM.length === 0 && adminDefault) {
       setShowChat(true);
     } else if (chatListCurrentUserByDMM.length === 0) {
@@ -533,7 +533,7 @@ export default function ChatBox() {
       }
 
     }
-    
+
   };
 
   //////
@@ -544,7 +544,7 @@ export default function ChatBox() {
   };
 
   // Sử dụng useSWR để fetch messages
-  const { data, isLoading, error, mutate } = useSWR <Message2[]>(
+  const { data, isLoading, error, mutate } = useSWR<Message2[]>(
     currentUser && receiver
       ? `${BASE_URL}api/messages/${currentUser.username}/${receiver}`
       : null,
@@ -572,7 +572,7 @@ export default function ChatBox() {
     if (dataByReceiverUsernameOrCurrentUser) {
       // Nhóm các tin nhắn theo người gửi hoặc người nhận
       const groupedMessages = dataByReceiverUsernameOrCurrentUser.reduce(
-        (acc:  { [username: string]: GroupedMessage2 }, message: Message2) => {
+        (acc: { [username: string]: GroupedMessage2 }, message: Message2) => {
           const username =
             message.receiver.username === currentUser?.username
               ? message.sender.username
@@ -602,49 +602,49 @@ export default function ChatBox() {
       console.log('chatlissttttttttttt', chatListCurrentUserByDMM)
       console.log('groupedMessagesArray=============', groupedMessagesArray)
       console.log('dataAdmin=============', dataAdmin)
-      setChatListCurrentUserByDMM((draft)=>{
-        const tempArr =cloneDeep(draft); // tạo một biến tempArr để lấy giá trị của State gốc chatListCurrentDDM nhưng không lấy địa chỉ
-      const arrIsAdds = cloneDeep(tempArr.filter((item)=>item.isAdd)) 
-      if (groupedMessagesArray.length>0) {
-        if (arrIsAdds.length>0) {
-          for (let k = 0; k < groupedMessagesArray.length; k++) {
-            const mess = groupedMessagesArray[k] as GroupedMessage;
-            for (let i = 0; i < arrIsAdds.length; i++) {
-              const addedItem = arrIsAdds[i];
-              if (addedItem.user?.username === mess.user?.username) {
-                const foundIndex = tempArr.findIndex((message)=>message.user?.username === addedItem.user?.username && message.isAdd)
-                if (foundIndex>=0) {
-                  tempArr.splice(foundIndex,1)
-                  arrIsAdds.splice(i,1)
-                  break;
+      setChatListCurrentUserByDMM((draft) => {
+        const tempArr = cloneDeep(draft); // tạo một biến tempArr để lấy giá trị của State gốc chatListCurrentDDM nhưng không lấy địa chỉ
+        const arrIsAdds = cloneDeep(tempArr.filter((item) => item.isAdd))
+        if (groupedMessagesArray.length > 0) {
+          if (arrIsAdds.length > 0) {
+            for (let k = 0; k < groupedMessagesArray.length; k++) {
+              const mess = groupedMessagesArray[k] as GroupedMessage;
+              for (let i = 0; i < arrIsAdds.length; i++) {
+                const addedItem = arrIsAdds[i];
+                if (addedItem.user?.username === mess.user?.username) {
+                  const foundIndex = tempArr.findIndex((message) => message.user?.username === addedItem.user?.username && message.isAdd)
+                  if (foundIndex >= 0) {
+                    tempArr.splice(foundIndex, 1)
+                    arrIsAdds.splice(i, 1)
+                    break;
+                  }
                 }
               }
             }
+            groupedMessagesArray = [...arrIsAdds, ...groupedMessagesArray]
           }
-          groupedMessagesArray = [...arrIsAdds,...groupedMessagesArray]
+        } else {
+          if (tempArr.length > 0) {
+            groupedMessagesArray = cloneDeep(tempArr)
+          } else {
+            groupedMessagesArray = [
+              {
+                user: dataAdmin,
+                content: "Chat với admin nhé bạn ơi!",
+                createdAt: new Date().toISOString(),
+                isAdd: true,
+              }
+            ]
+          }
         }
-      }else{
-        if (tempArr.length>0) {
-          groupedMessagesArray = cloneDeep(tempArr)
-        }else{
-          groupedMessagesArray = [
-            {
-              user: dataAdmin,
-              content: "Chat với admin nhé bạn ơi!",
-              createdAt: new Date().toISOString(),
-              isAdd: true,
-            }
-          ]
-        }
-      }
-      
+
         return groupedMessagesArray
       });
       // mới thêm 19/11
 
       console.log('ownerCurrent=======', ownerCurrent);
       console.log('groupedMessagesArray=======', groupedMessagesArray);
-    
+
 
       console.log("Danh sách chat real-time đã nhóm: ", groupedMessagesArray);
       console.log(
@@ -653,7 +653,7 @@ export default function ChatBox() {
       );
     }
   }, [dataByReceiverUsernameOrCurrentUser]);
-  
+
   const formatTime = (createdAt: Date | string) => {
     const date = createdAt instanceof Date ? createdAt : new Date(createdAt);
     if (isNaN(date.getTime())) return "Invalid Date";
@@ -667,14 +667,14 @@ export default function ChatBox() {
       month: "2-digit",
       day: "2-digit",
     };
-  
+
     const time = date.toLocaleTimeString("vi-VN", timeOptions); // Lấy giờ và phút
     const day = date.toLocaleDateString("vi-VN", dateOptions); // Lấy ngày, tháng, năm
-  
+
     return `${time} - ${day}`; // Ghép giờ và ngày bằng dấu "-"
   };
-  
-  
+
+
   useEffect(() => {
     if (data) {
       const tempData = data.map((item) => {
@@ -710,13 +710,13 @@ export default function ChatBox() {
       toast.warning("Vui lòng đăng nhập để sử dụng chat");
     } else {
       setShowChatList(!showChatList); //nếu true thì thực hiện mở form chat
-      if(currentUser?.username !== dataAdmin?.username){
-        if(showChatList === false){
-          if(dataAdmin){
+      if (currentUser?.username !== dataAdmin?.username) {
+        if (showChatList === false) {
+          if (dataAdmin) {
             handleSelectChat(dataAdmin);
           }
-        }else{
-          setShowChatList(!showChatList); 
+        } else {
+          setShowChatList(!showChatList);
         }
       }
       mutate(); // 
@@ -736,15 +736,15 @@ export default function ChatBox() {
 
   const filteredChatList = chatListCurrentUserByDMM.filter((chatGroup) => {
     if (!chatGroup?.user?.username) {
-      return false; 
+      return false;
     }
-    console.log('chat group =>>>>> ',chatGroup)
+    console.log('chat group =>>>>> ', chatGroup)
     const username = chatGroup.user.username;
     return removeVietnameseTones(username.toLowerCase()).includes(
       removeVietnameseTones(searchKeyword.toLowerCase())
     );
   });
-  
+
   // console.log("receiver====>", receiver);
   // console.log("current topic====>", currentTopic);
 
@@ -753,7 +753,7 @@ export default function ChatBox() {
   };
 
   // console.log('filteredChatList=======', filteredChatList);
-  
+
 
   if (isLoading) return <p>Loading messages...</p>;
   if (error) return <p>Error loading messages.</p>;
@@ -838,7 +838,7 @@ export default function ChatBox() {
 
                         >
                           <div className="d-flex align-items-center ">
-                          {/* <div className={`d-flex align-items-center  ${isActive ? 'active-link' : ''}`}> */}
+                            {/* <div className={`d-flex align-items-center  ${isActive ? 'active-link' : ''}`}> */}
                             <img
                               src={
                                 chatUser?.avatar
@@ -860,17 +860,17 @@ export default function ChatBox() {
 
                             <strong>
                               {index + 1} -{" "}
-                              {chatUser?.username ==='myntd'? 'Admin Mapogo' 
-                              : chatUser?.username ? chatUser?.fullname 
-                              : "Không có tên"}
+                              {chatUser?.username === 'myntd' ? 'Admin Mapogo'
+                                : chatUser?.username ? chatUser?.fullname
+                                  : "Không có tên"}
                             </strong>
                           </div>
                           <div className=" mt-1 row">
                             <p className=" col text-start title-content-preview">
-                              {dataMessageTemporary === null ? chatGroup.content 
-                                : chatUser.username === dataMessageTemporary.username ? 
-                                dataMessageTemporary.content 
-                                : chatGroup.content}
+                              {dataMessageTemporary === null ? chatGroup.content
+                                : chatUser.username === dataMessageTemporary.username ?
+                                  dataMessageTemporary.content
+                                  : chatGroup.content}
                               {/* {chatGroup.content || "Không có nội dung"} */}
                             </p>
                             {/* <p className="col text-end"> {formatTime(chatGroup.createdAt)}</p> */}
@@ -902,10 +902,10 @@ export default function ChatBox() {
                 <Image width={30} height={17} src="/images/logo.png" alt="Chat Logo" className="me-2" />
                 <h6 className="mb-0 title">
                   {/* {selectedChat?.fullname} */}
-                  {selectedChat?.username ==='myntd'? 'Admin Mapogo' 
-                   : selectedChat?.username ? selectedChat?.fullname 
-                   : "Không có tên"}
-                  </h6>
+                  {selectedChat?.username === 'myntd' ? 'Admin Mapogo'
+                    : selectedChat?.username ? selectedChat?.fullname
+                      : "Không có tên"}
+                </h6>
                 <div className="ms-auto">
                   <Button
                     variant="link"
@@ -950,66 +950,65 @@ export default function ChatBox() {
                     className="card-body overflow-auto"
                     style={{ height: "200px" }}
                   >
-                 {chatListRealTime
-                .filter((itemMessage) => {
-                  const senderUsername =
-                    typeof itemMessage.sender === "string"
-                      ? itemMessage.sender
-                      : itemMessage.sender?.username;
+                    {chatListRealTime
+                      .filter((itemMessage) => {
+                        const senderUsername =
+                          typeof itemMessage.sender === "string"
+                            ? itemMessage.sender
+                            : itemMessage.sender?.username;
 
-                  const receiverUsername =
-                    typeof itemMessage.receiver === "string"
-                      ? itemMessage.receiver
-                      : itemMessage.receiver?.username;
+                        const receiverUsername =
+                          typeof itemMessage.receiver === "string"
+                            ? itemMessage.receiver
+                            : itemMessage.receiver?.username;
 
-                  return (
-                    (receiverUsername ||
-                      (itemMessage.tempReceiver === currentUser?.username && senderUsername) ||
-                      itemMessage.tempSender === receiver || receiverUsername ||
-                      (itemMessage.tempReceiver === receiver && senderUsername) ||
-                      itemMessage.tempSender === currentUser?.username) &&
-                    currentTopic === itemMessage.topic
-                  );
-                })
-                .map((msg, index) => {
-                  const senderUsername =
-                    typeof msg.sender === "string"
-                      ? msg.sender
-                      : msg.sender?.username;
+                        return (
+                          (receiverUsername ||
+                            (itemMessage.tempReceiver === currentUser?.username && senderUsername) ||
+                            itemMessage.tempSender === receiver || receiverUsername ||
+                            (itemMessage.tempReceiver === receiver && senderUsername) ||
+                            itemMessage.tempSender === currentUser?.username) &&
+                          currentTopic === itemMessage.topic
+                        );
+                      })
+                      .map((msg, index) => {
+                        const senderUsername =
+                          typeof msg.sender === "string"
+                            ? msg.sender
+                            : msg.sender?.username;
 
-                  return (
-                    <div
-                      key={msg.messageId || index}
-                      className={`d-flex ${
-                        senderUsername === currentUser?.username ? "justify-content-end" : "justify-content-start"
-                      }`}
-                    >
-                      <div
-                        className={`p-2 rounded mb-2`}
-                        style={{
-                          maxWidth: "80%",
-                          backgroundColor:
-                            senderUsername === currentUser?.username ? "#66c7ff" : "#f0f0f0",
-                          color: "black",
-                        }}
-                      >
-                        {msg.content}
-                        <em
-                          className="mt-2"
-                          style={{
-                            display: "block",
-                            fontSize: "0.8em",
-                            color: "black",
-                          }}
-                        >
-                          {msg.createdAt
-                            ? formatTime(msg.createdAt)
-                            : "Không có thời gian"}
-                        </em>
-                      </div>
-                    </div>
-                  );
-                })}
+                        return (
+                          <div
+                            key={msg.messageId || index}
+                            className={`d-flex ${senderUsername === currentUser?.username ? "justify-content-end" : "justify-content-start"
+                              }`}
+                          >
+                            <div
+                              className={`p-2 rounded mb-2`}
+                              style={{
+                                maxWidth: "80%",
+                                backgroundColor:
+                                  senderUsername === currentUser?.username ? "#66c7ff" : "#f0f0f0",
+                                color: "black",
+                              }}
+                            >
+                              {msg.content}
+                              <em
+                                className="mt-2"
+                                style={{
+                                  display: "block",
+                                  fontSize: "0.8em",
+                                  color: "black",
+                                }}
+                              >
+                                {msg.createdAt
+                                  ? formatTime(msg.createdAt)
+                                  : "Không có thời gian"}
+                              </em>
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
                   {/* Phần nhập liệu và nút gửi */}
                   <div className="card-footer d-flex align-items-center p-2 bg-transparent">

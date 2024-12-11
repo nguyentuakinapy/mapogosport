@@ -168,40 +168,38 @@ export default function Home() {
     }
   };
 
-  // Handel received  voucher
-  const handelReceivedVoucher = async () => {
-    const usernameLocal = localStorage.getItem("username")
-    const username = usernameLocal ? decodeString(usernameLocal) : null;
-    try {
-      const response = await fetch(`${BASE_URL}rest/user/voucher/${username}`)
-      const data = await response.json();
-      console.log("Voucher user received: ", data)
-      setReceivedVoucher(data)
+  // const handelReceivedVoucher = async (userData: User) => {
+  //   try {
+  //     const response = await fetch(`${BASE_URL}rest/user/voucher/${userData.username}`)
+  //     const data = await response.json();
+  //     console.log("Voucher user received: ", data)
+  //     setReceivedVoucher(data)
 
-    } catch (error) {
-      console.error("Error handelReceived Voucher", error);
-    }
-  }
+  //   } catch (error) {
+  //     console.error("Error handelReceived Voucher", error);
+  //   }
+  // }
 
   const hasReceivedVoucher = (voucherId: number) => {
-    return receivedVoucher.some(v=> v.voucher.voucherId===voucherId);
-}
+    return receivedVoucher.some(v => v.voucher.voucherId === voucherId);
+  }
 
 
   //Handel select voucher khi active
   const filterVouchers = (vouchers: Voucher[]) => {
     const currentTime = new Date().getTime();
-    const statusactive = 'active'
+    const statusActive = 'active'
     return vouchers.filter(voucher => {
       const activeTime = new Date(voucher.activeDate).getTime();
       const endTime = new Date(voucher.endDate).getTime();
-      return (currentTime >= activeTime && currentTime <= endTime) && (voucher.status === statusactive);
+      return (currentTime >= activeTime && currentTime <= endTime) && (voucher.status === statusActive);
     });
   };
+
+
   let filteredVouchers: Voucher[] = [];
   if (voucher) {
     filteredVouchers = filterVouchers(voucher);
-    handelReceivedVoucher()
   }
 
 
@@ -402,7 +400,7 @@ export default function Home() {
                   <div className="get col-2 text-center ">
                     <button type="button" className="btn btn-dark text-center "
                       onClick={() => handelSubmitGetVoucher(voucher.voucherId)}
-                      disabled={voucher.quantity === 0||hasReceivedVoucher(voucher.voucherId)}
+                      disabled={voucher.quantity === 0 || hasReceivedVoucher(voucher.voucherId)}
                     >{hasReceivedVoucher(voucher.voucherId) ? "Đã nhận" : "Nhận"}</button>
                   </div>
                 </div>
