@@ -145,7 +145,7 @@ public class OrderServiceImpl implements OrderService {
 		order.setUser(user);
 		order.setAddress(orderDTO.getAddress());
 		order.setPhoneNumber(orderDTO.getPhoneNumber());
-		order.setDate(orderDTO.getDate());
+		order.setDate(LocalDateTime.now());
 		order.setStatus(orderDTO.getStatus());
 		order.setAmount(orderDTO.getAmount());
 		PaymentMethod payment = paymentService.findByName(orderDTO.getPaymentMethod());

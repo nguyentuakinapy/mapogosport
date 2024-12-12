@@ -62,6 +62,7 @@ const AdminOrder = () => {
     };
 
     const handleStatusChange = (orderId: number, newStatus: string) => {
+
         fetch(`${BASE_URL}rest/admin/order/update`, {
             method: 'PUT',
             headers: {
@@ -117,7 +118,17 @@ const AdminOrder = () => {
                                         <Link href={`/admin/order/${order.orderId}`}>#{order.orderId}</Link>
                                     </td>
                                     <td className="text-start title">{order.fullname}</td>
-                                    <td>{new Date(order.date).toLocaleDateString('en-GB')}</td>
+                                    <td>{new Date(order.date).toLocaleString('en-GB', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                        hour12: false,
+                                        timeZone: 'Asia/Ho_Chi_Minh'  // Múi giờ Việt Nam
+                                    })}</td>
+
                                     <td>{`${order.amount.toLocaleString()} ₫`}</td>
                                     <td className="title-brand">{order.address}</td>
                                     <td>{renderStatusDropdown(order)}</td>

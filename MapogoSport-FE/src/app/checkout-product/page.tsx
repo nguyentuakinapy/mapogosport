@@ -68,7 +68,7 @@ const CheckoutPage = () => {
   const [voucherSelected, setVoucherSelected] = useState<UserVoucher | null>(null);
   const [discount, setDiscount] = useState(0);
   const [newTotalPrice, setNewTotalPrice] = useState(0);
-
+  const [shippingFee, setShippingFee] = useState(0);
 
   useEffect(() => {
     if (userData) {
@@ -237,6 +237,58 @@ const CheckoutPage = () => {
     return phoneRegex.test(phoneNumberSelected);
   }
 
+  const calculateShippingFee = async () => {
+    try {
+      const response = await axios.post(
+        'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee',
+        {
+          "service_type_id": 5,
+          "from_district_id": 761,
+          "from_ward_code": "26776",
+          "to_district_id": 439,
+          "to_ward_code": "18133",
+          "height": 20,
+          "length": 30,
+          "weight": 3000,
+          "width": 40,
+          "insurance_value": 0,
+          "coupon": null,
+          "items": [
+            {
+              "name": "Product Name",
+              "quantity": 1,
+              "height": 10,
+              "weight": 200,
+              "length": 20,
+              "width": 15
+            }
+          ]
+        }
+        ,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Token': '7144a73c-b8a6-11ef-9834-7e8875c3faf5', // Thay bằng token thực tế
+            'ShopId': 5519624, // Thay bằng ShopId thực tế
+          },
+        }
+      );
+      console.log('Shipping Fee:', response.data.data.total);
+      setShippingFee(response.data.data.total);
+    } catch (error) {
+      console.error('Error fetching shipping fee:', error);
+      toast.error('Không thể tính phí giao hàng. Vui lòng kiểm tra lại thông tin!');
+    }
+  };
+
+
+  // Tự động tính phí khi địa chỉ thay đổi
+  useEffect(() => {
+    if (selectedDistrict && selectedWard) {
+      calculateShippingFee();
+    }
+  }, [selectedDistrict, selectedWard]);
+
   const setDataOrder = () => {
     const addressParts = [addressDetail, selectedWard, selectedDistrict, selectedProvince];
     const address1 = addressParts.filter(part => part).join(', ');
@@ -246,12 +298,12 @@ const CheckoutPage = () => {
       username: user1?.username,
       address: address1,
       phoneNumber: phoneNumber,
-      date: new Date().toISOString(), // Chuyển đổi sang ISO string
+      // date: new Date().toISOString(), // Chuyển đổi sang ISO string
       status: orderStatus,
       amount: newTotalPrice,
       paymentMethod: paymentMethod,
       voucherId: voucherSelected?.voucher.voucherId ?? '',
-      shipFee: 0.0, // Hoặc giá trị phí vận chuyển
+      shipFee: shippingFee, // Hoặc giá trị phí vận chuyển
     };
 
     const listCartCheckout = cartData.map(item => ({
@@ -447,6 +499,7 @@ const CheckoutPage = () => {
           }
         }
       } else {
+        setLoading(false)
         toast.warn("Số dư của bạn không đủ để thanh toán vui lòng chọn phương thức thanh toán khác hoặc nạp thêm tiền vào ví!");
       }
 
@@ -687,7 +740,7 @@ const CheckoutPage = () => {
                   </div>
                   <div className="d-flex justify-content-between my-3 fw-light">
                     <span>Phí vận chuyển </span>
-                    <span className="fw-light">{formatPrice(0)}</span>
+                    <span className="fw-light">{formatPrice(shippingFee)}</span>
                   </div>
                   <hr />
                   <div className="order-total d-flex justify-content-between">

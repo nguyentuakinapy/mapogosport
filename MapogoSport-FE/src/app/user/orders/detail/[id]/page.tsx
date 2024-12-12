@@ -13,7 +13,9 @@ type OrderInfo = {
     fullname: string,
     phoneNumber: string,
     address: string,
-    status: string
+    status: string,
+    note: string,
+    paymentMethodName: string
 }
 
 const OrdersDetail = ({ params }: { params: { id: number } }) => {
@@ -37,7 +39,9 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                 fullname: data.fullname,
                 phoneNumber: data.phoneNumber,
                 address: data.address,
-                status: data.status
+                status: data.status,
+                note: data.note,
+                paymentMethodName: data.paymentMethodName
             });
         }
     }, [data]);
@@ -120,9 +124,21 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                     </Col>
                     <Col xs={12} md={7}>
                         <p><i className="bi bi-geo-alt-fill"></i> <b>Địa chỉ: </b>{orderInfo?.address || "Chưa cập nhật địa chỉ"}</p>
+                        <p><i className="bi bi-currency-dollar"></i> <b>Phương thức thanh toán: </b>{orderInfo?.paymentMethodName || "Chưa cập nhật địa chỉ"}</p>
                     </Col>
+
                 </Row>
             </div>
+            {orderInfo?.status === 'Đã hủy' && (
+                <>
+                    <b className='text-danger' style={{ fontSize: '20px' }}>Lý do hủy</b>
+                    <div className='p-3' style={{ fontSize: '15px' }}>
+                        <Row className='item-address'>
+                            <b>{orderInfo.note}</b>
+                        </Row>
+                    </div>
+                </>
+            )}
             {orderInfo?.status === 'Đã hoàn thành' || orderInfo?.status === "Đã hủy" ? (
                 <div className="btn-layout"><Link href={"/categories/products"} className="btn btn-buyAgain">Tiếp tục mua hàng</Link></div>
             ) : <div className="btn-layout"><Button className="btn-cancel" disabled={orderInfo?.status === "Đang vận chuyển"}
