@@ -16,7 +16,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const { showSportFieldModal, setShowSportFieldModal, selectedSportField, username } = props;
-    const [fieldName, setFieldName] = useState("");
+    const [fieldName, setFieldName] = useState<string>("");
     const [openTime, setOpenTime] = useState<string | null>(null);
     const [closeTime, setCloseTime] = useState<string | null>(null);
     const [selectedFieldType, setSelectedFieldType] = useState<number>(0);
@@ -37,6 +37,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [selectedWard, setSelectedWard] = useState<string>('');
     const [addressDetail, setAddressDetail] = useState<string>('');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (!selectedSportField) {
@@ -51,6 +52,13 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             setCloseHour(0);
             setCloseMinute(0);
             setOpenMinute(0);
+
+            setSelectedProvince("");
+            setSelectedDistrict("");
+            setSelectedWard("");
+            setAddressDetail("");
+            setAvatar("/images/logo.png");
+            setLoading(false);
         } else {
             setFieldName(selectedSportField.name);
             setOpenTime(selectedSportField.opening);
@@ -147,6 +155,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         setGalleryImages([]);
         setOpenHour(0);
         setCloseHour(0);
+        setLoading(false);
         setShowSportFieldModal(false);
 
     };
@@ -179,103 +188,133 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         }
     }, [closeHour, closeMinute]);
 
+
+
+
+    const checkForm = () => {
+        setLoading(true);
+        console.log(fieldName);
+
+        const errors = [];
+
+        if (!fieldName) {
+            errors.push("Vui lòng nhập tên sân.");
+        }
+        if (!openTime) {
+            errors.push("Vui lòng nhập giờ mở cửa.");
+        }
+        if (!closeTime) {
+            errors.push("Vui lòng nhập giờ đóng cửa.");
+        }
+        if (!selectedFieldType) {
+            errors.push("Vui lòng chọn loại sân.");
+        }
+        if (!getAddress()) {
+            errors.push("Vui lòng nhập địa chỉ.");
+        }
+        // if (!description) {
+        //     errors.push("Vui lòng nhập mô tả.");
+        // }
+
+        if (errors.length > 0) {
+            errors.forEach(error => toast.error(error));
+            setLoading(false);
+            return false;
+        }
+
+        return true;
+    };
+
     const handleUpdate = () => {
-        if (!fieldName || !openTime || !closeTime || !selectedFieldType || !address || !description) {
-            toast.error("Vui lòng điền đầy đủ thông tin!");
-            return;
-        }
+        if (checkForm()) {
 
-        const sportFieldData = {
-            sportFieldId: selectedSportField?.sportFieldId,
-            name: fieldName,
-            opening: `${openTime}`,
-            closing: `${closeTime}`,
-            categoriesField: selectedFieldType,
-            address: getAddress(),
-            decription: description,
-            status: status,
-        };
+            const sportFieldData = {
+                sportFieldId: selectedSportField?.sportFieldId,
+                name: fieldName,
+                opening: `${openTime}`,
+                closing: `${closeTime}`,
+                categoriesField: selectedFieldType,
+                address: getAddress(),
+                decription: description,
+                status: status,
+            };
 
-        // Tạo FormData để gửi dữ liệu dưới dạng multipart/form-data
-        const formData = new FormData();
-        formData.append("sportFieldData", new Blob([JSON.stringify(sportFieldData)], { type: "application/json" }));
+            // Tạo FormData để gửi dữ liệu dưới dạng multipart/form-data
+            const formData = new FormData();
+            formData.append("sportFieldData", new Blob([JSON.stringify(sportFieldData)], { type: "application/json" }));
 
-        // Chỉ thêm avatar nếu nó là file mới hoặc khác ảnh gốc
-        if (avatar instanceof File || avatar !== selectedSportField?.image) {
-            formData.append("avatar", avatar as File);
-        }
+            // Chỉ thêm avatar nếu nó là file mới hoặc khác ảnh gốc
+            if (avatar instanceof File || avatar !== selectedSportField?.image) {
+                formData.append("avatar", avatar as File);
+            }
 
-        // Thêm từng ảnh trong selectedGalleryFiles vào FormData
-        if (selectedGalleryFiles && selectedGalleryFiles.length > 0) {
-            selectedGalleryFiles.forEach(file => {
-                formData.append("galleryFiles", file); // Tên phải trùng với tên yêu cầu trong API
-            });
-        }
+            // Thêm từng ảnh trong selectedGalleryFiles vào FormData
+            if (selectedGalleryFiles && selectedGalleryFiles.length > 0) {
+                selectedGalleryFiles.forEach(file => {
+                    formData.append("galleryFiles", file); // Tên phải trùng với tên yêu cầu trong API
+                });
+            }
 
-        axios.post(`${BASE_URL}rest/sportfield/update`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        })
-            .then(response => {
-                console.log("Thông tin sân đã được lưu thay đổi:", response.data);
-                mutate(`${BASE_URL}rest/sportfields/lists/${username}`);
-                handleClose();
+            axios.post(`${BASE_URL}rest/sportfield/update`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
             })
-            .catch(error => {
-                console.error("Lỗi khi lưu thay đổi thông tin sân:", error.response ? error.response.data : error.message);
-            });
-
+                .then(response => {
+                    console.log("Thông tin sân đã được lưu thay đổi:", response.data);
+                    mutate(`${BASE_URL}rest/sportfields/lists/${username}`);
+                    handleClose();
+                })
+                .catch(error => {
+                    console.error("Lỗi khi lưu thay đổi thông tin sân:", error.response ? error.response.data : error.message);
+                });
+        }
     }
-    const [loading, setLoading] = useState(false);
 
     // Lưu thông tin sân thể thao và gửi ảnh lên server
     const handleSave = () => {
-        setLoading(true);
-        if (!fieldName || !openTime || !closeTime || !selectedFieldType || !address || !description) {
-            toast.error("Vui lòng nhập tên sân.");
-            return;
-        }
-        const sportFieldData = {
-            name: fieldName,
-            opening: `${openTime}`,
-            closing: `${closeTime}`,
-            categoriesField: selectedFieldType,
-            address: getAddress(),
-            decription: description,
-            status: status,
-            owner: username
-        };
+        if (checkForm()) {
+            const sportFieldData = {
+                name: fieldName,
+                opening: `${openTime}`,
+                closing: `${closeTime}`,
+                categoriesField: selectedFieldType,
+                address: getAddress(),
+                decription: description,
+                status: status,
+                owner: username
+            };
 
-        // Tạo FormData để gửi dữ liệu dưới dạng multipart/form-data
-        const formData = new FormData();
-        formData.append("sportFieldData", new Blob([JSON.stringify(sportFieldData)], { type: "application/json" }));
+            // Tạo FormData để gửi dữ liệu dưới dạng multipart/form-data
+            const formData = new FormData();
+            formData.append("sportFieldData", new Blob([JSON.stringify(sportFieldData)], { type: "application/json" }));
 
-        // Thêm ảnh đại diện nếu có
-        if (avatar instanceof File) {
-            formData.append("avatar", avatar);
-        }
+            // Thêm ảnh đại diện nếu có
+            if (avatar instanceof File) {
+                formData.append("avatar", avatar);
+            }
 
-        // Thêm từng ảnh trong selectedGalleryFiles vào FormData
-        if (selectedGalleryFiles && selectedGalleryFiles.length > 0) {
-            selectedGalleryFiles.forEach(file => {
-                formData.append("galleryFiles", file); // Tên phải trùng với tên yêu cầu trong API
-            });
-        }
+            // Thêm từng ảnh trong selectedGalleryFiles vào FormData
+            if (selectedGalleryFiles && selectedGalleryFiles.length > 0) {
+                selectedGalleryFiles.forEach(file => {
+                    formData.append("galleryFiles", file); // Tên phải trùng với tên yêu cầu trong API
+                });
+            }
 
-        axios.post(`${BASE_URL}rest/sportfield/create`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        })
-            .then(response => {
-                console.log("Thông tin sân đã được lưu:", response.data);
-                mutate(`${BASE_URL}rest/sportfields/lists/${username}`);
-                handleClose();
+            axios.post(`${BASE_URL}rest/sportfield/create`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
             })
-            .catch(error => {
-                console.error("Lỗi khi lưu thông tin sân:", error.response ? error.response.data : error.message);
-            });
+                .then(response => {
+                    console.log("Thông tin sân đã được lưu:", response.data);
+                    mutate(`${BASE_URL}rest/sportfields/lists/${username}`);
+                    handleClose();
+                })
+                .catch(error => {
+                    console.error("Lỗi khi lưu thông tin sân:", error.response ? error.response.data : error.message);
+                });
+        }
     };
 
     //xóa hình
@@ -313,7 +352,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             <Modal.Body>
                 <Row>
                     <Col className="col-8">
-                        <FloatingLabel controlId="floatingFieldName" label="Tên sân" className="mb-3">
+                        <FloatingLabel controlId="floatingFieldName" label={<span>Tên sân <b className="text-danger">*</b></span>} className="mb-3">
                             <Form.Control type="text" placeholder="Tên sân" value={fieldName}
                                 onChange={(e) => setFieldName(e.target.value)}
                             />
@@ -321,7 +360,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                         <Row>
                             <Col className="col-6">
                                 <label className="">
-                                    Giờ mở cửa: {openHour !== 0 && openMinute !== null ? `${openHour}h${openMinute.toString().padStart(2, '0')}` : "Chưa chọn"}
+                                    Giờ mở cửa <b className="text-danger">*</b> : {openHour !== 0 && openMinute !== null ? `${openHour}h${openMinute.toString().padStart(2, '0')}` : "Chưa chọn"}
                                 </label>
                                 <div className="d-flex">
                                     <Form.Select value={openHour ?? ''} onChange={(e) => { setOpenHour(parseInt(e.target.value, 10)); }} className="me-2">
@@ -348,8 +387,9 @@ const ModalCreateSportField = (props: SportFieldProps) => {
 
                             <Col className="col-6 mb-3">
                                 <label className="">
-                                    Giờ đóng cửa: {closeHour !== 0 && closeMinute !== null ? `${closeHour}h${closeMinute.toString().padStart(2, '0')}` : "Chưa chọn"}
-                                </label>                                <div className="d-flex">
+                                    Giờ đóng cửa <b className="text-danger">*</b> : {closeHour !== 0 && closeMinute !== null ? `${closeHour}h${closeMinute.toString().padStart(2, '0')}` : "Chưa chọn"}
+                                </label>
+                                <div className="d-flex">
                                     <Form.Select
                                         value={closeHour ?? ''}
                                         onChange={(e) => {
@@ -382,7 +422,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                         </Row>
                         <Row>
                             <Col className="col-6">
-                                <FloatingLabel controlId="floatingFieldType" label="Loại sân" className="mb-3">
+                                <FloatingLabel controlId="floatingFieldType" label={<span>Loại sân <b className="text-danger">*</b></span>} className="mb-3">
                                     <Form.Select value={selectedFieldType} onChange={(e) => setSelectedFieldType(Number(e.target.value))}>
                                         <option value="">Chọn loại sân</option>
                                         {fieldTypes && fieldTypes.length > 0 ? (
@@ -398,7 +438,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                                 </FloatingLabel>
                             </Col>
                             <Col className="col-6">
-                                <FloatingLabel controlId="floatingStatus" label="Trạng thái" className="mb-3">
+                                <FloatingLabel controlId="floatingStatus" label={<span>Trạng thái <b className="text-danger">*</b></span>} className="mb-3">
                                     <Form.Select value={status} onChange={(e) => setStatus(e.target.value)}>
                                         <option value="">Chọn trạng thái</option>
                                         <option value="Hoạt động">Hoạt động</option>
@@ -464,7 +504,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                     </Col>
                     <Col md={4}>
                         {/* Phần 1: Avatar */}
-                        <h5>Ảnh đại diện</h5>
+                        <h5>Ảnh đại diện <b className="text-danger">*</b></h5>
                         <Image src={avatar instanceof File ? URL.createObjectURL(avatar) : avatar} alt="Sport field avatar" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }} />
                         <Form.Group controlId="avatarInput" className="mt-2">
                             <Form.Label>{selectedSportField ? 'Đổi ảnh đại diện' : 'Chọn ảnh đại diện'}</Form.Label>

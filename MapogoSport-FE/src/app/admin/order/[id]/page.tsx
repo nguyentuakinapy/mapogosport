@@ -26,7 +26,8 @@ const OrderDetail = ({ params }: { params: { id: number } }) => {
                 phoneNumber: data.phoneNumber,
                 address: data.address,
                 status: data.status,
-                note: data.note
+                note: data.note,
+                paymentMethodName: data.paymentMethodName
             });
         }
     }, [data]);
@@ -87,6 +88,8 @@ const OrderDetail = ({ params }: { params: { id: number } }) => {
                     </Col>
                     <Col xs={12} md={7}>
                         <p><i className="bi bi-geo-alt-fill"></i> <b>Địa chỉ: </b>{orderInfo?.address || "Chưa cập nhật địa chỉ"}</p>
+                        <p><i className="bi bi-currency-dollar"></i> <b>Phương thức thanh toán: </b>{orderInfo?.paymentMethodName || "Chưa cập nhật địa chỉ"}</p>
+
                     </Col>
                 </Row>
             </div>

@@ -66,4 +66,5 @@ interface OrderInfo {
     fullname: string;
     status: string;
     note: string;
+    paymentMethodName: string;
 }
