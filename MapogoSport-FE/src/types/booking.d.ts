@@ -167,6 +167,7 @@ interface BookingMap {
     statusBooking: string;
     bookingId: number;
     deposit: number;
+    paymentMethodName: string;
 }
 
 interface BookingDetailPeriod {

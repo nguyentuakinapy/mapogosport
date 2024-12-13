@@ -20,7 +20,6 @@ const ModalCreateSportField = (props: SportFieldProps) => {
     const [openTime, setOpenTime] = useState<string | null>(null);
     const [closeTime, setCloseTime] = useState<string | null>(null);
     const [selectedFieldType, setSelectedFieldType] = useState<number>(0);
-    const [address, setAddress] = useState("");
     const [description, setDescription] = useState("");
     const [status, setStatus] = useState("");
     const [avatar, setAvatar] = useState<File | string>("/images/logo.png");  // Chọn avatar chính
@@ -45,7 +44,6 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             setOpenTime(null);
             setCloseTime(null);
             setSelectedFieldType(0);
-            setAddress("");
             setDescription("");
             setStatus("");
             setOpenHour(0);
@@ -70,7 +68,6 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             setCloseHour(parseInt(hourStr1, 10));
             setCloseMinute(parseInt(minuteStr1, 10));
             setSelectedFieldType(selectedSportField.categoriesField.categoriesFieldId);
-            setAddress(selectedSportField.address);
             setDescription(selectedSportField.decription);
             setStatus(selectedSportField.status);
             setAvatar(selectedSportField.image || "/images/logo.png");
@@ -147,7 +144,6 @@ const ModalCreateSportField = (props: SportFieldProps) => {
         setOpenTime(null);
         setCloseTime(null);
         setSelectedFieldType(0);
-        setAddress("");
         setDescription("");
         setStatus("");
         setAvatar("/images/logo.png");

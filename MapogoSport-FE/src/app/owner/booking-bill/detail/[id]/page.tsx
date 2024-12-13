@@ -161,25 +161,6 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                         })}
                     </tbody>
                 </Table>
-                <b className='text-danger' style={{ fontSize: '20px' }}>Thông tin sân</b>
-                <div className="mt-2">
-                    <div className="text-secondary mb-2 fw-bold">Địa chỉ</div>
-                    <b>{bookingInfo?.address}</b>
-                    <Table className="my-3">
-                        <thead>
-                            <tr>
-                                <th className="text-secondary">Tên chủ sân</th>
-                                <th className="text-secondary">Số điện thoại</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td className="title">{bookingInfo?.ownerFullname}</td>
-                                <td>{bookingInfo?.ownerPhoneNumber || "Chưa cập nhật số điện thoại"}</td>
-                            </tr>
-                        </tbody>
-                    </Table>
-                </div>
             </div>
             <CancelBookingDetailModal showCancelBooking={showCancelBooking} setShowCancelBooking={setShowCancelBooking}
                 aBookingDetail={aBookingDetail} booking={booking} />

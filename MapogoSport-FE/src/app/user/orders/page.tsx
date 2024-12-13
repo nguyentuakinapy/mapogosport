@@ -164,11 +164,10 @@ const Orders = () => {
                     </Row>
                 </div>
                 <div className="box-table-border mb-4">
-                    <Table striped className="mb-0">
+                    <Table striped className="mb-0" style={{ fontSize: '14px' }}>
                         <thead>
                             <tr>
                                 <th style={{ width: '140px' }}>Mã hóa đơn</th>
-                                <th style={{ width: '300px' }}>Tên sản phẩm</th>
                                 <th>Ngày</th>
                                 <th>Tình trạng</th>
                                 <th>Tổng</th>
@@ -182,8 +181,16 @@ const Orders = () => {
                                         <td className="ps-3 text-start">
                                             <Link href={`/user/orders/detail/${order.orderId}`}>#{order.orderId}</Link>
                                         </td>
-                                        <td className="title text-start">{order.productName}</td>
-                                        <td>{new Date(order.date).toLocaleDateString('en-GB')}</td>
+                                        <td>{new Date(order.date).toLocaleString('en-GB', {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit',
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour12: false,
+                                            timeZone: 'Asia/Ho_Chi_Minh'  // Múi giờ Việt Nam
+                                        })}</td>
                                         <td>
                                             <Badge bg={getStatusVariant(order.status)}>{order.status}</Badge>
                                         </td>

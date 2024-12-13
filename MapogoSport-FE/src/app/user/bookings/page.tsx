@@ -115,6 +115,14 @@ const Bookings = () => {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
 
+    useEffect(() => {
+        if (currentItems) {
+            currentItems.map((booking) => (
+                console.log(booking.bookingDetails)
+            ))
+        }
+    }, [currentItems]);
+
     const handleStatusChange = (bookingId: number, refundAmount: number) => {
         fetch(`${BASE_URL}rest/owner/booking/update`, {
             method: 'PUT',
@@ -181,17 +189,17 @@ const Bookings = () => {
                     </Row>
                 </div>
                 <div className="box-table-border mb-4">
-                    <Table striped className="mb-0" style={{ fontSize: '15px' }}>
+                    <Table striped className="mb-0" style={{ fontSize: '14px' }}>
                         <thead>
                             <tr>
-                                <th style={{ width: '100px' }}>Mã</th>
+                                <th style={{ width: '80px' }}>Mã</th>
                                 <th style={{ width: '220px' }}>Tên sân</th>
-                                <th style={{ width: '100px' }}>Ngày đặt</th>
-                                <th style={{ width: '130px' }}>Tổng tiền</th>
+                                <th style={{ width: '200px' }}>Ngày đặt</th>
+                                <th style={{ width: '100px' }}>Tổng tiền</th>
                                 <OverlayTrigger overlay={<Tooltip>Hoàn lại/Trả thêm</Tooltip>}>
                                     <th style={{ width: '130px' }}>Hoàn / Thêm</th>
                                 </OverlayTrigger>
-                                <th style={{ width: '120px' }}>Tình trạng</th>
+                                <th style={{ width: '100px' }}>Tình trạng</th>
                                 <th style={{ width: '100px' }}>Thao tác</th>
                             </tr>
                         </thead>
@@ -205,7 +213,17 @@ const Bookings = () => {
                                             </Link>
                                         </td>
                                         <td className="title text-start">{booking.sportFieldName}</td>
-                                        <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
+                                        {/* <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td> */}
+                                        <td>{new Date(booking.date).toLocaleString('en-GB', {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit',
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour12: false,
+                                            timeZone: 'Asia/Ho_Chi_Minh'  // Múi giờ Việt Nam
+                                        })}</td>
                                         <td>{booking.totalAmount.toLocaleString()} ₫</td>
                                         <td className={booking.status === 'Đã thanh toán' && booking.oldTotalAmount !== 0
                                             && booking.oldTotalAmount - booking.totalAmount <= 0 ? 'text-danger' : 'text-success'}>
@@ -220,7 +238,7 @@ const Bookings = () => {
                                             </Badge>
                                         </td>
                                         <td>
-                                            {booking.status != 'Đã hủy' && booking.bookingDetails.filter(item => item.bookingDetailStatus === "Chưa bắt đầu") ? (
+                                            {booking.bookingDetails.every(item => item.bookingDetailStatus !== "Đã hủy" && item.bookingDetailStatus !== "Đã hoàn thành") ? (
                                                 <Nav>
                                                     <NavDropdown id="nav-dropdown-dark-example" title="Thao tác">
                                                         <Link href={`/user/bookings/detail/${booking.bookingId}`} className="dropdown-item">
