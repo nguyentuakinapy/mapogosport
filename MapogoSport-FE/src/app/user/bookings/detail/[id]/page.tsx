@@ -61,7 +61,16 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                                 <tr>
                                     <td><b>#{bookingInfo?.bookingId}</b></td>
                                     <td className="title">{bookingInfo?.sportFieldName}</td>
-                                    <td>{bookingInfo?.date && new Date(bookingInfo.date).toLocaleDateString('en-GB')}</td>
+                                    <td>{bookingInfo?.date && new Date(bookingInfo.date).toLocaleString('en-GB', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                        hour12: false,
+                                        timeZone: 'Asia/Ho_Chi_Minh'  // Múi giờ Việt Nam
+                                    })}</td>
                                     <td>{bookingInfo?.userPhoneNumber || "Chưa cập nhật số điện thoại"}</td>
                                 </tr>
                             </tbody>
@@ -89,8 +98,14 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                             </tbody>
                         </Table>
                         <div>
-                            <div className="text-secondary mb-2 fw-bold">Địa chỉ</div>
-                            <b>{bookingInfo?.address}</b>
+                            <div className="mb-2">
+                                <div className="text-secondary me-1">Phương thức thanh toán:</div>
+                                <b>{bookingInfo?.paymentMethodName}</b>
+                            </div>
+                            <div className="mb-2">
+                                <div className="text-secondary fw-bold">Địa chỉ</div>
+                                <b>{bookingInfo?.address}</b>
+                            </div>
                             <Table className="my-3">
                                 <thead>
                                     <tr>

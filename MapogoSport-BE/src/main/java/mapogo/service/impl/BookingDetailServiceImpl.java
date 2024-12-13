@@ -77,6 +77,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
         bookingInfo.put("address", booking.getBookingDetails().get(0).getSportFieldDetail().getSportField()
         		.getAddress());
         bookingInfo.put("deposit", booking.getPercentDeposit());
+        bookingInfo.put("paymentMethodName", booking.getPaymentMethod().getDescription());
         resultMap.put("booking", bookingInfo);
 
         List<Map<String, Object>> bookingDetailsList = new ArrayList<>();

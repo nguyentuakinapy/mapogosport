@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ListGroup } from "react-bootstrap";
@@ -19,19 +19,20 @@ const SidebarDropdown = ({ item }: SidebarDropdownProps) => {
     const userData = useData();
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-    const handleClick = () => {
+    useEffect(() => {
         if (userData) {
             mutate(userData);
+            mutate(`${BASE_URL}rest/user/booking/${userData.username}`);
             mutate(`${BASE_URL}rest/user/voucher/${userData.username}`);
             mutate(`${BASE_URL}rest/wallet/transaction/${userData.wallet.walletId}`)
         }
-    }
+    }, [userData]);
 
     return (
         <ul className="ps-0">
             {item.map((child, index) => (
                 <ListGroup key={index}>
-                    <Link onClick={() => handleClick()} href={child.route} className={`text-decoration-none rounded-2 px-3 py-2 transition-all 
+                    <Link href={child.route} className={`text-decoration-none rounded-2 px-3 py-2 transition-all 
                     ${pathname === child.route ? "bg-secondary text-white" : "text-secondary"}`} >
                         {child.label}
                     </Link>

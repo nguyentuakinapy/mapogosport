@@ -416,7 +416,7 @@
         border-width: 1px 0px 1px 1px !important;
         border-style: solid;
         border-color: black;
-        width: 110px;
+        width: 150px;
     }
 
     .input-group-text {
@@ -431,7 +431,7 @@
         border-width: 1px 1px 1px 0px !important;
         border-style: solid;
         border-color: black;
-        width: 110px;
+        width: 150px;
     }
 }
 
@@ -442,6 +442,19 @@
     border-bottom: 5px solid #142239;
     padding-bottom: 1rem;
     margin-bottom: 1rem;
+
+    .btn-sd-cc {
+        background-color: #142239 !important;
+        border: 1px solid #142239 !important;
+        padding: 6px;
+        width: 140px;
+        font-size: 15px;
+
+        &:hover {
+            background-color: white !important;
+            color: black;
+        }
+    }
 
     .btn-sd-admin {
         background-color: #142239 !important;

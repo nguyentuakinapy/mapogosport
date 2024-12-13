@@ -105,7 +105,12 @@ const OwnerBookingBill = () => {
             <Dropdown onSelect={(newStatus) => handleStatusChange(booking.bookingId, newStatus || booking.status)}>
                 <Dropdown.Toggle disabled={booking.status == "Đã hủy"} variant={getStatusVariant(booking.status)}>{booking.status}</Dropdown.Toggle>
                 <Dropdown.Menu>
-                    {bookingStatuses.map((status) => (
+                    {bookingStatuses.filter((status) => {
+                        if (booking.status === "Đã thanh toán" && status === "Chờ thanh toán") {
+                            return false;
+                        }
+                        return status !== booking.status;
+                    }).map((status) => (
                         <Dropdown.Item key={status} eventKey={status}>
                             {status}
                         </Dropdown.Item>
@@ -366,7 +371,7 @@ const OwnerBookingBill = () => {
                 <div className="box-ultil">
                     <b className='text-danger' style={{ fontSize: '20px' }}>Quản Lý Hóa Đơn</b>
                     <div>
-                        <Form.Control type="text" placeholder="Tìm theo tên và SĐT..." onChange={handleSearch} />
+                        <Form.Control type="text" placeholder="Tìm theo tên và số điện thoại..." onChange={handleSearch} style={{ width: '280px' }} />
                     </div>
                     <div>
                         <InputGroup className="search-date-booking">
@@ -383,8 +388,8 @@ const OwnerBookingBill = () => {
                         </InputGroup>
                     </div>
                     <div>
-                        <Button className="btn-sd-admin" style={{ fontSize: '15px' }} onClick={exportPDF}>Xuất File PDF</Button>
-                        <Button className="btn-sd-admin ms-2" style={{ fontSize: '15px' }} onClick={exportExcel}>Xuất File Excel</Button>
+                        <Button className="btn-sd-cc" style={{ fontSize: '15px' }} onClick={exportPDF}>Xuất File PDF</Button>
+                        <Button className="btn-sd-cc ms-2" style={{ fontSize: '15px' }} onClick={exportExcel}>Xuất File Excel</Button>
                     </div>
                 </div>
                 <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
