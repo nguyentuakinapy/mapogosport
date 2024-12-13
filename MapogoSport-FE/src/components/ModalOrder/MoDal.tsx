@@ -1,5 +1,6 @@
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Table from 'react-bootstrap/Table';
 import React from 'react';
 import useSWR from 'swr';
 
@@ -32,16 +33,28 @@ const MyVerticallyCenteredModal = ({ showModal, orderId, onHide }: OrderProps) =
             <Modal.Body>
                 <h4>Thông tin chi tiết</h4>
                 {data && data.length > 0 ? (
-                    <ul>
-                        {data.map((detail, index) => (
-                            <div key={index}>
-                                <p>Sản phẩm: {detail.productDetailSize.productDetail.product.name}</p>
-                                <p>Số Lượng: {detail.quantity}</p>
-                                <p>Size: {detail.productDetailSize.size.sizeName}</p>
-                                <p>Màu: {detail.productDetailSize.productDetail.color}</p>
-                            </div>
-                        ))}
-                    </ul>
+                    <Table striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Size</th>
+                                <th>Màu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.map((detail, index) => (
+                                <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>{detail.productDetailSize.productDetail.product.name}</td>
+                                    <td>{detail.quantity}</td>
+                                    <td>{detail.productDetailSize.size.sizeName}</td>
+                                    <td>{detail.productDetailSize.productDetail.color}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
                 ) : (
                     <p>Không có chi tiết đơn hàng.</p>
                 )}

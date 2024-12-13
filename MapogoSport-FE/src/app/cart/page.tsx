@@ -68,6 +68,11 @@ const Cart = () => {
 
     // Cập nhật tổng tiền ngay lập tức
     updateTotalPrice(selectedProducts, newQuantities);
+    if (newQuantities[index] >= 10) {
+      toast.warning("Sản phẩm đạt số lượng tối đa !")
+      return;
+    }
+
   };
 
   // Cập nhật hàm giảm số lượng
@@ -79,6 +84,10 @@ const Cart = () => {
 
     // Cập nhật tổng tiền ngay lập tức
     updateTotalPrice(selectedProducts, newQuantities);
+    if (newQuantities[index] <= 1) {
+      toast.warning("Sản phẩm đạt số lượng tối thiểu !")
+      return;
+    }
   };
 
   // Hàm cập nhật tổng tiền
