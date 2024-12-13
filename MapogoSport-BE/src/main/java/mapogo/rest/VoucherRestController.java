@@ -51,6 +51,7 @@ public class VoucherRestController {
 	    }
 	  @PutMapping("/update/voucher/{id}")
 	  public ResponseEntity<Voucher> updateVoucher(@PathVariable Integer id, @RequestBody Map<String, Object> bd) {
+		  System.err.println(bd);
 		  Voucher updatedVoucher = voucherService.updateVoucher(id,bd);
 		  return new ResponseEntity<>(updatedVoucher, HttpStatus.CREATED);
 	  }

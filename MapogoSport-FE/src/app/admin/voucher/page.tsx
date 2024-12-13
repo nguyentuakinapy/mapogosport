@@ -52,7 +52,8 @@ const VoucherPage = () => {
       default: return true;
     }
   }).filter(voucher => {
-    if (selectedStatus === "activited") return voucher.status === "active" && new Date(voucher.endDate) > new Date();
+    // if (selectedStatus === "activited") return voucher.status === "active" && new Date(voucher.endDate) > new Date();
+    if (selectedStatus === "activited") return voucher.status === "inactive" && new Date(voucher.endDate) > new Date();
     if (selectedStatus === "expired") return voucher.status === "inactive" && new Date(voucher.endDate) <= new Date();
     return true;
   });;
@@ -99,6 +100,7 @@ const VoucherPage = () => {
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const role = event.target.value;
     setSelectedStatus(role);
+    setCurrentPage(1)
   };
 
   const renderTable = (filteredVouchers: Voucher[]) => {
@@ -122,7 +124,7 @@ const VoucherPage = () => {
             <thead>
               <tr>
                 <th>ID</th>
-                <th style={{ width: "50px" }}>Mã</th>
+                {/* <th style={{ width: "50px" }}>Mã</th> */}
                 <th style={{ width: "100px" }}>Tên</th>
                 <th>Giảm</th>
                 <th>Số lượng</th>
@@ -141,7 +143,7 @@ const VoucherPage = () => {
                 {filteredVouchers.map((voucher, index) => (
                   <tr key={voucher.voucherId}>
                     <td>{index + 1}</td>
-                    <td className="text-start title">{voucher.discountCode}</td>
+                    {/* <td className="text-start title">{voucher.discountCode}</td> */}
                     <td className="text-start title">{voucher.name}</td>
                     <td>{voucher.discountPercent}%</td>
                     <td>{voucher.quantity}</td>
@@ -237,7 +239,7 @@ const VoucherPage = () => {
             Quản lý mã giảm giá/ Tổng: {vouchers?.length || 0} mã giảm giá
           </b>
           <div>
-            <Form.Control type="text" placeholder="Tìm theo tên và địa chỉ..." onChange={handleSearchChange} />
+            <Form.Control type="text" placeholder="Tìm theo tên voucher..." onChange={handleSearchChange} />
           </div>
           <Button className="btn-sd-admin" style={{ fontSize: "15px" }}
             onClick={() => {

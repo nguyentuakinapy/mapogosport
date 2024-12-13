@@ -86,7 +86,6 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
     }
   }, [voucher, currentUser, showAddVoucher]);
 
-
   const handleClose = () => {
     setFormValueNull();
     setShowAddVoucher(false);
@@ -94,23 +93,26 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
 
   const handleUpdateVoucher = async () => {
     try {
-      await axios.put(`${BASE_URL}rest/update/voucher/${voucher?.voucherId}`,
-        JSON.stringify({
-          name: formValue.name,
-          discountPercent: formValue.discountPercent,
-          quantity: formValue.quantity,
-          createDate: formValue.createDate.toISOString(),
-          endDate: formValue.endDate.toISOString(),
-          status: formValue.status,
-          discountCode: formValue.discountCode,
-          activeDate: formValue.activeDate.toISOString(),
-          createdBy: formValue.createdBy?.username,
-        }), {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json",
-        },
-      });
+      if (voucher) {
+        await axios.put(`${BASE_URL}rest/update/voucher/${voucher.voucherId}`,
+          JSON.stringify({
+            name: formValue.name,
+            discountPercent: formValue.discountPercent,
+            quantity: formValue.quantity,
+            createDate: new Date(formValue.createDate),
+            endDate: new Date(formValue.endDate),
+            status: formValue.status,
+            // discountCode: formValue.discountCode,
+            discountCode: 'DISCOUNTCODE-'+ formValue.discountPercent.toLocaleString(),
+            activeDate: new Date(formValue.activeDate),
+            createdBy: formValue.createdBy?.username,
+          }), {
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+          },
+        });
+      }
       toast.success("Cập nhật mã giảm giá thành công!");
       onFetch();
     } catch (error) {
@@ -129,7 +131,8 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
           createDate: formValue.createDate ? new Date(formValue.createDate) : new Date(), // Đảm bảo tạo Date hợp lệ
           endDate: formValue.endDate ? new Date(formValue.endDate) : new Date(), // Đảm bảo tạo Date hợp lệ
           status: formValue.status,
-          discountCode: formValue.discountCode,
+          // discountCode: formValue.discountCode,
+          discountCode: 'DISCOUNTCODE',
           activeDate: formValue.activeDate ? new Date(formValue.activeDate) : new Date(), // Đảm bảo tạo Date hợp lệ
           createdBy: formValue.createdBy?.username,
         }), {
@@ -145,72 +148,147 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
     }
   };
 
-  const isValidate = () => {
-    if (formValue.discountCode === "") {
-      toast.warning("Vui lòng nhập mã code");
-      return false;
-    }
+  // const isValidate = () => {
+  //   // if (formValue.discountCode === "") {
+  //   //   toast.warning("Vui lòng nhập mã code");
+  //   //   return false;
+  //   // }
 
+  //   if (formValue.name === "") {
+  //     toast.warning("Vui lòng nhập tên voucher");
+  //     return false;
+  //   }
+
+  //   // Kiểm tra phần trăm giảm giá
+  //   if (!formValue.discountPercent || formValue.discountPercent <= 0) {
+  //     toast.warning("Vui lòng nhập phần trăm giảm giá hợp lệ");
+  //     return false;
+  //   }
+
+  //   // Kiểm tra số lượng
+  //   if (!formValue.quantity || formValue.quantity <= 0) {
+  //     toast.warning("Vui lòng nhập số lượng hợp lệ");
+  //     return false;
+  //   }
+
+  //   // Kiểm tra ngày tạo
+  //   if (!formValue.createDate) {
+  //     toast.warning("Vui lòng chọn ngày tạo");
+  //     return false;
+  //   }
+
+  //   // Kiểm tra ngày hết hạn
+  //   if (!formValue.endDate) {
+  //     toast.warning("Vui lòng chọn ngày hết hạn");
+  //     return false;
+  //   }
+
+  //   // Kiểm tra ngày hết hạn không trước ngày hiện tại
+  //   toast.info('=<>>>>>>> '+ new Date(formValue.endDate))
+  //   toast.success('=<>>>>>>> '+ new Date())
+  //   if (new Date(formValue.endDate) < new Date()) {
+  //     toast.warning("Ngày hết hạn không thể là quá khứ trong is validate");
+  //     return false;
+  //   }
+
+  //   // Kiểm tra ngày hoạt động
+  //   if (!formValue.activeDate) {
+  //     toast.warning("Vui lòng chọn ngày hoạt động");
+  //     return false;
+  //   }
+
+  //   const activeDate = new Date(formValue.activeDate);
+  //   const currentDate = new Date();
+  //   activeDate.setHours(0, 0, 0, 0);
+  //   currentDate.setHours(0, 0, 0, 0);
+
+  //   if (activeDate < currentDate) {
+  //     toast.warning("Ngày kích hoạt không thể là quá khứ");
+  //     return false;
+  //   }
+
+  //   // Kiểm tra trạng thái
+  //   if (!formValue.status) {
+  //     toast.warning("Vui lòng chọn trạng thái");
+  //     return false;
+  //   }
+
+  //   return true; // Tất cả các trường hợp đã hợp lệ
+  // };
+
+  const isValidate = () => {
     if (formValue.name === "") {
       toast.warning("Vui lòng nhập tên voucher");
       return false;
     }
-
+  
     // Kiểm tra phần trăm giảm giá
     if (!formValue.discountPercent || formValue.discountPercent <= 0) {
       toast.warning("Vui lòng nhập phần trăm giảm giá hợp lệ");
       return false;
     }
-
+  
     // Kiểm tra số lượng
     if (!formValue.quantity || formValue.quantity <= 0) {
       toast.warning("Vui lòng nhập số lượng hợp lệ");
       return false;
     }
-
+  
     // Kiểm tra ngày tạo
     if (!formValue.createDate) {
       toast.warning("Vui lòng chọn ngày tạo");
       return false;
     }
-
+  
     // Kiểm tra ngày hết hạn
     if (!formValue.endDate) {
       toast.warning("Vui lòng chọn ngày hết hạn");
       return false;
     }
-
-    // Kiểm tra ngày hết hạn không trước ngày hiện tại
-    if (new Date(formValue.endDate) < new Date()) {
-      toast.warning("Ngày hết hạn không thể là quá khứ trong is validate");
+  
+    // Kiểm tra ngày hết hạn không trước ngày hiện tại (chỉ so sánh ngày)
+    const endDate = new Date(formValue.endDate);
+    const currentDate = new Date();
+    endDate.setHours(0, 0, 0, 0);
+    currentDate.setHours(0, 0, 0, 0);
+  
+    if (endDate < currentDate) {
+      toast.warning("Ngày hết hạn không thể là quá khứ");
       return false;
     }
-
+  
     // Kiểm tra ngày hoạt động
     if (!formValue.activeDate) {
       toast.warning("Vui lòng chọn ngày hoạt động");
       return false;
     }
-
+  
     const activeDate = new Date(formValue.activeDate);
-    const currentDate = new Date();
+    const createDate = new Date(formValue.createDate);
     activeDate.setHours(0, 0, 0, 0);
-    currentDate.setHours(0, 0, 0, 0);
-
+    createDate.setHours(0, 0, 0, 0);
+  
+    // Kiểm tra ngày kích hoạt không nhỏ hơn ngày tạo
+    if (activeDate < createDate) {
+      toast.warning("Ngày kích hoạt không thể trước ngày tạo");
+      return false;
+    }
+  
+    // Kiểm tra ngày kích hoạt không trước ngày hiện tại
     if (activeDate < currentDate) {
       toast.warning("Ngày kích hoạt không thể là quá khứ");
       return false;
     }
-
+  
     // Kiểm tra trạng thái
     if (!formValue.status) {
       toast.warning("Vui lòng chọn trạng thái");
       return false;
     }
-
+  
     return true; // Tất cả các trường hợp đã hợp lệ
   };
-
+  
   const handleSave = () => {
     if (voucher) {
       const endDate = new Date(formValue.endDate);
@@ -246,19 +324,19 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
   ];
 
   // Xử lý logic trạng thái: đang hoạt động, chưa hoạt động, hết hạn
-  const getVoucherStatus = () => {
-    const currentDate = new Date();
-    if (formValue.status === "active" && formValue.endDate > currentDate) {
-      return "Đang hoạt động"; // Đang hoạt động
-    }
-    if (formValue.status === "inactive") {
-      return "Chưa hoạt động"; // Chưa hoạt động
-    }
-    if (formValue.endDate < currentDate) {
-      return "Hết hạn"; // Hết hạn
-    }
-    return "Đang hoạt động"; // Mặc định là đang hoạt động nếu không có tình huống nào khác
-  };
+  // const getVoucherStatus = () => {
+  //   const currentDate = new Date();
+  //   if (formValue.status === "active" && formValue.endDate > currentDate) {
+  //     return "Đang hoạt động"; // Đang hoạt động
+  //   }
+  //   if (formValue.status === "inactive") {
+  //     return "Chưa hoạt động"; // Chưa hoạt động
+  //   }
+  //   if (formValue.endDate < currentDate) {
+  //     return "Hết hạn"; // Hết hạn
+  //   }
+  //   return "Đang hoạt động"; // Mặc định là đang hoạt động nếu không có tình huống nào khác
+  // };
 
   return (
     <Modal show={showAddVoucher} onHide={handleClose} centered backdrop="static" keyboard={true}>
@@ -271,9 +349,11 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
         <Form>
           <Row>
             <Col>
-              <Form.Group className="mb-3">
+              <Form.Group className="mb-3 " hidden>
                 <Form.Floating>
-                  <Form.Control type="text" placeholder="Mã code" name="discountCode" value={formValue.discountCode}
+                  <Form.Control type="text" placeholder="Mã code" name="discountCode" 
+                  // value={formValue.discountCode}
+                  value={'DISCOUNTCODE'}
                     onChange={handleChange} />
                   <Form.Label>
                     Mã Code <b className="text-danger">*</b>
@@ -343,26 +423,7 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
             </Col>
             <Col>
 
-              <Form.Group className="mb-3">
-                <Form.Floating>
-
-                  <Form.Control
-                    type="date"
-                    placeholder="Ngày hết hạn"
-                    name="endDate"
-                    value={
-                      formValue.endDate
-                        ? new Date(formValue.endDate).toLocaleDateString("en-CA")
-                        : ""
-                    }
-                    onChange={handleChange}
-                    // min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate() + 1)).toISOString().split("T")[0]}                   />
-                    min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate())).toISOString().split("T")[0]} />
-                  <Form.Label>
-                    Ngày hết hạn <b className="text-danger">*</b>
-                  </Form.Label>
-                </Form.Floating>
-              </Form.Group>
+            
               <Form.Group className="mb-3">
                 <Form.Floating>
                   <Form.Control
@@ -371,7 +432,7 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
                     name="activeDate"
                     value={
                       formValue.activeDate
-                        ? formValue.activeDate.toLocaleDateString("en-CA")
+                        ? new Date( formValue.activeDate).toLocaleDateString("en-CA")
                         : ""
                     }
                     onChange={handleChange}
@@ -386,7 +447,25 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
                   </Form.Label>
                 </Form.Floating>
               </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Floating>
 
+                  <Form.Control
+                    type="date"
+                    placeholder="Ngày hết hạn"
+                    name="endDate"
+                    value={
+                      formValue
+                        && new Date(formValue.endDate).toLocaleDateString("en-CA")
+                    }
+                    onChange={handleChange}
+                    // min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate() + 1)).toISOString().split("T")[0]}                   />
+                    min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate())).toISOString().split("T")[0]} />
+                  <Form.Label>
+                    Ngày hết hạn <b className="text-danger">*</b>
+                  </Form.Label>
+                </Form.Floating>
+              </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Floating>
                   <Form.Control
@@ -427,10 +506,10 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
                 </Form.Floating>
               </Form.Group>
 
-              {/* Hiển thị trạng thái theo logic */}
+              {/* Hiển thị trạng thái theo logic 
               <div>
                 <strong>Trạng thái hiện tại:</strong> {getVoucherStatus()}
-              </div>
+              </div>*/}
             </Col>
           </Row>
         </Form>

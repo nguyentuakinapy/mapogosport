@@ -231,7 +231,7 @@ const Bookings = () => {
                                                             const b = booking.bookingDetails.filter(item => item.bookingDetailStatus === "Chưa bắt đầu");
                                                             const subtract = a.reduce((total, item) => total + item.price, 0);
                                                             const currentDateTime = new Date();
-                                                            const formattedTime = b[0].startTime.replace('h', ':').padStart(5, '0');
+                                                            const formattedTime = b[0]?.startTime.replace('h', ':').padStart(5, '0');
                                                             const bookingDateTime = new Date(`${b[0].bookingDetailDate}T${formattedTime}:00`);
                                                             const diffMinutes = (bookingDateTime.getTime() - currentDateTime.getTime()) / (1000 * 60);
                                                             const refundAmount = (booking.totalAmount * (booking.percentDeposit / 100));

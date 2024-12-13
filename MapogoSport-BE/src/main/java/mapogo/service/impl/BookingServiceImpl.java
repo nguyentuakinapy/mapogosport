@@ -152,40 +152,6 @@ public class BookingServiceImpl implements BookingService {
 	public List<Map<String, Object>> findBookingByUsername(String username) {
 		List<Booking> bookings = bookingDAO.findByUser_Username(username);
 		List<Map<String, Object>> resultList = new ArrayList<>();
-
-// 	    List<Booking> bookings = bookingDAO.findByUser_Username(username);
-// 	    List<Map<String, Object>> resultList = new ArrayList<>();
-
-// 	    for (Booking booking : bookings) {
-// 	        Map<String, Object> bookingMap = new HashMap<>();
-// 	        bookingMap.put("bookingId", booking.getBookingId());
-// 	        bookingMap.put("date", booking.getDate());
-// 	        bookingMap.put("totalAmount", booking.getTotalAmount());
-// 	        bookingMap.put("oldTotalAmount", booking.getOldTotalAmount());
-// 	        bookingMap.put("status", booking.getStatus());
-// 	        bookingMap.put("percentDeposit", booking.getPercentDeposit());
-
-// 	        List<Map<String, Object>> bookingDetailsList = new ArrayList<>();
-// 	        for (BookingDetail bookingDetail : booking.getBookingDetails()) {
-// 	            Map<String, Object> bookingDetailMap = new HashMap<>();
-// 	            bookingDetailMap.put("bookingDetailStatus", bookingDetail.getStatus());
-// 	            bookingDetailMap.put("price", bookingDetail.getPrice());
-// 	            bookingDetailMap.put("bookingDetailDate", bookingDetail.getDate());
-// 	            bookingDetailMap.put("startTime", bookingDetail.getStartTime());
-
-//                 SportField sportField = bookingDetail.getSportFieldDetail().getSportField();
-//                 if (sportField != null) {
-//                 	bookingMap.put("sportFieldName", sportField.getName());
-//                 }
-
-// 	            bookingDetailsList.add(bookingDetailMap);
-// 	        }
-
-// 	        bookingMap.put("bookingDetails", bookingDetailsList);
-// 	        resultList.add(bookingMap);
-// 	    }
-// 	    return resultList;
-// 	}
 		for (Booking booking : bookings) {
 			Map<String, Object> bookingMap = new HashMap<>();
 			bookingMap.put("bookingId", booking.getBookingId());

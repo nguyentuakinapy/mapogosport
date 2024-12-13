@@ -776,7 +776,7 @@ export default function ChatBox() {
               onClick={handleChatListToggle}
             // Khi click vào icon sẽ mở form chat nhấn vào sẽ thành TRUE
             >
-              <Image src="/images/mail_giphy.webp" alt="Messenger" width={40} height={40}
+              <Image src="/images/messenger logo.png" alt="Messenger" width={40} height={40}
                 style={{ cursor: "pointer" }} unoptimized />
             </div>
           </>

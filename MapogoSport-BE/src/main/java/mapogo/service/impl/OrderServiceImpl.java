@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import mapogo.dao.AuthorityDAO;
 import mapogo.dao.NotificationDAO;
 import mapogo.dao.OrderDAO;
+import mapogo.dao.ProductDAO;
 import mapogo.dao.ProductDetailSizeDAO;
 import mapogo.dao.RoleDAO;
 import mapogo.dto.OrderDTO;
@@ -31,6 +32,7 @@ import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
 import mapogo.entity.PaymentMethod;
 import mapogo.entity.PhoneNumberUser;
+import mapogo.entity.Product;
 import mapogo.entity.ProductDetailSize;
 import mapogo.entity.Role;
 import mapogo.entity.Transaction;
@@ -53,6 +55,9 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	OrderDAO orderDAO;
 
+	@Autowired
+	ProductDAO productDAO;
+	
 	List<String> statuses = Arrays.asList("Đã hoàn thành");
 
 	Locale vietnam = new Locale("vi", "VN");
@@ -390,6 +395,13 @@ public class OrderServiceImpl implements OrderService {
 			ProductDetailSize productDetailSize = orderDetail.getProductDetailSize();
 			productDetailSize.setQuantity(productDetailSize.getQuantity() + orderDetail.getQuantity());
 			productDetailSizeDAO.save(productDetailSize);
+			Product p = productDetailSize.getProductDetail().getProduct();
+			int sumQuantity = p.getStock() + orderDetail.getQuantity();
+			if (sumQuantity > 0) {
+				 p.setStatus("Còn hàng");
+			}
+			p.setStock(sumQuantity);
+			productDAO.save(p);
 		}
 
 		Role r = roleDAO.findById(2).get();
