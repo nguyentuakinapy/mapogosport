@@ -25,7 +25,7 @@ export default function Home() {
   const [showCreateOwnerModal, setShowCreateOwnerModal] = useState<boolean>(false);
   const [typeFilter, setTypeFilter] = useState<number>(0);
   const [nameFilter, setNameFilter] = useState<string>("");
-  const [receivedVoucher, setReceivedVoucher] = useState<UserVoucherReceived[]>([])
+  const [userData, setUserData] = useState<User>();
 
   const router = useRouter();
 
@@ -72,6 +72,12 @@ export default function Home() {
     revalidateOnReconnect: false,
   });
 
+  const { data: receivedVoucher } = useSWR<UserVoucherReceived[]>(userData ? `${BASE_URL}rest/user/voucher/${userData.username}` : null, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
+
   const createOwnerSubmit = () => {
     const user = localStorage.getItem('username');
     if (user) {
@@ -81,7 +87,6 @@ export default function Home() {
     }
   }
 
-  const [userData, setUserData] = useState<User>();
 
   useEffect(() => {
     const userSession = sessionStorage.getItem('user');
@@ -161,6 +166,7 @@ export default function Home() {
         },
       });
       mutate(`${BASE_URL}rest/voucher/findAll`);
+      mutate(`${BASE_URL}rest/user/voucher/${username}`);
       toast.success("Nhận Voucher giá thành công!");
     } catch (error) {
       console.error("Lỗi khi nhận Voucher:", error);
@@ -168,24 +174,10 @@ export default function Home() {
     }
   };
 
-  // const handelReceivedVoucher = async (userData: User) => {
-  //   try {
-  //     const response = await fetch(`${BASE_URL}rest/user/voucher/${userData.username}`)
-  //     const data = await response.json();
-  //     console.log("Voucher user received: ", data)
-  //     setReceivedVoucher(data)
-
-  //   } catch (error) {
-  //     console.error("Error handelReceived Voucher", error);
-  //   }
-  // }
-
   const hasReceivedVoucher = (voucherId: number) => {
-    return receivedVoucher.some(v => v.voucher.voucherId === voucherId);
+    return receivedVoucher && receivedVoucher.some(v => v.voucher.voucherId === voucherId);
   }
 
-
-  //Handel select voucher khi active
   const filterVouchers = (vouchers: Voucher[]) => {
     const currentTime = new Date().getTime();
     const statusActive = 'active'
@@ -195,7 +187,6 @@ export default function Home() {
       return (currentTime >= activeTime && currentTime <= endTime) && (voucher.status === statusActive);
     });
   };
-
 
   let filteredVouchers: Voucher[] = [];
   if (voucher) {
