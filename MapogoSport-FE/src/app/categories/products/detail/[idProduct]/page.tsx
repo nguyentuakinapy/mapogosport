@@ -65,6 +65,7 @@ const ProductDetail = () => {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
+
     // FindByIdProduct
     useEffect(() => {
         if (imageGallery) {
@@ -85,11 +86,21 @@ const ProductDetail = () => {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
+    const username = decodeString(String(localStorage.getItem('username')));
+    const { data: dataCart } = useSWR(username && `${BASE_URL}rest/cart/${username}`, fetcher);
+
 
     const handleAddToCart = async () => {
-        // console.log("số lượng size là ", selectedSizeQuantity)
+        const existingItem = dataCart?.find(
+            (item: Cart) => item.productDetailSize.productDetailSizeId === selectedSize
+        );
+        const currentQuantity = existingItem ? existingItem.quantity : 0;
+        if (currentQuantity >= 10) {
+            toast.warning("Sản phẩm này đã đạt giới hạn tối đa trong giỏ hàng (10 sản phẩm).");
+            return;
+        }
 
-        const username = decodeString(String(localStorage.getItem('username')));
+
         if (username) {
             if (selectedSizeQuantity <= 0) {
                 toast.info("Không thể thêm vào giỏ hàng vì size này đã hết. Vui lòng chọn 1 size khác")
@@ -116,7 +127,7 @@ const ProductDetail = () => {
                     const errorMessage = await response.text();
                     throw new Error(`Có lỗi xảy ra khi thêm giỏ hàng: ${errorMessage}`);
                 }
-                
+
 
                 toast.success("Thêm sản phẩm vào giỏ hàng thành công!");
 
