@@ -50,8 +50,12 @@ public class CartService {
 		Cart existingCart = cartDao.findByUserAndProductDetailSize(cart.getUser(), productDetailSize);
 
 		if (existingCart != null) {
-			// Nếu sản phẩm đã có trong giỏ hàng, tăng số lượng lên
-			existingCart.setQuantity(existingCart.getQuantity() + cartDto.getQuantity());
+			// Nếu sản phẩm đã có trong giỏ hàng, kiểm tra và tăng số lượng
+			int newQuantity = existingCart.getQuantity() + cartDto.getQuantity();
+			if (newQuantity > 10) {
+				newQuantity = 10; // Giới hạn số lượng tối đa là 10
+			}
+			existingCart.setQuantity(newQuantity);
 			return cartDao.save(existingCart); // Lưu thay đổi
 		} else {
 			// Nếu sản phẩm chưa có trong giỏ hàng, thiết lập các trường cho cart mới
@@ -90,9 +94,9 @@ public class CartService {
 		return cartDao.existsById(cartId);
 	}
 
-	//Mỵ đây
+	// Mỵ đây
 	public Cart findById(Integer cartId) {
 		return cartDao.findById(cartId).get();
 	}
-	//đây
+	// đây
 }

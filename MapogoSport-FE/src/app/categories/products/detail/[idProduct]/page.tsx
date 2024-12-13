@@ -130,7 +130,7 @@ const ProductDetail = () => {
 
 
                 toast.success("Thêm sản phẩm vào giỏ hàng thành công!");
-
+                mutate(`${BASE_URL}rest/cart/${username}`);
                 mutate(`${BASE_URL}rest/cart/count/${username}`); // Tái tải dữ liệu
 
             } catch (error) {
