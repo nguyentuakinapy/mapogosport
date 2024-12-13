@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
+import mapogo.dao.ProductDAO;
 import mapogo.dao.ProductDetailSizeDAO;
 import mapogo.entity.Order;
 import mapogo.entity.OrderDetail;
+import mapogo.entity.Product;
 import mapogo.entity.ProductDetailSize;
 import mapogo.service.OrderDetailService;
 import mapogo.service.OrderService;
@@ -31,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class OrderDetailRestController {
 	@Autowired
 	OrderDetailService orderDetailService;
+	
+	@Autowired
+	ProductDAO productDAO;
 	
 //	@GetMapping("/admin/order-detail-by-order/{orderId}")
 //	public OrderDetail getOrderdetailByOrderId(@PathVariable("orderId") Integer orderId) {
@@ -69,8 +74,15 @@ public class OrderDetailRestController {
 		List<OrderDetail> orderDetails = orderDetailService.findOrderDetailByOrderId(order.getOrderId());
 		for (OrderDetail orderDetail : orderDetails) {
 			ProductDetailSize pds = pdsDAO.findByProductDetailSizeId(orderDetail.getProductDetailSize().getProductDetailSizeId());
-			int kho= pds.getQuantity();
+			int kho = pds.getQuantity();
 			pds.setQuantity(kho-orderDetail.getQuantity());
+			Product p = pds.getProductDetail().getProduct();
+			int sumQuantity = p.getStock() - orderDetail.getQuantity();
+			if (sumQuantity == 0) {
+				 p.setStatus("Hết hàng");
+			}
+			p.setStock(sumQuantity);
+			productDAO.save(p);
 			pdsDAO.save(pds);
 		}
 		return ResponseEntity.status(HttpStatus.SC_OK).body(orderDetails);

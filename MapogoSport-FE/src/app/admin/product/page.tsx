@@ -1,11 +1,13 @@
 'use client'
 import ProductAddNew from "@/components/Admin/Modal/product.addNew";
-import { formatPrice } from "@/components/Utils/Format";
+import { decodeString, formatPrice } from "@/components/Utils/Format";
+import { Stomp } from "@stomp/stompjs";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Badge, Button, Form, Nav, OverlayTrigger, Pagination, Table, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
+import SockJS from "sockjs-client";
 import useSWR from "swr";
 
 const AdminProduct = () => {
@@ -18,6 +20,25 @@ const AdminProduct = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(8);
   const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+  useEffect(() => {
+    const socket = new SockJS(`${BASE_URL}ws`); // Địa chỉ endpoint WebSocket
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+          stompClient.subscribe('/topic/order/new', (message) => {
+            if (message.body === decodeString(String(localStorage.getItem('username')))) {
+              mutate();
+            }
+        });
+
+        stompClient.subscribe('/topic/order/cancel', (message) => {
+            if (message.body === decodeString(String(localStorage.getItem('username')))) {
+              mutate();
+            }
+        });
+        })
+  }, [])
 
   const { data: categoryProducts } = useSWR<CategoryProduct[]>(`${BASE_URL}rest/category_product/category-products`, fetcher,
     {

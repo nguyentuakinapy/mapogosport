@@ -252,6 +252,7 @@ public class VoucherServiceImpl implements VoucherService{
 	        Object activeDateObj = bd.get("activeDate");
 	        LocalDateTime activeDate = null;
 	        if (activeDateObj instanceof String) {
+	        	System.err.println("chạy vo day");
 	            try {
 	                Date date = dateFormat.parse((String) activeDateObj);
 	                activeDate = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
@@ -263,11 +264,30 @@ public class VoucherServiceImpl implements VoucherService{
 	        }
 	        voucher.setActiveDate(activeDate);
 
-	        if (voucher.getActiveDate().isEqual(voucher.getEndDate())) {
+	        
+//	        if (voucher.getActiveDate().isEqual(voucher.getCreateDate())) {
+//	            voucher.setStatus("active");
+//	        }else if(voucher.getActiveDate().isAfter(voucher.getCreateDate())) {
+//	        	voucher.setStatus("inactive");
+//	        }
+	        // So sánh theo LocalDate (không bao gồm giờ)
+	        LocalDate activeDateOnly = voucher.getActiveDate().toLocalDate();
+	        LocalDate createDateOnly = voucher.getCreateDate().toLocalDate();
+	        LocalDate endDateOnly = voucher.getEndDate().toLocalDate();
+
+//	        if (activeDateOnly.isEqual(createDateOnly) && activeDateOnly.isBefore(endDateOnly)) {
+//	            voucher.setStatus("active");
+//	        } else if (activeDateOnly.isAfter(createDateOnly)) {
+//	            voucher.setStatus("inactive");
+//	        } 
+	     // Cập nhật trạng thái dựa trên activeDate và endDate
+	        if (!activeDateOnly.isBefore(createDateOnly) && activeDateOnly.isBefore(endDateOnly)) {
 	            voucher.setStatus("active");
+	        } else {
+	            voucher.setStatus("inactive");
 	        }
 	    }
-
+	    
 	    if (bd.containsKey("createdBy")) {
 	    	  User u = new User()	;
 	  	    u.setUsername((String) bd.get("createdBy"));	  	    
@@ -276,6 +296,8 @@ public class VoucherServiceImpl implements VoucherService{
 	  	    voucher.setCreatedBy(u);
 //	        voucher.setCreatedBy();
 	    }
+	    System.err.println("active day "+ voucher.getActiveDate());
+	    System.err.println("getCreateDate day "+ voucher.getCreateDate());
 	    System.err.println("voucher cuoisi "+ voucher.getStatus());
 
 	    return dao.save(voucher);
