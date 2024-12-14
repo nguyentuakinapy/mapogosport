@@ -10,6 +10,8 @@ import { toast } from 'react-toastify';
 import ModalOrderSuccess from '@/components/ModalOrder/modal.Success';
 import Link from 'next/link';
 import Image from 'next/image';
+import { fetchLocationCurrent } from '../utils/LocationCurrent';
+import { log } from 'node:console';
 
 const CheckoutPage = () => {
   const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -89,6 +91,7 @@ const CheckoutPage = () => {
       const activeAddress = userData.addressUsers.find((item: AddressUsers) => item.active);
       if (activeAddress) {
         setAddressSelected(activeAddress);
+        fetchCoordinatesForFields(activeAddress);
       }
     }
   }, [userData]);
@@ -140,7 +143,13 @@ const CheckoutPage = () => {
   const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const wardName = e.target.value;
     setSelectedWard(wardName);
+    const addressParts = [addressDetail, wardName, selectedDistrict, selectedProvince];
+    const address1 = addressParts.filter(part => part).join(', ');
+    console.log(address1);
+
+    fetchCoordinatesForFields(address1);
   };
+
 
   useEffect(() => {
     if (addressSelected) {
@@ -163,8 +172,6 @@ const CheckoutPage = () => {
 
   const [orderStatus, setOrderStatus] = useState('Chờ xác nhận');
   const [paymentMethod, setPaymentMethod] = useState('COD');
-
-
 
   const handleVoucherSelectedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedVoucher = vouchers.find(v => v.voucher.voucherId === Number(e.target.value));
@@ -236,58 +243,60 @@ const CheckoutPage = () => {
     const phoneRegex = /^(0|\+84)(3|5|7|8|9)\d{8}$/;
     return phoneRegex.test(phoneNumberSelected);
   }
-
-  const calculateShippingFee = async () => {
-    try {
-      const response = await axios.post(
-        'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee',
-        {
-          "service_type_id": 5,
-          "from_district_id": 761,
-          "from_ward_code": "26776",
-          "to_district_id": 439,
-          "to_ward_code": "18133",
-          "height": 20,
-          "length": 30,
-          "weight": 3000,
-          "width": 40,
-          "insurance_value": 0,
-          "coupon": null,
-          "items": [
-            {
-              "name": "Product Name",
-              "quantity": 1,
-              "height": 10,
-              "weight": 200,
-              "length": 20,
-              "width": 15
-            }
-          ]
-        }
-        ,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Token': '7144a73c-b8a6-11ef-9834-7e8875c3faf5', // Thay bằng token thực tế
-            'ShopId': 5519624, // Thay bằng ShopId thực tế
-          },
-        }
-      );
-      console.log('Shipping Fee:', response.data.data.total);
-      setShippingFee(response.data.data.total);
-    } catch (error) {
-      console.error('Error fetching shipping fee:', error);
-      toast.error('Không thể tính phí giao hàng. Vui lòng kiểm tra lại thông tin!');
-    }
+  const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
+  const [adminLocation, setAdminLocation] = useState<{ lat: number, lng: number } | null>(null);
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (value: number) => (value * Math.PI) / 180;
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in kilometers
   };
 
+  const calculateDistance1 = async () => {
+    if (userLocation && adminLocation) {
+      const distance = calculateDistance(userLocation.lat, userLocation.lng, adminLocation.lat, adminLocation?.lng);
+      let fee = Math.round(distance * 1000) / 1000 * 2000;
+      if (fee <= 10000) {
+        fee = 10000;
+      } else if (fee >= 100000) {
+        fee = 100000;
+      }
+      setShippingFee(fee);
+      setNewTotalPrice(newTotalPrice + fee)
+      console.log(": distance", distance);
 
-  // Tự động tính phí khi địa chỉ thay đổi
-  useEffect(() => {
-    if (selectedDistrict && selectedWard) {
-      calculateShippingFee();
     }
-  }, [selectedDistrict, selectedWard]);
+
+  };
+
+  const fetchCoordinatesForFields = async (fullAddress: string) => {
+    try {
+      console.log("fullAddress", fullAddress);
+
+      const coordUser = await fetchLocationCurrent(fullAddress);
+      const coordAdmin = await fetchLocationCurrent("Tô Ký, Tân Chánh Hiệp, Quận 12, Thành phố Hồ Chí Minh");
+      if (coordUser && coordAdmin) {
+        setUserLocation({ lat: coordUser?.lat, lng: coordUser?.lon });
+        setAdminLocation({ lat: coordAdmin?.lat, lng: coordAdmin?.lon });
+
+      }
+      console.log("userLocation", coordUser?.lat, coordUser?.lon);
+      console.log("adminLocation;", coordAdmin?.lat, coordAdmin?.lon);
+
+    } catch (error) {
+      console.error("Error fetching coordinates: ", error);
+    }
+
+  };
+
+  useEffect(() => {
+
+    calculateDistance1();
+
+  }, [userLocation, adminLocation]);
 
   const setDataOrder = () => {
     const addressParts = [addressDetail, selectedWard, selectedDistrict, selectedProvince];
@@ -600,7 +609,7 @@ const CheckoutPage = () => {
                   <div className="form-floating mb-2">
                     <Form.Floating>
                       <Form.Control size="sm" type="text" placeholder="Địa chỉ chi tiết"
-                        value={addressDetail ?? ''} onChange={(e) => setAddressDetail(e.target.value)} />
+                        value={addressDetail ?? ''} onChange={e => setAddressDetail(e.target.value)} />
                       <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
                     </Form.Floating>
                   </div>
