@@ -146,32 +146,28 @@ public class NotificationScheduledService {
 			Date endDate = userSubscription.getEndDay();
 
 			if (endDate != null) {
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(today);
-
-				calendar.add(Calendar.DATE, +99999);
-
-				Date endDay = calendar.getTime();
-
 				long timeDifference = endDate.getTime() - new Date().getTime();
 
 				if (dateFormat.format(today).equals(dateFormat.format(endDate))) {
 					userSubscription.setAccountPackage(accountPackageDAO.findById(1).get());
-					userSubscription.setEndDay(endDay);
+					userSubscription.setEndDay(userSubscription.getStartDay());
 					userSubscriptionDAO.save(userSubscription);
-				    List<SportField> sportFields = sportFieldDAO.findSportFieldByOwner(userSubscription.getUser().getOwner().getOwnerId()); // Đây sẽ không gây lỗi LazyInitializationException
-				    for (SportField sportField : sportFields) {
-				        if (sportField != null) {
-				            sportField.setStatus("Tạm đóng");
-				        }
-				    }
-				    sportFieldDAO.saveAll(sportFields);
-				    
-				    Notification n = new Notification();
+					List<SportField> sportFields = sportFieldDAO
+							.findSportFieldByOwner(userSubscription.getUser().getOwner().getOwnerId()); // Đây sẽ không
+																										// gây lỗi
+																										// LazyInitializationException
+					for (SportField sportField : sportFields) {
+						if (sportField != null) {
+							sportField.setStatus("Tạm đóng");
+						}
+					}
+					sportFieldDAO.saveAll(sportFields);
+
+					Notification n = new Notification();
 					n.setUser(userSubscription.getUser());
 					n.setTitle(userSubscription.getAccountPackage().getPackageName() + " đã hết hạn!");
-					n.setMessage(
-							userSubscription.getAccountPackage().getPackageName() + " đã hết hạn, gói đã quay về gói miễn phí!");
+					n.setMessage(userSubscription.getAccountPackage().getPackageName()
+							+ " đã hết hạn, gói đã quay về gói miễn phí!");
 					n.setType("subscription");
 					// Lưu và gửi thông báo
 					notificationDAO.save(n);
@@ -182,7 +178,8 @@ public class NotificationScheduledService {
 					emailService.sendEmail(userSubscription.getUser().getEmail(), "Thông báo hết hạn gói đăng ký.",
 							userSubscription.getAccountPackage().getPackageName().toLowerCase() + " đã hết hạn"
 									+ ". Vui lòng gia hạn hoặc nâng cấp thêm để tiếp tục sử dụng dịch vụ của chúng tôi!");
-				} else if (timeDifference <= 5 * 24 * 60 * 60 * 1000) {
+				} else if (timeDifference <= 5 * 24 * 60 * 60 * 1000
+						&& !userSubscription.getAccountPackage().getPackageName().equals("Gói miễn phí")) {
 					Calendar startCalendar = Calendar.getInstance();
 					startCalendar.setTime(today);
 
@@ -216,8 +213,7 @@ public class NotificationScheduledService {
 							userSubscription.getUser().getUsername());
 
 					emailService.sendEmail(userSubscription.getUser().getEmail(), "Thông báo gia hạn gói đăng ký.",
-							userSubscription.getAccountPackage().getPackageName() + " còn "
-									+ daysRemaining
+							userSubscription.getAccountPackage().getPackageName() + " còn " + daysRemaining
 									+ " ngày. Vui lòng gia hạn thêm để tiếp tục sử dụng dịch vụ của chúng tôi!");
 
 				}

@@ -241,7 +241,14 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 				date, "Đã hủy");
 
 		if (b != null && b.getBooking() != null) {
-			b.setFullName(b.getBooking().getFullName());
+			User u = userDAO.findUserByBookingDetailId(b.getBookingDetailId());
+
+			if (u.getFullname().equals("Offline")) {
+				b.setFullName(b.getBooking().getFullName());
+			} else {
+				b.setFullName(u.getFullname());
+			}
+			
 			b.setPhoneNumber(b.getBooking().getPhoneNumber());
 			b.setCheckOffline(b.getBooking().getUser().getUsername().equals("sportoffline"));
 			b.setPaymentMethod(b.getBooking().getPaymentMethod());
