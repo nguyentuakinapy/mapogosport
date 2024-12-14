@@ -48,6 +48,8 @@ public class OrderDetailServiceImpl implements OrderDetailService{
         resultMap.put("status", order.getStatus());
         resultMap.put("note", order.getNote());
         resultMap.put("paymentMethodName", order.getPaymentMethod().getDescription());
+        resultMap.put("shipFee", order.getShipFee());
+        resultMap.put("amount", order.getAmount());
 
 	    List<Map<String, Object>> orderDetailList = new ArrayList<>();
 	    for (OrderDetail orderDetail : orderDetails) {
