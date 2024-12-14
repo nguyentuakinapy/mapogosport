@@ -97,6 +97,12 @@ const VoucherPage = () => {
     }
   };
 
+  const findAll = () => {
+    setSearchTerm('')
+    setSelectedStatus('')
+    mutate();
+  }
+
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const role = event.target.value;
     setSelectedStatus(role);
@@ -252,7 +258,7 @@ const VoucherPage = () => {
         </div>
         <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
           <Nav.Item>
-            <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
+            <Nav.Link onClick={() => findAll()} eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
           </Nav.Item>
           <Nav.Item>
             <Nav.Link eventKey="valid" className="tab-link">Còn hiệu lực</Nav.Link>
