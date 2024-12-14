@@ -159,7 +159,7 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
           endDate: formValue.endDate ? new Date(formValue.endDate) : new Date(), // Đảm bảo tạo Date hợp lệ
           status: formValue.status,
           // discountCode: formValue.discountCode,
-          discountCode: 'DISCOUNTCODE',
+          discountCode: 'DISCOUNTCODE-'+ formValue.discountPercent.toLocaleString(),
           activeDate: formValue.activeDate ? new Date(formValue.activeDate) : new Date(), // Đảm bảo tạo Date hợp lệ
           createdBy: formValue.createdBy?.username,
         }), {
@@ -175,73 +175,7 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
     }
   };
 
-  // const isValidate = () => {
-  //   // if (formValue.discountCode === "") {
-  //   //   toast.warning("Vui lòng nhập mã code");
-  //   //   return false;
-  //   // }
 
-  //   if (formValue.name === "") {
-  //     toast.warning("Vui lòng nhập tên voucher");
-  //     return false;
-  //   }
-
-  //   // Kiểm tra phần trăm giảm giá
-  //   if (!formValue.discountPercent || formValue.discountPercent <= 0) {
-  //     toast.warning("Vui lòng nhập phần trăm giảm giá hợp lệ");
-  //     return false;
-  //   }
-
-  //   // Kiểm tra số lượng
-  //   if (!formValue.quantity || formValue.quantity <= 0) {
-  //     toast.warning("Vui lòng nhập số lượng hợp lệ");
-  //     return false;
-  //   }
-
-  //   // Kiểm tra ngày tạo
-  //   if (!formValue.createDate) {
-  //     toast.warning("Vui lòng chọn ngày tạo");
-  //     return false;
-  //   }
-
-  //   // Kiểm tra ngày hết hạn
-  //   if (!formValue.endDate) {
-  //     toast.warning("Vui lòng chọn ngày hết hạn");
-  //     return false;
-  //   }
-
-  //   // Kiểm tra ngày hết hạn không trước ngày hiện tại
-  //   toast.info('=<>>>>>>> '+ new Date(formValue.endDate))
-  //   toast.success('=<>>>>>>> '+ new Date())
-  //   if (new Date(formValue.endDate) < new Date()) {
-  //     toast.warning("Ngày hết hạn không thể là quá khứ trong is validate");
-  //     return false;
-  //   }
-
-  //   // Kiểm tra ngày hoạt động
-  //   if (!formValue.activeDate) {
-  //     toast.warning("Vui lòng chọn ngày hoạt động");
-  //     return false;
-  //   }
-
-  //   const activeDate = new Date(formValue.activeDate);
-  //   const currentDate = new Date();
-  //   activeDate.setHours(0, 0, 0, 0);
-  //   currentDate.setHours(0, 0, 0, 0);
-
-  //   if (activeDate < currentDate) {
-  //     toast.warning("Ngày kích hoạt không thể là quá khứ");
-  //     return false;
-  //   }
-
-  //   // Kiểm tra trạng thái
-  //   if (!formValue.status) {
-  //     toast.warning("Vui lòng chọn trạng thái");
-  //     return false;
-  //   }
-
-  //   return true; // Tất cả các trường hợp đã hợp lệ
-  // };
 
   const isValidate = () => {
     if (formValue.name === "") {
@@ -301,10 +235,20 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
       return false;
     }
   
-    // Kiểm tra ngày kích hoạt không trước ngày hiện tại
-    if (activeDate < currentDate) {
-      toast.warning("Ngày kích hoạt không thể là quá khứ");
+      // Nếu voucher hết hạn và đang ở trạng thái inactive, thì không cần kiểm tra ngày kích hoạt là quá khứ
+    if(formValue.status === 'active'){
+          // Kiểm tra nếu ngày kích hoạt lớn hơn ngày hết hạn (ngày kích hoạt không thể lớn hơn ngày kết thúc)
+    if (activeDate > endDate) {
+      toast.warning("Ngày hoạt động không thể sau ngày kết thúc");
       return false;
+    }
+    }else{
+
+      // Kiểm tra ngày kích hoạt không trước ngày hiện tại
+      if (activeDate < currentDate) {
+        toast.warning("Ngày kích hoạt không thể là quá khứ");
+        return false;
+      }
     }
 
     // if(endDate < activeDate ){
@@ -356,7 +300,6 @@ let FL = false;
       ...prevState,
       [name]: value,
     }));
-    // handleClose()
   };
 
   const handleChangeCbo = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -367,7 +310,6 @@ let FL = false;
       [name]: value,
     }));
     confirmInactiveVoucher();
-    handleClose()
   };
   const confirmInactiveVoucher =  () => {
     if (formValue.status === "active") {
@@ -378,14 +320,16 @@ let FL = false;
           "Voucher đang có hiệu lực và còn hạn. Bạn có chắc muốn chuyển sang trạng thái 'inactive' không?"
         );
         if (!confirm) {
+          handleClose();
           return;
         }else{
-            // setFlag(true);
             FL = true;
             // handleUpdateVoucher();
             setTimeout(() => {
               handleUpdateVoucher(); // Đảm bảo flag được cập nhật trước khi gọi handleUpdateVoucher
             }, 0);
+            handleClose()
+
         }
       }
     }
@@ -582,6 +526,7 @@ let FL = false;
                     name="status"
                     value={formValue.status}
                     onChange={handleChangeCbo}
+                    disabled={!voucher}
                   >
                     {option.map((opt, idx) => (
                       <option key={idx} value={opt.value}>
