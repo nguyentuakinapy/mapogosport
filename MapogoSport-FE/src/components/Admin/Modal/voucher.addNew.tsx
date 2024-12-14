@@ -94,24 +94,51 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
   const handleUpdateVoucher = async () => {
     try {
       if (voucher) {
-        await axios.put(`${BASE_URL}rest/update/voucher/${voucher.voucherId}`,
-          JSON.stringify({
-            name: formValue.name,
-            discountPercent: formValue.discountPercent,
-            quantity: formValue.quantity,
-            createDate: new Date(formValue.createDate),
-            endDate: new Date(formValue.endDate),
-            status: formValue.status,
-            // discountCode: formValue.discountCode,
-            discountCode: 'DISCOUNTCODE-'+ formValue.discountPercent.toLocaleString(),
-            activeDate: new Date(formValue.activeDate),
-            createdBy: formValue.createdBy?.username,
-          }), {
-          headers: {
-            Accept: "application/json, text/plain, */*",
-            "Content-Type": "application/json",
-          },
-        });
+        // if(flag){
+        if(FL === true){
+          const endDate = new Date(formValue.endDate);
+          const currentDate = new Date();
+          if (endDate >= currentDate) {
+          await axios.put(`${BASE_URL}rest/update/voucher/${voucher.voucherId}`,
+            JSON.stringify({
+              name: formValue.name,
+              discountPercent: formValue.discountPercent,
+              quantity: formValue.quantity,
+              createDate: new Date(formValue.createDate),
+              endDate: new Date(formValue.endDate),
+              status: formValue.status,
+              discountCode: 'DISCOUNTCODE-'+ formValue.discountPercent.toLocaleString(),
+              activeDate: new Date(formValue.activeDate),
+              createdBy: formValue.createdBy?.username,
+              flag: FL
+            }), {
+            headers: {
+              Accept: "application/json, text/plain, */*",
+              "Content-Type": "application/json",
+            },
+          }); 
+        }
+        }else{
+
+          await axios.put(`${BASE_URL}rest/update/voucher/${voucher.voucherId}`,
+            JSON.stringify({
+              name: formValue.name,
+              discountPercent: formValue.discountPercent,
+              quantity: formValue.quantity,
+              createDate: new Date(formValue.createDate),
+              endDate: new Date(formValue.endDate),
+              status: formValue.status,
+              // discountCode: formValue.discountCode,
+              discountCode: 'DISCOUNTCODE-'+ formValue.discountPercent.toLocaleString(),
+              activeDate: new Date(formValue.activeDate),
+              createdBy: formValue.createdBy?.username,
+            }), {
+            headers: {
+              Accept: "application/json, text/plain, */*",
+              "Content-Type": "application/json",
+            },
+          });
+        }
       }
       toast.success("Cập nhật mã giảm giá thành công!");
       onFetch();
@@ -279,6 +306,14 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
       toast.warning("Ngày kích hoạt không thể là quá khứ");
       return false;
     }
+
+    // if(endDate < activeDate ){
+    // toast.info('ac date '+ activeDate)
+    // toast.info('endDate date '+ endDate)
+    if(activeDate >= endDate ){
+      toast.warning("Ngày kết thúc phải lớn hơn ngày hoạt động");
+      return false;
+    }
   
     // Kiểm tra trạng thái
     if (!formValue.status) {
@@ -300,6 +335,9 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
         toast.warning("Ngày hết hạn nhỏ hơn ngày hiện tại!");
         return false;
       }
+      if (!isValidate()) {
+        return
+      }
       handleUpdateVoucher();
     } else {
       if (!isValidate()) {
@@ -309,14 +347,50 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
     }
     handleClose();
   };
+let FL = false;
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+   
     setFormValue((prevState) => ({
       ...prevState,
       [name]: value,
     }));
+    // handleClose()
   };
+
+  const handleChangeCbo = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+   
+    setFormValue((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+    confirmInactiveVoucher();
+    handleClose()
+  };
+  const confirmInactiveVoucher =  () => {
+    if (formValue.status === "active") {
+      const endDate = new Date(formValue.endDate);
+      const currentDate = new Date();
+      if (endDate >= currentDate) {
+        const confirm = window.confirm(
+          "Voucher đang có hiệu lực và còn hạn. Bạn có chắc muốn chuyển sang trạng thái 'inactive' không?"
+        );
+        if (!confirm) {
+          return;
+        }else{
+            // setFlag(true);
+            FL = true;
+            // handleUpdateVoucher();
+            setTimeout(() => {
+              handleUpdateVoucher(); // Đảm bảo flag được cập nhật trước khi gọi handleUpdateVoucher
+            }, 0);
+        }
+      }
+    }
+  };
+  
 
   const option = [
     { label: "Chưa hiệu lực", value: "inactive" },
@@ -438,10 +512,25 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
                     onChange={handleChange}
                     min={new Date().toISOString().split("T")[0]}
                     // max={new Date(formValue?.endDate).toISOString().split("T")[0]}
+                    // disabled={
+                    //   new Date(new Date(formValue.endDate).setHours(0, 0, 0, 0)).getTime() >= new Date().setHours(0, 0, 0, 0)
+                    //    && formValue.status === 'inactive' ? false :
+                    //   new Date(new Date(formValue.activeDate).setHours(0, 0, 0, 0)).getTime() < new Date().setHours(0, 0, 0, 0)
+                    //   ? true : false
+                    // }
                     disabled={
-                      formValue.activeDate &&
-                      new Date(formValue.activeDate).getTime() < new Date().setHours(0, 0, 0, 0)
-                    } />
+                      new Date(new Date(formValue.endDate).setHours(0, 0, 0, 0)).getTime() > new Date().setHours(0, 0, 0, 0) &&
+                      formValue.status === 'inactive'
+                        ? false
+                        : new Date(new Date(formValue.endDate).setHours(0, 0, 0, 0)).getTime() === new Date().setHours(0, 0, 0, 0) &&
+                          formValue.status === 'inactive'
+                        ? true // Disable khi endDate = ngày hiện tại
+                        : new Date(new Date(formValue.activeDate).setHours(0, 0, 0, 0)).getTime() < new Date().setHours(0, 0, 0, 0)
+                        ? true
+                        : false
+                    }
+                    
+                    />
                   <Form.Label>
                     Ngày Kích Hoạt <b className="text-danger">*</b>
                   </Form.Label>
@@ -460,7 +549,7 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
                     }
                     onChange={handleChange}
                     // min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate() + 1)).toISOString().split("T")[0]}                   />
-                    min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate())).toISOString().split("T")[0]} />
+                    min={new Date(new Date(formValue?.activeDate).setDate(new Date(formValue?.activeDate).getDate() + 1)).toISOString().split("T")[0]} />
                   <Form.Label>
                     Ngày hết hạn <b className="text-danger">*</b>
                   </Form.Label>
@@ -492,7 +581,7 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
                     as="select"
                     name="status"
                     value={formValue.status}
-                    onChange={handleChange}
+                    onChange={handleChangeCbo}
                   >
                     {option.map((opt, idx) => (
                       <option key={idx} value={opt.value}>

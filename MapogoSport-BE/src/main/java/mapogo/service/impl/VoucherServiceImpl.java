@@ -55,9 +55,8 @@ public class VoucherServiceImpl implements VoucherService{
 	    // Kiểm tra và cập nhật trạng thái hết hạn
 	    for (Voucher voucher : vouchers) {
 //	    	System.err.println("voucher end date "+ voucher.getEndDate());
-	        if (voucher.getEndDate() != null && voucher.getEndDate().toLocalDate().isBefore(today)) {
+	        if (voucher.getEndDate() != null && voucher.getEndDate().toLocalDate().isBefore(today) || voucher.getEndDate().toLocalDate().isEqual(today) ) {
 	            voucher.setStatus("inactive");
-//	            System.err.println("Trag thái mưới" + voucher.getStatus());
 	            dao.save(voucher); // Lưu lại trạng thái mới
 	        }
 //	        else if(voucher.getActiveDate().toLocalDate().isEqual(today)) {
@@ -274,18 +273,37 @@ public class VoucherServiceImpl implements VoucherService{
 	        LocalDate activeDateOnly = voucher.getActiveDate().toLocalDate();
 	        LocalDate createDateOnly = voucher.getCreateDate().toLocalDate();
 	        LocalDate endDateOnly = voucher.getEndDate().toLocalDate();
+	        LocalDate curentDateOnly = LocalDate.now();
 
-//	        if (activeDateOnly.isEqual(createDateOnly) && activeDateOnly.isBefore(endDateOnly)) {
-//	            voucher.setStatus("active");
-//	        } else if (activeDateOnly.isAfter(createDateOnly)) {
-//	            voucher.setStatus("inactive");
-//	        } 
-	     // Cập nhật trạng thái dựa trên activeDate và endDate
-	        if (!activeDateOnly.isBefore(createDateOnly) && activeDateOnly.isBefore(endDateOnly)) {
-	            voucher.setStatus("active");
-	        } else {
-	            voucher.setStatus("inactive");
-	        }
+	        System.err.println("createDateOnly "+ createDateOnly);
+	        System.err.println("activeDateOnly "+ activeDateOnly);
+		    System.err.println("endDateOnly day "+ endDateOnly);
+		    System.err.println("curentDateOnly "+curentDateOnly);
+
+		    
+//		    if ((curentDateOnly.isEqual(activeDateOnly) || curentDateOnly.isAfter(activeDateOnly)) && 
+//		    	    (curentDateOnly.isEqual(endDateOnly) || curentDateOnly.isBefore(endDateOnly))) {
+//		    	    voucher.setStatus("active");
+//		    	} else {
+//		    	    voucher.setStatus("inactive");
+//		    	}
+			if(bd.containsKey("flag")) {
+				 voucher.setStatus("inactive");
+			}else {
+				    if (activeDateOnly.equals(createDateOnly) && 
+					    	    activeDateOnly.equals(endDateOnly) && 
+					    	    curentDateOnly.equals(activeDateOnly)) {
+					    	    // Trường hợp tất cả ngày trùng nhau, đặt là "inactive"
+					    	    voucher.setStatus("inactive");
+					    	} else if ((curentDateOnly.isEqual(activeDateOnly) || curentDateOnly.isAfter(activeDateOnly)) && 
+					    	           (curentDateOnly.isEqual(endDateOnly) || curentDateOnly.isBefore(endDateOnly))) {
+					    	    voucher.setStatus("active");
+					    	} else {
+					    	    voucher.setStatus("inactive");
+					    	}
+			}
+		
+
 	    }
 	    
 	    if (bd.containsKey("createdBy")) {
