@@ -79,7 +79,7 @@ const VoucherPage = () => {
   };
 
   const handleDelete = async (voucherId: number) => {
-    if (window.confirm('Bạn có chắc muốn xóa địa chỉ này?')) {
+    if (window.confirm('Bạn có chắc muốn voucher này?')) {
       fetch(`${BASE_URL}rest/delete/voucher/${voucherId}`, {
         method: 'PUT',
         headers: {

@@ -54,6 +54,12 @@ const AdminProduct = () => {
       revalidateOnReconnect: false,
     }
   );
+  const findAll =()=>{
+    mutate();
+    setSelectedType(0)
+    setSearchTerm('')
+  }
+  
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value.toLowerCase());
@@ -204,7 +210,7 @@ const AdminProduct = () => {
   };
 
   const markProductAsOutOfStock = async (productId: number) => {
-    if (window.confirm('Bạn có chắc muốn xóa loại sân này?')) {
+    if (window.confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
       await fetch(`${BASE_URL}rest/products/${productId}/mark-as-out-of-stock`, {
         method: 'PUT',
         headers: {
@@ -256,7 +262,7 @@ const AdminProduct = () => {
         </div>
         <Nav variant="pills" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey as string)} className="custom-tabs my-3">
           <Nav.Item>
-            <Nav.Link eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
+            <Nav.Link onClick={findAll} eventKey="all" className="tab-link">Toàn bộ</Nav.Link>
           </Nav.Item>
           <Nav.Item>
             <Nav.Link eventKey="inStock" className="tab-link">Còn hàng</Nav.Link>
