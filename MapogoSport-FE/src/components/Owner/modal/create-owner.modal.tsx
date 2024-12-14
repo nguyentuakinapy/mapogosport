@@ -59,14 +59,13 @@ const CreateOwnerModal = (props: OwnerProps) => {
     }
 
     const handleClick = (ap: AccountPackage) => {
-        // toast.success(ap.packageName)
         setAccountPackageTemporary(ap);
         setPage(false);
     }
 
     //Myj
 
-    const createOwnerAccount = async () => {
+    const createOwnerAccount = async (apTemp: AccountPackage) => {
         const responseUserSubscription = await fetch(`${BASE_URL}rest/user/subscription`, {
             method: 'POST',
             headers: {
@@ -74,10 +73,10 @@ const CreateOwnerModal = (props: OwnerProps) => {
                 'Content-Type': 'application/json' // Không cần charset=UTF-8
             },
             body: JSON.stringify({
-                accountPackageId: accountPackageTemporary?.accountPackageId,
+                accountPackageId: apTemp.accountPackageId,
                 username: userData?.username,
                 startDay: new Date().toLocaleDateString(),
-                endDay: accountPackageTemporary?.price === 0 ? '9999-12-31' : new Date(new Date().setDate(new Date().getDate() + (accountPackageTemporary?.durationDays || 0))).toLocaleDateString(),
+                endDay: new Date(new Date().setDate(new Date().getDate() + (apTemp.durationDays || 0))).toLocaleDateString(),
                 status: 'Đã thanh toán'
             })
         })
@@ -177,13 +176,13 @@ const CreateOwnerModal = (props: OwnerProps) => {
 
 
     const handleSubmit = async () => {
-        if (checkPaymentMethod) {
-            if (accountPackageTemporary?.price === 0) {
-                await createOwnerAccount();
+        if (checkPaymentMethod && accountPackageTemporary) {
+            if (accountPackageTemporary.price === 0) {
+                await createOwnerAccount(accountPackageTemporary);
                 window.location.href = '/owner'
             } else {
                 if (userData && accountPackageTemporary && userData.wallet.balance >= accountPackageTemporary.price) {
-                    await createOwnerAccount();
+                    await createOwnerAccount(accountPackageTemporary);
                     const responseWallet = await fetch(`${BASE_URL}rest/wallet/create/owner/${userData?.username}/${accountPackageTemporary?.price}`, {
                         method: 'PUT',
                         headers: {
@@ -201,15 +200,15 @@ const CreateOwnerModal = (props: OwnerProps) => {
                     toast.warning("Số dư của bạn không đủ");
                 }
             }
-        } else {
+        } else if (accountPackageTemporary) {
             if (paymentMethodId === 0) {
                 toast.warning("Vui lòng chọn phương thức thanh toán!");
                 return;
             }
-            if (accountPackageTemporary?.price === 0) {
-                await createOwnerAccount();
+            if (accountPackageTemporary.price === 0) {
+                await createOwnerAccount(accountPackageTemporary);
             } else {
-                const accountData = await createOwnerAccount();
+                const accountData = await createOwnerAccount(accountPackageTemporary);
                 try {
                     const responsePayment = await fetch(`${BASE_URL}rest/subscription/payment`, {
                         method: 'POST',
@@ -284,7 +283,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                 <Col>
                                     <div className="form-floating mb-3">
                                         <input type="text" className="form-control"
-                                            value={userData?.gender == 0 ? 'Nam' : 'Nữ'} disabled
+                                            value={userData?.gender === null ? "Không có" : userData?.gender === 0 ? 'Nam' : 'Nữ'} disabled
                                         />
                                         <label>Giới tính </label>
                                     </div>
