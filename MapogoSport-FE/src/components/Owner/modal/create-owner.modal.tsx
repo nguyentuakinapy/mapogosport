@@ -87,7 +87,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
 
         const resSubscription = await responseUserSubscription.json() as UserSubscription;
         const userSubscriptionId = resSubscription.userSubscriptionId;
-        console.log(">>>>resSubscription: ", resSubscription);
+        // console.log(">>>>resSubscription: ", resSubscription);
 
         const responseOwner = await fetch(`${BASE_URL}rest/owner`, {
             method: 'POST',
@@ -381,7 +381,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                     <select value={paymentMethodId}
                                         onChange={(e) => {
                                             const value = Number(e.target.value);
-                                            console.log("Selected value:", value);
+                                            // console.log("Selected value:", value);
                                             setPaymentMethodId(value);
                                         }}
                                         className="form-select" aria-label="Default select example">

@@ -506,7 +506,7 @@ const BookingModal = (props: OwnerProps) => {
                 }
                 // console.log(`Khoảng cách giữa hai ngày là: ${timeIndex} ngày`);
 
-                console.log('bookingBySubscriptionKey', bookingBySubscriptionKey);
+                // console.log('bookingBySubscriptionKey', bookingBySubscriptionKey);
 
                 // // Biến lưu trữ booking có ngày sớm nhất
                 // let earliestBooking = bookingBySubscriptionKey[0];
@@ -541,7 +541,7 @@ const BookingModal = (props: OwnerProps) => {
 
                 const bk = bookingBySubscriptionKey.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-                console.log('bk', bk[0].date);
+                // console.log('bk', bk[0].date);
 
                 const dateTemporaryChecked = new Date(bk[0].date);
                 dateTemporaryChecked.setDate(dateTemporaryChecked.getDate() + timeIndex);

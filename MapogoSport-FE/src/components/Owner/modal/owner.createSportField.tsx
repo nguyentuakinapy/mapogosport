@@ -189,7 +189,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
 
     const checkForm = () => {
         setLoading(true);
-        console.log(fieldName);
+        // console.log(fieldName);
 
         const errors = [];
 
@@ -257,7 +257,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                 },
             })
                 .then(response => {
-                    console.log("Thông tin sân đã được lưu thay đổi:", response.data);
+                    // console.log("Thông tin sân đã được lưu thay đổi:", response.data);
                     mutate(`${BASE_URL}rest/sportfields/lists/${username}`);
                     handleClose();
                 })
@@ -303,7 +303,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                 },
             })
                 .then(response => {
-                    console.log("Thông tin sân đã được lưu:", response.data);
+                    // console.log("Thông tin sân đã được lưu:", response.data);
                     mutate(`${BASE_URL}rest/sportfields/lists/${username}`);
                     handleClose();
                 })

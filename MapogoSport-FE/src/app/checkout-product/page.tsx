@@ -11,7 +11,6 @@ import ModalOrderSuccess from '@/components/ModalOrder/modal.Success';
 import Link from 'next/link';
 import Image from 'next/image';
 import { fetchLocationCurrent } from '../utils/LocationCurrent';
-import { log } from 'node:console';
 
 const CheckoutPage = () => {
   const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -144,7 +143,7 @@ const CheckoutPage = () => {
     setSelectedWard(wardName);
     const addressParts = [addressDetail, wardName, selectedDistrict, selectedProvince];
     const address1 = addressParts.filter(part => part).join(', ');
-    console.log(address1);
+    // console.log(address1);
 
     fetchCoordinatesForFields(address1);
   };
@@ -265,7 +264,7 @@ const CheckoutPage = () => {
       }
       setShippingFee(fee);
       setNewTotalPrice(newTotalPrice + fee)
-      console.log(": distance", distance);
+      // console.log(": distance", distance);
 
     }
 
@@ -273,7 +272,7 @@ const CheckoutPage = () => {
 
   const fetchCoordinatesForFields = async (fullAddress: string) => {
     try {
-      console.log("fullAddress", fullAddress);
+      // console.log("fullAddress", fullAddress);
 
       const coordUser = await fetchLocationCurrent(fullAddress);
       const coordAdmin = await fetchLocationCurrent("Tô Ký, Tân Chánh Hiệp, Quận 12, Thành phố Hồ Chí Minh");
@@ -282,8 +281,8 @@ const CheckoutPage = () => {
         setAdminLocation({ lat: coordAdmin?.lat, lng: coordAdmin?.lon });
 
       }
-      console.log("userLocation", coordUser?.lat, coordUser?.lon);
-      console.log("adminLocation;", coordAdmin?.lat, coordAdmin?.lon);
+      // console.log("userLocation", coordUser?.lat, coordUser?.lon);
+      // console.log("adminLocation;", coordAdmin?.lat, coordAdmin?.lon);
 
     } catch (error) {
       console.error("Error fetching coordinates: ", error);
@@ -352,7 +351,7 @@ const CheckoutPage = () => {
           },
         }
       );
-      console.log("Dữ liệu trả về từ API ORDERDETAIL:", response.data);
+      // console.log("Dữ liệu trả về từ API ORDERDETAIL:", response.data);
       localStorage.removeItem('listCartCheckout');
       return response.data; // Trả về thông tin đơn hàng
     } catch (error) {
@@ -451,7 +450,7 @@ const CheckoutPage = () => {
             username
           }
         );
-        console.log('Payment Response:', paymentResponse.data);
+        // console.log('Payment Response:', paymentResponse.data);
         const paymentUrl = paymentResponse.data.url;
         // chuyển hướng đến URL thanh toán
         window.location.href = paymentUrl;
@@ -470,7 +469,7 @@ const CheckoutPage = () => {
             username
           }
         );
-        console.log('Payment Response:', paymentResponse.data);
+        // console.log('Payment Response:', paymentResponse.data);
         const paymentUrl = paymentResponse.data.payUrl;
         // chuyển hướng đến URL thanh toán
         window.location.href = paymentUrl;

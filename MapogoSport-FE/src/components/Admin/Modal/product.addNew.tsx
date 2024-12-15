@@ -366,7 +366,7 @@ const ProductAddNew = (props: UserProps) => {
       const file = e.target.files[0];
       setPreviewImageProductColor(URL.createObjectURL(file)); // Tạo URL xem trước
       setImageProductDetail(file);
-      console.log('dddd=>>>>>, ', file);
+      // console.log('dddd=>>>>>, ', file);
 
     }
   };
@@ -548,12 +548,12 @@ const ProductAddNew = (props: UserProps) => {
           }
         );
       } else if (currentProduct) {
-        console.log('prod₫>>>>>>>>: ', productDetails?.length);
+        // console.log('prod₫>>>>>>>>: ', productDetails?.length);
 
         // Trường hợp sản phẩm chưa có ProductDetail nào
         if (!productDetails || productDetails.length === 0) {
           // Chỉ cho phép nếu có đủ thông tin để tạo ProductDetail mới
-          console.log('pro dang tróng ');
+          // console.log('pro dang tróng ');
 
           if (
             newColor !== "" &&
@@ -563,19 +563,19 @@ const ProductAddNew = (props: UserProps) => {
             canProceed = true; // Cho phép thêm ProductDetail mới nếu đủ thông tin
           }
         } else {
-          console.log('pro ko tróng ');
+          // console.log('pro ko tróng ');
 
           // Nếu sản phẩm đã tồn tại ProductDetail
           if (productDetails.length < 0) {
 
             if (!selectedProductDetail) {
-              console.log('chưa chọn product detail');
+              // console.log('chưa chọn product detail');
 
               // Nếu `selectedProductDetail` là mảng rỗng, kiểm tra các điều kiện để thêm mới
               if (newColor !== "" && selectedGalleryFiles.length > 0 && previewImageProductColor !== null) {
                 canProceed = true; // Có đủ thông tin để thêm mới
               } else {
-                console.log('chạy vòa can ₫ false');
+                // console.log('chạy vòa can ₫ false');
                 canProceed = false; // Ngăn việc tạo mới khi thiếu thông tin
               }
             } else {

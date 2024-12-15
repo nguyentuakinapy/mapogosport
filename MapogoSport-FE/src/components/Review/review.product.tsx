@@ -109,7 +109,7 @@ const ModalReviewProductField = (props: ReviewProps) => {
                 }
 
                 mutate(`${BASE_URL}rest/user/productReview/${idProduct}`)
-                console.log("Đánh giá đã được gửi thành công");
+                // console.log("Đánh giá đã được gửi thành công");
                 handleClose();
                 toast.success("Gửi đánh giá thành công!");
             } catch (error) {
