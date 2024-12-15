@@ -71,24 +71,24 @@ const Categories = () => {
             return (
                 <Col key={product.productId} lg={3} md={4} sm={6} xs={12} className="mb-4">
                     <div className='product-card'>
-                        <Link href={`/categories/products/detail/${product.productId}`} >
-                            <div className='product-card-inner'>
+                        <div className='product-card-inner'>
+                            <Link href={`/categories/products/detail/${product.productId}`} >
                                 <Image className="image-front" alt={product.name} width={250} height={250} src={String(product.image)} />
-                                <h4 className='product-category'>{product.categoryProduct.name}</h4>
-                                <h3 className='product-title'>{product.name}</h3>
-                                <div className='product-price'>{formatPrice(product.price)}</div>
-                                <div className="star-item d-flex ms-1">
-                                    <div className="icon text-warning">
-                                        {[...Array(fullStars)].map((_, i) => <i key={`full-${i}`} className="bi bi-star-fill"></i>)}
-                                        {hasHalfStar && <i className="bi bi-star-half"></i>}
-                                        {[...Array(emptyStars)].map((_, i) => <i key={`empty-${i}`} className="bi bi-star"></i>)}
-                                    </div>
+                            </Link>
+                            <h4 className='product-category'>{product.categoryProduct.name}</h4>
+                            <h3 className='product-title'>{product.name}</h3>
+                            <div className='product-price'>{formatPrice(product.price)}</div>
+                            <div className="star-item d-flex ms-1">
+                                <div className="icon text-warning">
+                                    {[...Array(fullStars)].map((_, i) => <i key={`full-${i}`} className="bi bi-star-fill"></i>)}
+                                    {hasHalfStar && <i className="bi bi-star-half"></i>}
+                                    {[...Array(emptyStars)].map((_, i) => <i key={`empty-${i}`} className="bi bi-star"></i>)}
                                 </div>
                             </div>
-                            <div className='product-card-action px-1'>
-                                <Link className='button-ajax' href={`/categories/products/detail/${product.productId}`}>Xem</Link>
-                            </div>
-                        </Link>
+                        </div>
+                        <div className='product-card-action px-1'>
+                            <Link className='button-ajax' href={`/categories/products/detail/${product.productId}`}>Xem</Link>
+                        </div>
                     </div>
                 </Col>
             );

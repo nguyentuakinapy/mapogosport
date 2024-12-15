@@ -68,7 +68,7 @@ const PageVoucher = () => {
             const data = await response.json();
             setVoucher(data);
         } catch (error) {
-            console.log("Error fetch voucher data", error)
+            // console.log("Error fetch voucher data", error)
         }
     }
      
@@ -78,7 +78,7 @@ const PageVoucher = () => {
         try {
             const response = await fetch(`${BASE_URL}rest/user/voucher/${username}`)
             const data = await response.json();
-            console.log("Voucher user received: ",data)
+            // console.log("Voucher user received: ",data)
             setReceivedVoucher(data)
            
         } catch (error) {

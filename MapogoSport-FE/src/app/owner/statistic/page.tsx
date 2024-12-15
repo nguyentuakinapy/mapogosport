@@ -103,7 +103,7 @@ export default function Home() {
           const data = await response.json();
           setBookingSuccess(data);
         } catch (error) {
-          console.log("Error fetching revenue", error);
+          // console.log("Error fetching revenue", error);
         }
       };
       fetchData();
@@ -124,9 +124,9 @@ export default function Home() {
           }
           const data = await response.json();
           setSportFieldByOwner(data);
-          console.log("Field Owner Data:", data);
+          // console.log("Field Owner Data:", data);
         } catch (error) {
-          console.log("Error fetching sport field data", error);
+          // console.log("Error fetching sport field data", error);
         }
       };
       fetchData();
@@ -153,7 +153,7 @@ export default function Home() {
           const ids = data.sportFielDetails.map((detail: SportFieldDetail) => detail.sportFielDetailId);
           setSportFieldDetailIds(ids);
         } catch (error) {
-          console.log("error fetch bookingdetail", error);
+          // console.log("error fetch bookingdetail", error);
           setSportFieldDetailIds([]);
         }
       };
@@ -173,7 +173,7 @@ export default function Home() {
           const data = await response.json();
           setBookingdetailBySportField(data);
         } catch (error) {
-          console.log("error fetch bookingdetail", error);
+          // console.log("error fetch bookingdetail", error);
           setBookingdetailBySportField([]);
         }
       };
@@ -204,7 +204,7 @@ export default function Home() {
           ];
           setChartData(formattedData);
         } catch (error) {
-          console.log("error fetch ", error);
+          // console.log("error fetch ", error);
           setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
         }
       };
@@ -252,7 +252,7 @@ export default function Home() {
             setBookingSuccessByDate(data);
           }
         } catch (error) {
-          console.log("Error fetching revenue", error);
+          // console.log("Error fetching revenue", error);
           setBookingSuccessByDate([]);
         }
       };
@@ -380,7 +380,7 @@ export default function Home() {
           const data = await response.json();
           setBookingDetailBySpFDetail(data); // Store modal-specific data
         } catch (error) {
-          console.log("Error fetching modal booking details by date", error);
+          // console.log("Error fetching modal booking details by date", error);
         }
       };
 
@@ -393,7 +393,7 @@ export default function Home() {
           const data = await response.json();
           setBookingDetailBySpFDetail(data);
         } catch (error) {
-          console.log("Error fetching modal booking details", error);
+          // console.log("Error fetching modal booking details", error);
         }
       };
 
@@ -415,7 +415,7 @@ export default function Home() {
           const data = await response.json();
           setTotalCustomer(data);
         } catch (error) {
-          console.log("Lỗi khi lấy data totalCustomer", error)
+          // console.log("Lỗi khi lấy data totalCustomer", error)
         }
       }
       fetchData()
@@ -439,7 +439,7 @@ export default function Home() {
           ...Object.entries(data).map(([month, count]) => [parseInt(month), Number(count)] as CustomerChartRow)];
           setCustomerData(formattedData)
         } catch (error) {
-          console.log("Lỗi fetch data của customer by month", error)
+          // console.log("Lỗi fetch data của customer by month", error)
         }
       }
       fetchData()
@@ -462,7 +462,7 @@ export default function Home() {
 
           setRankCustomerOffline(data);
         } catch (error) {
-          console.log("Error fetch data rank customer", error)
+          // console.log("Error fetch data rank customer", error)
         }
       }
       fetchData()
@@ -477,10 +477,10 @@ export default function Home() {
           const response = await fetch(`${BASE_URL}rest/booking/rank/customer/online/byOwerId/${owner?.ownerId}`)
           const data = await response.json()
           setRankCustomerOnline(data)
-          console.log(data);
+          // console.log(data);
 
         } catch (error) {
-          console.log("Error fetch data rank customer", error)
+          // console.log("Error fetch data rank customer", error)
         }
       }
       fetchData()
@@ -497,7 +497,7 @@ export default function Home() {
         const data = await response.json();
         setBookingByUsernameModal(data);
       } catch (error) {
-        console.log("Error fetching modal booking details", error);
+        // console.log("Error fetching modal booking details", error);
       }
     };
     fetchModalData();
@@ -518,7 +518,7 @@ export default function Home() {
         const data = await response.json();
         setBookingByFullNameOffline(data);
       } catch (error) {
-        console.log("Error fetching modal booking details", error);
+        // console.log("Error fetching modal booking details", error);
       }
     };
     fetchModalData();
@@ -636,7 +636,7 @@ export default function Home() {
       toast.success("Đã xuất file PDF thành công!");
     } catch (error) {
       toast.error("Đã xảy ra lỗi trong quá trình xuất file! Vui lòng thử lại sau!");
-      console.log(error)
+      // console.log(error)
     }
 
   };
@@ -729,7 +729,7 @@ export default function Home() {
       toast.success("Đã xuất file PDF thành công!");
     } catch (error) {
       toast.error("Đã xảy ra lỗi trong quá trình xuất file! Vui lòng thử lại sau!");
-      console.log(error)
+      // console.log(error)
     }
 
   };

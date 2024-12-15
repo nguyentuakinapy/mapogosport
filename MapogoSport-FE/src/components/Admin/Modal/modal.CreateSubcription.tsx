@@ -136,8 +136,8 @@ const ModalCreateSubcription = (props: createSubcription) => {
     const handleCreateSave = async () => {
 
         // Log dữ liệu nhập vào
-        console.log("Dữ liệu gói đăng ký:", newPackage);
-        console.log("Dữ liệu lợi ích đã chọn:", benefitSelections);
+        // console.log("Dữ liệu gói đăng ký:", newPackage);
+        // console.log("Dữ liệu lợi ích đã chọn:", benefitSelections);
         // Step 1: Validate mandatory fields
         if (!newPackage || !newPackage.packageName || !newPackage.price || !newPackage.durationDays || !newPackage.limitBookings || newPackage.limitSportFields === 0) {
             toast.error("Vui lòng điền đầy đủ thông tin gói đăng ký!");

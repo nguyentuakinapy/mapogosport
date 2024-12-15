@@ -150,10 +150,9 @@ export default function Login(props: LoginProps) {
             setUsername(parsedUserData.username);
             setPassword(parsedUserData.password);
             setCheckRememberMe(true);
-            console.log("Dữ liệu người dùng từ cookie:", parsedUserData);
-        } else {
-            console.log("Không có dữ liệu người dùng trong cookie.");
+            // console.log("Dữ liệu người dùng từ cookie:", parsedUserData);
         }
+
     }
 
     useEffect(() => {

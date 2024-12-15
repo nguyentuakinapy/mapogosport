@@ -115,13 +115,13 @@ const Bookings = () => {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
 
-    useEffect(() => {
-        if (currentItems) {
-            currentItems.map((booking) => (
-                console.log(booking.bookingDetails)
-            ))
-        }
-    }, [currentItems]);
+    // useEffect(() => {
+    //     if (currentItems) {
+    //         currentItems.map((booking) => (
+    //             console.log(booking.bookingDetails)
+    //         ))
+    //     }
+    // }, [currentItems]);
 
     const handleStatusChange = (bookingId: number, refundAmount: number) => {
         fetch(`${BASE_URL}rest/owner/booking/update`, {

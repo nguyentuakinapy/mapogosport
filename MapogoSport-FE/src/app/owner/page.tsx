@@ -92,7 +92,7 @@ export default function Owner() {
                 if (!res.ok) {
                     const errorText = await res.text();
                     toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
-                    console.log(errorText);
+                    // console.log(errorText);
                     handleCloseModal();
                 }
 
@@ -109,7 +109,7 @@ export default function Owner() {
                 }
             }).catch((error) => {
                 toast.error(`Đã xảy ra lỗi: ${error.message}`);
-                console.log(error);
+                // console.log(error);
                 handleCloseModal();
             });
         } else {

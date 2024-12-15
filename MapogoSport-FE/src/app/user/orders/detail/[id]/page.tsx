@@ -60,7 +60,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
 
 
     const handleCancelOrder = (reason: string) => {
-        console.log("Lý do hủy:", reason);
+        // console.log("Lý do hủy:", reason);
         fetch(`${BASE_URL}rest/order/cancel`, {
             method: 'PUT',
             headers: {

@@ -54,7 +54,7 @@ export default function OwnerLayout({
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude, accuracy } = position.coords;
-                        console.log(`Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`);
+                        // console.log(`Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`);
                         fetchWeather(latitude, longitude);
                     },
                     (err) => {

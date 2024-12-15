@@ -44,7 +44,7 @@ const BookingModal = (props: BookingProps) => {
             let operatingTime: number = 0;
 
             if (startTime && sport.closing) {
-                console.log(startTime, sport.closing);
+                // console.log(startTime, sport.closing);
 
                 const [openHour, openMinute] = startTime.split("h").map(Number);
                 const [closeHour, closeMinute] = sport.closing.split("h").map(Number);
@@ -296,7 +296,7 @@ const BookingModal = (props: BookingProps) => {
                 const peakHourEnd = sportDetail.peakHour.split('-')[1];
 
                 const timeSlots: string[] = createTimeStringH(`${hours}h${minutes > 0 ? minutes : '00'}`, `${endHour}h${endMinute > 0 ? endMinute : '00'}`)
-                console.log(timeSlots);
+                // console.log(timeSlots);
 
                 const price = sportDetail.price / 2;
                 const pricePeakHour = sportDetail.peakHourPrices / 2;

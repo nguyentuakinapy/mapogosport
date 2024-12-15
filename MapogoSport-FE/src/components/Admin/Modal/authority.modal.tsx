@@ -28,7 +28,7 @@ const Authority = (props: UserProps) => {
 
     useEffect(() => {
         if (user) {
-            console.log(user);
+            // console.log(user);
             setEnabled(!!user.enabled)
             const userRoles = user.authorities.map(auth => auth.role.name);
             setSelectedRoles(userRoles);
@@ -53,8 +53,8 @@ const Authority = (props: UserProps) => {
 
     const handleSave = async () => {
         if (!user) return;
-        console.log("trước:", selectedRoles);
-        console.log("enabled: ", enabled);
+        // console.log("trước:", selectedRoles);
+        // console.log("enabled: ", enabled);
 
         try {
             await axios.post(`${BASE_URL}rest/update-user-authority/${user?.username}`,

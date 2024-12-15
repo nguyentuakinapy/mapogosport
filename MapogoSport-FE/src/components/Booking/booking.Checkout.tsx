@@ -157,7 +157,7 @@ const BookingModal = (props: BookingProps) => {
         }
         if (activeTab === 'byDay') {
             setDataTimeTemporary(newData.slice(1));
-            console.log(newData.slice(1));
+            // console.log(newData.slice(1));
 
         }
     }, [operatingTimeFetchData])
@@ -215,7 +215,7 @@ const BookingModal = (props: BookingProps) => {
                 const peakHourEnd = sportDetail.peakHour.split('-')[1];
 
                 const timeSlots: string[] = createTimeStringH(`${hours}h${minutes > 0 ? minutes : '00'}`, `${endHour}h${endMinute > 0 ? endMinute : '00'}`)
-                console.log(timeSlots);
+                // console.log(timeSlots);
 
                 const price = sportDetail.price / 2;
                 const pricePeakHour = sportDetail.peakHourPrices / 2;
@@ -261,7 +261,7 @@ const BookingModal = (props: BookingProps) => {
                     });
                     const responseData = await responsePayment.json();
                     const paymentUrl = responseData.url;
-                    console.log(paymentUrl);
+                    // console.log(paymentUrl);
 
                     // chuyển hướng đến URL thanh toán
                     window.location.href = paymentUrl;
@@ -475,7 +475,7 @@ const BookingModal = (props: BookingProps) => {
                     });
                     const responseData = await responsePayment.json();
                     const paymentUrl = responseData.url;
-                    console.log(paymentUrl);
+                    // console.log(paymentUrl);
 
                     // chuyển hướng đến URL thanh toán
                     window.location.href = paymentUrl;
@@ -607,7 +607,7 @@ const BookingModal = (props: BookingProps) => {
                 return;
             }
             const amountToPay = checkPrepayPrice && prepayPrice !== undefined ? prepayPrice : totalAmount;
-            console.log("paymentMethod.name", paymentMethod.name);
+            // console.log("paymentMethod.name", paymentMethod.name);
 
             if (!userData?.wallet?.balance && paymentMethod.name === 'Thanh toán ví' ||
                 paymentMethod.name === 'Thanh toán ví' && userData && userData.wallet.balance < amountToPay) {
@@ -656,7 +656,7 @@ const BookingModal = (props: BookingProps) => {
             }
 
         } catch (error) {
-            console.log(error);
+            // console.log(error);
         }
     }
 

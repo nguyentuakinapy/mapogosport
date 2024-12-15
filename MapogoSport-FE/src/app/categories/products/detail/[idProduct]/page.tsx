@@ -9,11 +9,14 @@ import { toast } from "react-toastify";
 import useSWR, { mutate } from 'swr';
 import ModalReviewProductField from '@/components/Review/review.product';
 import Loading from '@/components/loading';
-import { decodeString } from '@/components/Utils/Format';
+import { decodeJson, decodeString } from '@/components/Utils/Format';
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
 
 const ProductDetail = () => {
     const [quantity, setQuantity] = useState<number>(1);
     const [open, setOpen] = useState(false);
+    const [userData, setUserData] = useState<User>();
 
     const decreaseQuantity = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
     const [modalShow, setModalShow] = useState<boolean>(false);
@@ -24,6 +27,31 @@ const ProductDetail = () => {
     const [visibleCount, setVisibleCount] = useState(5);
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    useEffect(() => {
+        const userSession = sessionStorage.getItem('user');
+        if (userSession) {
+            setUserData(JSON.parse(decodeJson(userSession)) as User);
+        }
+    }, [])
+
+    useEffect(() => {
+        const socket = new SockJS(`${BASE_URL}ws`); // Địa chỉ endpoint WebSocket
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            stompClient.subscribe('/topic/login', (message) => {
+                const userSession = sessionStorage.getItem('user');
+                if (userSession && message.body == decodeString(String(localStorage.getItem('username')))) {
+                    setUserData(JSON.parse(decodeJson(userSession)) as User);
+                }
+            });
+        });
+
+        return () => {
+            stompClient.disconnect();
+        };
+    }, []);
 
     const [selectedSizeQuantity, setSelectedSizeQuantity] = useState<number>(0);
     const increaseQuantity = () => {
@@ -86,11 +114,15 @@ const ProductDetail = () => {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
     });
-    const username = decodeString(String(localStorage.getItem('username')));
-    const { data: dataCart } = useSWR(username && `${BASE_URL}rest/cart/${username}`, fetcher);
 
+    const { data: dataCart } = useSWR(userData && `${BASE_URL}rest/cart/${userData.username}`, fetcher);
 
     const handleAddToCart = async () => {
+        if (!userData) {
+            toast.success("Bạn chưa đăng nhập!")
+            return
+        }
+
         const existingItem = dataCart?.find(
             (item: Cart) => item.productDetailSize.productDetailSizeId === selectedSize
         );
@@ -100,48 +132,43 @@ const ProductDetail = () => {
             return;
         }
 
+        if (selectedSizeQuantity <= 0) {
+            toast.info("Không thể thêm vào giỏ hàng vì size này đã hết. Vui lòng chọn 1 size khác")
+            return;
+        }
+        const dataAddCart = {
+            username: userData.username,
+            productDetailSizeId: selectedSize,
+            date: new Date(),
+            totalAmount: 150.00,
+            quantity: quantity
+        };
 
-        if (username) {
-            if (selectedSizeQuantity <= 0) {
-                toast.info("Không thể thêm vào giỏ hàng vì size này đã hết. Vui lòng chọn 1 size khác")
-                return;
-            }
-            const dataAddCart = {
-                username,
-                productDetailSizeId: selectedSize,
-                date: new Date(),
-                totalAmount: 150.00,
-                quantity: quantity
-            };
+        try {
+            const response = await fetch(`${BASE_URL}rest/cart/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dataAddCart)
+            });
 
-            try {
-                const response = await fetch(`${BASE_URL}rest/cart/add`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(dataAddCart)
-                });
-
-                if (!response.ok) {
-                    const errorMessage = await response.text();
-                    throw new Error(`Có lỗi xảy ra khi thêm giỏ hàng: ${errorMessage}`);
-                }
-
-
-                toast.success("Thêm sản phẩm vào giỏ hàng thành công!");
-                mutate(`${BASE_URL}rest/cart/${username}`);
-                mutate(`${BASE_URL}rest/cart/count/${username}`); // Tái tải dữ liệu
-
-            } catch (error) {
-                console.error("Lỗi khi gửi yêu cầu:", error);
-                alert("Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.");
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                throw new Error(`Có lỗi xảy ra khi thêm giỏ hàng: ${errorMessage}`);
             }
 
-        } else {
-            console.log("Người dùng chưa đăng nhập");
+
+            toast.success("Thêm sản phẩm vào giỏ hàng thành công!");
+            mutate(`${BASE_URL}rest/cart/${username}`);
+            mutate(`${BASE_URL}rest/cart/count/${username}`); // Tái tải dữ liệu
+
+        } catch (error) {
+            // console.error("Lỗi khi gửi yêu cầu:", error);
+            alert("Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.");
         }
     };
+
     const [filteredData, setFilteredData] = useState(null); // State to store filtered reviews
 
     const [selectedRatingFilter, setSelectedRatingFilter] = useState<number | null>(null); // `null` để hiển thị tất cả mặc định
@@ -151,7 +178,6 @@ const ProductDetail = () => {
             // Nếu đã chọn số sao này rồi, nhấn lại sẽ xóa bộ lọc
             setSelectedRatingFilter(null);
             setFilteredData(data); // Hiển thị lại tất cả bình luận
-            console.log("All reviews are displayed");
             return;
         }
 
@@ -163,25 +189,21 @@ const ProductDetail = () => {
                 const response = await axios.get(`${BASE_URL}rest/user/productReview/find-review-by-rating/${idProduct}/${value}`);
                 if (response.data) {
                     setFilteredData(response.data); // Cập nhật bình luận theo số sao
-                    console.log("Filtered reviews by rating:", response.data);
                 } else {
-                    console.log("No reviews found for this rating.");
                     setFilteredData(null); // Không có bình luận nào
                 }
             } catch (error) {
-                console.log("Error fetching rating data:", error);
+                
             }
         };
 
         fetchData();
-        console.log(`Rating selected: ${value}`);
+        
     };
 
     const handleChatMess = () => {
-        const username = localStorage.getItem('username');
-
-        if (username) {
-            if (decodeString(username) !== "myntd") {
+        if (userData) {
+            if (userData.username !== "myntd") {
                 window.history.pushState({}, "", `?status=default`);
             } else {
                 toast.info('Bạn không thể nhắn với chính mình ')

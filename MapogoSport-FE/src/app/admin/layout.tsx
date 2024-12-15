@@ -2,7 +2,7 @@ import AdminLayout from "@/components/Admin/AdminLayout"
 import './adminStyle.scss';
 
 export const metadata = {
-    title: 'Admin'
+    title: 'Quản trị'
 }
 
 export default function Layout({
