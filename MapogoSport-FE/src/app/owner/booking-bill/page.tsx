@@ -74,7 +74,7 @@ const OwnerBookingBill = () => {
     const handleStatusChange = (bookingId: number, newStatus: string) => {
         const booking = bookingData?.find(item => item.bookingId === bookingId);
         if (!booking) {
-            console.error("Không tìm thấy booking");
+            // console.error("Không tìm thấy booking");
             return;
         }
         if (newStatus === "Đã hủy") {

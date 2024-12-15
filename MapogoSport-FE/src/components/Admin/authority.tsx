@@ -19,12 +19,12 @@ function AuthorityComponent() {
 
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
-    const { data, error } = useSWR(`${BASE_URL}rest/list-users`, fetcher);
+    const { data, error } = useSWR<User[]>(`${BASE_URL}rest/list-users`, fetcher);
 
     useEffect(() => {
         if (data) {
-            setUsers(data);
-            setDisplayedUsers(data.slice(0, itemsPerPage));
+            setUsers(data.filter(item => item.username !== 'sportoffline'));
+            setDisplayedUsers(data.filter(item => item.username !== 'sportoffline').slice(0, itemsPerPage));
         }
     }, [data]);
 

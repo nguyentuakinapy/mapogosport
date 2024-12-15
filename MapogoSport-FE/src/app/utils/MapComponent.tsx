@@ -23,7 +23,7 @@ const loadHereMapsScripts = async (initializeMap: () => void) => {
         await loadScript("https://js.api.here.com/v3/3.1/mapsjs-mapevents.js");
         initializeMap();
     } catch (error) {
-        console.error("Lỗi khi tải scripts HERE Maps:", error);
+        // console.error("Lỗi khi tải scripts HERE Maps:", error);
     }
 };
 

@@ -51,7 +51,7 @@ const CheckoutPage = () => {
     if (cartData && cartData.length > 0) {
       const total = cartData.reduce((sum: number, cart) => sum + cart.productDetailSize.price * cart.quantity, 0);
       setTotalPrice(total);
-      setNewTotalPrice(total);
+      // setNewTotalPrice(total);
     }
   }, [cartData]);
 
@@ -67,7 +67,7 @@ const CheckoutPage = () => {
   const [vouchers, setVouchers] = useState<UserVoucher[]>([]);
   const [voucherSelected, setVoucherSelected] = useState<UserVoucher | null>(null);
   const [discount, setDiscount] = useState(0);
-  const [newTotalPrice, setNewTotalPrice] = useState(0);
+  // const [newTotalPrice, setNewTotalPrice] = useState(0);
   const [shippingFee, setShippingFee] = useState(0);
 
   useEffect(() => {
@@ -177,22 +177,16 @@ const CheckoutPage = () => {
   const handleVoucherSelectedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedVoucher = vouchers.find(v => v.voucher.voucherId === Number(e.target.value));
     setVoucherSelected(selectedVoucher || null);  // Cập nhật `voucherSelected`
-  };
-
-
-  const applyVoucher = async () => {
-    if (!voucherSelected) {
-      toast.error("Vui lòng chọn mã giảm giá");
-      return;
+    if (selectedVoucher) {
+      const calculatedDiscount = (totalPrice * selectedVoucher.voucher.discountPercent) / 100;
+      setDiscount(calculatedDiscount);
+    } else {
+      setDiscount(0);
     }
-
-    const calculatedDiscount = (totalPrice * voucherSelected.voucher.discountPercent) / 100;
-    setDiscount(calculatedDiscount);
-
-    const calculatedTotalPrice = totalPrice - calculatedDiscount;
-    setNewTotalPrice(calculatedTotalPrice);
-
   };
+
+
+
 
   const checkForm = () => {
     setLoading(true);
@@ -266,7 +260,7 @@ const CheckoutPage = () => {
         fee = 100000;
       }
       setShippingFee(fee);
-      setNewTotalPrice(newTotalPrice + fee)
+      // setNewTotalPrice(newTotalPrice + fee)
       // console.log(": distance", distance);
 
     }
@@ -287,10 +281,16 @@ const CheckoutPage = () => {
       // console.log("adminLocation;", coordAdmin?.lat, coordAdmin?.lon);
 
     } catch (error) {
-      console.error("Error fetching coordinates: ", error);
+      // console.error("Error fetching coordinates: ", error);
     }
 
   };
+
+  useEffect(() => {
+    if (selectedProvince && selectedDistrict && selectedWard) {
+      fetchCoordinatesForFields(`${selectedProvince}, ${selectedDistrict}, ${selectedWard}`);
+    }
+  }, [selectedProvince, selectedDistrict, selectedWard])
 
   useEffect(() => {
 
@@ -309,7 +309,7 @@ const CheckoutPage = () => {
       phoneNumber: phoneNumber,
       // date: new Date().toISOString(), // Chuyển đổi sang ISO string
       status: orderStatus,
-      amount: newTotalPrice,
+      amount: totalPrice + shippingFee - discount,
       paymentMethod: paymentMethod,
       voucherId: voucherSelected?.voucher.voucherId ?? '',
       shipFee: shippingFee, // Hoặc giá trị phí vận chuyển
@@ -400,7 +400,7 @@ const CheckoutPage = () => {
                 setShowOrderSuccessModal(true);
               }
             } catch (error) {
-              console.error("Error processing order:", error);
+              // console.error("Error processing order:", error);
               toast.error("Đã xảy ra lỗi trong quá trình xử lý đơn hàng.");
             }
           } else if (status === 'fail') {
@@ -438,7 +438,7 @@ const CheckoutPage = () => {
           setOrderId(order.orderId);
           setShowOrderSuccessModal(true);
         } catch (error) {
-          console.error('Error during payment:', error);
+          // console.error('Error during payment:', error);
         }
       }
     } else if (paymentMethod === "VNPay") {
@@ -448,7 +448,7 @@ const CheckoutPage = () => {
         const paymentResponse = await axios.post(
           `${BASE_URL}rest/payment/create_payment`,
           {
-            amount: newTotalPrice,
+            amount: totalPrice + shippingFee - discount,
             username
           }
         );
@@ -458,7 +458,7 @@ const CheckoutPage = () => {
         window.location.href = paymentUrl;
 
       } catch (error) {
-        console.error('Payment Error:', error);
+        // console.error('Payment Error:', error);
       }
     } else if (paymentMethod === "MoMo") {
       setDataOrder();
@@ -467,7 +467,7 @@ const CheckoutPage = () => {
         const paymentResponse = await axios.post(
           `${BASE_URL}rest/payment/create-momo-payment`,
           {
-            amount: newTotalPrice,
+            amount: totalPrice + shippingFee - discount,
             username
           }
         );
@@ -477,12 +477,12 @@ const CheckoutPage = () => {
         window.location.href = paymentUrl;
 
       } catch (error) {
-        console.error('Payment Error:', error);
+        // console.error('Payment Error:', error);
       }
     } else if (paymentMethod === "Thanh toán ví") {
       setLoading(true);
 
-      if (user1 && user1?.wallet.balance >= newTotalPrice) {
+      if (user1 && user1?.wallet.balance >= totalPrice + shippingFee - discount) {
         setDataOrder();
         const orderData = JSON.parse(localStorage.getItem('orderData') || '{}');
         const order = await handleCreateOrder(orderData);
@@ -503,7 +503,7 @@ const CheckoutPage = () => {
             setOrderId(order.orderId);
             setShowOrderSuccessModal(true);
           } catch (error) {
-            console.error('Error during payment:', error);
+            // console.error('Error during payment:', error);
           }
         }
       } else {
@@ -729,10 +729,6 @@ const CheckoutPage = () => {
                               </option>
                             ))}
                       </Form.Select>
-                      <button className="btn btn-apply px-4 " type="button" style={{ backgroundColor: "#142239", color: 'white', fontSize: '15px' }}
-                        onClick={applyVoucher}>
-                        Áp dụng
-                      </button>
                     </div>
                   </div>
                   <hr />
@@ -753,7 +749,7 @@ const CheckoutPage = () => {
                   <hr />
                   <div className="order-total d-flex justify-content-between">
                     <span className="fw-bold">Tổng cộng</span>
-                    <span className="fw-bold text-danger">{formatPrice(newTotalPrice)}</span>
+                    <span className="fw-bold text-danger">{formatPrice(totalPrice + shippingFee - discount)}</span>
                   </div>
                   <div className="order-total d-flex justify-content-between align-items-center my-4">
                     <Link href={"/cart"} className="text-reset text-decoration-none">

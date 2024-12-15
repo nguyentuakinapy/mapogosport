@@ -47,7 +47,7 @@ const ModalUpdateSubcription = (props: subscriptionProps) => {
             mutate(`${BASE_URL}rest/accountpackage`);
             handleClose();
         } catch (error) {
-            console.error('Error updating package:', error);
+            // console.error('Error updating package:', error);
         }
     }
 

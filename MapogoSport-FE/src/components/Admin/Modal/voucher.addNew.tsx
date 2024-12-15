@@ -51,7 +51,7 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
 
   const setFormValueNull = () => {
     if (!currentUser) {
-      console.error("currentUser is null or username is missing");
+      // console.error("currentUser is null or username is missing");
       return; // Ngừng nếu currentUser hoặc username không hợp lệ
     }
 
@@ -143,7 +143,7 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
       toast.success("Cập nhật mã giảm giá thành công!");
       onFetch();
     } catch (error) {
-      console.error("Lỗi khi tạo update voucher:", error);
+      // console.error("Lỗi khi tạo update voucher:", error);
     }
   };
 
@@ -171,7 +171,7 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
       toast.success("thành công tạo voucher");
       onFetch();
     } catch (error) {
-      console.error("Lỗi khi tạo voucher:", error);
+      // console.error("Lỗi khi tạo voucher:", error);
     }
   };
 

@@ -688,7 +688,7 @@ export default function ChatBox() {
         };
       });
       setChatListRealTime(tempData);
-      console.error("chat list: ", chatListRealTime);
+      // console.error("chat list: ", chatListRealTime);
     } //               mới
   }, [data]);
 

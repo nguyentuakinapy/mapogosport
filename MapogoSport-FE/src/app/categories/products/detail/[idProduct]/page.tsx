@@ -160,8 +160,8 @@ const ProductDetail = () => {
 
 
             toast.success("Thêm sản phẩm vào giỏ hàng thành công!");
-            mutate(`${BASE_URL}rest/cart/${username}`);
-            mutate(`${BASE_URL}rest/cart/count/${username}`); // Tái tải dữ liệu
+            mutate(`${BASE_URL}rest/cart/${userData.username}`);
+            mutate(`${BASE_URL}rest/cart/count/${userData.username}`); // Tái tải dữ liệu
 
         } catch (error) {
             // console.error("Lỗi khi gửi yêu cầu:", error);
@@ -193,12 +193,12 @@ const ProductDetail = () => {
                     setFilteredData(null); // Không có bình luận nào
                 }
             } catch (error) {
-                
+
             }
         };
 
         fetchData();
-        
+
     };
 
     const handleChatMess = () => {

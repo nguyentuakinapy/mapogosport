@@ -304,7 +304,7 @@ export default function Home() {
             setBookingdetailBySportFieldByDate(data);
           }
         } catch (error) {
-          console.error("Error fetching booking details:", error);
+          // console.error("Error fetching booking details:", error);
           setBookingdetailBySportFieldByDate([]);
         }
       };
@@ -570,7 +570,7 @@ export default function Home() {
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       saveAs(blob, 'Doanh thu.xlsx');
     } catch (error) {
-      console.error('Error exporting Excel:', error);
+      // console.error('Error exporting Excel:', error);
     }
   };
 
@@ -676,7 +676,7 @@ export default function Home() {
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       saveAs(blob, 'Thống kê khách.xlsx');
     } catch (error) {
-      console.error('Error exporting Excel:', error);
+      // console.error('Error exporting Excel:', error);
     }
   };
 
@@ -870,8 +870,8 @@ export default function Home() {
                     const row = field as ChartRow;
                     const isDateSelected = startDate || endDate;
                     const displayDate = startDate || endDate
-                      ? `${startDate ? new Date(startDate).toLocaleDateString('en-GB') : ''} / ${endDate ? new Date(endDate).toLocaleDateString('en-GB') : ''}`
-                      : `${new Date(row[2]).toLocaleDateString('en-GB')} / ${new Date(row[3]).toLocaleDateString('en-GB')}`;
+                      ? `${startDate ? new Date(startDate).toLocaleDateString('en-GB') : ''} - ${endDate ? new Date(endDate).toLocaleDateString('en-GB') : ''}`
+                      : `${new Date(row[2]).toLocaleDateString('en-GB')} - ${new Date(row[3]).toLocaleDateString('en-GB')}`;
                     const displayTotalBookingPrice = isDateSelected ? totalBookingDetailPriceByDate : totalBookingPrice;
                     const displayFieldRevenue = isDateSelected ? row[1] : row[1];
                     return (
@@ -1073,9 +1073,11 @@ export default function Home() {
         );
     }
   };
+
+  if (!totalBookingPrice) return <>Không có dữ liệu</>;
+
   if (bookingSuccess.length >= 0) {
-    if (!totalBookingPrice) return <>Loading</>;
-    else if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       return (
         <Suspense fallback={<div>Đang tải...</div>}>
           <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>THỐNG KÊ</h3>

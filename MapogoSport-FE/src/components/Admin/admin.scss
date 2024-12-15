@@ -113,7 +113,7 @@
 //     background-color: #ffffff;
 //   }
 // }
-.image-container-new{
+.image-container-new {
   position: relative;
   width: 400px; // Chiều rộng cố định cho hình ảnh
   height: 300px; // Chiều cao cố định
@@ -128,11 +128,12 @@
     background-color: #ffffff;
   }
 }
-.image-container-preview{
+
+.image-container-preview {
   position: relative;
   width: 100px; // Chiều rộng cố định cho hình ảnh
   height: 100px; // Chiều cao cố định
-  
+
 
   .preview-img {
     width: 100%; // Đảm bảo hình ảnh chiếm toàn bộ chiều rộng
@@ -166,6 +167,7 @@
     color: white; // Màu biểu tượng
   }
 }
+
 .upload-icon-new {
   position: absolute;
   bottom: 2px; // Đặt ở dưới cùng của hình ảnh
@@ -196,7 +198,8 @@
     height: 100%; // Đảm bảo hình ảnh xem trước chiếm toàn bộ chiều cao
     object-fit: cover; // Đảm bảo hình ảnh không bị méo
     border-radius: 5px;
-    border: 2px solid #898787; /* Thêm chiều rộng và kiểu border */
+    border: 2px solid #898787;
+    /* Thêm chiều rộng và kiểu border */
     overflow: hidden; // Ẩn phần hình ảnh ra ngoài vùng chứa
   }
 }
@@ -227,7 +230,7 @@ textarea.is-invalid {
     position: absolute;
     top: 95%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-80%);
     width: 400px;
     max-height: 500px;
     background-color: rgb(255, 255, 255);
@@ -345,6 +348,7 @@ textarea.is-invalid {
   .modal-content {
     /* background-color: #132239;  Uncomment if you want a dark blue background */
     // border: 2px solid #0f1c2b; /* Darker blue border for clearer edges */
-    box-shadow: 4px 2px 10px rgba(20, 49, 93, 0.8); /* Dark blue shadow with more spread */
+    box-shadow: 4px 2px 10px rgba(20, 49, 93, 0.8);
+    /* Dark blue shadow with more spread */
   }
 }

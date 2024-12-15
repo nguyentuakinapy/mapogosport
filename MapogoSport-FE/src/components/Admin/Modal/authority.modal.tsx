@@ -62,7 +62,7 @@ const Authority = (props: UserProps) => {
             mutate(`${BASE_URL}rest/list-users`)
             toast.success(`Cập nhật vai trò của "${user.username}" thành công!`);
         } catch (error) {
-            console.error("Lỗi khi cập nhật vai trò:", error);
+            // console.error("Lỗi khi cập nhật vai trò:", error);
             toast.error("Có lỗi xảy ra khi cập nhật vai trò.");
         }
         handleClose();

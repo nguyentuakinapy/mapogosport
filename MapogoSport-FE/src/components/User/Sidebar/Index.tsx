@@ -84,7 +84,7 @@ const Sidebar = () => {
                 toast.success("Thêm ảnh thành công!");
                 mutate(`${BASE_URL}rest/user/avatar/${userData?.username}`);
             } catch (error) {
-                console.error("Thêm ảnh không thành công: ", error);
+                // console.error("Thêm ảnh không thành công: ", error);
             }
         }
     };

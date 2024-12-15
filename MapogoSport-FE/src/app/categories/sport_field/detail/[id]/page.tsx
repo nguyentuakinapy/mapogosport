@@ -419,7 +419,7 @@ const SportDetail = ({ params }: { params: { id: number } }) => {
 
                         setBookingsOnWeek(updatedBookingsOnWeek);
                     } catch (error) {
-                        console.error(error);
+                        // console.error(error);
                     }
                 }
                 setCheckLoadingData(false);

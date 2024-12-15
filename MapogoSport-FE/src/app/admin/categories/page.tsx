@@ -67,7 +67,7 @@ const AdminProduct = () => {
                         mutateProduct();
                     });
                 } catch (error) {
-                    console.error("Error deleting category product: ", error)
+                    // console.error("Error deleting category product: ", error)
                     toast.error("Không được xóa loại sản phẩm này")
                 }
 
@@ -94,7 +94,7 @@ const AdminProduct = () => {
                         mutateField();
                     })
                 } catch (error) {
-
+                    toast.error('Không thể xóa loại sân này!');
                 }
 
             }

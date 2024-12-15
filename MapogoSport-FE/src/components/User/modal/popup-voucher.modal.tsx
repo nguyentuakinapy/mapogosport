@@ -1,9 +1,10 @@
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
 const Popup = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [timeDisplay, setTimeDisplay] = useState("");
-
+  const router = useRouter();
   useEffect(() => {
 
     const hasSeenPopupSession = sessionStorage.getItem('hasSeenPopup');
@@ -62,7 +63,7 @@ const Popup = () => {
           <button
             className="claim-btn"
             onClick={() => {
-              window.location.href = "/categories/products";
+              router.push("/categories/products");
               handlePopupClick();
             }}
           >

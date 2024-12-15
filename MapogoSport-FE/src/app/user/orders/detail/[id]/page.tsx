@@ -112,11 +112,15 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                                     </tr>
                                 ))
                             )}
-                            <tr className="">
-                                <td colSpan={4}>Tổng thành tiền</td>
-                                <td>{totalAmount.toLocaleString()} ₫</td>
+                            <tr>
+                                <td colSpan={4}>Giảm giá</td>
+                                <td>
+                                    {orderInfo && (totalAmount - orderInfo.amount + orderInfo.shipFee) === 0 ?
+                                        0 :
+                                        `-${orderInfo && (totalAmount - orderInfo.amount + orderInfo.shipFee).toLocaleString()} ₫`}
+                                </td>
                             </tr>
-                            <tr className="">
+                            <tr>
                                 <td colSpan={4}>Phí vận chuyển</td>
                                 <td>+{formatPrice(orderInfo?.shipFee || 0)}</td>
                             </tr>

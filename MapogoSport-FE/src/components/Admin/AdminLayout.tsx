@@ -36,7 +36,7 @@ export default function AdminLayout({
                     setWeather(data);
                 }
             } catch (error) {
-                console.error('Error fetching weather data:', error);
+                // console.error('Error fetching weather data:', error);
             }
         };
 
@@ -49,8 +49,8 @@ export default function AdminLayout({
                         // console.log(latitude + '-' + longitude);
                         // console.log(navigator.geolocation)
                     },
-                    (err) => {
-                        console.error('Error getting geolocation:', err);
+                    () => {
+                        // console.error('Error getting geolocation:', err);
                     }
                 );
             }

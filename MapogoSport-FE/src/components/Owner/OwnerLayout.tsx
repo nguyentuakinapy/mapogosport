@@ -34,7 +34,7 @@ export default function OwnerLayout({
                     setWeather(data);
                 }
             } catch (error) {
-                console.error('Error fetching weather data:', error);
+                // console.error('Error fetching weather data:', error);
             }
         };
 
@@ -53,12 +53,12 @@ export default function OwnerLayout({
                 // );
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const { latitude, longitude, accuracy } = position.coords;
+                        const { latitude, longitude } = position.coords;
                         // console.log(`Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`);
                         fetchWeather(latitude, longitude);
                     },
-                    (err) => {
-                        console.error('Error getting geolocation:', err);
+                    () => {
+                        // console.error('Error getting geolocation:', err);
                     },
                     { enableHighAccuracy: true }
                 );

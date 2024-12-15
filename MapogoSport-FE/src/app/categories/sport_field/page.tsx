@@ -47,7 +47,7 @@ function Categories() {
                     );
                     setUpdatedSportFields(updatedCategoriesField);
                 } catch (error) {
-                    console.error("Error fetching coordinates: ", error);
+                    // console.error("Error fetching coordinates: ", error);
                 }
             };
             fetchCoordinatesForFields();
@@ -59,8 +59,8 @@ function Categories() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
                 setCurrentLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
-            }, (error) => {
-                console.error("Error getting location: ", error);
+            }, () => {
+                // console.error("Error getting location: ", error);
             });
         }
     }, [sportFields]);

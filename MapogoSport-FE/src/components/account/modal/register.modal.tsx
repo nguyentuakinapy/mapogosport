@@ -125,7 +125,7 @@ export default function Register(props: RegisterProps) {
             }
 
         } catch (error) {
-            console.error("Error during fetch:", error);
+            // console.error("Error during fetch:", error);
             toast.error("Create failed!");
         }
     }
@@ -191,10 +191,6 @@ export default function Register(props: RegisterProps) {
         setOtpValue("");
     }
 
-    useEffect(() => {
-        console.log("Client-side code running");
-    }, []);
-
     const decodeJWT = (token: string) => {
         try {
             const base64Url = token.split(".")[1];
@@ -207,7 +203,7 @@ export default function Register(props: RegisterProps) {
             );
             return JSON.parse(jsonPayload);
         } catch (error) {
-            console.error("Failed to decode JWT:", error);
+            // console.error("Failed to decode JWT:", error);
             return null;
         }
     };
@@ -329,7 +325,7 @@ export default function Register(props: RegisterProps) {
                     }
 
                 } catch (error) {
-                    console.error("Error during fetch:", error);
+                    // console.error("Error during fetch:", error);
                     toast.error("Create failed!");
                 }
             }
