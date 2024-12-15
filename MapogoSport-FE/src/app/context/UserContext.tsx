@@ -64,7 +64,7 @@ export function UserProvider({ children, refreshKey }: UserProviderProps) {
     }, [data]);
 
     if (error) {
-        console.error("Error fetching user data:", error);
+        // console.error("Error fetching user data:", error);
     }
 
     return (

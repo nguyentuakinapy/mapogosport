@@ -155,10 +155,6 @@ export default function Login(props: LoginProps) {
 
     }
 
-    useEffect(() => {
-        console.log("Client-side code running");
-    }, []);
-
     const decodeJWT = (token: string) => {
         try {
             const base64Url = token.split(".")[1];
@@ -171,18 +167,18 @@ export default function Login(props: LoginProps) {
             );
             return JSON.parse(jsonPayload);
         } catch (error) {
-            console.error("Failed to decode JWT:", error);
+            // console.error("Failed to decode JWT:", error);
             return null;
         }
     };
 
     const handleLoginSuccess = async (response: CredentialResponse) => {
         const token = response.credential;
-        console.log("Token received:", token);
+        // console.log("Token received:", token);
 
         const user = decodeJWT(token!) as JwtGoogleAccount;
         if (user) {
-            console.log("User Info:", user);
+            // console.log("User Info:", user);
             try {
                 const responseUser = await fetch(`${BASE_URL}rest/user/${user.sub}`);
                 if (!responseUser.ok) {

@@ -210,7 +210,7 @@ const WalletPage = () => {
             // chuyển hướng đến URL thanh toán
             window.location.href = paymentUrl;
         } catch (error) {
-            console.error('Error during payment:', error);
+            // console.error('Error during payment:', error);
         }
     }
 

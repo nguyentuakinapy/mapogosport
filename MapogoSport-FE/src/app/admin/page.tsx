@@ -48,9 +48,9 @@ export default function Owner() {
                     <h2>{userData?.fullname}</h2>
                     {/* <p>Thằng nào có tiền thì nạp vào DONATE cho tao</p> */}
                     <div className="stats">
-                        <span>0 Bài Viết</span>
-                        <span>0 Sân</span>
-                        <span>0 Được thích</span>
+                        {/* <span>0 Bài Viết</span> */}
+                        {/* <span>0 Sân</span> */}
+                        {/* <span>0 Được thích</span> */}
                         <span>{userData?.authorities.find(item => item.role.name === 'ROLE_ADMIN')?.role.name ? "Quản trị viên" : 'Nhân viên'}</span>
                     </div>
                 </div>

@@ -63,7 +63,7 @@ const CategoryFieldAddNew = (props: CategoryFieldProps) => {
                 handleClose();
             });
         } catch (error) {
-            console.error("Error create category field: ",error)
+            // console.error("Error create category field: ",error)
             toast.error("Không thể thêm loại sân")
         }
 
@@ -93,7 +93,7 @@ const CategoryFieldAddNew = (props: CategoryFieldProps) => {
                 handleClose();
             });
         } catch (error) {
-            console.error("Error update category field: ",error)
+            // console.error("Error update category field: ",error)
             toast.error("Không thể cập nhật loại sân")
         }
         

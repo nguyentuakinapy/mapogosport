@@ -193,7 +193,7 @@ const Cart = () => {
         localStorage.setItem('CartIds', JSON.stringify(cartIds));
         router.push("/checkout-product");
       } catch (error) {
-        console.error("Error saving to localStorage:", error);
+        // console.error("Error saving to localStorage:", error);
       }
     }
   };

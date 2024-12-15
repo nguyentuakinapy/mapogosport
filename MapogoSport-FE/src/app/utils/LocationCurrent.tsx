@@ -8,7 +8,7 @@ export const fetchLocationCurrent = async (address: string) => {
 
         const text = await response.text();
         if (!text) {
-            console.warn('Empty response body.');
+            // console.warn('Empty response body.');
             return null;
         }
 

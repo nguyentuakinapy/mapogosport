@@ -79,7 +79,7 @@ const ModalReviewProductField = (props: ReviewProps) => {
         if (dataOrder) {
             const userIsOrder = dataOrder.some((order: Order) => order.user.username === user?.username && order.status === "Đã hoàn thành");
             if (!userIsOrder) {
-                toast.warning("Bạn không thể đánh giá khi chưa đặt hàng.");
+                toast.warning("Bạn không thể đánh giá khi chưa nhận hàng.");
                 return;
             }
         }
@@ -113,7 +113,7 @@ const ModalReviewProductField = (props: ReviewProps) => {
                 handleClose();
                 toast.success("Gửi đánh giá thành công!");
             } catch (error) {
-                console.error("Lỗi khi gửi đánh giá:", error);
+                // console.error("Lỗi khi gửi đánh giá:", error);
                 toast.error("Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.");
             }
         }

@@ -254,6 +254,11 @@ public class BookingServiceImpl implements BookingService {
 				}
 			}
 			bookingDAO.save(booking);
+			Map<String, Object> dataPush = new HashMap<String, Object>();
+			dataPush.put("username", booking.getOwner().getUser().getUsername());
+			dataPush.put("bookingId", booking.getBookingDetails().get(0).getBookingDetailId());
+			messagingTemplate.convertAndSend("/topic/bookingDetail/reload", dataPush);
+			
 			return booking;
 		}
 		return null;

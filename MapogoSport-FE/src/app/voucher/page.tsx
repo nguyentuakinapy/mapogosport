@@ -55,7 +55,7 @@ const PageVoucher = () => {
             fetchDataVoucher();
             toast.success("Nhận Voucher giá thành công!");
         } catch (error) {
-            console.error("Lỗi khi nhận Voucher:", error);
+            // console.error("Lỗi khi nhận Voucher:", error);
             alert("Có lỗi xảy ra khi nhận Voucher. Vui lòng thử lại sau.");
         }
     };
@@ -82,7 +82,7 @@ const PageVoucher = () => {
             setReceivedVoucher(data)
            
         } catch (error) {
-            console.error("Error handelReceived Voucher",error);
+            // console.error("Error handelReceived Voucher",error);
         }
     }
     //Handel select voucher khi active

@@ -120,7 +120,7 @@ export function middleware(request: NextRequest) {
             }
 
         } else {
-            console.error("Invalid sessionData structure:", sessionData);
+            // console.error("Invalid sessionData structure:", sessionData);
         }
     }
     return NextResponse.next();

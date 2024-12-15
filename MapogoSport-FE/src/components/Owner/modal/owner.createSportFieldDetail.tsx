@@ -83,8 +83,8 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
             mutate(`${BASE_URL}rest/sport_field_by_owner/${owner?.ownerId}`);
             handleClose();
             toast.success("Thêm sân thành công!");
-        }).catch(error => {
-            console.error("Lỗi khi lưu thông tin sân:", error.response ? error.response.data : error.message);
+        }).catch(() => {
+            // console.error("Lỗi khi lưu thông tin sân:", error.response ? error.response.data : error.message);
         });
     };
     const handleUpdate = () => {
@@ -111,8 +111,8 @@ const ModalCreateSportFieldDetail = (props: SportFieldDetailProps) => {
             mutate(`${BASE_URL}rest/sport_field_by_owner/${owner?.ownerId}`);
             handleClose();
             toast.success("Cập nhật thành công!");
-        }).catch(error => {
-            console.error("Lỗi khi lưu thay đổi thông tin sân:", error.response ? error.response.data : error.message);
+        }).catch(() => {
+            // console.error("Lỗi khi lưu thay đổi thông tin sân:", error.response ? error.response.data : error.message);
         });
     }
 

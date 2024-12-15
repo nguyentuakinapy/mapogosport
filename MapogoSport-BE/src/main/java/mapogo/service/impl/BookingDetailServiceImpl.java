@@ -159,6 +159,11 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 			}
 			
 		}
+		
+		Map<String, Object> dataPush = new HashMap<String, Object>();
+		dataPush.put("username", bookingDetail.getBooking().getOwner().getUser().getUsername());
+		dataPush.put("bookingId", bookingDetail.getBookingDetailId());
+		messagingTemplate.convertAndSend("/topic/bookingDetail/reload", dataPush);
 		return null;
 	}
 
@@ -214,6 +219,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 
 		messagingTemplate.convertAndSend("/topic/bookingDetail/user/reload", b.getUser().getUsername());
 		messagingTemplate.convertAndSend("/topic/bookingDetail/reload", dataPush);
+		
 		return bookingDetail;
 //		return null;
 	}
@@ -292,6 +298,11 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		if (!bd.getBooking().getUser().getUsername().equals("sportoffline")) {
 //			transactionService.createTransactionOwnerByPaymentBooking(bookingDetailId, totalAmount);
 		}
+		
+		Map<String, Object> dataPush = new HashMap<String, Object>();
+		dataPush.put("username", bd.getBooking().getOwner().getUser().getUsername());
+		dataPush.put("bookingId", bd.getBookingDetailId());
+		messagingTemplate.convertAndSend("/topic/bookingDetail/reload", dataPush);
 	}
 
 	@Override
@@ -409,6 +420,11 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		booking.setStatus("Đã hủy");
 		booking.setNote(note);
 		bookingDAO.save(booking);
+		
+		Map<String, Object> dataPush = new HashMap<String, Object>();
+		dataPush.put("username", bookingDetail.getBooking().getOwner().getUser().getUsername());
+		dataPush.put("bookingId", bookingDetail.getBookingDetailId());
+		messagingTemplate.convertAndSend("/topic/bookingDetail/reload", dataPush);
 	}
 
 	@Override
@@ -464,9 +480,7 @@ public class BookingDetailServiceImpl implements BookingDetailService {
 		});
 		
 		Booking b = bookingDAO.findById((Integer) bd.get(0).get("booking")).get();
-		
-		messagingTemplate.convertAndSend("/topic/bookingDetail/user/reload", b.getUser().getUsername());
-		
+				
 		Map<String, Object> dataPush = new HashMap<String, Object>();
 		dataPush.put("username", b.getOwner().getUser().getUsername());
 		dataPush.put("bookingId", b.getBookingDetails().get(0).getBookingDetailId());

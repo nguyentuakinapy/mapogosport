@@ -69,7 +69,7 @@ const ModalReviewSportField = (props: ReviewProps) => {
                 toast.error("Gửi đánh giá không thành công!");
             }
         } catch (error) {
-            console.error("Lỗi khi gửi đánh giá:", error);
+            // console.error("Lỗi khi gửi đánh giá:", error);
             toast.error("Đã xảy ra lỗi khi gửi đánh giá. Vui lòng thử lại.");
         }
     };

@@ -14,7 +14,7 @@ const ModalTableDetail = ({ showModal, onClose, data }: ModalTableDetailProps) =
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-    const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+    const currentItems = data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(data.length / itemsPerPage);
     const handlePageChange = (pageNumber: number) => {
         setCurrentPage(pageNumber);

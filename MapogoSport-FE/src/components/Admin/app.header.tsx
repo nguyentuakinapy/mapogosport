@@ -289,8 +289,8 @@ export default function Header({ isAniActive, toggleAni, weather }: HeaderProps)
                                                                         }</b>
                                                                         <div className=''>{item.message}</div>
                                                                     </div>
-                                                                    <div className=' ms-auto'>{new Date(item.createdAt).toLocaleDateString()} <br />
-                                                                        {item.createdAt.split('T')[1].split('.')[0]}
+                                                                    <div className=' ms-auto'>{item.createdAt.split('T')[1].split('.')[0]}<br />
+                                                                        {new Date(item.createdAt).toLocaleDateString()}
                                                                     </div>
                                                                 </div>
                                                             </Link>

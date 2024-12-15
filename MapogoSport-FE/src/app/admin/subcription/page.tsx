@@ -87,7 +87,7 @@ const SubcriptionPage = () => {
                     : `Bạn đã khôi phục gói ${pkg?.packageName}`
             );
         } catch (error) {
-            console.error("Error updating package:", error);
+            // console.error("Error updating package:", error);
             toast.error("Đã xảy ra lỗi khi vô hiệu hóa gói!");
         }
     };
@@ -191,7 +191,7 @@ const SubcriptionPage = () => {
             // Success message
             toast.success('Đã xuất file Excel thành công!');
         } catch (error) {
-            console.error('Error exporting Excel file:', error);
+            // console.error('Error exporting Excel file:', error);
             toast.error('Có lỗi xảy ra khi xuất file!');
         }
     };

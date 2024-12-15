@@ -88,7 +88,7 @@ const BookingModal = (props: BookingProps) => {
                         }
                     }
                 } catch (error) {
-                    console.error("API or JSON parsing error:", error);
+                    // console.error("API or JSON parsing error:", error);
                 }
 
                 count++;
@@ -139,7 +139,7 @@ const BookingModal = (props: BookingProps) => {
                                         }
                                     }
                                 } catch (error) {
-                                    console.error("API or JSON parsing error:", error);
+                                    // console.error("API or JSON parsing error:", error);
                                 }
                                 const result = timeStringH.includes(time);
                                 if (!result) {
@@ -188,7 +188,7 @@ const BookingModal = (props: BookingProps) => {
                                             }
                                         }
                                     } catch (error) {
-                                        console.error("API or JSON parsing error:", error);
+                                        // console.error("API or JSON parsing error:", error);
                                     }
                                     const result = timeStringH.includes(time);
                                     if (!result) {
@@ -514,7 +514,7 @@ const BookingModal = (props: BookingProps) => {
                             }
                         }
                     } catch (error) {
-                        console.error("API or JSON parsing error:", error);
+                        // console.error("API or JSON parsing error:", error);
                     }
                 }
             }

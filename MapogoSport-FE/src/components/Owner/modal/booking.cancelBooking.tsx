@@ -22,7 +22,7 @@ const CancelBookingModal = (props: CancelBooking) => {
 
     const handleSave = () => {
         if (!booking) {
-            console.error("Không tìm thấy booking");
+            // console.error("Không tìm thấy booking");
             return;
         }
         const startedDetails = booking.bookingDetails.filter(detail => detail.bookingDetailStatus !== "Chưa bắt đầu");

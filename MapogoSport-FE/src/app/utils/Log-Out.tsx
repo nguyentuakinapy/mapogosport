@@ -16,10 +16,10 @@ const logOut = async () => {
             // Chuyển hướng về trang chủ
             window.location.href = "/";
         } else {
-            console.error("Failed to log out");
+            // console.error("Failed to log out");
         }
     } catch (error) {
-        console.error("Error logging out:", error);
+        // console.error("Error logging out:", error);
     }
 };
 
