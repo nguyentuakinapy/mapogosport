@@ -75,6 +75,12 @@ public class AddressUserServiceImpl implements AddressUserService{
 			}
 		}
 		addressUserDAO.deleteByAddressUserId(addressUserId);
+		
+		Integer addressId = addressUser.getAddress().getAddressId();
+		boolean isAddressUsed = addressUserDAO.existsByAddress_AddressId(addressId);
+		if (!isAddressUsed) {
+	        addressDAO.deleteById(addressId);
+	    }
 	}
 
 	@Override
