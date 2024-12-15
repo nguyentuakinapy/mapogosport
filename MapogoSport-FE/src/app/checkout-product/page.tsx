@@ -90,7 +90,10 @@ const CheckoutPage = () => {
       const activeAddress = userData.addressUsers.find((item: AddressUsers) => item.active);
       if (activeAddress) {
         setAddressSelected(activeAddress);
-        fetchCoordinatesForFields(activeAddress);
+        const diachi = activeAddress.activeAddress + ", " + activeAddress.address.ward + ", "
+          + activeAddress.address.district + ", " + activeAddress.address.province;
+        fetchCoordinatesForFields(diachi);
+        calculateDistance1();
       }
     }
   }, [userData]);
@@ -274,7 +277,6 @@ const CheckoutPage = () => {
   const fetchCoordinatesForFields = async (fullAddress: string) => {
     try {
       console.log("fullAddress", fullAddress);
-
       const coordUser = await fetchLocationCurrent(fullAddress);
       const coordAdmin = await fetchLocationCurrent("Tô Ký, Tân Chánh Hiệp, Quận 12, Thành phố Hồ Chí Minh");
       if (coordUser && coordAdmin) {
