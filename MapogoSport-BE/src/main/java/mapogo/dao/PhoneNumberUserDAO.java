@@ -9,4 +9,5 @@ import mapogo.entity.PhoneNumberUser;
 public interface PhoneNumberUserDAO extends JpaRepository<PhoneNumberUser, Integer>{
 	List<PhoneNumberUser> findByUser_Username(String username);
 	void deleteByPhoneNumberUserId(Integer phoneNumberUserId);
+	boolean existsByPhoneNumber_PhoneNumberId(Integer phoneNumberId);
 }
