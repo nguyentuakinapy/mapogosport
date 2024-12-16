@@ -408,7 +408,9 @@ export default function ChatBox() {
 
     if (messageListRef.current) {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+      
     }
+
 
     // console.log("Đã vào với: ", chat?.username || "Không có tên");
     // console.log("chatListCurrentUserByDMM: ", chatListCurrentUserByDMM);
