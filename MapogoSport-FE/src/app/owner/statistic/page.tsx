@@ -451,14 +451,14 @@ export default function Home() {
     if (owner?.ownerId) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`${BASE_URL}rest/booking/customer/byOwner/byUsernameOffline/${owner?.ownerId}`)
+          const response = await fetch(`${BASE_URL}rest/booking/customer/byOwner/byUsernameOffline/${owner?.ownerId}/Đã thanh toán`)
           const data = await response.json()
           const convertedData = data.map((item: RankCustomer[]) => ({
             rank: item[0],
             username: item[1],
             fullName: item[2]
           }));
-          setRankCustomerOnline(convertedData);
+          //setRankCustomerOnline(convertedData);
 
           setRankCustomerOffline(data);
         } catch (error) {
@@ -474,7 +474,7 @@ export default function Home() {
     if (owner?.ownerId) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`${BASE_URL}rest/booking/rank/customer/online/byOwerId/${owner?.ownerId}`)
+          const response = await fetch(`${BASE_URL}rest/booking/rank/customer/online/byOwerId/${owner?.ownerId}/Đã thanh toán`)
           const data = await response.json()
           setRankCustomerOnline(data)
           // console.log(data);
@@ -909,8 +909,15 @@ export default function Home() {
       case 'withdraw':
         return (
           <>
-            <ModalTableDetailCustomer showModal={showModalRank} onClose={handleCloseModalRank} data={bookingByUsernameModal} />
-            <ModalTableDetailCustomerByFullName showModal={showModalRankOffline} onClose={handleCloseModalRankOffline} data={bookingByFullNameOffline} />
+            <ModalTableDetailCustomer showModal={showModalRank} onClose={handleCloseModalRank} data={bookingByUsernameModal.filter((booking)=>booking.status==='Đã thanh toán'&& booking.owner.ownerId===owner?.ownerId)} />
+            <ModalTableDetailCustomerByFullName
+              showModal={showModalRankOffline}
+              onClose={handleCloseModalRankOffline}
+              data={bookingByFullNameOffline.filter(
+                (booking) => booking.status === 'Đã thanh toán' && booking.owner.ownerId === owner?.ownerId
+              )}
+            />
+
             <div className="card mb-3">
               <div className="card-body">
                 <div className="row mt-0">

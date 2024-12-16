@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Modal, Table } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Modal, Spinner, Table } from "react-bootstrap";
 import { formatPrice } from "@/components/Utils/Format"
 
 interface ModalTableDetailCustomerProps {
@@ -19,6 +19,7 @@ const ModalTableDetailCustomer = ({ showModal, onClose, data }: ModalTableDetail
     const handlePageChange = (pageNumber: number) => {
         setCurrentPage(pageNumber);
     };
+
     return (
         <Modal
             show={showModal}
@@ -35,28 +36,39 @@ const ModalTableDetailCustomer = ({ showModal, onClose, data }: ModalTableDetail
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Table striped bordered hover>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Tên khách hàng</th>
-                            <th>Ngày đặt</th>
-                            <th>Tổng tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentItems.map((booking, index) => (
-                            <tr key={index}>
-                                <td>{indexOfFirstItem + index + 1}</td>
-                                <td>{booking.fullName}</td>
-                                <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
-                                <td>{formatPrice(booking.totalAmount)}</td>
+                {(data.length > 0) ? (
+                    <Table striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Tên khách hàng</th>
+                                <th>Mã hóa đơn</th>
+                                <th>Ngày đặt</th>
+                                <th>Tổng tiền</th>
                             </tr>
-                        ))}
-                    </tbody>
-                    {/* Table content here */}
+                        </thead>
+                        <tbody>
+                            {currentItems.map((booking, index) => (
+                                <tr key={index}>
+                                    <td>{indexOfFirstItem + index + 1}</td>
+                                    <td>{booking.fullName}</td>
+                                    <td>{booking.bookingId}</td>
+                                    <td>{new Date(booking.date).toLocaleDateString('en-GB')}</td>
+                                    <td>{formatPrice(booking.totalAmount)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                        {/* Table content here */}
 
-                </Table>
+                    </Table>
+
+                ) : (
+                    <div className="text-center">
+                        <Spinner animation="border" role="status">
+                            <span className="sr-only"></span>
+                        </Spinner>
+                    </div>
+                )}
                 <>
                     {totalPages > 1 && (
                         <nav aria-label="Page navigation example">
