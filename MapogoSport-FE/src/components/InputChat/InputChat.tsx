@@ -13,7 +13,7 @@ const InputChat: React.FC<InputChatProps> = ({ inputRef, handleKeyEnter }) => {
   const [inputMessage, setInputMessage] = useState(""); // lưu trữ nội dung người dùng đang nhập vào ô chat
 
   return (
-    <div className=" d-flex ms-2">
+    <div className=" d-flex ms-2 input-chat">
       <Form.Control
         ref={inputRef}
         type="text"

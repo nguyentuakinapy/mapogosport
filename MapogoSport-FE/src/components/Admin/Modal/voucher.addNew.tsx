@@ -293,9 +293,20 @@ const VoucherAddNew = ({ showAddVoucher, setShowAddVoucher, voucher, currentUser
   };
 let FL = false;
 
+
+
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-   
+    if(name === 'discountPercent' || name === 'quantity'){
+
+      const sanitizedValue = value.replace(/^\+/, '');
+      const number = Number(sanitizedValue);
+
+      if(!Number.isInteger(number) || number < 0){
+        toast.warning('Vui lòng nhập đúng định dạng')
+        return 
+      }
+    }
     setFormValue((prevState) => ({
       ...prevState,
       [name]: value,
@@ -402,6 +413,7 @@ let FL = false;
                     name="quantity"
                     value={formValue.quantity}
                     onChange={handleChange}
+                    min={0}
                   />
                   <Form.Label>
                     Số lượng <b className="text-danger">*</b>
@@ -432,6 +444,7 @@ let FL = false;
                     name="discountPercent"
                     value={formValue.discountPercent}
                     onChange={handleChange}
+                    min={0}
                   />
                   <Form.Label>
                     Giảm (%) <b className="text-danger">*</b>

@@ -42,7 +42,7 @@ public class ChatController {
 	
 
     @MessageMapping("/chat.sendMessage/{userSort_1}-{userSort_2}")
-    @SendTo("/topic/public/{userSort_1}-{userSort_2}")
+    @SendTo("/topic/public/{userSort_1}-{userSort_2}") // dòng này chạy sau cùng
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage,
                                    @DestinationVariable("userSort_1") String userSort_1,
                                    @DestinationVariable("userSort_2") String userSort_2) {
@@ -121,7 +121,7 @@ public class ChatController {
      messagingTemplate.convertAndSend("/topic/notification/username", receiverUser.getUsername());
 
         messageDAO.save(message);
-        return tempStr;
+        return tempStr; // chạy lên anotation @sento để gứi tin tới các client đã subcribe
     }
 
 
