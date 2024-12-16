@@ -14,7 +14,7 @@ const ModalTableDetailCustomerByFullName = ({ showModal, onClose, data }: ModalT
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-    const [loading, setLoading] = useState(true);
+    // const [loading, setLoading] = useState(true);
 
     const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(data.length / itemsPerPage);

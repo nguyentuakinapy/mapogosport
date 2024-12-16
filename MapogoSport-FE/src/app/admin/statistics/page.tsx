@@ -68,31 +68,32 @@ const Admin = () => {
                 setDataColumnnChartOther(response1.data);
             }
         } catch (error) {
-            // console.error("Error fetching orders:", error);
+            console.error("Error fetching orders:", error);
             // Optional: Show error message to the user
         }
     };
 
     const ColumnChart = () => {
-        const fetchData = async () => {
-            try {
-
-                const [todayResp, yesterdayResp, weekResp, monthResp] = await Promise.all([
-                    axios.get(`${BASE_URL}rest/admin/category-product-totals-today`),
-                    axios.get(`${BASE_URL}rest/admin/category-product-totals-yesterday`),
-                    axios.get(`${BASE_URL}rest/admin/category-product-totals-7day`),
-                    axios.get(`${BASE_URL}rest/admin/category-product-totals-one-month`),
-                ]);
-
-                setDataColumnnChartToday(todayResp.data);
-                setDataColumnnChartYesterday(yesterdayResp.data);
-                setDataColumnnChart7Day(weekResp.data);
-                setDataColumnnChartOneMonth(monthResp.data);
-            } catch (error) {
-                // console.error("Error fetching chart data", error);
-            }
-        };
         useEffect(() => {
+            const fetchData = async () => {
+                try {
+
+                    const [todayResp, yesterdayResp, weekResp, monthResp] = await Promise.all([
+                        axios.get(`${BASE_URL}rest/admin/category-product-totals-today`),
+                        axios.get(`${BASE_URL}rest/admin/category-product-totals-yesterday`),
+                        axios.get(`${BASE_URL}rest/admin/category-product-totals-7day`),
+                        axios.get(`${BASE_URL}rest/admin/category-product-totals-one-month`),
+                    ]);
+
+                    setDataColumnnChartToday(todayResp.data);
+                    setDataColumnnChartYesterday(yesterdayResp.data);
+                    setDataColumnnChart7Day(weekResp.data);
+                    setDataColumnnChartOneMonth(monthResp.data);
+                } catch (error) {
+                    console.error("Error fetching chart data", error);
+                }
+            };
+
             if (!dataColumnnToday.length && !dataColumnnYesterday.length && !dataColumnnChart7Day.length && !dataColumnnChartOneMonth.length) {
                 fetchData();
             }
@@ -207,7 +208,7 @@ const Admin = () => {
                 const response = await axios.get(`${BASE_URL}rest/admin/orderToDay`);
                 setDataOrderToDay(response.data);
             } catch (error) {
-                // console.error('Error:', error); // Sử dụng console.error để hiển thị lỗi
+                console.error('Error:', error); // Sử dụng console.error để hiển thị lỗi
             }
         };
         fetchDataOrderToDay();
@@ -220,7 +221,7 @@ const Admin = () => {
                 const response = await axios.get(`${BASE_URL}rest/admin/orderYesterday`);
                 setDataOrderYesterday(response.data);
             } catch (error) {
-                // console.error('Error:', error);
+                console.error('Error:', error);
             }
         };
         fetchDataOrderYesterday();
@@ -234,7 +235,7 @@ const Admin = () => {
                 const response = await axios.get(`${BASE_URL}rest/admin/order7day`);
                 setDataOrder7day(response.data);
             } catch (error) {
-                // console.error('Error:', error);
+                console.error('Error:', error);
             }
         };
         fetchDataOrder7day();
@@ -248,7 +249,7 @@ const Admin = () => {
                 const response = await axios.get(`${BASE_URL}rest/admin/orderOneMonth`);
                 setDataOrderOneMonth(response.data);
             } catch (error) {
-                // console.error('Error:', error);
+                console.error('Error:', error);
             }
         };
         fetchDataOrderOneMonth();
@@ -458,6 +459,7 @@ const Admin = () => {
                 case 'Một Tháng':
                     return dataColumnnChartOneMonth;
                 case 'Một Ngày':
+
                 case 'Nhiều Ngày':
                     return dataColumnnChartOther;
                 default:
@@ -544,7 +546,16 @@ const Admin = () => {
             toast.error('Xuất file Excel không thành công! Vui lòng thử lại sau!');
         }
     };
+    const [isLoading, setIsLoading] = useState(true);
 
+    useEffect(() => {
+        if (selectedOption === "Danh Sách Hóa Đơn") {
+            // Giả lập tải dữ liệu, thay bằng việc kiểm tra tải dữ liệu thực tế
+            setTimeout(() => {
+                setIsLoading(false);
+            }, 2500); // Loading giả lập trong 1 giây
+        }
+    }, [selectedOption]);
 
     return (
         <Suspense fallback={<div>Đang tải...</div>}>
@@ -637,7 +648,11 @@ const Admin = () => {
 
                 {selectedOption === "Danh Sách Hóa Đơn" ? (
                     <>
-                        <ColumnChart />
+                        {isLoading ? (
+                            <div>Loading...</div> // Spinner hoặc giao diện loading
+                        ) : (
+                            <ColumnChart />
+                        )}
                         <LisOrder />
                     </>
                 ) : null}
