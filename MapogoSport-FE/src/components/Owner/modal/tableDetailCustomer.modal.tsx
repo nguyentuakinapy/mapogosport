@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Modal, Spinner, Table } from "react-bootstrap";
 import { formatPrice } from "@/components/Utils/Format"
 

@@ -453,11 +453,11 @@ export default function Home() {
         try {
           const response = await fetch(`${BASE_URL}rest/booking/customer/byOwner/byUsernameOffline/${owner?.ownerId}/Đã thanh toán`)
           const data = await response.json()
-          const convertedData = data.map((item: RankCustomer[]) => ({
-            rank: item[0],
-            username: item[1],
-            fullName: item[2]
-          }));
+          // const convertedData = data.map((item: RankCustomer[]) => ({
+          //   rank: item[0],
+          //   username: item[1],
+          //   fullName: item[2]
+          // }));
           //setRankCustomerOnline(convertedData);
 
           setRankCustomerOffline(data);
@@ -909,7 +909,7 @@ export default function Home() {
       case 'withdraw':
         return (
           <>
-            <ModalTableDetailCustomer showModal={showModalRank} onClose={handleCloseModalRank} data={bookingByUsernameModal.filter((booking)=>booking.status==='Đã thanh toán'&& booking.owner.ownerId===owner?.ownerId)} />
+            <ModalTableDetailCustomer showModal={showModalRank} onClose={handleCloseModalRank} data={bookingByUsernameModal.filter((booking) => booking.status === 'Đã thanh toán' && booking.owner.ownerId === owner?.ownerId)} />
             <ModalTableDetailCustomerByFullName
               showModal={showModalRankOffline}
               onClose={handleCloseModalRankOffline}
