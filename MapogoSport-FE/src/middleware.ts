@@ -34,10 +34,7 @@ export function middleware(request: NextRequest) {
 
         try {
             sessionData = JSON.parse(sessionDataAuth) as SessionData;
-            // console.log(">>>> check ROLE: ", sessionData.authorities.map(a => a.role.name));
-
         } catch (error) {
-            // console.error("Failed to parse sessionDataAuth:", error);
             return NextResponse.next();
         }
 
@@ -123,7 +120,7 @@ export function middleware(request: NextRequest) {
             }
 
         } else {
-            console.error("Invalid sessionData structure:", sessionData);
+            // console.error("Invalid sessionData structure:", sessionData);
         }
     }
     return NextResponse.next();

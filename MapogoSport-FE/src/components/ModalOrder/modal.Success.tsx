@@ -20,17 +20,26 @@ const ModalOrderSuccess = (props: OrderProps) => {
 
     return (
         <>
-            <Modal show={showOrderSuccessModal} onHide={handleClose} size="xl" centered backdrop="static" keyboard={false}>
-                <Modal.Header closeButton>
-                    <Modal.Title className="text-danger fw-bold">Cảm ơn bạn đã đặt hàng! <br />
-                        Chúng tôi sẽ cố gắng giao hàng đến bạn sớm nhất có thể!</Modal.Title>
+            <Modal show={showOrderSuccessModal} onHide={handleClose} centered backdrop="static" keyboard={false}>
+                <Modal.Header>
+                    <Modal.Title className="text-danger fw-bold m-auto">Cảm ơn bạn đã đặt hàng!
+                    </Modal.Title>
                 </Modal.Header>
-
+                <Modal.Body >
+                    <span style={{
+                        fontSize: '16px'
+                    }}>Chúng tôi sẽ cố gắng giao hàng đến bạn sớm nhất có thể!</span>
+                </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>Đóng</Button>
-                    <Button variant="success" onClick={handleChange}>Xem hóa đơn</Button>
-                </Modal.Footer>
-            </Modal>
+                    <Button variant=""
+                        style={{
+                            backgroundColor: '#142239',
+                            color: 'white'
+                        }}
+                        onClick={handleChange}>Xem hóa đơn</Button>
+                </Modal.Footer >
+            </Modal >
         </>
     );
 };

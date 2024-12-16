@@ -12,7 +12,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { Col, Row, Table } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import SockJS from "sockjs-client";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 type BookingsTypeOnDay = {
     [time: string]: BookingDetails[];
@@ -90,6 +90,7 @@ export default function BookingSport() {
                     setCheckNotification(prev => prev + 1);
                     setCheckUsername(jsonData.username);
                     setFocusedId(jsonData.bookingId);
+                    mutate(`${BASE_URL}rest/owner/booking/findAll/${jsonData.username}`);
                 }
             });
 
@@ -98,6 +99,7 @@ export default function BookingSport() {
                     setCheckNotification(prev => prev + 1);
                     setCheckUsername(message.body);
                     // refreshStatusBooking();
+                    mutate(`${BASE_URL}rest/owner/booking/findAll/${message.body}`);
                 }
             });
         });

@@ -8,6 +8,7 @@ import useSWR, { mutate } from "swr";
 import CancelOrderModal from "../../CancelOrderModal";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import { formatPrice } from "@/components/Utils/Format";
 
 type OrderInfo = {
     fullname: string,
@@ -15,7 +16,9 @@ type OrderInfo = {
     address: string,
     status: string,
     note: string,
-    paymentMethodName: string
+    paymentMethodName: string,
+    shipFee: number,
+    amount: number
 }
 
 const OrdersDetail = ({ params }: { params: { id: number } }) => {
@@ -41,7 +44,9 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                 address: data.address,
                 status: data.status,
                 note: data.note,
-                paymentMethodName: data.paymentMethodName
+                paymentMethodName: data.paymentMethodName,
+                shipFee: data.shipFee,
+                amount: data.amount
             });
         }
     }, [data]);
@@ -55,7 +60,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
 
 
     const handleCancelOrder = (reason: string) => {
-        console.log("Lý do hủy:", reason);
+        // console.log("Lý do hủy:", reason);
         fetch(`${BASE_URL}rest/order/cancel`, {
             method: 'PUT',
             headers: {
@@ -107,9 +112,21 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                                     </tr>
                                 ))
                             )}
+                            <tr>
+                                <td colSpan={4}>Giảm giá</td>
+                                <td>
+                                    {orderInfo && (totalAmount - orderInfo.amount + orderInfo.shipFee) === 0 ?
+                                        0 :
+                                        `-${orderInfo && (totalAmount - orderInfo.amount + orderInfo.shipFee).toLocaleString()} ₫`}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan={4}>Phí vận chuyển</td>
+                                <td>+{formatPrice(orderInfo?.shipFee || 0)}</td>
+                            </tr>
                             <tr className="total-money">
-                                <td colSpan={4}>Tổng thành tiền</td>
-                                <td>{totalAmount.toLocaleString()} ₫</td>
+                                <td colSpan={4}>Tổng tiền</td>
+                                <td>{formatPrice(orderInfo?.amount || 0)}</td>
                             </tr>
                         </tbody>
                     </Table>
@@ -120,8 +137,7 @@ const OrdersDetail = ({ params }: { params: { id: number } }) => {
                 <Row className='item-address'>
                     <Col xs={12} md={5}>
                         <p><i className="bi bi-person-vcard"></i> <b>Họ và tên: </b>{orderInfo?.fullname}</p>
-                        <p><i className="bi bi-telephone-fill"></i> <b>Số điện thoại:</b> {orderInfo?.phoneNumber}</p>
-                    </Col>
+                        <p><i className="bi bi-telephone-fill"></i> <b>Số điện thoại:</b> {orderInfo?.phoneNumber}</p>                    </Col>
                     <Col xs={12} md={7}>
                         <p><i className="bi bi-geo-alt-fill"></i> <b>Địa chỉ: </b>{orderInfo?.address || "Chưa cập nhật địa chỉ"}</p>
                         <p><i className="bi bi-currency-dollar"></i> <b>Phương thức thanh toán: </b>{orderInfo?.paymentMethodName}</p>

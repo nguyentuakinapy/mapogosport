@@ -92,7 +92,7 @@ export default function Owner() {
                 if (!res.ok) {
                     const errorText = await res.text();
                     toast.error(`Cập nhật không thành công! Chi tiết lỗi: ${errorText}`);
-                    console.log(errorText);
+                    // console.log(errorText);
                     handleCloseModal();
                 }
 
@@ -109,7 +109,7 @@ export default function Owner() {
                 }
             }).catch((error) => {
                 toast.error(`Đã xảy ra lỗi: ${error.message}`);
-                console.log(error);
+                // console.log(error);
                 handleCloseModal();
             });
         } else {
@@ -136,7 +136,7 @@ export default function Owner() {
                 if (data.status === "ok" && data.url) {
                     window.location.href = data.url;
                 } else {
-                    console.error();
+                    // console.error();
 
                     toast.error("Có lỗi xảy ra trong quá trình tạo thanh toán.");
                 }
@@ -206,7 +206,7 @@ export default function Owner() {
                 if (data.status === "ok" && data.url) {
                     window.location.href = data.url;
                 } else {
-                    console.error();
+                    // console.error();
 
                     toast.error("Có lỗi xảy ra trong quá trình tạo thanh toán.");
                 }
@@ -242,7 +242,7 @@ export default function Owner() {
                                 userSubscription?.accountPackage?.accountPackageId;
                             return (
 
-                                <Col xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
+                                <Col className="mt-3" xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div className="card packageUpdate">
                                         <b className="ms-3 mt-3 fs-5">{ap.packageName}</b>
                                         <div className="body-package my-3">

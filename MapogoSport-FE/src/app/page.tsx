@@ -169,7 +169,7 @@ export default function Home() {
       mutate(`${BASE_URL}rest/user/voucher/${username}`);
       toast.success("Nhận Voucher giá thành công!");
     } catch (error) {
-      console.error("Lỗi khi nhận Voucher:", error);
+      // console.error("Lỗi khi nhận Voucher:", error);
       alert("Có lỗi xảy ra khi nhận Voucher. Vui lòng thử lại sau.");
     }
   };

@@ -55,7 +55,7 @@ const PageVoucher = () => {
             fetchDataVoucher();
             toast.success("Nhận Voucher giá thành công!");
         } catch (error) {
-            console.error("Lỗi khi nhận Voucher:", error);
+            // console.error("Lỗi khi nhận Voucher:", error);
             alert("Có lỗi xảy ra khi nhận Voucher. Vui lòng thử lại sau.");
         }
     };
@@ -68,7 +68,7 @@ const PageVoucher = () => {
             const data = await response.json();
             setVoucher(data);
         } catch (error) {
-            console.log("Error fetch voucher data", error)
+            // console.log("Error fetch voucher data", error)
         }
     }
      
@@ -78,11 +78,11 @@ const PageVoucher = () => {
         try {
             const response = await fetch(`${BASE_URL}rest/user/voucher/${username}`)
             const data = await response.json();
-            console.log("Voucher user received: ",data)
+            // console.log("Voucher user received: ",data)
             setReceivedVoucher(data)
            
         } catch (error) {
-            console.error("Error handelReceived Voucher",error);
+            // console.error("Error handelReceived Voucher",error);
         }
     }
     //Handel select voucher khi active

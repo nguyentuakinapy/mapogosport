@@ -205,12 +205,12 @@ const WalletPage = () => {
             });
             const responseData = await responsePayment.json();
             const paymentUrl = responseData.url;
-            console.log(paymentUrl);
+            // console.log(paymentUrl);
 
             // chuyển hướng đến URL thanh toán
             window.location.href = paymentUrl;
         } catch (error) {
-            console.error('Error during payment:', error);
+            // console.error('Error during payment:', error);
         }
     }
 

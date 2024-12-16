@@ -294,23 +294,23 @@ export default function ChatBox() {
             }
           });
 
-          console.log('setChatListCurrentUserByDMM =>>>>>>> ', chatListCurrentUserByDMM);
+          // console.log('setChatListCurrentUserByDMM =>>>>>>> ', chatListCurrentUserByDMM);
 
 
           toast.info(
             "Bạn nhận được tin nhắn từ " + parsedMessage.senderFullName
           );
 
-          console.log("Sender:", parsedMessage.sender);
-          console.log("Message:", parsedMessage.message);
-          console.log("createdAt:", parsedMessage.createdAt);
+          // console.log("Sender:", parsedMessage.sender);
+          // console.log("Message:", parsedMessage.message);
+          // console.log("createdAt:", parsedMessage.createdAt);
         });
       }, () => { setIsConnected(false); });
     // Đóng kết nối khi component bị hủy
     return () => {
       if (stompClient.current) {
         stompClient.current.disconnect(() => {
-          console.log("Disconnected from STOMP server");
+          // console.log("Disconnected from STOMP server");
         });
       }
     };
@@ -361,9 +361,9 @@ export default function ChatBox() {
       }
     }
 
-    console.log("_content ++++++>>>>>>>> ", _content);
-    console.log("contentStr ++++++>>>>>>>> ", contentStr);
-    console.log("isString(_content) ++++++>>>>>>>> ", isString(_content));
+    // console.log("_content ++++++>>>>>>>> ", _content);
+    // console.log("contentStr ++++++>>>>>>>> ", contentStr);
+    // console.log("isString(_content) ++++++>>>>>>>> ", isString(_content));
 
     if (contentStr.trim() !== "" && stompClient.current && stompClient.current.connected) {
       const newMessage = {
@@ -375,8 +375,8 @@ export default function ChatBox() {
         isDelete: false,
       };
 
-      console.log("Đang gửi tin nhắn");
-      console.log("newMessage ", JSON.stringify(newMessage));
+      // console.log("Đang gửi tin nhắn");
+      // console.log("newMessage ", JSON.stringify(newMessage));
 
       // Sắp xếp tên người gửi và người nhận theo thứ tự alphabet
       const sortedUsers = [currentUser?.username, receiver].sort();
@@ -412,8 +412,8 @@ export default function ChatBox() {
     }
 
 
-    console.log("Đã vào với: ", chat?.username || "Không có tên");
-    console.log("chatListCurrentUserByDMM: ", chatListCurrentUserByDMM);
+    // console.log("Đã vào với: ", chat?.username || "Không có tên");
+    // console.log("chatListCurrentUserByDMM: ", chatListCurrentUserByDMM);
 
     // setReceiver(chat?.username);
     // console.log("Người nhận là ", chat?.username);
@@ -444,7 +444,7 @@ export default function ChatBox() {
       const isChatExists = tempArr.some(
         (item) => item?.user?.username === chat.username
       );
-      console.log("isChatExists: ", isChatExists);
+      // console.log("isChatExists: ", isChatExists);
 
       if (!isChatExists) {
         tempArr.push({
@@ -457,14 +457,14 @@ export default function ChatBox() {
         )
 
       }
-      console.log("tempArrtempArrtempArrtempArr: ", tempArr);
+      // console.log("tempArrtempArrtempArrtempArr: ", tempArr);
 
       return tempArr
 
     });
 
     setReceiver(chat?.username);
-    console.log("Người nhận là ", chat?.username);
+    // console.log("Người nhận là ", chat?.username);
 
     if (chatListCurrentUserByDMM.length === 0 && adminDefault) {
       setShowChat(true);
@@ -601,9 +601,9 @@ export default function ChatBox() {
 
       let groupedMessagesArray = Object.values(groupedMessages);
 
-      console.log('chatlissttttttttttt', chatListCurrentUserByDMM)
-      console.log('groupedMessagesArray=============', groupedMessagesArray)
-      console.log('dataAdmin=============', dataAdmin)
+      // console.log('chatlissttttttttttt', chatListCurrentUserByDMM)
+      // console.log('groupedMessagesArray=============', groupedMessagesArray)
+      // console.log('dataAdmin=============', dataAdmin)
       setChatListCurrentUserByDMM((draft) => {
         const tempArr = cloneDeep(draft); // tạo một biến tempArr để lấy giá trị của State gốc chatListCurrentDDM nhưng không lấy địa chỉ
         const arrIsAdds = cloneDeep(tempArr.filter((item) => item.isAdd))
@@ -644,15 +644,15 @@ export default function ChatBox() {
       });
       // mới thêm 19/11
 
-      console.log('ownerCurrent=======', ownerCurrent);
-      console.log('groupedMessagesArray=======', groupedMessagesArray);
+      // console.log('ownerCurrent=======', ownerCurrent);
+      // console.log('groupedMessagesArray=======', groupedMessagesArray);
 
 
-      console.log("Danh sách chat real-time đã nhóm: ", groupedMessagesArray);
-      console.log(
-        "Danh sách setChatListCurrentUserByDMM: ",
-        chatListCurrentUserByDMM
-      );
+      // console.log("Danh sách chat real-time đã nhóm: ", groupedMessagesArray);
+      // console.log(
+      //   "Danh sách setChatListCurrentUserByDMM: ",
+      //   chatListCurrentUserByDMM
+      // );
     }
   }, [dataByReceiverUsernameOrCurrentUser]);
 
@@ -690,7 +690,7 @@ export default function ChatBox() {
         };
       });
       setChatListRealTime(tempData);
-      console.error("chat list: ", chatListRealTime);
+      // console.error("chat list: ", chatListRealTime);
     } //               mới
   }, [data]);
 
@@ -740,7 +740,7 @@ export default function ChatBox() {
     if (!chatGroup?.user?.username) {
       return false;
     }
-    console.log('chat group =>>>>> ', chatGroup)
+    // console.log('chat group =>>>>> ', chatGroup)
     const username = chatGroup.user.username;
     return removeVietnameseTones(username.toLowerCase()).includes(
       removeVietnameseTones(searchKeyword.toLowerCase())

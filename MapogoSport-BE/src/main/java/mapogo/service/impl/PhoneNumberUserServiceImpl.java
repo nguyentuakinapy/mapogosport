@@ -43,7 +43,12 @@ public class PhoneNumberUserServiceImpl implements PhoneNumberUserService{
 		}
 		
 		phoneNumberUserDAO.deleteByPhoneNumberUserId(phoneNumberUserId);
-		phoneNumberDAO.deleteById(phoneNumberUser.getPhoneNumber().getPhoneNumberId());
+		
+		Integer phoneNumberId = phoneNumberUser.getPhoneNumber().getPhoneNumberId();
+		boolean isPhoneNumberUsed = phoneNumberUserDAO.existsByPhoneNumber_PhoneNumberId(phoneNumberId);
+		if (!isPhoneNumberUsed) {
+	        phoneNumberDAO.deleteById(phoneNumberId);
+	    }
 	}
 	
 	@Transactional

@@ -68,32 +68,31 @@ const Admin = () => {
                 setDataColumnnChartOther(response1.data);
             }
         } catch (error) {
-            console.error("Error fetching orders:", error);
+            // console.error("Error fetching orders:", error);
             // Optional: Show error message to the user
         }
     };
 
     const ColumnChart = () => {
+        const fetchData = async () => {
+            try {
+
+                const [todayResp, yesterdayResp, weekResp, monthResp] = await Promise.all([
+                    axios.get(`${BASE_URL}rest/admin/category-product-totals-today`),
+                    axios.get(`${BASE_URL}rest/admin/category-product-totals-yesterday`),
+                    axios.get(`${BASE_URL}rest/admin/category-product-totals-7day`),
+                    axios.get(`${BASE_URL}rest/admin/category-product-totals-one-month`),
+                ]);
+
+                setDataColumnnChartToday(todayResp.data);
+                setDataColumnnChartYesterday(yesterdayResp.data);
+                setDataColumnnChart7Day(weekResp.data);
+                setDataColumnnChartOneMonth(monthResp.data);
+            } catch (error) {
+                // console.error("Error fetching chart data", error);
+            }
+        };
         useEffect(() => {
-            const fetchData = async () => {
-                try {
-
-                    const [todayResp, yesterdayResp, weekResp, monthResp] = await Promise.all([
-                        axios.get(`${BASE_URL}rest/admin/category-product-totals-today`),
-                        axios.get(`${BASE_URL}rest/admin/category-product-totals-yesterday`),
-                        axios.get(`${BASE_URL}rest/admin/category-product-totals-7day`),
-                        axios.get(`${BASE_URL}rest/admin/category-product-totals-one-month`),
-                    ]);
-
-                    setDataColumnnChartToday(todayResp.data);
-                    setDataColumnnChartYesterday(yesterdayResp.data);
-                    setDataColumnnChart7Day(weekResp.data);
-                    setDataColumnnChartOneMonth(monthResp.data);
-                } catch (error) {
-                    console.error("Error fetching chart data", error);
-                }
-            };
-
             if (!dataColumnnToday.length && !dataColumnnYesterday.length && !dataColumnnChart7Day.length && !dataColumnnChartOneMonth.length) {
                 fetchData();
             }
@@ -106,17 +105,6 @@ const Admin = () => {
                 data: dataColumnnToday.length > 0
                     ? [['Category', { role: 'style' }, 'Total'],
                     ...dataColumnnToday.map(item => [
-                        item[1] || 'Chưa có tên',
-                        'color: #76A7FA',
-                        parseFloat(item[3]) || 0])]
-                    : [['Category', { role: 'style' }, 'Total'], ['Loading', 'color: #76A7FA', 0]]
-            },
-            {
-                option: 'Hôm Qua',
-                title: 'Biểu đồ hoạt động hôm qua',
-                data: dataColumnnYesterday.length > 0
-                    ? [['Category', { role: 'style' }, 'Total'],
-                    ...dataColumnnYesterday.map(item => [
                         item[1] || 'Chưa có tên',
                         'color: #76A7FA',
                         parseFloat(item[3]) || 0])]
@@ -219,7 +207,7 @@ const Admin = () => {
                 const response = await axios.get(`${BASE_URL}rest/admin/orderToDay`);
                 setDataOrderToDay(response.data);
             } catch (error) {
-                console.error('Error:', error); // Sử dụng console.error để hiển thị lỗi
+                // console.error('Error:', error); // Sử dụng console.error để hiển thị lỗi
             }
         };
         fetchDataOrderToDay();
@@ -232,7 +220,7 @@ const Admin = () => {
                 const response = await axios.get(`${BASE_URL}rest/admin/orderYesterday`);
                 setDataOrderYesterday(response.data);
             } catch (error) {
-                console.error('Error:', error);
+                // console.error('Error:', error);
             }
         };
         fetchDataOrderYesterday();
@@ -246,7 +234,7 @@ const Admin = () => {
                 const response = await axios.get(`${BASE_URL}rest/admin/order7day`);
                 setDataOrder7day(response.data);
             } catch (error) {
-                console.error('Error:', error);
+                // console.error('Error:', error);
             }
         };
         fetchDataOrder7day();
@@ -260,7 +248,7 @@ const Admin = () => {
                 const response = await axios.get(`${BASE_URL}rest/admin/orderOneMonth`);
                 setDataOrderOneMonth(response.data);
             } catch (error) {
-                console.error('Error:', error);
+                // console.error('Error:', error);
             }
         };
         fetchDataOrderOneMonth();

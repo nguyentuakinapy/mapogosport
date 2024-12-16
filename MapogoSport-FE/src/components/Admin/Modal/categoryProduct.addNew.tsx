@@ -63,7 +63,7 @@ const CategoryAddNew = (props: CategoryProductProps) => {
                 handleClose();
             });
         } catch (error) {
-            console.error("Error create category product: ",error)
+            // console.error("Error create category product: ",error)
             toast.error("Không thể thêm mới loại sản phẩm")
         }
         
@@ -93,7 +93,7 @@ const CategoryAddNew = (props: CategoryProductProps) => {
                 handleClose();
             });
         } catch (error) {
-            console.error("Error update category product: ",error)
+            // console.error("Error update category product: ",error)
             toast.error("Không thể cập nhật loại sản phẩm")
         }
         

@@ -103,7 +103,7 @@ export default function Home() {
           const data = await response.json();
           setBookingSuccess(data);
         } catch (error) {
-          console.log("Error fetching revenue", error);
+          // console.log("Error fetching revenue", error);
         }
       };
       fetchData();
@@ -124,9 +124,9 @@ export default function Home() {
           }
           const data = await response.json();
           setSportFieldByOwner(data);
-          console.log("Field Owner Data:", data);
+          // console.log("Field Owner Data:", data);
         } catch (error) {
-          console.log("Error fetching sport field data", error);
+          // console.log("Error fetching sport field data", error);
         }
       };
       fetchData();
@@ -153,7 +153,7 @@ export default function Home() {
           const ids = data.sportFielDetails.map((detail: SportFieldDetail) => detail.sportFielDetailId);
           setSportFieldDetailIds(ids);
         } catch (error) {
-          console.log("error fetch bookingdetail", error);
+          // console.log("error fetch bookingdetail", error);
           setSportFieldDetailIds([]);
         }
       };
@@ -173,7 +173,7 @@ export default function Home() {
           const data = await response.json();
           setBookingdetailBySportField(data);
         } catch (error) {
-          console.log("error fetch bookingdetail", error);
+          // console.log("error fetch bookingdetail", error);
           setBookingdetailBySportField([]);
         }
       };
@@ -204,7 +204,7 @@ export default function Home() {
           ];
           setChartData(formattedData);
         } catch (error) {
-          console.log("error fetch ", error);
+          // console.log("error fetch ", error);
           setChartData([["Field", "Revenue", "StarDate", "EndDate", "IdSportFieldDetail"]]);
         }
       };
@@ -252,7 +252,7 @@ export default function Home() {
             setBookingSuccessByDate(data);
           }
         } catch (error) {
-          console.log("Error fetching revenue", error);
+          // console.log("Error fetching revenue", error);
           setBookingSuccessByDate([]);
         }
       };
@@ -304,7 +304,7 @@ export default function Home() {
             setBookingdetailBySportFieldByDate(data);
           }
         } catch (error) {
-          console.error("Error fetching booking details:", error);
+          // console.error("Error fetching booking details:", error);
           setBookingdetailBySportFieldByDate([]);
         }
       };
@@ -380,7 +380,7 @@ export default function Home() {
           const data = await response.json();
           setBookingDetailBySpFDetail(data); // Store modal-specific data
         } catch (error) {
-          console.log("Error fetching modal booking details by date", error);
+          // console.log("Error fetching modal booking details by date", error);
         }
       };
 
@@ -393,7 +393,7 @@ export default function Home() {
           const data = await response.json();
           setBookingDetailBySpFDetail(data);
         } catch (error) {
-          console.log("Error fetching modal booking details", error);
+          // console.log("Error fetching modal booking details", error);
         }
       };
 
@@ -415,7 +415,7 @@ export default function Home() {
           const data = await response.json();
           setTotalCustomer(data);
         } catch (error) {
-          console.log("Lỗi khi lấy data totalCustomer", error)
+          // console.log("Lỗi khi lấy data totalCustomer", error)
         }
       }
       fetchData()
@@ -439,7 +439,7 @@ export default function Home() {
           ...Object.entries(data).map(([month, count]) => [parseInt(month), Number(count)] as CustomerChartRow)];
           setCustomerData(formattedData)
         } catch (error) {
-          console.log("Lỗi fetch data của customer by month", error)
+          // console.log("Lỗi fetch data của customer by month", error)
         }
       }
       fetchData()
@@ -451,18 +451,18 @@ export default function Home() {
     if (owner?.ownerId) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`${BASE_URL}rest/booking/customer/byOwner/byUsernameOffline/${owner?.ownerId}`)
+          const response = await fetch(`${BASE_URL}rest/booking/customer/byOwner/byUsernameOffline/${owner?.ownerId}/Đã thanh toán`)
           const data = await response.json()
           const convertedData = data.map((item: RankCustomer[]) => ({
             rank: item[0],
             username: item[1],
             fullName: item[2]
           }));
-          setRankCustomerOnline(convertedData);
+          //setRankCustomerOnline(convertedData);
 
           setRankCustomerOffline(data);
         } catch (error) {
-          console.log("Error fetch data rank customer", error)
+          // console.log("Error fetch data rank customer", error)
         }
       }
       fetchData()
@@ -474,13 +474,13 @@ export default function Home() {
     if (owner?.ownerId) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`${BASE_URL}rest/booking/rank/customer/online/byOwerId/${owner?.ownerId}`)
+          const response = await fetch(`${BASE_URL}rest/booking/rank/customer/online/byOwerId/${owner?.ownerId}/Đã thanh toán`)
           const data = await response.json()
           setRankCustomerOnline(data)
-          console.log(data);
+          // console.log(data);
 
         } catch (error) {
-          console.log("Error fetch data rank customer", error)
+          // console.log("Error fetch data rank customer", error)
         }
       }
       fetchData()
@@ -497,7 +497,7 @@ export default function Home() {
         const data = await response.json();
         setBookingByUsernameModal(data);
       } catch (error) {
-        console.log("Error fetching modal booking details", error);
+        // console.log("Error fetching modal booking details", error);
       }
     };
     fetchModalData();
@@ -518,7 +518,7 @@ export default function Home() {
         const data = await response.json();
         setBookingByFullNameOffline(data);
       } catch (error) {
-        console.log("Error fetching modal booking details", error);
+        // console.log("Error fetching modal booking details", error);
       }
     };
     fetchModalData();
@@ -570,7 +570,7 @@ export default function Home() {
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       saveAs(blob, 'Doanh thu.xlsx');
     } catch (error) {
-      console.error('Error exporting Excel:', error);
+      // console.error('Error exporting Excel:', error);
     }
   };
 
@@ -636,7 +636,7 @@ export default function Home() {
       toast.success("Đã xuất file PDF thành công!");
     } catch (error) {
       toast.error("Đã xảy ra lỗi trong quá trình xuất file! Vui lòng thử lại sau!");
-      console.log(error)
+      // console.log(error)
     }
 
   };
@@ -676,7 +676,7 @@ export default function Home() {
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       saveAs(blob, 'Thống kê khách.xlsx');
     } catch (error) {
-      console.error('Error exporting Excel:', error);
+      // console.error('Error exporting Excel:', error);
     }
   };
 
@@ -729,7 +729,7 @@ export default function Home() {
       toast.success("Đã xuất file PDF thành công!");
     } catch (error) {
       toast.error("Đã xảy ra lỗi trong quá trình xuất file! Vui lòng thử lại sau!");
-      console.log(error)
+      // console.log(error)
     }
 
   };
@@ -870,8 +870,8 @@ export default function Home() {
                     const row = field as ChartRow;
                     const isDateSelected = startDate || endDate;
                     const displayDate = startDate || endDate
-                      ? `${startDate ? new Date(startDate).toLocaleDateString('en-GB') : ''} / ${endDate ? new Date(endDate).toLocaleDateString('en-GB') : ''}`
-                      : `${new Date(row[2]).toLocaleDateString('en-GB')} / ${new Date(row[3]).toLocaleDateString('en-GB')}`;
+                      ? `${startDate ? new Date(startDate).toLocaleDateString('en-GB') : ''} - ${endDate ? new Date(endDate).toLocaleDateString('en-GB') : ''}`
+                      : `${new Date(row[2]).toLocaleDateString('en-GB')} - ${new Date(row[3]).toLocaleDateString('en-GB')}`;
                     const displayTotalBookingPrice = isDateSelected ? totalBookingDetailPriceByDate : totalBookingPrice;
                     const displayFieldRevenue = isDateSelected ? row[1] : row[1];
                     return (
@@ -909,8 +909,15 @@ export default function Home() {
       case 'withdraw':
         return (
           <>
-            <ModalTableDetailCustomer showModal={showModalRank} onClose={handleCloseModalRank} data={bookingByUsernameModal} />
-            <ModalTableDetailCustomerByFullName showModal={showModalRankOffline} onClose={handleCloseModalRankOffline} data={bookingByFullNameOffline} />
+            <ModalTableDetailCustomer showModal={showModalRank} onClose={handleCloseModalRank} data={bookingByUsernameModal.filter((booking)=>booking.status==='Đã thanh toán'&& booking.owner.ownerId===owner?.ownerId)} />
+            <ModalTableDetailCustomerByFullName
+              showModal={showModalRankOffline}
+              onClose={handleCloseModalRankOffline}
+              data={bookingByFullNameOffline.filter(
+                (booking) => booking.status === 'Đã thanh toán' && booking.owner.ownerId === owner?.ownerId
+              )}
+            />
+
             <div className="card mb-3">
               <div className="card-body">
                 <div className="row mt-0">
@@ -1073,9 +1080,11 @@ export default function Home() {
         );
     }
   };
+
+  if (!totalBookingPrice) return <>Không có dữ liệu</>;
+
   if (bookingSuccess.length >= 0) {
-    if (!totalBookingPrice) return <>Loading</>;
-    else if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       return (
         <Suspense fallback={<div>Đang tải...</div>}>
           <h3 className="text-center text-danger fw-bold" style={{ fontSize: '20px' }}>THỐNG KÊ</h3>

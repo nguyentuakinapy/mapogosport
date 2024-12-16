@@ -79,19 +79,34 @@ public interface BookingDAO extends JpaRepository<Booking, Integer> {
 	List<Object[]> findCustomerCountsByMonth(@Param("year") Integer year, @Param("ownerId") Integer ownerId);
 
 	@Query("select count(b), b.user.username, b.fullName from Booking b "
-			+ "where b.owner.ownerId = :ownerId And b.user.username='sportoffline' "
-			+ "group by b.user.username, b.fullName " + "order by count(b) desc ")
-	List<Object[]> findBookingByOwnerIdUsernameOffline(@Param("ownerId") Integer ownerId);
+	        + "where b.owner.ownerId = :ownerId "
+	        + "and b.user.username = 'sportoffline' "
+	        + "and b.status = :status "
+	        + "group by b.user.username, b.fullName "
+	        + "order by count(b) desc")
+	List<Object[]> findBookingByOwnerIdUsernameOffline(
+	    @Param("ownerId") Integer ownerId, 
+	    @Param("status") String status
+	);
+
 
 //	@Query("select count(b), b.user.username, b.fullName from Booking b " +
 //		       "where b.owner.ownerId = :ownerId and b.user.username <> 'sportoffline' " +
 //		       "group by b.user.username, b.fullName " +
 //		       "order by count(b) desc")
-	@Query("SELECT COUNT(b) AS totalBookings, b.user.username AS username, u.fullname AS fullname "
-			+ "FROM Booking b JOIN b.user u "
-			+ "WHERE b.owner.ownerId = :ownerId AND b.user.username <> 'sportoffline' "
-			+ "GROUP BY b.user.username, u.fullname " + "ORDER BY COUNT(b) DESC")
-	List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(@Param("ownerId") Integer ownerId);
+	@Query("SELECT COUNT(b) AS totalBookings, b.user.username AS username, b.fullName AS fullname "
+	        + "FROM Booking b "
+	        + "WHERE b.owner.ownerId = :ownerId "
+	        + "AND b.user.username <> 'sportoffline' "
+	        + "AND b.status = :status "
+	        + "GROUP BY b.user.username, b.fullName "
+	        + "ORDER BY COUNT(b) DESC")
+	List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(
+	    @Param("ownerId") Integer ownerId, 
+	    @Param("status") String status
+	);
+
+
 
 	@Query("select o from Booking o where o.user.username = 'sportoffline' and o.fullName = :fullName")
 	List<Booking> findByFullNameOffline(@Param("fullName") String fullName);

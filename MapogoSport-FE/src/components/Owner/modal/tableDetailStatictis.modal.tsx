@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal, Table } from "react-bootstrap";
+import { Modal, Spinner, Table } from "react-bootstrap";
 import { formatPrice } from "@/components/Utils/Format"
 
 interface ModalTableDetailProps {
@@ -14,7 +14,7 @@ const ModalTableDetail = ({ showModal, onClose, data }: ModalTableDetailProps) =
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-    const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+    const currentItems = data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(data.length / itemsPerPage);
     const handlePageChange = (pageNumber: number) => {
         setCurrentPage(pageNumber);
@@ -35,32 +35,41 @@ const ModalTableDetail = ({ showModal, onClose, data }: ModalTableDetailProps) =
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Table striped bordered hover>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Tên sân</th>
-                            <th>Thời gian bắt đầu</th>
-                            <th>Thời gian kết thúc</th>
-                            <th>Giá</th>
-                            <th>Ngày</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentItems.map((booking, index) => (
-                            <tr key={index}>
-                                <td>{index + 1}</td>
-                                <td>{booking.sportFieldDetail.name}</td>
-                                <td>{booking.startTime}</td>
-                                <td>{booking.endTime}</td>
-                                <td>{formatPrice(booking.price)}</td>
-                                <td>{new Date(booking.date).toLocaleDateString()}</td>
+                {(data.length > 0) ? (
+                    <Table striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Tên sân</th>
+                                <th>Thời gian bắt đầu</th>
+                                <th>Thời gian kết thúc</th>
+                                <th>Giá</th>
+                                <th>Ngày</th>
                             </tr>
-                        ))}
-                    </tbody>
-                    {/* Table content here */}
+                        </thead>
+                        <tbody>
+                            {currentItems.map((booking, index) => (
+                                <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>{booking.sportFieldDetail.name}</td>
+                                    <td>{booking.startTime}</td>
+                                    <td>{booking.endTime}</td>
+                                    <td>{formatPrice(booking.price)}</td>
+                                    <td>{new Date(booking.date).toLocaleDateString()}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                        {/* Table content here */}
 
-                </Table>
+                    </Table>
+                ) : (
+                    <div className="text-center">
+                        <Spinner animation="border" role="status">
+                            <span className="sr-only"></span>
+                        </Spinner>
+                    </div>
+                )}
+
                 <>
                     {totalPages > 1 && (
                         <nav aria-label="Page navigation example">

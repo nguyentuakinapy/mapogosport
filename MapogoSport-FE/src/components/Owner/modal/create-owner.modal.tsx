@@ -76,7 +76,8 @@ const CreateOwnerModal = (props: OwnerProps) => {
                 accountPackageId: apTemp.accountPackageId,
                 username: userData?.username,
                 startDay: new Date().toLocaleDateString(),
-                endDay: new Date(new Date().setDate(new Date().getDate() + (apTemp.durationDays || 0))).toLocaleDateString(),
+                endDay: apTemp.packageName === "Gói miễn phí" ? new Date().toLocaleDateString() :
+                    new Date(new Date().setDate(new Date().getDate() + (apTemp.durationDays || 0))).toLocaleDateString(),
                 status: 'Đã thanh toán'
             })
         })
@@ -87,7 +88,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
 
         const resSubscription = await responseUserSubscription.json() as UserSubscription;
         const userSubscriptionId = resSubscription.userSubscriptionId;
-        console.log(">>>>resSubscription: ", resSubscription);
+        // console.log(">>>>resSubscription: ", resSubscription);
 
         const responseOwner = await fetch(`${BASE_URL}rest/owner`, {
             method: 'POST',
@@ -228,7 +229,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
                     // chuyển hướng đến URL thanh toán
                     window.location.href = paymentUrl;
                 } catch (error) {
-                    console.error('Error during payment:', error);
+                    // console.error('Error during payment:', error);
                 }
             }
         }
@@ -249,7 +250,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
                     <Row className="my-3" style={{ fontSize: '15px', height: '100%', display: 'flex' }}>
                         {accountPackage && accountPackage.filter(item => item.status === "active").map(ap => {
                             return (
-                                <Col xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
+                                <Col className="mt-3" xs={4} key={ap.accountPackageId} style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div className="card packageUpdate">
                                         <b className="ms-3 mt-3 fs-5">{ap.packageName}</b>
                                         <div className="body-package my-3">
@@ -381,7 +382,7 @@ const CreateOwnerModal = (props: OwnerProps) => {
                                     <select value={paymentMethodId}
                                         onChange={(e) => {
                                             const value = Number(e.target.value);
-                                            console.log("Selected value:", value);
+                                            // console.log("Selected value:", value);
                                             setPaymentMethodId(value);
                                         }}
                                         className="form-select" aria-label="Default select example">

@@ -311,10 +311,11 @@ public class BookingRestController {
 		return bookingService.findCustomerCountsByMonth(year, ownerId);
 	}
 
-	@GetMapping("/booking/customer/byOwner/byUsernameOffline/{ownerId}")
-	public List<Object[]> findBookingByOwnerIdUsername(@PathVariable("ownerId") Integer ownerId) {
+	@GetMapping("/booking/customer/byOwner/byUsernameOffline/{ownerId}/{status}")
+	public List<Object[]> findBookingByOwnerIdUsername(@PathVariable("ownerId") Integer ownerId, 
+													   @PathVariable("status") String status) {
 
-		return bookingService.findBookingByOwnerIdUsernameOffline(ownerId);
+		return bookingService.findBookingByOwnerIdUsernameOffline(ownerId,status);
 	}
 
 	@PutMapping("/booking/update/status/{bookingDetailId}")
@@ -364,9 +365,10 @@ public class BookingRestController {
 		return bookingService.findByFullNameOffline(fullname);
 	}
 
-	@GetMapping("/booking/rank/customer/online/byOwerId/{ownerId}")
-	public List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(@PathVariable("ownerId") Integer ownerId) {
-		return bookingService.findBookingByOwnerIdExcludingUsernameOffline(ownerId);
+	@GetMapping("/booking/rank/customer/online/byOwerId/{ownerId}/{status}")
+	public List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(@PathVariable("ownerId") Integer ownerId,
+																	   @PathVariable("status") String status) {
+		return bookingService.findBookingByOwnerIdExcludingUsernameOffline(ownerId, status);
 	}
 
 	@GetMapping("/booking/rank/customer/online/{username}")

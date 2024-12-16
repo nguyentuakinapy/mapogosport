@@ -57,7 +57,9 @@ const BookingModal = (props: BookingProps) => {
             const response = await fetch(`${BASE_URL}rest/paymentMethod`);
             const data = await response.json();
             if (Array.isArray(data)) {
-                setDataPaymentMethod(data.filter(item => item.name != 'Thanh toán tại sân' && item.name != 'COD'));
+                setDataPaymentMethod(data.filter(item => item.name != 'Thanh toán tại sân' && item.name != 'COD' &&
+                    item.name != "Credit Card" && item.name != "Bank Transfer"
+                ));
             }
         }
         fetchPaymentMethods();
@@ -108,7 +110,7 @@ const BookingModal = (props: BookingProps) => {
                         setOperatingTimeFetchData(count);
                     }
                 } catch (error) {
-                    console.error("API or JSON parsing error:", error);
+                    // console.error("API or JSON parsing error:", error);
                 }
                 count++;
             }
@@ -157,7 +159,7 @@ const BookingModal = (props: BookingProps) => {
         }
         if (activeTab === 'byDay') {
             setDataTimeTemporary(newData.slice(1));
-            console.log(newData.slice(1));
+            // console.log(newData.slice(1));
 
         }
     }, [operatingTimeFetchData])
@@ -215,7 +217,7 @@ const BookingModal = (props: BookingProps) => {
                 const peakHourEnd = sportDetail.peakHour.split('-')[1];
 
                 const timeSlots: string[] = createTimeStringH(`${hours}h${minutes > 0 ? minutes : '00'}`, `${endHour}h${endMinute > 0 ? endMinute : '00'}`)
-                console.log(timeSlots);
+                // console.log(timeSlots);
 
                 const price = sportDetail.price / 2;
                 const pricePeakHour = sportDetail.peakHourPrices / 2;
@@ -261,12 +263,12 @@ const BookingModal = (props: BookingProps) => {
                     });
                     const responseData = await responsePayment.json();
                     const paymentUrl = responseData.url;
-                    console.log(paymentUrl);
+                    // console.log(paymentUrl);
 
                     // chuyển hướng đến URL thanh toán
                     window.location.href = paymentUrl;
                 } catch (error) {
-                    console.error('Error during payment:', error);
+                    // console.error('Error during payment:', error);
                     toast.error('Lỗi thanh toán')
                 }
             } else {
@@ -421,7 +423,7 @@ const BookingModal = (props: BookingProps) => {
                             }
                         }
                     } catch (error) {
-                        console.error("API or JSON parsing error:", error);
+                        // console.error("API or JSON parsing error:", error);
                     }
                 }
             }
@@ -475,12 +477,12 @@ const BookingModal = (props: BookingProps) => {
                     });
                     const responseData = await responsePayment.json();
                     const paymentUrl = responseData.url;
-                    console.log(paymentUrl);
+                    // console.log(paymentUrl);
 
                     // chuyển hướng đến URL thanh toán
                     window.location.href = paymentUrl;
                 } catch (error) {
-                    console.error('Error during payment:', error);
+                    // console.error('Error during payment:', error);
                     toast.error('Lỗi thanh toán')
                 }
             } else {
@@ -579,8 +581,8 @@ const BookingModal = (props: BookingProps) => {
             body: JSON.stringify(bookingData)
         })
         if (!responseBooking.ok) {
-            const errorText = await responseBooking.text();
-            console.error(`Error from API: ${errorText}`);
+            // const errorText = await responseBooking.text();
+            // console.error(`Error from API: ${errorText}`);
             toast.error('Lỗi đặt sân, vui lòng thử lại sau!');
             return;
         }
@@ -607,7 +609,7 @@ const BookingModal = (props: BookingProps) => {
                 return;
             }
             const amountToPay = checkPrepayPrice && prepayPrice !== undefined ? prepayPrice : totalAmount;
-            console.log("paymentMethod.name", paymentMethod.name);
+            // console.log("paymentMethod.name", paymentMethod.name);
 
             if (!userData?.wallet?.balance && paymentMethod.name === 'Thanh toán ví' ||
                 paymentMethod.name === 'Thanh toán ví' && userData && userData.wallet.balance < amountToPay) {
@@ -625,8 +627,8 @@ const BookingModal = (props: BookingProps) => {
                 body: JSON.stringify(bookingData)
             })
             if (!responseBooking.ok) {
-                const errorText = await responseBooking.text();
-                console.error(`Error from API: ${errorText}`);
+                // const errorText = await responseBooking.text();
+                // console.error(`Error from API: ${errorText}`);
                 toast.error('Lỗi đặt sân, vui lòng thử lại sau!');
                 return;
             }
@@ -656,7 +658,7 @@ const BookingModal = (props: BookingProps) => {
             }
 
         } catch (error) {
-            console.log(error);
+            // console.log(error);
         }
     }
 
@@ -846,7 +848,7 @@ const BookingModal = (props: BookingProps) => {
         return (
             <>
                 <h6 className="text-uppercase text-danger fw-bold text-center">Thông tin {sportDetail && sportDetail.name}</h6>
-                <ul>
+                <ul className="ms-3">
                     <li><span className="fw-bold">Giá đặt sân / 1h:</span> {(sportDetail && sportDetail.price.toLocaleString())} đ.</li>
                     <li><span className="fw-bold">Giá đặt sân giờ vàng / 1h:</span> {sportDetail && sportDetail.peakHourPrices.toLocaleString()} đ.</li>
                     <li><span className="fw-bold">Giờ vàng:</span> {sportDetail && sportDetail.peakHour}.</li>

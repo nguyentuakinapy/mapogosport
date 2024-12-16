@@ -49,6 +49,10 @@ const ModalCreateSubcription = (props: createSubcription) => {
     };
 
     const handleAddBenefit = async () => {
+        if (!benefitData) {
+            toast.warning(`Vui lòng nhập giá trị!`)
+            return
+        }
         try {
             const response = await fetch(`${BASE_URL}rest/add-benefit`, {
                 method: 'POST',
@@ -65,7 +69,7 @@ const ModalCreateSubcription = (props: createSubcription) => {
             toast.success("Lợi ích đã được tạo thành công!");
             mutateBenefit();
         } catch (error) {
-            console.error('Error creating benefit:', error);
+            // console.error('Error creating benefit:', error);
             toast.error("Có lỗi xảy ra khi tạo lợi ích !");
         }
     };
@@ -136,8 +140,8 @@ const ModalCreateSubcription = (props: createSubcription) => {
     const handleCreateSave = async () => {
 
         // Log dữ liệu nhập vào
-        console.log("Dữ liệu gói đăng ký:", newPackage);
-        console.log("Dữ liệu lợi ích đã chọn:", benefitSelections);
+        // console.log("Dữ liệu gói đăng ký:", newPackage);
+        // console.log("Dữ liệu lợi ích đã chọn:", benefitSelections);
         // Step 1: Validate mandatory fields
         if (!newPackage || !newPackage.packageName || !newPackage.price || !newPackage.durationDays || !newPackage.limitBookings || newPackage.limitSportFields === 0) {
             toast.error("Vui lòng điền đầy đủ thông tin gói đăng ký!");
@@ -182,8 +186,8 @@ const ModalCreateSubcription = (props: createSubcription) => {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error("Lỗi từ API:", errorText);
+            // const errorText = await response.text();
+            // console.error("Lỗi từ API:", errorText);
             throw new Error("Failed to create the subscription package");
         }
         mutate(`${BASE_URL}rest/accountpackage`);

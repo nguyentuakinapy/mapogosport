@@ -42,9 +42,9 @@ public interface BookingService {
 	
 	Map<Integer, Integer> findCustomerCountsByMonth(Integer year, Integer ownerId);
 	
-	List<Object[]> findBookingByOwnerIdUsernameOffline(Integer ownerId);
+	List<Object[]> findBookingByOwnerIdUsernameOffline(Integer ownerId, String status);
 	
-	List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(Integer ownerId);
+	List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(Integer ownerId, String status);
 	
 	List<Booking> findByFullNameOffline(String fullName);
 	

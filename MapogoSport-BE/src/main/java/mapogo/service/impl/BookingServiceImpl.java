@@ -254,6 +254,11 @@ public class BookingServiceImpl implements BookingService {
 				}
 			}
 			bookingDAO.save(booking);
+			Map<String, Object> dataPush = new HashMap<String, Object>();
+			dataPush.put("username", booking.getOwner().getUser().getUsername());
+			dataPush.put("bookingId", booking.getBookingDetails().get(0).getBookingDetailId());
+			messagingTemplate.convertAndSend("/topic/bookingDetail/reload", dataPush);
+			
 			return booking;
 		}
 		return null;
@@ -384,9 +389,9 @@ public class BookingServiceImpl implements BookingService {
 	}
 
 	@Override
-	public List<Object[]> findBookingByOwnerIdUsernameOffline(Integer ownerId) {
+	public List<Object[]> findBookingByOwnerIdUsernameOffline(Integer ownerId, String status) {
 		// TODO Auto-generated method stub
-		return bookingDAO.findBookingByOwnerIdUsernameOffline(ownerId);
+		return bookingDAO.findBookingByOwnerIdUsernameOffline(ownerId, status);
 
 	}
 
@@ -405,9 +410,9 @@ public class BookingServiceImpl implements BookingService {
 	}
 
 	@Override
-	public List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(Integer ownerId) {
+	public List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(Integer ownerId, String status) {
 		// TODO Auto-generated method stub
-		return bookingDAO.findBookingByOwnerIdExcludingUsernameOffline(ownerId);
+		return bookingDAO.findBookingByOwnerIdExcludingUsernameOffline(ownerId, status);
 	}
 
 	@Override

@@ -9,4 +9,5 @@ import mapogo.entity.AddressUser;
 public interface AddressUserDAO extends JpaRepository<AddressUser, Integer>{
 	List<AddressUser> findByUser_Username(String username);
 	void deleteByAddressUserId(Integer addressUserId);
+	boolean existsByAddress_AddressId(Integer addressId);
 }

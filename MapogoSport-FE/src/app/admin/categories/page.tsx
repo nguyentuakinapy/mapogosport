@@ -51,26 +51,26 @@ const AdminProduct = () => {
     const handleDeleteProduct = async (id: number) => {
         if (typeof window !== 'undefined') {
             if (window.confirm('Bạn có chắc muốn xóa loại sản phẩm này?')) {
-               try {
-                await fetch(`${BASE_URL}rest/category_product/delete/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Accept': 'application/json, text/plain, */*',
-                        'Content-Type': 'application/json',
-                    }
-                }).then((res) => {
-                    if (!res.ok) {
-                        toast.error('Xóa sản phẩm thất bại');
-                        return;
-                    }
-                    toast.success('Sản phẩm đã được xóa thành công');
-                    mutateProduct();
-                });
-               } catch (error) {
-                console.error("Error deleting category product: ", error)
-                toast.error("Không được xóa loại sản phẩm này")
-               }
-                
+                try {
+                    await fetch(`${BASE_URL}rest/category_product/delete/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json',
+                        }
+                    }).then((res) => {
+                        if (!res.ok) {
+                            toast.error('Xóa sản phẩm thất bại');
+                            return;
+                        }
+                        toast.success('Sản phẩm đã được xóa thành công');
+                        mutateProduct();
+                    });
+                } catch (error) {
+                    // console.error("Error deleting category product: ", error)
+                    toast.error("Không được xóa loại sản phẩm này")
+                }
+
             }
         }
     };
@@ -94,10 +94,9 @@ const AdminProduct = () => {
                         mutateField();
                     })
                 } catch (error) {
-                    console.log("Error deleting field: ", error)
-                    toast.error("Không được phép xóa loại sân.")
+                    toast.error('Không thể xóa loại sân này!');
                 }
-                
+
             }
         }
     };

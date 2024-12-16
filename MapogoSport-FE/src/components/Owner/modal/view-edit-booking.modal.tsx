@@ -479,7 +479,7 @@ const BookingModal = (props: OwnerProps) => {
                     }
                 }
             } catch (error) {
-                console.error("API or JSON parsing error:", error);
+                // console.error("API or JSON parsing error:", error);
             }
             // }
 
@@ -506,7 +506,7 @@ const BookingModal = (props: OwnerProps) => {
                 }
                 // console.log(`Khoảng cách giữa hai ngày là: ${timeIndex} ngày`);
 
-                console.log('bookingBySubscriptionKey', bookingBySubscriptionKey);
+                // console.log('bookingBySubscriptionKey', bookingBySubscriptionKey);
 
                 // // Biến lưu trữ booking có ngày sớm nhất
                 // let earliestBooking = bookingBySubscriptionKey[0];
@@ -541,7 +541,7 @@ const BookingModal = (props: OwnerProps) => {
 
                 const bk = bookingBySubscriptionKey.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-                console.log('bk', bk[0].date);
+                // console.log('bk', bk[0].date);
 
                 const dateTemporaryChecked = new Date(bk[0].date);
                 dateTemporaryChecked.setDate(dateTemporaryChecked.getDate() + timeIndex);
@@ -602,7 +602,7 @@ const BookingModal = (props: OwnerProps) => {
                             }
                         }
                     } catch (error) {
-                        console.error("API or JSON parsing error:", error);
+                        // console.error("API or JSON parsing error:", error);
                     }
                 }
             }
@@ -1013,7 +1013,7 @@ const BookingModal = (props: OwnerProps) => {
                     }
                 }
             } catch (error) {
-                console.error("API or JSON parsing error:", error);
+                // console.error("API or JSON parsing error:", error);
             }
         }
 
@@ -1021,7 +1021,7 @@ const BookingModal = (props: OwnerProps) => {
         setConfirmNewData(isAvailable);
 
         if (isAvailable) {
-            toast.warning('Sân này còn trống, bạn có thể xác nhận!');
+            toast.success('Sân này còn trống, bạn có thể xác nhận!');
         } else {
             toast.warning('Đã có sân đặt rồi!');
         }
@@ -1112,7 +1112,7 @@ const BookingModal = (props: OwnerProps) => {
                         onChange={(e) => setNote(e.target.value)}
                     />
                 </FloatingLabel> */}
-                <button onClick={testOnclick} className="mt-2 w-100 btn btn-danger">XÁC NHẬN HỦY</button>
+                <button onClick={testOnclick} disabled={!note} className="mt-2 w-100 btn btn-danger">XÁC NHẬN HỦY</button>
             </div>
 
         )

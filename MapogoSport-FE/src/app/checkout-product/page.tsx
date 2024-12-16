@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import ModalOrderSuccess from '@/components/ModalOrder/modal.Success';
 import Link from 'next/link';
 import Image from 'next/image';
+import { fetchLocationCurrent } from '../utils/LocationCurrent';
 
 const CheckoutPage = () => {
   const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -50,7 +51,7 @@ const CheckoutPage = () => {
     if (cartData && cartData.length > 0) {
       const total = cartData.reduce((sum: number, cart) => sum + cart.productDetailSize.price * cart.quantity, 0);
       setTotalPrice(total);
-      setNewTotalPrice(total);
+      // setNewTotalPrice(total);
     }
   }, [cartData]);
 
@@ -66,7 +67,7 @@ const CheckoutPage = () => {
   const [vouchers, setVouchers] = useState<UserVoucher[]>([]);
   const [voucherSelected, setVoucherSelected] = useState<UserVoucher | null>(null);
   const [discount, setDiscount] = useState(0);
-  const [newTotalPrice, setNewTotalPrice] = useState(0);
+  // const [newTotalPrice, setNewTotalPrice] = useState(0);
   const [shippingFee, setShippingFee] = useState(0);
 
   useEffect(() => {
@@ -88,6 +89,10 @@ const CheckoutPage = () => {
       const activeAddress = userData.addressUsers.find((item: AddressUsers) => item.active);
       if (activeAddress) {
         setAddressSelected(activeAddress);
+        const diachi = activeAddress.activeAddress + ", " + activeAddress.address.ward + ", "
+          + activeAddress.address.district + ", " + activeAddress.address.province;
+        fetchCoordinatesForFields(diachi);
+        calculateDistance1();
       }
     }
   }, [userData]);
@@ -139,7 +144,13 @@ const CheckoutPage = () => {
   const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const wardName = e.target.value;
     setSelectedWard(wardName);
+    const addressParts = [addressDetail, wardName, selectedDistrict, selectedProvince];
+    const address1 = addressParts.filter(part => part).join(', ');
+    // console.log(address1);
+
+    fetchCoordinatesForFields(address1);
   };
+
 
   useEffect(() => {
     if (addressSelected) {
@@ -163,27 +174,19 @@ const CheckoutPage = () => {
   const orderStatus = 'Chờ xác nhận';
   const [paymentMethod, setPaymentMethod] = useState('COD');
 
-
-
   const handleVoucherSelectedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedVoucher = vouchers.find(v => v.voucher.voucherId === Number(e.target.value));
     setVoucherSelected(selectedVoucher || null);  // Cập nhật `voucherSelected`
-  };
-
-
-  const applyVoucher = async () => {
-    if (!voucherSelected) {
-      toast.error("Vui lòng chọn mã giảm giá");
-      return;
+    if (selectedVoucher) {
+      const calculatedDiscount = (totalPrice * selectedVoucher.voucher.discountPercent) / 100;
+      setDiscount(calculatedDiscount);
+    } else {
+      setDiscount(0);
     }
-
-    const calculatedDiscount = (totalPrice * voucherSelected.voucher.discountPercent) / 100;
-    setDiscount(calculatedDiscount);
-
-    const calculatedTotalPrice = totalPrice - calculatedDiscount;
-    setNewTotalPrice(calculatedTotalPrice);
-
   };
+
+
+
 
   const checkForm = () => {
     setLoading(true);
@@ -235,58 +238,65 @@ const CheckoutPage = () => {
     const phoneRegex = /^(0|\+84)(3|5|7|8|9)\d{8}$/;
     return phoneRegex.test(phoneNumberSelected);
   }
-
-  const calculateShippingFee = async () => {
-    try {
-      const response = await axios.post(
-        'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee',
-        {
-          "service_type_id": 5,
-          "from_district_id": 761,
-          "from_ward_code": "26776",
-          "to_district_id": 439,
-          "to_ward_code": "18133",
-          "height": 20,
-          "length": 30,
-          "weight": 3000,
-          "width": 40,
-          "insurance_value": 0,
-          "coupon": null,
-          "items": [
-            {
-              "name": "Product Name",
-              "quantity": 1,
-              "height": 10,
-              "weight": 200,
-              "length": 20,
-              "width": 15
-            }
-          ]
-        }
-        ,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Token': '7144a73c-b8a6-11ef-9834-7e8875c3faf5', // Thay bằng token thực tế
-            'ShopId': 5519624, // Thay bằng ShopId thực tế
-          },
-        }
-      );
-      console.log('Shipping Fee:', response.data.data.total);
-      setShippingFee(response.data.data.total);
-    } catch (error) {
-      console.error('Error fetching shipping fee:', error);
-      toast.error('Không thể tính phí giao hàng. Vui lòng kiểm tra lại thông tin!');
-    }
+  const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
+  const [adminLocation, setAdminLocation] = useState<{ lat: number, lng: number } | null>(null);
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (value: number) => (value * Math.PI) / 180;
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in kilometers
   };
 
+  const calculateDistance1 = async () => {
+    if (userLocation && adminLocation) {
+      const distance = calculateDistance(userLocation.lat, userLocation.lng, adminLocation.lat, adminLocation?.lng);
+      let fee = Math.round(distance * 1000) / 1000 * 2000;
+      if (fee <= 10000) {
+        fee = 10000;
+      } else if (fee >= 100000) {
+        fee = 100000;
+      }
+      setShippingFee(fee);
+      // setNewTotalPrice(newTotalPrice + fee)
+      // console.log(": distance", distance);
 
-  // Tự động tính phí khi địa chỉ thay đổi
-  useEffect(() => {
-    if (selectedDistrict && selectedWard) {
-      calculateShippingFee();
     }
-  }, [selectedDistrict, selectedWard]);
+
+  };
+
+  const fetchCoordinatesForFields = async (fullAddress: string) => {
+    try {
+      // console.log("fullAddress", fullAddress);
+      const coordUser = await fetchLocationCurrent(fullAddress);
+      const coordAdmin = await fetchLocationCurrent("Tô Ký, Tân Chánh Hiệp, Quận 12, Thành phố Hồ Chí Minh");
+      if (coordUser && coordAdmin) {
+        setUserLocation({ lat: coordUser?.lat, lng: coordUser?.lon });
+        setAdminLocation({ lat: coordAdmin?.lat, lng: coordAdmin?.lon });
+
+      }
+      // console.log("userLocation", coordUser?.lat, coordUser?.lon);
+      // console.log("adminLocation;", coordAdmin?.lat, coordAdmin?.lon);
+
+    } catch (error) {
+      // console.error("Error fetching coordinates: ", error);
+    }
+
+  };
+
+  useEffect(() => {
+    if (selectedProvince && selectedDistrict && selectedWard) {
+      fetchCoordinatesForFields(`${selectedProvince}, ${selectedDistrict}, ${selectedWard}`);
+    }
+  }, [selectedProvince, selectedDistrict, selectedWard])
+
+  useEffect(() => {
+
+    calculateDistance1();
+
+  }, [userLocation, adminLocation]);
 
   const setDataOrder = () => {
     const addressParts = [addressDetail, selectedWard, selectedDistrict, selectedProvince];
@@ -299,7 +309,7 @@ const CheckoutPage = () => {
       phoneNumber: phoneNumber,
       // date: new Date().toISOString(), // Chuyển đổi sang ISO string
       status: orderStatus,
-      amount: newTotalPrice,
+      amount: totalPrice + shippingFee - discount,
       paymentMethod: paymentMethod,
       voucherId: voucherSelected?.voucher.voucherId ?? '',
       shipFee: shippingFee, // Hoặc giá trị phí vận chuyển
@@ -343,7 +353,7 @@ const CheckoutPage = () => {
           },
         }
       );
-      console.log("Dữ liệu trả về từ API ORDERDETAIL:", response.data);
+      // console.log("Dữ liệu trả về từ API ORDERDETAIL:", response.data);
       localStorage.removeItem('listCartCheckout');
       return response.data; // Trả về thông tin đơn hàng
     } catch (error) {
@@ -390,7 +400,7 @@ const CheckoutPage = () => {
                 setShowOrderSuccessModal(true);
               }
             } catch (error) {
-              console.error("Error processing order:", error);
+              // console.error("Error processing order:", error);
               toast.error("Đã xảy ra lỗi trong quá trình xử lý đơn hàng.");
             }
           } else if (status === 'fail') {
@@ -428,7 +438,7 @@ const CheckoutPage = () => {
           setOrderId(order.orderId);
           setShowOrderSuccessModal(true);
         } catch (error) {
-          console.error('Error during payment:', error);
+          // console.error('Error during payment:', error);
         }
       }
     } else if (paymentMethod === "VNPay") {
@@ -438,17 +448,17 @@ const CheckoutPage = () => {
         const paymentResponse = await axios.post(
           `${BASE_URL}rest/payment/create_payment`,
           {
-            amount: newTotalPrice,
+            amount: totalPrice + shippingFee - discount,
             username
           }
         );
-        console.log('Payment Response:', paymentResponse.data);
+        // console.log('Payment Response:', paymentResponse.data);
         const paymentUrl = paymentResponse.data.url;
         // chuyển hướng đến URL thanh toán
         window.location.href = paymentUrl;
 
       } catch (error) {
-        console.error('Payment Error:', error);
+        // console.error('Payment Error:', error);
       }
     } else if (paymentMethod === "MoMo") {
       setDataOrder();
@@ -457,22 +467,22 @@ const CheckoutPage = () => {
         const paymentResponse = await axios.post(
           `${BASE_URL}rest/payment/create-momo-payment`,
           {
-            amount: newTotalPrice,
+            amount: totalPrice + shippingFee - discount,
             username
           }
         );
-        console.log('Payment Response:', paymentResponse.data);
+        // console.log('Payment Response:', paymentResponse.data);
         const paymentUrl = paymentResponse.data.payUrl;
         // chuyển hướng đến URL thanh toán
         window.location.href = paymentUrl;
 
       } catch (error) {
-        console.error('Payment Error:', error);
+        // console.error('Payment Error:', error);
       }
     } else if (paymentMethod === "Thanh toán ví") {
       setLoading(true);
 
-      if (user1 && user1?.wallet.balance >= newTotalPrice) {
+      if (user1 && user1?.wallet.balance >= totalPrice + shippingFee - discount) {
         setDataOrder();
         const orderData = JSON.parse(localStorage.getItem('orderData') || '{}');
         const order = await handleCreateOrder(orderData);
@@ -493,7 +503,7 @@ const CheckoutPage = () => {
             setOrderId(order.orderId);
             setShowOrderSuccessModal(true);
           } catch (error) {
-            console.error('Error during payment:', error);
+            // console.error('Error during payment:', error);
           }
         }
       } else {
@@ -598,7 +608,7 @@ const CheckoutPage = () => {
                   <div className="form-floating mb-2">
                     <Form.Floating>
                       <Form.Control size="sm" type="text" placeholder="Địa chỉ chi tiết"
-                        value={addressDetail ?? ''} onChange={(e) => setAddressDetail(e.target.value)} />
+                        value={addressDetail ?? ''} onChange={e => setAddressDetail(e.target.value)} />
                       <Form.Label htmlFor="detailAddress">Địa chỉ chi tiết <b className='text-danger'>*</b></Form.Label>
                     </Form.Floating>
                   </div>
@@ -719,10 +729,6 @@ const CheckoutPage = () => {
                               </option>
                             ))}
                       </Form.Select>
-                      <button className="btn btn-apply px-4 " type="button" style={{ backgroundColor: "#142239", color: 'white', fontSize: '15px' }}
-                        onClick={applyVoucher}>
-                        Áp dụng
-                      </button>
                     </div>
                   </div>
                   <hr />
@@ -743,7 +749,7 @@ const CheckoutPage = () => {
                   <hr />
                   <div className="order-total d-flex justify-content-between">
                     <span className="fw-bold">Tổng cộng</span>
-                    <span className="fw-bold text-danger">{formatPrice(newTotalPrice)}</span>
+                    <span className="fw-bold text-danger">{formatPrice(totalPrice + shippingFee - discount)}</span>
                   </div>
                   <div className="order-total d-flex justify-content-between align-items-center my-4">
                     <Link href={"/cart"} className="text-reset text-decoration-none">

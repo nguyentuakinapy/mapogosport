@@ -189,7 +189,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
 
     const checkForm = () => {
         setLoading(true);
-        console.log(fieldName);
+        // console.log(fieldName);
 
         const errors = [];
 
@@ -256,13 +256,13 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                     'Content-Type': 'multipart/form-data',
                 },
             })
-                .then(response => {
-                    console.log("Thông tin sân đã được lưu thay đổi:", response.data);
+                .then(() => {
+                    // console.log("Thông tin sân đã được lưu thay đổi:", response.data);
                     mutate(`${BASE_URL}rest/sportfields/lists/${username}`);
                     handleClose();
                 })
-                .catch(error => {
-                    console.error("Lỗi khi lưu thay đổi thông tin sân:", error.response ? error.response.data : error.message);
+                .catch(() => {
+                    // console.error("Lỗi khi lưu thay đổi thông tin sân:", error.response ? error.response.data : error.message);
                 });
         }
     }
@@ -302,13 +302,13 @@ const ModalCreateSportField = (props: SportFieldProps) => {
                     'Content-Type': 'multipart/form-data',
                 },
             })
-                .then(response => {
-                    console.log("Thông tin sân đã được lưu:", response.data);
+                .then(() => {
+                    // console.log("Thông tin sân đã được lưu:", response.data);
                     mutate(`${BASE_URL}rest/sportfields/lists/${username}`);
                     handleClose();
                 })
-                .catch(error => {
-                    console.error("Lỗi khi lưu thông tin sân:", error.response ? error.response.data : error.message);
+                .catch(() => {
+                    // console.error("Lỗi khi lưu thông tin sân:", error.response ? error.response.data : error.message);
                 });
         }
     };
@@ -329,7 +329,7 @@ const ModalCreateSportField = (props: SportFieldProps) => {
             toast.success("Xóa ảnh trong thư viện thành công");
         } catch (error) {
             toast.error("Xóa ảnh trong thư viện không thành công");
-            console.error("Error deleting product:", error);
+            // console.error("Error deleting product:", error);
         }
     };
 

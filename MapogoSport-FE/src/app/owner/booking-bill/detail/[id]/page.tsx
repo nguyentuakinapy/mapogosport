@@ -103,6 +103,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                         <th className="text-secondary">Họ và tên</th>
                         <th className="text-secondary">Ngày đặt</th>
                         <th className="text-secondary">Số điện thoại</th>
+                        <th className="text-secondary">Phương thức thanh toán</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -112,6 +113,7 @@ const BookingsDetail = ({ params }: { params: { id: number } }) => {
                         <td>{bookingInfo?.userFullname}</td>
                         <td>{bookingInfo?.date && new Date(bookingInfo.date).toLocaleDateString('en-GB')}</td>
                         <td>{bookingInfo?.userPhoneNumber || "Chưa cập nhật số điện thoại"}</td>
+                        <td>{bookingInfo?.paymentMethodName}</td>
                     </tr>
                 </tbody>
             </Table>

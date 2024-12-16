@@ -21,7 +21,7 @@ const CancelBookingDetailModal = (props: CancelBookingDetail) => {
 
     const handleSave = async () => {
         if (!aBookingDetail) {
-            console.error("Không tìm thấy booking");
+            // console.error("Không tìm thấy booking");
             return;
         }
         const currentDateTime = new Date();

@@ -148,7 +148,8 @@ public class NotificationScheduledService {
 			if (endDate != null) {
 				long timeDifference = endDate.getTime() - new Date().getTime();
 
-				if (dateFormat.format(today).equals(dateFormat.format(endDate))) {
+				if (dateFormat.format(today).equals(dateFormat.format(endDate)) 
+						&& !userSubscription.getAccountPackage().getPackageName().equals("Gói miễn phí")) {
 					userSubscription.setAccountPackage(accountPackageDAO.findById(1).get());
 					userSubscription.setEndDay(userSubscription.getStartDay());
 					userSubscriptionDAO.save(userSubscription);
