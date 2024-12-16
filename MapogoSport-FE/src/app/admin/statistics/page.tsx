@@ -111,17 +111,6 @@ const Admin = () => {
                     : [['Category', { role: 'style' }, 'Total'], ['Loading', 'color: #76A7FA', 0]]
             },
             {
-                option: 'Hôm Qua',
-                title: 'Biểu đồ hoạt động hôm qua',
-                data: dataColumnnYesterday.length > 0
-                    ? [['Category', { role: 'style' }, 'Total'],
-                    ...dataColumnnYesterday.map(item => [
-                        item[1] || 'Chưa có tên',
-                        'color: #76A7FA',
-                        parseFloat(item[3]) || 0])]
-                    : [['Category', { role: 'style' }, 'Total'], ['Loading', 'color: #76A7FA', 0]]
-            },
-            {
                 option: 'Một Tuần',
                 title: 'Biểu đồ hoạt động một tuần',
                 data: dataColumnnChart7Day.length > 0

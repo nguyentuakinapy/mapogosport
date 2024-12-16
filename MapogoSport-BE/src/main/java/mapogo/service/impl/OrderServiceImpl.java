@@ -260,7 +260,7 @@ public class OrderServiceImpl implements OrderService {
 	public List<Object[]> getCategoryProductTotals7Day() {
 	    // Lấy thời điểm hiện tại
 		LocalDateTime endDate = LocalDateTime.now(); // Current date and time
-		LocalDateTime startDate = endDate.minus(6, ChronoUnit.DAYS); 
+		LocalDateTime startDate = endDate.minus(1, ChronoUnit.WEEKS); 
 
 	    if (statuses == null || statuses.isEmpty()) {
 	        statuses = Arrays.asList("Đã hoàn thành");
