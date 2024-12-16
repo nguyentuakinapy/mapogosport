@@ -389,9 +389,9 @@ public class BookingServiceImpl implements BookingService {
 	}
 
 	@Override
-	public List<Object[]> findBookingByOwnerIdUsernameOffline(Integer ownerId) {
+	public List<Object[]> findBookingByOwnerIdUsernameOffline(Integer ownerId, String status) {
 		// TODO Auto-generated method stub
-		return bookingDAO.findBookingByOwnerIdUsernameOffline(ownerId);
+		return bookingDAO.findBookingByOwnerIdUsernameOffline(ownerId, status);
 
 	}
 
@@ -410,9 +410,9 @@ public class BookingServiceImpl implements BookingService {
 	}
 
 	@Override
-	public List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(Integer ownerId) {
+	public List<Object[]> findBookingByOwnerIdExcludingUsernameOffline(Integer ownerId, String status) {
 		// TODO Auto-generated method stub
-		return bookingDAO.findBookingByOwnerIdExcludingUsernameOffline(ownerId);
+		return bookingDAO.findBookingByOwnerIdExcludingUsernameOffline(ownerId, status);
 	}
 
 	@Override
