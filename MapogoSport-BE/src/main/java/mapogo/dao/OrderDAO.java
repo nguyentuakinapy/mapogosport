@@ -137,17 +137,31 @@ public interface OrderDAO extends JpaRepository<Order, Integer> {
 
 
 	// total amount category for a specific day
-	@Query("WITH CleanedOrders AS ("
-			+ "SELECT DISTINCT o.orderId AS orderId, cp.categoryProductId AS categoryProductId, "
-			+ "cp.name AS name, cp.image AS image, o.amount AS amount "
-			+ "FROM Order o "
-			+ "JOIN o.orderDetails od "
-			+ "JOIN od.productDetailSize pds " + "JOIN pds.productDetail pd "
-			+ "JOIN pd.product p "
-			+ "JOIN p.categoryProduct cp "
-			+ "WHERE o.date BETWEEN :startOfDay AND :endOfDay AND o.status IN :statuses" + ") "
-			+ "SELECT co.categoryProductId, co.name, co.image, SUM(co.amount) AS totalAmount "
-			+ "FROM CleanedOrders co " + "GROUP BY co.categoryProductId, co.name, co.image")
+		@Query("WITH OrderTotals AS ( " +
+		           "  SELECT o.orderId AS orderId, " +
+		           "         SUM(od.quantity * pds.price) AS totalPriceBeforeDiscount " +
+		           "  FROM Order o " +
+		           "  JOIN o.orderDetails od " +
+		           "  JOIN od.productDetailSize pds " +
+		           "  GROUP BY o.orderId " +
+		           "), " +
+		           "CleanedOrders AS ( " +
+		           "  SELECT cp.categoryProductId AS categoryProductId, " +
+		           "         cp.name AS name, " +
+		           "         cp.image AS image, " +
+		           "         SUM((od.quantity * pds.price) / ot.totalPriceBeforeDiscount * o.amount) AS totalAmount " +
+		           "  FROM Order o " +
+		           "  JOIN o.orderDetails od " +
+		           "  JOIN od.productDetailSize pds " +
+		           "  JOIN pds.productDetail pd " +
+		           "  JOIN pd.product p " +
+		           "  JOIN p.categoryProduct cp " +
+		           "  JOIN OrderTotals ot ON o.orderId = ot.orderId " +
+		           "  WHERE o.date BETWEEN :startOfDay AND :endOfDay AND o.status IN :statuses " +
+		           "  GROUP BY cp.categoryProductId, cp.name, cp.image " +
+		           ") " +
+		           "SELECT co.categoryProductId, co.name, co.image, co.totalAmount " +
+		           "FROM CleanedOrders co")
 	List<Object[]> findCategoryProductTotalsByDateAndStatus(@Param("startOfDay") LocalDateTime startOfDay,
 			@Param("endOfDay") LocalDateTime endOfDay, @Param("statuses") List<String> statuses);
 
