@@ -277,7 +277,7 @@ const CheckoutPage = () => {
         setAdminLocation({ lat: coordAdmin?.lat, lng: coordAdmin?.lon });
 
       }
-      // console.log("userLocation", coordUser?.lat, coordUser?.lon);
+      // console.log("userLocation", coordUser?.lat, coordUser?.lon);npmnpm
       // console.log("adminLocation;", coordAdmin?.lat, coordAdmin?.lon);
 
     } catch (error) {
